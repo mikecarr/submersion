@@ -114,6 +114,15 @@ class DiveProfileChart extends ConsumerStatefulWidget {
   /// Height of the integrated gas timeline strip in logical pixels.
   static const double gasTimelineHeight = 22.0;
 
+  /// fl_chart default axisNameSize used for left and right axes.
+  static const double _leftRightAxisNameSize = 16.0;
+
+  /// axisNameSize for the bottom (time) axis.
+  static const double _bottomAxisNameSize = 14.0;
+
+  /// reservedSize for the bottom sideTitles tick-label area (no gas strip).
+  static const double _bottomTickReservedSize = 22.0;
+
   /// Optional key for exporting the chart as an image.
   /// When provided, wraps the chart in a RepaintBoundary for screenshot capture.
   final GlobalKey? exportKey;
@@ -935,9 +944,10 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        // Left axis offset = axisNameSize (16, default) + sideTitles reservedSize
+        // Left axis offset = axisNameSize + sideTitles reservedSize
         final legendLeftPadding =
-            16.0 + DiveProfileChart.leftAxisSize(constraints.maxWidth);
+            DiveProfileChart._leftRightAxisNameSize +
+            DiveProfileChart.leftAxisSize(constraints.maxWidth);
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -1290,7 +1300,7 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                axisNameSize: 14,
+                axisNameSize: DiveProfileChart._bottomAxisNameSize,
                 sideTitles: SideTitles(
                   showTitles: true,
                   // When the gas strip is rendered, reserve extra room and
@@ -1298,8 +1308,9 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
                   // strip can be Positioned in the resulting gap, directly
                   // between the plot area and the time labels.
                   reservedSize: _hasGasStrip
-                      ? 22 + DiveProfileChart.gasTimelineHeight
-                      : 22,
+                      ? DiveProfileChart._bottomTickReservedSize +
+                            DiveProfileChart.gasTimelineHeight
+                      : DiveProfileChart._bottomTickReservedSize,
                   interval: _calculateTimeInterval(visibleRangeX),
                   getTitlesWidget: (value, meta) {
                     // Suppress interval ticks that are too close to the max
@@ -2081,20 +2092,24 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
         // X-axis tick labels. Sized to exactly the chart's plot width by
         // mirroring the chart's left/right axis reservations, and offset
         // from the bottom so it lands in the gap reserved above by
-        // `_hasGasStrip` (axisNameSize 14 + tick label area 22 = 36).
+        // `_hasGasStrip` (_bottomAxisNameSize + _bottomTickReservedSize).
         //
-        // Plot bounds = axisNameSize (16, default) + sideTitles reservedSize
+        // Plot bounds = _leftRightAxisNameSize + sideTitles reservedSize
         // on each side that has an axisNameWidget. Left axis always renders
         // its name; the right axis only does so when a metric is selected.
         if (_hasGasStrip)
           Positioned(
-            left: 16 + DiveProfileChart.leftAxisSize(availableWidth),
+            left:
+                DiveProfileChart._leftRightAxisNameSize +
+                DiveProfileChart.leftAxisSize(availableWidth),
             right:
                 (effectiveRightAxisMetric != null && rightAxisRange != null
-                    ? 16
+                    ? DiveProfileChart._leftRightAxisNameSize
                     : 0) +
                 DiveProfileChart.rightAxisSize(availableWidth),
-            bottom: 14 + 22,
+            bottom:
+                DiveProfileChart._bottomAxisNameSize +
+                DiveProfileChart._bottomTickReservedSize,
             height: DiveProfileChart.gasTimelineHeight,
             child: GasTimelineStrip(
               segments: widget.gasSegments!,
@@ -2144,9 +2159,11 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
     ];
     if (cursors.isEmpty) return const [];
 
-    final left = 16 + DiveProfileChart.leftAxisSize(availableWidth);
+    final left =
+        DiveProfileChart._leftRightAxisNameSize +
+        DiveProfileChart.leftAxisSize(availableWidth);
     final right =
-        (hasRightAxisName ? 16 : 0) +
+        (hasRightAxisName ? DiveProfileChart._leftRightAxisNameSize : 0) +
         DiveProfileChart.rightAxisSize(availableWidth);
     final stripWidth = (availableWidth - left - right).clamp(
       0.0,
@@ -2163,7 +2180,9 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
                 left +
                 ((timestamp - visibleMinX) / visibleRangeX) * stripWidth -
                 width / 2,
-            bottom: 14 + 22,
+            bottom:
+                DiveProfileChart._bottomAxisNameSize +
+                DiveProfileChart._bottomTickReservedSize,
             height: DiveProfileChart.gasTimelineHeight,
             width: width,
             child: IgnorePointer(child: ColoredBox(color: color)),

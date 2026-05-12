@@ -119,7 +119,7 @@ void main() {
       );
       // 240/3000 * 400 = 32px — too narrow to show label
       expect(find.text('Air'), findsNothing);
-      // EAN50 block is 3040/3000 * 400 = wide → label shown
+      // EAN50 block is 2760/3000 * 400 = 368px — wide → label shown
       expect(find.text('EAN50'), findsOneWidget);
     });
 
