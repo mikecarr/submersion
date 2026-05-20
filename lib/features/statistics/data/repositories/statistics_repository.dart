@@ -25,6 +25,7 @@ class RankingItem {
   final int count;
   final double? value;
   final String? subtitle;
+  final DateTime? date;
 
   RankingItem({
     required this.id,
@@ -32,6 +33,7 @@ class RankingItem {
     required this.count,
     this.value,
     this.subtitle,
+    this.date,
   });
 }
 
@@ -234,7 +236,7 @@ class StatisticsRepository {
 
       RankingItem mapRow(dynamic row) {
         final dateMs = row.read<int>('dive_date_time');
-        final date = DateTime.fromMillisecondsSinceEpoch(dateMs);
+        final date = DateTime.fromMillisecondsSinceEpoch(dateMs, isUtc: true);
         final diveNum = row.read<int?>('dive_number');
         final siteName = row.read<String?>('site_name');
         return RankingItem(
@@ -242,7 +244,7 @@ class StatisticsRepository {
           name: siteName ?? 'Dive #${diveNum ?? "?"}',
           count: 0,
           value: row.read<double>('sac'),
-          subtitle: '${date.day}/${date.month}/${date.year}',
+          date: date,
         );
       }
 
@@ -286,7 +288,7 @@ class StatisticsRepository {
 
       RankingItem mapRow(dynamic row) {
         final dateMs = row.read<int>('dive_date_time');
-        final date = DateTime.fromMillisecondsSinceEpoch(dateMs);
+        final date = DateTime.fromMillisecondsSinceEpoch(dateMs, isUtc: true);
         final diveNum = row.read<int?>('dive_number');
         final siteName = row.read<String?>('site_name');
         return RankingItem(
@@ -294,7 +296,7 @@ class StatisticsRepository {
           name: siteName ?? 'Dive #${diveNum ?? "?"}',
           count: 0,
           value: row.read<double>('sac'),
-          subtitle: '${date.day}/${date.month}/${date.year}',
+          date: date,
         );
       }
 
