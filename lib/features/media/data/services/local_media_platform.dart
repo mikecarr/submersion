@@ -2,6 +2,15 @@ import 'dart:io';
 
 import 'package:flutter/services.dart';
 
+/// One file returned by [LocalMediaPlatform.enumerateScopedDirectory]: its
+/// [basename] and the security-scoped [bookmarkBlob] the native side created
+/// while the directory scope was held.
+class ScopedDirEntry {
+  final String basename;
+  final Uint8List bookmarkBlob;
+  const ScopedDirEntry({required this.basename, required this.bookmarkBlob});
+}
+
 /// Result of a successful bookmark resolution. The [bookmarkRef] is a
 /// session-local key that callers must pass to [LocalMediaPlatform.releaseBookmark]
 /// when done reading the file.
@@ -88,6 +97,37 @@ class LocalMediaPlatform {
     if (!Platform.isIOS && !Platform.isMacOS) return;
     // coverage:ignore-line
     await _channel.invokeMethod<void>('releaseAllBookmarks');
+  }
+
+  /// iOS / macOS only. Enumerates [directoryUrl] (a security-scoped folder
+  /// URL string the user granted via the document picker) and returns one
+  /// [ScopedDirEntry] per file. The native side holds the directory's
+  /// security scope for the whole walk and creates each file's bookmark
+  /// inside that window, so the returned blobs remain resolvable after the
+  /// scope is released.
+  Future<List<ScopedDirEntry>> enumerateScopedDirectory(
+    String directoryUrl,
+  ) async {
+    if (!Platform.isIOS && !Platform.isMacOS) {
+      throw UnsupportedError(
+        'enumerateScopedDirectory is only supported on iOS / macOS',
+      );
+    }
+    // coverage:ignore-start
+    final raw = await _channel.invokeListMethod<Map<Object?, Object?>>(
+      'enumerateScopedDirectory',
+      {'directoryUrl': directoryUrl},
+    );
+    if (raw == null) return const [];
+    return raw
+        .map(
+          (m) => ScopedDirEntry(
+            basename: m['basename'] as String,
+            bookmarkBlob: m['bookmarkBlob'] as Uint8List,
+          ),
+        )
+        .toList();
+    // coverage:ignore-end
   }
 
   /// Android only. Calls `ContentResolver.takePersistableUriPermission` and

@@ -107,6 +107,18 @@ class LocalMediaHandler: NSObject {
                 return
             }
             readBookmarkBytes(blob: blob.data, result: result)
+        case "enumerateScopedDirectory":
+            guard let args = call.arguments as? [String: Any],
+                  let urlString = args["directoryUrl"] as? String else {
+                result(FlutterError(code: "INVALID_ARGS", message: "directoryUrl required", details: nil))
+                return
+            }
+            // file_picker returns a POSIX path (not a URL string), so build a file URL.
+            // NOTE (iOS, manual-verify): a security-scoped folder URL cannot be fully
+            // reconstructed from a bare path; real-device verification is required for
+            // the iOS scoped-access path. Desktop/macOS use the dart:io scanner.
+            let dirURL = URL(fileURLWithPath: urlString)
+            enumerateScopedDirectory(dirURL: dirURL, result: result)
         default:
             result(FlutterMethodNotImplemented)
         }
@@ -179,6 +191,35 @@ class LocalMediaHandler: NSObject {
         }
         active.removeAll()
         result(nil)
+    }
+
+    private func enumerateScopedDirectory(dirURL: URL, result: @escaping FlutterResult) {
+        let didAccess = dirURL.startAccessingSecurityScopedResource()
+        defer { if didAccess { dirURL.stopAccessingSecurityScopedResource() } }
+        var entries: [[String: Any]] = []
+        let fm = FileManager.default
+        if let walker = fm.enumerator(at: dirURL, includingPropertiesForKeys: [.isRegularFileKey]) {
+            for case let fileURL as URL in walker {
+                let isFile = (try? fileURL.resourceValues(forKeys: [.isRegularFileKey]))?.isRegularFile ?? false
+                if !isFile { continue }
+                #if os(macOS)
+                let bookmarkOptions: URL.BookmarkCreationOptions = [.withSecurityScope]
+                #else
+                let bookmarkOptions: URL.BookmarkCreationOptions = []
+                #endif
+                if let blob = try? fileURL.bookmarkData(
+                    options: bookmarkOptions,
+                    includingResourceValuesForKeys: nil,
+                    relativeTo: nil
+                ) {
+                    entries.append([
+                        "basename": fileURL.lastPathComponent,
+                        "bookmarkBlob": FlutterStandardTypedData(bytes: blob),
+                    ])
+                }
+            }
+        }
+        result(entries)
     }
 
     private func readBookmarkBytes(blob: Data, result: @escaping FlutterResult) {

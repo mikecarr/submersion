@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:submersion/core/providers/provider.dart';
@@ -11,6 +12,7 @@ import 'package:submersion/features/media/presentation/providers/media_providers
 import 'package:submersion/features/media/presentation/providers/media_resolver_providers.dart';
 import 'package:submersion/features/universal_import/data/services/desktop_directory_scanner.dart';
 import 'package:submersion/features/universal_import/data/services/directory_scanner.dart';
+import 'package:submersion/features/universal_import/data/services/ios_directory_scanner.dart';
 import 'package:submersion/features/universal_import/presentation/providers/import_photo_link_controller.dart';
 
 /// Session-scoped controller for the post-import photo-locate flow.
@@ -24,9 +26,13 @@ final importPhotoLinkControllerProvider =
     ) {
       final mediaRepository = ref.read(mediaRepositoryProvider);
       final bookmarkStorage = ref.read(localBookmarkStorageProvider);
+      final platform = ref.read(localMediaPlatformProvider);
       final exif = ExifExtractor();
       return ImportPhotoLinkController(
-        scannerFor: (_) => DesktopDirectoryScanner(),
+        scannerFor: (_) {
+          if (!kIsWeb && Platform.isIOS) return IosDirectoryScanner(platform);
+          return DesktopDirectoryScanner();
+        },
         linker: LocalMediaLinker(
           mediaRepository: mediaRepository,
           bookmarkStorage: bookmarkStorage,
