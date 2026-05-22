@@ -824,6 +824,10 @@ class DiveComputerRepository {
     String? descriptorProduct,
     int? descriptorModel,
     String? libdivecomputerVersion,
+    double? entryLatitude,
+    double? entryLongitude,
+    double? exitLatitude,
+    double? exitLongitude,
   }) async {
     try {
       _log.info('Importing profile from computer $computerId');
@@ -886,6 +890,10 @@ class DiveComputerRepository {
                 decoConservatism: Value(decoConservatism),
                 createdAt: Value(now),
                 updatedAt: Value(now),
+                entryLatitude: Value(entryLatitude),
+                entryLongitude: Value(entryLongitude),
+                exitLatitude: Value(exitLatitude),
+                exitLongitude: Value(exitLongitude),
               ),
             );
 
