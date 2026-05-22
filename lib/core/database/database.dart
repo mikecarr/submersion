@@ -1090,6 +1090,10 @@ class DiveDataSources extends Table {
   RealColumn get avgDepth => real().nullable()();
   IntColumn get duration => integer().nullable()();
   RealColumn get waterTemp => real().nullable()();
+  RealColumn get entryLatitude => real().nullable()();
+  RealColumn get entryLongitude => real().nullable()();
+  RealColumn get exitLatitude => real().nullable()();
+  RealColumn get exitLongitude => real().nullable()();
   DateTimeColumn get entryTime => dateTime().nullable()();
   DateTimeColumn get exitTime => dateTime().nullable()();
   RealColumn get maxAscentRate => real().nullable()();
@@ -1453,7 +1457,7 @@ class AppDatabase extends _$AppDatabase {
 
   /// The current schema version as a static constant so that pre-open checks
   /// (e.g. version-mismatch guard) can reference it without an instance.
-  static const int currentSchemaVersion = 73;
+  static const int currentSchemaVersion = 74;
 
   /// Every schema version that has a migration block in onUpgrade.
   /// Used to calculate progress step counts. When adding a new migration,
@@ -1530,6 +1534,7 @@ class AppDatabase extends _$AppDatabase {
     71,
     72,
     73,
+    74,
   ];
 
   /// Returns the number of migration steps that will execute when upgrading
@@ -3595,6 +3600,29 @@ class AppDatabase extends _$AppDatabase {
           );
         }
         if (from < 73) await reportProgress();
+        if (from < 74) {
+          final cols = await customSelect(
+            "PRAGMA table_info('dive_data_sources')",
+          ).get();
+          if (cols.isNotEmpty) {
+            final existing = cols.map((c) => c.read<String>('name')).toSet();
+            if (!existing.contains('entry_latitude')) {
+              await customStatement(
+                'ALTER TABLE dive_data_sources ADD COLUMN entry_latitude REAL',
+              );
+              await customStatement(
+                'ALTER TABLE dive_data_sources ADD COLUMN entry_longitude REAL',
+              );
+              await customStatement(
+                'ALTER TABLE dive_data_sources ADD COLUMN exit_latitude REAL',
+              );
+              await customStatement(
+                'ALTER TABLE dive_data_sources ADD COLUMN exit_longitude REAL',
+              );
+            }
+          }
+        }
+        if (from < 74) await reportProgress();
       },
       beforeOpen: (details) async {
         // Enable foreign keys
