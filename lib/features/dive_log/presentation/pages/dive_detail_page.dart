@@ -743,7 +743,11 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
     UnitFormatter units, {
     Map<String, String>? attribution,
   }) {
-    final hasLocation = dive.site?.location != null;
+    final entryLoc = dive.entryLocation;
+    final exitLoc = dive.exitLocation;
+    final siteLoc = dive.site?.location;
+    final hasGps = entryLoc != null || exitLoc != null;
+    final hasLocation = siteLoc != null || hasGps;
     final colorScheme = Theme.of(context).colorScheme;
     final cardColor = Theme.of(context).cardColor;
 
@@ -861,26 +865,55 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
       return Card(clipBehavior: Clip.antiAlias, child: content);
     }
 
-    final site = dive.site!;
-    final siteLocation = LatLng(
-      site.location!.latitude,
-      site.location!.longitude,
-    );
+    final site = dive.site;
+    final LatLng mapCenter = entryLoc != null
+        ? LatLng(entryLoc.latitude, entryLoc.longitude)
+        : exitLoc != null
+        ? LatLng(exitLoc.latitude, exitLoc.longitude)
+        : LatLng(siteLoc!.latitude, siteLoc.longitude);
+
+    final markers = <Marker>[
+      if (siteLoc != null && !hasGps)
+        Marker(
+          point: LatLng(siteLoc.latitude, siteLoc.longitude),
+          width: 32,
+          height: 32,
+          child: _mapPin(colorScheme, Icons.scuba_diving, colorScheme.primary),
+        ),
+      if (entryLoc != null)
+        Marker(
+          key: const ValueKey('gps-entry-marker'),
+          point: LatLng(entryLoc.latitude, entryLoc.longitude),
+          width: 28,
+          height: 28,
+          child: _mapPin(colorScheme, Icons.south, const Color(0xFF34C759)),
+        ),
+      if (exitLoc != null)
+        Marker(
+          key: const ValueKey('gps-exit-marker'),
+          point: LatLng(exitLoc.latitude, exitLoc.longitude),
+          width: 28,
+          height: 28,
+          child: _mapPin(colorScheme, Icons.north, const Color(0xFFFF9F0A)),
+        ),
+    ];
 
     return Card(
       clipBehavior: Clip.antiAlias,
       child: Semantics(
-        button: true,
-        label: '${context.l10n.diveLog_detail_viewSite} ${site.name}',
+        button: site != null,
+        label: site != null
+            ? '${context.l10n.diveLog_detail_viewSite} ${site.name}'
+            : '',
         child: InkWell(
-          onTap: () => context.push('/sites/${site.id}'),
+          onTap: site != null ? () => context.push('/sites/${site.id}') : null,
           child: Stack(
             children: [
               // Map background
               Positioned.fill(
                 child: FlutterMap(
                   options: MapOptions(
-                    initialCenter: siteLocation,
+                    initialCenter: mapCenter,
                     initialZoom: 12.0,
                     interactionOptions: const InteractionOptions(
                       flags: InteractiveFlag.none,
@@ -895,32 +928,21 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
                           ? TileCacheService.instance.getTileProvider()
                           : null,
                     ),
-                    MarkerLayer(
-                      markers: [
-                        Marker(
-                          point: siteLocation,
-                          width: 32,
-                          height: 32,
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: colorScheme.primary,
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: colorScheme.onPrimary,
-                                width: 2,
-                              ),
-                            ),
-                            child: Center(
-                              child: Icon(
-                                Icons.scuba_diving,
-                                size: 16,
-                                color: colorScheme.onPrimary,
-                              ),
-                            ),
+                    if (entryLoc != null && exitLoc != null)
+                      PolylineLayer(
+                        polylines: [
+                          Polyline(
+                            points: [
+                              LatLng(entryLoc.latitude, entryLoc.longitude),
+                              LatLng(exitLoc.latitude, exitLoc.longitude),
+                            ],
+                            strokeWidth: 3.0,
+                            color: colorScheme.onSurface.withValues(alpha: 0.7),
+                            pattern: const StrokePattern.dotted(),
                           ),
-                        ),
-                      ],
-                    ),
+                        ],
+                      ),
+                    MarkerLayer(markers: markers),
                     const MapAttribution(),
                   ],
                 ),
@@ -946,49 +968,62 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
               // Content
               content,
               // View Site button
-              Positioned(
-                right: 8,
-                top: 8,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: colorScheme.primaryContainer,
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.2),
-                        blurRadius: 4,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.open_in_new,
-                        size: 14,
-                        color: colorScheme.onPrimaryContainer,
-                      ),
-                      const SizedBox(width: 6),
-                      Text(
-                        context.l10n.diveLog_detail_viewSite,
-                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: colorScheme.onPrimaryContainer,
-                          fontWeight: FontWeight.w600,
+              if (site != null)
+                Positioned(
+                  right: 8,
+                  top: 8,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: colorScheme.primaryContainer,
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.2),
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.open_in_new,
+                          size: 14,
+                          color: colorScheme.onPrimaryContainer,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          context.l10n.diveLog_detail_viewSite,
+                          style: Theme.of(context).textTheme.labelSmall
+                              ?.copyWith(
+                                color: colorScheme.onPrimaryContainer,
+                                fontWeight: FontWeight.w600,
+                              ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  Widget _mapPin(ColorScheme colorScheme, IconData icon, Color color) {
+    return Container(
+      decoration: BoxDecoration(
+        color: color,
+        shape: BoxShape.circle,
+        border: Border.all(color: colorScheme.onPrimary, width: 2),
+      ),
+      child: Center(child: Icon(icon, size: 14, color: colorScheme.onPrimary)),
     );
   }
 
