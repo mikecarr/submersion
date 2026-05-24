@@ -807,6 +807,102 @@ void main() {
       expect(t2.endPressure, 100.0);
     });
 
+    test('re-inserts tank pressure profiles and backfills start/end pressure '
+        'from samples when the tank summary has no pressure (AI)', () async {
+      await insertDive('dive-1');
+      await insertComputer('comp-1');
+      await insertSource(
+        id: 'src-1',
+        diveId: 'dive-1',
+        computerId: 'comp-1',
+        isPrimary: true,
+      );
+
+      // Existing tank with previously-derived pressures, plus a stale pressure
+      // profile row that the re-parse must replace.
+      await db
+          .into(db.diveTanks)
+          .insert(
+            const DiveTanksCompanion(
+              id: Value('tank-0'),
+              diveId: Value('dive-1'),
+              volume: Value(12.0),
+              startPressure: Value(225.9),
+              endPressure: Value(93.5),
+              o2Percent: Value(32.0),
+              hePercent: Value(0.0),
+              tankOrder: Value(0),
+              tankRole: Value('backGas'),
+            ),
+          );
+      await db
+          .into(db.tankPressureProfiles)
+          .insert(
+            TankPressureProfilesCompanion.insert(
+              id: 'stale-pp',
+              diveId: 'dive-1',
+              tankId: 'tank-0',
+              timestamp: 0,
+              pressure: 999.0,
+            ),
+          );
+
+      // Air-integrated tank: summary pressure is null, pressure lives in the
+      // sample stream.
+      final parsed = makeParsedDive(
+        tanks: [pigeon.TankInfo(index: 0, gasMixIndex: 0, volumeLiters: 12.0)],
+        gasMixes: [pigeon.GasMix(index: 0, o2Percent: 32.0, hePercent: 0.0)],
+        samples: [
+          pigeon.ProfileSample(
+            timeSeconds: 0,
+            depthMeters: 0.0,
+            pressureBar: 220.0,
+            tankIndex: 0,
+          ),
+          pigeon.ProfileSample(
+            timeSeconds: 60,
+            depthMeters: 18.0,
+            pressureBar: 150.0,
+            tankIndex: 0,
+          ),
+          pigeon.ProfileSample(
+            timeSeconds: 120,
+            depthMeters: 5.0,
+            pressureBar: 90.0,
+            tankIndex: 0,
+          ),
+        ],
+      );
+
+      await service.applyParsedUpdate(
+        diveId: 'dive-1',
+        sourceRowId: 'src-1',
+        parsed: parsed,
+        descriptorVendor: null,
+        descriptorProduct: null,
+        descriptorModel: null,
+        libdivecomputerVersion: null,
+      );
+
+      // Pressure profiles replaced with the parsed samples (stale row gone).
+      final profiles =
+          await (db.select(db.tankPressureProfiles)
+                ..where((t) => t.diveId.equals('dive-1'))
+                ..orderBy([(t) => OrderingTerm.asc(t.timestamp)]))
+              .get();
+      expect(profiles.length, 3);
+      expect(profiles.first.pressure, 220.0);
+      expect(profiles.last.pressure, 90.0);
+      expect(profiles.every((p) => p.tankId == 'tank-0'), isTrue);
+
+      // Tank start/end pressure backfilled from first/last sample.
+      final tank = await (db.select(
+        db.diveTanks,
+      )..where((t) => t.diveId.equals('dive-1'))).getSingle();
+      expect(tank.startPressure, 220.0);
+      expect(tank.endPressure, 90.0);
+    });
+
     test('multi-source dive skips event/gasSwitch/tankPressure deletion '
         'and tank carry-over', () async {
       // Arrange: dive with two sources
