@@ -9679,6 +9679,13 @@ class AppLocalizationsPt extends AppLocalizations {
       'Mostrar marcadores para trocas de gas';
 
   @override
+  String get settings_appearance_gasTimeline => 'Gas timeline';
+
+  @override
+  String get settings_appearance_gasTimeline_subtitle =>
+      'Show the gas-usage strip below the dive profile by default';
+
+  @override
   String get settings_appearance_header_diveDetails => 'Detalhes do Mergulho';
 
   @override

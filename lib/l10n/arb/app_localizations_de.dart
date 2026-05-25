@@ -9663,6 +9663,13 @@ class AppLocalizationsDe extends AppLocalizations {
       'Markierungen für Gaswechsel anzeigen';
 
   @override
+  String get settings_appearance_gasTimeline => 'Gas timeline';
+
+  @override
+  String get settings_appearance_gasTimeline_subtitle =>
+      'Show the gas-usage strip below the dive profile by default';
+
+  @override
   String get settings_appearance_header_diveDetails => 'Tauchgang-Details';
 
   @override

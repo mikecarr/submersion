@@ -5293,6 +5293,8 @@
   "settings_appearance_colorGradient_custom": "Custom",
   "settings_appearance_gasSwitchMarkers": "Gas switch markers",
   "settings_appearance_gasSwitchMarkers_subtitle": "Show markers for gas switches",
+  "settings_appearance_gasTimeline": "Gas timeline",
+  "settings_appearance_gasTimeline_subtitle": "Show the gas-usage strip below the dive profile by default",
   "settings_appearance_header_diveDetails": "Dive Details",
   "settings_appearance_header_diveLog": "Dive Log",
   "settings_appearance_header_diveProfile": "Dive Profile",

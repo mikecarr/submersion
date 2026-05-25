@@ -9241,6 +9241,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_appearance_gasSwitchMarkers_subtitle => '显示气体切换标记';
 
   @override
+  String get settings_appearance_gasTimeline => 'Gas timeline';
+
+  @override
+  String get settings_appearance_gasTimeline_subtitle =>
+      'Show the gas-usage strip below the dive profile by default';
+
+  @override
   String get settings_appearance_header_diveDetails => '潜水详情';
 
   @override

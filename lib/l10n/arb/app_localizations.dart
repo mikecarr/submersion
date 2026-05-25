@@ -16588,6 +16588,18 @@ abstract class AppLocalizations {
   /// **'Show markers for gas switches'**
   String get settings_appearance_gasSwitchMarkers_subtitle;
 
+  /// No description provided for @settings_appearance_gasTimeline.
+  ///
+  /// In en, this message translates to:
+  /// **'Gas timeline'**
+  String get settings_appearance_gasTimeline;
+
+  /// No description provided for @settings_appearance_gasTimeline_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Show the gas-usage strip below the dive profile by default'**
+  String get settings_appearance_gasTimeline_subtitle;
+
   /// No description provided for @settings_appearance_header_diveDetails.
   ///
   /// In en, this message translates to:
