@@ -1104,6 +1104,11 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
     await _saveSettings();
   }
 
+  Future<void> setDefaultShowGasTimeline(bool value) async {
+    state = state.copyWith(defaultShowGasTimeline: value);
+    await _saveSettings();
+  }
+
   // Notification settings setters
 
   Future<void> setNotificationsEnabled(bool value) async {
