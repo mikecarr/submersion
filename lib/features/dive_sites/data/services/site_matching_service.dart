@@ -1,3 +1,4 @@
+import 'package:submersion/core/services/database_service.dart';
 import 'package:submersion/core/utils/geo_math.dart';
 import 'package:submersion/features/dive_log/data/repositories/dive_repository_impl.dart';
 import 'package:submersion/features/dive_log/domain/entities/dive.dart';
@@ -9,83 +10,77 @@ import 'package:submersion/features/dive_sites/domain/matching/match_thresholds.
 import 'package:submersion/features/dive_sites/domain/matching/site_match_outcome.dart';
 import 'package:submersion/features/dive_sites/domain/matching/site_matcher.dart';
 
-enum MatchEntryStatus { autoMatched, needsReview, noMatch }
+enum ProposalStatus { clear, review, none }
 
-/// A display candidate for the review screen (resolved name + distance).
+/// A display candidate for the review screen + map (resolved from a user site
+/// or a bundled site; fields are null when the source lacks them).
 class MatchCandidateView {
   final String id; // existing site id or bundled externalId
   final String name;
   final bool isExisting;
   final double distanceMeters;
+  final GeoPoint location;
+  final double? minDepth;
+  final double? maxDepth;
+  final String? country;
+  final String? region;
+  final double? rating;
+  final String? difficulty; // SiteDifficulty.displayName
+  final List<String> features; // bundled: wreck/reef/shore...
+  final String? description;
 
   const MatchCandidateView({
     required this.id,
     required this.name,
     required this.isExisting,
     required this.distanceMeters,
+    required this.location,
+    this.minDepth,
+    this.maxDepth,
+    this.country,
+    this.region,
+    this.rating,
+    this.difficulty,
+    this.features = const [],
+    this.description,
   });
 }
 
-/// The site actually linked by an apply (resolves a bundled externalId to the
-/// real created/linked DiveSites row id).
-class AppliedMatch {
-  final String siteId; // a real DiveSites row id, never a bundled externalId
-  final String siteName;
-  final bool isNewlyCreated;
-
-  const AppliedMatch({
-    required this.siteId,
-    required this.siteName,
-    required this.isNewlyCreated,
-  });
-}
-
-/// One dive's matching result, ready for the UI.
-class DiveMatchEntry {
+/// One dive's matching proposal (no write state — selection lives in the
+/// notifier).
+class MatchProposal {
   final Dive dive;
-  final MatchEntryStatus status;
-  final String? siteId; // when matched
-  final String? siteName; // when matched
-  final double? distanceMeters;
-  final bool isNewlyCreated; // bundled site materialised by this match
-  final List<MatchCandidateView> candidates; // for needsReview
+  final ProposalStatus status;
+  final List<MatchCandidateView> candidates; // distance-sorted
+  final String? recommendedCandidateId; // matcher's pick (clear only)
 
-  const DiveMatchEntry({
+  const MatchProposal({
     required this.dive,
     required this.status,
-    this.siteId,
-    this.siteName,
-    this.distanceMeters,
-    this.isNewlyCreated = false,
     this.candidates = const [],
+    this.recommendedCandidateId,
   });
-
-  DiveMatchEntry copyWith({
-    MatchEntryStatus? status,
-    String? siteId,
-    String? siteName,
-    double? distanceMeters,
-    bool? isNewlyCreated,
-    List<MatchCandidateView>? candidates,
-    bool clearSite = false,
-  }) {
-    return DiveMatchEntry(
-      dive: dive,
-      status: status ?? this.status,
-      siteId: clearSite ? null : (siteId ?? this.siteId),
-      siteName: clearSite ? null : (siteName ?? this.siteName),
-      distanceMeters: clearSite
-          ? null
-          : (distanceMeters ?? this.distanceMeters),
-      isNewlyCreated: clearSite
-          ? false
-          : (isNewlyCreated ?? this.isNewlyCreated),
-      candidates: candidates ?? this.candidates,
-    );
-  }
 }
 
-/// Resolved candidate objects retained per dive so the UI can apply by id.
+/// A user-confirmed (diveId -> chosen candidate) pair to apply.
+class ConfirmedMatch {
+  final String diveId;
+  final String candidateId; // existing site id or bundled externalId
+  const ConfirmedMatch(this.diveId, this.candidateId);
+}
+
+/// Outcome counts from applyConfirmed, for the result message.
+class ApplyResult {
+  final int divesLinked;
+  final int sitesCreated;
+  const ApplyResult({required this.divesLinked, required this.sitesCreated});
+}
+
+/// Runs a body inside a DB transaction. Injectable so unit tests can pass a
+/// pass-through that doesn't require a real database.
+typedef TransactionRunner = Future<void> Function(Future<void> Function() body);
+
+/// Resolved candidate objects retained per dive so apply can act on a chosen id.
 class _CandidateRef {
   final DiveSite? existing; // non-null when existing
   final ExternalDiveSite? bundled; // non-null when bundled
@@ -93,8 +88,8 @@ class _CandidateRef {
   const _CandidateRef.bundled(this.bundled) : existing = null;
 }
 
-/// Gathers candidates, runs the matcher, and applies results for one review
-/// session. Stateful: it tracks batch dedup and rollback bookkeeping.
+/// Gathers candidates and computes proposals (no writes); applies confirmed
+/// selections in a single transaction on demand.
 class SiteMatchingService {
   SiteMatchingService({
     required SiteRepository siteRepository,
@@ -102,33 +97,38 @@ class SiteMatchingService {
     required DiveRepository diveRepository,
     required this.diverId,
     required this.thresholds,
+    TransactionRunner? runInTransaction,
   }) : _siteRepository = siteRepository,
        _apiService = apiService,
-       _diveRepository = diveRepository;
+       _diveRepository = diveRepository,
+       _runInTransaction =
+           runInTransaction ??
+           ((body) => DatabaseService.instance.database.transaction(body));
 
   final SiteRepository _siteRepository;
   final DiveSiteApiService _apiService;
   final DiveRepository _diveRepository;
   final String? diverId;
   final MatchThresholds thresholds;
+  final TransactionRunner _runInTransaction;
 
   static const double _coincidenceMeters = 100;
 
-  // Per-session state.
+  // Per-session state (no rollback bookkeeping — nothing is written until apply).
   List<DiveSite> _userSites = const [];
-  final Map<String, String> _createdByExternalId = {}; // externalId -> site id
-  final Map<String, Set<String>> _createdSiteRefs = {}; // created id -> diveIds
   final Map<String, Map<String, _CandidateRef>> _refsByDive = {};
-  final Map<String, String> _appliedSiteByDive = {};
+  // Reset at the start of each applyConfirmed pass (batch dedup).
+  final Map<String, String> _createdByExternalId = {};
 
   GeoPoint? _pointFor(Dive dive) => dive.entryLocation ?? dive.exitLocation;
 
-  Future<List<DiveMatchEntry>> run(List<Dive> dives) async {
+  /// Computes proposals for [dives]. Performs NO database writes.
+  Future<List<MatchProposal>> computeProposals(List<Dive> dives) async {
     _userSites = (await _siteRepository.getAllSites(
       diverId: diverId,
     )).where((s) => s.location != null).toList();
 
-    final entries = <DiveMatchEntry>[];
+    final proposals = <MatchProposal>[];
     for (final dive in dives) {
       final point = _pointFor(dive);
       if (point == null) continue;
@@ -160,17 +160,11 @@ class SiteMatchingService {
       }
       _refsByDive[dive.id] = refs;
 
-      // Display views for every in-range candidate, so auto-matched rows can
-      // still offer "Change" and review rows can list alternatives.
-      final rankedViews =
+      final views =
           candidates
               .map(
-                (c) => MatchCandidateView(
-                  id: c.id,
-                  name: _nameOf(refs[c.id]!),
-                  isExisting: c.isExisting,
-                  distanceMeters: distanceMeters(point, c.location),
-                ),
+                (c) =>
+                    _viewFor(c, refs[c.id]!, distanceMeters(point, c.location)),
               )
               .where((v) => v.distanceMeters <= thresholds.outerRadiusMeters)
               .toList()
@@ -181,127 +175,114 @@ class SiteMatchingService {
         candidates: candidates,
         thresholds: thresholds,
       );
-      entries.add(await _toEntry(dive, outcome, refs, rankedViews));
-    }
-    return entries;
-  }
 
-  Future<DiveMatchEntry> _toEntry(
-    Dive dive,
-    SiteMatchOutcome outcome,
-    Map<String, _CandidateRef> refs,
-    List<MatchCandidateView> rankedViews,
-  ) async {
-    switch (outcome) {
-      case NoMatch():
-        return DiveMatchEntry(dive: dive, status: MatchEntryStatus.noMatch);
-      case Suggested():
-        return DiveMatchEntry(
+      proposals.add(switch (outcome) {
+        NoMatch() => MatchProposal(dive: dive, status: ProposalStatus.none),
+        Suggested() => MatchProposal(
           dive: dive,
-          status: MatchEntryStatus.needsReview,
-          candidates: rankedViews,
-        );
-      case AutoMatch(:final siteId, :final distanceMeters):
-        final applied = await _applyCandidate(dive.id, refs[siteId]!);
-        _appliedSiteByDive[dive.id] = applied.siteId;
-        return DiveMatchEntry(
+          status: ProposalStatus.review,
+          candidates: views,
+        ),
+        AutoMatch(:final siteId) => MatchProposal(
           dive: dive,
-          status: MatchEntryStatus.autoMatched,
-          siteId: applied.siteId,
-          siteName: applied.siteName,
-          distanceMeters: distanceMeters,
-          isNewlyCreated: applied.isNewlyCreated,
-          candidates: rankedViews,
-        );
+          status: ProposalStatus.clear,
+          candidates: views,
+          recommendedCandidateId: siteId,
+        ),
+      });
     }
+    return proposals;
   }
 
-  String _nameOf(_CandidateRef ref) => ref.existing?.name ?? ref.bundled!.name;
-
-  /// Applies a user-chosen candidate; returns the real applied site (resolving
-  /// a bundled externalId to its created site id), or null if it is gone.
-  Future<AppliedMatch?> link(String diveId, String candidateId) async {
-    await unlink(diveId); // clear any prior link (and roll back its orphan)
-    final ref = _refsByDive[diveId]?[candidateId];
-    if (ref == null) return null;
-    final applied = await _applyCandidate(diveId, ref);
-    _appliedSiteByDive[diveId] = applied.siteId;
-    return applied;
-  }
-
-  Future<void> unlink(String diveId) async {
-    final prior = _appliedSiteByDive.remove(diveId);
-    // Nothing was applied by this session -> no DB write or sync event needed.
-    if (prior == null) return;
-    await _diveRepository.setSite(diveId, null);
-
-    final refs = _createdSiteRefs[prior];
-    if (refs != null) {
-      refs.remove(diveId);
-      if (refs.isEmpty) {
-        _createdSiteRefs.remove(prior);
-        _createdByExternalId.removeWhere((_, id) => id == prior);
-        await _siteRepository.deleteSite(prior);
-      }
-    }
-  }
-
-  Future<AppliedMatch> _applyCandidate(String diveId, _CandidateRef ref) async {
+  MatchCandidateView _viewFor(
+    MatchCandidate c,
+    _CandidateRef ref,
+    double distance,
+  ) {
     if (ref.existing != null) {
-      final site = ref.existing!;
-      await _diveRepository.setSite(diveId, site.id);
-      _track(site.id, diveId, created: false);
-      return AppliedMatch(
-        siteId: site.id,
-        siteName: site.name,
-        isNewlyCreated: false,
+      final s = ref.existing!;
+      return MatchCandidateView(
+        id: s.id,
+        name: s.name,
+        isExisting: true,
+        distanceMeters: distance,
+        location: s.location!,
+        minDepth: s.minDepth,
+        maxDepth: s.maxDepth,
+        country: s.country,
+        region: s.region,
+        rating: s.rating,
+        difficulty: s.difficulty?.displayName,
+        description: s.description.isEmpty ? null : s.description,
       );
+    }
+    final b = ref.bundled!;
+    return MatchCandidateView(
+      id: b.externalId,
+      name: b.name,
+      isExisting: false,
+      distanceMeters: distance,
+      location: GeoPoint(b.latitude!, b.longitude!),
+      maxDepth: b.maxDepth,
+      country: b.country,
+      region: b.region ?? b.ocean,
+      features: b.features,
+      description: (b.description == null || b.description!.isEmpty)
+          ? null
+          : b.description,
+    );
+  }
+
+  /// Applies confirmed selections in a single transaction. Returns counts.
+  Future<ApplyResult> applyConfirmed(List<ConfirmedMatch> confirmed) async {
+    _createdByExternalId.clear();
+    var linked = 0;
+    var created = 0;
+    await _runInTransaction(() async {
+      for (final c in confirmed) {
+        final ref = _refsByDive[c.diveId]?[c.candidateId];
+        if (ref == null) continue;
+        final didCreate = await _applyOne(c.diveId, ref);
+        linked++;
+        if (didCreate) created++;
+      }
+    });
+    return ApplyResult(divesLinked: linked, sitesCreated: created);
+  }
+
+  /// Links one dive to its chosen candidate. Returns true if a new bundled site
+  /// row was created. Mirrors the original apply logic (dedup + coincidence
+  /// guard) minus the rollback bookkeeping.
+  Future<bool> _applyOne(String diveId, _CandidateRef ref) async {
+    if (ref.existing != null) {
+      await _diveRepository.setSite(diveId, ref.existing!.id);
+      return false;
     }
 
     final bundled = ref.bundled!;
     final point = GeoPoint(bundled.latitude!, bundled.longitude!);
 
-    // Batch dedup: already materialised this bundled site in this session?
-    final existingNewId = _createdByExternalId[bundled.externalId];
-    if (existingNewId != null) {
-      await _diveRepository.setSite(diveId, existingNewId);
-      _track(existingNewId, diveId, created: true);
-      return AppliedMatch(
-        siteId: existingNewId,
-        siteName: bundled.name,
-        isNewlyCreated: true,
-      );
+    // Batch dedup: this bundled site already materialised in this pass?
+    final dedupId = _createdByExternalId[bundled.externalId];
+    if (dedupId != null) {
+      await _diveRepository.setSite(diveId, dedupId);
+      return false;
     }
 
     // Coincidence guard: an existing user site essentially here?
     for (final s in _userSites) {
       if (distanceMeters(point, s.location!) <= _coincidenceMeters) {
         await _diveRepository.setSite(diveId, s.id);
-        _track(s.id, diveId, created: false);
-        return AppliedMatch(
-          siteId: s.id,
-          siteName: s.name,
-          isNewlyCreated: false,
-        );
+        return false;
       }
     }
 
-    // Materialise.
-    final created = await _siteRepository.createSite(
+    // Materialise the bundled site, then link.
+    final createdSite = await _siteRepository.createSite(
       bundled.toDiveSite(diverId: diverId),
     );
-    _createdByExternalId[bundled.externalId] = created.id;
-    await _diveRepository.setSite(diveId, created.id);
-    _track(created.id, diveId, created: true);
-    return AppliedMatch(
-      siteId: created.id,
-      siteName: created.name,
-      isNewlyCreated: true,
-    );
-  }
-
-  void _track(String siteId, String diveId, {required bool created}) {
-    if (!created) return;
-    (_createdSiteRefs[siteId] ??= <String>{}).add(diveId);
+    _createdByExternalId[bundled.externalId] = createdSite.id;
+    await _diveRepository.setSite(diveId, createdSite.id);
+    return true;
   }
 }

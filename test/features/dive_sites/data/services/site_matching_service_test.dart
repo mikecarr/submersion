@@ -12,7 +12,6 @@ import 'package:submersion/features/dive_sites/domain/matching/site_match_sensit
 
 import 'site_matching_service_test.mocks.dart';
 
-// ~0.001 deg longitude at the equator is ~111 m. Build points by metres east.
 GeoPoint _eastMeters(double m) => GeoPoint(0, m / 111320.0);
 
 Dive _diveAt(String id, GeoPoint where) => Dive(
@@ -29,12 +28,14 @@ void main() {
   late MockDiveSiteApiService api;
   late MockDiveRepository dives;
 
+  // Pass-through transaction runner so apply runs without a real database.
   SiteMatchingService service() => SiteMatchingService(
     siteRepository: sites,
     apiService: api,
     diveRepository: dives,
     diverId: 'diver-1',
     thresholds: SiteMatchSensitivity.balanced.thresholds,
+    runInTransaction: (body) => body(),
   );
 
   setUp(() {
@@ -52,169 +53,174 @@ void main() {
       sites.getAllSites(diverId: anyNamed('diverId')),
     ).thenAnswer((_) async => const []);
     when(dives.setSite(any, any)).thenAnswer((_) async {});
-    when(sites.deleteSite(any)).thenAnswer((_) async {});
   });
 
-  test('auto-links an existing site within inner radius', () async {
-    const existing = DiveSite(
-      id: 's1',
-      name: 'Blue Hole',
-      location: GeoPoint(0, 0),
-    );
-    when(
-      sites.getAllSites(diverId: anyNamed('diverId')),
-    ).thenAnswer((_) async => [existing]);
-
-    final entries = await service().run([_diveAt('d1', _eastMeters(33))]);
-
-    expect(entries.single.status, MatchEntryStatus.autoMatched);
-    expect(entries.single.siteId, 's1');
-    verify(dives.setSite('d1', 's1')).called(1);
-  });
-
-  test('no candidates -> noMatch, no write', () async {
-    final entries = await service().run([
-      _diveAt('d1', const GeoPoint(10, 10)),
-    ]);
-
-    expect(entries.single.status, MatchEntryStatus.noMatch);
-    verifyNever(dives.setSite(any, any));
-  });
-
-  test(
-    'materialises a bundled site once for two dives (batch dedup)',
-    () async {
-      when(
-        api.searchNearby(
-          latitude: anyNamed('latitude'),
-          longitude: anyNamed('longitude'),
-          radiusKm: anyNamed('radiusKm'),
-        ),
-      ).thenAnswer(
-        (_) async => const DiveSiteSearchResult(
-          sites: [
-            ExternalDiveSite(
-              externalId: 'osm_1',
-              name: 'Wreck',
-              latitude: 0,
-              longitude: 0,
-              source: 'OpenStreetMap',
-            ),
-          ],
-        ),
-      );
-      when(sites.createSite(any)).thenAnswer((inv) async {
-        final s = inv.positionalArguments.first as DiveSite;
-        return s.copyWith(id: 'new-site-1');
-      });
-
-      final entries = await service().run([
-        _diveAt('d1', _eastMeters(22)),
-        _diveAt('d2', _eastMeters(33)),
-      ]);
-
-      expect(
-        entries.every((e) => e.status == MatchEntryStatus.autoMatched),
-        true,
-      );
-      expect(entries.every((e) => e.siteId == 'new-site-1'), true);
-      expect(entries.first.isNewlyCreated, true);
-      verify(sites.createSite(any)).called(1); // created once, linked twice
-      verify(dives.setSite('d1', 'new-site-1')).called(1);
-      verify(dives.setSite('d2', 'new-site-1')).called(1);
-    },
-  );
-
-  test(
-    'coincidence guard links existing site instead of creating bundled',
-    () async {
-      // Existing site at ~160 m (outside inner 150, so precedence does not fire),
-      // bundled at ~140 m (inside inner -> auto), and the two are ~20 m apart so
-      // the guard fires at apply time.
-      final existing = DiveSite(
-        id: 's-exist',
-        name: 'Known Reef',
-        location: _eastMeters(160),
+  group('computeProposals', () {
+    test('clear match: existing site within inner radius, no writes', () async {
+      const existing = DiveSite(
+        id: 's1',
+        name: 'Blue Hole',
+        location: GeoPoint(0, 0),
+        maxDepth: 40,
+        country: 'Egypt',
       );
       when(
         sites.getAllSites(diverId: anyNamed('diverId')),
-      ).thenAnswer((_) async => [existing]);
-      when(
-        api.searchNearby(
-          latitude: anyNamed('latitude'),
-          longitude: anyNamed('longitude'),
-          radiusKm: anyNamed('radiusKm'),
-        ),
-      ).thenAnswer(
-        (_) async => DiveSiteSearchResult(
-          sites: [
-            ExternalDiveSite(
-              externalId: 'osm_2',
-              name: 'Reef',
-              latitude: 0,
-              longitude: _eastMeters(140).longitude,
-              source: 'OpenStreetMap',
-            ),
-          ],
-        ),
-      );
+      ).thenAnswer((_) async => const [existing]);
 
-      await service().run([_diveAt('d1', const GeoPoint(0, 0))]);
+      final proposals = await service().computeProposals([
+        _diveAt('d1', _eastMeters(33)),
+      ]);
 
-      verify(dives.setSite('d1', 's-exist')).called(1);
+      expect(proposals.single.status, ProposalStatus.clear);
+      expect(proposals.single.recommendedCandidateId, 's1');
+      final view = proposals.single.candidates.single;
+      expect(view.name, 'Blue Hole');
+      expect(view.maxDepth, 40);
+      expect(view.location, const GeoPoint(0, 0));
+      verifyNever(dives.setSite(any, any));
       verifyNever(sites.createSite(any));
-    },
-  );
+    });
 
-  test(
-    'unlink clears site and deletes an orphaned created bundled site',
-    () async {
-      when(
-        api.searchNearby(
-          latitude: anyNamed('latitude'),
-          longitude: anyNamed('longitude'),
-          radiusKm: anyNamed('radiusKm'),
-        ),
-      ).thenAnswer(
-        (_) async => const DiveSiteSearchResult(
-          sites: [
-            ExternalDiveSite(
-              externalId: 'osm_1',
-              name: 'Wreck',
-              latitude: 0,
-              longitude: 0,
-              source: 'OpenStreetMap',
-            ),
-          ],
-        ),
-      );
-      when(sites.createSite(any)).thenAnswer(
-        (inv) async =>
-            (inv.positionalArguments.first as DiveSite).copyWith(id: 'new-1'),
-      );
+    test('no candidates -> none', () async {
+      final proposals = await service().computeProposals([
+        _diveAt('d1', const GeoPoint(10, 10)),
+      ]);
+      expect(proposals.single.status, ProposalStatus.none);
+      expect(proposals.single.candidates, isEmpty);
+    });
 
+    test('two close sites -> review, no recommendation', () async {
+      when(sites.getAllSites(diverId: anyNamed('diverId'))).thenAnswer(
+        (_) async => const [
+          DiveSite(id: 'a', name: 'A', location: GeoPoint(0, 0.0003)),
+          DiveSite(id: 'b', name: 'B', location: GeoPoint(0, 0.0006)),
+        ],
+      );
+      final proposals = await service().computeProposals([
+        _diveAt('d1', const GeoPoint(0, 0)),
+      ]);
+      expect(proposals.single.status, ProposalStatus.review);
+      expect(proposals.single.recommendedCandidateId, isNull);
+      expect(proposals.single.candidates.length, 2);
+    });
+  });
+
+  group('applyConfirmed', () {
+    setUp(() {
+      when(sites.createSite(any)).thenAnswer((inv) async {
+        final s = inv.positionalArguments.first as DiveSite;
+        return s.copyWith(id: 'new-${s.name}');
+      });
+    });
+
+    test('links an existing candidate; no site created', () async {
+      when(sites.getAllSites(diverId: anyNamed('diverId'))).thenAnswer(
+        (_) async => const [
+          DiveSite(id: 's1', name: 'Blue Hole', location: GeoPoint(0, 0)),
+        ],
+      );
       final s = service();
-      await s.run([_diveAt('d1', _eastMeters(22))]);
-      await s.unlink('d1');
+      await s.computeProposals([_diveAt('d1', _eastMeters(33))]);
 
-      verify(dives.setSite('d1', null)).called(1);
-      verify(sites.deleteSite('new-1')).called(1);
-    },
-  );
+      final result = await s.applyConfirmed([const ConfirmedMatch('d1', 's1')]);
 
-  test('link applies a user-chosen candidate to a needsReview dive', () async {
-    const a = DiveSite(id: 's-a', name: 'A', location: GeoPoint(0, 0.0030));
-    const b = DiveSite(id: 's-b', name: 'B', location: GeoPoint(0, 0.0034));
-    when(
-      sites.getAllSites(diverId: anyNamed('diverId')),
-    ).thenAnswer((_) async => const [a, b]); // both >150 m, <1000 m
+      expect(result.divesLinked, 1);
+      expect(result.sitesCreated, 0);
+      verify(dives.setSite('d1', 's1')).called(1);
+      verifyNever(sites.createSite(any));
+    });
 
-    final s = service();
-    final entries = await s.run([_diveAt('d1', const GeoPoint(0, 0))]);
-    expect(entries.single.status, MatchEntryStatus.needsReview);
+    test(
+      'materialises a bundled site once for two dives (batch dedup)',
+      () async {
+        when(
+          api.searchNearby(
+            latitude: anyNamed('latitude'),
+            longitude: anyNamed('longitude'),
+            radiusKm: anyNamed('radiusKm'),
+          ),
+        ).thenAnswer(
+          (_) async => const DiveSiteSearchResult(
+            sites: [
+              ExternalDiveSite(
+                externalId: 'osm_1',
+                name: 'Wreck',
+                latitude: 0,
+                longitude: 0,
+                source: 'OpenStreetMap',
+              ),
+            ],
+          ),
+        );
+        final s = service();
+        await s.computeProposals([
+          _diveAt('d1', _eastMeters(22)),
+          _diveAt('d2', _eastMeters(33)),
+        ]);
 
-    final applied = await s.link('d1', 's-b');
-    expect(applied?.siteId, 's-b');
-    verify(dives.setSite('d1', 's-b')).called(1);
+        final result = await s.applyConfirmed([
+          const ConfirmedMatch('d1', 'osm_1'),
+          const ConfirmedMatch('d2', 'osm_1'),
+        ]);
+
+        expect(result.divesLinked, 2);
+        expect(result.sitesCreated, 1);
+        verify(sites.createSite(any)).called(1);
+        verify(dives.setSite('d1', 'new-Wreck')).called(1);
+        verify(dives.setSite('d2', 'new-Wreck')).called(1);
+      },
+    );
+
+    test(
+      'coincidence guard links existing instead of creating bundled',
+      () async {
+        final existing = DiveSite(
+          id: 's-exist',
+          name: 'Known Reef',
+          location: _eastMeters(160),
+        );
+        when(
+          sites.getAllSites(diverId: anyNamed('diverId')),
+        ).thenAnswer((_) async => [existing]);
+        when(
+          api.searchNearby(
+            latitude: anyNamed('latitude'),
+            longitude: anyNamed('longitude'),
+            radiusKm: anyNamed('radiusKm'),
+          ),
+        ).thenAnswer(
+          (_) async => DiveSiteSearchResult(
+            sites: [
+              ExternalDiveSite(
+                externalId: 'osm_2',
+                name: 'Reef',
+                latitude: 0,
+                longitude: _eastMeters(140).longitude,
+                source: 'OpenStreetMap',
+              ),
+            ],
+          ),
+        );
+        final s = service();
+        await s.computeProposals([_diveAt('d1', const GeoPoint(0, 0))]);
+
+        final result = await s.applyConfirmed([
+          const ConfirmedMatch('d1', 'osm_2'),
+        ]);
+
+        expect(result.sitesCreated, 0);
+        verify(dives.setSite('d1', 's-exist')).called(1);
+        verifyNever(sites.createSite(any));
+      },
+    );
+
+    test('empty confirmed list writes nothing', () async {
+      final s = service();
+      await s.computeProposals([_diveAt('d1', _eastMeters(33))]);
+      final result = await s.applyConfirmed(const []);
+      expect(result.divesLinked, 0);
+      verifyNever(dives.setSite(any, any));
+    });
   });
 }
