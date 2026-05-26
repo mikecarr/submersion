@@ -268,7 +268,11 @@ class _DiveListPageState extends ConsumerState<DiveListPage> {
                     children: [
                       const Icon(Icons.add_location_alt_outlined, size: 20),
                       const SizedBox(width: 12),
-                      Text(context.l10n.diveLog_listPage_menuMatchSites),
+                      Flexible(
+                        child: Text(
+                          context.l10n.diveLog_listPage_menuMatchSites,
+                        ),
+                      ),
                     ],
                   ),
                 ),
