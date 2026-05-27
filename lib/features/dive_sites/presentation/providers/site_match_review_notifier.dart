@@ -34,7 +34,9 @@ class SiteMatchReviewState {
     bool? isApplying,
   }) => SiteMatchReviewState(
     isLoading: isLoading ?? this.isLoading,
-    errorMessage: errorMessage,
+    // Preserve a set (fatal) error unless a new one is passed; transient
+    // state changes (focus/select/apply) must not silently clear it.
+    errorMessage: errorMessage ?? this.errorMessage,
     proposals: proposals ?? this.proposals,
     focusedDiveId: focusedDiveId ?? this.focusedDiveId,
     selections: selections ?? this.selections,
@@ -158,12 +160,10 @@ class SiteMatchReviewNotifier extends StateNotifier<SiteMatchReviewState> {
       if (mounted) state = state.copyWith(isApplying: false);
       return result;
     } catch (e) {
-      if (mounted) {
-        state = state.copyWith(
-          isApplying: false,
-          errorMessage: 'Could not apply matches: $e',
-        );
-      }
+      // Apply failures are transient: the page surfaces them with a snackbar
+      // (confirm returns null) and keeps the review screen so the user can
+      // retry. Don't set the fatal errorMessage, which replaces the whole UI.
+      if (mounted) state = state.copyWith(isApplying: false);
       return null;
     }
   }

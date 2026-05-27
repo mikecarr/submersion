@@ -253,7 +253,7 @@ void main() {
   });
 
   test(
-    'confirm returns null and sets errorMessage when apply throws',
+    'apply failure is transient: returns null, keeps review screen reviewable',
     () async {
       final container = makeContainer([_dive('d1', _eastMeters(33))]);
       when(sites.getAllSites(diverId: anyNamed('diverId'))).thenAnswer(
@@ -266,12 +266,15 @@ void main() {
 
       final notifier = container.read(siteMatchReviewProvider(null).notifier);
       final result = await notifier.confirm();
+      final state = container.read(siteMatchReviewProvider(null));
 
       expect(result, isNull);
-      expect(
-        container.read(siteMatchReviewProvider(null)).errorMessage,
-        isNotNull,
-      );
+      // Apply errors are surfaced by the page's snackbar, not the fatal
+      // errorMessage view; the proposals/selections stay so the user can retry.
+      expect(state.errorMessage, isNull);
+      expect(state.isApplying, false);
+      expect(state.proposals, isNotEmpty);
+      expect(state.selections['d1'], 's1');
     },
   );
 
