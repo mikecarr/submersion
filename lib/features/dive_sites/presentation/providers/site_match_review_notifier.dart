@@ -44,10 +44,16 @@ class SiteMatchReviewState {
   );
 
   int get selectedCount => selections.length;
+
+  /// Any proposal with candidates (clear or review) that has no selection yet.
+  /// A clear match whose seeded selection was toggled off still needs review,
+  /// so this counts the full unselected-but-matchable set, not just review-tier
+  /// proposals. Together with [selectedCount] and [noMatchCount] this partitions
+  /// every proposal exactly once.
   int get reviewCount => proposals
       .where(
         (p) =>
-            p.status == ProposalStatus.review &&
+            p.status != ProposalStatus.none &&
             !selections.containsKey(p.dive.id),
       )
       .length;
@@ -141,8 +147,10 @@ class SiteMatchReviewNotifier extends StateNotifier<SiteMatchReviewState> {
     state = state.copyWith(selections: next);
   }
 
-  /// Applies all selections in one transaction. Returns the result, or null on
-  /// error (errorMessage set). The page handles pop + snackbar.
+  /// Applies all selections in one transaction. Returns the result, or null if
+  /// there is nothing to apply or the apply fails. Apply failures are transient:
+  /// [errorMessage] is left unset (it is fatal-only) and the page surfaces the
+  /// null result with a snackbar, keeping the review screen up for retry.
   Future<ApplyResult?> confirm() async {
     final service = _service;
     if (service == null) return null;

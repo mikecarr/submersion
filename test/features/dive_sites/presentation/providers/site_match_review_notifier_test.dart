@@ -220,6 +220,36 @@ void main() {
     );
   });
 
+  test(
+    'deselecting a clear match counts it as "to review", not unaccounted',
+    () async {
+      final container = makeContainer([_dive('d1', _eastMeters(33))]);
+      when(sites.getAllSites(diverId: anyNamed('diverId'))).thenAnswer(
+        (_) async => const [
+          DiveSite(id: 's1', name: 'Blue Hole', location: GeoPoint(0, 0)),
+        ],
+      );
+      await _settle();
+      final notifier = container.read(siteMatchReviewProvider(null).notifier);
+
+      // Pre-selected clear match: counted as selected, not to-review.
+      var state = container.read(siteMatchReviewProvider(null));
+      expect(state.selectedCount, 1);
+      expect(state.reviewCount, 0);
+
+      // Toggle it off: it now needs review rather than disappearing from every
+      // summary bucket. The three counts must still partition all proposals.
+      notifier.select('d1', 's1');
+      state = container.read(siteMatchReviewProvider(null));
+      expect(state.selectedCount, 0);
+      expect(state.reviewCount, 1);
+      expect(
+        state.selectedCount + state.reviewCount + state.noMatchCount,
+        state.proposals.length,
+      );
+    },
+  );
+
   test('_init surfaces an error message when matching throws', () async {
     final container = makeContainer(const []);
     when(
