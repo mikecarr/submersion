@@ -48,4 +48,30 @@ void main() {
     await tester.tap(find.byIcon(Icons.place));
     expect(tapped, 's1');
   });
+
+  testWidgets('renders only the dive pin when there are no candidates', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          settingsProvider.overrideWith((ref) => MockSettingsNotifier()),
+        ],
+        child: MaterialApp(
+          home: Scaffold(
+            body: MatchSitesMap(
+              divePoint: const GeoPoint(0, 0),
+              candidates: const [],
+              selectedCandidateId: null,
+              onSelectCandidate: (_) {},
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.byIcon(Icons.my_location), findsOneWidget);
+    expect(find.byIcon(Icons.place), findsNothing);
+  });
 }

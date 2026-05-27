@@ -32,31 +32,13 @@ class MatchSitesMap extends ConsumerStatefulWidget {
 class _MatchSitesMapState extends ConsumerState<MatchSitesMap> {
   final MapController _controller = MapController();
 
+  // The review page keys this widget by dive id, so a focus change recreates
+  // it (fresh initialCameraFit below) rather than updating it in place.
   List<LatLng> get _points => [
     LatLng(widget.divePoint.latitude, widget.divePoint.longitude),
     for (final c in widget.candidates)
       LatLng(c.location.latitude, c.location.longitude),
   ];
-
-  @override
-  void didUpdateWidget(MatchSitesMap old) {
-    super.didUpdateWidget(old);
-    // Refit when the focused dive (and so its point/candidates) changes.
-    if (old.divePoint != widget.divePoint) {
-      final pts = _points;
-      if (pts.length >= 2) {
-        _controller.fitCamera(
-          CameraFit.bounds(
-            bounds: LatLngBounds.fromPoints(pts),
-            padding: const EdgeInsets.all(40),
-            maxZoom: 16,
-          ),
-        );
-      } else {
-        _controller.move(pts.first, 13);
-      }
-    }
-  }
 
   @override
   Widget build(BuildContext context) {

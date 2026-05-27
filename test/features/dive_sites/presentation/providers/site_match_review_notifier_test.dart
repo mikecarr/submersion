@@ -159,4 +159,61 @@ void main() {
       isNotNull,
     );
   });
+
+  test('focusDive changes the focused dive', () async {
+    final container = makeContainer([
+      _dive('d1', _eastMeters(33)),
+      _dive('d2', _eastMeters(40)),
+    ]);
+    when(sites.getAllSites(diverId: anyNamed('diverId'))).thenAnswer(
+      (_) async => const [
+        DiveSite(id: 's1', name: 'Blue Hole', location: GeoPoint(0, 0)),
+      ],
+    );
+    await _settle();
+    final notifier = container.read(siteMatchReviewProvider(null).notifier);
+
+    notifier.focusDive('d2');
+    expect(container.read(siteMatchReviewProvider(null)).focusedDiveId, 'd2');
+  });
+
+  test(
+    'confirm returns null and sets errorMessage when apply throws',
+    () async {
+      final container = makeContainer([_dive('d1', _eastMeters(33))]);
+      when(sites.getAllSites(diverId: anyNamed('diverId'))).thenAnswer(
+        (_) async => const [
+          DiveSite(id: 's1', name: 'Blue Hole', location: GeoPoint(0, 0)),
+        ],
+      );
+      await _settle();
+      when(dives.setSite(any, any)).thenThrow(StateError('write failed'));
+
+      final notifier = container.read(siteMatchReviewProvider(null).notifier);
+      final result = await notifier.confirm();
+
+      expect(result, isNull);
+      expect(
+        container.read(siteMatchReviewProvider(null)).errorMessage,
+        isNotNull,
+      );
+    },
+  );
+
+  test(
+    'eligibleImportedDivesProvider returns matchable imported ids',
+    () async {
+      final container = makeContainer([_dive('d1', _eastMeters(33))]);
+
+      final ids = await container.read(
+        eligibleImportedDivesProvider(['d1', 'd2']).future,
+      );
+      expect(ids, ['d1']);
+
+      final empty = await container.read(
+        eligibleImportedDivesProvider(const []).future,
+      );
+      expect(empty, isEmpty);
+    },
+  );
 }
