@@ -3,6 +3,24 @@
 All notable changes to Submersion are documented in this file.
 
 
+## 1.4.9 (2026-05-29)
+
+### Bug Fixes
+
+- respect depth unit in Time at Depth Ranges chart
+- honor user date format + count duration inclusively
+- refresh paginated dive list after applying matches
+
+### Chores
+
+- bump version to 1.4.9+95
+
+### Other
+
+- vendor patches via fork submodule so CI builds include them
+- Update docs
+
+
 ## 1.4.8 (2026-05-27)
 
 ### Features
