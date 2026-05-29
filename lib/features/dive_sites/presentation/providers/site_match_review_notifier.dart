@@ -164,9 +164,9 @@ class SiteMatchReviewNotifier extends StateNotifier<SiteMatchReviewState> {
           ConfirmedMatch(e.key, e.value),
       ];
       final result = await service.applyConfirmed(confirmed);
-      // The writes bypass DiveListNotifier (the only thing that reloads the
-      // dives list), so without this the list keeps showing the pre-match
-      // "unknown site" rows. Refresh the affected views before returning.
+      // The writes bypass both dive-list notifiers (legacy and paginated), so
+      // without this the list keeps showing the pre-match "unknown site" rows.
+      // Refresh the affected views before returning.
       if (mounted) await _refreshAfterApply(confirmed, result);
       if (mounted) state = state.copyWith(isApplying: false);
       return result;
@@ -182,12 +182,17 @@ class SiteMatchReviewNotifier extends StateNotifier<SiteMatchReviewState> {
   /// Refreshes the views invalidated by [applyConfirmed]'s direct writes:
   /// the dives list (drops stale "unknown site" rows), dive statistics, the
   /// per-dive detail cache for each linked dive, and the sites list when
-  /// bundled sites were materialised.
+  /// bundled sites were materialised. Both dive-list notifiers must be
+  /// refreshed: the legacy [diveListNotifierProvider] for export/map views,
+  /// and [paginatedDiveListProvider] for the actual dive list page, which
+  /// caches DiveSummary rows (siteName comes from a LEFT JOIN at query time,
+  /// so a setSite() write does not refresh the cached state).
   Future<void> _refreshAfterApply(
     List<ConfirmedMatch> confirmed,
     ApplyResult result,
   ) async {
     await _ref.read(diveListNotifierProvider.notifier).refresh();
+    await _ref.read(paginatedDiveListProvider.notifier).refresh();
     _ref.invalidate(diveStatisticsProvider);
     for (final c in confirmed) {
       _ref.invalidate(diveProvider(c.diveId));

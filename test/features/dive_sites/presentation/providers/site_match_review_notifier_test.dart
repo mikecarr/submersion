@@ -5,6 +5,7 @@ import 'package:mockito/mockito.dart';
 import 'package:submersion/core/providers/provider.dart';
 import 'package:submersion/features/dive_log/data/repositories/dive_repository_impl.dart';
 import 'package:submersion/features/dive_log/domain/entities/dive.dart';
+import 'package:submersion/features/dive_log/domain/entities/dive_summary.dart';
 import 'package:submersion/features/dive_log/presentation/providers/dive_providers.dart';
 import 'package:submersion/features/dive_sites/data/repositories/site_repository_impl.dart';
 import 'package:submersion/features/dive_sites/data/services/dive_site_api_service.dart';
@@ -65,6 +66,24 @@ void main() {
     when(
       dives.getAllDives(diverId: anyNamed('diverId')),
     ).thenAnswer((_) async => <Dive>[]);
+    // PaginatedDiveListNotifier.refresh() (triggered by confirm) reloads via
+    // getDiveSummaries + getDiveCount; both must answer for loadFirstPage().
+    when(
+      dives.getDiveSummaries(
+        diverId: anyNamed('diverId'),
+        filter: anyNamed('filter'),
+        sort: anyNamed('sort'),
+        cursor: anyNamed('cursor'),
+        offset: anyNamed('offset'),
+        limit: anyNamed('limit'),
+      ),
+    ).thenAnswer((_) async => <DiveSummary>[]);
+    when(
+      dives.getDiveCount(
+        diverId: anyNamed('diverId'),
+        filter: anyNamed('filter'),
+      ),
+    ).thenAnswer((_) async => 0);
     when(
       sites.getAllSites(diverId: anyNamed('diverId')),
     ).thenAnswer((_) async => const []);
@@ -177,6 +196,48 @@ void main() {
     // stale "unknown site" rows for the dives it just linked.
     verify(
       dives.getAllDives(diverId: anyNamed('diverId')),
+    ).called(greaterThanOrEqualTo(1));
+  });
+
+  test('confirm refreshes the paginated dive list (the UI provider)', () async {
+    final container = makeContainer([_dive('d1', _eastMeters(33))]);
+    when(sites.getAllSites(diverId: anyNamed('diverId'))).thenAnswer(
+      (_) async => const [
+        DiveSite(id: 's1', name: 'Blue Hole', location: GeoPoint(0, 0)),
+      ],
+    );
+    await _settle();
+
+    final notifier = container.read(siteMatchReviewProvider(null).notifier);
+    // The dive list page watches paginatedDiveListProvider, which queries via
+    // getDiveSummaries. Init never touches it, so before confirm() it should
+    // be untouched.
+    verifyNever(
+      dives.getDiveSummaries(
+        diverId: anyNamed('diverId'),
+        filter: anyNamed('filter'),
+        sort: anyNamed('sort'),
+        cursor: anyNamed('cursor'),
+        offset: anyNamed('offset'),
+        limit: anyNamed('limit'),
+      ),
+    );
+
+    await notifier.confirm();
+
+    // confirm() must refresh paginatedDiveListProvider too — it caches
+    // DiveSummary rows with siteName from a LEFT JOIN, so a setSite() write
+    // does not update them. Without this, the dive list keeps showing the
+    // pre-match "unknown site" names until app restart.
+    verify(
+      dives.getDiveSummaries(
+        diverId: anyNamed('diverId'),
+        filter: anyNamed('filter'),
+        sort: anyNamed('sort'),
+        cursor: anyNamed('cursor'),
+        offset: anyNamed('offset'),
+        limit: anyNamed('limit'),
+      ),
     ).called(greaterThanOrEqualTo(1));
   });
 
