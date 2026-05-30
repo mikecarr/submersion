@@ -1790,6 +1790,8 @@
   "diveSites_edit_field_siteName_hint": "לדוגמה, Blue Hole",
   "diveSites_edit_field_siteName_label": "שם האתר *",
   "diveSites_edit_field_siteName_validation": "נא להזין שם אתר",
+  "diveSites_similarSite_useHint": "דומה לאתר צלילה קיים \"{siteName}\". הקש כדי להשתמש.",
+  "diveSites_similarSite_warning": "כבר קיים אתר דומה: \"{siteName}\"",
   "diveSites_edit_gps_gettingLocation": "מאתר...",
   "diveSites_edit_gps_helperText": "בחר שיטת מיקום - הקואורדינטות ימלאו אוטומטית את המדינה והאזור",
   "diveSites_edit_gps_latitude_hint": "לדוגמה, 21.4225",

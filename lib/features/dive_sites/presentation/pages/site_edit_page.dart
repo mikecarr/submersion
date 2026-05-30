@@ -13,8 +13,11 @@ import 'package:submersion/features/divers/presentation/providers/diver_provider
 import 'package:submersion/features/settings/presentation/providers/settings_providers.dart';
 import 'package:submersion/features/dive_sites/data/repositories/site_repository_impl.dart';
 import 'package:submersion/features/dive_sites/domain/entities/dive_site.dart';
+import 'package:submersion/features/dive_sites/domain/services/site_suggestions.dart';
 import 'package:submersion/features/dive_sites/presentation/providers/site_providers.dart';
 import 'package:submersion/features/dive_sites/presentation/widgets/location_picker_map.dart';
+import 'package:submersion/features/dive_sites/presentation/widgets/similar_value_hint.dart';
+import 'package:submersion/features/dive_sites/presentation/widgets/suggestion_field.dart';
 import 'package:submersion/features/marine_life/domain/entities/species.dart';
 import 'package:submersion/features/marine_life/presentation/providers/species_providers.dart';
 import 'package:submersion/features/marine_life/presentation/widgets/species_picker_dialog.dart';
@@ -474,28 +477,54 @@ class _SiteEditPageState extends ConsumerState<SiteEditPage> {
   }
 
   Widget _buildForm(BuildContext context, UnitFormatter units) {
+    final allSites = ref.watch(sitesProvider).value ?? const <DiveSite>[];
     final body = Form(
       key: _formKey,
       child: ListView(
         padding: const EdgeInsets.all(16),
         children: [
           // Name
-          TextFormField(
-            controller: _nameController,
-            decoration: _withMergeTextDecoration(
-              key: 'name',
-              decoration: InputDecoration(
-                labelText: context.l10n.diveSites_edit_field_siteName_label,
-                prefixIcon: const Icon(Icons.location_on),
-                hintText: context.l10n.diveSites_edit_field_siteName_hint,
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SuggestionField(
+                controller: _nameController,
+                suggestions: suggestedSiteNames(
+                  allSites,
+                  excludeId: _originalSite?.id,
+                ),
+                enableFuzzy: true,
+                textCapitalization: TextCapitalization.words,
+                decoration: _withMergeTextDecoration(
+                  key: 'name',
+                  decoration: InputDecoration(
+                    labelText: context.l10n.diveSites_edit_field_siteName_label,
+                    prefixIcon: const Icon(Icons.location_on),
+                    hintText: context.l10n.diveSites_edit_field_siteName_hint,
+                  ),
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return context
+                        .l10n
+                        .diveSites_edit_field_siteName_validation;
+                  }
+                  return null;
+                },
               ),
-            ),
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return context.l10n.diveSites_edit_field_siteName_validation;
-              }
-              return null;
-            },
+              ValueListenableBuilder<TextEditingValue>(
+                valueListenable: _nameController,
+                builder: (context, name, _) {
+                  return SimilarValueHint(
+                    query: name.text,
+                    candidates: suggestedSiteNames(
+                      allSites,
+                      excludeId: _originalSite?.id,
+                    ),
+                  );
+                },
+              ),
+            ],
           ),
           const SizedBox(height: 16),
 
@@ -518,8 +547,10 @@ class _SiteEditPageState extends ConsumerState<SiteEditPage> {
           Row(
             children: [
               Expanded(
-                child: TextFormField(
+                child: SuggestionField(
                   controller: _countryController,
+                  suggestions: suggestedCountries(allSites),
+                  textCapitalization: TextCapitalization.words,
                   decoration: _withMergeTextDecoration(
                     key: 'country',
                     decoration: InputDecoration(
@@ -532,15 +563,24 @@ class _SiteEditPageState extends ConsumerState<SiteEditPage> {
               ),
               const SizedBox(width: 16),
               Expanded(
-                child: TextFormField(
-                  controller: _regionController,
-                  decoration: _withMergeTextDecoration(
-                    key: 'region',
-                    decoration: InputDecoration(
-                      labelText: context.l10n.diveSites_edit_field_region_label,
-                      prefixIcon: const Icon(Icons.map),
-                    ),
-                  ),
+                child: ValueListenableBuilder<TextEditingValue>(
+                  valueListenable: _countryController,
+                  builder: (context, country, _) {
+                    return SuggestionField(
+                      controller: _regionController,
+                      suggestions: suggestedRegions(allSites, country.text),
+                      enableFuzzy: true,
+                      textCapitalization: TextCapitalization.words,
+                      decoration: _withMergeTextDecoration(
+                        key: 'region',
+                        decoration: InputDecoration(
+                          labelText:
+                              context.l10n.diveSites_edit_field_region_label,
+                          prefixIcon: const Icon(Icons.map),
+                        ),
+                      ),
+                    );
+                  },
                 ),
               ),
             ],

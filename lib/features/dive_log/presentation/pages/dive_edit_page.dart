@@ -8,12 +8,14 @@ import 'package:uuid/uuid.dart';
 import 'package:submersion/core/constants/enums.dart';
 import 'package:submersion/core/deco/altitude_calculator.dart';
 import 'package:submersion/core/services/location_service.dart';
+import 'package:submersion/core/text/fuzzy_match.dart';
 import 'package:submersion/core/utils/unit_formatter.dart';
 import 'package:submersion/features/buddies/domain/entities/buddy.dart';
 import 'package:submersion/features/buddies/presentation/providers/buddy_providers.dart';
 import 'package:submersion/features/buddies/presentation/widgets/buddy_picker.dart';
 import 'package:submersion/features/dive_sites/domain/entities/dive_site.dart';
 import 'package:submersion/features/dive_sites/presentation/providers/site_providers.dart';
+import 'package:submersion/features/dive_sites/presentation/widgets/similar_value_hint.dart';
 import 'package:submersion/features/equipment/domain/entities/equipment_item.dart';
 import 'package:submersion/features/equipment/domain/entities/equipment_set.dart';
 import 'package:submersion/features/equipment/presentation/providers/equipment_providers.dart';
@@ -3931,6 +3933,26 @@ class _SitePickerSheetState extends ConsumerState<_SitePickerSheet> {
             onChanged: (value) => setState(() => _searchQuery = value),
           ),
         ),
+        if (_searchQuery.trim().isNotEmpty)
+          Builder(
+            builder: (context) {
+              final sites = sitesAsync.value ?? const <DiveSite>[];
+              final hidden = sites
+                  .where((s) => !siteMatchesPickerQuery(s, normalizedQuery))
+                  .toList();
+              final match = findSimilar(
+                _searchQuery,
+                hidden.map((s) => s.name),
+              );
+              if (match == null) return const SizedBox.shrink();
+              final site = hidden.firstWhere((s) => s.name == match);
+              return SimilarValueHint(
+                query: _searchQuery,
+                candidates: [match],
+                onAccept: (_) => widget.onSiteSelected(site),
+              );
+            },
+          ),
         const Divider(height: 1),
         Expanded(
           child: sitesAsync.when(
