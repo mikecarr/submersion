@@ -1824,6 +1824,8 @@
   "diveSites_edit_field_siteName_hint": "مثال: الحفرة الزرقاء",
   "diveSites_edit_field_siteName_label": "اسم الموقع *",
   "diveSites_edit_field_siteName_validation": "يرجى إدخال اسم الموقع",
+  "diveSites_similarSite_useHint": "مشابه لموقع غوص موجود \"{siteName}\". انقر للاستخدام.",
+  "diveSites_similarSite_warning": "يوجد بالفعل موقع مشابه: \"{siteName}\"",
   "diveSites_edit_gps_gettingLocation": "جارٍ الحصول على الموقع...",
   "diveSites_edit_gps_helperText": "اختر طريقة تحديد الموقع - سيتم ملء الدولة والمنطقة تلقائياً",
   "diveSites_edit_gps_latitude_hint": "مثال: 21.4225",

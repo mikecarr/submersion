@@ -1953,6 +1953,8 @@
   "diveSites_edit_field_siteName_hint": "例如，蓝洞",
   "diveSites_edit_field_siteName_label": "潜水点名称 *",
   "diveSites_edit_field_siteName_validation": "请输入潜水点名称",
+  "diveSites_similarSite_useHint": "与现有潜点\"{siteName}\"相似。点按以使用。",
+  "diveSites_similarSite_warning": "已存在相似的潜点：\"{siteName}\"",
   "diveSites_edit_gps_gettingLocation": "获取中...",
   "diveSites_edit_gps_helperText": "选择定位方式 - 坐标将自动填充国家和地区",
   "diveSites_edit_gps_latitude_hint": "e.g., 21.4225",

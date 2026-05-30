@@ -1824,6 +1824,8 @@
   "diveSites_edit_field_siteName_hint": "bijv. Blue Hole",
   "diveSites_edit_field_siteName_label": "Steknaam *",
   "diveSites_edit_field_siteName_validation": "Voer een steknaam in",
+  "diveSites_similarSite_useHint": "Vergelijkbaar met bestaande duiklocatie \"{siteName}\". Tik om te gebruiken.",
+  "diveSites_similarSite_warning": "Er bestaat al een vergelijkbare locatie: \"{siteName}\"",
   "diveSites_edit_gps_gettingLocation": "Ophalen...",
   "diveSites_edit_gps_helperText": "Kies een locatiemethode - coordinaten vullen automatisch land en regio in",
   "diveSites_edit_gps_latitude_hint": "bijv. 21.4225",

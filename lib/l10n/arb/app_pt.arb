@@ -1824,6 +1824,8 @@
   "diveSites_edit_field_siteName_hint": "ex., Blue Hole",
   "diveSites_edit_field_siteName_label": "Nome do Ponto *",
   "diveSites_edit_field_siteName_validation": "Por favor, insira o nome do ponto",
+  "diveSites_similarSite_useHint": "Semelhante a um local de mergulho existente \"{siteName}\". Toque para usar.",
+  "diveSites_similarSite_warning": "Já existe um local semelhante: \"{siteName}\"",
   "diveSites_edit_gps_gettingLocation": "Obtendo...",
   "diveSites_edit_gps_helperText": "Escolha um metodo de localizacao - as coordenadas preencherao automaticamente pais e regiao",
   "diveSites_edit_gps_latitude_hint": "ex., 21.4225",
