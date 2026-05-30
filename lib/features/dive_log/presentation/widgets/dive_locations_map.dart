@@ -85,32 +85,47 @@ class DiveLocationsMap extends ConsumerWidget {
       zoom = 14.0;
     }
 
+    // Keys live on the marker child, never on the Marker itself. flutter_map
+    // reuses Marker.key for every repeated world copy it renders at low zoom,
+    // which would make those copies duplicate-keyed siblings in the
+    // MarkerLayer's Stack ("Duplicate keys found"). Keying the child instead
+    // keeps each copy isolated in its own Positioned while staying findable.
     final markers = <Marker>[
       if (entry != null)
         Marker(
-          key: const ValueKey('gps-entry-marker'),
           point: LatLng(entry!.latitude, entry!.longitude),
           width: 28,
           height: 28,
-          child: _mapPin(colorScheme, Icons.south, kGpsEntryColor),
+          child: KeyedSubtree(
+            key: const ValueKey('gps-entry-marker'),
+            child: _mapPin(colorScheme, Icons.south, kGpsEntryColor),
+          ),
         ),
       if (exit != null)
         Marker(
-          key: const ValueKey('gps-exit-marker'),
           point: LatLng(exit!.latitude, exit!.longitude),
           width: 28,
           height: 28,
-          child: _mapPin(colorScheme, Icons.north, kGpsExitColor),
+          child: KeyedSubtree(
+            key: const ValueKey('gps-exit-marker'),
+            child: _mapPin(colorScheme, Icons.north, kGpsExitColor),
+          ),
         ),
       if (site != null)
         Marker(
-          key: const ValueKey('gps-site-marker'),
           point: LatLng(site!.latitude, site!.longitude),
           width: 32,
           height: 32,
           // Diver glyph, matching the dive-site marker on the Sites map
           // (site_map_content.dart) and the rest of the app's site/dive maps.
-          child: _mapPin(colorScheme, Icons.scuba_diving, colorScheme.primary),
+          child: KeyedSubtree(
+            key: const ValueKey('gps-site-marker'),
+            child: _mapPin(
+              colorScheme,
+              Icons.scuba_diving,
+              colorScheme.primary,
+            ),
+          ),
         ),
     ];
 
