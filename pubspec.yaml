@@ -150,3 +150,6 @@ flutter:
     - assets/data/
     - assets/data/tide/
     - assets/icon/
+
+  shaders:
+    - shaders/heatmap.frag
