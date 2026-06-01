@@ -87,9 +87,11 @@ final daysSinceLastDiveProvider = FutureProvider<int?>((ref) async {
   final recentDives = await ref.watch(recentDivesProvider.future);
   if (recentDives.isEmpty) return null;
 
-  final lastDiveDate = recentDives.first.dateTime;
+  final lastDive = recentDives.first.effectiveEntryTime;
   final now = DateTime.now();
-  return now.difference(lastDiveDate).inDays;
+  final diveDay = DateTime(lastDive.year, lastDive.month, lastDive.day);
+  final today = DateTime(now.year, now.month, now.day);
+  return today.difference(diveDay).inDays;
 });
 
 /// Monthly dive count provider (dives in current month)
