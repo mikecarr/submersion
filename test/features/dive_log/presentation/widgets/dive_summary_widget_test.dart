@@ -22,10 +22,10 @@ void main() {
       await tearDownTestDatabase();
     });
 
-    testWidgets('displays longest dive record with bottomTime', (tester) async {
-      // Create a dive with bottomTime to populate the records
+    testWidgets('displays longest dive using runtime when set', (tester) async {
       final dive = createTestDiveWithBottomTime(
-        bottomTime: const Duration(minutes: 45),
+        bottomTime: null,
+        runtime: const Duration(minutes: 123),
         maxDepth: 25.0,
         waterTemp: 22.0,
       );
@@ -54,7 +54,43 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // Should show the longest dive duration
+      expect(find.text('123 min'), findsOneWidget);
+    });
+
+    testWidgets('displays longest dive using bottomTime when runtime is null', (
+      tester,
+    ) async {
+      final dive = createTestDiveWithBottomTime(
+        bottomTime: const Duration(minutes: 45),
+        runtime: null,
+        maxDepth: 25.0,
+        waterTemp: 22.0,
+      );
+      await repository.createDive(dive);
+
+      final overrides = await getBaseOverrides();
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            ...overrides,
+            diveRepositoryProvider.overrideWithValue(repository),
+            diveStatisticsProvider.overrideWith((ref) async {
+              return repository.getStatistics();
+            }),
+            diveRecordsProvider.overrideWith((ref) async {
+              return repository.getRecords();
+            }),
+          ].cast(),
+          child: const MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: Scaffold(body: DiveSummaryWidget()),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
       expect(find.text('45 min'), findsOneWidget);
     });
 
