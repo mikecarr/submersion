@@ -72,6 +72,7 @@ import 'package:submersion/features/statistics/presentation/pages/statistics_tim
 import 'package:submersion/features/statistics/presentation/pages/statistics_equipment_page.dart';
 import 'package:submersion/features/statistics/presentation/pages/statistics_profile_page.dart';
 import 'package:submersion/features/backup/presentation/pages/backup_settings_page.dart';
+import 'package:submersion/features/settings/presentation/pages/cloud_sync_page.dart';
 import 'package:submersion/features/settings/presentation/pages/fix_dive_times_page.dart';
 import 'package:submersion/features/settings/presentation/pages/settings_page.dart';
 import 'package:submersion/features/settings/presentation/pages/appearance_page.dart';
@@ -854,6 +855,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                 path: 'backup',
                 name: 'backupSettings',
                 builder: (context, state) => const BackupSettingsPage(),
+              ),
+              GoRoute(
+                path: 'cloud-sync',
+                name: 'cloudSync',
+                builder: (context, state) => const CloudSyncPage(),
               ),
               GoRoute(
                 path: 'fix-dive-times',
