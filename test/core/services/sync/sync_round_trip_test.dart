@@ -156,5 +156,36 @@ void main() {
       );
       expect(restored!['name'], 'Blue Hole');
     });
+
+    // Media was broken too: its custom export dropped 5 non-nullable fields.
+    test('media metadata round-trips A -> B (toJson export)', () async {
+      final serializer = SyncDataSerializer();
+      final repo = SyncRepository();
+
+      await serializer.upsertRecord('media', {
+        'id': 'media-rt-1',
+        'filePath': '/photos/reef.jpg',
+        'fileType': 'image',
+        'caption': 'Reef shark',
+        'isFavorite': false,
+        'isOrphaned': false,
+        'sourceType': 'local',
+        'createdAt': 1000,
+        'updatedAt': 1000,
+      });
+      await buildService().performSync(); // push
+
+      await serializer.deleteRecord('media', 'media-rt-1');
+      await repo.resetSyncState();
+      await buildService().performSync(); // pull
+
+      final restored = await serializer.fetchRecord('media', 'media-rt-1');
+      expect(
+        restored,
+        isNotNull,
+        reason: 'media should round-trip A -> B via toJson export',
+      );
+      expect(restored!['caption'], 'Reef shark');
+    });
   });
 }

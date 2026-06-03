@@ -1110,7 +1110,7 @@ class SyncDataSerializer {
       query.where((t) => t.takenAt.isBiggerOrEqualValue(since));
     }
     final rows = await query.get();
-    return rows.map((r) => _mediaToJson(r)).toList();
+    return rows.map((r) => r.toJson()).toList();
   }
 
   Future<List<Map<String, dynamic>>> _exportBuddies(int? since) async {
@@ -1145,7 +1145,7 @@ class SyncDataSerializer {
       query.where((t) => t.updatedAt.isBiggerOrEqualValue(since));
     }
     final rows = await query.get();
-    return rows.map((r) => _certificationToJson(r)).toList();
+    return rows.map((r) => r.toJson()).toList();
   }
 
   Future<List<Map<String, dynamic>>> _exportServiceRecords(int? since) async {
