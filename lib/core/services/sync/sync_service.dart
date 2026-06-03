@@ -358,6 +358,7 @@ class SyncService {
 
       var recordsSynced = 0;
       var conflictsFound = 0;
+      var recordsFailed = 0;
 
       if (remotePayload != null && remotePayload.deviceId != deviceId) {
         _log.info(
@@ -373,6 +374,7 @@ class SyncService {
         );
         recordsSynced += mergeResult.recordsApplied;
         conflictsFound += mergeResult.conflictsFound;
+        recordsFailed += mergeResult.recordsFailed;
       }
 
       _reportProgress(SyncPhase.exporting, 0.7, 'Exporting local data...');
@@ -450,10 +452,18 @@ class SyncService {
 
       _log.info('Sync completed successfully');
 
+      if (recordsFailed > 0) {
+        _log.error('$recordsFailed record(s) failed to apply during sync');
+      }
       return SyncResult(
-        status: conflictsFound > 0
-            ? SyncResultStatus.hasConflicts
-            : SyncResultStatus.success,
+        status: recordsFailed > 0
+            ? SyncResultStatus.error
+            : (conflictsFound > 0
+                  ? SyncResultStatus.hasConflicts
+                  : SyncResultStatus.success),
+        message: recordsFailed > 0
+            ? '$recordsFailed record(s) failed to apply'
+            : null,
         recordsSynced: recordsSynced,
         conflictsFound: conflictsFound,
         lastSyncTime: result.uploadTime,
@@ -567,6 +577,7 @@ class SyncService {
     final lastSyncMs = localLastSync?.millisecondsSinceEpoch;
     var recordsApplied = 0;
     var conflictsFound = 0;
+    var recordsFailed = 0;
     final pendingByEntity = await _pendingRecordMap();
 
     final deletionResult = await _applyRemoteDeletions(
@@ -577,6 +588,7 @@ class SyncService {
     );
     recordsApplied += deletionResult.recordsApplied;
     conflictsFound += deletionResult.conflictsFound;
+    recordsFailed += deletionResult.recordsFailed;
 
     final data = remotePayload.data;
 
@@ -676,11 +688,13 @@ class SyncService {
       );
       recordsApplied += result.recordsApplied;
       conflictsFound += result.conflictsFound;
+      recordsFailed += result.recordsFailed;
     }
 
     return _MergeResult(
       recordsApplied: recordsApplied,
       conflictsFound: conflictsFound,
+      recordsFailed: recordsFailed,
     );
   }
 
@@ -752,6 +766,7 @@ class SyncService {
 
     var applied = 0;
     var conflicts = 0;
+    var failed = 0;
 
     for (final record in records) {
       String? recordId;
@@ -805,20 +820,18 @@ class SyncService {
           error: e,
           stackTrace: stackTrace,
         );
-        conflicts += 1;
-        if (recordId != null) {
-          await _syncRepository.markRecordConflict(
-            entityType: entityType,
-            recordId: recordId,
-            conflictDataJson: jsonEncode(record),
-            localUpdatedAt:
-                localUpdatedAt ?? DateTime.now().millisecondsSinceEpoch,
-          );
-        }
+        // An apply error is a real failure, not a "conflict" (which means both
+        // sides edited the same record). Masking apply errors as conflicts is
+        // what hid the cross-device no-op; count it so performSync surfaces it.
+        failed += 1;
       }
     }
 
-    return _MergeResult(recordsApplied: applied, conflictsFound: conflicts);
+    return _MergeResult(
+      recordsApplied: applied,
+      conflictsFound: conflicts,
+      recordsFailed: failed,
+    );
   }
 
   Future<Map<String, Set<String>>> _pendingRecordMap() async {
@@ -982,9 +995,11 @@ class SyncService {
 class _MergeResult {
   final int recordsApplied;
   final int conflictsFound;
+  final int recordsFailed;
 
   const _MergeResult({
     required this.recordsApplied,
     required this.conflictsFound,
+    this.recordsFailed = 0,
   });
 }

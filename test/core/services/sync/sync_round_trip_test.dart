@@ -1,5 +1,7 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
+import 'package:crypto/crypto.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:submersion/core/data/repositories/sync_repository.dart';
 import 'package:submersion/core/services/database_service.dart';
@@ -187,5 +189,55 @@ void main() {
       );
       expect(restored!['caption'], 'Reef shark');
     });
+
+    // De-mask: a record that cannot be applied must surface as a sync ERROR,
+    // not be silently relabeled as a "conflict" (the masking that hid the bug).
+    test(
+      'an unapplyable record surfaces as a sync error, not a conflict',
+      () async {
+        final serializer = SyncDataSerializer();
+        final repo = SyncRepository();
+        final diveRepo = DiveRepository();
+
+        await diveRepo.createDive(
+          createTestDiveWithBottomTime(id: 'dive-corrupt-1'),
+        );
+        await buildService().performSync(); // push a valid payload
+
+        // Corrupt a dive field so Dive.fromJson throws on import, then recompute
+        // the checksum so the payload still passes validation.
+        final payload = serializer.deserializePayload(
+          utf8.decode(await cloud.downloadFile('submersion_sync.json')),
+        );
+        payload.data.dives.first['maxDepth'] = 'NOT_A_NUMBER';
+        final checksum = sha256
+            .convert(utf8.encode(jsonEncode(payload.data.toJson())))
+            .toString();
+        final corrupt = SyncPayload(
+          version: payload.version,
+          exportedAt: payload.exportedAt,
+          deviceId: payload.deviceId,
+          lastSyncTimestamp: payload.lastSyncTimestamp,
+          checksum: checksum,
+          data: payload.data,
+          deletions: payload.deletions,
+        );
+        await cloud.uploadFile(
+          Uint8List.fromList(utf8.encode(serializer.serializePayload(corrupt))),
+          'submersion_sync.json',
+        );
+
+        // Device B pulls the corrupt file.
+        await diveRepo.deleteDive('dive-corrupt-1');
+        await repo.resetSyncState();
+        final result = await buildService().performSync();
+
+        expect(
+          result.status,
+          SyncResultStatus.error,
+          reason: 'an apply failure must surface as an error, not be masked',
+        );
+      },
+    );
   });
 }
