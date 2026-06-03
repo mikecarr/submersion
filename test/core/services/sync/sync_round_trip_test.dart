@@ -123,5 +123,38 @@ void main() {
       expect(restored.maxDepth, 30.5);
       expect(restored.waterTemp, 19.0);
     });
+
+    // Verifies the mass toJson() export conversion works for a non-dive entity.
+    test('a dive site round-trips A -> B with its fields', () async {
+      final serializer = SyncDataSerializer();
+      final repo = SyncRepository();
+
+      // Seed a site on "device A" via the import path (no companion needed).
+      await serializer.upsertRecord('diveSites', {
+        'id': 'site-rt-1',
+        'name': 'Blue Hole',
+        'description': 'A nice wall dive',
+        'notes': '',
+        'isShared': false,
+        'createdAt': 1000,
+        'updatedAt': 1000,
+      });
+      await buildService().performSync(); // push
+
+      // Impersonate a fresh device B.
+      await serializer.deleteRecord('diveSites', 'site-rt-1');
+      await repo.resetSyncState();
+      expect(await serializer.fetchRecord('diveSites', 'site-rt-1'), isNull);
+
+      await buildService().performSync(); // pull
+
+      final restored = await serializer.fetchRecord('diveSites', 'site-rt-1');
+      expect(
+        restored,
+        isNotNull,
+        reason: 'dive site should round-trip A -> B via toJson export',
+      );
+      expect(restored!['name'], 'Blue Hole');
+    });
   });
 }

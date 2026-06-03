@@ -976,7 +976,7 @@ class SyncDataSerializer {
       query.where((t) => t.updatedAt.isBiggerOrEqualValue(since));
     }
     final rows = await query.get();
-    return rows.map((r) => _diverToJson(r)).toList();
+    return rows.map((r) => r.toJson()).toList();
   }
 
   Future<List<Map<String, dynamic>>> _exportDiverSettings(int? since) async {
@@ -985,7 +985,7 @@ class SyncDataSerializer {
       query.where((t) => t.updatedAt.isBiggerOrEqualValue(since));
     }
     final rows = await query.get();
-    return rows.map((r) => _diverSettingToJson(r)).toList();
+    return rows.map((r) => r.toJson()).toList();
   }
 
   Future<List<Map<String, dynamic>>> _exportDives(int? since) async {
@@ -1012,10 +1012,10 @@ class SyncDataSerializer {
       final rows = await (_db.select(
         _db.diveProfiles,
       )..where((t) => t.diveId.isIn(diveIds))).get();
-      return rows.map((r) => _diveProfileToJson(r)).toList();
+      return rows.map((r) => r.toJson()).toList();
     }
     final rows = await _db.select(_db.diveProfiles).get();
-    return rows.map((r) => _diveProfileToJson(r)).toList();
+    return rows.map((r) => r.toJson()).toList();
   }
 
   Future<List<Map<String, dynamic>>> _exportDiveTanks(int? since) async {
@@ -1030,10 +1030,10 @@ class SyncDataSerializer {
       final rows = await (_db.select(
         _db.diveTanks,
       )..where((t) => t.diveId.isIn(diveIds))).get();
-      return rows.map((r) => _diveTankToJson(r)).toList();
+      return rows.map((r) => r.toJson()).toList();
     }
     final rows = await _db.select(_db.diveTanks).get();
-    return rows.map((r) => _diveTankToJson(r)).toList();
+    return rows.map((r) => r.toJson()).toList();
   }
 
   Future<List<Map<String, dynamic>>> _exportDiveEquipment(int? since) async {
@@ -1047,10 +1047,10 @@ class SyncDataSerializer {
       final rows = await (_db.select(
         _db.diveEquipment,
       )..where((t) => t.diveId.isIn(diveIds))).get();
-      return rows.map((r) => _diveEquipmentToJson(r)).toList();
+      return rows.map((r) => r.toJson()).toList();
     }
     final rows = await _db.select(_db.diveEquipment).get();
-    return rows.map((r) => _diveEquipmentToJson(r)).toList();
+    return rows.map((r) => r.toJson()).toList();
   }
 
   Future<List<Map<String, dynamic>>> _exportDiveWeights(int? since) async {
@@ -1064,10 +1064,10 @@ class SyncDataSerializer {
       final rows = await (_db.select(
         _db.diveWeights,
       )..where((t) => t.diveId.isIn(diveIds))).get();
-      return rows.map((r) => _diveWeightToJson(r)).toList();
+      return rows.map((r) => r.toJson()).toList();
     }
     final rows = await _db.select(_db.diveWeights).get();
-    return rows.map((r) => _diveWeightToJson(r)).toList();
+    return rows.map((r) => r.toJson()).toList();
   }
 
   Future<List<Map<String, dynamic>>> _exportDiveSites(int? since) async {
@@ -1076,7 +1076,7 @@ class SyncDataSerializer {
       query.where((t) => t.updatedAt.isBiggerOrEqualValue(since));
     }
     final rows = await query.get();
-    return rows.map((r) => _diveSiteToJson(r)).toList();
+    return rows.map((r) => r.toJson()).toList();
   }
 
   Future<List<Map<String, dynamic>>> _exportEquipment(int? since) async {
@@ -1085,7 +1085,7 @@ class SyncDataSerializer {
       query.where((t) => t.updatedAt.isBiggerOrEqualValue(since));
     }
     final rows = await query.get();
-    return rows.map((r) => _equipmentToJson(r)).toList();
+    return rows.map((r) => r.toJson()).toList();
   }
 
   Future<List<Map<String, dynamic>>> _exportEquipmentSets(int? since) async {
@@ -1094,7 +1094,7 @@ class SyncDataSerializer {
       query.where((t) => t.updatedAt.isBiggerOrEqualValue(since));
     }
     final rows = await query.get();
-    return rows.map((r) => _equipmentSetToJson(r)).toList();
+    return rows.map((r) => r.toJson()).toList();
   }
 
   Future<List<Map<String, dynamic>>> _exportEquipmentSetItems() async {
@@ -1119,7 +1119,7 @@ class SyncDataSerializer {
       query.where((t) => t.updatedAt.isBiggerOrEqualValue(since));
     }
     final rows = await query.get();
-    return rows.map((r) => _buddyToJson(r)).toList();
+    return rows.map((r) => r.toJson()).toList();
   }
 
   Future<List<Map<String, dynamic>>> _exportDiveBuddies(int? since) async {
@@ -1133,10 +1133,10 @@ class SyncDataSerializer {
       final rows = await (_db.select(
         _db.diveBuddies,
       )..where((t) => t.diveId.isIn(diveIds))).get();
-      return rows.map((r) => _diveBuddyToJson(r)).toList();
+      return rows.map((r) => r.toJson()).toList();
     }
     final rows = await _db.select(_db.diveBuddies).get();
-    return rows.map((r) => _diveBuddyToJson(r)).toList();
+    return rows.map((r) => r.toJson()).toList();
   }
 
   Future<List<Map<String, dynamic>>> _exportCertifications(int? since) async {
@@ -1154,7 +1154,7 @@ class SyncDataSerializer {
       query.where((t) => t.updatedAt.isBiggerOrEqualValue(since));
     }
     final rows = await query.get();
-    return rows.map((r) => _serviceRecordToJson(r)).toList();
+    return rows.map((r) => r.toJson()).toList();
   }
 
   Future<List<Map<String, dynamic>>> _exportDiveCenters(int? since) async {
@@ -1163,7 +1163,7 @@ class SyncDataSerializer {
       query.where((t) => t.updatedAt.isBiggerOrEqualValue(since));
     }
     final rows = await query.get();
-    return rows.map((r) => _diveCenterToJson(r)).toList();
+    return rows.map((r) => r.toJson()).toList();
   }
 
   Future<List<Map<String, dynamic>>> _exportTrips(int? since) async {
@@ -1172,7 +1172,7 @@ class SyncDataSerializer {
       query.where((t) => t.updatedAt.isBiggerOrEqualValue(since));
     }
     final rows = await query.get();
-    return rows.map((r) => _tripToJson(r)).toList();
+    return rows.map((r) => r.toJson()).toList();
   }
 
   Future<List<Map<String, dynamic>>> _exportLiveaboardDetails(
@@ -1183,7 +1183,7 @@ class SyncDataSerializer {
       query.where((t) => t.updatedAt.isBiggerOrEqualValue(since));
     }
     final rows = await query.get();
-    return rows.map((r) => _liveaboardDetailToJson(r)).toList();
+    return rows.map((r) => r.toJson()).toList();
   }
 
   Future<List<Map<String, dynamic>>> _exportItineraryDays(int? since) async {
@@ -1192,7 +1192,7 @@ class SyncDataSerializer {
       query.where((t) => t.updatedAt.isBiggerOrEqualValue(since));
     }
     final rows = await query.get();
-    return rows.map((r) => _itineraryDayToJson(r)).toList();
+    return rows.map((r) => r.toJson()).toList();
   }
 
   Future<List<Map<String, dynamic>>> _exportTags(int? since) async {
@@ -1201,7 +1201,7 @@ class SyncDataSerializer {
       query.where((t) => t.updatedAt.isBiggerOrEqualValue(since));
     }
     final rows = await query.get();
-    return rows.map((r) => _tagToJson(r)).toList();
+    return rows.map((r) => r.toJson()).toList();
   }
 
   Future<List<Map<String, dynamic>>> _exportDiveTags(int? since) async {
@@ -1215,10 +1215,10 @@ class SyncDataSerializer {
       final rows = await (_db.select(
         _db.diveTags,
       )..where((t) => t.diveId.isIn(diveIds))).get();
-      return rows.map((r) => _diveTagToJson(r)).toList();
+      return rows.map((r) => r.toJson()).toList();
     }
     final rows = await _db.select(_db.diveTags).get();
-    return rows.map((r) => _diveTagToJson(r)).toList();
+    return rows.map((r) => r.toJson()).toList();
   }
 
   Future<List<Map<String, dynamic>>> _exportDiveTypes(int? since) async {
@@ -1227,7 +1227,7 @@ class SyncDataSerializer {
       query.where((t) => t.updatedAt.isBiggerOrEqualValue(since));
     }
     final rows = await query.get();
-    return rows.map((r) => _diveTypeToJson(r)).toList();
+    return rows.map((r) => r.toJson()).toList();
   }
 
   Future<List<Map<String, dynamic>>> _exportTankPresets(int? since) async {
@@ -1236,7 +1236,7 @@ class SyncDataSerializer {
       query.where((t) => t.updatedAt.isBiggerOrEqualValue(since));
     }
     final rows = await query.get();
-    return rows.map((r) => _tankPresetToJson(r)).toList();
+    return rows.map((r) => r.toJson()).toList();
   }
 
   Future<List<Map<String, dynamic>>> _exportDiveComputers(int? since) async {
@@ -1245,7 +1245,7 @@ class SyncDataSerializer {
       query.where((t) => t.updatedAt.isBiggerOrEqualValue(since));
     }
     final rows = await query.get();
-    return rows.map((r) => _diveComputerToJson(r)).toList();
+    return rows.map((r) => r.toJson()).toList();
   }
 
   Future<List<Map<String, dynamic>>> _exportTankPressureProfiles(
@@ -1261,10 +1261,10 @@ class SyncDataSerializer {
       final rows = await (_db.select(
         _db.tankPressureProfiles,
       )..where((t) => t.diveId.isIn(diveIds))).get();
-      return rows.map((r) => _tankPressureProfileToJson(r)).toList();
+      return rows.map((r) => r.toJson()).toList();
     }
     final rows = await _db.select(_db.tankPressureProfiles).get();
-    return rows.map((r) => _tankPressureProfileToJson(r)).toList();
+    return rows.map((r) => r.toJson()).toList();
   }
 
   Future<List<Map<String, dynamic>>> _exportTideRecords(int? since) async {
@@ -1278,10 +1278,10 @@ class SyncDataSerializer {
       final rows = await (_db.select(
         _db.tideRecords,
       )..where((t) => t.diveId.isIn(diveIds))).get();
-      return rows.map((r) => _tideRecordToJson(r)).toList();
+      return rows.map((r) => r.toJson()).toList();
     }
     final rows = await _db.select(_db.tideRecords).get();
-    return rows.map((r) => _tideRecordToJson(r)).toList();
+    return rows.map((r) => r.toJson()).toList();
   }
 
   Future<List<Map<String, dynamic>>> _exportSettings(int? since) async {
@@ -1290,17 +1290,17 @@ class SyncDataSerializer {
       query.where((t) => t.updatedAt.isBiggerOrEqualValue(since));
     }
     final rows = await query.get();
-    return rows.map((r) => _settingsToJson(r)).toList();
+    return rows.map((r) => r.toJson()).toList();
   }
 
   Future<List<Map<String, dynamic>>> _exportSpecies() async {
     final rows = await _db.select(_db.species).get();
-    return rows.map((r) => _speciesToJson(r)).toList();
+    return rows.map((r) => r.toJson()).toList();
   }
 
   Future<List<Map<String, dynamic>>> _exportSightings() async {
     final rows = await _db.select(_db.sightings).get();
-    return rows.map((r) => _sightingToJson(r)).toList();
+    return rows.map((r) => r.toJson()).toList();
   }
 
   Future<List<Map<String, dynamic>>> _exportDiveProfileEvents(
@@ -1316,10 +1316,10 @@ class SyncDataSerializer {
       final rows = await (_db.select(
         _db.diveProfileEvents,
       )..where((t) => t.diveId.isIn(diveIds))).get();
-      return rows.map((r) => _diveProfileEventToJson(r)).toList();
+      return rows.map((r) => r.toJson()).toList();
     }
     final rows = await _db.select(_db.diveProfileEvents).get();
-    return rows.map((r) => _diveProfileEventToJson(r)).toList();
+    return rows.map((r) => r.toJson()).toList();
   }
 
   Future<List<Map<String, dynamic>>> _exportGasSwitches(int? since) async {
@@ -1333,10 +1333,10 @@ class SyncDataSerializer {
       final rows = await (_db.select(
         _db.gasSwitches,
       )..where((t) => t.diveId.isIn(diveIds))).get();
-      return rows.map((r) => _gasSwitchToJson(r)).toList();
+      return rows.map((r) => r.toJson()).toList();
     }
     final rows = await _db.select(_db.gasSwitches).get();
-    return rows.map((r) => _gasSwitchToJson(r)).toList();
+    return rows.map((r) => r.toJson()).toList();
   }
 
   // ============================================================================
