@@ -268,20 +268,21 @@ class DiveSummaryWidget extends ConsumerWidget {
       );
     }
 
-    if (records.longestDive != null &&
-        records.longestDive!.bottomTime != null) {
-      final minutes = records.longestDive!.bottomTime!.inMinutes;
-      recordItems.add(
-        _buildRecordItem(
-          context,
-          units,
-          icon: Icons.timer,
-          title: context.l10n.diveLog_summary_record_longest,
-          value: '$minutes min',
-          diveId: records.longestDive!.diveId,
-          date: records.longestDive!.dateTime,
-        ),
-      );
+    if (records.longestDive != null) {
+      final effectiveRuntime = records.longestDive!.effectiveRuntime;
+      if (effectiveRuntime != null) {
+        recordItems.add(
+          _buildRecordItem(
+            context,
+            units,
+            icon: Icons.timer,
+            title: context.l10n.diveLog_summary_record_longest,
+            value: '${effectiveRuntime.inMinutes} min',
+            diveId: records.longestDive!.diveId,
+            date: records.longestDive!.dateTime,
+          ),
+        );
+      }
     }
 
     if (records.coldestDive != null && records.coldestDive!.waterTemp != null) {
