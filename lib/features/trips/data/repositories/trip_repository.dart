@@ -385,7 +385,15 @@ class TripRepository {
     try {
       _log.info('Scanning for candidate dives: $startDate - $endDate');
       final startMs = startDate.millisecondsSinceEpoch;
-      final endMs = endDate.millisecondsSinceEpoch;
+      final endMs = DateTime(
+        endDate.year,
+        endDate.month,
+        endDate.day,
+        23,
+        59,
+        59,
+        999,
+      ).millisecondsSinceEpoch;
 
       final rows = await _db
           .customSelect(
