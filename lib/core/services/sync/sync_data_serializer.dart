@@ -10,6 +10,49 @@ import 'package:submersion/core/services/logger_service.dart';
 /// Sync data format version for compatibility checking
 const int syncFormatVersion = 2;
 
+/// Value serializer used only for sync export/import of BLOB-bearing entities.
+///
+/// Drift's default serializer encodes a `Uint8List` as a JSON array of byte
+/// ints (`[1,2,3,...]`), which is ~3x the size of the raw bytes once rendered
+/// as text. Dive-computer fingerprints and embedded photos make that the
+/// dominant cost of the sync file. This serializer encodes BLOBs as base64
+/// strings instead (~1.33x), delegating every other type to the default.
+///
+/// `fromJson` accepts BOTH formats so this is a non-breaking change: a payload
+/// already in iCloud that used the old array encoding still decodes, while new
+/// payloads are written as base64.
+class _SyncBlobValueSerializer extends ValueSerializer {
+  const _SyncBlobValueSerializer();
+
+  static const _default = ValueSerializer.defaults();
+
+  @override
+  T fromJson<T>(dynamic json) {
+    if (json != null) {
+      final typeList = <T>[];
+      if (typeList is List<Uint8List?>) {
+        if (json is String) {
+          return base64Decode(json) as T;
+        }
+        if (json is List) {
+          return Uint8List.fromList(json.cast<int>()) as T;
+        }
+      }
+    }
+    return _default.fromJson<T>(json);
+  }
+
+  @override
+  dynamic toJson<T>(T value) {
+    if (value is Uint8List) {
+      return base64Encode(value);
+    }
+    return _default.toJson<T>(value);
+  }
+}
+
+const _syncBlobSerializer = _SyncBlobValueSerializer();
+
 /// Represents a record deletion to sync across devices.
 class SyncDeletion {
   final String id;
@@ -574,7 +617,7 @@ class SyncDataSerializer {
         final row = await (_db.select(
           _db.media,
         )..where((t) => t.id.equals(recordId))).getSingleOrNull();
-        return row?.toJson();
+        return row?.toJson(serializer: _syncBlobSerializer);
       case 'buddies':
         final row = await (_db.select(
           _db.buddies,
@@ -589,7 +632,7 @@ class SyncDataSerializer {
         final row = await (_db.select(
           _db.certifications,
         )..where((t) => t.id.equals(recordId))).getSingleOrNull();
-        return row?.toJson();
+        return row?.toJson(serializer: _syncBlobSerializer);
       case 'courses':
         final row = await (_db.select(
           _db.courses,
@@ -690,7 +733,7 @@ class SyncDataSerializer {
         final row = await (_db.select(
           _db.diveDataSources,
         )..where((t) => t.id.equals(recordId))).getSingleOrNull();
-        return row?.toJson();
+        return row?.toJson(serializer: _syncBlobSerializer);
       case 'siteSpecies':
         final row = await (_db.select(
           _db.siteSpecies,
@@ -776,7 +819,9 @@ class SyncDataSerializer {
       case 'media':
         await _db
             .into(_db.media)
-            .insertOnConflictUpdate(MediaData.fromJson(data));
+            .insertOnConflictUpdate(
+              MediaData.fromJson(data, serializer: _syncBlobSerializer),
+            );
         return;
       case 'buddies':
         await _db
@@ -791,7 +836,9 @@ class SyncDataSerializer {
       case 'certifications':
         await _db
             .into(_db.certifications)
-            .insertOnConflictUpdate(Certification.fromJson(data));
+            .insertOnConflictUpdate(
+              Certification.fromJson(data, serializer: _syncBlobSerializer),
+            );
         return;
       case 'courses':
         await _db
@@ -894,7 +941,12 @@ class SyncDataSerializer {
       case 'diveDataSources':
         await _db
             .into(_db.diveDataSources)
-            .insertOnConflictUpdate(DiveDataSourcesData.fromJson(data));
+            .insertOnConflictUpdate(
+              DiveDataSourcesData.fromJson(
+                data,
+                serializer: _syncBlobSerializer,
+              ),
+            );
         return;
       case 'siteSpecies':
         await _db
@@ -1267,7 +1319,8 @@ class SyncDataSerializer {
       query.where((t) => t.takenAt.isBiggerOrEqualValue(since));
     }
     final rows = await query.get();
-    return rows.map((r) => r.toJson()).toList();
+    // Media carries the imageData BLOB; encode it as base64, not a byte array.
+    return rows.map((r) => r.toJson(serializer: _syncBlobSerializer)).toList();
   }
 
   Future<List<Map<String, dynamic>>> _exportBuddies(int? since) async {
@@ -1302,7 +1355,8 @@ class SyncDataSerializer {
       query.where((t) => t.updatedAt.isBiggerOrEqualValue(since));
     }
     final rows = await query.get();
-    return rows.map((r) => r.toJson()).toList();
+    // Certifications carry photoFront/photoBack BLOBs; base64-encode them.
+    return rows.map((r) => r.toJson(serializer: _syncBlobSerializer)).toList();
   }
 
   Future<List<Map<String, dynamic>>> _exportCourses(int? since) async {
@@ -1495,7 +1549,8 @@ class SyncDataSerializer {
 
   Future<List<Map<String, dynamic>>> _exportDiveDataSources() async {
     final rows = await _db.select(_db.diveDataSources).get();
-    return rows.map((r) => r.toJson()).toList();
+    // Carries rawData/rawFingerprint BLOBs; base64-encode them.
+    return rows.map((r) => r.toJson(serializer: _syncBlobSerializer)).toList();
   }
 
   Future<List<Map<String, dynamic>>> _exportSiteSpecies() async {

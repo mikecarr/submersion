@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -252,13 +253,19 @@ void main() {
         );
         expect(restored!['sourceFormat'], 'shearwater');
 
-        // BLOB survives the JSON round-trip. Drift encodes Uint8List as a
-        // JSON array of bytes via its default serializer.
+        // BLOB survives the JSON round-trip. The sync layer encodes BLOBs as
+        // base64 strings (see sync_blob_base64_test.dart); fetchRecord decodes
+        // them back to a Uint8List. Accept any of the shapes defensively.
         final restoredBlob = restored['rawFingerprint'];
         expect(restoredBlob, isNotNull);
-        final restoredBytes = restoredBlob is Uint8List
-            ? restoredBlob.toList()
-            : (restoredBlob as List).cast<int>();
+        final List<int> restoredBytes;
+        if (restoredBlob is Uint8List) {
+          restoredBytes = restoredBlob.toList();
+        } else if (restoredBlob is String) {
+          restoredBytes = base64Decode(restoredBlob);
+        } else {
+          restoredBytes = (restoredBlob as List).cast<int>();
+        }
         expect(restoredBytes, [0x01, 0x02, 0x03, 0xFE, 0xFF]);
       },
     );
