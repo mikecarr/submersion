@@ -545,7 +545,7 @@ class SpeciesRepository {
         );
 
     await _syncRepository.markRecordPending(
-      entityType: 'site_species',
+      entityType: 'siteSpecies',
       recordId: id,
       localUpdatedAt: now,
     );
@@ -579,7 +579,7 @@ class SpeciesRepository {
       final id = existing.data['id'] as String;
       await (_db.delete(_db.siteSpecies)..where((t) => t.id.equals(id))).go();
       await _syncRepository.logDeletion(
-        entityType: 'site_species',
+        entityType: 'siteSpecies',
         recordId: id,
       );
       SyncEventBus.notifyLocalChange();
@@ -598,7 +598,7 @@ class SpeciesRepository {
 
     for (final row in existing) {
       await _syncRepository.logDeletion(
-        entityType: 'site_species',
+        entityType: 'siteSpecies',
         recordId: row.id,
       );
     }

@@ -558,7 +558,7 @@ class SiteRepository {
                 ),
               );
           await _syncRepository.markRecordPending(
-            entityType: 'site_species',
+            entityType: 'siteSpecies',
             recordId: entry.id,
             localUpdatedAt: now,
           );
@@ -575,7 +575,7 @@ class SiteRepository {
             ),
           );
           await _syncRepository.markRecordPending(
-            entityType: 'site_species',
+            entityType: 'siteSpecies',
             recordId: entry.id,
             localUpdatedAt: now,
           );
@@ -825,7 +825,7 @@ class SiteRepository {
           ),
         );
         await _syncRepository.markRecordPending(
-          entityType: 'site_species',
+          entityType: 'siteSpecies',
           recordId: primary.id,
           localUpdatedAt: now,
         );
@@ -836,7 +836,7 @@ class SiteRepository {
           _db.siteSpecies,
         )..where((t) => t.id.equals(duplicate.id))).go();
         await _syncRepository.logDeletion(
-          entityType: 'site_species',
+          entityType: 'siteSpecies',
           recordId: duplicate.id,
         );
       }

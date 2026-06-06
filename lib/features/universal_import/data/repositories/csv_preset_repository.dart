@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 
+import 'package:submersion/core/data/repositories/sync_repository.dart';
 import 'package:submersion/core/database/database.dart';
 import 'package:submersion/core/services/database_service.dart';
 import 'package:submersion/core/services/logger_service.dart';
@@ -8,11 +9,11 @@ import 'package:submersion/features/universal_import/data/csv/presets/csv_preset
 
 /// Repository for persisting user-saved CSV import presets.
 ///
-/// Presets are local-only (not synced). Each row stores the full preset as a
-/// JSON blob in the `preset_json` column, with `id` and `name` duplicated at
-/// the table level for efficient queries.
+/// Each row stores the full preset as a JSON blob in the `preset_json` column,
+/// with `id` and `name` duplicated at the table level for efficient queries.
 class CsvPresetRepository {
   AppDatabase get _db => DatabaseService.instance.database;
+  final SyncRepository _syncRepository = SyncRepository();
   final _log = LoggerService.forClass(CsvPresetRepository);
 
   /// Returns all user-saved presets, ordered by name.
@@ -76,6 +77,7 @@ class CsvPresetRepository {
     try {
       _log.info('Deleting CSV preset: $id');
       await (_db.delete(_db.csvPresets)..where((t) => t.id.equals(id))).go();
+      await _syncRepository.logDeletion(entityType: 'csvPresets', recordId: id);
       _log.info('Deleted CSV preset: $id');
     } catch (e, stackTrace) {
       _log.error(

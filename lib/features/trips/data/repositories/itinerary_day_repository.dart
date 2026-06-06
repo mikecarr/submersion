@@ -76,7 +76,7 @@ class ItineraryDayRepository {
       // Mark each day as sync pending
       for (final entry in resolvedDays) {
         await _syncRepository.markRecordPending(
-          entityType: 'tripItineraryDays',
+          entityType: 'itineraryDays',
           recordId: entry.id,
           localUpdatedAt: now.millisecondsSinceEpoch,
         );
@@ -116,7 +116,7 @@ class ItineraryDayRepository {
       );
 
       await _syncRepository.markRecordPending(
-        entityType: 'tripItineraryDays',
+        entityType: 'itineraryDays',
         recordId: day.id,
         localUpdatedAt: now,
       );
@@ -151,7 +151,7 @@ class ItineraryDayRepository {
 
       for (final day in existing) {
         await _syncRepository.logDeletion(
-          entityType: 'tripItineraryDays',
+          entityType: 'itineraryDays',
           recordId: day.id,
         );
       }

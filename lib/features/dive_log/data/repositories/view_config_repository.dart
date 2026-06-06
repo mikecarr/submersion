@@ -4,6 +4,7 @@ import 'package:drift/drift.dart';
 import 'package:uuid/uuid.dart';
 
 import 'package:submersion/core/constants/list_view_mode.dart';
+import 'package:submersion/core/data/repositories/sync_repository.dart';
 import 'package:submersion/core/database/database.dart';
 import 'package:submersion/features/dive_log/domain/entities/view_field_config.dart'
     as domain;
@@ -11,6 +12,7 @@ import 'package:submersion/features/dive_log/domain/entities/view_field_config.d
 /// Repository for persisting dive list view configurations and field presets.
 class ViewConfigRepository {
   final AppDatabase _db;
+  final SyncRepository _syncRepository = SyncRepository();
   static const _uuid = Uuid();
 
   ViewConfigRepository(this._db);
@@ -165,9 +167,15 @@ class ViewConfigRepository {
 
   /// Deletes the preset with [presetId] only if it is not a built-in preset.
   Future<void> deletePreset(String presetId) async {
-    await (_db.delete(
+    final deleted = await (_db.delete(
       _db.fieldPresets,
     )..where((r) => r.id.equals(presetId) & r.isBuiltIn.equals(false))).go();
+    if (deleted > 0) {
+      await _syncRepository.logDeletion(
+        entityType: 'fieldPresets',
+        recordId: presetId,
+      );
+    }
   }
 
   /// Upserts built-in table presets for [diverId]. Idempotent: safe to call

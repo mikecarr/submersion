@@ -266,16 +266,6 @@ class SyncData {
     if (value == null) return [];
     return (value as List).map((e) => e as Map<String, dynamic>).toList();
   }
-
-  /// Check if this sync data is empty
-  bool get isEmpty =>
-      divers.isEmpty &&
-      dives.isEmpty &&
-      diveSites.isEmpty &&
-      equipment.isEmpty &&
-      buddies.isEmpty &&
-      tankPresets.isEmpty &&
-      media.isEmpty;
 }
 
 /// Service for serializing and deserializing sync data
