@@ -869,7 +869,20 @@ class StatisticsRepository {
         SELECT
           dc.id,
           dc.name,
-          dc.location,
+          CASE
+            WHEN dc.city IS NOT NULL AND dc.state_province IS NOT NULL AND dc.country IS NOT NULL
+              THEN dc.city || ', ' || dc.state_province || ', ' || dc.country
+            WHEN dc.city IS NOT NULL AND dc.country IS NOT NULL
+              THEN dc.city || ', ' || dc.country
+            WHEN dc.city IS NOT NULL AND dc.state_province IS NOT NULL
+              THEN dc.city || ', ' || dc.state_province
+            WHEN dc.state_province IS NOT NULL AND dc.country IS NOT NULL
+              THEN dc.state_province || ', ' || dc.country
+            WHEN dc.city IS NOT NULL THEN dc.city
+            WHEN dc.state_province IS NOT NULL THEN dc.state_province
+            WHEN dc.country IS NOT NULL THEN dc.country
+            ELSE NULL
+          END AS location,
           COUNT(d.id) AS dive_count
         FROM dive_centers dc
         JOIN dives d ON d.dive_center_id = dc.id
