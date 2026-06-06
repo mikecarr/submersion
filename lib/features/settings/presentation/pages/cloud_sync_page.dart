@@ -7,6 +7,8 @@ import 'package:intl/intl.dart';
 
 import 'package:submersion/core/data/repositories/sync_repository.dart'
     show CloudProviderType;
+import 'package:submersion/features/divers/data/repositories/diver_merge_repository.dart';
+import 'package:submersion/features/divers/presentation/providers/diver_providers.dart';
 import 'package:submersion/features/settings/presentation/providers/sync_providers.dart';
 import 'package:submersion/features/settings/presentation/widgets/conflict_resolution_dialog.dart';
 import 'package:submersion/l10n/l10n_extension.dart';
@@ -29,6 +31,8 @@ class CloudSyncPage extends ConsumerWidget {
         children: [
           // Show banner when custom folder mode is active
           if (isCustomFolderMode) _buildCustomFolderBanner(context),
+          // Surface apparent duplicate diver profiles created across devices.
+          _buildDuplicateDiversBanner(context, ref),
           _buildSyncStatusCard(context, ref, syncState),
           const Divider(),
           _buildProviderSection(context, ref, selectedProvider),
@@ -101,6 +105,120 @@ class CloudSyncPage extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  /// Banner shown when two or more diver profiles share a name -- the typical
+  /// result of each device auto-creating its own owner diver before the first
+  /// sync. Offers a one-tap merge per duplicate group.
+  Widget _buildDuplicateDiversBanner(BuildContext context, WidgetRef ref) {
+    final groupsAsync = ref.watch(duplicateDiverGroupsProvider);
+    final groups = groupsAsync.asData?.value ?? const [];
+    if (groups.isEmpty) return const SizedBox.shrink();
+
+    final theme = Theme.of(context);
+    return Container(
+      margin: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.primaryContainer.withValues(alpha: 0.4),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: theme.colorScheme.primary.withValues(alpha: 0.3),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.merge_type, color: theme.colorScheme.primary),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'Duplicate diver profiles',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Sync found more than one profile with the same name. This usually '
+            'happens when each device created its own profile before syncing. '
+            'Merging moves all dives and data onto one profile.',
+            style: theme.textTheme.bodyMedium,
+          ),
+          const SizedBox(height: 12),
+          for (final group in groups)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      '${group.displayName} '
+                      '(${group.duplicates.length + 1} profiles)',
+                      style: theme.textTheme.bodyLarge,
+                    ),
+                  ),
+                  FilledButton.tonal(
+                    onPressed: () => _confirmAndMerge(context, ref, group),
+                    child: const Text('Merge'),
+                  ),
+                ],
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _confirmAndMerge(
+    BuildContext context,
+    WidgetRef ref,
+    DuplicateDiverGroup group,
+  ) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Merge diver profiles?'),
+        content: Text(
+          'All dives, certifications, gear, and other data from '
+          '${group.duplicates.length} duplicate profile(s) will be moved onto '
+          '"${group.displayName}". This cannot be undone automatically.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Merge'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+
+    final repo = ref.read(diverMergeRepositoryProvider);
+    try {
+      for (final duplicate in group.duplicates) {
+        await repo.mergeDivers(
+          keeperId: group.keeper.id,
+          duplicateId: duplicate.id,
+        );
+      }
+      ref.invalidate(allDiversProvider);
+      messenger.showSnackBar(
+        SnackBar(content: Text('Merged into ${group.displayName}')),
+      );
+    } catch (e) {
+      messenger.showSnackBar(SnackBar(content: Text('Merge failed: $e')));
+    }
   }
 
   Widget _buildSyncStatusCard(

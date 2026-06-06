@@ -2,6 +2,7 @@ import 'package:submersion/core/providers/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:submersion/features/settings/presentation/providers/settings_providers.dart';
+import 'package:submersion/features/divers/data/repositories/diver_merge_repository.dart';
 import 'package:submersion/features/divers/data/repositories/diver_repository.dart';
 import 'package:submersion/features/divers/domain/entities/diver.dart';
 
@@ -10,10 +11,24 @@ final diverRepositoryProvider = Provider<DiverRepository>((ref) {
   return DiverRepository();
 });
 
+/// Diver merge repository provider
+final diverMergeRepositoryProvider = Provider<DiverMergeRepository>((ref) {
+  return DiverMergeRepository();
+});
+
 /// All divers provider
 final allDiversProvider = FutureProvider<List<Diver>>((ref) async {
   final repository = ref.watch(diverRepositoryProvider);
   return repository.getAllDivers();
+});
+
+/// Duplicate diver groups (same normalized name), surfaced after sync so the
+/// user can confirm a merge. Empty when there are no apparent duplicates.
+final duplicateDiverGroupsProvider = FutureProvider<List<DuplicateDiverGroup>>((
+  ref,
+) async {
+  final divers = await ref.watch(allDiversProvider.future);
+  return DiverMergeRepository.findDuplicateGroups(divers);
 });
 
 /// Check if any diver profiles exist
