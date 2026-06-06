@@ -676,8 +676,11 @@ class SyncService {
             hasUpdatedAt: false,
           ),
           (type: 'gasSwitches', records: data.gasSwitches, hasUpdatedAt: false),
-          // Extra entities added in the SyncData expansion. Append-only or
-          // last-writer-wins (no updatedAt column on most), and FK ordering
+          // Extra entities added in the SyncData expansion. Four are
+          // append-only and use the blind-upsert merge path (no updatedAt
+          // column: diveCustomFields, diveDataSources, siteSpecies,
+          // fieldPresets). Two carry updatedAt and use the standard
+          // conflict-detection path (csvPresets, viewConfigs). FK ordering
           // is handled by the deferred-FK transaction wrapping this loop.
           (
             type: 'diveCustomFields',

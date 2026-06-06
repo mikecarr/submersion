@@ -39,15 +39,19 @@ class DiverMergeRepository {
   final SyncRepository _syncRepository = SyncRepository();
   final _log = LoggerService.forClass(DiverMergeRepository);
 
-  /// Tables where a diver owns at most one row and the value is per-device
-  /// configuration. The keeper's row wins, so the duplicate's row is deleted
-  /// rather than repointed (repointing could create two rows for one diver,
-  /// or collide on a unique constraint).
-  static const _singletonConfigTables = {
-    'diver_settings',
-    'view_configs',
-    'field_presets',
-  };
+  /// Tables holding per-device or per-(diver,view-mode) configuration that
+  /// should not accumulate across devices when divers are merged. The keeper's
+  /// rows win and the duplicate's rows are dropped rather than repointed.
+  ///
+  /// (Note: there are no unique constraints on `diver_id` in these tables, so
+  /// repointing would not crash -- it would just leave the keeper with two of
+  /// every config row, which is worse UX than the keeper's existing config
+  /// winning unconditionally for these auto-generated layouts/settings.)
+  ///
+  /// `field_presets` is intentionally NOT in this set: those are user-named
+  /// custom presets and losing them would be real data loss; they are
+  /// repointed onto the keeper instead.
+  static const _singletonConfigTables = {'diver_settings', 'view_configs'};
 
   /// Repoint all references from [duplicateId] to [keeperId], then delete the
   /// duplicate diver. Idempotent-safe to call once per duplicate.
@@ -85,17 +89,19 @@ class DiverMergeRepository {
         }
       }
 
-      // Finally remove the duplicate diver itself.
+      // Finally remove the duplicate diver itself, and log the deletion
+      // inside the same transaction so the local DB state and the sync
+      // tombstone commit atomically (matches the buddy-merge pattern; a
+      // crash between the two would otherwise leave the duplicate gone
+      // locally but unable to propagate the delete to other devices).
       await (_db.delete(
         _db.divers,
       )..where((t) => t.id.equals(duplicateId))).go();
+      await _syncRepository.logDeletion(
+        entityType: 'divers',
+        recordId: duplicateId,
+      );
     });
-
-    // Log the diver deletion outside the txn so it propagates to other devices.
-    await _syncRepository.logDeletion(
-      entityType: 'divers',
-      recordId: duplicateId,
-    );
 
     SyncEventBus.notifyLocalChange();
     _log.info('Merge complete: $duplicateId -> $keeperId');

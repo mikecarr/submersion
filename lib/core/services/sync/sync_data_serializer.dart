@@ -28,15 +28,20 @@ class _SyncBlobValueSerializer extends ValueSerializer {
 
   @override
   T fromJson<T>(dynamic json) {
-    if (json != null) {
-      final typeList = <T>[];
-      if (typeList is List<Uint8List?>) {
-        if (json is String) {
-          return base64Decode(json) as T;
-        }
-        if (json is List) {
-          return Uint8List.fromList(json.cast<int>()) as T;
-        }
+    // Special-case BLOB columns: accept both base64 strings (the current
+    // sync format) and JSON byte arrays (the legacy format). The check is
+    // true for both `Uint8List` and `Uint8List?` (since `List<Uint8List>` is
+    // a subtype of `List<Uint8List?>`), so a future non-nullable BLOB column
+    // would still hit this branch instead of leaking back to the default
+    // serializer's array-of-bytes path.
+    final typeList = <T>[];
+    if (typeList is List<Uint8List?>) {
+      if (json == null) return null as T;
+      if (json is String) {
+        return base64Decode(json) as T;
+      }
+      if (json is List) {
+        return Uint8List.fromList(json.cast<int>()) as T;
       }
     }
     return _default.fromJson<T>(json);
@@ -936,14 +941,16 @@ class SyncDataSerializer {
       case 'diveCustomFields':
         await _db
             .into(_db.diveCustomFields)
-            .insertOnConflictUpdate(DiveCustomField.fromJson(data));
+            .insertOnConflictUpdate(
+              DiveCustomField.fromJson(_withTimestampDefaults(data)),
+            );
         return;
       case 'diveDataSources':
         await _db
             .into(_db.diveDataSources)
             .insertOnConflictUpdate(
               DiveDataSourcesData.fromJson(
-                data,
+                _withTimestampDefaults(data),
                 serializer: _syncBlobSerializer,
               ),
             );
@@ -951,22 +958,30 @@ class SyncDataSerializer {
       case 'siteSpecies':
         await _db
             .into(_db.siteSpecies)
-            .insertOnConflictUpdate(SiteSpecy.fromJson(data));
+            .insertOnConflictUpdate(
+              SiteSpecy.fromJson(_withTimestampDefaults(data)),
+            );
         return;
       case 'csvPresets':
         await _db
             .into(_db.csvPresets)
-            .insertOnConflictUpdate(CsvPreset.fromJson(data));
+            .insertOnConflictUpdate(
+              CsvPreset.fromJson(_withTimestampDefaults(data)),
+            );
         return;
       case 'viewConfigs':
         await _db
             .into(_db.viewConfigs)
-            .insertOnConflictUpdate(ViewConfig.fromJson(data));
+            .insertOnConflictUpdate(
+              ViewConfig.fromJson(_withTimestampDefaults(data)),
+            );
         return;
       case 'fieldPresets':
         await _db
             .into(_db.fieldPresets)
-            .insertOnConflictUpdate(FieldPreset.fromJson(data));
+            .insertOnConflictUpdate(
+              FieldPreset.fromJson(_withTimestampDefaults(data)),
+            );
         return;
     }
   }
@@ -1636,6 +1651,16 @@ class SyncDataSerializer {
 
   /// Applies default values for DiverSettings fields that may be missing
   /// from older sync data or incomplete conflict records.
+  /// Defensive back-compat for the entities most recently added to SyncData:
+  /// if a peer ever ships a partial record missing `createdAt`/`updatedAt`,
+  /// fall back to "now" rather than letting Drift's strict `fromJson` throw
+  /// when it sees `null` where `int` was expected. The new entities all use
+  /// Unix-milliseconds for their timestamp columns.
+  Map<String, dynamic> _withTimestampDefaults(Map<String, dynamic> data) {
+    final now = DateTime.now().millisecondsSinceEpoch;
+    return {'createdAt': now, 'updatedAt': now, 'importedAt': now, ...data};
+  }
+
   Map<String, dynamic> _applyDiverSettingDefaults(Map<String, dynamic> data) {
     final merged = {
       // Unit settings
