@@ -676,6 +676,27 @@ class SyncService {
             hasUpdatedAt: false,
           ),
           (type: 'gasSwitches', records: data.gasSwitches, hasUpdatedAt: false),
+          // Extra entities added in the SyncData expansion. Append-only or
+          // last-writer-wins (no updatedAt column on most), and FK ordering
+          // is handled by the deferred-FK transaction wrapping this loop.
+          (
+            type: 'diveCustomFields',
+            records: data.diveCustomFields,
+            hasUpdatedAt: false,
+          ),
+          (
+            type: 'diveDataSources',
+            records: data.diveDataSources,
+            hasUpdatedAt: false,
+          ),
+          (type: 'siteSpecies', records: data.siteSpecies, hasUpdatedAt: false),
+          (type: 'csvPresets', records: data.csvPresets, hasUpdatedAt: true),
+          (type: 'viewConfigs', records: data.viewConfigs, hasUpdatedAt: true),
+          (
+            type: 'fieldPresets',
+            records: data.fieldPresets,
+            hasUpdatedAt: false,
+          ),
           (
             type: 'tankPressureProfiles',
             records: data.tankPressureProfiles,

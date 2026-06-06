@@ -127,6 +127,12 @@ class SyncData {
   final List<Map<String, dynamic>> sightings;
   final List<Map<String, dynamic>> diveProfileEvents;
   final List<Map<String, dynamic>> gasSwitches;
+  final List<Map<String, dynamic>> diveCustomFields;
+  final List<Map<String, dynamic>> diveDataSources;
+  final List<Map<String, dynamic>> siteSpecies;
+  final List<Map<String, dynamic>> csvPresets;
+  final List<Map<String, dynamic>> viewConfigs;
+  final List<Map<String, dynamic>> fieldPresets;
 
   const SyncData({
     this.divers = const [],
@@ -162,6 +168,12 @@ class SyncData {
     this.sightings = const [],
     this.diveProfileEvents = const [],
     this.gasSwitches = const [],
+    this.diveCustomFields = const [],
+    this.diveDataSources = const [],
+    this.siteSpecies = const [],
+    this.csvPresets = const [],
+    this.viewConfigs = const [],
+    this.fieldPresets = const [],
   });
 
   Map<String, dynamic> toJson() => {
@@ -198,6 +210,12 @@ class SyncData {
     'sightings': sightings,
     'diveProfileEvents': diveProfileEvents,
     'gasSwitches': gasSwitches,
+    'diveCustomFields': diveCustomFields,
+    'diveDataSources': diveDataSources,
+    'siteSpecies': siteSpecies,
+    'csvPresets': csvPresets,
+    'viewConfigs': viewConfigs,
+    'fieldPresets': fieldPresets,
   };
 
   factory SyncData.fromJson(Map<String, dynamic> json) {
@@ -235,6 +253,12 @@ class SyncData {
       sightings: _parseList(json['sightings']),
       diveProfileEvents: _parseList(json['diveProfileEvents']),
       gasSwitches: _parseList(json['gasSwitches']),
+      diveCustomFields: _parseList(json['diveCustomFields']),
+      diveDataSources: _parseList(json['diveDataSources']),
+      siteSpecies: _parseList(json['siteSpecies']),
+      csvPresets: _parseList(json['csvPresets']),
+      viewConfigs: _parseList(json['viewConfigs']),
+      fieldPresets: _parseList(json['fieldPresets']),
     );
   }
 
@@ -385,6 +409,24 @@ class SyncDataSerializer {
           'gasSwitches',
           () => _exportGasSwitches(sinceMs),
         ),
+        diveCustomFields: await _safeExport(
+          'diveCustomFields',
+          _exportDiveCustomFields,
+        ),
+        diveDataSources: await _safeExport(
+          'diveDataSources',
+          _exportDiveDataSources,
+        ),
+        siteSpecies: await _safeExport('siteSpecies', _exportSiteSpecies),
+        csvPresets: await _safeExport(
+          'csvPresets',
+          () => _exportCsvPresets(sinceMs),
+        ),
+        viewConfigs: await _safeExport(
+          'viewConfigs',
+          () => _exportViewConfigs(sinceMs),
+        ),
+        fieldPresets: await _safeExport('fieldPresets', _exportFieldPresets),
       );
 
       // Group deletions by entity type
@@ -649,6 +691,36 @@ class SyncDataSerializer {
           _db.gasSwitches,
         )..where((t) => t.id.equals(recordId))).getSingleOrNull();
         return row == null ? null : _gasSwitchToJson(row);
+      case 'diveCustomFields':
+        final row = await (_db.select(
+          _db.diveCustomFields,
+        )..where((t) => t.id.equals(recordId))).getSingleOrNull();
+        return row?.toJson();
+      case 'diveDataSources':
+        final row = await (_db.select(
+          _db.diveDataSources,
+        )..where((t) => t.id.equals(recordId))).getSingleOrNull();
+        return row?.toJson();
+      case 'siteSpecies':
+        final row = await (_db.select(
+          _db.siteSpecies,
+        )..where((t) => t.id.equals(recordId))).getSingleOrNull();
+        return row?.toJson();
+      case 'csvPresets':
+        final row = await (_db.select(
+          _db.csvPresets,
+        )..where((t) => t.id.equals(recordId))).getSingleOrNull();
+        return row?.toJson();
+      case 'viewConfigs':
+        final row = await (_db.select(
+          _db.viewConfigs,
+        )..where((t) => t.id.equals(recordId))).getSingleOrNull();
+        return row?.toJson();
+      case 'fieldPresets':
+        final row = await (_db.select(
+          _db.fieldPresets,
+        )..where((t) => t.id.equals(recordId))).getSingleOrNull();
+        return row?.toJson();
     }
     return null;
   }
@@ -824,6 +896,36 @@ class SyncDataSerializer {
             .into(_db.gasSwitches)
             .insertOnConflictUpdate(GasSwitche.fromJson(data));
         return;
+      case 'diveCustomFields':
+        await _db
+            .into(_db.diveCustomFields)
+            .insertOnConflictUpdate(DiveCustomField.fromJson(data));
+        return;
+      case 'diveDataSources':
+        await _db
+            .into(_db.diveDataSources)
+            .insertOnConflictUpdate(DiveDataSourcesData.fromJson(data));
+        return;
+      case 'siteSpecies':
+        await _db
+            .into(_db.siteSpecies)
+            .insertOnConflictUpdate(SiteSpecy.fromJson(data));
+        return;
+      case 'csvPresets':
+        await _db
+            .into(_db.csvPresets)
+            .insertOnConflictUpdate(CsvPreset.fromJson(data));
+        return;
+      case 'viewConfigs':
+        await _db
+            .into(_db.viewConfigs)
+            .insertOnConflictUpdate(ViewConfig.fromJson(data));
+        return;
+      case 'fieldPresets':
+        await _db
+            .into(_db.fieldPresets)
+            .insertOnConflictUpdate(FieldPreset.fromJson(data));
+        return;
     }
   }
 
@@ -992,6 +1094,36 @@ class SyncDataSerializer {
       case 'gasSwitches':
         await (_db.delete(
           _db.gasSwitches,
+        )..where((t) => t.id.equals(recordId))).go();
+        return;
+      case 'diveCustomFields':
+        await (_db.delete(
+          _db.diveCustomFields,
+        )..where((t) => t.id.equals(recordId))).go();
+        return;
+      case 'diveDataSources':
+        await (_db.delete(
+          _db.diveDataSources,
+        )..where((t) => t.id.equals(recordId))).go();
+        return;
+      case 'siteSpecies':
+        await (_db.delete(
+          _db.siteSpecies,
+        )..where((t) => t.id.equals(recordId))).go();
+        return;
+      case 'csvPresets':
+        await (_db.delete(
+          _db.csvPresets,
+        )..where((t) => t.id.equals(recordId))).go();
+        return;
+      case 'viewConfigs':
+        await (_db.delete(
+          _db.viewConfigs,
+        )..where((t) => t.id.equals(recordId))).go();
+        return;
+      case 'fieldPresets':
+        await (_db.delete(
+          _db.fieldPresets,
         )..where((t) => t.id.equals(recordId))).go();
         return;
     }
@@ -1357,6 +1489,44 @@ class SyncDataSerializer {
 
   Future<List<Map<String, dynamic>>> _exportSightings() async {
     final rows = await _db.select(_db.sightings).get();
+    return rows.map((r) => r.toJson()).toList();
+  }
+
+  Future<List<Map<String, dynamic>>> _exportDiveCustomFields() async {
+    final rows = await _db.select(_db.diveCustomFields).get();
+    return rows.map((r) => r.toJson()).toList();
+  }
+
+  Future<List<Map<String, dynamic>>> _exportDiveDataSources() async {
+    final rows = await _db.select(_db.diveDataSources).get();
+    return rows.map((r) => r.toJson()).toList();
+  }
+
+  Future<List<Map<String, dynamic>>> _exportSiteSpecies() async {
+    final rows = await _db.select(_db.siteSpecies).get();
+    return rows.map((r) => r.toJson()).toList();
+  }
+
+  Future<List<Map<String, dynamic>>> _exportCsvPresets(int? since) async {
+    final query = _db.select(_db.csvPresets);
+    if (since != null) {
+      query.where((t) => t.updatedAt.isBiggerOrEqualValue(since));
+    }
+    final rows = await query.get();
+    return rows.map((r) => r.toJson()).toList();
+  }
+
+  Future<List<Map<String, dynamic>>> _exportViewConfigs(int? since) async {
+    final query = _db.select(_db.viewConfigs);
+    if (since != null) {
+      query.where((t) => t.updatedAt.isBiggerOrEqualValue(since));
+    }
+    final rows = await query.get();
+    return rows.map((r) => r.toJson()).toList();
+  }
+
+  Future<List<Map<String, dynamic>>> _exportFieldPresets() async {
+    final rows = await _db.select(_db.fieldPresets).get();
     return rows.map((r) => r.toJson()).toList();
   }
 
