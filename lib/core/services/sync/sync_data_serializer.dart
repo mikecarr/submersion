@@ -1442,7 +1442,11 @@ class SyncDataSerializer {
   }
 
   Future<List<Map<String, dynamic>>> _exportDiveTypes(int? since) async {
-    final query = _db.select(_db.diveTypes);
+    // Built-in dive types are re-seeded identically on every device at first
+    // launch and cannot be edited, so syncing them only risks cross-device
+    // ID collisions and payload bloat. Export custom types only.
+    final query = _db.select(_db.diveTypes)
+      ..where((t) => t.isBuiltIn.equals(false));
     if (since != null) {
       query.where((t) => t.updatedAt.isBiggerOrEqualValue(since));
     }
@@ -1533,7 +1537,12 @@ class SyncDataSerializer {
   }
 
   Future<List<Map<String, dynamic>>> _exportSpecies() async {
-    final rows = await _db.select(_db.species).get();
+    // Built-in species come from a bundled asset re-seeded on every device;
+    // only export user-created species. (Built-ins use stable bundled IDs so
+    // they would not collide, but there is no value in shipping them.)
+    final rows = await (_db.select(
+      _db.species,
+    )..where((t) => t.isBuiltIn.equals(false))).get();
     return rows.map((r) => r.toJson()).toList();
   }
 
@@ -1577,7 +1586,11 @@ class SyncDataSerializer {
   }
 
   Future<List<Map<String, dynamic>>> _exportFieldPresets() async {
-    final rows = await _db.select(_db.fieldPresets).get();
+    // Built-in field presets are re-seeded per diver on every device; export
+    // only user-created presets.
+    final rows = await (_db.select(
+      _db.fieldPresets,
+    )..where((t) => t.isBuiltIn.equals(false))).get();
     return rows.map((r) => r.toJson()).toList();
   }
 
