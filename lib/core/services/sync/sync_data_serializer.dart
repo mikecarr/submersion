@@ -109,6 +109,7 @@ class SyncData {
   final List<Map<String, dynamic>> buddies;
   final List<Map<String, dynamic>> diveBuddies;
   final List<Map<String, dynamic>> certifications;
+  final List<Map<String, dynamic>> courses;
   final List<Map<String, dynamic>> serviceRecords;
   final List<Map<String, dynamic>> diveCenters;
   final List<Map<String, dynamic>> trips;
@@ -143,6 +144,7 @@ class SyncData {
     this.buddies = const [],
     this.diveBuddies = const [],
     this.certifications = const [],
+    this.courses = const [],
     this.serviceRecords = const [],
     this.diveCenters = const [],
     this.trips = const [],
@@ -178,6 +180,7 @@ class SyncData {
     'buddies': buddies,
     'diveBuddies': diveBuddies,
     'certifications': certifications,
+    'courses': courses,
     'serviceRecords': serviceRecords,
     'diveCenters': diveCenters,
     'trips': trips,
@@ -214,6 +217,7 @@ class SyncData {
       buddies: _parseList(json['buddies']),
       diveBuddies: _parseList(json['diveBuddies']),
       certifications: _parseList(json['certifications']),
+      courses: _parseList(json['courses']),
       serviceRecords: _parseList(json['serviceRecords']),
       diveCenters: _parseList(json['diveCenters']),
       trips: _parseList(json['trips']),
@@ -330,6 +334,7 @@ class SyncDataSerializer {
           'certifications',
           () => _exportCertifications(sinceMs),
         ),
+        courses: await _safeExport('courses', () => _exportCourses(sinceMs)),
         serviceRecords: await _safeExport(
           'serviceRecords',
           () => _exportServiceRecords(sinceMs),
@@ -449,6 +454,20 @@ class SyncDataSerializer {
   // Import / Apply Methods
   // ============================================================================
 
+  /// Runs [body] inside a single DB transaction with deferred FK checks.
+  ///
+  /// `PRAGMA defer_foreign_keys = ON` is per-transaction in SQLite, so it must
+  /// be set as the first statement inside this transaction. It auto-resets at
+  /// commit/rollback. Required for `_applyRemotePayload`: a single payload can
+  /// contain rows that reference siblings appearing later in the merge order
+  /// (e.g. a dive whose `siteId` points at a `diveSites` row applied after).
+  Future<T> applyInDeferredFkTransaction<T>(Future<T> Function() body) async {
+    return _db.transaction(() async {
+      await _db.customStatement('PRAGMA defer_foreign_keys = ON');
+      return await body();
+    });
+  }
+
   Future<Map<String, dynamic>?> fetchRecord(
     String entityType,
     String recordId,
@@ -539,6 +558,12 @@ class SyncDataSerializer {
           _db.certifications,
         )..where((t) => t.id.equals(recordId))).getSingleOrNull();
         return row == null ? null : _certificationToJson(row);
+      case 'courses':
+        final row = await (_db.select(
+          _db.courses,
+        )..where((t) => t.id.equals(recordId))).getSingleOrNull();
+        // Drift-generated toJson keeps fetch symmetric with import.
+        return row?.toJson();
       case 'serviceRecords':
         final row = await (_db.select(
           _db.serviceRecords,
@@ -705,6 +730,11 @@ class SyncDataSerializer {
         await _db
             .into(_db.certifications)
             .insertOnConflictUpdate(Certification.fromJson(data));
+        return;
+      case 'courses':
+        await _db
+            .into(_db.courses)
+            .insertOnConflictUpdate(Course.fromJson(data));
         return;
       case 'serviceRecords':
         await _db
@@ -876,6 +906,11 @@ class SyncDataSerializer {
       case 'certifications':
         await (_db.delete(
           _db.certifications,
+        )..where((t) => t.id.equals(recordId))).go();
+        return;
+      case 'courses':
+        await (_db.delete(
+          _db.courses,
         )..where((t) => t.id.equals(recordId))).go();
         return;
       case 'serviceRecords':
@@ -1148,6 +1183,15 @@ class SyncDataSerializer {
     return rows.map((r) => r.toJson()).toList();
   }
 
+  Future<List<Map<String, dynamic>>> _exportCourses(int? since) async {
+    final query = _db.select(_db.courses);
+    if (since != null) {
+      query.where((t) => t.updatedAt.isBiggerOrEqualValue(since));
+    }
+    final rows = await query.get();
+    return rows.map((r) => r.toJson()).toList();
+  }
+
   Future<List<Map<String, dynamic>>> _exportServiceRecords(int? since) async {
     final query = _db.select(_db.serviceRecords);
     if (since != null) {
@@ -1284,13 +1328,26 @@ class SyncDataSerializer {
     return rows.map((r) => r.toJson()).toList();
   }
 
+  /// Settings keys that hold per-device state and must never sync.
+  ///
+  /// Including these in the payload causes the receiving device to flag a
+  /// conflict on every cross-device pull (same `key` row, different value
+  /// per device). `active_diver_id` is the canonical case: at first launch
+  /// each device auto-creates an owner diver with its own UUID and writes
+  /// the pointer here; both devices then have a perfectly valid local value
+  /// that has no business overwriting the other side.
+  static const Set<String> _deviceLocalSettingsKeys = {'active_diver_id'};
+
   Future<List<Map<String, dynamic>>> _exportSettings(int? since) async {
     final query = _db.select(_db.settings);
     if (since != null) {
       query.where((t) => t.updatedAt.isBiggerOrEqualValue(since));
     }
     final rows = await query.get();
-    return rows.map((r) => r.toJson()).toList();
+    return rows
+        .where((r) => !_deviceLocalSettingsKeys.contains(r.key))
+        .map((r) => r.toJson())
+        .toList();
   }
 
   Future<List<Map<String, dynamic>>> _exportSpecies() async {

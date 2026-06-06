@@ -574,6 +574,21 @@ class SyncService {
     SyncPayload remotePayload,
     DateTime? localLastSync,
   ) async {
+    // Wrap deletions + merge in a single transaction with deferred FK checks.
+    // Without this, intra-payload references (e.g. a dive whose siteId points
+    // at a dive site appearing later in the apply order, or a dive whose
+    // courseId points at a course in the same payload) fail immediately and
+    // the affected rows never reach the receiving DB. See
+    // docs/superpowers/findings/2026-06-02-icloud-sync-diagnosis.md.
+    return _serializer.applyInDeferredFkTransaction(
+      () => _applyRemotePayloadInner(remotePayload, localLastSync),
+    );
+  }
+
+  Future<_MergeResult> _applyRemotePayloadInner(
+    SyncPayload remotePayload,
+    DateTime? localLastSync,
+  ) async {
     final lastSyncMs = localLastSync?.millisecondsSinceEpoch;
     var recordsApplied = 0;
     var conflictsFound = 0;
@@ -635,6 +650,10 @@ class SyncService {
           ),
           (type: 'species', records: data.species, hasUpdatedAt: false),
           (type: 'tags', records: data.tags, hasUpdatedAt: true),
+          // Courses must apply before dives/certifications that reference them.
+          // (Deferred FK already covers ordering, but keep the logical sequence
+          // so a future read of this list still tells the dependency story.)
+          (type: 'courses', records: data.courses, hasUpdatedAt: true),
           (type: 'dives', records: data.dives, hasUpdatedAt: true),
           (type: 'diveSites', records: data.diveSites, hasUpdatedAt: true),
           (type: 'diveTanks', records: data.diveTanks, hasUpdatedAt: false),

@@ -17,37 +17,43 @@ void main() {
       DatabaseService.instance.resetForTesting();
     });
 
-    test('a dive survives export -> serialize -> deserialize with valid checksum', () async {
-      // Seed one dive. If the first run fails on a foreign-key requirement
-      // (e.g. a diver must exist), insert that prerequisite first — the red
-      // run will tell you exactly what is missing.
-      final dive = createTestDiveWithBottomTime(id: 'dive-rt-1', diveNumber: 7);
-      await DiveRepository().createDive(dive);
+    test(
+      'a dive survives export -> serialize -> deserialize with valid checksum',
+      () async {
+        // Seed one dive. If the first run fails on a foreign-key requirement
+        // (e.g. a diver must exist), insert that prerequisite first — the red
+        // run will tell you exactly what is missing.
+        final dive = createTestDiveWithBottomTime(
+          id: 'dive-rt-1',
+          diveNumber: 7,
+        );
+        await DiveRepository().createDive(dive);
 
-      final serializer = SyncDataSerializer();
-      final repo = SyncRepository();
-      final deviceId = await repo.getDeviceId();
-      final deletions = await repo.getAllDeletions();
+        final serializer = SyncDataSerializer();
+        final repo = SyncRepository();
+        final deviceId = await repo.getDeviceId();
+        final deletions = await repo.getAllDeletions();
 
-      final payload = await serializer.exportData(
-        deviceId: deviceId,
-        since: null,
-        lastSyncTimestamp: null,
-        deletions: deletions,
-      );
-      final json = serializer.serializePayload(payload);
-      final restored = serializer.deserializePayload(json);
+        final payload = await serializer.exportData(
+          deviceId: deviceId,
+          since: null,
+          lastSyncTimestamp: null,
+          deletions: deletions,
+        );
+        final json = serializer.serializePayload(payload);
+        final restored = serializer.deserializePayload(json);
 
-      expect(
-        serializer.validateChecksum(restored),
-        isTrue,
-        reason: 'checksum should validate after a clean round-trip',
-      );
-      expect(
-        json,
-        contains('dive-rt-1'),
-        reason: 'the seeded dive must appear in the exported payload',
-      );
-    });
+        expect(
+          serializer.validateChecksum(restored),
+          isTrue,
+          reason: 'checksum should validate after a clean round-trip',
+        );
+        expect(
+          json,
+          contains('dive-rt-1'),
+          reason: 'the seeded dive must appear in the exported payload',
+        );
+      },
+    );
   });
 }
