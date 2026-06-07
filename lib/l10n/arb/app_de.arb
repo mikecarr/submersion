@@ -4730,5 +4730,6 @@
   "settings_cloudSync_duplicateDivers_confirmCancel": "Abbrechen",
   "settings_cloudSync_duplicateDivers_confirmAction": "Zusammenführen",
   "settings_cloudSync_duplicateDivers_successSnack": "Zusammengeführt in {name}",
-  "settings_cloudSync_duplicateDivers_failureSnack": "Zusammenführung fehlgeschlagen: {error}"
+  "settings_cloudSync_duplicateDivers_failureSnack": "Zusammenführung fehlgeschlagen: {error}",
+  "settings_cloudSync_duplicateDivers_undo": "Rückgängig"
 }

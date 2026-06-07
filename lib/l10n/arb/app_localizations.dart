@@ -28119,6 +28119,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Merge failed: {error}'**
   String settings_cloudSync_duplicateDivers_failureSnack(String error);
+
+  /// Snackbar action that reverses a just-performed diver merge.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get settings_cloudSync_duplicateDivers_undo;
 }
 
 class _AppLocalizationsDelegate

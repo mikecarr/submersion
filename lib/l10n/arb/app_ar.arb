@@ -4730,5 +4730,6 @@
   "settings_cloudSync_duplicateDivers_confirmCancel": "إلغاء",
   "settings_cloudSync_duplicateDivers_confirmAction": "دمج",
   "settings_cloudSync_duplicateDivers_successSnack": "تم الدمج في {name}",
-  "settings_cloudSync_duplicateDivers_failureSnack": "فشل الدمج: {error}"
+  "settings_cloudSync_duplicateDivers_failureSnack": "فشل الدمج: {error}",
+  "settings_cloudSync_duplicateDivers_undo": "تراجع"
 }

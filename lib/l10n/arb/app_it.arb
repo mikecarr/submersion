@@ -4730,5 +4730,6 @@
   "settings_cloudSync_duplicateDivers_confirmCancel": "Annulla",
   "settings_cloudSync_duplicateDivers_confirmAction": "Unisci",
   "settings_cloudSync_duplicateDivers_successSnack": "Unito in {name}",
-  "settings_cloudSync_duplicateDivers_failureSnack": "Unione non riuscita: {error}"
+  "settings_cloudSync_duplicateDivers_failureSnack": "Unione non riuscita: {error}",
+  "settings_cloudSync_duplicateDivers_undo": "Annulla"
 }

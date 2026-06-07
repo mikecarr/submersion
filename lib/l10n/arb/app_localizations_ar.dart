@@ -16378,4 +16378,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String settings_cloudSync_duplicateDivers_failureSnack(String error) {
     return 'فشل الدمج: $error';
   }
+
+  @override
+  String get settings_cloudSync_duplicateDivers_undo => 'تراجع';
 }

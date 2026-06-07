@@ -16262,4 +16262,7 @@ class AppLocalizationsHe extends AppLocalizations {
   String settings_cloudSync_duplicateDivers_failureSnack(String error) {
     return 'המיזוג נכשל: $error';
   }
+
+  @override
+  String get settings_cloudSync_duplicateDivers_undo => 'בטל';
 }

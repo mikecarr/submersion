@@ -16758,4 +16758,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String settings_cloudSync_duplicateDivers_failureSnack(String error) {
     return 'Échec de la fusion : $error';
   }
+
+  @override
+  String get settings_cloudSync_duplicateDivers_undo => 'Annuler';
 }

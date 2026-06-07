@@ -16563,4 +16563,7 @@ class AppLocalizationsNl extends AppLocalizations {
   String settings_cloudSync_duplicateDivers_failureSnack(String error) {
     return 'Samenvoegen mislukt: $error';
   }
+
+  @override
+  String get settings_cloudSync_duplicateDivers_undo => 'Ongedaan maken';
 }

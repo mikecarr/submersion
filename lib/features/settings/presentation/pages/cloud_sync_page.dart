@@ -217,13 +217,19 @@ class CloudSyncPage extends ConsumerWidget {
       },
     );
     if (confirmed != true) return;
+    if (!context.mounted) return;
 
     final repo = ref.read(diverMergeRepositoryProvider);
     try {
+      // Collect every snapshot so the whole group merge can be undone, not
+      // just the last duplicate.
+      final snapshots = <DiverMergeSnapshot>[];
       for (final duplicate in group.duplicates) {
-        await repo.mergeDivers(
-          keeperId: group.keeper.id,
-          duplicateId: duplicate.id,
+        snapshots.add(
+          await repo.mergeDivers(
+            keeperId: group.keeper.id,
+            duplicateId: duplicate.id,
+          ),
         );
       }
       ref.invalidate(allDiversProvider);
@@ -233,6 +239,10 @@ class CloudSyncPage extends ConsumerWidget {
             l10n.settings_cloudSync_duplicateDivers_successSnack(
               group.displayName,
             ),
+          ),
+          action: SnackBarAction(
+            label: l10n.settings_cloudSync_duplicateDivers_undo,
+            onPressed: () => _undoMerge(ref, repo, snapshots),
           ),
         ),
       );
@@ -245,6 +255,19 @@ class CloudSyncPage extends ConsumerWidget {
         ),
       );
     }
+  }
+
+  /// Reverse every snapshot from a group merge, newest first (so a row touched
+  /// by two duplicates is restored to its true original).
+  Future<void> _undoMerge(
+    WidgetRef ref,
+    DiverMergeRepository repo,
+    List<DiverMergeSnapshot> snapshots,
+  ) async {
+    for (final snapshot in snapshots.reversed) {
+      await repo.undoMerge(snapshot);
+    }
+    ref.invalidate(allDiversProvider);
   }
 
   Widget _buildSyncStatusCard(

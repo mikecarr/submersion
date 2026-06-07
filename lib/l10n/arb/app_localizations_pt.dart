@@ -16699,4 +16699,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String settings_cloudSync_duplicateDivers_failureSnack(String error) {
     return 'Falha ao mesclar: $error';
   }
+
+  @override
+  String get settings_cloudSync_duplicateDivers_undo => 'Desfazer';
 }

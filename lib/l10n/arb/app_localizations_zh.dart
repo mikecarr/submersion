@@ -15893,4 +15893,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String settings_cloudSync_duplicateDivers_failureSnack(String error) {
     return '合并失败：$error';
   }
+
+  @override
+  String get settings_cloudSync_duplicateDivers_undo => '撤销';
 }

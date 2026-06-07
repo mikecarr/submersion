@@ -10366,5 +10366,9 @@
   "@settings_cloudSync_duplicateDivers_failureSnack": {
     "description": "Snackbar shown when a diver merge throws an exception.",
     "placeholders": {"error": {"type": "String", "example": "Database error"}}
+  },
+  "settings_cloudSync_duplicateDivers_undo": "Undo",
+  "@settings_cloudSync_duplicateDivers_undo": {
+    "description": "Snackbar action that reverses a just-performed diver merge."
   }
 }

@@ -16650,4 +16650,7 @@ class AppLocalizationsHu extends AppLocalizations {
   String settings_cloudSync_duplicateDivers_failureSnack(String error) {
     return 'Összevonás sikertelen: $error';
   }
+
+  @override
+  String get settings_cloudSync_duplicateDivers_undo => 'Visszavonás';
 }

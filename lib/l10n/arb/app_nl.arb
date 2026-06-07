@@ -4730,5 +4730,6 @@
   "settings_cloudSync_duplicateDivers_confirmCancel": "Annuleren",
   "settings_cloudSync_duplicateDivers_confirmAction": "Samenvoegen",
   "settings_cloudSync_duplicateDivers_successSnack": "Samengevoegd in {name}",
-  "settings_cloudSync_duplicateDivers_failureSnack": "Samenvoegen mislukt: {error}"
+  "settings_cloudSync_duplicateDivers_failureSnack": "Samenvoegen mislukt: {error}",
+  "settings_cloudSync_duplicateDivers_undo": "Ongedaan maken"
 }

@@ -16704,4 +16704,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String settings_cloudSync_duplicateDivers_failureSnack(String error) {
     return 'Error al fusionar: $error';
   }
+
+  @override
+  String get settings_cloudSync_duplicateDivers_undo => 'Deshacer';
 }

@@ -4730,5 +4730,6 @@
   "settings_cloudSync_duplicateDivers_confirmCancel": "Mégse",
   "settings_cloudSync_duplicateDivers_confirmAction": "Összevon",
   "settings_cloudSync_duplicateDivers_successSnack": "Összevonva ide: {name}",
-  "settings_cloudSync_duplicateDivers_failureSnack": "Összevonás sikertelen: {error}"
+  "settings_cloudSync_duplicateDivers_failureSnack": "Összevonás sikertelen: {error}",
+  "settings_cloudSync_duplicateDivers_undo": "Visszavonás"
 }

@@ -4730,5 +4730,6 @@
   "settings_cloudSync_duplicateDivers_confirmCancel": "Cancelar",
   "settings_cloudSync_duplicateDivers_confirmAction": "Mesclar",
   "settings_cloudSync_duplicateDivers_successSnack": "Mesclado em {name}",
-  "settings_cloudSync_duplicateDivers_failureSnack": "Falha ao mesclar: {error}"
+  "settings_cloudSync_duplicateDivers_failureSnack": "Falha ao mesclar: {error}",
+  "settings_cloudSync_duplicateDivers_undo": "Desfazer"
 }

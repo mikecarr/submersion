@@ -4730,5 +4730,6 @@
   "settings_cloudSync_duplicateDivers_confirmCancel": "Cancelar",
   "settings_cloudSync_duplicateDivers_confirmAction": "Fusionar",
   "settings_cloudSync_duplicateDivers_successSnack": "Fusionado en {name}",
-  "settings_cloudSync_duplicateDivers_failureSnack": "Error al fusionar: {error}"
+  "settings_cloudSync_duplicateDivers_failureSnack": "Error al fusionar: {error}",
+  "settings_cloudSync_duplicateDivers_undo": "Deshacer"
 }
