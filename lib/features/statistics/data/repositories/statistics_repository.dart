@@ -870,17 +870,24 @@ class StatisticsRepository {
           dc.id,
           dc.name,
           CASE
-            WHEN dc.city IS NOT NULL AND dc.state_province IS NOT NULL AND dc.country IS NOT NULL
-              THEN dc.city || ', ' || dc.state_province || ', ' || dc.country
-            WHEN dc.city IS NOT NULL AND dc.country IS NOT NULL
-              THEN dc.city || ', ' || dc.country
-            WHEN dc.city IS NOT NULL AND dc.state_province IS NOT NULL
-              THEN dc.city || ', ' || dc.state_province
-            WHEN dc.state_province IS NOT NULL AND dc.country IS NOT NULL
-              THEN dc.state_province || ', ' || dc.country
-            WHEN dc.city IS NOT NULL THEN dc.city
-            WHEN dc.state_province IS NOT NULL THEN dc.state_province
-            WHEN dc.country IS NOT NULL THEN dc.country
+            WHEN NULLIF(TRIM(dc.city), '') IS NOT NULL AND
+                 NULLIF(TRIM(dc.state_province), '') IS NOT NULL AND
+                 NULLIF(TRIM(dc.country), '') IS NOT NULL
+              THEN NULLIF(TRIM(dc.city), '') || ', ' ||
+                   NULLIF(TRIM(dc.state_province), '') || ', ' ||
+                   NULLIF(TRIM(dc.country), '')
+            WHEN NULLIF(TRIM(dc.city), '') IS NOT NULL AND
+                 NULLIF(TRIM(dc.country), '') IS NOT NULL
+              THEN NULLIF(TRIM(dc.city), '') || ', ' || NULLIF(TRIM(dc.country), '')
+            WHEN NULLIF(TRIM(dc.city), '') IS NOT NULL AND
+                 NULLIF(TRIM(dc.state_province), '') IS NOT NULL
+              THEN NULLIF(TRIM(dc.city), '') || ', ' || NULLIF(TRIM(dc.state_province), '')
+            WHEN NULLIF(TRIM(dc.state_province), '') IS NOT NULL AND
+                 NULLIF(TRIM(dc.country), '') IS NOT NULL
+              THEN NULLIF(TRIM(dc.state_province), '') || ', ' || NULLIF(TRIM(dc.country), '')
+            WHEN NULLIF(TRIM(dc.city), '') IS NOT NULL THEN NULLIF(TRIM(dc.city), '')
+            WHEN NULLIF(TRIM(dc.state_province), '') IS NOT NULL THEN NULLIF(TRIM(dc.state_province), '')
+            WHEN NULLIF(TRIM(dc.country), '') IS NOT NULL THEN NULLIF(TRIM(dc.country), '')
             ELSE NULL
           END AS location,
           COUNT(d.id) AS dive_count
