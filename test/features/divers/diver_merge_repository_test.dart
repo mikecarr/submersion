@@ -344,6 +344,72 @@ void main() {
           .getSingle();
       expect(remaining.read<int>('c'), 0);
     });
+
+    test('undo is a true inverse of sync state: no tombstones or pending '
+        'residue remain', () async {
+      // Additive row owned by the duplicate (repointed -> marked pending).
+      await db
+          .into(db.dives)
+          .insert(
+            DivesCompanion.insert(
+              id: 'dive-resid',
+              diveDateTime: 2000,
+              diverId: const Value(dup),
+              createdAt: 2000,
+              updatedAt: 2000,
+            ),
+          );
+      // Singleton config on both keeper and duplicate (duplicate's is deleted
+      // -> tombstone logged).
+      for (final owner in [keeper, dup]) {
+        await db
+            .into(db.viewConfigs)
+            .insert(
+              ViewConfigsCompanion.insert(
+                id: 'vc-$owner',
+                diverId: owner,
+                viewMode: 'table',
+                configJson: '{}',
+                updatedAt: 2000,
+              ),
+            );
+      }
+
+      final snapshot = await repo.mergeDivers(
+        keeperId: keeper,
+        duplicateId: dup,
+      );
+      // Sanity: the merge created tombstone(s) and pending residue.
+      final tombstonesAfterMerge =
+          (await db
+                  .customSelect('SELECT COUNT(*) AS c FROM deletion_log')
+                  .getSingle())
+              .read<int>('c');
+      expect(tombstonesAfterMerge, greaterThan(0));
+
+      await repo.undoMerge(snapshot);
+
+      final tombstones =
+          (await db
+                  .customSelect('SELECT COUNT(*) AS c FROM deletion_log')
+                  .getSingle())
+              .read<int>('c');
+      final pending =
+          (await db
+                  .customSelect('SELECT COUNT(*) AS c FROM sync_records')
+                  .getSingle())
+              .read<int>('c');
+      expect(
+        tombstones,
+        0,
+        reason: 'undo must clear every tombstone the merge logged',
+      );
+      expect(
+        pending,
+        0,
+        reason: 'undo must clear the pending residue the merge created',
+      );
+    });
   });
 
   group('findDuplicateGroups', () {

@@ -273,21 +273,26 @@ class SyncRepository {
       final now = DateTime.now().millisecondsSinceEpoch;
       final id = '${entityType}_$recordId';
 
-      await _db
-          .into(_db.syncRecords)
-          .insertOnConflictUpdate(
-            SyncRecordsCompanion(
-              id: Value(id),
-              entityType: Value(entityType),
-              recordId: Value(recordId),
-              localUpdatedAt: Value(localUpdatedAt),
-              syncStatus: const Value('pending'),
-              createdAt: Value(now),
-              updatedAt: Value(now),
-            ),
-          );
+      // Mark-pending and the HLC stamp on the entity row are one logical write;
+      // run them in a transaction so a crash can't leave the row pending with a
+      // stale/absent HLC, and concurrent calls can't interleave the two steps.
+      await _db.transaction(() async {
+        await _db
+            .into(_db.syncRecords)
+            .insertOnConflictUpdate(
+              SyncRecordsCompanion(
+                id: Value(id),
+                entityType: Value(entityType),
+                recordId: Value(recordId),
+                localUpdatedAt: Value(localUpdatedAt),
+                syncStatus: const Value('pending'),
+                createdAt: Value(now),
+                updatedAt: Value(now),
+              ),
+            );
 
-      await _stampHlc(entityType, recordId);
+        await _stampHlc(entityType, recordId);
+      });
     } catch (e, stackTrace) {
       _log.error(
         'Failed to mark record pending: $entityType/$recordId',

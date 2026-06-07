@@ -134,23 +134,34 @@ class DiverMergeRepository {
             duplicateId,
           ]);
         } else {
-          // Additive data: repoint onto the keeper and mark pending for sync.
-          // Capture each row's prior hlc BEFORE markRowsPending re-stamps it,
-          // so undo can restore the exact pre-merge state.
+          // Additive data: capture each row's id + prior hlc, repoint onto the
+          // keeper, THEN mark pending so the sync queue reflects the final
+          // (repointed) state -- matches the buddy-merge precedent. Capturing
+          // before the repoint lets undo restore the exact pre-merge state.
           final rows = await _rowsByDiverId(table, duplicateId);
+          final ids = <String>[];
           for (final row in rows) {
+            final id = row['id'] as String;
+            ids.add(id);
             repointed.add((
               table: table,
-              rowId: row['id'] as String,
+              rowId: id,
               priorHlc: row['hlc'] as String?,
               hasHlc: row.containsKey('hlc'),
             ));
           }
-          await _markRowsPending(table, duplicateId, now);
           await _db.customStatement(
             'UPDATE "$table" SET diver_id = ? WHERE diver_id = ?',
             [keeperId, duplicateId],
           );
+          final entityType = _entityTypeFor(table);
+          for (final id in ids) {
+            await _syncRepository.markRecordPending(
+              entityType: entityType,
+              recordId: id,
+              localUpdatedAt: now,
+            );
+          }
         }
       }
 
@@ -212,9 +223,27 @@ class DiverMergeRepository {
         }
       }
 
-      // Re-insert any singleton-config rows that the merge deleted.
+      // Re-insert any singleton-config rows that the merge deleted, and clear
+      // the tombstones the merge logged for them -- otherwise the next sync
+      // would re-propagate those deletions and wipe the restored rows again.
       for (final entry in snapshot.deletedSingletonRows) {
         await _insertRowMap(entry.table, entry.row);
+        final id = entry.row['id'];
+        if (id != null) {
+          await _db.customStatement(
+            'DELETE FROM deletion_log WHERE entity_type = ? AND record_id = ?',
+            [_entityTypeFor(entry.table), id],
+          );
+        }
+      }
+
+      // Clear the pending sync-queue entries the merge created for repointed
+      // rows, so undo is a true inverse of the local sync state too.
+      for (final entry in snapshot.repointedRows) {
+        await _db.customStatement(
+          'DELETE FROM sync_records WHERE entity_type = ? AND record_id = ?',
+          [_entityTypeFor(entry.table), entry.rowId],
+        );
       }
 
       // Clear the diver's deletion-log tombstone so a subsequent sync won't
@@ -275,20 +304,6 @@ class DiverMergeRepository {
             .skip(1)
             .map((p) => p.isEmpty ? p : p[0].toUpperCase() + p.substring(1))
             .join();
-  }
-
-  /// Mark every row in [table] owned by [diverId] as pending sync (so the
-  /// repoint propagates to other devices).
-  Future<void> _markRowsPending(String table, String diverId, int now) async {
-    final entityType = _entityTypeFor(table);
-    final ids = await _rowIds(table, diverId);
-    for (final id in ids) {
-      await _syncRepository.markRecordPending(
-        entityType: entityType,
-        recordId: id,
-        localUpdatedAt: now,
-      );
-    }
   }
 
   /// Log a deletion for every row in [table] owned by [diverId].
