@@ -218,7 +218,9 @@ class ViewConfigRepository {
             ))
             .getSingleOrNull();
 
+    final String rowId;
     if (existing != null) {
+      rowId = existing.id;
       await (_db.update(
         _db.viewConfigs,
       )..where((r) => r.id.equals(existing.id))).write(
@@ -228,11 +230,12 @@ class ViewConfigRepository {
         ),
       );
     } else {
+      rowId = _uuid.v4();
       await _db
           .into(_db.viewConfigs)
           .insert(
             ViewConfigsCompanion(
-              id: Value(_uuid.v4()),
+              id: Value(rowId),
               diverId: Value(diverId),
               viewMode: Value(viewMode),
               configJson: Value(configJson),
@@ -240,6 +243,14 @@ class ViewConfigRepository {
             ),
           );
     }
+
+    // Mark pending so the edit is protected during merge and gets an HLC
+    // stamped onto the row (cross-device config edits resolve by HLC).
+    await _syncRepository.markRecordPending(
+      entityType: 'viewConfigs',
+      recordId: rowId,
+      localUpdatedAt: now,
+    );
   }
 
   domain.CardViewConfig _defaultCardConfig(ListViewMode mode) {

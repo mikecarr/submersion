@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:drift/drift.dart';
 
+import 'package:submersion/core/data/repositories/sync_repository.dart';
 import 'package:submersion/core/database/database.dart';
 import 'package:submersion/core/services/database_service.dart';
 import 'package:submersion/core/services/logger_service.dart';
@@ -10,6 +11,7 @@ import 'package:submersion/core/services/logger_service.dart';
 /// key-value `settings` table.
 class AppSettingsRepository {
   AppDatabase get _db => DatabaseService.instance.database;
+  final SyncRepository _syncRepository = SyncRepository();
   static final _log = LoggerService.forClass(AppSettingsRepository);
 
   static const _shareByDefaultKey = 'share_new_records_by_default';
@@ -52,6 +54,11 @@ class AppSettingsRepository {
               updatedAt: Value(now),
             ),
           );
+      await _syncRepository.markRecordPending(
+        entityType: 'settings',
+        recordId: _navPrimaryIdsKey,
+        localUpdatedAt: now,
+      );
     } catch (e, stackTrace) {
       _log.error(
         'Failed to write $_navPrimaryIdsKey',
@@ -97,6 +104,11 @@ class AppSettingsRepository {
               updatedAt: Value(now),
             ),
           );
+      await _syncRepository.markRecordPending(
+        entityType: 'settings',
+        recordId: _shareByDefaultKey,
+        localUpdatedAt: now,
+      );
     } catch (e, stackTrace) {
       _log.error(
         'Failed to write $_shareByDefaultKey',

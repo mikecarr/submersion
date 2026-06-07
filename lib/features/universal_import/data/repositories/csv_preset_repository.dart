@@ -61,6 +61,14 @@ class CsvPresetRepository {
             ),
           );
 
+      // Mark pending so the edit is protected during merge and gets an HLC
+      // stamped (the choke point also stamps the row's hlc column).
+      await _syncRepository.markRecordPending(
+        entityType: 'csvPresets',
+        recordId: preset.id,
+        localUpdatedAt: now,
+      );
+
       _log.info('Saved CSV preset: ${preset.id}');
     } catch (e, stackTrace) {
       _log.error(
