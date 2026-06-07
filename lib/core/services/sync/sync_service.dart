@@ -277,81 +277,26 @@ class SyncService {
         'Checking for remote data...',
       );
 
-      SyncPayload? remotePayload;
-      String? remoteFileId;
+      // Resolve every sync file we should apply: all OTHER devices'
+      // per-device files plus any legacy shared file. Our own per-device file
+      // is excluded (it is our data, already local). Listing all files (rather
+      // than a single canonical file) is what lets per-device files coexist
+      // without a write-write race.
+      List<CloudFileInfo> remoteFiles;
       try {
-        remoteFileId = await _resolveRemoteFileId(
+        remoteFiles = await _resolveRemoteSyncFiles(
           provider,
+          deviceId,
         ).timeout(const Duration(seconds: 8));
       } on TimeoutException {
-        _log.warning('Timed out checking for remote sync file');
-        remoteFileId = null;
+        _log.warning('Timed out listing remote sync files');
+        remoteFiles = const [];
       } catch (e, stackTrace) {
         _log.warning(
-          'Failed to check remote sync file: $e',
+          'Failed to list remote sync files: $e',
           stackTrace: stackTrace,
         );
-        remoteFileId = null;
-      }
-
-      if (remoteFileId != null) {
-        try {
-          if (lastSyncTime != null) {
-            final info = await provider.getFileInfo(remoteFileId);
-            if (info != null && !info.modifiedTime.isAfter(lastSyncTime)) {
-              _log.debug(
-                'Remote sync file not newer than last sync; skipping.',
-              );
-              remoteFileId = null;
-            }
-          }
-        } catch (e, stackTrace) {
-          _log.warning(
-            'Failed to check remote file info: $e',
-            stackTrace: stackTrace,
-          );
-        }
-      }
-
-      if (remoteFileId != null) {
-        try {
-          final remoteData = await provider
-              .downloadFile(remoteFileId)
-              .timeout(const Duration(seconds: 15));
-          final remoteJson = _decodePayloadBytes(remoteData);
-          try {
-            remotePayload = _serializer.deserializePayload(remoteJson);
-          } catch (e, stackTrace) {
-            _log.warning(
-              'Failed to parse remote sync payload: $e',
-              stackTrace: stackTrace,
-            );
-            remotePayload = null;
-          }
-
-          // Validate checksum
-          if (remotePayload != null &&
-              !_serializer.validateChecksum(remotePayload)) {
-            _log.warning('Remote sync file has invalid checksum');
-            remotePayload = null;
-          }
-          if (remotePayload != null &&
-              remotePayload.deviceId == deviceId &&
-              lastSyncTime != null) {
-            final lastSyncMs = lastSyncTime.millisecondsSinceEpoch;
-            if (remotePayload.exportedAt <= lastSyncMs) {
-              _log.debug(
-                'Remote payload from this device is not newer; skipping apply.',
-              );
-              remotePayload = null;
-            }
-          }
-        } on TimeoutException {
-          _log.warning('Timed out downloading remote sync file');
-        } catch (e) {
-          _log.warning('Failed to download remote sync file: $e');
-          // Continue with upload-only sync
-        }
+        remoteFiles = const [];
       }
 
       _reportProgress(SyncPhase.importing, 0.6, 'Processing changes...');
@@ -360,14 +305,40 @@ class SyncService {
       var conflictsFound = 0;
       var recordsFailed = 0;
 
-      if (remotePayload != null && remotePayload.deviceId != deviceId) {
-        _log.info(
-          'Remote data from different device: ${remotePayload.deviceId}',
-        );
-      }
+      for (final file in remoteFiles) {
+        // Per-file freshness: skip files not modified since our last sync.
+        if (lastSyncTime != null && !file.modifiedTime.isAfter(lastSyncTime)) {
+          _log.debug('${file.name} not newer than last sync; skipping.');
+          continue;
+        }
 
-      if (remotePayload != null) {
-        final payload = remotePayload;
+        SyncPayload payload;
+        try {
+          final remoteData = await provider
+              .downloadFile(file.id)
+              .timeout(const Duration(seconds: 15));
+          final remoteJson = _decodePayloadBytes(remoteData);
+          final parsed = _serializer.deserializePayload(remoteJson);
+          if (!_serializer.validateChecksum(parsed)) {
+            _log.warning('Remote sync file ${file.name} has invalid checksum');
+            continue;
+          }
+          payload = parsed;
+        } on TimeoutException {
+          _log.warning('Timed out downloading ${file.name}');
+          continue;
+        } catch (e, stackTrace) {
+          _log.warning(
+            'Failed to download/parse ${file.name}: $e',
+            stackTrace: stackTrace,
+          );
+          continue;
+        }
+
+        if (payload.deviceId != deviceId) {
+          _log.info('Remote data from different device: ${payload.deviceId}');
+        }
+
         final mergeResult = await _withStep(
           'apply remote data',
           () => _applyRemotePayload(payload, lastSyncTime),
@@ -409,7 +380,10 @@ class SyncService {
           const Duration(seconds: 10),
         ),
       );
-      const filename = CloudStorageProviderMixin.canonicalSyncFileName;
+      // Write to this device's own file so two devices never contend for the
+      // same file (the iCloud "conflicted copy" race). Other devices pick this
+      // up by listing the folder on their next sync.
+      final filename = _deviceSyncFileName(deviceId);
 
       _log.debug(
         'Uploading ${localData.length} bytes to $syncFolder/$filename...',
@@ -534,39 +508,31 @@ class SyncService {
     }
   }
 
-  Future<String?> _resolveRemoteFileId(CloudStorageProvider provider) async {
-    var remoteFileId = await _syncRepository.getRemoteFileId();
-    if (remoteFileId != null) {
-      final exists = await provider.fileExists(remoteFileId);
-      if (exists) {
-        return remoteFileId;
-      }
-      await _syncRepository.setRemoteFileId(null);
-      remoteFileId = null;
-    }
+  /// This device's own per-device sync filename.
+  String _deviceSyncFileName(String deviceId) =>
+      '${CloudStorageProviderMixin.syncFilePrefix}$deviceId'
+      '${CloudStorageProviderMixin.syncFileExtension}';
 
+  /// Resolve every remote sync file this device should apply: all other
+  /// devices' per-device files, plus a legacy shared `submersion_sync.json`
+  /// if one is still present. Excludes our own per-device file and any iCloud
+  /// "conflicted copy" duplicates. Returns [] on failure.
+  Future<List<CloudFileInfo>> _resolveRemoteSyncFiles(
+    CloudStorageProvider provider,
+    String deviceId,
+  ) async {
     try {
+      final ownFileName = _deviceSyncFileName(deviceId);
       final files = await provider.listFiles(
         namePattern: CloudStorageProviderMixin.syncFileStem,
       );
-      if (files.isEmpty) return null;
-
-      CloudFileInfo? selected = files.firstWhere(
-        (f) => f.name == CloudStorageProviderMixin.canonicalSyncFileName,
-        orElse: () => files.first,
-      );
-
-      final candidates = files.where((f) => !_isConflictCopy(f.name)).toList();
-      if (candidates.isNotEmpty) {
-        candidates.sort((a, b) => b.modifiedTime.compareTo(a.modifiedTime));
-        selected = candidates.first;
-      }
-
-      await _syncRepository.setRemoteFileId(selected.id);
-      return selected.id;
+      return files
+          .where((f) => !_isConflictCopy(f.name))
+          .where((f) => f.name != ownFileName)
+          .toList();
     } catch (e) {
-      _log.warning('Failed to resolve remote sync file: $e');
-      return null;
+      _log.warning('Failed to resolve remote sync files: $e');
+      return const [];
     }
   }
 

@@ -10,6 +10,7 @@ import 'package:submersion/core/services/sync/sync_service.dart';
 import 'package:submersion/features/dive_log/data/repositories/dive_repository_impl.dart';
 
 import '../../../helpers/fake_cloud_storage_provider.dart';
+import '../../../helpers/sync_test_helpers.dart';
 import '../../../helpers/test_database.dart';
 import '../../../helpers/mock_providers.dart';
 
@@ -48,13 +49,13 @@ void main() {
             '(${pushResult.message})',
       );
       expect(
-        cloud.bytesOf('submersion_sync.json'),
+        cloud.syncFileBytes(),
         isNotNull,
-        reason: 'the canonical sync file should exist in the cloud after push',
+        reason: 'this device\'s per-device sync file should exist after push',
       );
       // Export side is healthy: device A's upload must contain the dive.
       final afterPush = SyncDataSerializer().deserializePayload(
-        utf8.decode(await cloud.downloadFile('submersion_sync.json')),
+        utf8.decode(cloud.syncFileBytes()!),
       );
       expect(
         afterPush.data.dives.length,
@@ -67,7 +68,7 @@ void main() {
       // clears the deletion log and the last-sync timestamp. The result is a
       // device that looks like it never had the dive (not one that deleted it).
       await diveRepo.deleteDive('dive-xfer-1');
-      await SyncRepository().resetSyncState();
+      await impersonateFreshDevice();
       expect(
         await diveRepo.getDiveById('dive-xfer-1'),
         isNull,
@@ -112,7 +113,7 @@ void main() {
       await buildService().performSync(); // device A push
 
       await diveRepo.deleteDive('dive-fields-1');
-      await SyncRepository().resetSyncState();
+      await impersonateFreshDevice();
       await buildService().performSync(); // device B pull
 
       final restored = await diveRepo.getDiveById('dive-fields-1');
@@ -129,7 +130,6 @@ void main() {
     // Verifies the mass toJson() export conversion works for a non-dive entity.
     test('a dive site round-trips A -> B with its fields', () async {
       final serializer = SyncDataSerializer();
-      final repo = SyncRepository();
 
       // Seed a site on "device A" via the import path (no companion needed).
       await serializer.upsertRecord('diveSites', {
@@ -145,7 +145,7 @@ void main() {
 
       // Impersonate a fresh device B.
       await serializer.deleteRecord('diveSites', 'site-rt-1');
-      await repo.resetSyncState();
+      await impersonateFreshDevice();
       expect(await serializer.fetchRecord('diveSites', 'site-rt-1'), isNull);
 
       await buildService().performSync(); // pull
@@ -162,7 +162,6 @@ void main() {
     // Media was broken too: its custom export dropped 5 non-nullable fields.
     test('media metadata round-trips A -> B (toJson export)', () async {
       final serializer = SyncDataSerializer();
-      final repo = SyncRepository();
 
       await serializer.upsertRecord('media', {
         'id': 'media-rt-1',
@@ -178,7 +177,7 @@ void main() {
       await buildService().performSync(); // push
 
       await serializer.deleteRecord('media', 'media-rt-1');
-      await repo.resetSyncState();
+      await impersonateFreshDevice();
       await buildService().performSync(); // pull
 
       final restored = await serializer.fetchRecord('media', 'media-rt-1');
@@ -196,7 +195,6 @@ void main() {
       'an unapplyable record surfaces as a sync error, not a conflict',
       () async {
         final serializer = SyncDataSerializer();
-        final repo = SyncRepository();
         final diveRepo = DiveRepository();
 
         await diveRepo.createDive(
@@ -207,7 +205,7 @@ void main() {
         // Corrupt a dive field so Dive.fromJson throws on import, then recompute
         // the checksum so the payload still passes validation.
         final payload = serializer.deserializePayload(
-          utf8.decode(await cloud.downloadFile('submersion_sync.json')),
+          utf8.decode(cloud.syncFileBytes()!),
         );
         payload.data.dives.first['maxDepth'] = 'NOT_A_NUMBER';
         final checksum = sha256
@@ -222,14 +220,16 @@ void main() {
           data: payload.data,
           deletions: payload.deletions,
         );
+        // Overwrite device A's own per-device file with the corrupt content,
+        // so the fresh device B below downloads it as a foreign file.
         await cloud.uploadFile(
           Uint8List.fromList(utf8.encode(serializer.serializePayload(corrupt))),
-          'submersion_sync.json',
+          'submersion_sync_${payload.deviceId}.json',
         );
 
         // Device B pulls the corrupt file.
         await diveRepo.deleteDive('dive-corrupt-1');
-        await repo.resetSyncState();
+        await impersonateFreshDevice();
         final result = await buildService().performSync();
 
         expect(

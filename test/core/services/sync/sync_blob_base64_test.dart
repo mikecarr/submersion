@@ -55,7 +55,7 @@ void main() {
         await buildService().performSync();
 
         final payload = serializer.deserializePayload(
-          utf8.decode(await cloud.downloadFile('submersion_sync.json')),
+          utf8.decode(cloud.syncFileBytes()!),
         );
         final row = payload.data.diveDataSources.firstWhere(
           (r) => r['id'] == 'ds-b64-1',

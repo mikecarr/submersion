@@ -63,7 +63,7 @@ void main() {
         await buildService().performSync();
 
         final payload = serializer.deserializePayload(
-          utf8.decode(await cloud.downloadFile('submersion_sync.json')),
+          utf8.decode(cloud.syncFileBytes()!),
         );
         final exportedKeys = payload.data.settings.map((s) => s['key']).toSet();
 

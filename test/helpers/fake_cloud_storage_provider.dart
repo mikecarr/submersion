@@ -13,6 +13,19 @@ class FakeCloudStorageProvider extends CloudStorageProvider
   int get fileCount => _files.length;
   Uint8List? bytesOf(String name) => _files[name]?.data;
 
+  /// Bytes of the single sync payload file present, regardless of its
+  /// per-device filename (`submersion_sync_<deviceId>.json`) or the legacy
+  /// canonical name. Convenience for export-shape assertions in tests.
+  Uint8List? syncFileBytes() {
+    for (final e in _files.entries) {
+      if (e.key.startsWith(CloudStorageProviderMixin.syncFilePrefix) ||
+          e.key == CloudStorageProviderMixin.canonicalSyncFileName) {
+        return e.value.data;
+      }
+    }
+    return null;
+  }
+
   @override
   String get providerName => 'Fake';
 

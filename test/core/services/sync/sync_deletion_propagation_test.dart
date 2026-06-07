@@ -7,6 +7,7 @@ import 'package:submersion/features/marine_life/data/repositories/species_reposi
 import 'package:submersion/features/universal_import/data/repositories/csv_preset_repository.dart';
 
 import '../../../helpers/fake_cloud_storage_provider.dart';
+import '../../../helpers/sync_test_helpers.dart';
 import '../../../helpers/test_database.dart';
 
 /// Regression tests for cross-device deletion propagation gaps.
@@ -40,7 +41,6 @@ void main() {
       'removing a site-species link on device A propagates the delete to B',
       () async {
         final serializer = SyncDataSerializer();
-        final syncRepo = SyncRepository();
         final speciesRepo = SpeciesRepository();
 
         // Seed parent rows on "device A".
@@ -94,7 +94,7 @@ void main() {
           'notes': 'often seen at depth',
           'createdAt': 1000,
         });
-        await syncRepo.resetSyncState();
+        await impersonateFreshDevice();
         expect(
           await serializer.fetchRecord('siteSpecies', 'ss-del-1'),
           isNotNull,
@@ -118,7 +118,6 @@ void main() {
       'deleting a CSV preset on device A propagates the delete to B',
       () async {
         final serializer = SyncDataSerializer();
-        final syncRepo = SyncRepository();
         final presetRepo = CsvPresetRepository();
 
         // Seed a preset directly (the upsert path is covered by
@@ -148,7 +147,7 @@ void main() {
           'createdAt': 1000,
           'updatedAt': 1000,
         });
-        await syncRepo.resetSyncState();
+        await impersonateFreshDevice();
         await buildService().performSync(); // pull
 
         expect(

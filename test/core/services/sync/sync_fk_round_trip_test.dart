@@ -6,6 +6,7 @@ import 'package:submersion/core/services/sync/sync_service.dart';
 import 'package:submersion/features/dive_log/data/repositories/dive_repository_impl.dart';
 
 import '../../../helpers/fake_cloud_storage_provider.dart';
+import '../../../helpers/sync_test_helpers.dart';
 import '../../../helpers/mock_providers.dart';
 import '../../../helpers/test_database.dart';
 
@@ -42,7 +43,6 @@ void main() {
     test('a dive with siteId round-trips A -> B even though dives apply before '
         'diveSites in the static order', () async {
       final serializer = SyncDataSerializer();
-      final syncRepo = SyncRepository();
       final diveRepo = DiveRepository();
 
       // Device A: a dive site, plus a dive that points at it. We build the
@@ -74,7 +74,7 @@ void main() {
       // the pull genuinely re-applies them from the cloud payload.
       await serializer.deleteRecord('dives', 'dive-fk-1');
       await serializer.deleteRecord('diveSites', 'site-fk-1');
-      await syncRepo.resetSyncState();
+      await impersonateFreshDevice();
       expect(await serializer.fetchRecord('dives', 'dive-fk-1'), isNull);
       expect(await serializer.fetchRecord('diveSites', 'site-fk-1'), isNull);
 
@@ -108,7 +108,6 @@ void main() {
     test('a course + a dive referencing it both round-trip A -> B '
         '(courses must be in SyncData)', () async {
       final serializer = SyncDataSerializer();
-      final syncRepo = SyncRepository();
       final diveRepo = DiveRepository();
 
       // Courses require a Diver (FK NOT NULL, cascade). Drift's `fromJson`
@@ -152,7 +151,7 @@ void main() {
       // course propagation itself.
       await serializer.deleteRecord('dives', 'dive-course-1');
       await serializer.deleteRecord('courses', 'course-fk-1');
-      await syncRepo.resetSyncState();
+      await impersonateFreshDevice();
 
       final pull = await buildService().performSync();
       expect(

@@ -9,6 +9,7 @@ import 'package:submersion/core/services/sync/sync_service.dart';
 import 'package:submersion/features/dive_log/data/repositories/dive_repository_impl.dart';
 
 import '../../../helpers/fake_cloud_storage_provider.dart';
+import '../../../helpers/sync_test_helpers.dart';
 import '../../../helpers/mock_providers.dart';
 import '../../../helpers/test_database.dart';
 
@@ -77,7 +78,6 @@ void main() {
 
     test('DiveCustomFields round-trips A -> B', () async {
       final serializer = SyncDataSerializer();
-      final syncRepo = SyncRepository();
       final diveRepo = DiveRepository();
 
       await diveRepo.createDive(
@@ -94,7 +94,7 @@ void main() {
 
       await buildService().performSync();
       await serializer.deleteRecord('diveCustomFields', 'cf-1');
-      await syncRepo.resetSyncState();
+      await impersonateFreshDevice();
       expect(await serializer.fetchRecord('diveCustomFields', 'cf-1'), isNull);
 
       final pull = await buildService().performSync();
@@ -108,7 +108,6 @@ void main() {
 
     test('SiteSpecies round-trips A -> B', () async {
       final serializer = SyncDataSerializer();
-      final syncRepo = SyncRepository();
 
       await seedDiveSite(serializer, 'site-ss-1');
       await seedSpecies(serializer, 'species-ss-1');
@@ -122,7 +121,7 @@ void main() {
 
       await buildService().performSync();
       await serializer.deleteRecord('siteSpecies', 'ss-1');
-      await syncRepo.resetSyncState();
+      await impersonateFreshDevice();
       expect(await serializer.fetchRecord('siteSpecies', 'ss-1'), isNull);
 
       final pull = await buildService().performSync();
@@ -135,7 +134,6 @@ void main() {
 
     test('CsvPresets round-trips A -> B', () async {
       final serializer = SyncDataSerializer();
-      final syncRepo = SyncRepository();
 
       await serializer.upsertRecord('csvPresets', {
         'id': 'csv-1',
@@ -147,7 +145,7 @@ void main() {
 
       await buildService().performSync();
       await serializer.deleteRecord('csvPresets', 'csv-1');
-      await syncRepo.resetSyncState();
+      await impersonateFreshDevice();
       expect(await serializer.fetchRecord('csvPresets', 'csv-1'), isNull);
 
       final pull = await buildService().performSync();
@@ -161,7 +159,6 @@ void main() {
 
     test('ViewConfigs round-trips A -> B', () async {
       final serializer = SyncDataSerializer();
-      final syncRepo = SyncRepository();
 
       await seedDiver(serializer, 'diver-vc-1');
       await serializer.upsertRecord('viewConfigs', {
@@ -174,7 +171,7 @@ void main() {
 
       await buildService().performSync();
       await serializer.deleteRecord('viewConfigs', 'vc-1');
-      await syncRepo.resetSyncState();
+      await impersonateFreshDevice();
       expect(await serializer.fetchRecord('viewConfigs', 'vc-1'), isNull);
 
       final pull = await buildService().performSync();
@@ -187,7 +184,6 @@ void main() {
 
     test('FieldPresets round-trips A -> B', () async {
       final serializer = SyncDataSerializer();
-      final syncRepo = SyncRepository();
 
       await seedDiver(serializer, 'diver-fp-1');
       await serializer.upsertRecord('fieldPresets', {
@@ -202,7 +198,7 @@ void main() {
 
       await buildService().performSync();
       await serializer.deleteRecord('fieldPresets', 'fp-1');
-      await syncRepo.resetSyncState();
+      await impersonateFreshDevice();
       expect(await serializer.fetchRecord('fieldPresets', 'fp-1'), isNull);
 
       final pull = await buildService().performSync();
@@ -217,7 +213,6 @@ void main() {
       'DiveDataSources round-trips A -> B including raw BLOB fingerprint',
       () async {
         final serializer = SyncDataSerializer();
-        final syncRepo = SyncRepository();
         final diveRepo = DiveRepository();
 
         await diveRepo.createDive(
@@ -236,7 +231,7 @@ void main() {
 
         await buildService().performSync();
         await serializer.deleteRecord('diveDataSources', 'ds-1');
-        await syncRepo.resetSyncState();
+        await impersonateFreshDevice();
         expect(await serializer.fetchRecord('diveDataSources', 'ds-1'), isNull);
 
         final pull = await buildService().performSync();
