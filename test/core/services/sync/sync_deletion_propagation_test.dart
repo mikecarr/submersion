@@ -35,8 +35,8 @@ void main() {
       cloud = FakeCloudStorageProvider();
     });
 
-    tearDown(() {
-      DatabaseService.instance.resetForTesting();
+    tearDown(() async {
+      await tearDownTestDatabase();
     });
 
     SyncService buildService() => SyncService(
@@ -243,8 +243,8 @@ void main() {
       cloud = FakeCloudStorageProvider();
     });
 
-    tearDown(() {
-      DatabaseService.instance.resetForTesting();
+    tearDown(() async {
+      await tearDownTestDatabase();
     });
 
     SyncService buildService() => SyncService(

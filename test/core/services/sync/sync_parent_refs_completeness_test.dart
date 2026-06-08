@@ -16,6 +16,7 @@ void main() {
   // SQL table name -> sync entityType, for every entity the merge applies
   // (mirrors SyncService's mergeOrder).
   const syncedTables = <String, String>{
+    'divers': 'divers',
     'dives': 'dives',
     'diver_settings': 'diverSettings',
     'buddies': 'buddies',
@@ -52,6 +53,7 @@ void main() {
     'sightings': 'sightings',
     'certifications': 'certifications',
     'service_records': 'serviceRecords',
+    'settings': 'settings',
     'media': 'media',
   };
 

@@ -599,7 +599,17 @@ class SyncDataSerializer {
         }
       }
     }
-    _log.error('Foreign-key repair did not converge after 5 passes');
+    // Still inconsistent after the cap: fail now with a targeted error rather
+    // than letting the deferred-FK COMMIT throw a context-free 787.
+    final remaining = await _db.customSelect('PRAGMA foreign_key_check').get();
+    _log.error(
+      'Foreign-key repair did not converge after 5 passes; '
+      '${remaining.length} violation(s) remain',
+    );
+    throw StateError(
+      'Sync foreign-key repair did not converge: '
+      '${remaining.length} dangling reference(s) remain after 5 passes',
+    );
   }
 
   Future<Map<String, dynamic>?> fetchRecord(
