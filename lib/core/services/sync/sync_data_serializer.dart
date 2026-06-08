@@ -548,6 +548,60 @@ class SyncDataSerializer {
     });
   }
 
+  /// Repairs every foreign key left dangling after a sync apply: a nullable
+  /// reference is cleared; a non-nullable orphan is deleted (a manual cascade).
+  /// Applying a remote deletion of a parent can leave a local row pointing at
+  /// it via a non-cascading FK, which would otherwise fail the deferred-FK
+  /// COMMIT and abort the whole sync. Must run inside
+  /// [applyInDeferredFkTransaction] so COMMIT sees a consistent graph. Loops
+  /// because deleting an orphan can in turn dangle its own children.
+  Future<void> repairDanglingForeignKeys() async {
+    for (var pass = 0; pass < 5; pass++) {
+      final violations = await _db
+          .customSelect('PRAGMA foreign_key_check')
+          .get();
+      if (violations.isEmpty) return;
+
+      for (final v in violations) {
+        final table = v.read<String>('table');
+        final rowid = v.data['rowid'] as int?;
+        if (rowid == null) continue; // WITHOUT ROWID tables: not in sync schema
+        final fkid = v.read<int>('fkid');
+
+        final fkList = await _db
+            .customSelect('PRAGMA foreign_key_list("$table")')
+            .get();
+        final fk = fkList.where((f) => f.read<int>('id') == fkid).toList();
+        if (fk.isEmpty) continue;
+        final column = fk.first.read<String>('from');
+
+        final info = await _db
+            .customSelect('PRAGMA table_info("$table")')
+            .get();
+        final col = info
+            .where((c) => c.read<String>('name') == column)
+            .toList();
+        final notNull = col.isNotEmpty && col.first.read<int>('notnull') == 1;
+
+        if (notNull) {
+          _log.warning(
+            'Sync repair: deleting orphaned $table row (no parent for "$column")',
+          );
+          await _db.customStatement('DELETE FROM "$table" WHERE rowid = ?', [
+            rowid,
+          ]);
+        } else {
+          _log.warning('Sync repair: clearing dangling $table."$column"');
+          await _db.customStatement(
+            'UPDATE "$table" SET "$column" = NULL WHERE rowid = ?',
+            [rowid],
+          );
+        }
+      }
+    }
+    _log.error('Foreign-key repair did not converge after 5 passes');
+  }
+
   Future<Map<String, dynamic>?> fetchRecord(
     String entityType,
     String recordId,

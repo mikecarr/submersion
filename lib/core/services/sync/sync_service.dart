@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:submersion/core/data/repositories/sync_repository.dart';
 import 'package:submersion/core/database/database.dart' show SyncRecord;
 import 'package:submersion/core/services/cloud_storage/cloud_storage_provider.dart';
@@ -117,7 +118,7 @@ enum ConflictResolution { keepLocal, keepRemote, keepBoth }
 /// deletion is tracked in the deletion log. [nullable] distinguishes a cascade
 /// child (NOT NULL -> the row cannot exist without the parent) from a set-null
 /// reference (nullable -> the row survives with the reference cleared).
-typedef _ParentRef = ({String field, String parent, bool nullable});
+typedef ParentRef = ({String field, String parent, bool nullable});
 
 /// Core sync service that orchestrates cloud sync operations
 class SyncService {
@@ -745,6 +746,13 @@ class SyncService {
       recordsFailed += result.recordsFailed;
     }
 
+    // Integrity backstop: applying a remote deletion of a parent can leave a
+    // local row pointing at it via a non-cascading FK, which would fail the
+    // deferred-FK COMMIT and abort the whole sync. Clear or delete any such
+    // dangling reference before the transaction commits. (The merge guard
+    // above stops a peer's orphan from being re-added, so this does not loop.)
+    await _serializer.repairDanglingForeignKeys();
+
     return _MergeResult(
       recordsApplied: recordsApplied,
       conflictsFound: conflictsFound,
@@ -831,24 +839,49 @@ class SyncService {
     );
   }
 
-  /// Synced child -> parent FK relationships whose parent deletion is tracked
-  /// in the deletion log (dives, diveSites, trips). Used by [_mergeEntity] to
-  /// keep a peer's live child from dangling its FK against a parent we have
-  /// deleted. Covered by the resurrection tests in
-  /// sync_deletion_propagation_test.dart. (diverId is intentionally absent:
-  /// diver deletion goes through DiverMergeRepository, which repoints FKs
-  /// rather than orphaning them.)
-  static const Map<String, List<_ParentRef>> _parentRefs = {
+  /// Every synced child -> parent FK whose parent can be deleted (and thus
+  /// tombstoned in the deletion log). Used by [_mergeEntity] to keep a peer's
+  /// live child from dangling its FK against a parent we have deleted -- which
+  /// would otherwise fail the deferred-FK COMMIT and abort the whole sync.
+  /// NOT NULL (nullable: false) children are skipped; nullable references are
+  /// cleared so the row survives detached.
+  ///
+  /// Generated from every `references(<deletable parent>, ...)` in the schema;
+  /// completeness (and column nullability) is asserted against the live schema
+  /// by sync_parent_refs_completeness_test.dart, so a new FK to a deletable
+  /// parent fails that test until it is added here. (diverId is intentionally
+  /// absent: diver deletion goes through DiverMergeRepository, which repoints
+  /// FKs rather than orphaning them.)
+  @visibleForTesting
+  static const Map<String, List<ParentRef>> parentRefs = {
     'dives': [
       (field: 'siteId', parent: 'diveSites', nullable: true),
       (field: 'tripId', parent: 'trips', nullable: true),
+      (field: 'courseId', parent: 'courses', nullable: true),
+      (field: 'computerId', parent: 'diveComputers', nullable: true),
+      (field: 'diveCenterId', parent: 'diveCenters', nullable: true),
     ],
-    'diveProfiles': [(field: 'diveId', parent: 'dives', nullable: false)],
-    'diveTanks': [(field: 'diveId', parent: 'dives', nullable: false)],
+    'diveProfiles': [
+      (field: 'diveId', parent: 'dives', nullable: false),
+      (field: 'computerId', parent: 'diveComputers', nullable: true),
+    ],
+    'diveTanks': [
+      (field: 'diveId', parent: 'dives', nullable: false),
+      (field: 'equipmentId', parent: 'equipment', nullable: true),
+    ],
     'diveWeights': [(field: 'diveId', parent: 'dives', nullable: false)],
-    'diveEquipment': [(field: 'diveId', parent: 'dives', nullable: false)],
-    'diveBuddies': [(field: 'diveId', parent: 'dives', nullable: false)],
-    'diveTags': [(field: 'diveId', parent: 'dives', nullable: false)],
+    'diveEquipment': [
+      (field: 'diveId', parent: 'dives', nullable: false),
+      (field: 'equipmentId', parent: 'equipment', nullable: false),
+    ],
+    'diveBuddies': [
+      (field: 'diveId', parent: 'dives', nullable: false),
+      (field: 'buddyId', parent: 'buddies', nullable: false),
+    ],
+    'diveTags': [
+      (field: 'diveId', parent: 'dives', nullable: false),
+      (field: 'tagId', parent: 'tags', nullable: false),
+    ],
     'diveProfileEvents': [(field: 'diveId', parent: 'dives', nullable: false)],
     'gasSwitches': [(field: 'diveId', parent: 'dives', nullable: false)],
     'diveCustomFields': [(field: 'diveId', parent: 'dives', nullable: false)],
@@ -856,15 +889,34 @@ class SyncService {
       (field: 'diveId', parent: 'dives', nullable: false),
     ],
     'tideRecords': [(field: 'diveId', parent: 'dives', nullable: false)],
-    'diveDataSources': [(field: 'diveId', parent: 'dives', nullable: false)],
-    'sightings': [(field: 'diveId', parent: 'dives', nullable: false)],
+    'diveDataSources': [
+      (field: 'diveId', parent: 'dives', nullable: false),
+      (field: 'computerId', parent: 'diveComputers', nullable: true),
+    ],
+    'sightings': [
+      (field: 'diveId', parent: 'dives', nullable: false),
+      (field: 'speciesId', parent: 'species', nullable: false),
+    ],
     'media': [
       (field: 'diveId', parent: 'dives', nullable: true),
       (field: 'siteId', parent: 'diveSites', nullable: true),
+      (field: 'signerId', parent: 'buddies', nullable: true),
     ],
-    'siteSpecies': [(field: 'siteId', parent: 'diveSites', nullable: false)],
+    'siteSpecies': [
+      (field: 'siteId', parent: 'diveSites', nullable: false),
+      (field: 'speciesId', parent: 'species', nullable: false),
+    ],
     'liveaboardDetails': [(field: 'tripId', parent: 'trips', nullable: false)],
     'itineraryDays': [(field: 'tripId', parent: 'trips', nullable: false)],
+    'certifications': [(field: 'courseId', parent: 'courses', nullable: true)],
+    'courses': [(field: 'instructorId', parent: 'buddies', nullable: true)],
+    'equipmentSetItems': [
+      (field: 'setId', parent: 'equipmentSets', nullable: false),
+      (field: 'equipmentId', parent: 'equipment', nullable: false),
+    ],
+    'serviceRecords': [
+      (field: 'equipmentId', parent: 'equipment', nullable: false),
+    ],
   };
 
   Future<_MergeResult> _mergeEntity({
@@ -884,7 +936,7 @@ class SyncService {
     var failed = 0;
 
     final selfTombstones = allTombstones[entityType] ?? const <String, int>{};
-    final parentRefs = _parentRefs[entityType] ?? const <_ParentRef>[];
+    final entityParentRefs = parentRefs[entityType] ?? const <ParentRef>[];
 
     for (final record in records) {
       String? recordId;
@@ -910,7 +962,7 @@ class SyncService {
         // (e.g. a photo whose dive was deleted keeps the photo, sans dive link).
         var recordToApply = record;
         var droppedByParent = false;
-        for (final ref in parentRefs) {
+        for (final ref in entityParentRefs) {
           final parentId = record[ref.field];
           if (parentId is String &&
               (allTombstones[ref.parent]?.containsKey(parentId) ?? false)) {

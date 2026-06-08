@@ -483,5 +483,76 @@ void main() {
         reason: 'the dangling dive link is cleared, not resurrected',
       );
     });
+
+    test(
+      'applying a peer deletion of a SITE a local dive still references does '
+      'not fail the sync; the dive survives with a cleared site link',
+      () async {
+        final serializer = SyncDataSerializer();
+        final diveRepo = DiveRepository();
+
+        await serializer.upsertRecord('diveSites', {
+          'id': 'site-x',
+          'name': 'Reef',
+          'description': '',
+          'notes': '',
+          'isShared': false,
+          'createdAt': 1000,
+          'updatedAt': 1000,
+        });
+        await diveRepo.createDive(
+          createTestDiveWithBottomTime(id: 'dive-x', diveNumber: 1),
+        );
+        final diveJson = await serializer.fetchRecord('dives', 'dive-x');
+        await serializer.upsertRecord('dives', {
+          ...diveJson!,
+          'siteId': 'site-x',
+        });
+
+        await buildService()
+            .performSync(); // push current state, advance lastSync
+
+        // A peer deletes the site while our local dive still references it
+        // (dives.siteId is a non-cascading FK, so it would dangle at COMMIT).
+        const data = SyncData();
+        final checksum = sha256
+            .convert(utf8.encode(jsonEncode(data.toJson())))
+            .toString();
+        final payload = SyncPayload(
+          version: syncFormatVersion,
+          exportedAt: 9000,
+          deviceId: 'peer-dev',
+          checksum: checksum,
+          data: data,
+          deletions: {
+            'diveSites': [const SyncDeletion(id: 'site-x', deletedAt: 8000)],
+          },
+        );
+        await cloud.uploadFile(
+          Uint8List.fromList(utf8.encode(serializer.serializePayload(payload))),
+          'submersion_sync_peer-dev.json',
+        );
+
+        final result = await buildService().performSync();
+
+        expect(
+          result.status,
+          isNot(SyncResultStatus.error),
+          reason: 'a deleted parent must not abort the whole sync (787)',
+        );
+        expect(
+          await serializer.fetchRecord('diveSites', 'site-x'),
+          isNull,
+          reason: 'the site deletion still applies',
+        );
+        final dive = await serializer.fetchRecord('dives', 'dive-x');
+        expect(dive, isNotNull, reason: 'the dive itself must survive');
+        expect(
+          dive!['siteId'],
+          isNull,
+          reason: 'the dangling site link is cleared, not left to crash COMMIT',
+        );
+      },
+    );
   });
 }
