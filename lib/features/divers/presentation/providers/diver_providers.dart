@@ -16,9 +16,17 @@ final diverMergeRepositoryProvider = Provider<DiverMergeRepository>((ref) {
   return DiverMergeRepository();
 });
 
-/// All divers provider
+/// All divers provider.
+///
+/// A [FutureProvider] that self-invalidates whenever the `divers` table is
+/// written (e.g. after a sync), so the list refreshes while imperative
+/// `ref.read(allDiversProvider.future)` reads still resolve.
 final allDiversProvider = FutureProvider<List<Diver>>((ref) async {
   final repository = ref.watch(diverRepositoryProvider);
+  final sub = repository.watchDiversChanges().listen(
+    (_) => ref.invalidateSelf(),
+  );
+  ref.onDispose(sub.cancel);
   return repository.getAllDivers();
 });
 
@@ -176,6 +184,12 @@ class DiverListNotifier extends StateNotifier<AsyncValue<List<Diver>>> {
   DiverListNotifier(this._repository, this._ref)
     : super(const AsyncValue.loading()) {
     _loadDivers();
+
+    // Refresh when the divers table changes (e.g. a sync writes rows directly).
+    final tableChangeSub = _repository.watchDiversChanges().listen(
+      (_) => _silentReloadDivers(),
+    );
+    _ref.onDispose(tableChangeSub.cancel);
   }
 
   Future<void> _loadDivers() async {
@@ -185,6 +199,17 @@ class DiverListNotifier extends StateNotifier<AsyncValue<List<Diver>>> {
       state = AsyncValue.data(divers);
     } catch (e, st) {
       state = AsyncValue.error(e, st);
+    }
+  }
+
+  /// Reload without flipping to a loading state, so table-driven refreshes
+  /// (e.g. after a sync write) do not flash a spinner over existing data.
+  Future<void> _silentReloadDivers() async {
+    try {
+      final divers = await _repository.getAllDivers();
+      if (mounted) state = AsyncValue.data(divers);
+    } catch (e, st) {
+      if (mounted) state = AsyncValue.error(e, st);
     }
   }
 

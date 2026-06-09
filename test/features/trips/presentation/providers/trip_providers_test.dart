@@ -333,6 +333,55 @@ void main() {
       expect(newTrip.diverId, equals(diver.id));
     });
 
+    test('auto-refreshes the list when a trip is written directly to the DB '
+        '(sync scenario)', () async {
+      final diver = await diverRepo.createDiver(
+        Diver(
+          id: '',
+          name: 'D',
+          isDefault: true,
+          createdAt: DateTime(2024),
+          updatedAt: DateTime(2024),
+        ),
+      );
+      await prefs.setString(currentDiverIdKey, diver.id);
+
+      final container = makeContainer();
+      addTearDown(container.dispose);
+      // Active listener keeps the notifier (and its table-change subscription)
+      // alive, mirroring the on-screen list.
+      final sub = container.listen(tripListNotifierProvider, (_, _) {});
+      addTearDown(sub.close);
+
+      while (container.read(tripListNotifierProvider).isLoading) {
+        await Future<void>.delayed(Duration.zero);
+      }
+      expect(container.read(tripListNotifierProvider).value, isEmpty);
+
+      // A sync applies a remote trip straight to the DB (no notifier mutation
+      // call). The watchTripsChanges tick must silently reload the list.
+      await tripRepo.createTrip(
+        _makeTrip(name: 'Synced').copyWith(diverId: diver.id),
+      );
+
+      var names = <String>[];
+      for (var i = 0; i < 50; i++) {
+        await Future<void>.delayed(const Duration(milliseconds: 10));
+        names = (container.read(tripListNotifierProvider).value ?? [])
+            .map((t) => t.trip.name)
+            .toList();
+        if (names.contains('Synced')) break;
+      }
+
+      expect(
+        names,
+        contains('Synced'),
+        reason:
+            'TripListNotifier should auto-refresh after a direct DB write '
+            'without any manual refresh() call',
+      );
+    });
+
     test('updateTrip persists changes', () async {
       final t = await tripRepo.createTrip(_makeTrip(name: 'Original'));
 

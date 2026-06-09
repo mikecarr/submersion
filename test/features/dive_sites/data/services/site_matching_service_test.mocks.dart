@@ -100,6 +100,14 @@ class MockSiteRepository extends _i1.Mock implements _i7.SiteRepository {
           as _i8.Future<List<_i2.DiveSite>>);
 
   @override
+  _i8.Stream<void> watchSitesChanges() =>
+      (super.noSuchMethod(
+            Invocation.method(#watchSitesChanges, []),
+            returnValue: _i8.Stream<void>.empty(),
+          )
+          as _i8.Stream<void>);
+
+  @override
   _i8.Future<_i2.DiveSite?> getSiteById(String? id) =>
       (super.noSuchMethod(
             Invocation.method(#getSiteById, [id]),
@@ -304,6 +312,14 @@ class MockDiveRepository extends _i1.Mock implements _i5.DiveRepository {
   MockDiveRepository() {
     _i1.throwOnMissingStub(this);
   }
+
+  @override
+  _i8.Stream<void> watchDivesChanges() =>
+      (super.noSuchMethod(
+            Invocation.method(#watchDivesChanges, []),
+            returnValue: _i8.Stream<void>.empty(),
+          )
+          as _i8.Stream<void>);
 
   @override
   _i8.Future<List<_i4.Dive>> getAllDives({String? diverId}) =>

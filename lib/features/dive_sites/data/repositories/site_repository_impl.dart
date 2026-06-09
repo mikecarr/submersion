@@ -35,6 +35,11 @@ class SiteRepository {
     }
   }
 
+  /// Emits whenever the `dive_sites` table changes so list providers can
+  /// refresh after a sync or any other write.
+  Stream<void> watchSitesChanges() =>
+      _db.tableUpdates(TableUpdateQuery.onTable(_db.diveSites));
+
   /// Get a single site by ID
   Future<domain.DiveSite?> getSiteById(String id) async {
     try {

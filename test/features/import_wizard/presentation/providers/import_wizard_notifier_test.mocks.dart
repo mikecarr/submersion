@@ -214,6 +214,15 @@ class MockImportSourceAdapter extends _i1.Mock
 /// See the documentation for Mockito's code generation for more information.
 class MockTagRepository extends _i1.Mock implements _i12.TagRepository {
   @override
+  _i9.Stream<void> watchTagsChanges() =>
+      (super.noSuchMethod(
+            Invocation.method(#watchTagsChanges, []),
+            returnValue: _i9.Stream<void>.empty(),
+            returnValueForMissingStub: _i9.Stream<void>.empty(),
+          )
+          as _i9.Stream<void>);
+
+  @override
   _i9.Future<List<_i4.Tag>> getAllTags({String? diverId}) =>
       (super.noSuchMethod(
             Invocation.method(#getAllTags, [], {#diverId: diverId}),

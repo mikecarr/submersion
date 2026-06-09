@@ -1,5 +1,6 @@
 import 'package:submersion/core/providers/provider.dart';
 
+import 'package:submersion/features/dive_log/data/repositories/dive_repository_impl.dart';
 import 'package:submersion/features/dive_log/presentation/providers/dive_providers.dart';
 import 'package:submersion/features/divers/presentation/providers/diver_providers.dart';
 import 'package:submersion/features/tags/data/repositories/tag_repository.dart';
@@ -11,11 +12,18 @@ final tagRepositoryProvider = Provider<TagRepository>((ref) {
 });
 
 /// All tags list provider
+///
+/// Stays a [FutureProvider] so imperative `ref.read(tagsProvider.future)` reads
+/// still resolve, while self-invalidating whenever the `tags` table changes --
+/// including when a sync applies remote changes -- so list UIs refresh instead
+/// of serving a cached one-shot snapshot.
 final tagsProvider = FutureProvider<List<Tag>>((ref) async {
   final repository = ref.watch(tagRepositoryProvider);
   final validatedDiverId = await ref.watch(
     validatedCurrentDiverIdProvider.future,
   );
+  final sub = repository.watchTagsChanges().listen((_) => ref.invalidateSelf());
+  ref.onDispose(sub.cancel);
   return repository.getAllTags(diverId: validatedDiverId);
 });
 
@@ -31,6 +39,14 @@ final tagStatisticsProvider = FutureProvider<List<TagStatistic>>((ref) async {
   final validatedDiverId = await ref.watch(
     validatedCurrentDiverIdProvider.future,
   );
+  final tagsSub = repository.watchTagsChanges().listen(
+    (_) => ref.invalidateSelf(),
+  );
+  ref.onDispose(tagsSub.cancel);
+  final divesSub = DiveRepository().watchDivesChanges().listen(
+    (_) => ref.invalidateSelf(),
+  );
+  ref.onDispose(divesSub.cancel);
   return repository.getTagStatistics(diverId: validatedDiverId);
 });
 

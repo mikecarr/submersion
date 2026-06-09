@@ -87,6 +87,15 @@ void main() {
     when(
       sites.getAllSites(diverId: anyNamed('diverId')),
     ).thenAnswer((_) async => const []);
+    // The dive/site list notifiers (rebuilt by confirm()'s refresh) and the
+    // base providers subscribe to these table-change ticks; strict mocks throw
+    // MissingStubError unless every called method is stubbed.
+    when(
+      dives.watchDivesChanges(),
+    ).thenAnswer((_) => const Stream<void>.empty());
+    when(
+      sites.watchSitesChanges(),
+    ).thenAnswer((_) => const Stream<void>.empty());
     when(
       api.searchNearby(
         latitude: anyNamed('latitude'),

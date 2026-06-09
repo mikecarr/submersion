@@ -20,7 +20,12 @@ final certificationRepositoryProvider = Provider<CertificationRepository>((
   return CertificationRepository();
 });
 
-/// All certifications provider
+/// All certifications provider.
+///
+/// Self-invalidates whenever the `certifications` table changes -- including
+/// when a sync applies remote changes -- so the list refreshes automatically,
+/// while remaining a [FutureProvider] so imperative
+/// `ref.read(provider.future)` reads still resolve.
 final allCertificationsProvider = FutureProvider<List<Certification>>((
   ref,
 ) async {
@@ -28,6 +33,10 @@ final allCertificationsProvider = FutureProvider<List<Certification>>((
   final validatedDiverId = await ref.watch(
     validatedCurrentDiverIdProvider.future,
   );
+  final sub = repository.watchCertificationsChanges().listen(
+    (_) => ref.invalidateSelf(),
+  );
+  ref.onDispose(sub.cancel);
   return repository.getAllCertifications(diverId: validatedDiverId);
 });
 
@@ -151,6 +160,13 @@ class CertificationListNotifier
         _initializeAndLoad();
       }
     });
+
+    // Refresh when the certifications table changes (e.g. a sync writes rows
+    // directly).
+    final tableChangeSub = _repository.watchCertificationsChanges().listen(
+      (_) => _silentReloadCertifications(),
+    );
+    _ref.onDispose(tableChangeSub.cancel);
   }
 
   Future<void> _initializeAndLoad() async {
@@ -169,6 +185,20 @@ class CertificationListNotifier
       state = AsyncValue.data(certifications);
     } catch (e, st) {
       state = AsyncValue.error(e, st);
+    }
+  }
+
+  /// Reload without flipping to a loading state, so table-driven refreshes
+  /// (e.g. after a sync write) do not flash a spinner over existing data.
+  /// Reuses the already-resolved [_validatedDiverId].
+  Future<void> _silentReloadCertifications() async {
+    try {
+      final certifications = await _repository.getAllCertifications(
+        diverId: _validatedDiverId,
+      );
+      if (mounted) state = AsyncValue.data(certifications);
+    } catch (e, st) {
+      if (mounted) state = AsyncValue.error(e, st);
     }
   }
 

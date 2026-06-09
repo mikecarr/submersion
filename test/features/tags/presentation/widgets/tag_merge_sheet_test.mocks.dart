@@ -39,6 +39,14 @@ class MockTagRepository extends _i1.Mock implements _i3.TagRepository {
   }
 
   @override
+  _i4.Stream<void> watchTagsChanges() =>
+      (super.noSuchMethod(
+            Invocation.method(#watchTagsChanges, []),
+            returnValue: _i4.Stream<void>.empty(),
+          )
+          as _i4.Stream<void>);
+
+  @override
   _i4.Future<List<_i2.Tag>> getAllTags({String? diverId}) =>
       (super.noSuchMethod(
             Invocation.method(#getAllTags, [], {#diverId: diverId}),

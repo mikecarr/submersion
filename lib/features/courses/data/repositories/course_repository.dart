@@ -37,6 +37,11 @@ class CourseRepository {
     }
   }
 
+  /// Emits whenever the `courses` table changes so list providers can
+  /// refresh after a sync or any other write.
+  Stream<void> watchCoursesChanges() =>
+      _db.tableUpdates(TableUpdateQuery.onTable(_db.courses));
+
   /// Get course by ID
   Future<domain.Course?> getCourseById(String id) async {
     try {

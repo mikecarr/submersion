@@ -239,6 +239,15 @@ class MockImportedDiveConverter extends _i1.Mock
 /// See the documentation for Mockito's code generation for more information.
 class MockDiveRepository extends _i1.Mock implements _i3.DiveRepository {
   @override
+  _i7.Stream<void> watchDivesChanges() =>
+      (super.noSuchMethod(
+            Invocation.method(#watchDivesChanges, []),
+            returnValue: _i7.Stream<void>.empty(),
+            returnValueForMissingStub: _i7.Stream<void>.empty(),
+          )
+          as _i7.Stream<void>);
+
+  @override
   _i7.Future<List<_i2.Dive>> getAllDives({String? diverId}) =>
       (super.noSuchMethod(
             Invocation.method(#getAllDives, [], {#diverId: diverId}),

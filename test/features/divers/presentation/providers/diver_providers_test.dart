@@ -64,6 +64,44 @@ void main() {
 
       expect(await container.read(allDiversProvider.future), isEmpty);
     });
+
+    test(
+      'auto-refreshes after a write to the divers table (sync scenario)',
+      () async {
+        final container = makeContainer();
+        addTearDown(container.dispose);
+
+        // An active listener keeps the provider alive, mirroring a widget that
+        // watches the list; this is what keeps its table-change subscription open.
+        final sub = container.listen(allDiversProvider, (_, _) {});
+        addTearDown(sub.close);
+
+        expect(await container.read(allDiversProvider.future), isEmpty);
+
+        // A sync applies a remote diver straight to the DB, bypassing the list
+        // notifier (no manual invalidate). The tableUpdates tick must invalidate
+        // the provider so the UI reflects the new row.
+        await repo.createDiver(_makeDiver(name: 'Synced Diver'));
+
+        // Poll until the tick -> invalidateSelf -> rebuild settles.
+        var names = <String>[];
+        for (var i = 0; i < 50; i++) {
+          await Future<void>.delayed(const Duration(milliseconds: 10));
+          names = (await container.read(
+            allDiversProvider.future,
+          )).map((d) => d.name).toList();
+          if (names.contains('Synced Diver')) break;
+        }
+
+        expect(
+          names,
+          contains('Synced Diver'),
+          reason:
+              'allDiversProvider should auto-refresh after the table write '
+              'without any manual invalidation',
+        );
+      },
+    );
   });
 
   group('hasAnyDiversProvider', () {

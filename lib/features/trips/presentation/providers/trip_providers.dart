@@ -45,12 +45,23 @@ final tripRepositoryProvider = Provider<TripRepository>((ref) {
   return TripRepository();
 });
 
-/// All trips provider
+/// All trips provider.
+///
+/// A one-shot read that self-invalidates whenever the `trips` table changes
+/// (a sync apply, a local create/edit/delete, ...), so list UIs refresh
+/// automatically while imperative `ref.read(allTripsProvider.future)` reads
+/// still resolve.
 final allTripsProvider = FutureProvider<List<Trip>>((ref) async {
   final repository = ref.watch(tripRepositoryProvider);
   final validatedDiverId = await ref.watch(
     validatedCurrentDiverIdProvider.future,
   );
+
+  final sub = repository.watchTripsChanges().listen(
+    (_) => ref.invalidateSelf(),
+  );
+  ref.onDispose(sub.cancel);
+
   return repository.getAllTrips(diverId: validatedDiverId);
 });
 
@@ -260,6 +271,19 @@ class TripListNotifier extends StateNotifier<AsyncValue<List<TripWithStats>>> {
         _initializeAndLoad();
       }
     });
+
+    // Auto-refresh when the underlying tables change (e.g. after a sync).
+    // Subscribe to both the trips table and the dives table: the stats query
+    // LEFT JOINs dives, so a synced dive can change the per-trip counts even
+    // when no trip row changed.
+    final tripsChangeSub = _repository.watchTripsChanges().listen(
+      (_) => _silentReload(),
+    );
+    final divesChangeSub = DiveRepository().watchDivesChanges().listen(
+      (_) => _silentReload(),
+    );
+    _ref.onDispose(tripsChangeSub.cancel);
+    _ref.onDispose(divesChangeSub.cancel);
   }
 
   Future<void> _initializeAndLoad() async {
@@ -284,6 +308,22 @@ class TripListNotifier extends StateNotifier<AsyncValue<List<TripWithStats>>> {
       state = AsyncValue.data(trips);
     } catch (e, st) {
       state = AsyncValue.error(e, st);
+    }
+  }
+
+  /// Silent reload used when the underlying tables change (e.g. after a sync).
+  ///
+  /// Mirrors [_loadTrips] but never flips state to loading, so the list
+  /// refreshes in place without flashing a spinner. The trip stats LEFT JOIN
+  /// the dives table, so this fires for both trip and dive table changes.
+  Future<void> _silentReload() async {
+    try {
+      final trips = await _repository.getAllTripsWithStats(
+        diverId: _validatedDiverId,
+      );
+      if (mounted) state = AsyncValue.data(trips);
+    } catch (e, st) {
+      if (mounted) state = AsyncValue.error(e, st);
     }
   }
 

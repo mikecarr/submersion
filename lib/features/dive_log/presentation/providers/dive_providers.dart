@@ -113,10 +113,18 @@ final customFieldKeySuggestionsProvider =
       return repository.getDistinctKeysForDiver(diverId);
     });
 
-/// All dives list provider (filtered by current diver)
+/// All dives list provider (filtered by current diver).
+///
+/// A [FutureProvider] that self-invalidates whenever the `dives` table is
+/// written (e.g. after a sync applies remote changes), so the list refreshes
+/// while imperative `ref.read(divesProvider.future)` reads still resolve.
 final divesProvider = FutureProvider<List<domain.Dive>>((ref) async {
   final repository = ref.watch(diveRepositoryProvider);
   final currentDiverId = ref.watch(currentDiverIdProvider);
+  final sub = repository.watchDivesChanges().listen(
+    (_) => ref.invalidateSelf(),
+  );
+  ref.onDispose(sub.cancel);
   return repository.getAllDives(diverId: currentDiverId);
 });
 
@@ -216,6 +224,14 @@ class DiveListNotifier extends StateNotifier<AsyncValue<List<domain.Dive>>> {
       }
     });
     _loadDives();
+
+    // Reload silently when the `dives` table is written directly (e.g. a sync
+    // applies remote changes) without going through this notifier's mutation
+    // methods. Silent so a multi-write sync doesn't flash a loading spinner.
+    final divesChangeSub = _repository.watchDivesChanges().listen(
+      (_) => _silentReload(),
+    );
+    _ref.onDispose(divesChangeSub.cancel);
   }
 
   Future<void> _loadDives() async {
@@ -228,6 +244,18 @@ class DiveListNotifier extends StateNotifier<AsyncValue<List<domain.Dive>>> {
       _ref.invalidate(divesProvider);
     } catch (e, st) {
       state = AsyncValue.error(e, st);
+    }
+  }
+
+  /// Reload the list without flashing a loading spinner. Mirrors [_loadDives]
+  /// but never sets `state = AsyncValue.loading()`, so table-change ticks from
+  /// a sync update the data in place instead of flickering the UI.
+  Future<void> _silentReload() async {
+    try {
+      final dives = await _repository.getAllDives(diverId: _currentDiverId);
+      if (mounted) state = AsyncValue.data(dives);
+    } catch (e, st) {
+      if (mounted) state = AsyncValue.error(e, st);
     }
   }
 
@@ -432,6 +460,14 @@ class PaginatedDiveListNotifier
       }
     });
     loadFirstPage();
+
+    // Reload silently when the `dives` table is written directly (e.g. a sync
+    // applies remote changes) without going through this notifier's mutation
+    // methods. Silent so a multi-write sync doesn't flash a loading spinner.
+    final divesChangeSub = _repository.watchDivesChanges().listen(
+      (_) => _silentReloadFirstPage(),
+    );
+    _ref.onDispose(divesChangeSub.cancel);
   }
 
   bool get _isDateSort {
@@ -524,6 +560,45 @@ class PaginatedDiveListNotifier
 
   Future<void> refresh() async {
     await loadFirstPage();
+  }
+
+  /// Reload the first page without flashing a loading spinner. Mirrors
+  /// [loadFirstPage] (resetting to page 1 with the same diver/filter/sort
+  /// params) but never sets `state = AsyncValue.loading()`, so table-change
+  /// ticks from a sync update the data in place instead of flickering the UI.
+  Future<void> _silentReloadFirstPage() async {
+    _currentOffset = 0;
+    try {
+      final filter = _ref.read(diveFilterProvider);
+      final sort = _ref.read(diveSortProvider);
+      final results = await Future.wait([
+        _repository.getDiveSummaries(
+          diverId: _currentDiverId,
+          filter: filter,
+          sort: sort,
+          limit: _pageSize,
+        ),
+        _repository.getDiveCount(diverId: _currentDiverId, filter: filter),
+      ]);
+      final dives = results[0] as List<DiveSummary>;
+      final totalCount = results[1] as int;
+      _currentOffset = dives.length;
+
+      if (mounted) {
+        state = AsyncValue.data(
+          PaginatedDiveListState(
+            dives: dives,
+            hasMore: dives.length >= _pageSize,
+            nextCursor: _isDateSort ? _cursorFromLastDive(dives) : null,
+            totalCount: totalCount,
+          ),
+        );
+      }
+      // Pre-load downsampled profiles for mini charts (fire and forget)
+      _loadBatchProfiles(dives.map((d) => d.id).toList());
+    } catch (e, st) {
+      if (mounted) state = AsyncValue.error(e, st);
+    }
   }
 
   DiveSummaryCursor? _cursorFromLastDive(List<DiveSummary> dives) {

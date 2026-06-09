@@ -4,6 +4,7 @@ import 'package:submersion/core/performance/perf_timer.dart';
 import 'package:submersion/core/providers/provider.dart';
 
 import 'package:submersion/features/divers/presentation/providers/diver_providers.dart';
+import 'package:submersion/features/dive_log/data/repositories/dive_repository_impl.dart';
 import 'package:submersion/features/dive_log/data/repositories/view_config_repository.dart';
 import 'package:submersion/features/dive_log/presentation/providers/dive_providers.dart';
 import 'package:submersion/features/dive_log/presentation/providers/view_config_providers.dart';
@@ -173,11 +174,19 @@ final siteRepositoryProvider = Provider<SiteRepository>((ref) {
 });
 
 /// All sites provider
+///
+/// A [FutureProvider] that self-invalidates whenever the `dive_sites` table is
+/// written (e.g. after a sync applies remote changes), so the list refreshes
+/// while imperative `ref.read(sitesProvider.future)` reads still resolve.
 final sitesProvider = FutureProvider<List<domain.DiveSite>>((ref) async {
   final repository = ref.watch(siteRepositoryProvider);
   final validatedDiverId = await ref.watch(
     validatedCurrentDiverIdProvider.future,
   );
+  final sub = repository.watchSitesChanges().listen(
+    (_) => ref.invalidateSelf(),
+  );
+  ref.onDispose(sub.cancel);
   return repository.getAllSites(diverId: validatedDiverId);
 });
 
@@ -189,6 +198,14 @@ final sitesWithCountsProvider = FutureProvider<List<SiteWithDiveCount>>((
   final validatedDiverId = await ref.watch(
     validatedCurrentDiverIdProvider.future,
   );
+  final sitesSub = repository.watchSitesChanges().listen(
+    (_) => ref.invalidateSelf(),
+  );
+  ref.onDispose(sitesSub.cancel);
+  final divesSub = DiveRepository().watchDivesChanges().listen(
+    (_) => ref.invalidateSelf(),
+  );
+  ref.onDispose(divesSub.cancel);
   return repository.getSitesWithDiveCounts(diverId: validatedDiverId);
 });
 

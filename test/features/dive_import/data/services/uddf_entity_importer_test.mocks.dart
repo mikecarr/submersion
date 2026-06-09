@@ -180,6 +180,14 @@ class MockTripRepository extends _i1.Mock implements _i16.TripRepository {
   }
 
   @override
+  _i17.Stream<void> watchTripsChanges() =>
+      (super.noSuchMethod(
+            Invocation.method(#watchTripsChanges, []),
+            returnValue: _i17.Stream<void>.empty(),
+          )
+          as _i17.Stream<void>);
+
+  @override
   _i17.Future<List<_i2.Trip>> getAllTrips({String? diverId}) =>
       (super.noSuchMethod(
             Invocation.method(#getAllTrips, [], {#diverId: diverId}),
@@ -391,6 +399,14 @@ class MockEquipmentRepository extends _i1.Mock
             ),
           )
           as _i17.Future<List<_i3.EquipmentItem>>);
+
+  @override
+  _i17.Stream<void> watchEquipmentChanges() =>
+      (super.noSuchMethod(
+            Invocation.method(#watchEquipmentChanges, []),
+            returnValue: _i17.Stream<void>.empty(),
+          )
+          as _i17.Stream<void>);
 
   @override
   _i17.Future<List<_i3.EquipmentItem>> getAllEquipment({String? diverId}) =>
@@ -657,6 +673,14 @@ class MockBuddyRepository extends _i1.Mock implements _i6.BuddyRepository {
   }
 
   @override
+  _i17.Stream<void> watchBuddiesChanges() =>
+      (super.noSuchMethod(
+            Invocation.method(#watchBuddiesChanges, []),
+            returnValue: _i17.Stream<void>.empty(),
+          )
+          as _i17.Stream<void>);
+
+  @override
   _i17.Future<List<_i5.Buddy>> getAllBuddies({String? diverId}) =>
       (super.noSuchMethod(
             Invocation.method(#getAllBuddies, [], {#diverId: diverId}),
@@ -854,6 +878,14 @@ class MockDiveCenterRepository extends _i1.Mock
   }
 
   @override
+  _i17.Stream<void> watchDiveCentersChanges() =>
+      (super.noSuchMethod(
+            Invocation.method(#watchDiveCentersChanges, []),
+            returnValue: _i17.Stream<void>.empty(),
+          )
+          as _i17.Stream<void>);
+
+  @override
   _i17.Future<List<_i7.DiveCenter>> getAllDiveCenters({String? diverId}) =>
       (super.noSuchMethod(
             Invocation.method(#getAllDiveCenters, [], {#diverId: diverId}),
@@ -971,6 +1003,14 @@ class MockCertificationRepository extends _i1.Mock
   MockCertificationRepository() {
     _i1.throwOnMissingStub(this);
   }
+
+  @override
+  _i17.Stream<void> watchCertificationsChanges() =>
+      (super.noSuchMethod(
+            Invocation.method(#watchCertificationsChanges, []),
+            returnValue: _i17.Stream<void>.empty(),
+          )
+          as _i17.Stream<void>);
 
   @override
   _i17.Future<List<_i8.Certification>> getAllCertifications({
@@ -1091,6 +1131,14 @@ class MockTagRepository extends _i1.Mock implements _i25.TagRepository {
   MockTagRepository() {
     _i1.throwOnMissingStub(this);
   }
+
+  @override
+  _i17.Stream<void> watchTagsChanges() =>
+      (super.noSuchMethod(
+            Invocation.method(#watchTagsChanges, []),
+            returnValue: _i17.Stream<void>.empty(),
+          )
+          as _i17.Stream<void>);
 
   @override
   _i17.Future<List<_i9.Tag>> getAllTags({String? diverId}) =>
@@ -1280,6 +1328,14 @@ class MockDiveTypeRepository extends _i1.Mock
   }
 
   @override
+  _i17.Stream<void> watchDiveTypesChanges() =>
+      (super.noSuchMethod(
+            Invocation.method(#watchDiveTypesChanges, []),
+            returnValue: _i17.Stream<void>.empty(),
+          )
+          as _i17.Stream<void>);
+
+  @override
   _i17.Future<List<_i10.DiveTypeEntity>> getAllDiveTypes({String? diverId}) =>
       (super.noSuchMethod(
             Invocation.method(#getAllDiveTypes, [], {#diverId: diverId}),
@@ -1398,6 +1454,14 @@ class MockSiteRepository extends _i1.Mock implements _i27.SiteRepository {
             ),
           )
           as _i17.Future<List<_i11.DiveSite>>);
+
+  @override
+  _i17.Stream<void> watchSitesChanges() =>
+      (super.noSuchMethod(
+            Invocation.method(#watchSitesChanges, []),
+            returnValue: _i17.Stream<void>.empty(),
+          )
+          as _i17.Stream<void>);
 
   @override
   _i17.Future<_i11.DiveSite?> getSiteById(String? id) =>
@@ -1547,6 +1611,14 @@ class MockDiveRepository extends _i1.Mock implements _i13.DiveRepository {
   MockDiveRepository() {
     _i1.throwOnMissingStub(this);
   }
+
+  @override
+  _i17.Stream<void> watchDivesChanges() =>
+      (super.noSuchMethod(
+            Invocation.method(#watchDivesChanges, []),
+            returnValue: _i17.Stream<void>.empty(),
+          )
+          as _i17.Stream<void>);
 
   @override
   _i17.Future<List<_i12.Dive>> getAllDives({String? diverId}) =>
@@ -2300,6 +2372,14 @@ class MockCourseRepository extends _i1.Mock implements _i37.CourseRepository {
             returnValue: _i17.Future<List<_i15.Course>>.value(<_i15.Course>[]),
           )
           as _i17.Future<List<_i15.Course>>);
+
+  @override
+  _i17.Stream<void> watchCoursesChanges() =>
+      (super.noSuchMethod(
+            Invocation.method(#watchCoursesChanges, []),
+            returnValue: _i17.Stream<void>.empty(),
+          )
+          as _i17.Stream<void>);
 
   @override
   _i17.Future<_i15.Course?> getCourseById(String? id) =>

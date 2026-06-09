@@ -11,11 +11,21 @@ final tankPresetRepositoryProvider = Provider<TankPresetRepository>((ref) {
 
 /// All tank presets provider (custom + built-in, custom first)
 /// Includes built-in presets plus custom presets for the current diver
+///
+/// Stays a [FutureProvider] so imperative
+/// `ref.read(tankPresetsProvider.future)` reads still resolve, while
+/// self-invalidating whenever the `tank_presets` table changes -- including
+/// when a sync applies remote changes -- so list UIs refresh instead of serving
+/// a cached one-shot snapshot.
 final tankPresetsProvider = FutureProvider<List<TankPresetEntity>>((ref) async {
   final repository = ref.watch(tankPresetRepositoryProvider);
   final validatedDiverId = await ref.watch(
     validatedCurrentDiverIdProvider.future,
   );
+  final sub = repository.watchTankPresetsChanges().listen(
+    (_) => ref.invalidateSelf(),
+  );
+  ref.onDispose(sub.cancel);
   return repository.getAllPresets(diverId: validatedDiverId);
 });
 
@@ -63,6 +73,13 @@ class TankPresetListNotifier
         _initializeAndLoad();
       }
     });
+
+    // Refresh when the tank_presets table changes (e.g. a sync writes rows
+    // directly). Cancelled on dispose (provider is autoDispose).
+    final tableChangeSub = _repository.watchTankPresetsChanges().listen(
+      (_) => _silentReloadPresets(),
+    );
+    _ref.onDispose(tableChangeSub.cancel);
   }
 
   Future<void> _initializeAndLoad() async {
@@ -81,6 +98,20 @@ class TankPresetListNotifier
       state = AsyncValue.data(presets);
     } catch (e, st) {
       state = AsyncValue.error(e, st);
+    }
+  }
+
+  /// Reload without flipping to a loading state, so table-driven refreshes
+  /// (e.g. after a sync write) do not flash a spinner over existing data.
+  /// Reuses the already-resolved [_validatedDiverId].
+  Future<void> _silentReloadPresets() async {
+    try {
+      final presets = await _repository.getAllPresets(
+        diverId: _validatedDiverId,
+      );
+      if (mounted) state = AsyncValue.data(presets);
+    } catch (e, st) {
+      if (mounted) state = AsyncValue.error(e, st);
     }
   }
 
