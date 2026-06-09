@@ -222,6 +222,14 @@ class BuddyListNotifier extends StateNotifier<AsyncValue<List<Buddy>>> {
         _initializeAndLoad();
       }
     });
+
+    // Reload when the `buddies` table changes (e.g. a sync writes rows
+    // directly) so surfaces watching this notifier (e.g. the buddy summary)
+    // refresh too.
+    final tableChangeSub = _repository.watchBuddiesChanges().listen(
+      (_) => _silentReloadBuddies(),
+    );
+    _ref.onDispose(tableChangeSub.cancel);
   }
 
   Future<void> _initializeAndLoad() async {
@@ -240,6 +248,23 @@ class BuddyListNotifier extends StateNotifier<AsyncValue<List<Buddy>>> {
       state = AsyncValue.data(buddies);
     } catch (e, st) {
       state = AsyncValue.error(e, st);
+    }
+  }
+
+  /// Reload without flipping to a loading state, for table-change ticks (e.g.
+  /// a sync). Resolves the validated diver id first so an early tick scopes
+  /// correctly.
+  Future<void> _silentReloadBuddies() async {
+    try {
+      _validatedDiverId = await _ref.read(
+        validatedCurrentDiverIdProvider.future,
+      );
+      final buddies = await _repository.getAllBuddies(
+        diverId: _validatedDiverId,
+      );
+      if (mounted) state = AsyncValue.data(buddies);
+    } catch (e, st) {
+      if (mounted) state = AsyncValue.error(e, st);
     }
   }
 

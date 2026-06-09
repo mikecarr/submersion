@@ -91,6 +91,13 @@ class TagListNotifier extends StateNotifier<AsyncValue<List<Tag>>> {
         _initializeAndLoad();
       }
     });
+
+    // Reload when the `tags` table changes (e.g. a sync writes rows directly)
+    // so surfaces watching this notifier (e.g. the tag picker) refresh too.
+    final tableChangeSub = _repository.watchTagsChanges().listen(
+      (_) => _silentReloadTags(),
+    );
+    _ref.onDispose(tableChangeSub.cancel);
   }
 
   Future<void> _initializeAndLoad() async {
@@ -107,6 +114,21 @@ class TagListNotifier extends StateNotifier<AsyncValue<List<Tag>>> {
       state = AsyncValue.data(tags);
     } catch (e, st) {
       state = AsyncValue.error(e, st);
+    }
+  }
+
+  /// Reload without flipping to a loading state, for table-change ticks (e.g.
+  /// a sync). Resolves the validated diver id first so an early tick scopes
+  /// correctly.
+  Future<void> _silentReloadTags() async {
+    try {
+      _validatedDiverId = await _ref.read(
+        validatedCurrentDiverIdProvider.future,
+      );
+      final tags = await _repository.getAllTags(diverId: _validatedDiverId);
+      if (mounted) state = AsyncValue.data(tags);
+    } catch (e, st) {
+      if (mounted) state = AsyncValue.error(e, st);
     }
   }
 

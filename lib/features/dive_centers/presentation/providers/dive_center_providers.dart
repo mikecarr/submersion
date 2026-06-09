@@ -6,9 +6,9 @@ import 'package:submersion/features/dive_centers/data/repositories/dive_center_r
 import 'package:submersion/features/dive_centers/data/services/dive_center_api_service.dart';
 import 'package:submersion/features/dive_centers/domain/constants/dive_center_field.dart';
 import 'package:submersion/features/dive_centers/domain/entities/dive_center.dart';
-import 'package:submersion/features/dive_log/data/repositories/dive_repository_impl.dart';
 import 'package:submersion/features/dive_log/data/repositories/view_config_repository.dart';
 import 'package:submersion/features/dive_log/presentation/providers/view_config_providers.dart';
+import 'package:submersion/features/dive_log/presentation/providers/dive_providers.dart';
 import 'package:submersion/features/divers/presentation/providers/diver_providers.dart';
 import 'package:submersion/shared/models/entity_card_view_config.dart';
 import 'package:submersion/shared/models/entity_table_config.dart';
@@ -140,9 +140,10 @@ final diveCenterDiveCountProvider = FutureProvider.family<int, String>((
   final repository = ref.watch(diveCenterRepositoryProvider);
   // The count reads the `dives` table, so self-invalidate whenever dives
   // change (e.g. after a sync) to keep per-row counts fresh.
-  final sub = DiveRepository().watchDivesChanges().listen(
-    (_) => ref.invalidateSelf(),
-  );
+  final sub = ref
+      .read(diveRepositoryProvider)
+      .watchDivesChanges()
+      .listen((_) => ref.invalidateSelf());
   ref.onDispose(sub.cancel);
   return repository.getDiveCountForCenter(centerId);
 });

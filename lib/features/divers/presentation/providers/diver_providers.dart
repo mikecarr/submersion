@@ -5,6 +5,7 @@ import 'package:submersion/features/settings/presentation/providers/settings_pro
 import 'package:submersion/features/divers/data/repositories/diver_merge_repository.dart';
 import 'package:submersion/features/divers/data/repositories/diver_repository.dart';
 import 'package:submersion/features/divers/domain/entities/diver.dart';
+import 'package:submersion/features/dive_log/presentation/providers/dive_providers.dart';
 
 /// Repository provider
 final diverRepositoryProvider = Provider<DiverRepository>((ref) {
@@ -298,6 +299,13 @@ final diverStatsProvider = FutureProvider.family<DiverStats, String>((
   diverId,
 ) async {
   final repository = ref.watch(diverRepositoryProvider);
+  // The stats read the `dives` table, so self-invalidate when dives change
+  // (e.g. after a sync) to keep the per-tile counts on the diver list fresh.
+  final diveSub = ref
+      .read(diveRepositoryProvider)
+      .watchDivesChanges()
+      .listen((_) => ref.invalidateSelf());
+  ref.onDispose(diveSub.cancel);
   final diveCount = await repository.getDiveCountForDiver(diverId);
   final totalTime = await repository.getTotalBottomTimeForDiver(diverId);
   return DiverStats(diveCount: diveCount, totalBottomTimeSeconds: totalTime);

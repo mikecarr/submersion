@@ -9,6 +9,7 @@ import 'package:submersion/features/dive_log/presentation/providers/view_config_
 import 'package:submersion/features/dive_sites/domain/entities/dive_site.dart'
     as domain;
 import 'package:submersion/features/divers/presentation/providers/diver_providers.dart';
+import 'package:submersion/features/dive_log/presentation/providers/dive_providers.dart';
 import 'package:submersion/features/equipment/data/repositories/equipment_repository_impl.dart';
 import 'package:submersion/features/trips/data/repositories/trip_repository.dart';
 import 'package:submersion/features/trips/domain/constants/trip_field.dart';
@@ -279,9 +280,10 @@ class TripListNotifier extends StateNotifier<AsyncValue<List<TripWithStats>>> {
     final tripsChangeSub = _repository.watchTripsChanges().listen(
       (_) => _silentReload(),
     );
-    final divesChangeSub = DiveRepository().watchDivesChanges().listen(
-      (_) => _silentReload(),
-    );
+    final divesChangeSub = _ref
+        .read(diveRepositoryProvider)
+        .watchDivesChanges()
+        .listen((_) => _silentReload());
     _ref.onDispose(tripsChangeSub.cancel);
     _ref.onDispose(divesChangeSub.cancel);
   }

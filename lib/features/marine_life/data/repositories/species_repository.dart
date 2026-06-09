@@ -27,6 +27,11 @@ class SpeciesRepository {
     return rows.map((row) => _mapRowToSpecies(row)).toList();
   }
 
+  /// Emits whenever the `species` table changes so list providers can
+  /// refresh after a sync or any other write.
+  Stream<void> watchSpeciesChanges() =>
+      _db.tableUpdates(TableUpdateQuery.onTable(_db.species));
+
   /// Get species by category
   Future<List<domain.Species>> getSpeciesByCategory(
     SpeciesCategory category,
