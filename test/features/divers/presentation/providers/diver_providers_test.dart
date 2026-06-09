@@ -315,6 +315,42 @@ void main() {
       );
     });
 
+    test('silently reloads when a diver is written directly to the DB '
+        '(sync scenario)', () async {
+      final container = makeContainer();
+      addTearDown(container.dispose);
+      // Active listener keeps the notifier (and its divers-table subscription)
+      // alive, mirroring the on-screen list.
+      final sub = container.listen(diverListNotifierProvider, (_, _) {});
+      addTearDown(sub.close);
+
+      while (container.read(diverListNotifierProvider).isLoading) {
+        await Future<void>.delayed(Duration.zero);
+      }
+      expect(container.read(diverListNotifierProvider).value, isEmpty);
+
+      // A sync applies a remote diver straight to the DB (no addDiver call).
+      // The watchDiversChanges tick must silently reload the list.
+      await repo.createDiver(_makeDiver(name: 'Synced Diver'));
+
+      var names = <String>[];
+      for (var i = 0; i < 50; i++) {
+        await Future<void>.delayed(const Duration(milliseconds: 10));
+        names = (container.read(diverListNotifierProvider).value ?? [])
+            .map((d) => d.name)
+            .toList();
+        if (names.contains('Synced Diver')) break;
+      }
+
+      expect(
+        names,
+        contains('Synced Diver'),
+        reason:
+            'DiverListNotifier should auto-refresh after a direct DB write '
+            'without any manual refresh() call',
+      );
+    });
+
     test('addDiver creates the diver and returns it', () async {
       final container = makeContainer();
       addTearDown(container.dispose);
