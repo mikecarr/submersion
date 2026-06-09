@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:submersion/core/data/repositories/sync_repository.dart';
 import 'package:submersion/core/database/database.dart' show SyncRecord;
 import 'package:submersion/core/services/cloud_storage/cloud_storage_provider.dart';
@@ -112,6 +113,12 @@ class SyncConflict {
 
 /// Resolution choice for a conflict
 enum ConflictResolution { keepLocal, keepRemote, keepBoth }
+
+/// A foreign-key reference from a synced child record to a parent whose
+/// deletion is tracked in the deletion log. [nullable] distinguishes a cascade
+/// child (NOT NULL -> the row cannot exist without the parent) from a set-null
+/// reference (nullable -> the row survives with the reference cleared).
+typedef ParentRef = ({String field, String parent, bool nullable});
 
 /// Core sync service that orchestrates cloud sync operations
 class SyncService {
@@ -601,6 +608,14 @@ class SyncService {
     conflictsFound += deletionResult.conflictsFound;
     recordsFailed += deletionResult.recordsFailed;
 
+    // Local tombstones (including any just applied from this payload's
+    // deletions) guard the merge below: a remote LIVE record must not
+    // resurrect a record we have deleted unless the remote edit is newer than
+    // our deletion. Loaded after _applyRemoteDeletions so a tombstone arriving
+    // in the same payload also protects against a self-contradictory payload
+    // that carries both a delete and a stale live copy of the same record.
+    final tombstonesByEntity = await _deletionMap();
+
     final data = remotePayload.data;
 
     final mergeOrder =
@@ -717,6 +732,39 @@ class SyncService {
           (type: 'media', records: data.media, hasUpdatedAt: false),
         ];
 
+    // Precompute the locally-tombstoned parents this payload will REVIVE (a
+    // remote edit strictly newer than our deletion). A child must not be
+    // dropped/cleared for a parent that is coming back. The merge order does
+    // not guarantee a parent is processed before its children, and a revival
+    // only clears the tombstone in the DB (not the in-memory snapshot used by
+    // the guard below), so this is computed up front to stay order-independent.
+    final recordsByType = {for (final e in mergeOrder) e.type: e};
+    final revivedParents = <String, Set<String>>{};
+    final parentTypes = <String>{
+      for (final refs in parentRefs.values)
+        for (final ref in refs) ref.parent,
+    };
+    for (final parentType in parentTypes) {
+      final tombs = tombstonesByEntity[parentType];
+      final entry = recordsByType[parentType];
+      if (tombs == null ||
+          tombs.isEmpty ||
+          entry == null ||
+          !entry.hasUpdatedAt) {
+        continue;
+      }
+      for (final rec in entry.records) {
+        final id = _recordIdForEntity(parentType, rec);
+        if (id == null) continue;
+        final deletedAt = tombs[id];
+        if (deletedAt == null) continue;
+        final remoteUpdatedAt = _extractUpdatedAtMillis(rec);
+        if (remoteUpdatedAt != null && remoteUpdatedAt > deletedAt) {
+          revivedParents.putIfAbsent(parentType, () => <String>{}).add(id);
+        }
+      }
+    }
+
     for (final entry in mergeOrder) {
       final result = await _mergeEntity(
         entityType: entry.type,
@@ -724,11 +772,20 @@ class SyncService {
         hasUpdatedAt: entry.hasUpdatedAt,
         lastSyncMs: lastSyncMs,
         pendingRecordIds: pendingByEntity[entry.type] ?? const <String>{},
+        allTombstones: tombstonesByEntity,
+        revivedParents: revivedParents,
       );
       recordsApplied += result.recordsApplied;
       conflictsFound += result.conflictsFound;
       recordsFailed += result.recordsFailed;
     }
+
+    // Integrity backstop: applying a remote deletion of a parent can leave a
+    // local row pointing at it via a non-cascading FK, which would fail the
+    // deferred-FK COMMIT and abort the whole sync. Clear or delete any such
+    // dangling reference before the transaction commits. (The merge guard
+    // above stops a peer's orphan from being re-added, so this does not loop.)
+    await _serializer.repairDanglingForeignKeys();
 
     return _MergeResult(
       recordsApplied: recordsApplied,
@@ -816,12 +873,94 @@ class SyncService {
     );
   }
 
+  /// Every synced child -> parent FK whose parent can be deleted (and thus
+  /// tombstoned in the deletion log). Used by [_mergeEntity] to keep a peer's
+  /// live child from dangling its FK against a parent we have deleted -- which
+  /// would otherwise fail the deferred-FK COMMIT and abort the whole sync.
+  /// NOT NULL (nullable: false) children are skipped; nullable references are
+  /// cleared so the row survives detached.
+  ///
+  /// Generated from every `references(<deletable parent>, ...)` in the schema;
+  /// completeness (and column nullability) is asserted against the live schema
+  /// by sync_parent_refs_completeness_test.dart, so a new FK to a deletable
+  /// parent fails that test until it is added here. (diverId is intentionally
+  /// absent: diver deletion goes through DiverMergeRepository, which repoints
+  /// FKs rather than orphaning them.)
+  @visibleForTesting
+  static const Map<String, List<ParentRef>> parentRefs = {
+    'dives': [
+      (field: 'siteId', parent: 'diveSites', nullable: true),
+      (field: 'tripId', parent: 'trips', nullable: true),
+      (field: 'courseId', parent: 'courses', nullable: true),
+      (field: 'computerId', parent: 'diveComputers', nullable: true),
+      (field: 'diveCenterId', parent: 'diveCenters', nullable: true),
+    ],
+    'diveProfiles': [
+      (field: 'diveId', parent: 'dives', nullable: false),
+      (field: 'computerId', parent: 'diveComputers', nullable: true),
+    ],
+    'diveTanks': [
+      (field: 'diveId', parent: 'dives', nullable: false),
+      (field: 'equipmentId', parent: 'equipment', nullable: true),
+    ],
+    'diveWeights': [(field: 'diveId', parent: 'dives', nullable: false)],
+    'diveEquipment': [
+      (field: 'diveId', parent: 'dives', nullable: false),
+      (field: 'equipmentId', parent: 'equipment', nullable: false),
+    ],
+    'diveBuddies': [
+      (field: 'diveId', parent: 'dives', nullable: false),
+      (field: 'buddyId', parent: 'buddies', nullable: false),
+    ],
+    'diveTags': [
+      (field: 'diveId', parent: 'dives', nullable: false),
+      (field: 'tagId', parent: 'tags', nullable: false),
+    ],
+    'diveProfileEvents': [(field: 'diveId', parent: 'dives', nullable: false)],
+    'gasSwitches': [(field: 'diveId', parent: 'dives', nullable: false)],
+    'diveCustomFields': [(field: 'diveId', parent: 'dives', nullable: false)],
+    'tankPressureProfiles': [
+      (field: 'diveId', parent: 'dives', nullable: false),
+    ],
+    'tideRecords': [(field: 'diveId', parent: 'dives', nullable: false)],
+    'diveDataSources': [
+      (field: 'diveId', parent: 'dives', nullable: false),
+      (field: 'computerId', parent: 'diveComputers', nullable: true),
+    ],
+    'sightings': [
+      (field: 'diveId', parent: 'dives', nullable: false),
+      (field: 'speciesId', parent: 'species', nullable: false),
+    ],
+    'media': [
+      (field: 'diveId', parent: 'dives', nullable: true),
+      (field: 'siteId', parent: 'diveSites', nullable: true),
+      (field: 'signerId', parent: 'buddies', nullable: true),
+    ],
+    'siteSpecies': [
+      (field: 'siteId', parent: 'diveSites', nullable: false),
+      (field: 'speciesId', parent: 'species', nullable: false),
+    ],
+    'liveaboardDetails': [(field: 'tripId', parent: 'trips', nullable: false)],
+    'itineraryDays': [(field: 'tripId', parent: 'trips', nullable: false)],
+    'certifications': [(field: 'courseId', parent: 'courses', nullable: true)],
+    'courses': [(field: 'instructorId', parent: 'buddies', nullable: true)],
+    'equipmentSetItems': [
+      (field: 'setId', parent: 'equipmentSets', nullable: false),
+      (field: 'equipmentId', parent: 'equipment', nullable: false),
+    ],
+    'serviceRecords': [
+      (field: 'equipmentId', parent: 'equipment', nullable: false),
+    ],
+  };
+
   Future<_MergeResult> _mergeEntity({
     required String entityType,
     required List<Map<String, dynamic>> records,
     required bool hasUpdatedAt,
     required int? lastSyncMs,
     required Set<String> pendingRecordIds,
+    required Map<String, Map<String, int>> allTombstones,
+    required Map<String, Set<String>> revivedParents,
   }) async {
     if (records.isEmpty) {
       return const _MergeResult(recordsApplied: 0, conflictsFound: 0);
@@ -830,6 +969,9 @@ class SyncService {
     var applied = 0;
     var conflicts = 0;
     var failed = 0;
+
+    final selfTombstones = allTombstones[entityType] ?? const <String, int>{};
+    final entityParentRefs = parentRefs[entityType] ?? const <ParentRef>[];
 
     for (final record in records) {
       String? recordId;
@@ -848,8 +990,53 @@ class SyncService {
           continue;
         }
 
+        // Parent-deletion guard: a record pointing at a locally-tombstoned
+        // parent would otherwise dangle its FK (failing the deferred-FK commit)
+        // or resurrect an orphan. A NOT NULL (cascade) child is skipped; a
+        // nullable (set-null) reference is cleared so the row survives detached
+        // (e.g. a photo whose dive was deleted keeps the photo, sans dive link).
+        var recordToApply = record;
+        var droppedByParent = false;
+        for (final ref in entityParentRefs) {
+          final parentId = record[ref.field];
+          if (parentId is String &&
+              (allTombstones[ref.parent]?.containsKey(parentId) ?? false) &&
+              // A parent being revived in this same payload is NOT gone; keep
+              // the child's reference intact regardless of merge order.
+              (revivedParents[ref.parent]?.contains(parentId) != true)) {
+            if (ref.nullable) {
+              recordToApply = {...recordToApply, ref.field: null};
+            } else {
+              droppedByParent = true;
+              break;
+            }
+          }
+        }
+        if (droppedByParent) continue;
+
+        // Local-deletion guard: if we deleted this record, a remote LIVE copy
+        // must not resurrect it unless the remote edit is newer than our
+        // deletion (a genuine revival). Without this, a peer that has not yet
+        // seen our delete re-introduces the record on every sync.
+        final deletedAt = selfTombstones[recordId];
+        if (deletedAt != null) {
+          final remoteUpdatedAt = hasUpdatedAt
+              ? _extractUpdatedAtMillis(record)
+              : null;
+          if (remoteUpdatedAt == null || remoteUpdatedAt <= deletedAt) {
+            // No newer remote edit -- the deletion wins; stay deleted.
+            continue;
+          }
+          // Remote edit is newer than the deletion: revive the record and drop
+          // the now-obsolete tombstone so it stops re-deleting it.
+          await _syncRepository.removeDeletion(
+            entityType: entityType,
+            recordId: recordId,
+          );
+        }
+
         if (!hasUpdatedAt) {
-          await _serializer.upsertRecord(entityType, record);
+          await _serializer.upsertRecord(entityType, recordToApply);
           applied += 1;
           continue;
         }
@@ -873,7 +1060,7 @@ class SyncService {
         // remote HLC wins; an exact tie or a local-newer HLC keeps local.
         if (localHlc != null && remoteHlc != null) {
           if (remoteHlc.compareTo(localHlc) > 0) {
-            await _serializer.upsertRecord(entityType, record);
+            await _serializer.upsertRecord(entityType, recordToApply);
             applied += 1;
           }
           continue;
@@ -900,7 +1087,7 @@ class SyncService {
         if (remoteUpdatedAt == null ||
             localUpdatedAt == null ||
             remoteUpdatedAt >= localUpdatedAt) {
-          await _serializer.upsertRecord(entityType, record);
+          await _serializer.upsertRecord(entityType, recordToApply);
           applied += 1;
         }
       } catch (e, stackTrace) {
@@ -928,6 +1115,23 @@ class SyncService {
     final map = <String, Set<String>>{};
     for (final record in records) {
       map.putIfAbsent(record.entityType, () => <String>{}).add(record.recordId);
+    }
+    return map;
+  }
+
+  /// Local deletion tombstones as entityType -> (recordId -> latest deletedAt).
+  /// Used by [_mergeEntity] to keep a remote live copy from resurrecting a
+  /// record we have deleted.
+  Future<Map<String, Map<String, int>>> _deletionMap() async {
+    final deletions = await _syncRepository.getAllDeletions();
+    final map = <String, Map<String, int>>{};
+    for (final d in deletions) {
+      final byId = map.putIfAbsent(d.entityType, () => <String, int>{});
+      final existing = byId[d.recordId];
+      // Keep the most recent deletion if duplicate tombstones exist.
+      if (existing == null || d.deletedAt > existing) {
+        byId[d.recordId] = d.deletedAt;
+      }
     }
     return map;
   }

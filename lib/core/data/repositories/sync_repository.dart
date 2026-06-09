@@ -669,6 +669,31 @@ class SyncRepository {
     );
   }
 
+  /// Remove the tombstone(s) for one record of [entityType]. The deletion log
+  /// is a single table shared across entity types and recordIds are only unique
+  /// within an entity type, so the delete matches BOTH [entityType] and
+  /// [recordId]. Called when a remote edit newer than the deletion revives the
+  /// record, so the obsolete tombstone stops re-deleting it on later syncs.
+  Future<void> removeDeletion({
+    required String entityType,
+    required String recordId,
+  }) async {
+    try {
+      await (_db.delete(_db.deletionLog)..where(
+            (t) =>
+                t.entityType.equals(entityType) & t.recordId.equals(recordId),
+          ))
+          .go();
+    } catch (e, stackTrace) {
+      _log.error(
+        'Failed to remove deletion: $entityType/$recordId',
+        error: e,
+        stackTrace: stackTrace,
+      );
+      rethrow;
+    }
+  }
+
   /// Clear old deletions (older than given days)
   Future<void> clearOldDeletions({int olderThanDays = 90}) async {
     try {
