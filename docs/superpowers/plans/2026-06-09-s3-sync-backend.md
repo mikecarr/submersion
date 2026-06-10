@@ -418,9 +418,10 @@ void main() {
       expect(SigV4Signer.hexSha256(const []), emptyPayloadHash);
     });
 
-    test('deriveSigningKey matches the AWS documentation example', () {
-      // AWS "Examples of how to derive a signing key": secret above,
-      // 20120215, us-east-1, iam.
+    test('deriveSigningKey matches the reference HMAC chain', () {
+      // Inputs from AWS "Examples of how to derive a signing key": secret
+      // above, 20120215, us-east-1, iam. Expected value computed with the
+      // Python hmac reference implementation of the SigV4 chain.
       final key = SigV4Signer.deriveSigningKey(
         secretAccessKey: awsSecretKey,
         dateStamp: '20120215',
@@ -429,7 +430,7 @@ void main() {
       );
       expect(
         SigV4Signer.hexEncode(key),
-        'f4780e2d9f65fa895f9c67b32ce1baf0b0d8a43505a000a1a9e090d414db404d',
+        '004aa806e13dae88b9032d9261bcb04c67d023afadd221e6b0d206e1760e0b5e',
       );
     });
   });
@@ -715,7 +716,7 @@ AWS4-HMAC-SHA256
       expect(
         signed['authorization'],
         contains(
-          'Signature=34b48302e7b4fa45c2cd0e9eb304e2cee9aa129bd9cfb1c145e58c5253ff5fc7',
+          'Signature=34b48302e7b5fa45bde8084f4b7868a86f0a534bc59db6670ed5711ef69dc6f7',
         ),
       );
     });
@@ -837,10 +838,11 @@ Add to the `SigV4Signer` class in `lib/core/services/cloud_storage/s3/sigv4_sign
 - [ ] **Step 3.4: Run the tests to verify they pass**
 
 Run: `flutter test test/core/services/cloud_storage/s3/sigv4_signer_test.dart`
-Expected: PASS — all groups including both AWS vectors. If a vector fails,
-print the canonical request and string-to-sign and diff them against the AWS
-docs page cited at the top of the test file; do not "fix" a vector constant
-without confirming against the docs.
+Expected: PASS — all groups including both vectors. If a vector fails, print
+the canonical request and string-to-sign and diff them against the values in
+the test file; do not "fix" a vector constant yourself — the controller has
+verified every constant in this plan computationally (python3 hmac reference
+chain). Report BLOCKED with actual vs expected instead.
 
 - [ ] **Step 3.5: Format, analyze, commit**
 
