@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -30,14 +31,20 @@ class _FakeS3ApiClient implements S3ApiClient {
   List<S3ObjectInfo> listing = [];
   bool closed = false;
 
+  void _assertOpen() {
+    if (closed) throw const CloudStorageException('client closed');
+  }
+
   @override
   Future<void> putObject(String key, Uint8List bytes) async {
+    _assertOpen();
     calls.add('put:$key');
     objects[key] = bytes;
   }
 
   @override
   Future<Uint8List> getObject(String key) async {
+    _assertOpen();
     calls.add('get:$key');
     final data = objects[key];
     if (data == null) throw CloudStorageException('File not found in S3: $key');
@@ -46,6 +53,7 @@ class _FakeS3ApiClient implements S3ApiClient {
 
   @override
   Future<S3ObjectInfo?> headObject(String key) async {
+    _assertOpen();
     calls.add('head:$key');
     if (!objects.containsKey(key)) return null;
     return S3ObjectInfo(
@@ -57,18 +65,48 @@ class _FakeS3ApiClient implements S3ApiClient {
 
   @override
   Future<void> deleteObject(String key) async {
+    _assertOpen();
     calls.add('delete:$key');
     objects.remove(key);
   }
 
   @override
-  Future<List<S3ObjectInfo>> listObjects({String prefix = ''}) async {
+  Future<List<S3ObjectInfo>> listObjects({
+    String prefix = '',
+    int? maxKeys,
+  }) async {
+    _assertOpen();
     calls.add('list:$prefix');
     return listing;
   }
 
   @override
   void close() => closed = true;
+}
+
+class _GatedCredentialsStore implements S3CredentialsStore {
+  _GatedCredentialsStore(this._gate);
+
+  final Completer<void> _gate;
+  bool gateNextLoad = true;
+  S3Config? stored;
+
+  @override
+  Future<S3Config?> load() async {
+    final value = stored; // capture BEFORE parking, like a real stale read
+    if (gateNextLoad) {
+      gateNextLoad = false;
+      await _gate.future;
+      return value;
+    }
+    return stored;
+  }
+
+  @override
+  Future<void> save(S3Config config) async => stored = config;
+
+  @override
+  Future<void> clear() async => stored = null;
 }
 
 void main() {
@@ -136,15 +174,25 @@ void main() {
       );
     });
 
-    test('runs the read+write probe: list, put probe, delete probe', () async {
+    test(
+      'runs the read+write probe: list, put probe, get probe, delete probe',
+      () async {
+        store.stored = config();
+        await provider.authenticate();
+        final client = builtClients.single;
+        expect(client.calls, [
+          'list:submersion-sync/',
+          'put:submersion-sync/.submersion-probe',
+          'get:submersion-sync/.submersion-probe',
+          'delete:submersion-sync/.submersion-probe',
+        ]);
+      },
+    );
+
+    test('authenticate closes its transient probe client', () async {
       store.stored = config();
       await provider.authenticate();
-      final client = builtClients.single;
-      expect(client.calls, [
-        'list:submersion-sync/',
-        'put:submersion-sync/.submersion-probe',
-        'delete:submersion-sync/.submersion-probe',
-      ]);
+      expect(builtClients.single.closed, isTrue);
     });
   });
 
@@ -236,7 +284,47 @@ void main() {
 
     test('folders resolve to the configured prefix', () async {
       expect(await provider.getOrCreateSyncFolder(), 'submersion-sync/');
-      expect(await provider.createFolder('anything'), 'submersion-sync/');
+      expect(
+        await provider.createFolder('anything'),
+        'submersion-sync/anything/',
+      );
+      expect(
+        await provider.createFolder('Backups', parentFolderId: 'other/'),
+        'other/Backups/',
+      );
+    });
+
+    test('empty prefix keys at the bucket root', () async {
+      store.stored = config().copyWith(prefix: '');
+      expect(await provider.getOrCreateSyncFolder(), '');
+      final result = await provider.uploadFile(
+        Uint8List.fromList([1]),
+        'f.json',
+      );
+      expect(result.fileId, 'f.json');
+    });
+
+    test('listFiles drops bare-prefix directory markers', () async {
+      store.stored = config();
+      final client = _FakeS3ApiClient(config());
+      provider = S3StorageProvider(
+        store: store,
+        apiClientFactory: (_) => client,
+      );
+      client.listing = [
+        S3ObjectInfo(
+          key: 'submersion-sync/',
+          lastModified: DateTime.utc(2026, 6, 1),
+          size: 0,
+        ),
+        S3ObjectInfo(
+          key: 'submersion-sync/submersion_sync_a.json',
+          lastModified: DateTime.utc(2026, 6, 2),
+          size: 5,
+        ),
+      ];
+      final files = await provider.listFiles();
+      expect(files.map((f) => f.name), ['submersion_sync_a.json']);
     });
   });
 
@@ -260,5 +348,39 @@ void main() {
       expect(builtClients, hasLength(2));
       expect(builtClients.last.config.bucket, 'other-bucket');
     });
+
+    test('saveConfig and signOut close the cached client', () async {
+      store.stored = config();
+      await provider.uploadFile(Uint8List.fromList([1]), 'f.json');
+      final first = builtClients.single;
+      await provider.saveConfig(config().copyWith(bucket: 'b2'));
+      expect(first.closed, isTrue);
+      await provider.uploadFile(Uint8List.fromList([2]), 'g.json');
+      final second = builtClients.last;
+      await provider.signOut();
+      expect(second.closed, isTrue);
+    });
+
+    test(
+      'a saveConfig racing a config load does not re-pin stale state',
+      () async {
+        final gate = Completer<void>();
+        final gatedStore = _GatedCredentialsStore(gate)..stored = config();
+        provider = S3StorageProvider(
+          store: gatedStore,
+          apiClientFactory: (c) {
+            final client = _FakeS3ApiClient(c);
+            builtClients.add(client);
+            return client;
+          },
+        );
+        final firstRead = provider.getUserEmail(); // parks on the gate
+        gatedStore.gateNextLoad = false; // saves/loads after this are direct
+        await provider.saveConfig(config().copyWith(bucket: 'new-bucket'));
+        gate.complete(); // stale load resumes AFTER the invalidation
+        await firstRead;
+        expect(await provider.getUserEmail(), 'new-bucket @ nas.local');
+      },
+    );
   });
 }

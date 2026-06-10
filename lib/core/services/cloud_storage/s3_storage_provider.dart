@@ -36,6 +36,7 @@ class S3StorageProvider
 
   S3Config? _cachedConfig;
   S3ApiClient? _client;
+  int _generation = 0;
 
   @override
   String get providerName => 'S3-Compatible Storage';
@@ -74,7 +75,12 @@ class S3StorageProvider
         'bucket details.',
       );
     }
-    await _probe(_apiClientFactory(config), config);
+    final client = _apiClientFactory(config);
+    try {
+      await _probe(client, config);
+    } finally {
+      client.close();
+    }
     _log.info('S3 probe succeeded for bucket ${config.bucket}');
   }
 
@@ -92,13 +98,14 @@ class S3StorageProvider
     }
   }
 
-  /// Read permission (list) then write permission (put + delete of a tiny
-  /// probe object under the prefix). Shared by [authenticate] and
+  /// Read permission (capped list), then write, read-back, and delete of a
+  /// tiny probe object under the prefix. Shared by [authenticate] and
   /// [testConnection] so the two paths cannot drift.
   Future<void> _probe(S3ApiClient client, S3Config config) async {
-    await client.listObjects(prefix: config.prefix);
+    await client.listObjects(prefix: config.prefix, maxKeys: 1);
     final probeKey = '${config.prefix}$probeObjectName';
     await client.putObject(probeKey, Uint8List.fromList('probe'.codeUnits));
+    await client.getObject(probeKey);
     await client.deleteObject(probeKey);
   }
 
@@ -121,23 +128,22 @@ class S3StorageProvider
     String filename, {
     String? folderId,
   }) async {
-    final config = await _requireConfig();
-    final client = _requireClient(config);
-    final key = '${folderId ?? config.prefix}$filename';
-    await client.putObject(key, data);
+    final session = await _requireSession();
+    final key = '${folderId ?? session.config.prefix}$filename';
+    await session.client.putObject(key, data);
     return UploadResult(fileId: key, uploadTime: DateTime.now().toUtc());
   }
 
   @override
   Future<Uint8List> downloadFile(String fileId) async {
-    final client = _requireClient(await _requireConfig());
-    return client.getObject(fileId);
+    final session = await _requireSession();
+    return session.client.getObject(fileId);
   }
 
   @override
   Future<CloudFileInfo?> getFileInfo(String fileId) async {
-    final client = _requireClient(await _requireConfig());
-    final info = await client.headObject(fileId);
+    final session = await _requireSession();
+    final info = await session.client.headObject(fileId);
     return info == null ? null : _toCloudFileInfo(info);
   }
 
@@ -146,9 +152,10 @@ class S3StorageProvider
     String? folderId,
     String? namePattern,
   }) async {
-    final config = await _requireConfig();
-    final client = _requireClient(config);
-    final objects = await client.listObjects(prefix: folderId ?? config.prefix);
+    final session = await _requireSession();
+    final objects = await session.client.listObjects(
+      prefix: folderId ?? session.config.prefix,
+    );
     return objects
         .map(_toCloudFileInfo)
         // Some servers list the bare prefix as a zero-length "directory"
@@ -160,19 +167,25 @@ class S3StorageProvider
 
   @override
   Future<void> deleteFile(String fileId) async {
-    final client = _requireClient(await _requireConfig());
-    await client.deleteObject(fileId);
+    final session = await _requireSession();
+    await session.client.deleteObject(fileId);
   }
 
   @override
   Future<bool> fileExists(String fileId) async {
-    final client = _requireClient(await _requireConfig());
-    return (await client.headObject(fileId)) != null;
+    final session = await _requireSession();
+    return (await session.client.headObject(fileId)) != null;
   }
 
   @override
-  Future<String> createFolder(String folderName, {String? parentFolderId}) =>
-      getOrCreateSyncFolder();
+  Future<String> createFolder(
+    String folderName, {
+    String? parentFolderId,
+  }) async {
+    final config = await _requireConfig();
+    final base = parentFolderId ?? config.prefix;
+    return '$base$folderName/';
+  }
 
   @override
   Future<String> getOrCreateSyncFolder() async =>
@@ -185,8 +198,17 @@ class S3StorageProvider
     sizeBytes: info.size,
   );
 
-  Future<S3Config?> _loadConfig() async =>
-      _cachedConfig ??= await _store.load();
+  Future<S3Config?> _loadConfig() async {
+    final cached = _cachedConfig;
+    if (cached != null) return cached;
+    final generation = _generation;
+    final loaded = await _store.load();
+    if (generation != _generation) {
+      // saveConfig/signOut raced this load; do not pin the stale value.
+      return _cachedConfig;
+    }
+    return _cachedConfig = loaded;
+  }
 
   Future<S3Config> _requireConfig() async {
     final config = await _loadConfig();
@@ -196,10 +218,23 @@ class S3StorageProvider
     return config;
   }
 
-  S3ApiClient _requireClient(S3Config config) =>
-      _client ??= _apiClientFactory(config);
+  /// Config+client captured consistently: if an invalidation races the
+  /// config load, re-loads so an operation never pins or uses a
+  /// pre-invalidation pair.
+  Future<({S3Config config, S3ApiClient client})> _requireSession() async {
+    while (true) {
+      final generation = _generation;
+      final config = await _loadConfig();
+      if (config == null) {
+        throw const CloudStorageException('S3 is not configured');
+      }
+      if (generation != _generation) continue;
+      return (config: config, client: _client ??= _apiClientFactory(config));
+    }
+  }
 
   void _invalidate() {
+    _generation++;
     _client?.close();
     _client = null;
     _cachedConfig = null;

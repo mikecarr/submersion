@@ -89,7 +89,10 @@ class S3ApiClient {
     }
   }
 
-  Future<List<S3ObjectInfo>> listObjects({String prefix = ''}) async {
+  Future<List<S3ObjectInfo>> listObjects({
+    String prefix = '',
+    int? maxKeys,
+  }) async {
     final results = <S3ObjectInfo>[];
     String? continuationToken;
     do {
@@ -100,13 +103,14 @@ class S3ApiClient {
           'list-type': '2',
           if (prefix.isNotEmpty) 'prefix': prefix,
           'continuation-token': ?continuationToken,
+          if (maxKeys != null) 'max-keys': '$maxKeys',
         },
       );
       if (response.statusCode != 200) _throwFor('list', prefix, response);
 
       final (pageObjects, nextToken) = _parseListPage(response.bodyBytes);
       results.addAll(pageObjects);
-      continuationToken = nextToken;
+      continuationToken = maxKeys != null ? null : nextToken;
     } while (continuationToken != null);
     return results;
   }

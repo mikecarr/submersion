@@ -311,6 +311,21 @@ void main() {
       await clientWith(minioConfig(), mock).listObjects(prefix: 'p/');
       expect(seen.path, '/dive-sync/');
     });
+
+    test('maxKeys caps the listing to a single page', () async {
+      final seenUrls = <Uri>[];
+      final mock = MockClient((request) async {
+        seenUrls.add(request.url);
+        return http.Response(pageOne, 200); // IsTruncated=true + token
+      });
+      final objects = await clientWith(
+        minioConfig(),
+        mock,
+      ).listObjects(prefix: 'submersion-sync/', maxKeys: 1);
+      expect(seenUrls, hasLength(1));
+      expect(seenUrls.single.queryParameters['max-keys'], '1');
+      expect(objects, hasLength(2)); // page contents returned as-is
+    });
   });
 
   group('error code mapping', () {
