@@ -311,9 +311,10 @@ TDD throughout; tests mirror `lib/` structure under `test/`.
 - **Config staleness in the provider singleton** — addressed by in-memory
   cache invalidation on `saveConfig`/`signOut` (§5).
 - **Vestigial sync_metadata columns** — `sync_provider`/`remote_file_id` are
-  never written non-null by any current code path; the S3 sign-out branch
-  deliberately skips clearing them. If a future change starts writing them,
-  revisit `SyncNotifier.signOut`.
+  never written non-null by any current code path. The S3 sign-out branch
+  still clears them exactly like the standard sign-out (it skips only the
+  provider's credential deletion), so metadata behavior is uniform across
+  providers.
 
 ## 12. Success criteria
 

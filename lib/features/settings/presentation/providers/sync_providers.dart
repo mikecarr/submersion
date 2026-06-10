@@ -332,6 +332,11 @@ class SyncNotifier extends StateNotifier<SyncState> {
     final selected = _ref.read(selectedCloudProviderTypeProvider);
     if (selected != CloudProviderType.s3) {
       await _syncService.signOut();
+    } else {
+      // Match SyncService.signOut()'s metadata clearing without the
+      // provider sign-out, so the hand-entered credentials survive.
+      await _syncRepository.setCloudProvider(null);
+      await _syncRepository.setRemoteFileId(null);
     }
     _ref.read(selectedCloudProviderTypeProvider.notifier).state = null;
     // Clear the saved provider from SharedPreferences

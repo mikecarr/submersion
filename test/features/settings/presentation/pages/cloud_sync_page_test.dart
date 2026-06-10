@@ -1102,6 +1102,11 @@ void main() {
 
       // The S3 path must NOT touch the cloud sign-out chain.
       expect(svc.signOutCalled, isFalse);
+      // ...but it must still clear the sync metadata like a normal
+      // sign-out would.
+      final repo =
+          container.read(syncRepositoryProvider) as _FakeSyncRepository;
+      expect(repo.signOutCalls, 1);
     });
 
     test('S3 signOut preserves stored S3 credentials', () async {
