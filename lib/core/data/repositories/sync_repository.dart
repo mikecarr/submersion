@@ -11,7 +11,7 @@ import 'package:submersion/core/services/sync/sync_clock.dart';
 enum SyncStatus { synced, pending, conflict }
 
 /// Cloud provider types
-enum CloudProviderType { icloud, googledrive }
+enum CloudProviderType { icloud, googledrive, s3 }
 
 /// Repository for managing sync metadata and tracking
 class SyncRepository {

@@ -8,6 +8,8 @@ import 'package:submersion/core/services/logger_service.dart';
 import 'package:submersion/core/services/cloud_storage/cloud_storage_provider.dart';
 import 'package:submersion/core/services/cloud_storage/google_drive_storage_provider.dart';
 import 'package:submersion/core/services/cloud_storage/icloud_storage_provider.dart';
+import 'package:submersion/core/services/cloud_storage/s3/s3_config.dart';
+import 'package:submersion/core/services/cloud_storage/s3_storage_provider.dart';
 import 'package:submersion/core/services/sync/sync_data_serializer.dart';
 import 'package:submersion/core/services/sync/sync_event_bus.dart';
 import 'package:submersion/core/services/sync/sync_initializer.dart';
@@ -98,6 +100,7 @@ final selectedCloudProviderTypeProvider = StateProvider<CloudProviderType?>(
 /// Cloud storage provider singletons
 final _googleDriveProvider = GoogleDriveStorageProvider();
 final _icloudProvider = ICloudStorageProvider();
+final _s3Provider = S3StorageProvider();
 
 /// Cloud storage provider instance (null if none selected or custom folder mode)
 ///
@@ -118,6 +121,8 @@ final cloudStorageProviderProvider = Provider<CloudStorageProvider?>((ref) {
       return _icloudProvider;
     case CloudProviderType.googledrive:
       return _googleDriveProvider;
+    case CloudProviderType.s3:
+      return _s3Provider;
   }
 });
 
@@ -318,11 +323,27 @@ class SyncNotifier extends StateNotifier<SyncState> {
   }
 
   /// Sign out from the cloud provider
+  ///
+  /// For S3 the credentials are hand-entered, so disconnecting only
+  /// deselects the provider; the stored configuration survives and the
+  /// S3 settings page offers the explicit, destructive
+  /// "Remove Configuration" instead.
   Future<void> signOut() async {
-    await _syncService.signOut();
+    final selected = _ref.read(selectedCloudProviderTypeProvider);
+    if (selected != CloudProviderType.s3) {
+      await _syncService.signOut();
+    } else {
+      // Match SyncService.signOut()'s metadata clearing without the
+      // provider sign-out, so the hand-entered credentials survive.
+      await _syncRepository.setCloudProvider(null);
+      await _syncRepository.setRemoteFileId(null);
+    }
     _ref.read(selectedCloudProviderTypeProvider.notifier).state = null;
     // Clear the saved provider from SharedPreferences
     await _ref.read(syncInitializerProvider).saveProvider(null);
+    // The S3 tile watches this; a sign-out (or future config change) must
+    // not leave it showing stale state.
+    _ref.invalidate(s3ConfigProvider);
     state = const SyncState();
   }
 
@@ -438,4 +459,16 @@ final restoreLastProviderProvider = FutureProvider<void>((ref) async {
       ref.read(selectedCloudProviderTypeProvider.notifier).state = lastProvider;
     });
   }
+});
+
+/// Direct access to the S3 provider singleton for the configuration UI
+/// (load/save config, test connection).
+final s3StorageProviderInstanceProvider = Provider<S3StorageProvider>(
+  (ref) => _s3Provider,
+);
+
+/// The stored S3 configuration, or null when S3 has not been set up.
+/// Invalidate after saving or removing the configuration.
+final s3ConfigProvider = FutureProvider<S3Config?>((ref) async {
+  return ref.watch(s3StorageProviderInstanceProvider).loadConfig();
 });

@@ -45,9 +45,9 @@ Decisions made with the owner during design:
 |---|----------|--------|
 | 1 | Endpoint scope | Any S3-compatible endpoint (AWS, MinIO, R2, B2, NAS), not AWS-only |
 | 2 | Payload format | Plaintext JSON, byte-identical to iCloud/Google Drive payloads; no client-side encryption |
-| 3 | Client implementation | Hand-rolled SigV4 signer + minimal REST client; only new dependency is the pure-Dart `xml` package |
+| 3 | Client implementation | Hand-rolled SigV4 signer + minimal REST client; zero new dependencies (`xml` was already a dependency) |
 | 4 | Configuration UI | Dedicated settings page (`s3_config_page.dart`), not a dialog or inline expansion |
-| 5 | Test Connection | Read **and** write probe: ListObjectsV2 plus PUT/DELETE of a tiny probe object |
+| 5 | Test Connection | Read **and** write probe: capped ListObjectsV2 (max-keys=1) plus PUT, GET, and DELETE of a tiny probe object |
 | 6 | Plain `http://` endpoints | Allowed (for trusted-LAN NAS/MinIO) with a visible unencrypted-traffic warning |
 | 7 | Provider card label | "S3-Compatible Storage", subtitle "Amazon S3, MinIO, Cloudflare R2, Backblaze B2…" |
 
@@ -110,8 +110,8 @@ Default prefix: `submersion-sync/` (user-overridable in the config form).
 | `lib/core/services/cloud_storage/s3_storage_provider.dart` | `S3StorageProvider implements CloudStorageProvider` | 200 |
 | `lib/features/settings/presentation/pages/s3_config_page.dart` | Configuration form + Test Connection | 300 |
 
-New pub dependency: `xml` (pure Dart, parses ListObjectsV2 responses). `http`,
-`crypto`, and `flutter_secure_storage` are already direct dependencies.
+No new pub dependencies: `xml` (parses ListObjectsV2 responses), `http`,
+`crypto`, and `flutter_secure_storage` were already direct dependencies.
 
 ## 5. S3Config and credential storage
 
@@ -155,7 +155,7 @@ S3 semantics:
 | `providerId` / `providerName` | `'s3'` / `'S3-Compatible Storage'` |
 | `isAvailable()` | `true` on every platform |
 | `isAuthenticated()` | `true` iff a config blob exists in secure storage (presence-only; no network — this is called on UI rebuild paths) |
-| `authenticate()` | Live probe: ListObjectsV2 on the prefix (read), then PUT + DELETE of `<prefix>.submersion-probe` (write). Throws `CloudStorageException` with a specific message on failure |
+| `authenticate()` | Live probe: capped ListObjectsV2 on the prefix (max-keys=1, read), then PUT, GET, and DELETE of `<prefix>.submersion-probe` (write + read-back). A missing s3:GetObject permission fails the probe. Throws `CloudStorageException` with a specific message on failure |
 | `signOut()` | Delete the secure-storage blob; clear in-memory cache |
 | `getUserEmail()` | Display label: `<bucket> @ <endpoint host>` (no email concept in S3) |
 | `uploadFile(data, filename, {folderId})` | PutObject to key `<folderId ?? prefix><filename>`; returns `UploadResult(fileId: key, uploadTime: now)` |
@@ -164,7 +164,7 @@ S3 semantics:
 | `listFiles({folderId, namePattern})` | ListObjectsV2 with `prefix=folderId ?? config.prefix`, following `NextContinuationToken` until complete; `namePattern` filtered client-side on the basename |
 | `deleteFile(fileId)` | DeleteObject (idempotent; 404 is success) |
 | `fileExists(fileId)` | HeadObject → 200/404 |
-| `createFolder(...)` / `getOrCreateSyncFolder()` | S3 has no folders: both return the configured prefix; no probe writes, no zero-byte "directory" objects |
+| `createFolder(...)` / `getOrCreateSyncFolder()` | S3 has no folders: `getOrCreateSyncFolder()` returns the configured prefix; `createFolder(name)` maps to the `<prefix><name>/` sub-prefix (used by cloud backup so database backups do not co-locate with sync files); no probe writes, no zero-byte "directory" objects |
 
 `CloudFileInfo.name` is the key's basename, so the sync engine's existing
 `isSyncFile()` filename matching works unchanged.
@@ -256,8 +256,13 @@ Actions:
 - **Save** — validates, persists via `S3CredentialsStore`, selects
   `CloudProviderType.s3`, records `'s3'` as the last provider, pops back to
   the sync page.
-- **Sign out / Remove configuration** (when editing an existing config) —
-  clears the blob via the existing `signOut()` flow.
+- **Remove Configuration** (when editing an existing config via the S3 form) —
+  the explicit destructive path: clears the blob via `signOut()` and
+  deselects the provider. **Sign Out** on the generic cloud-sync page for an
+  already-configured S3 provider only deselects the provider and does **not**
+  delete the stored credentials, so the hand-entered endpoint/key/secret
+  survive a provider switch and are available to re-select without
+  re-entering them.
 
 ### Localization
 
@@ -279,7 +284,7 @@ TDD throughout; tests mirror `lib/` structure under `test/`.
   fires exactly once on a transient failure).
 - **Provider:** tests over a fake `S3ApiClient` — fileId↔key mapping, folder
   no-ops returning the prefix, the authenticate probe sequence
-  (list→put→delete), `signOut` clearing the store and cache, presence-only
+  (list→put→get→delete), `signOut` clearing the store and cache, presence-only
   `isAuthenticated`.
 - **Credentials store:** JSON round-trip with a mocked `FlutterSecureStorage`.
 - **Config page:** widget test for validation (required fields, http warning,
@@ -305,6 +310,11 @@ TDD throughout; tests mirror `lib/` structure under `test/`.
   enum/init lines. This work is based on `main`.
 - **Config staleness in the provider singleton** — addressed by in-memory
   cache invalidation on `saveConfig`/`signOut` (§5).
+- **Vestigial sync_metadata columns** — `sync_provider`/`remote_file_id` are
+  never written non-null by any current code path. The S3 sign-out branch
+  still clears them exactly like the standard sign-out (it skips only the
+  provider's credential deletion), so metadata behavior is uniform across
+  providers.
 
 ## 12. Success criteria
 
