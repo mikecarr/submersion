@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -65,7 +66,7 @@ class S3ApiClient {
       key: key,
       lastModified: lastModifiedHeader != null
           ? HttpDate.parse(lastModifiedHeader)
-          : DateTime.now().toUtc(),
+          : _now().toUtc(),
       size: contentLength != null ? int.tryParse(contentLength) : null,
     );
   }
@@ -90,14 +91,12 @@ class S3ApiClient {
         queryParams: {
           'list-type': '2',
           if (prefix.isNotEmpty) 'prefix': prefix,
-          // ignore: use_null_aware_elements
-          if (continuationToken != null)
-            'continuation-token': continuationToken,
+          'continuation-token': ?continuationToken,
         },
       );
       if (response.statusCode != 200) _throwFor('list', prefix, response);
 
-      final document = XmlDocument.parse(response.body);
+      final document = XmlDocument.parse(utf8.decode(response.bodyBytes));
       for (final contents in document.findAllElements('Contents')) {
         final key = contents.getElement('Key')?.innerText;
         final lastModified = contents.getElement('LastModified')?.innerText;
@@ -123,6 +122,7 @@ class S3ApiClient {
     return results;
   }
 
+  /// Closes the underlying HTTP client (including an injected one).
   void close() => _http.close();
 
   /// Scheme/host/port/path for [key], honoring path-style vs virtual-hosted
@@ -158,23 +158,22 @@ class S3ApiClient {
     Map<String, String> queryParams = const {},
     Uint8List? body,
   }) async {
-    http.Response response;
     try {
-      response = await _send(method, key, queryParams: queryParams, body: body);
+      final response = await _send(
+        method,
+        key,
+        queryParams: queryParams,
+        body: body,
+      );
       if (response.statusCode < 500) return response;
     } on http.ClientException {
-      response = await _retry(method, key, queryParams, body);
-      return response;
-    } on SocketException {
-      response = await _retry(method, key, queryParams, body);
-      return response;
+      // Transport failure; retry once below.
+    } on IOException {
+      // Socket or TLS failure; retry once below.
     } on TimeoutException {
-      response = await _retry(method, key, queryParams, body);
-      return response;
+      // Timed out; retry once below.
     }
-    // First attempt was a 5xx: retry once, return whatever comes back.
-    await Future<void>.delayed(_retryDelay);
-    return _send(method, key, queryParams: queryParams, body: body);
+    return _retry(method, key, queryParams, body);
   }
 
   Future<http.Response> _retry(
@@ -231,7 +230,9 @@ class S3ApiClient {
   }
 
   Never _throwFor(String operation, String key, http.Response response) {
-    final errorCode = _xmlErrorCode(response.body);
+    final errorCode = _xmlErrorCode(
+      utf8.decode(response.bodyBytes, allowMalformed: true),
+    );
     if (response.statusCode == 403) {
       if (errorCode == 'RequestTimeTooSkewed') {
         throw const CloudStorageException(
