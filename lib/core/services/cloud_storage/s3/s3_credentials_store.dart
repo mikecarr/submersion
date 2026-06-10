@@ -21,8 +21,12 @@ class S3CredentialsStore {
     final raw = await _storage.read(key: storageKey);
     if (raw == null) return null;
     try {
-      return S3Config.fromJson(jsonDecode(raw) as Map<String, Object?>);
+      final decoded = jsonDecode(raw);
+      if (decoded is! Map<String, Object?>) return null;
+      return S3Config.fromJson(decoded);
     } on FormatException {
+      return null;
+    } on TypeError {
       return null;
     }
   }

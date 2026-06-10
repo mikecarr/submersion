@@ -90,4 +90,14 @@ void main() {
     storage.values[S3CredentialsStore.storageKey] = 'not-json{';
     expect(await store.load(), isNull);
   });
+
+  test('valid JSON that is not an object loads as null', () async {
+    storage.values[S3CredentialsStore.storageKey] = '[]';
+    expect(await store.load(), isNull);
+  });
+
+  test('an object with wrong-typed fields loads as null', () async {
+    storage.values[S3CredentialsStore.storageKey] = '{"endpoint": 1}';
+    expect(await store.load(), isNull);
+  });
 }
