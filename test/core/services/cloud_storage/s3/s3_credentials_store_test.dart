@@ -49,6 +49,19 @@ class _MemorySecureStorage extends Fake implements FlutterSecureStorage {
   }
 }
 
+class _ThrowingSecureStorage extends Fake implements FlutterSecureStorage {
+  @override
+  Future<String?> read({
+    required String key,
+    AppleOptions? iOptions,
+    AndroidOptions? aOptions,
+    LinuxOptions? lOptions,
+    WebOptions? webOptions,
+    AppleOptions? mOptions,
+    WindowsOptions? wOptions,
+  }) async => throw Exception('keychain locked');
+}
+
 void main() {
   late _MemorySecureStorage storage;
   late S3CredentialsStore store;
@@ -99,5 +112,10 @@ void main() {
   test('an object with wrong-typed fields loads as null', () async {
     storage.values[S3CredentialsStore.storageKey] = '{"endpoint": 1}';
     expect(await store.load(), isNull);
+  });
+
+  test('storage errors propagate to the caller', () async {
+    final throwingStore = S3CredentialsStore(storage: _ThrowingSecureStorage());
+    expect(throwingStore.load(), throwsA(isA<Exception>()));
   });
 }

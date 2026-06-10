@@ -8,6 +8,9 @@ import 'package:submersion/core/services/cloud_storage/s3/s3_config.dart';
 /// JSON blob in the platform keychain. One blob keeps load/save atomic;
 /// nothing about the S3 setup ever touches SharedPreferences or the
 /// database.
+///
+/// A corrupt blob is left in place rather than deleted, so a transient
+/// decode bug cannot destroy credentials; save() simply overwrites it.
 class S3CredentialsStore {
   S3CredentialsStore({FlutterSecureStorage? storage})
     : _storage = storage ?? const FlutterSecureStorage();
@@ -16,7 +19,8 @@ class S3CredentialsStore {
 
   static const String storageKey = 'sync_s3_config';
 
-  /// The stored config, or null when unset or unreadable.
+  /// The stored config, or null when unset or the stored blob is corrupt;
+  /// platform keychain errors propagate.
   Future<S3Config?> load() async {
     final raw = await _storage.read(key: storageKey);
     if (raw == null) return null;
