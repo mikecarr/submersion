@@ -38,6 +38,30 @@ void main() {
     epochStore: epochStore,
   );
 
+  /// Seed a peer's sync file in the cloud: a valid checksummed payload (it
+  /// exports the current local test DB) under [peerDeviceId], optionally
+  /// stamped with [epochId].
+  Future<void> seedPeerFile({
+    required String peerDeviceId,
+    String? epochId,
+  }) async {
+    final serializer = SyncDataSerializer();
+    final payload = await serializer.exportData(
+      deviceId: peerDeviceId,
+      since: null,
+      lastSyncTimestamp: null,
+      deletions: const [],
+      uploadNonce: null,
+      epochId: epochId,
+    );
+    final json = serializer.serializePayload(payload);
+    await cloud.uploadFile(
+      Uint8List.fromList(utf8.encode(json)),
+      '${CloudStorageProviderMixin.syncFilePrefix}$peerDeviceId'
+      '${CloudStorageProviderMixin.syncFileExtension}',
+    );
+  }
+
   group('marker IO', () {
     const marker = LibraryEpochMarker(
       epochId: 'e1',
@@ -147,6 +171,99 @@ void main() {
       expect(result.isSuccess, isFalse);
       expect(epochStore.pendingReplace?.epochId, 'new-epoch');
       expect(await SyncRepository().getLastAcceptedEpochId(), isNull);
+    });
+  });
+
+  group('performSync epoch gating', () {
+    const marker = LibraryEpochMarker(
+      epochId: 'e1',
+      replacedAt: 1,
+      deviceId: 'replacer',
+    );
+
+    test('pending intent executes the replace instead of merging', () async {
+      await seedPeerFile(peerDeviceId: 'peer-1');
+      await epochStore.setPendingReplace(marker);
+
+      final result = await buildService().performSync();
+
+      expect(result.isSuccess, isTrue);
+      expect(epochStore.pendingReplace, isNull);
+      expect(await SyncRepository().getLastAcceptedEpochId(), 'e1');
+      // The peer file was wiped, not merged.
+      final files = await cloud.listFiles(
+        namePattern: CloudStorageProviderMixin.syncFileStem,
+      );
+      expect(files.any((f) => f.name.contains('peer-1')), isFalse);
+    });
+
+    test(
+      'no marker + no accepted epoch behaves as legacy (normal sync)',
+      () async {
+        final result = await buildService().performSync();
+        expect(result.isSuccess, isTrue);
+        expect(result.status, isNot(SyncResultStatus.awaitingAdoption));
+      },
+    );
+
+    test(
+      'marker matching accepted epoch proceeds and filters stale files',
+      () async {
+        final service = buildService();
+        await service.writeLibraryEpochMarker(cloud, marker);
+        await SyncRepository().setLastAcceptedEpochId('e1');
+        await epochStore.setLastAccepted(marker);
+        await seedPeerFile(peerDeviceId: 'stale-peer'); // unstamped = stale
+        await seedPeerFile(peerDeviceId: 'fresh-peer', epochId: 'e1');
+
+        final result = await service.performSync();
+
+        expect(result.isSuccess, isTrue);
+        // Stale file was ignored and opportunistically deleted.
+        final files = await cloud.listFiles(
+          namePattern: CloudStorageProviderMixin.syncFileStem,
+        );
+        expect(files.any((f) => f.name.contains('stale-peer')), isFalse);
+        expect(files.any((f) => f.name.contains('fresh-peer')), isTrue);
+      },
+    );
+
+    test('marker mismatch halts before merge or upload', () async {
+      final service = buildService();
+      await service.writeLibraryEpochMarker(cloud, marker);
+      // This device never accepted e1.
+      await seedPeerFile(peerDeviceId: 'peer-1', epochId: 'e1');
+      cloud.operationLog.clear();
+
+      final result = await service.performSync();
+
+      expect(result.status, SyncResultStatus.awaitingAdoption);
+      expect(result.replaceMarker?.epochId, 'e1');
+      // No upload of our own file happened.
+      expect(
+        cloud.operationLog.where((op) => op.startsWith('upload:')),
+        isEmpty,
+      );
+    });
+
+    test('missing marker with accepted epoch self-heals the marker', () async {
+      await SyncRepository().setLastAcceptedEpochId('e1');
+      await epochStore.setLastAccepted(marker);
+
+      final service = buildService();
+      final result = await service.performSync();
+
+      expect(result.isSuccess, isTrue);
+      expect((await service.readLibraryEpochMarker(cloud))?.epochId, 'e1');
+    });
+
+    test('unreadable marker fails the sync closed', () async {
+      await cloud.uploadFile(
+        Uint8List.fromList(utf8.encode('not json')),
+        libraryEpochFileName,
+      );
+      final result = await buildService().performSync();
+      expect(result.status, SyncResultStatus.error);
     });
   });
 }

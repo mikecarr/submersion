@@ -22,6 +22,7 @@ enum SyncResultStatus {
   hasConflicts,
   networkError,
   authError,
+  awaitingAdoption,
   error,
 }
 
@@ -34,6 +35,11 @@ class SyncResult {
   final DateTime? lastSyncTime;
   final bool adoptedFreshIdentity;
 
+  /// Set with [SyncResultStatus.awaitingAdoption]: the cloud library was
+  /// replaced under this marker's epoch and the user must adopt (or defer)
+  /// before any sync can proceed.
+  final LibraryEpochMarker? replaceMarker;
+
   const SyncResult({
     required this.status,
     this.message,
@@ -41,6 +47,7 @@ class SyncResult {
     this.conflictsFound = 0,
     this.lastSyncTime,
     this.adoptedFreshIdentity = false,
+    this.replaceMarker,
   });
 
   bool get isSuccess =>
@@ -299,6 +306,60 @@ class SyncService {
         () => _syncRepository.ensureSyncClockConfigured(),
       );
 
+      // ---- Library epoch gate (restore Replace mode) ----
+      // Order matters: a pending replace must run INSTEAD of a merge (merging
+      // would pull back the data the user just replaced away), and a marker
+      // from an unknown epoch must halt everything until the user adopts.
+      String? currentEpochId;
+      final epochStore = _epochStore;
+      if (epochStore != null) {
+        final pending = epochStore.pendingReplace;
+        if (pending != null) {
+          return await executeLibraryReplace(pending);
+        }
+        final accepted =
+            await _syncRepository.getLastAcceptedEpochId() ??
+            epochStore.lastAcceptedEpochId;
+        LibraryEpochMarker? marker;
+        try {
+          marker = await readLibraryEpochMarker(provider);
+        } catch (e) {
+          _log.warning('Library epoch marker unreadable; failing closed: $e');
+          return const SyncResult(
+            status: SyncResultStatus.error,
+            message: 'Could not read the library epoch marker',
+          );
+        }
+        if (marker == null) {
+          if (accepted != null) {
+            // We are on an epoch but the marker vanished: self-heal it from
+            // the mirrored copy and continue as current.
+            final stored = epochStore.lastAcceptedMarker;
+            if (stored != null) {
+              try {
+                await writeLibraryEpochMarker(provider, stored);
+              } catch (e) {
+                _log.warning('Could not self-heal epoch marker: $e');
+              }
+            }
+            currentEpochId = accepted;
+          }
+          // accepted == null: pre-epoch world, proceed exactly as today.
+        } else if (marker.epochId == accepted) {
+          currentEpochId = accepted;
+        } else {
+          _log.info(
+            'Cloud library was replaced (epoch ${marker.epochId}); '
+            'halting sync until the user adopts',
+          );
+          return SyncResult(
+            status: SyncResultStatus.awaitingAdoption,
+            message: 'The cloud library was replaced from a backup',
+            replaceMarker: marker,
+          );
+        }
+      }
+
       // Try to download existing remote file
       _reportProgress(
         SyncPhase.downloading,
@@ -396,6 +457,24 @@ class SyncService {
           continue;
         }
 
+        // Stale-epoch filter: a file written under an older library epoch
+        // (or none, once an epoch exists) is inert -- merging it would leak
+        // the replaced-away library back in. Best-effort delete it.
+        if (currentEpochId != null && payload.epochId != currentEpochId) {
+          _log.info(
+            'Ignoring stale-epoch sync file ${file.name} '
+            '(${payload.epochId ?? 'unstamped'} != $currentEpochId)',
+          );
+          try {
+            await provider
+                .deleteFile(file.id)
+                .timeout(const Duration(seconds: 8));
+          } catch (e) {
+            _log.warning('Could not delete stale sync file ${file.name}: $e');
+          }
+          continue;
+        }
+
         if (file.name == CloudStorageProviderMixin.canonicalSyncFileName) {
           // Parsed fine: its content is either our own pre-upgrade upload or
           // about to be merged below. Either way it is fully represented by
@@ -435,6 +514,7 @@ class SyncService {
           lastSyncTimestamp: lastSyncTime?.millisecondsSinceEpoch,
           deletions: deletions,
           uploadNonce: uploadNonce,
+          epochId: currentEpochId,
         ),
       );
 
