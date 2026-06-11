@@ -85,6 +85,15 @@ class SyncPayload {
   final SyncData data;
   final Map<String, List<SyncDeletion>> deletions;
 
+  /// The `data` section exactly as it appeared in the received document,
+  /// re-encoded from the decoded map (Dart maps preserve key order, and the
+  /// writer used compact jsonEncode, so this reproduces the writer's bytes).
+  /// Checksums must be verified against the WRITER's encoding: re-serializing
+  /// through this build's [SyncData.toJson] adds entity keys older builds
+  /// never wrote, which made every released build's payload "invalid".
+  /// Null for locally constructed payloads (export path).
+  final String? rawDataJson;
+
   const SyncPayload({
     required this.version,
     required this.exportedAt,
@@ -93,6 +102,7 @@ class SyncPayload {
     required this.checksum,
     required this.data,
     required this.deletions,
+    this.rawDataJson,
   });
 
   Map<String, dynamic> toJson() => {
@@ -117,6 +127,7 @@ class SyncPayload {
       lastSyncTimestamp: json['lastSyncTimestamp'] as int?,
       checksum: json['checksum'] as String,
       data: SyncData.fromJson(json['data'] as Map<String, dynamic>),
+      rawDataJson: json['data'] == null ? null : jsonEncode(json['data']),
       deletions: rawDeletions.map((key, value) {
         final list = value as List? ?? [];
         final deletions = list
@@ -516,9 +527,13 @@ class SyncDataSerializer {
     return SyncPayload.fromJson(map);
   }
 
-  /// Validate checksum of payload
+  /// Validate checksum of payload.
+  ///
+  /// Verified over the data section as received ([SyncPayload.rawDataJson])
+  /// so payloads written by builds with fewer/more entity keys still
+  /// validate; falls back to re-serializing for locally built payloads.
   bool validateChecksum(SyncPayload payload) {
-    final dataJson = jsonEncode(payload.data.toJson());
+    final dataJson = payload.rawDataJson ?? jsonEncode(payload.data.toJson());
     final computed = _computeChecksum(dataJson);
     return computed == payload.checksum;
   }

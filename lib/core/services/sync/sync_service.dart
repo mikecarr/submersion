@@ -327,26 +327,8 @@ class SyncService {
         // records; and skipping a file whose record failed to apply once would
         // drop it forever. Re-applying is idempotent (upsert + HLC), so we
         // always download and merge every foreign file.
-        SyncPayload payload;
-        try {
-          final remoteData = await provider
-              .downloadFile(file.id)
-              .timeout(const Duration(seconds: 15));
-          final remoteJson = _decodePayloadBytes(remoteData);
-          final parsed = _serializer.deserializePayload(remoteJson);
-          if (!_serializer.validateChecksum(parsed)) {
-            _log.warning('Remote sync file ${file.name} has invalid checksum');
-            continue;
-          }
-          payload = parsed;
-        } on TimeoutException {
-          _log.warning('Timed out downloading ${file.name}');
-          continue;
-        } catch (e, stackTrace) {
-          _log.warning(
-            'Failed to download/parse ${file.name}: $e',
-            stackTrace: stackTrace,
-          );
+        final payload = await _downloadAndParsePayload(provider, file);
+        if (payload == null) {
           continue;
         }
 
@@ -542,6 +524,46 @@ class SyncService {
       return utf8.decode(data);
     } catch (_) {
       return String.fromCharCodes(data);
+    }
+  }
+
+  /// Download and parse one remote sync file. Returns null (after logging)
+  /// when the file cannot be fetched, fails checksum validation, or was
+  /// written by a NEWER format version than this build understands --
+  /// applying a future format would have undefined semantics, so it is
+  /// skipped until the app is updated.
+  Future<SyncPayload?> _downloadAndParsePayload(
+    CloudStorageProvider provider,
+    CloudFileInfo file,
+  ) async {
+    try {
+      final remoteData = await provider
+          .downloadFile(file.id)
+          .timeout(const Duration(seconds: 15));
+      final remoteJson = _decodePayloadBytes(remoteData);
+      final parsed = _serializer.deserializePayload(remoteJson);
+      if (parsed.version > syncFormatVersion) {
+        _log.warning(
+          'Remote sync file ${file.name} uses format v${parsed.version} '
+          '(this build understands v$syncFormatVersion); update the app on '
+          'this device to merge it',
+        );
+        return null;
+      }
+      if (!_serializer.validateChecksum(parsed)) {
+        _log.warning('Remote sync file ${file.name} has invalid checksum');
+        return null;
+      }
+      return parsed;
+    } on TimeoutException {
+      _log.warning('Timed out downloading ${file.name}');
+      return null;
+    } catch (e, stackTrace) {
+      _log.warning(
+        'Failed to download/parse ${file.name}: $e',
+        stackTrace: stackTrace,
+      );
+      return null;
     }
   }
 

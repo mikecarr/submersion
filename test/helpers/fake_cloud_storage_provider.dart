@@ -13,6 +13,11 @@ class FakeCloudStorageProvider extends CloudStorageProvider
   int get fileCount => _files.length;
   Uint8List? bytesOf(String name) => _files[name]?.data;
 
+  /// Seed a file as though another device had uploaded it.
+  void seedFile(String name, Uint8List data) {
+    _files[name] = _FakeFile(data, DateTime.now());
+  }
+
   /// Bytes of the single sync payload file present, regardless of its
   /// per-device filename (`submersion_sync_<deviceId>.json`) or the legacy
   /// canonical name. Convenience for export-shape assertions in tests.
