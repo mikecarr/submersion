@@ -3204,6 +3204,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get diveLog_edit_group_conditions => '环境条件';
 
   @override
+  String get diveLog_edit_group_experience => '潜水体验';
+
+  @override
   String get diveLog_edit_group_gasGear => '气体与装备';
 
   @override
@@ -3220,6 +3223,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get diveLog_edit_invite_conditions => '添加环境条件 - 水况、能见度、天气';
+
+  @override
+  String get diveLog_edit_invite_experience => '添加评分、生物目击、笔记或标签';
 
   @override
   String get diveLog_edit_invite_gasGear => '添加气体与装备 - 模式、气瓶、装备、配重';
@@ -3480,6 +3486,20 @@ class AppLocalizationsZh extends AppLocalizations {
       locale: localeName,
       other: '$count 件装备',
       one: '1 件装备',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get diveLog_edit_summary_notes => '笔记';
+
+  @override
+  String diveLog_edit_summary_species(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 个物种',
+      one: '1 个物种',
     );
     return '$_temp0';
   }

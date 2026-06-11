@@ -3366,6 +3366,9 @@ class AppLocalizationsIt extends AppLocalizations {
   String get diveLog_edit_group_conditions => 'Condizioni';
 
   @override
+  String get diveLog_edit_group_experience => 'Esperienza';
+
+  @override
   String get diveLog_edit_group_gasGear => 'Gas e attrezzatura';
 
   @override
@@ -3383,6 +3386,10 @@ class AppLocalizationsIt extends AppLocalizations {
   @override
   String get diveLog_edit_invite_conditions =>
       'Aggiungi condizioni: acqua, visibilità, meteo';
+
+  @override
+  String get diveLog_edit_invite_experience =>
+      'Aggiungi valutazione, avvistamenti, note o tag';
 
   @override
   String get diveLog_edit_invite_gasGear =>
@@ -3657,6 +3664,20 @@ class AppLocalizationsIt extends AppLocalizations {
       locale: localeName,
       other: '$count elementi',
       one: '1 elemento',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get diveLog_edit_summary_notes => 'note';
+
+  @override
+  String diveLog_edit_summary_species(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count specie',
+      one: '1 specie',
     );
     return '$_temp0';
   }

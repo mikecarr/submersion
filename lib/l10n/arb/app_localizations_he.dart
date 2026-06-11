@@ -3272,6 +3272,9 @@ class AppLocalizationsHe extends AppLocalizations {
   String get diveLog_edit_group_conditions => 'תנאים';
 
   @override
+  String get diveLog_edit_group_experience => 'חוויה';
+
+  @override
   String get diveLog_edit_group_gasGear => 'גז וציוד';
 
   @override
@@ -3289,6 +3292,10 @@ class AppLocalizationsHe extends AppLocalizations {
   @override
   String get diveLog_edit_invite_conditions =>
       'הוספת תנאים - מים, ראות, מזג אוויר';
+
+  @override
+  String get diveLog_edit_invite_experience =>
+      'הוספת דירוג, תצפיות, הערות או תגיות';
 
   @override
   String get diveLog_edit_invite_gasGear =>
@@ -3556,6 +3563,20 @@ class AppLocalizationsHe extends AppLocalizations {
       locale: localeName,
       other: '$count פריטים',
       one: 'פריט אחד',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get diveLog_edit_summary_notes => 'הערות';
+
+  @override
+  String diveLog_edit_summary_species(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count מינים',
+      one: 'מין אחד',
     );
     return '$_temp0';
   }

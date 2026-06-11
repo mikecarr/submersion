@@ -5680,6 +5680,12 @@ abstract class AppLocalizations {
   /// **'Conditions'**
   String get diveLog_edit_group_conditions;
 
+  /// Form group: rating, marine life, notes, tags
+  ///
+  /// In en, this message translates to:
+  /// **'Experience'**
+  String get diveLog_edit_group_experience;
+
   /// Form group: mode, tanks, equipment, weight
   ///
   /// In en, this message translates to:
@@ -5715,6 +5721,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Add conditions - water, visibility, weather'**
   String get diveLog_edit_invite_conditions;
+
+  /// Empty-state invitation for the Experience group
+  ///
+  /// In en, this message translates to:
+  /// **'Add rating, sightings, notes or tags'**
+  String get diveLog_edit_invite_experience;
 
   /// Empty-state invitation for the Gas & Gear group
   ///
@@ -6177,6 +6189,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count, plural, one{1 item} other{{count} items}}'**
   String diveLog_edit_summary_items(int count);
+
+  /// Collapsed summary fragment indicating notes exist
+  ///
+  /// In en, this message translates to:
+  /// **'notes'**
+  String get diveLog_edit_summary_notes;
+
+  /// Collapsed summary fragment: sighting species count
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{1 species} other{{count} species}}'**
+  String diveLog_edit_summary_species(int count);
 
   /// Collapsed summary fragment: tank count
   ///

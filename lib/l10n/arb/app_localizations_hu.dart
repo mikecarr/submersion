@@ -3349,6 +3349,9 @@ class AppLocalizationsHu extends AppLocalizations {
   String get diveLog_edit_group_conditions => 'Körülmények';
 
   @override
+  String get diveLog_edit_group_experience => 'Élmény';
+
+  @override
   String get diveLog_edit_group_gasGear => 'Gáz és felszerelés';
 
   @override
@@ -3366,6 +3369,10 @@ class AppLocalizationsHu extends AppLocalizations {
   @override
   String get diveLog_edit_invite_conditions =>
       'Körülmények hozzáadása - víz, látótávolság, időjárás';
+
+  @override
+  String get diveLog_edit_invite_experience =>
+      'Értékelés, észlelések, jegyzetek vagy címkék hozzáadása';
 
   @override
   String get diveLog_edit_invite_gasGear =>
@@ -3639,6 +3646,20 @@ class AppLocalizationsHu extends AppLocalizations {
       locale: localeName,
       other: '$count elem',
       one: '1 elem',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get diveLog_edit_summary_notes => 'jegyzetek';
+
+  @override
+  String diveLog_edit_summary_species(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count faj',
+      one: '1 faj',
     );
     return '$_temp0';
   }

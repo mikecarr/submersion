@@ -38,7 +38,9 @@ import 'package:submersion/features/dive_log/presentation/providers/outlier_sugg
 import 'package:submersion/features/dive_log/presentation/widgets/custom_field_input_row.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/edit_sections/buddies_section.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/edit_sections/conditions_section.dart';
+import 'package:submersion/features/dive_log/presentation/widgets/edit_sections/experience_section.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/edit_sections/gas_gear_section.dart';
+import 'package:submersion/features/dive_log/presentation/widgets/edit_sections/rare_sections.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/edit_sections/tank_card.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/edit_sections/the_dive_section.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/edit_sections/trip_section.dart';
@@ -61,6 +63,7 @@ import 'package:submersion/features/media/presentation/providers/media_providers
 import 'package:submersion/features/media/presentation/widgets/photo_gps_suggestion_banner.dart';
 import 'package:submersion/features/media/presentation/widgets/quick_site_from_gps_dialog.dart';
 import 'package:submersion/l10n/l10n_extension.dart';
+import 'package:submersion/shared/widgets/forms/add_section_row.dart';
 import 'package:submersion/shared/widgets/forms/form_row.dart';
 import 'package:submersion/shared/widgets/forms/form_style.dart';
 import 'package:submersion/core/constants/tank_presets.dart';
@@ -212,6 +215,12 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
       () => _expanded[key] = !_isExpanded(key, defaultValue: defaultValue),
     );
   }
+
+  bool get _showCourseSection =>
+      _selectedCourse != null || _expanded['course'] == true;
+
+  bool get _showCustomFieldsSection =>
+      _customFields.isNotEmpty || _expanded['customFields'] == true;
 
   @override
   void initState() {
@@ -579,17 +588,30 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
           const SizedBox(height: FormStyle.sectionGap),
           _buildBuddiesSection(),
           const SizedBox(height: FormStyle.sectionGap),
-          _buildRatingSection(),
-          const SizedBox(height: 16),
-          _buildSightingsSection(),
-          const SizedBox(height: 16),
-          _buildNotesSection(),
-          const SizedBox(height: 16),
-          _buildCourseSection(),
-          const SizedBox(height: 16),
-          _buildTagsSection(),
-          const SizedBox(height: 16),
-          _buildCustomFieldsSection(),
+          _buildExperienceSection(),
+          const SizedBox(height: FormStyle.sectionGap),
+          if (_showCourseSection) ...[
+            _buildCourseGroupSection(),
+            const SizedBox(height: FormStyle.sectionGap),
+          ],
+          if (_showCustomFieldsSection) ...[
+            _buildCustomFieldsGroupSection(),
+            const SizedBox(height: FormStyle.sectionGap),
+          ],
+          AddSectionRow(
+            entries: [
+              if (!_showCourseSection)
+                AddSectionEntry(
+                  label: context.l10n.diveLog_edit_section_trainingCourse,
+                  onTap: () => setState(() => _expanded['course'] = true),
+                ),
+              if (!_showCustomFieldsSection)
+                AddSectionEntry(
+                  label: context.l10n.diveLog_edit_section_customFields,
+                  onTap: () => setState(() => _expanded['customFields'] = true),
+                ),
+            ],
+          ),
           const SizedBox(height: 32),
         ],
       ),
@@ -687,31 +709,7 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
     );
   }
 
-  Widget _buildTagsSection() {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              context.l10n.diveLog_edit_section_tags,
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const SizedBox(height: 16),
-            TagInputWidget(
-              selectedTags: _selectedTags,
-              onTagsChanged: (tags) {
-                setState(() => _selectedTags = tags);
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCustomFieldsSection() {
+  Widget _customFieldsChild() {
     final currentDiverId = ref.watch(currentDiverIdProvider);
     final suggestions = currentDiverId != null
         ? ref
@@ -720,74 +718,66 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
               []
         : <String>[];
 
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              context.l10n.diveLog_edit_section_customFields,
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            if (_customFields.isNotEmpty) const Divider(),
-            if (_customFields.isNotEmpty)
-              ReorderableListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                buildDefaultDragHandles: false,
-                itemCount: _customFields.length,
-                onReorder: (oldIndex, newIndex) {
-                  setState(() {
-                    if (newIndex > oldIndex) newIndex--;
-                    final item = _customFields.removeAt(oldIndex);
-                    _customFields.insert(newIndex, item);
-                    for (var i = 0; i < _customFields.length; i++) {
-                      _customFields[i] = _customFields[i].copyWith(
-                        sortOrder: i,
-                      );
-                    }
-                  });
-                },
-                itemBuilder: (context, index) {
-                  final field = _customFields[index];
-                  return CustomFieldInputRow(
-                    key: ValueKey(field.id),
-                    index: index,
-                    field: field,
-                    keySuggestions: suggestions,
-                    onChanged: (updated) {
-                      setState(() {
-                        _customFields[index] = updated;
-                      });
-                    },
-                    onDelete: () {
-                      setState(() {
-                        _customFields.removeAt(index);
-                      });
-                    },
-                  );
-                },
-              ),
-            const SizedBox(height: 8),
-            OutlinedButton.icon(
-              onPressed: () {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(14, 10, 14, 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (_customFields.isNotEmpty) const Divider(),
+          if (_customFields.isNotEmpty)
+            ReorderableListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              buildDefaultDragHandles: false,
+              itemCount: _customFields.length,
+              onReorder: (oldIndex, newIndex) {
                 setState(() {
-                  _customFields.add(
-                    DiveCustomField(
-                      id: _uuid.v4(),
-                      key: '',
-                      value: '',
-                      sortOrder: _customFields.length,
-                    ),
-                  );
+                  if (newIndex > oldIndex) newIndex--;
+                  final item = _customFields.removeAt(oldIndex);
+                  _customFields.insert(newIndex, item);
+                  for (var i = 0; i < _customFields.length; i++) {
+                    _customFields[i] = _customFields[i].copyWith(sortOrder: i);
+                  }
                 });
               },
-              icon: const Icon(Icons.add),
-              label: Text(context.l10n.diveLog_edit_addCustomField),
+              itemBuilder: (context, index) {
+                final field = _customFields[index];
+                return CustomFieldInputRow(
+                  key: ValueKey(field.id),
+                  index: index,
+                  field: field,
+                  keySuggestions: suggestions,
+                  onChanged: (updated) {
+                    setState(() {
+                      _customFields[index] = updated;
+                    });
+                  },
+                  onDelete: () {
+                    setState(() {
+                      _customFields.removeAt(index);
+                    });
+                  },
+                );
+              },
             ),
-          ],
-        ),
+          const SizedBox(height: 8),
+          OutlinedButton.icon(
+            onPressed: () {
+              setState(() {
+                _customFields.add(
+                  DiveCustomField(
+                    id: _uuid.v4(),
+                    key: '',
+                    value: '',
+                    sortOrder: _customFields.length,
+                  ),
+                );
+              });
+            },
+            icon: const Icon(Icons.add),
+            label: Text(context.l10n.diveLog_edit_addCustomField),
+          ),
+        ],
       ),
     );
   }
@@ -1221,25 +1211,27 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
     }
   }
 
-  Widget _buildCourseSection() {
-    return Card(
+  Widget _buildCourseGroupSection() {
+    return RareSection(
+      label: context.l10n.diveLog_edit_section_trainingCourse,
+      expanded: _isExpanded('course', defaultValue: _selectedCourse != null),
+      onToggle: () =>
+          _toggleSection('course', defaultValue: _selectedCourse != null),
+      summary: _selectedCourse?.name ?? '',
+      isEmpty: _selectedCourse == null,
+      emptyInvitation: context.l10n.diveLog_edit_trainingCourseHint,
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.fromLTRB(14, 10, 14, 12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              context.l10n.diveLog_edit_section_trainingCourse,
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const SizedBox(height: 8),
             Text(
               context.l10n.diveLog_edit_trainingCourseHint,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
             CoursePicker(
               selectedCourse: _selectedCourse,
               onCourseSelected: (course) {
@@ -1248,6 +1240,75 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildCustomFieldsGroupSection() {
+    return RareSection(
+      label: context.l10n.diveLog_edit_section_customFields,
+      expanded: _isExpanded(
+        'customFields',
+        defaultValue: _customFields.isNotEmpty,
+      ),
+      onToggle: () => _toggleSection(
+        'customFields',
+        defaultValue: _customFields.isNotEmpty,
+      ),
+      summary: '${_customFields.length}',
+      isEmpty: _customFields.isEmpty,
+      emptyInvitation: context.l10n.diveLog_edit_addCustomField,
+      child: _customFieldsChild(),
+    );
+  }
+
+  Widget _buildExperienceSection() {
+    return ExperienceSection(
+      expanded: _isExpanded('experience', defaultValue: false),
+      onToggle: () => _toggleSection('experience', defaultValue: false),
+      summary: _experienceSummary(),
+      isEmpty: _experienceSummary().isEmpty,
+      rating: _rating,
+      onRatingChanged: (v) => setState(() => _rating = v),
+      notesController: _notesController,
+      notesPlaceholder: context.l10n.diveLog_edit_notesHint,
+      sightingsChild: _sightingsChild(),
+      tagsChild: _tagsChild(),
+    );
+  }
+
+  String _experienceSummary() {
+    final l10n = context.l10n;
+    return [
+      if (_rating > 0) '★' * _rating,
+      if (_sightings.isNotEmpty)
+        l10n.diveLog_edit_summary_species(_sightings.length),
+      if (_notesController.text.trim().isNotEmpty)
+        l10n.diveLog_edit_summary_notes,
+      if (_selectedTags.isNotEmpty) '#${_selectedTags.length}',
+    ].join(' · ');
+  }
+
+  Widget _tagsChild() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(14, 10, 14, 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            context.l10n.diveLog_edit_section_tags,
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+              color: Theme.of(context).colorScheme.primary,
+            ),
+          ),
+          const SizedBox(height: 8),
+          TagInputWidget(
+            selectedTags: _selectedTags,
+            onTagsChanged: (tags) {
+              setState(() => _selectedTags = tags);
+            },
+          ),
+        ],
       ),
     );
   }
@@ -2748,163 +2809,121 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
     return extra == 0 ? first : '$first +$extra';
   }
 
-  Widget _buildRatingSection() {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              context.l10n.diveLog_edit_section_rating,
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
+  Widget _sightingsChild() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(14, 4, 14, 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                context.l10n.diveLog_edit_section_marineLife,
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              TextButton.icon(
+                onPressed: _showSpeciesPicker,
+                icon: const Icon(Icons.add, size: 18),
+                label: Text(context.l10n.diveLog_edit_add),
+              ),
+            ],
+          ),
+          if (_sightings.isEmpty) ...[
             const SizedBox(height: 8),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(5, (index) {
-                final starNumber = index + 1;
-                return IconButton(
-                  icon: Icon(
-                    index < _rating ? Icons.star : Icons.star_border,
-                    color: Colors.amber,
-                    size: 32,
-                  ),
-                  tooltip: '$starNumber star${starNumber > 1 ? 's' : ''}',
-                  onPressed: () {
-                    setState(() => _rating = index + 1);
-                  },
-                );
-              }),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSightingsSection() {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  context.l10n.diveLog_edit_section_marineLife,
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                TextButton.icon(
-                  onPressed: _showSpeciesPicker,
-                  icon: const Icon(Icons.add, size: 18),
-                  label: Text(context.l10n.diveLog_edit_add),
-                ),
-              ],
-            ),
-            if (_sightings.isEmpty) ...[
-              const SizedBox(height: 8),
-              Center(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  child: Column(
-                    children: [
-                      Icon(
-                        Icons.water,
-                        size: 48,
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                child: Column(
+                  children: [
+                    Icon(
+                      Icons.water,
+                      size: 48,
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      context.l10n.diveLog_edit_noMarineLife,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
-                      const SizedBox(height: 8),
-                      Text(
-                        context.l10n.diveLog_edit_noMarineLife,
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      context.l10n.diveLog_edit_marineLifeHint,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        context.l10n.diveLog_edit_marineLifeHint,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
-            ] else ...[
-              const Divider(),
-              ...List.generate(_sightings.length, (index) {
-                final sighting = _sightings[index];
-                return ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  leading: CircleAvatar(
-                    backgroundColor: _getCategoryColor(
-                      sighting.speciesCategory,
+            ),
+          ] else ...[
+            const Divider(),
+            ...List.generate(_sightings.length, (index) {
+              final sighting = _sightings[index];
+              return ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: CircleAvatar(
+                  backgroundColor: _getCategoryColor(sighting.speciesCategory),
+                  child: Icon(
+                    iconForSpeciesCategory(
+                      sighting.speciesCategory ?? SpeciesCategory.other,
                     ),
-                    child: Icon(
-                      iconForSpeciesCategory(
-                        sighting.speciesCategory ?? SpeciesCategory.other,
-                      ),
-                      color: Colors.white,
-                      size: 20,
-                    ),
+                    color: Colors.white,
+                    size: 20,
                   ),
-                  title: Text(sighting.speciesName),
-                  subtitle: sighting.notes.isNotEmpty
-                      ? Text(
-                          sighting.notes,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        )
-                      : null,
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (sighting.count > 1)
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
+                ),
+                title: Text(sighting.speciesName),
+                subtitle: sighting.notes.isNotEmpty
+                    ? Text(
+                        sighting.notes,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      )
+                    : null,
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (sighting.count > 1)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.primaryContainer,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          'x${sighting.count}',
+                          style: TextStyle(
                             color: Theme.of(
                               context,
-                            ).colorScheme.primaryContainer,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Text(
-                            'x${sighting.count}',
-                            style: TextStyle(
-                              color: Theme.of(
-                                context,
-                              ).colorScheme.onPrimaryContainer,
-                              fontWeight: FontWeight.bold,
-                            ),
+                            ).colorScheme.onPrimaryContainer,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
-                      IconButton(
-                        icon: const Icon(Icons.close, size: 18),
-                        tooltip:
-                            context.l10n.diveLog_edit_tooltip_removeSighting,
-                        onPressed: () {
-                          setState(() {
-                            _sightings.removeAt(index);
-                          });
-                        },
                       ),
-                    ],
-                  ),
-                  onTap: () => _editSighting(index),
-                );
-              }),
-            ],
+                    IconButton(
+                      icon: const Icon(Icons.close, size: 18),
+                      tooltip: context.l10n.diveLog_edit_tooltip_removeSighting,
+                      onPressed: () {
+                        setState(() {
+                          _sightings.removeAt(index);
+                        });
+                      },
+                    ),
+                  ],
+                ),
+                onTap: () => _editSighting(index),
+              );
+            }),
           ],
-        ),
+        ],
       ),
     );
   }
@@ -2984,32 +3003,6 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
           });
           Navigator.of(context).pop();
         },
-      ),
-    );
-  }
-
-  Widget _buildNotesSection() {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              context.l10n.diveLog_edit_section_notes,
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _notesController,
-              decoration: InputDecoration(
-                hintText: context.l10n.diveLog_edit_notesHint,
-                border: const OutlineInputBorder(),
-              ),
-              maxLines: 4,
-            ),
-          ],
-        ),
       ),
     );
   }
