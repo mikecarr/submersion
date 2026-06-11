@@ -78,4 +78,75 @@ void main() {
       );
     });
   });
+
+  group('executeLibraryReplace', () {
+    const marker = LibraryEpochMarker(
+      epochId: 'new-epoch',
+      replacedAt: 1,
+      deviceId: 'replacer',
+    );
+
+    test('wipes sync files, writes marker before wipe, uploads stamped file, '
+        'commits epoch', () async {
+      // Seed: one peer file and one legacy shared file in the cloud.
+      await cloud.uploadFile(
+        Uint8List.fromList(utf8.encode('{"version":1}')),
+        '${CloudStorageProviderMixin.syncFilePrefix}peer-1'
+        '${CloudStorageProviderMixin.syncFileExtension}',
+      );
+      await cloud.uploadFile(
+        Uint8List.fromList(utf8.encode('{"version":1}')),
+        CloudStorageProviderMixin.canonicalSyncFileName,
+      );
+      await epochStore.setPendingReplace(marker);
+      cloud.operationLog.clear();
+
+      final service = buildService();
+      final result = await service.executeLibraryReplace(marker);
+
+      expect(result.isSuccess, isTrue);
+      // Marker upload happens before any sync-file delete.
+      final markerIdx = cloud.operationLog.indexWhere(
+        (op) => op == 'upload:$libraryEpochFileName',
+      );
+      final firstDeleteIdx = cloud.operationLog.indexWhere(
+        (op) => op.startsWith('delete:'),
+      );
+      expect(markerIdx, isNonNegative);
+      expect(firstDeleteIdx, isNonNegative);
+      expect(markerIdx, lessThan(firstDeleteIdx));
+
+      // Peer and legacy files are gone; our stamped file exists.
+      final files = await cloud.listFiles(
+        namePattern: CloudStorageProviderMixin.syncFileStem,
+      );
+      final deviceId = await SyncRepository().getDeviceId();
+      expect(files.map((f) => f.name), [
+        '${CloudStorageProviderMixin.syncFilePrefix}$deviceId'
+            '${CloudStorageProviderMixin.syncFileExtension}',
+      ]);
+      final uploaded = SyncDataSerializer().deserializePayload(
+        utf8.decode(cloud.syncFileBytes()!),
+      );
+      expect(uploaded.epochId, 'new-epoch');
+
+      // Epoch committed to both anchors; intent cleared; lastSync set.
+      expect(await SyncRepository().getLastAcceptedEpochId(), 'new-epoch');
+      expect(epochStore.lastAcceptedEpochId, 'new-epoch');
+      expect(epochStore.pendingReplace, isNull);
+      expect(await SyncRepository().getLastSyncTime(), isNotNull);
+    });
+
+    test('upload failure keeps the pending intent for retry', () async {
+      await epochStore.setPendingReplace(marker);
+      cloud.failUploads = true;
+
+      final service = buildService();
+      final result = await service.executeLibraryReplace(marker);
+
+      expect(result.isSuccess, isFalse);
+      expect(epochStore.pendingReplace?.epochId, 'new-epoch');
+      expect(await SyncRepository().getLastAcceptedEpochId(), isNull);
+    });
+  });
 }

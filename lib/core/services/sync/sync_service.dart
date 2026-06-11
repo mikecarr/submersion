@@ -1477,6 +1477,110 @@ class SyncService {
     }
   }
 
+  /// Best-effort deletion of EVERY sync file in the cloud folder: all peers'
+  /// per-device files, our own, the legacy shared file, and conflict copies.
+  /// Failures are logged and skipped -- files that survive carry a stale (or
+  /// missing) epoch stamp and are inert to every current-epoch device.
+  Future<void> deleteAllSyncFiles(CloudStorageProvider provider) async {
+    try {
+      final files = await provider
+          .listFiles(namePattern: CloudStorageProviderMixin.syncFileStem)
+          .timeout(const Duration(seconds: 8));
+      for (final f in files) {
+        try {
+          await provider.deleteFile(f.id).timeout(const Duration(seconds: 8));
+          _log.info('Deleted sync file ${f.name} for library replace');
+        } catch (e) {
+          _log.warning('Could not delete sync file ${f.name}: $e');
+        }
+      }
+    } catch (e) {
+      _log.warning('Could not list sync files for replace wipe: $e');
+    }
+  }
+
+  /// Execute the cloud side of a Replace restore: write the new epoch marker
+  /// FIRST (a peer syncing mid-replace must learn the new epoch before it can
+  /// misread a half-empty folder), wipe every sync file, upload our library
+  /// stamped with the new epoch, then commit the epoch locally and clear the
+  /// pending intent. On any failure the intent is kept so the next sync
+  /// retries instead of merging.
+  Future<SyncResult> executeLibraryReplace(LibraryEpochMarker marker) async {
+    final provider = _cloudProvider;
+    final store = _epochStore;
+    if (provider == null || store == null) {
+      return const SyncResult(
+        status: SyncResultStatus.error,
+        message: 'No cloud provider configured',
+      );
+    }
+    try {
+      if (!await provider.isAuthenticated()) {
+        return const SyncResult(
+          status: SyncResultStatus.authError,
+          message: 'Not authenticated with cloud provider',
+        );
+      }
+      final deviceId = await _syncRepository.getDeviceId();
+      await _syncRepository.ensureSyncClockConfigured();
+
+      await writeLibraryEpochMarker(provider, marker);
+      await deleteAllSyncFiles(provider);
+
+      final deletions = await _syncRepository.getAllDeletions();
+      final uploadNonce = _uuid.v4();
+      final localPayload = await _serializer.exportData(
+        deviceId: deviceId,
+        since: null,
+        lastSyncTimestamp: null,
+        deletions: deletions,
+        uploadNonce: uploadNonce,
+        epochId: marker.epochId,
+      );
+      final localJson = _serializer.serializePayload(localPayload);
+      final localData = Uint8List.fromList(utf8.encode(localJson));
+      String? syncFolder;
+      try {
+        syncFolder = await provider.getOrCreateSyncFolder();
+      } catch (_) {
+        syncFolder = null;
+      }
+      await _syncInitializer?.recordUploadNonce(
+        uploadNonce,
+        provider.providerId,
+      );
+      final upload = await provider
+          .uploadFile(
+            localData,
+            _deviceSyncFileName(deviceId),
+            folderId: syncFolder,
+          )
+          .timeout(const Duration(seconds: 180));
+
+      await _syncRepository.setLastAcceptedEpochId(marker.epochId);
+      await store.setLastAccepted(marker);
+      await _syncRepository.updateLastSyncTime(upload.uploadTime);
+      await _syncRepository.persistSyncClock();
+      await store.clearPendingReplace();
+      _log.info('Library replace executed under epoch ${marker.epochId}');
+      return SyncResult(
+        status: SyncResultStatus.success,
+        message: 'Library replaced',
+        lastSyncTime: upload.uploadTime,
+      );
+    } catch (e, stackTrace) {
+      _log.error(
+        'Library replace failed; pending intent kept for retry',
+        error: e,
+        stackTrace: stackTrace,
+      );
+      return SyncResult(
+        status: SyncResultStatus.error,
+        message: 'Library replace failed: $e',
+      );
+    }
+  }
+
   /// Download and parse the cloud epoch marker. Returns null when absent.
   /// Throws on listing/parse failure: "unreadable" must be distinguishable
   /// from "absent" -- the caller fails the sync closed rather than guessing.
