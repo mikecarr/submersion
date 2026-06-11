@@ -2790,6 +2790,13 @@ class AppLocalizationsNl extends AppLocalizations {
   }
 
   @override
+  String get diveLog_computerSheet_description =>
+      'Kies vanaf welk computerprofiel je wilt bewerken.';
+
+  @override
+  String get diveLog_computerSheet_title => 'Startprofiel kiezen';
+
+  @override
   String diveLog_cylinderSac_avgDepth(Object depth) {
     return 'Gem.: $depth';
   }
@@ -3335,7 +3342,43 @@ class AppLocalizationsNl extends AppLocalizations {
   String get diveLog_edit_gettingLocation => 'Locatie ophalen...';
 
   @override
+  String get diveLog_edit_group_buddies => 'Buddy\'s';
+
+  @override
+  String get diveLog_edit_group_conditions => 'Omstandigheden';
+
+  @override
+  String get diveLog_edit_group_experience => 'Ervaring';
+
+  @override
+  String get diveLog_edit_group_gasGear => 'Gas & uitrusting';
+
+  @override
+  String get diveLog_edit_group_theDive => 'De duik';
+
+  @override
+  String get diveLog_edit_group_trip => 'Reis';
+
+  @override
   String get diveLog_edit_headerNew => 'Nieuwe duik loggen';
+
+  @override
+  String get diveLog_edit_invite_buddies => 'Buddy\'s toevoegen';
+
+  @override
+  String get diveLog_edit_invite_conditions =>
+      'Omstandigheden toevoegen - water, zicht, weer';
+
+  @override
+  String get diveLog_edit_invite_experience =>
+      'Beoordeling, waarnemingen, notities of tags toevoegen';
+
+  @override
+  String get diveLog_edit_invite_gasGear =>
+      'Gas & uitrusting toevoegen - modus, flessen, uitrusting, lood';
+
+  @override
+  String get diveLog_edit_invite_trip => 'Reis of duikcentrum toevoegen';
 
   @override
   String get diveLog_edit_label_airTemp => 'Luchttemp.';
@@ -3413,6 +3456,30 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get diveLog_edit_notesHint => 'Voeg notities toe over deze duik...';
+
+  @override
+  String get diveLog_edit_row_addSite => 'Duikstek toevoegen';
+
+  @override
+  String get diveLog_edit_row_diveCenter => 'Duikcentrum';
+
+  @override
+  String get diveLog_edit_row_entry => 'Te water';
+
+  @override
+  String get diveLog_edit_row_exit => 'Uit het water';
+
+  @override
+  String get diveLog_edit_row_notSet => 'Niet ingesteld';
+
+  @override
+  String get diveLog_edit_row_site => 'Duikstek';
+
+  @override
+  String get diveLog_edit_row_surfaceInterval => 'Oppervlakte-interval';
+
+  @override
+  String get diveLog_edit_row_trip => 'Reis';
 
   @override
   String get diveLog_edit_save => 'Opslaan';
@@ -3570,6 +3637,42 @@ class AppLocalizationsNl extends AppLocalizations {
       'Kan looptijd niet berekenen uit profiel';
 
   @override
+  String diveLog_edit_summary_items(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items',
+      one: '1 item',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get diveLog_edit_summary_notes => 'notities';
+
+  @override
+  String diveLog_edit_summary_species(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count soorten',
+      one: '1 soort',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String diveLog_edit_summary_tanks(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count flessen',
+      one: '1 fles',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String diveLog_edit_surfaceInterval(Object interval) {
     return 'Oppervlakte-interval: $interval';
   }
@@ -3580,6 +3683,26 @@ class AppLocalizationsNl extends AppLocalizations {
   @override
   String get diveLog_edit_surfacePressureHint =>
       'Standaard: 1013 mbar op zeeniveau';
+
+  @override
+  String get diveLog_edit_tankCard_done => 'Klaar';
+
+  @override
+  String get diveLog_edit_tankCard_edit => 'Bewerken';
+
+  @override
+  String get diveLog_edit_tankCard_mix => 'Mengsel';
+
+  @override
+  String get diveLog_edit_tankCard_pressure => 'Druk';
+
+  @override
+  String diveLog_edit_tankCard_title(int number) {
+    return 'Fles $number';
+  }
+
+  @override
+  String get diveLog_edit_tankCard_volume => 'Volume';
 
   @override
   String get diveLog_edit_tooltip_calculateFromProfile =>
@@ -3681,6 +3804,17 @@ class AppLocalizationsNl extends AppLocalizations {
   @override
   String diveLog_equipmentSetPicker_errorLoading(Object error) {
     return 'Fout bij laden van uitrustingssets: $error';
+  }
+
+  @override
+  String diveLog_equipmentSetPicker_itemsSummary(int count, String names) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items',
+      one: '1 item',
+    );
+    return '$_temp0: $names';
   }
 
   @override
@@ -4039,6 +4173,95 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get diveLog_listPage_menuMatchSites => 'Duiken aan stekken koppelen';
+
+  @override
+  String get diveLog_sighting_decreaseCount => 'Aantal verlagen';
+
+  @override
+  String get diveLog_sighting_increaseCount => 'Aantal verhogen';
+
+  @override
+  String diveLog_speciesPicker_errorLoading(String error) {
+    return 'Fout bij laden van soorten: $error';
+  }
+
+  @override
+  String get diveSites_edit_depth_heroMax => 'Max. diepte';
+
+  @override
+  String get diveSites_edit_depth_heroMin => 'Min. diepte';
+
+  @override
+  String get diveSites_edit_group_accessSafety => 'Toegang & veiligheid';
+
+  @override
+  String get diveSites_edit_group_diveInfo => 'Duikinfo';
+
+  @override
+  String get diveSites_edit_group_identity => 'Identiteit';
+
+  @override
+  String get diveSites_edit_group_lifeNotes => 'Leven & notities';
+
+  @override
+  String get diveSites_edit_group_location => 'Locatie';
+
+  @override
+  String get diveSites_edit_invite_accessSafety =>
+      'Toegang, parkeren, afmeren of gevaren toevoegen';
+
+  @override
+  String get diveSites_edit_invite_diveInfo =>
+      'Dieptebereik, moeilijkheid of beoordeling toevoegen';
+
+  @override
+  String get diveSites_edit_invite_lifeNotes =>
+      'Zeeleven, notities of delen toevoegen';
+
+  @override
+  String get diveSites_edit_invite_location =>
+      'GPS-positie of hoogte toevoegen';
+
+  @override
+  String get diveSites_edit_summary_shared => 'gedeeld';
+
+  @override
+  String get forms_addSection_prefix => 'Toevoegen:';
+
+  @override
+  String get forms_cancel => 'Annuleren';
+
+  @override
+  String get forms_discard_body =>
+      'Je hebt niet-opgeslagen wijzigingen. Als je nu weggaat, gaan ze verloren.';
+
+  @override
+  String get forms_discard_discard => 'Verwerpen';
+
+  @override
+  String get forms_discard_keepEditing => 'Doorgaan met bewerken';
+
+  @override
+  String get forms_discard_title => 'Wijzigingen verwerpen?';
+
+  @override
+  String get forms_save => 'Opslaan';
+
+  @override
+  String forms_section_issues(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count problemen',
+      one: '1 probleem',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String forms_statCell_useProfileValue(String value) {
+    return '$value uit duikprofiel overnemen';
+  }
 
   @override
   String get siteMatchReview_title => 'Stekken koppelen';

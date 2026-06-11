@@ -2673,6 +2673,12 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get diveLog_computerSheet_description => '选择要从哪台电脑的轮廓开始编辑。';
+
+  @override
+  String get diveLog_computerSheet_title => '选择起始轮廓';
+
+  @override
   String diveLog_cylinderSac_avgDepth(Object depth) {
     return '平均：$depth';
   }
@@ -3198,7 +3204,40 @@ class AppLocalizationsZh extends AppLocalizations {
   String get diveLog_edit_gettingLocation => '正在获取位置...';
 
   @override
+  String get diveLog_edit_group_buddies => '潜伴';
+
+  @override
+  String get diveLog_edit_group_conditions => '环境条件';
+
+  @override
+  String get diveLog_edit_group_experience => '潜水体验';
+
+  @override
+  String get diveLog_edit_group_gasGear => '气体与装备';
+
+  @override
+  String get diveLog_edit_group_theDive => '本次潜水';
+
+  @override
+  String get diveLog_edit_group_trip => '行程';
+
+  @override
   String get diveLog_edit_headerNew => '记录新潜水';
+
+  @override
+  String get diveLog_edit_invite_buddies => '添加潜伴';
+
+  @override
+  String get diveLog_edit_invite_conditions => '添加环境条件 - 水况、能见度、天气';
+
+  @override
+  String get diveLog_edit_invite_experience => '添加评分、生物目击、笔记或标签';
+
+  @override
+  String get diveLog_edit_invite_gasGear => '添加气体与装备 - 模式、气瓶、装备、配重';
+
+  @override
+  String get diveLog_edit_invite_trip => '添加行程或潜水中心';
 
   @override
   String get diveLog_edit_label_airTemp => '气温';
@@ -3274,6 +3313,30 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get diveLog_edit_notesHint => '添加关于此次潜水的备注...';
+
+  @override
+  String get diveLog_edit_row_addSite => '添加潜点';
+
+  @override
+  String get diveLog_edit_row_diveCenter => '潜水中心';
+
+  @override
+  String get diveLog_edit_row_entry => '入水';
+
+  @override
+  String get diveLog_edit_row_exit => '出水';
+
+  @override
+  String get diveLog_edit_row_notSet => '未设置';
+
+  @override
+  String get diveLog_edit_row_site => '潜点';
+
+  @override
+  String get diveLog_edit_row_surfaceInterval => '水面间隔';
+
+  @override
+  String get diveLog_edit_row_trip => '行程';
 
   @override
   String get diveLog_edit_save => '保存';
@@ -3423,6 +3486,42 @@ class AppLocalizationsZh extends AppLocalizations {
   String get diveLog_edit_snackbar_unableToCalculateRuntime => '无法从轮廓计算运行时间';
 
   @override
+  String diveLog_edit_summary_items(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 件装备',
+      one: '1 件装备',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get diveLog_edit_summary_notes => '笔记';
+
+  @override
+  String diveLog_edit_summary_species(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 个物种',
+      one: '1 个物种',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String diveLog_edit_summary_tanks(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 个气瓶',
+      one: '1 个气瓶',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String diveLog_edit_surfaceInterval(Object interval) {
     return '水面间隔：$interval';
   }
@@ -3432,6 +3531,26 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get diveLog_edit_surfacePressureHint => '标准：海平面 1013 mbar';
+
+  @override
+  String get diveLog_edit_tankCard_done => '完成';
+
+  @override
+  String get diveLog_edit_tankCard_edit => '编辑';
+
+  @override
+  String get diveLog_edit_tankCard_mix => '气体';
+
+  @override
+  String get diveLog_edit_tankCard_pressure => '压力';
+
+  @override
+  String diveLog_edit_tankCard_title(int number) {
+    return '气瓶 $number';
+  }
+
+  @override
+  String get diveLog_edit_tankCard_volume => '容积';
 
   @override
   String get diveLog_edit_tooltip_calculateFromProfile => '从潜水轮廓计算';
@@ -3523,6 +3642,17 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String diveLog_equipmentSetPicker_errorLoading(Object error) {
     return '加载装备套装出错：$error';
+  }
+
+  @override
+  String diveLog_equipmentSetPicker_itemsSummary(int count, String names) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 件装备',
+      one: '1 件装备',
+    );
+    return '$_temp0：$names';
   }
 
   @override
@@ -3872,6 +4002,90 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get diveLog_listPage_menuMatchSites => '将潜水匹配到潜水点';
+
+  @override
+  String get diveLog_sighting_decreaseCount => '减少数量';
+
+  @override
+  String get diveLog_sighting_increaseCount => '增加数量';
+
+  @override
+  String diveLog_speciesPicker_errorLoading(String error) {
+    return '加载物种时出错：$error';
+  }
+
+  @override
+  String get diveSites_edit_depth_heroMax => '最大深度';
+
+  @override
+  String get diveSites_edit_depth_heroMin => '最小深度';
+
+  @override
+  String get diveSites_edit_group_accessSafety => '通行与安全';
+
+  @override
+  String get diveSites_edit_group_diveInfo => '潜水信息';
+
+  @override
+  String get diveSites_edit_group_identity => '基本信息';
+
+  @override
+  String get diveSites_edit_group_lifeNotes => '生物与笔记';
+
+  @override
+  String get diveSites_edit_group_location => '位置';
+
+  @override
+  String get diveSites_edit_invite_accessSafety => '添加通行、停车、系泊或危险信息';
+
+  @override
+  String get diveSites_edit_invite_diveInfo => '添加深度范围、难度或评分';
+
+  @override
+  String get diveSites_edit_invite_lifeNotes => '添加海洋生物、笔记或共享';
+
+  @override
+  String get diveSites_edit_invite_location => '添加 GPS 位置或海拔';
+
+  @override
+  String get diveSites_edit_summary_shared => '已共享';
+
+  @override
+  String get forms_addSection_prefix => '添加：';
+
+  @override
+  String get forms_cancel => '取消';
+
+  @override
+  String get forms_discard_body => '您有未保存的更改。如果现在离开，更改将丢失。';
+
+  @override
+  String get forms_discard_discard => '放弃';
+
+  @override
+  String get forms_discard_keepEditing => '继续编辑';
+
+  @override
+  String get forms_discard_title => '放弃更改？';
+
+  @override
+  String get forms_save => '保存';
+
+  @override
+  String forms_section_issues(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 个问题',
+      one: '1 个问题',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String forms_statCell_useProfileValue(String value) {
+    return '使用潜水轮廓中的 $value';
+  }
 
   @override
   String get siteMatchReview_title => '匹配潜水点';

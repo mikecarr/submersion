@@ -4769,6 +4769,18 @@ abstract class AppLocalizations {
   /// **'Expand {title} section'**
   String diveLog_collapsible_semantics_expand(Object title);
 
+  /// Description of the computer profile selection sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Select which computer\'s profile to edit from.'**
+  String get diveLog_computerSheet_description;
+
+  /// Title of the sheet choosing which computer profile to edit from
+  ///
+  /// In en, this message translates to:
+  /// **'Choose starting profile'**
+  String get diveLog_computerSheet_title;
+
   /// No description provided for @diveLog_cylinderSac_avgDepth.
   ///
   /// In en, this message translates to:
@@ -5668,11 +5680,77 @@ abstract class AppLocalizations {
   /// **'Getting location...'**
   String get diveLog_edit_gettingLocation;
 
+  /// Form group: dive buddies
+  ///
+  /// In en, this message translates to:
+  /// **'Buddies'**
+  String get diveLog_edit_group_buddies;
+
+  /// Form group: water, environment and weather
+  ///
+  /// In en, this message translates to:
+  /// **'Conditions'**
+  String get diveLog_edit_group_conditions;
+
+  /// Form group: rating, marine life, notes, tags
+  ///
+  /// In en, this message translates to:
+  /// **'Experience'**
+  String get diveLog_edit_group_experience;
+
+  /// Form group: mode, tanks, equipment, weight
+  ///
+  /// In en, this message translates to:
+  /// **'Gas & Gear'**
+  String get diveLog_edit_group_gasGear;
+
+  /// Form group: core dive facts
+  ///
+  /// In en, this message translates to:
+  /// **'The Dive'**
+  String get diveLog_edit_group_theDive;
+
+  /// Form group: trip and dive center
+  ///
+  /// In en, this message translates to:
+  /// **'Trip'**
+  String get diveLog_edit_group_trip;
+
   /// No description provided for @diveLog_edit_headerNew.
   ///
   /// In en, this message translates to:
   /// **'Log New Dive'**
   String get diveLog_edit_headerNew;
+
+  /// Empty-state invitation for the Buddies group
+  ///
+  /// In en, this message translates to:
+  /// **'Add buddies'**
+  String get diveLog_edit_invite_buddies;
+
+  /// Empty-state invitation for the Conditions group
+  ///
+  /// In en, this message translates to:
+  /// **'Add conditions - water, visibility, weather'**
+  String get diveLog_edit_invite_conditions;
+
+  /// Empty-state invitation for the Experience group
+  ///
+  /// In en, this message translates to:
+  /// **'Add rating, sightings, notes or tags'**
+  String get diveLog_edit_invite_experience;
+
+  /// Empty-state invitation for the Gas & Gear group
+  ///
+  /// In en, this message translates to:
+  /// **'Add gas & gear - mode, tanks, equipment, weight'**
+  String get diveLog_edit_invite_gasGear;
+
+  /// Empty-state invitation for the Trip group
+  ///
+  /// In en, this message translates to:
+  /// **'Add trip or dive center'**
+  String get diveLog_edit_invite_trip;
 
   /// No description provided for @diveLog_edit_label_airTemp.
   ///
@@ -5823,6 +5901,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Add notes about this dive...'**
   String get diveLog_edit_notesHint;
+
+  /// Placeholder when no site selected
+  ///
+  /// In en, this message translates to:
+  /// **'Add site'**
+  String get diveLog_edit_row_addSite;
+
+  /// Row label: dive center picker
+  ///
+  /// In en, this message translates to:
+  /// **'Dive center'**
+  String get diveLog_edit_row_diveCenter;
+
+  /// Row label: entry date and time
+  ///
+  /// In en, this message translates to:
+  /// **'Entry'**
+  String get diveLog_edit_row_entry;
+
+  /// Row label: exit date and time
+  ///
+  /// In en, this message translates to:
+  /// **'Exit'**
+  String get diveLog_edit_row_exit;
+
+  /// Placeholder for unset picker rows
+  ///
+  /// In en, this message translates to:
+  /// **'Not set'**
+  String get diveLog_edit_row_notSet;
+
+  /// Row label: dive site picker
+  ///
+  /// In en, this message translates to:
+  /// **'Site'**
+  String get diveLog_edit_row_site;
+
+  /// Row label: surface interval since previous dive
+  ///
+  /// In en, this message translates to:
+  /// **'Surface interval'**
+  String get diveLog_edit_row_surfaceInterval;
+
+  /// Row label: trip picker
+  ///
+  /// In en, this message translates to:
+  /// **'Trip'**
+  String get diveLog_edit_row_trip;
 
   /// No description provided for @diveLog_edit_save.
   ///
@@ -6070,6 +6196,30 @@ abstract class AppLocalizations {
   /// **'Unable to calculate runtime from profile'**
   String get diveLog_edit_snackbar_unableToCalculateRuntime;
 
+  /// Collapsed summary fragment: equipment count
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{1 item} other{{count} items}}'**
+  String diveLog_edit_summary_items(int count);
+
+  /// Collapsed summary fragment indicating notes exist
+  ///
+  /// In en, this message translates to:
+  /// **'notes'**
+  String get diveLog_edit_summary_notes;
+
+  /// Collapsed summary fragment: sighting species count
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{1 species} other{{count} species}}'**
+  String diveLog_edit_summary_species(int count);
+
+  /// Collapsed summary fragment: tank count
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{1 tank} other{{count} tanks}}'**
+  String diveLog_edit_summary_tanks(int count);
+
   /// No description provided for @diveLog_edit_surfaceInterval.
   ///
   /// In en, this message translates to:
@@ -6087,6 +6237,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Standard: 1013 mbar at sea level'**
   String get diveLog_edit_surfacePressureHint;
+
+  /// Collapse the tank editor back to the card
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get diveLog_edit_tankCard_done;
+
+  /// Expand a tank card into the full editor
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get diveLog_edit_tankCard_edit;
+
+  /// Hero label on tank card: gas mix
+  ///
+  /// In en, this message translates to:
+  /// **'Mix'**
+  String get diveLog_edit_tankCard_mix;
+
+  /// Hero label on tank card: start to end pressure
+  ///
+  /// In en, this message translates to:
+  /// **'Pressure'**
+  String get diveLog_edit_tankCard_pressure;
+
+  /// Caption on a tank card
+  ///
+  /// In en, this message translates to:
+  /// **'Tank {number}'**
+  String diveLog_edit_tankCard_title(int number);
+
+  /// Hero label on tank card: tank volume
+  ///
+  /// In en, this message translates to:
+  /// **'Volume'**
+  String get diveLog_edit_tankCard_volume;
 
   /// No description provided for @diveLog_edit_tooltip_calculateFromProfile.
   ///
@@ -6255,6 +6441,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Error loading equipment sets: {error}'**
   String diveLog_equipmentSetPicker_errorLoading(Object error);
+
+  /// Equipment set subtitle: item count and names
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{1 item} other{{count} items}}: {names}'**
+  String diveLog_equipmentSetPicker_itemsSummary(int count, String names);
 
   /// No description provided for @diveLog_equipmentSetPicker_loading.
   ///
@@ -6927,6 +7119,150 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Match Dives to Sites'**
   String get diveLog_listPage_menuMatchSites;
+
+  /// Tooltip: decrease the sighting count
+  ///
+  /// In en, this message translates to:
+  /// **'Decrease count'**
+  String get diveLog_sighting_decreaseCount;
+
+  /// Tooltip: increase the sighting count
+  ///
+  /// In en, this message translates to:
+  /// **'Increase count'**
+  String get diveLog_sighting_increaseCount;
+
+  /// Error shown when the species list fails to load
+  ///
+  /// In en, this message translates to:
+  /// **'Error loading species: {error}'**
+  String diveLog_speciesPicker_errorLoading(String error);
+
+  /// Hero stat label: maximum site depth
+  ///
+  /// In en, this message translates to:
+  /// **'Max depth'**
+  String get diveSites_edit_depth_heroMax;
+
+  /// Hero stat label: minimum site depth
+  ///
+  /// In en, this message translates to:
+  /// **'Min depth'**
+  String get diveSites_edit_depth_heroMin;
+
+  /// Site form group: access, mooring, parking, hazards
+  ///
+  /// In en, this message translates to:
+  /// **'Access & safety'**
+  String get diveSites_edit_group_accessSafety;
+
+  /// Site form group: depth, difficulty, rating
+  ///
+  /// In en, this message translates to:
+  /// **'Dive info'**
+  String get diveSites_edit_group_diveInfo;
+
+  /// Site form group: name, description, country, region
+  ///
+  /// In en, this message translates to:
+  /// **'Identity'**
+  String get diveSites_edit_group_identity;
+
+  /// Site form group: species, notes, sharing
+  ///
+  /// In en, this message translates to:
+  /// **'Life & notes'**
+  String get diveSites_edit_group_lifeNotes;
+
+  /// Site form group: GPS and altitude
+  ///
+  /// In en, this message translates to:
+  /// **'Location'**
+  String get diveSites_edit_group_location;
+
+  /// Empty-state invitation for the Access & safety group
+  ///
+  /// In en, this message translates to:
+  /// **'Add access, parking, mooring or hazards'**
+  String get diveSites_edit_invite_accessSafety;
+
+  /// Empty-state invitation for the Dive info group
+  ///
+  /// In en, this message translates to:
+  /// **'Add depth range, difficulty or rating'**
+  String get diveSites_edit_invite_diveInfo;
+
+  /// Empty-state invitation for the Life & notes group
+  ///
+  /// In en, this message translates to:
+  /// **'Add marine life, notes or sharing'**
+  String get diveSites_edit_invite_lifeNotes;
+
+  /// Empty-state invitation for the Location group
+  ///
+  /// In en, this message translates to:
+  /// **'Add GPS position or altitude'**
+  String get diveSites_edit_invite_location;
+
+  /// Collapsed summary fragment indicating the site is shared
+  ///
+  /// In en, this message translates to:
+  /// **'shared'**
+  String get diveSites_edit_summary_shared;
+
+  /// Prefix of the trailing row listing unused optional form sections, e.g. '+ Add: Course / Custom fields'
+  ///
+  /// In en, this message translates to:
+  /// **'Add:'**
+  String get forms_addSection_prefix;
+
+  /// Cancel action on shared edit form scaffold
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get forms_cancel;
+
+  /// Body of the unsaved-changes dialog
+  ///
+  /// In en, this message translates to:
+  /// **'You have unsaved changes. If you leave now they will be lost.'**
+  String get forms_discard_body;
+
+  /// Leave the form, losing changes
+  ///
+  /// In en, this message translates to:
+  /// **'Discard'**
+  String get forms_discard_discard;
+
+  /// Stay on the form
+  ///
+  /// In en, this message translates to:
+  /// **'Keep editing'**
+  String get forms_discard_keepEditing;
+
+  /// Title of the unsaved-changes dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Discard changes?'**
+  String get forms_discard_title;
+
+  /// Save action on shared edit form scaffold
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get forms_save;
+
+  /// Badge on a collapsed form section that contains validation errors
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{1 issue} other{{count} issues}}'**
+  String forms_section_issues(int count);
+
+  /// Menu action offering to replace a stat with the value computed from the dive profile
+  ///
+  /// In en, this message translates to:
+  /// **'Use {value} from profile'**
+  String forms_statCell_useProfileValue(String value);
 
   /// No description provided for @siteMatchReview_title.
   ///

@@ -2820,6 +2820,13 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
+  String get diveLog_computerSheet_description =>
+      'Wähle, von welchem Computerprofil aus bearbeitet wird.';
+
+  @override
+  String get diveLog_computerSheet_title => 'Startprofil wählen';
+
+  @override
   String diveLog_cylinderSac_avgDepth(Object depth) {
     return 'Durchschn.: $depth';
   }
@@ -3362,7 +3369,43 @@ class AppLocalizationsDe extends AppLocalizations {
   String get diveLog_edit_gettingLocation => 'Standort wird ermittelt...';
 
   @override
+  String get diveLog_edit_group_buddies => 'Buddys';
+
+  @override
+  String get diveLog_edit_group_conditions => 'Bedingungen';
+
+  @override
+  String get diveLog_edit_group_experience => 'Erlebnis';
+
+  @override
+  String get diveLog_edit_group_gasGear => 'Gas & Ausrüstung';
+
+  @override
+  String get diveLog_edit_group_theDive => 'Der Tauchgang';
+
+  @override
+  String get diveLog_edit_group_trip => 'Reise';
+
+  @override
   String get diveLog_edit_headerNew => 'Neuen Tauchgang erfassen';
+
+  @override
+  String get diveLog_edit_invite_buddies => 'Buddys hinzufügen';
+
+  @override
+  String get diveLog_edit_invite_conditions =>
+      'Bedingungen hinzufügen - Wasser, Sicht, Wetter';
+
+  @override
+  String get diveLog_edit_invite_experience =>
+      'Bewertung, Sichtungen, Notizen oder Tags hinzufügen';
+
+  @override
+  String get diveLog_edit_invite_gasGear =>
+      'Gas & Ausrüstung hinzufügen - Modus, Flaschen, Ausrüstung, Blei';
+
+  @override
+  String get diveLog_edit_invite_trip => 'Reise oder Tauchbasis hinzufügen';
 
   @override
   String get diveLog_edit_label_airTemp => 'Lufttemperatur';
@@ -3441,6 +3484,30 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get diveLog_edit_notesHint =>
       'Notizen zu diesem Tauchgang hinzufügen...';
+
+  @override
+  String get diveLog_edit_row_addSite => 'Tauchplatz hinzufügen';
+
+  @override
+  String get diveLog_edit_row_diveCenter => 'Tauchbasis';
+
+  @override
+  String get diveLog_edit_row_entry => 'Einstieg';
+
+  @override
+  String get diveLog_edit_row_exit => 'Ausstieg';
+
+  @override
+  String get diveLog_edit_row_notSet => 'Nicht gesetzt';
+
+  @override
+  String get diveLog_edit_row_site => 'Tauchplatz';
+
+  @override
+  String get diveLog_edit_row_surfaceInterval => 'Oberflächenpause';
+
+  @override
+  String get diveLog_edit_row_trip => 'Reise';
 
   @override
   String get diveLog_edit_save => 'Speichern';
@@ -3599,6 +3666,42 @@ class AppLocalizationsDe extends AppLocalizations {
       'Laufzeit konnte nicht aus dem Profil berechnet werden';
 
   @override
+  String diveLog_edit_summary_items(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Artikel',
+      one: '1 Artikel',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get diveLog_edit_summary_notes => 'Notizen';
+
+  @override
+  String diveLog_edit_summary_species(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Arten',
+      one: '1 Art',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String diveLog_edit_summary_tanks(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Flaschen',
+      one: '1 Flasche',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String diveLog_edit_surfaceInterval(Object interval) {
     return 'Oberflächenintervall: $interval';
   }
@@ -3609,6 +3712,26 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get diveLog_edit_surfacePressureHint =>
       'Standard: 1013 mbar auf Meereshöhe';
+
+  @override
+  String get diveLog_edit_tankCard_done => 'Fertig';
+
+  @override
+  String get diveLog_edit_tankCard_edit => 'Bearbeiten';
+
+  @override
+  String get diveLog_edit_tankCard_mix => 'Gemisch';
+
+  @override
+  String get diveLog_edit_tankCard_pressure => 'Druck';
+
+  @override
+  String diveLog_edit_tankCard_title(int number) {
+    return 'Flasche $number';
+  }
+
+  @override
+  String get diveLog_edit_tankCard_volume => 'Volumen';
 
   @override
   String get diveLog_edit_tooltip_calculateFromProfile =>
@@ -3710,6 +3833,17 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String diveLog_equipmentSetPicker_errorLoading(Object error) {
     return 'Fehler beim Laden der Ausrüstungssets: $error';
+  }
+
+  @override
+  String diveLog_equipmentSetPicker_itemsSummary(int count, String names) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Artikel',
+      one: '1 Artikel',
+    );
+    return '$_temp0: $names';
   }
 
   @override
@@ -4069,6 +4203,95 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get diveLog_listPage_menuMatchSites =>
       'Tauchgänge Tauchplätzen zuordnen';
+
+  @override
+  String get diveLog_sighting_decreaseCount => 'Anzahl verringern';
+
+  @override
+  String get diveLog_sighting_increaseCount => 'Anzahl erhöhen';
+
+  @override
+  String diveLog_speciesPicker_errorLoading(String error) {
+    return 'Fehler beim Laden der Arten: $error';
+  }
+
+  @override
+  String get diveSites_edit_depth_heroMax => 'Max. Tiefe';
+
+  @override
+  String get diveSites_edit_depth_heroMin => 'Min. Tiefe';
+
+  @override
+  String get diveSites_edit_group_accessSafety => 'Zugang & Sicherheit';
+
+  @override
+  String get diveSites_edit_group_diveInfo => 'Tauchinfo';
+
+  @override
+  String get diveSites_edit_group_identity => 'Identität';
+
+  @override
+  String get diveSites_edit_group_lifeNotes => 'Leben & Notizen';
+
+  @override
+  String get diveSites_edit_group_location => 'Position';
+
+  @override
+  String get diveSites_edit_invite_accessSafety =>
+      'Zugang, Parken, Mooring oder Gefahren hinzufügen';
+
+  @override
+  String get diveSites_edit_invite_diveInfo =>
+      'Tiefenbereich, Schwierigkeit oder Bewertung hinzufügen';
+
+  @override
+  String get diveSites_edit_invite_lifeNotes =>
+      'Meeresleben, Notizen oder Freigabe hinzufügen';
+
+  @override
+  String get diveSites_edit_invite_location =>
+      'GPS-Position oder Höhe hinzufügen';
+
+  @override
+  String get diveSites_edit_summary_shared => 'geteilt';
+
+  @override
+  String get forms_addSection_prefix => 'Hinzufügen:';
+
+  @override
+  String get forms_cancel => 'Abbrechen';
+
+  @override
+  String get forms_discard_body =>
+      'Es gibt ungespeicherte Änderungen. Wenn Sie jetzt verlassen, gehen sie verloren.';
+
+  @override
+  String get forms_discard_discard => 'Verwerfen';
+
+  @override
+  String get forms_discard_keepEditing => 'Weiter bearbeiten';
+
+  @override
+  String get forms_discard_title => 'Änderungen verwerfen?';
+
+  @override
+  String get forms_save => 'Speichern';
+
+  @override
+  String forms_section_issues(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Probleme',
+      one: '1 Problem',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String forms_statCell_useProfileValue(String value) {
+    return '$value aus Tauchprofil übernehmen';
+  }
 
   @override
   String get siteMatchReview_title => 'Tauchplätze zuordnen';

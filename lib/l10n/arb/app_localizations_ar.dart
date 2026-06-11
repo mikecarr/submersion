@@ -2744,6 +2744,13 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
+  String get diveLog_computerSheet_description =>
+      'اختر ملف أي كمبيوتر تريد التحرير منه.';
+
+  @override
+  String get diveLog_computerSheet_title => 'اختيار الملف الأولي';
+
+  @override
   String diveLog_cylinderSac_avgDepth(Object depth) {
     return 'متوسط: $depth';
   }
@@ -3280,7 +3287,43 @@ class AppLocalizationsAr extends AppLocalizations {
   String get diveLog_edit_gettingLocation => 'جارٍ تحديد الموقع...';
 
   @override
+  String get diveLog_edit_group_buddies => 'الرفاق';
+
+  @override
+  String get diveLog_edit_group_conditions => 'الظروف';
+
+  @override
+  String get diveLog_edit_group_experience => 'التجربة';
+
+  @override
+  String get diveLog_edit_group_gasGear => 'الغاز والمعدات';
+
+  @override
+  String get diveLog_edit_group_theDive => 'الغوصة';
+
+  @override
+  String get diveLog_edit_group_trip => 'الرحلة';
+
+  @override
   String get diveLog_edit_headerNew => 'تسجيل غوصة جديدة';
+
+  @override
+  String get diveLog_edit_invite_buddies => 'إضافة رفاق';
+
+  @override
+  String get diveLog_edit_invite_conditions =>
+      'إضافة الظروف - الماء والرؤية والطقس';
+
+  @override
+  String get diveLog_edit_invite_experience =>
+      'إضافة تقييم أو مشاهدات أو ملاحظات أو وسوم';
+
+  @override
+  String get diveLog_edit_invite_gasGear =>
+      'إضافة الغاز والمعدات - الوضع والأسطوانات والمعدات والأثقال';
+
+  @override
+  String get diveLog_edit_invite_trip => 'إضافة رحلة أو مركز غوص';
 
   @override
   String get diveLog_edit_label_airTemp => 'درجة حرارة الهواء';
@@ -3356,6 +3399,30 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get diveLog_edit_notesHint => 'أضف ملاحظات حول هذه الغوصة...';
+
+  @override
+  String get diveLog_edit_row_addSite => 'إضافة موقع';
+
+  @override
+  String get diveLog_edit_row_diveCenter => 'مركز الغوص';
+
+  @override
+  String get diveLog_edit_row_entry => 'الدخول';
+
+  @override
+  String get diveLog_edit_row_exit => 'الخروج';
+
+  @override
+  String get diveLog_edit_row_notSet => 'غير محدد';
+
+  @override
+  String get diveLog_edit_row_site => 'الموقع';
+
+  @override
+  String get diveLog_edit_row_surfaceInterval => 'فترة السطح';
+
+  @override
+  String get diveLog_edit_row_trip => 'الرحلة';
 
   @override
   String get diveLog_edit_save => 'حفظ';
@@ -3511,6 +3578,42 @@ class AppLocalizationsAr extends AppLocalizations {
       'تعذر حساب وقت التشغيل من الملف';
 
   @override
+  String diveLog_edit_summary_items(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count عناصر',
+      one: 'عنصر واحد',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get diveLog_edit_summary_notes => 'ملاحظات';
+
+  @override
+  String diveLog_edit_summary_species(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count أنواع',
+      one: 'نوع واحد',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String diveLog_edit_summary_tanks(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count أسطوانات',
+      one: 'أسطوانة واحدة',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String diveLog_edit_surfaceInterval(Object interval) {
     return 'فترة السطح: $interval';
   }
@@ -3521,6 +3624,26 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get diveLog_edit_surfacePressureHint =>
       'القياسي: 1013 mbar عند مستوى سطح البحر';
+
+  @override
+  String get diveLog_edit_tankCard_done => 'تم';
+
+  @override
+  String get diveLog_edit_tankCard_edit => 'تحرير';
+
+  @override
+  String get diveLog_edit_tankCard_mix => 'الخليط';
+
+  @override
+  String get diveLog_edit_tankCard_pressure => 'الضغط';
+
+  @override
+  String diveLog_edit_tankCard_title(int number) {
+    return 'أسطوانة $number';
+  }
+
+  @override
+  String get diveLog_edit_tankCard_volume => 'الحجم';
 
   @override
   String get diveLog_edit_tooltip_calculateFromProfile => 'حساب من ملف الغوصة';
@@ -3616,6 +3739,17 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String diveLog_equipmentSetPicker_errorLoading(Object error) {
     return 'خطأ في تحميل أطقم المعدات: $error';
+  }
+
+  @override
+  String diveLog_equipmentSetPicker_itemsSummary(int count, String names) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count عناصر',
+      one: 'عنصر واحد',
+    );
+    return '$_temp0: $names';
   }
 
   @override
@@ -3969,6 +4103,94 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get diveLog_listPage_menuMatchSites => 'مطابقة الغوصات بالمواقع';
+
+  @override
+  String get diveLog_sighting_decreaseCount => 'تقليل العدد';
+
+  @override
+  String get diveLog_sighting_increaseCount => 'زيادة العدد';
+
+  @override
+  String diveLog_speciesPicker_errorLoading(String error) {
+    return 'خطأ في تحميل الأنواع: $error';
+  }
+
+  @override
+  String get diveSites_edit_depth_heroMax => 'أقصى عمق';
+
+  @override
+  String get diveSites_edit_depth_heroMin => 'أدنى عمق';
+
+  @override
+  String get diveSites_edit_group_accessSafety => 'الوصول والسلامة';
+
+  @override
+  String get diveSites_edit_group_diveInfo => 'معلومات الغوص';
+
+  @override
+  String get diveSites_edit_group_identity => 'الهوية';
+
+  @override
+  String get diveSites_edit_group_lifeNotes => 'الحياة البحرية والملاحظات';
+
+  @override
+  String get diveSites_edit_group_location => 'الموقع الجغرافي';
+
+  @override
+  String get diveSites_edit_invite_accessSafety =>
+      'إضافة الوصول أو المواقف أو المرساة أو المخاطر';
+
+  @override
+  String get diveSites_edit_invite_diveInfo =>
+      'إضافة نطاق العمق أو الصعوبة أو التقييم';
+
+  @override
+  String get diveSites_edit_invite_lifeNotes =>
+      'إضافة الحياة البحرية أو الملاحظات أو المشاركة';
+
+  @override
+  String get diveSites_edit_invite_location => 'إضافة إحداثيات GPS أو الارتفاع';
+
+  @override
+  String get diveSites_edit_summary_shared => 'مشترك';
+
+  @override
+  String get forms_addSection_prefix => 'إضافة:';
+
+  @override
+  String get forms_cancel => 'إلغاء';
+
+  @override
+  String get forms_discard_body =>
+      'لديك تغييرات غير محفوظة. إذا غادرت الآن فستفقد.';
+
+  @override
+  String get forms_discard_discard => 'تجاهل';
+
+  @override
+  String get forms_discard_keepEditing => 'متابعة التحرير';
+
+  @override
+  String get forms_discard_title => 'تجاهل التغييرات؟';
+
+  @override
+  String get forms_save => 'حفظ';
+
+  @override
+  String forms_section_issues(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count مشاكل',
+      one: 'مشكلة واحدة',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String forms_statCell_useProfileValue(String value) {
+    return 'استخدام $value من ملف الغوصة';
+  }
 
   @override
   String get siteMatchReview_title => 'مطابقة المواقع';

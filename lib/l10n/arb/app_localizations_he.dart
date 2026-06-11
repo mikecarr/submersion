@@ -2731,6 +2731,13 @@ class AppLocalizationsHe extends AppLocalizations {
   }
 
   @override
+  String get diveLog_computerSheet_description =>
+      'בחר מאיזה פרופיל מחשב לערוך.';
+
+  @override
+  String get diveLog_computerSheet_title => 'בחירת פרופיל התחלתי';
+
+  @override
   String diveLog_cylinderSac_avgDepth(Object depth) {
     return 'ממוצע: $depth';
   }
@@ -3266,7 +3273,43 @@ class AppLocalizationsHe extends AppLocalizations {
   String get diveLog_edit_gettingLocation => 'מקבל מיקום...';
 
   @override
+  String get diveLog_edit_group_buddies => 'שותפים';
+
+  @override
+  String get diveLog_edit_group_conditions => 'תנאים';
+
+  @override
+  String get diveLog_edit_group_experience => 'חוויה';
+
+  @override
+  String get diveLog_edit_group_gasGear => 'גז וציוד';
+
+  @override
+  String get diveLog_edit_group_theDive => 'הצלילה';
+
+  @override
+  String get diveLog_edit_group_trip => 'טיול';
+
+  @override
   String get diveLog_edit_headerNew => 'רישום צלילה חדשה';
+
+  @override
+  String get diveLog_edit_invite_buddies => 'הוספת שותפים';
+
+  @override
+  String get diveLog_edit_invite_conditions =>
+      'הוספת תנאים - מים, ראות, מזג אוויר';
+
+  @override
+  String get diveLog_edit_invite_experience =>
+      'הוספת דירוג, תצפיות, הערות או תגיות';
+
+  @override
+  String get diveLog_edit_invite_gasGear =>
+      'הוספת גז וציוד - מצב, מיכלים, ציוד, משקולות';
+
+  @override
+  String get diveLog_edit_invite_trip => 'הוספת טיול או מרכז צלילה';
 
   @override
   String get diveLog_edit_label_airTemp => 'טמפ\' אוויר';
@@ -3342,6 +3385,30 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get diveLog_edit_notesHint => 'הוסף הערות לצלילה זו...';
+
+  @override
+  String get diveLog_edit_row_addSite => 'הוספת אתר';
+
+  @override
+  String get diveLog_edit_row_diveCenter => 'מרכז צלילה';
+
+  @override
+  String get diveLog_edit_row_entry => 'כניסה';
+
+  @override
+  String get diveLog_edit_row_exit => 'יציאה';
+
+  @override
+  String get diveLog_edit_row_notSet => 'לא הוגדר';
+
+  @override
+  String get diveLog_edit_row_site => 'אתר';
+
+  @override
+  String get diveLog_edit_row_surfaceInterval => 'זמן פני השטח';
+
+  @override
+  String get diveLog_edit_row_trip => 'טיול';
 
   @override
   String get diveLog_edit_save => 'שמירה';
@@ -3497,6 +3564,42 @@ class AppLocalizationsHe extends AppLocalizations {
       'לא ניתן לחשב זמן ריצה מהפרופיל';
 
   @override
+  String diveLog_edit_summary_items(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count פריטים',
+      one: 'פריט אחד',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get diveLog_edit_summary_notes => 'הערות';
+
+  @override
+  String diveLog_edit_summary_species(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count מינים',
+      one: 'מין אחד',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String diveLog_edit_summary_tanks(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count מיכלים',
+      one: 'מיכל אחד',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String diveLog_edit_surfaceInterval(Object interval) {
     return 'מרווח פני שטח: $interval';
   }
@@ -3507,6 +3610,26 @@ class AppLocalizationsHe extends AppLocalizations {
   @override
   String get diveLog_edit_surfacePressureHint =>
       'סטנדרטי: 1013 mbar בגובה פני הים';
+
+  @override
+  String get diveLog_edit_tankCard_done => 'סיום';
+
+  @override
+  String get diveLog_edit_tankCard_edit => 'עריכה';
+
+  @override
+  String get diveLog_edit_tankCard_mix => 'תערובת';
+
+  @override
+  String get diveLog_edit_tankCard_pressure => 'לחץ';
+
+  @override
+  String diveLog_edit_tankCard_title(int number) {
+    return 'מיכל $number';
+  }
+
+  @override
+  String get diveLog_edit_tankCard_volume => 'נפח';
 
   @override
   String get diveLog_edit_tooltip_calculateFromProfile =>
@@ -3600,6 +3723,17 @@ class AppLocalizationsHe extends AppLocalizations {
   @override
   String diveLog_equipmentSetPicker_errorLoading(Object error) {
     return 'שגיאה בטעינת סטי ציוד: $error';
+  }
+
+  @override
+  String diveLog_equipmentSetPicker_itemsSummary(int count, String names) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count פריטים',
+      one: 'פריט אחד',
+    );
+    return '$_temp0: $names';
   }
 
   @override
@@ -3954,6 +4088,94 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get diveLog_listPage_menuMatchSites => 'התאמת צלילות לאתרים';
+
+  @override
+  String get diveLog_sighting_decreaseCount => 'הקטנת הכמות';
+
+  @override
+  String get diveLog_sighting_increaseCount => 'הגדלת הכמות';
+
+  @override
+  String diveLog_speciesPicker_errorLoading(String error) {
+    return 'שגיאה בטעינת מינים: $error';
+  }
+
+  @override
+  String get diveSites_edit_depth_heroMax => 'עומק מקס\'';
+
+  @override
+  String get diveSites_edit_depth_heroMin => 'עומק מינ\'';
+
+  @override
+  String get diveSites_edit_group_accessSafety => 'גישה ובטיחות';
+
+  @override
+  String get diveSites_edit_group_diveInfo => 'פרטי צלילה';
+
+  @override
+  String get diveSites_edit_group_identity => 'זהות';
+
+  @override
+  String get diveSites_edit_group_lifeNotes => 'חיים ימיים והערות';
+
+  @override
+  String get diveSites_edit_group_location => 'מיקום';
+
+  @override
+  String get diveSites_edit_invite_accessSafety =>
+      'הוספת גישה, חניה, עגינה או סכנות';
+
+  @override
+  String get diveSites_edit_invite_diveInfo =>
+      'הוספת טווח עומק, רמת קושי או דירוג';
+
+  @override
+  String get diveSites_edit_invite_lifeNotes =>
+      'הוספת חיים ימיים, הערות או שיתוף';
+
+  @override
+  String get diveSites_edit_invite_location => 'הוספת מיקום GPS או גובה';
+
+  @override
+  String get diveSites_edit_summary_shared => 'משותף';
+
+  @override
+  String get forms_addSection_prefix => 'הוספה:';
+
+  @override
+  String get forms_cancel => 'ביטול';
+
+  @override
+  String get forms_discard_body =>
+      'יש לך שינויים שלא נשמרו. אם תצא עכשיו הם יאבדו.';
+
+  @override
+  String get forms_discard_discard => 'ביטול שינויים';
+
+  @override
+  String get forms_discard_keepEditing => 'המשך עריכה';
+
+  @override
+  String get forms_discard_title => 'לבטל את השינויים?';
+
+  @override
+  String get forms_save => 'שמירה';
+
+  @override
+  String forms_section_issues(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count בעיות',
+      one: 'בעיה אחת',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String forms_statCell_useProfileValue(String value) {
+    return 'שימוש ב-$value מפרופיל הצלילה';
+  }
 
   @override
   String get siteMatchReview_title => 'התאמת אתרים';

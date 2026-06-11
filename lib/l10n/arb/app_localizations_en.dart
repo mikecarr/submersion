@@ -2761,6 +2761,13 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get diveLog_computerSheet_description =>
+      'Select which computer\'s profile to edit from.';
+
+  @override
+  String get diveLog_computerSheet_title => 'Choose starting profile';
+
+  @override
   String diveLog_cylinderSac_avgDepth(Object depth) {
     return 'Avg: $depth';
   }
@@ -3299,7 +3306,43 @@ class AppLocalizationsEn extends AppLocalizations {
   String get diveLog_edit_gettingLocation => 'Getting location...';
 
   @override
+  String get diveLog_edit_group_buddies => 'Buddies';
+
+  @override
+  String get diveLog_edit_group_conditions => 'Conditions';
+
+  @override
+  String get diveLog_edit_group_experience => 'Experience';
+
+  @override
+  String get diveLog_edit_group_gasGear => 'Gas & Gear';
+
+  @override
+  String get diveLog_edit_group_theDive => 'The Dive';
+
+  @override
+  String get diveLog_edit_group_trip => 'Trip';
+
+  @override
   String get diveLog_edit_headerNew => 'Log New Dive';
+
+  @override
+  String get diveLog_edit_invite_buddies => 'Add buddies';
+
+  @override
+  String get diveLog_edit_invite_conditions =>
+      'Add conditions - water, visibility, weather';
+
+  @override
+  String get diveLog_edit_invite_experience =>
+      'Add rating, sightings, notes or tags';
+
+  @override
+  String get diveLog_edit_invite_gasGear =>
+      'Add gas & gear - mode, tanks, equipment, weight';
+
+  @override
+  String get diveLog_edit_invite_trip => 'Add trip or dive center';
 
   @override
   String get diveLog_edit_label_airTemp => 'Air Temp';
@@ -3375,6 +3418,30 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get diveLog_edit_notesHint => 'Add notes about this dive...';
+
+  @override
+  String get diveLog_edit_row_addSite => 'Add site';
+
+  @override
+  String get diveLog_edit_row_diveCenter => 'Dive center';
+
+  @override
+  String get diveLog_edit_row_entry => 'Entry';
+
+  @override
+  String get diveLog_edit_row_exit => 'Exit';
+
+  @override
+  String get diveLog_edit_row_notSet => 'Not set';
+
+  @override
+  String get diveLog_edit_row_site => 'Site';
+
+  @override
+  String get diveLog_edit_row_surfaceInterval => 'Surface interval';
+
+  @override
+  String get diveLog_edit_row_trip => 'Trip';
 
   @override
   String get diveLog_edit_save => 'Save';
@@ -3533,6 +3600,42 @@ class AppLocalizationsEn extends AppLocalizations {
       'Unable to calculate runtime from profile';
 
   @override
+  String diveLog_edit_summary_items(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items',
+      one: '1 item',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get diveLog_edit_summary_notes => 'notes';
+
+  @override
+  String diveLog_edit_summary_species(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count species',
+      one: '1 species',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String diveLog_edit_summary_tanks(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count tanks',
+      one: '1 tank',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String diveLog_edit_surfaceInterval(Object interval) {
     return 'Surface Interval: $interval';
   }
@@ -3543,6 +3646,26 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get diveLog_edit_surfacePressureHint =>
       'Standard: 1013 mbar at sea level';
+
+  @override
+  String get diveLog_edit_tankCard_done => 'Done';
+
+  @override
+  String get diveLog_edit_tankCard_edit => 'Edit';
+
+  @override
+  String get diveLog_edit_tankCard_mix => 'Mix';
+
+  @override
+  String get diveLog_edit_tankCard_pressure => 'Pressure';
+
+  @override
+  String diveLog_edit_tankCard_title(int number) {
+    return 'Tank $number';
+  }
+
+  @override
+  String get diveLog_edit_tankCard_volume => 'Volume';
 
   @override
   String get diveLog_edit_tooltip_calculateFromProfile =>
@@ -3642,6 +3765,17 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String diveLog_equipmentSetPicker_errorLoading(Object error) {
     return 'Error loading equipment sets: $error';
+  }
+
+  @override
+  String diveLog_equipmentSetPicker_itemsSummary(int count, String names) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items',
+      one: '1 item',
+    );
+    return '$_temp0: $names';
   }
 
   @override
@@ -3995,6 +4129,94 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get diveLog_listPage_menuMatchSites => 'Match Dives to Sites';
+
+  @override
+  String get diveLog_sighting_decreaseCount => 'Decrease count';
+
+  @override
+  String get diveLog_sighting_increaseCount => 'Increase count';
+
+  @override
+  String diveLog_speciesPicker_errorLoading(String error) {
+    return 'Error loading species: $error';
+  }
+
+  @override
+  String get diveSites_edit_depth_heroMax => 'Max depth';
+
+  @override
+  String get diveSites_edit_depth_heroMin => 'Min depth';
+
+  @override
+  String get diveSites_edit_group_accessSafety => 'Access & safety';
+
+  @override
+  String get diveSites_edit_group_diveInfo => 'Dive info';
+
+  @override
+  String get diveSites_edit_group_identity => 'Identity';
+
+  @override
+  String get diveSites_edit_group_lifeNotes => 'Life & notes';
+
+  @override
+  String get diveSites_edit_group_location => 'Location';
+
+  @override
+  String get diveSites_edit_invite_accessSafety =>
+      'Add access, parking, mooring or hazards';
+
+  @override
+  String get diveSites_edit_invite_diveInfo =>
+      'Add depth range, difficulty or rating';
+
+  @override
+  String get diveSites_edit_invite_lifeNotes =>
+      'Add marine life, notes or sharing';
+
+  @override
+  String get diveSites_edit_invite_location => 'Add GPS position or altitude';
+
+  @override
+  String get diveSites_edit_summary_shared => 'shared';
+
+  @override
+  String get forms_addSection_prefix => 'Add:';
+
+  @override
+  String get forms_cancel => 'Cancel';
+
+  @override
+  String get forms_discard_body =>
+      'You have unsaved changes. If you leave now they will be lost.';
+
+  @override
+  String get forms_discard_discard => 'Discard';
+
+  @override
+  String get forms_discard_keepEditing => 'Keep editing';
+
+  @override
+  String get forms_discard_title => 'Discard changes?';
+
+  @override
+  String get forms_save => 'Save';
+
+  @override
+  String forms_section_issues(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count issues',
+      one: '1 issue',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String forms_statCell_useProfileValue(String value) {
+    return 'Use $value from profile';
+  }
 
   @override
   String get siteMatchReview_title => 'Match Sites';

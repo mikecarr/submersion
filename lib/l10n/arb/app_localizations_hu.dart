@@ -2800,6 +2800,13 @@ class AppLocalizationsHu extends AppLocalizations {
   }
 
   @override
+  String get diveLog_computerSheet_description =>
+      'Válaszd ki, melyik számítógép profiljából szerkesztesz.';
+
+  @override
+  String get diveLog_computerSheet_title => 'Kiindulási profil kiválasztása';
+
+  @override
   String diveLog_cylinderSac_avgDepth(Object depth) {
     return 'Atlag: $depth';
   }
@@ -3343,7 +3350,43 @@ class AppLocalizationsHu extends AppLocalizations {
   String get diveLog_edit_gettingLocation => 'Helymeghatározás...';
 
   @override
+  String get diveLog_edit_group_buddies => 'Merülőtársak';
+
+  @override
+  String get diveLog_edit_group_conditions => 'Körülmények';
+
+  @override
+  String get diveLog_edit_group_experience => 'Élmény';
+
+  @override
+  String get diveLog_edit_group_gasGear => 'Gáz és felszerelés';
+
+  @override
+  String get diveLog_edit_group_theDive => 'A merülés';
+
+  @override
+  String get diveLog_edit_group_trip => 'Utazás';
+
+  @override
   String get diveLog_edit_headerNew => 'Uj merules rogzitese';
+
+  @override
+  String get diveLog_edit_invite_buddies => 'Merülőtársak hozzáadása';
+
+  @override
+  String get diveLog_edit_invite_conditions =>
+      'Körülmények hozzáadása - víz, látótávolság, időjárás';
+
+  @override
+  String get diveLog_edit_invite_experience =>
+      'Értékelés, észlelések, jegyzetek vagy címkék hozzáadása';
+
+  @override
+  String get diveLog_edit_invite_gasGear =>
+      'Gáz és felszerelés hozzáadása - mód, palackok, felszerelés, súly';
+
+  @override
+  String get diveLog_edit_invite_trip => 'Utazás vagy búvárközpont hozzáadása';
 
   @override
   String get diveLog_edit_label_airTemp => 'Levego hom.';
@@ -3423,6 +3466,30 @@ class AppLocalizationsHu extends AppLocalizations {
   @override
   String get diveLog_edit_notesHint =>
       'Jegyzetek hozzaadasa ehhez a meruleshez...';
+
+  @override
+  String get diveLog_edit_row_addSite => 'Merülőhely hozzáadása';
+
+  @override
+  String get diveLog_edit_row_diveCenter => 'Búvárközpont';
+
+  @override
+  String get diveLog_edit_row_entry => 'Beszállás';
+
+  @override
+  String get diveLog_edit_row_exit => 'Kiszállás';
+
+  @override
+  String get diveLog_edit_row_notSet => 'Nincs megadva';
+
+  @override
+  String get diveLog_edit_row_site => 'Merülőhely';
+
+  @override
+  String get diveLog_edit_row_surfaceInterval => 'Felszíni idő';
+
+  @override
+  String get diveLog_edit_row_trip => 'Utazás';
 
   @override
   String get diveLog_edit_save => 'Mentes';
@@ -3580,6 +3647,42 @@ class AppLocalizationsHu extends AppLocalizations {
       'A futásidő nem számítható ki a profilból';
 
   @override
+  String diveLog_edit_summary_items(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count elem',
+      one: '1 elem',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get diveLog_edit_summary_notes => 'jegyzetek';
+
+  @override
+  String diveLog_edit_summary_species(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count faj',
+      one: '1 faj',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String diveLog_edit_summary_tanks(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count palack',
+      one: '1 palack',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String diveLog_edit_surfaceInterval(Object interval) {
     return 'Felszini szunet: $interval';
   }
@@ -3590,6 +3693,26 @@ class AppLocalizationsHu extends AppLocalizations {
   @override
   String get diveLog_edit_surfacePressureHint =>
       'Standard: 1013 mbar tengerszinten';
+
+  @override
+  String get diveLog_edit_tankCard_done => 'Kész';
+
+  @override
+  String get diveLog_edit_tankCard_edit => 'Szerkesztés';
+
+  @override
+  String get diveLog_edit_tankCard_mix => 'Keverék';
+
+  @override
+  String get diveLog_edit_tankCard_pressure => 'Nyomás';
+
+  @override
+  String diveLog_edit_tankCard_title(int number) {
+    return '$number. palack';
+  }
+
+  @override
+  String get diveLog_edit_tankCard_volume => 'Térfogat';
 
   @override
   String get diveLog_edit_tooltip_calculateFromProfile =>
@@ -3691,6 +3814,17 @@ class AppLocalizationsHu extends AppLocalizations {
   @override
   String diveLog_equipmentSetPicker_errorLoading(Object error) {
     return 'Hiba a felszereléskészletek betoltesekor: $error';
+  }
+
+  @override
+  String diveLog_equipmentSetPicker_itemsSummary(int count, String names) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count elem',
+      one: '1 elem',
+    );
+    return '$_temp0: $names';
   }
 
   @override
@@ -4056,6 +4190,95 @@ class AppLocalizationsHu extends AppLocalizations {
   @override
   String get diveLog_listPage_menuMatchSites =>
       'Merülések hozzárendelése helyekhez';
+
+  @override
+  String get diveLog_sighting_decreaseCount => 'Darabszám csökkentése';
+
+  @override
+  String get diveLog_sighting_increaseCount => 'Darabszám növelése';
+
+  @override
+  String diveLog_speciesPicker_errorLoading(String error) {
+    return 'Hiba a fajok betöltésekor: $error';
+  }
+
+  @override
+  String get diveSites_edit_depth_heroMax => 'Max. mélység';
+
+  @override
+  String get diveSites_edit_depth_heroMin => 'Min. mélység';
+
+  @override
+  String get diveSites_edit_group_accessSafety => 'Megközelítés és biztonság';
+
+  @override
+  String get diveSites_edit_group_diveInfo => 'Merülési adatok';
+
+  @override
+  String get diveSites_edit_group_identity => 'Azonosítás';
+
+  @override
+  String get diveSites_edit_group_lifeNotes => 'Élővilág és jegyzetek';
+
+  @override
+  String get diveSites_edit_group_location => 'Helyzet';
+
+  @override
+  String get diveSites_edit_invite_accessSafety =>
+      'Megközelítés, parkolás, kikötés vagy veszélyek hozzáadása';
+
+  @override
+  String get diveSites_edit_invite_diveInfo =>
+      'Mélységtartomány, nehézség vagy értékelés hozzáadása';
+
+  @override
+  String get diveSites_edit_invite_lifeNotes =>
+      'Élővilág, jegyzetek vagy megosztás hozzáadása';
+
+  @override
+  String get diveSites_edit_invite_location =>
+      'GPS-pozíció vagy magasság hozzáadása';
+
+  @override
+  String get diveSites_edit_summary_shared => 'megosztva';
+
+  @override
+  String get forms_addSection_prefix => 'Hozzáadás:';
+
+  @override
+  String get forms_cancel => 'Mégse';
+
+  @override
+  String get forms_discard_body =>
+      'Nem mentett módosításai vannak. Ha most kilép, elvesznek.';
+
+  @override
+  String get forms_discard_discard => 'Elvetés';
+
+  @override
+  String get forms_discard_keepEditing => 'Szerkesztés folytatása';
+
+  @override
+  String get forms_discard_title => 'Elveti a módosításokat?';
+
+  @override
+  String get forms_save => 'Mentés';
+
+  @override
+  String forms_section_issues(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count probléma',
+      one: '1 probléma',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String forms_statCell_useProfileValue(String value) {
+    return '$value átvétele a merülési profilból';
+  }
 
   @override
   String get siteMatchReview_title => 'Helyek hozzárendelése';

@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:submersion/features/dive_sites/data/repositories/site_repository_impl.dart';
 import 'package:submersion/features/dive_sites/domain/entities/dive_site.dart';
 import 'package:submersion/features/dive_sites/presentation/pages/site_edit_page.dart';
+import 'package:submersion/shared/widgets/forms/form_section.dart';
 import 'package:submersion/features/dive_sites/presentation/providers/site_providers.dart';
 import 'package:submersion/features/settings/presentation/providers/settings_providers.dart';
 import 'package:submersion/l10n/arb/app_localizations.dart';
@@ -89,6 +90,9 @@ void main() {
   testWidgets(
     'merge mode cycles difficulty when sites have different difficulties',
     (tester) async {
+      tester.view.physicalSize = const Size(900, 3600);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
       final site1 = await siteRepository.createSite(
         const DiveSite(
           id: 'diff-1',
@@ -123,7 +127,7 @@ void main() {
       // The difficulty section has a sync_alt icon for cycling
       final difficultySection = find.ancestor(
         of: find.text('Difficulty Level'),
-        matching: find.byType(Card),
+        matching: find.byType(FormSection),
       );
       final difficultyCycleButton = find.descendant(
         of: difficultySection,
@@ -144,6 +148,9 @@ void main() {
   testWidgets('merge mode cycles rating when sites have different ratings', (
     tester,
   ) async {
+    tester.view.physicalSize = const Size(900, 3600);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
     final site1 = await siteRepository.createSite(
       const DiveSite(id: 'rate-1', name: 'OK Site', rating: 2.0),
     );
@@ -175,7 +182,7 @@ void main() {
     // Cycle rating
     final ratingSection = find.ancestor(
       of: find.text('Rating'),
-      matching: find.byType(Card),
+      matching: find.byType(FormSection),
     );
     final ratingCycleButton = find.descendant(
       of: ratingSection,
@@ -194,6 +201,9 @@ void main() {
   testWidgets(
     'merge mode cycles GPS coordinates when sites have different locations',
     (tester) async {
+      tester.view.physicalSize = const Size(900, 3600);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
       final site1 = await siteRepository.createSite(
         const DiveSite(
           id: 'gps-1',
@@ -229,7 +239,7 @@ void main() {
       // Find the GPS section
       final gpsSection = find.ancestor(
         of: find.text('GPS Coordinates'),
-        matching: find.byType(Card),
+        matching: find.byType(FormSection),
       );
       final gpsCycleButton = find.descendant(
         of: gpsSection,
