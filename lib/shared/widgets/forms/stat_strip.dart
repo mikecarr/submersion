@@ -228,7 +228,13 @@ class _StatCellState extends State<StatCell> {
             textAlign: TextAlign.center,
             keyboardType: widget.keyboardType,
             inputFormatters: [
-              FilteringTextInputFormatter.allow(RegExp(r'[\d.,:-]')),
+              // Constrain to what the value will be parsed as: whole numbers
+              // for integer cells (e.g. minutes), digits + dot + leading
+              // minus for decimals. Avoids ':' / ',' that would later break
+              // int.parse / double.parse.
+              widget.keyboardType.decimal == true
+                  ? FilteringTextInputFormatter.allow(RegExp(r'[0-9.\-]'))
+                  : FilteringTextInputFormatter.digitsOnly,
             ],
             style: FormStyle.heroValueStyle(context, dense: widget.dense),
             decoration: const InputDecoration(

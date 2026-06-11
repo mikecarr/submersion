@@ -35,7 +35,13 @@ class TankCard extends StatefulWidget {
 }
 
 class _TankCardState extends State<TankCard> {
-  late bool _expanded = widget.initiallyExpanded;
+  late bool _expanded;
+
+  @override
+  void initState() {
+    super.initState();
+    _expanded = widget.initiallyExpanded;
+  }
 
   String _pressureText() {
     final units = widget.units;

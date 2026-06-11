@@ -3133,38 +3133,54 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
         runtime = exitDateTime.difference(entryDateTime);
         if (runtime.isNegative) runtime = null;
       } else if (_runtimeController.text.isNotEmpty) {
-        runtime = Duration(minutes: int.parse(_runtimeController.text));
+        runtime = Duration(
+          minutes: (int.tryParse(_runtimeController.text) ?? 0),
+        );
       }
 
       // Bottom time is manually entered (time at depth, excluding descent/ascent)
       Duration? duration;
       if (_durationController.text.isNotEmpty) {
-        duration = Duration(minutes: int.parse(_durationController.text));
+        duration = Duration(
+          minutes: (int.tryParse(_durationController.text) ?? 0),
+        );
       }
 
       // Parse form values and convert to metric for storage
       final maxDepth = _maxDepthController.text.isNotEmpty
-          ? units.depthToMeters(double.parse(_maxDepthController.text))
+          ? units.depthToMeters(
+              (double.tryParse(_maxDepthController.text) ?? 0),
+            )
           : null;
       final avgDepth = _avgDepthController.text.isNotEmpty
-          ? units.depthToMeters(double.parse(_avgDepthController.text))
+          ? units.depthToMeters(
+              (double.tryParse(_avgDepthController.text) ?? 0),
+            )
           : null;
       final waterTemp = _waterTempController.text.isNotEmpty
-          ? units.temperatureToCelsius(double.parse(_waterTempController.text))
+          ? units.temperatureToCelsius(
+              (double.tryParse(_waterTempController.text) ?? 0),
+            )
           : null;
       final airTemp = _airTempController.text.isNotEmpty
-          ? units.temperatureToCelsius(double.parse(_airTempController.text))
+          ? units.temperatureToCelsius(
+              (double.tryParse(_airTempController.text) ?? 0),
+            )
           : null;
 
       // Parse conditions values (convert to metric)
       final swellHeight = _swellHeightController.text.isNotEmpty
-          ? units.depthToMeters(double.parse(_swellHeightController.text))
+          ? units.depthToMeters(
+              (double.tryParse(_swellHeightController.text) ?? 0),
+            )
           : null;
       final altitude = _altitudeController.text.isNotEmpty
-          ? units.altitudeToMeters(double.parse(_altitudeController.text))
+          ? units.altitudeToMeters(
+              (double.tryParse(_altitudeController.text) ?? 0),
+            )
           : null;
       final surfacePressure = _surfacePressureController.text.isNotEmpty
-          ? double.parse(_surfacePressureController.text) /
+          ? (double.tryParse(_surfacePressureController.text) ?? 0) /
                 1000 // Convert mbar to bar
           : null;
 
@@ -3173,7 +3189,7 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
         id: widget.diveId ?? '',
         diverId: _existingDive?.diverId, // Preserve diver assignment
         diveNumber: _diveNumberController.text.isNotEmpty
-            ? int.parse(_diveNumberController.text)
+            ? (int.tryParse(_diveNumberController.text) ?? 0)
             : null,
         dateTime: entryDateTime, // Keep for backward compatibility
         entryTime: entryDateTime,
@@ -3207,13 +3223,15 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
         surfacePressure: surfacePressure,
         // Weather fields
         windSpeed: _windSpeedController.text.isNotEmpty
-            ? units.windSpeedToMs(double.parse(_windSpeedController.text))
+            ? units.windSpeedToMs(
+                (double.tryParse(_windSpeedController.text) ?? 0),
+              )
             : null,
         windDirection: _windDirection,
         cloudCover: _cloudCover,
         precipitation: _precipitation,
         humidity: _humidityController.text.isNotEmpty
-            ? double.parse(_humidityController.text)
+            ? (double.tryParse(_humidityController.text) ?? 0)
             : null,
         weatherDescription: _weatherDescriptionController.text.isNotEmpty
             ? _weatherDescriptionController.text

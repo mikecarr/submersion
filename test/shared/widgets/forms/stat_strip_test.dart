@@ -96,6 +96,51 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byType(TextField), findsNothing);
     });
+
+    testWidgets('decimal cell strips colon/comma/letters, keeps . and -', (
+      tester,
+    ) async {
+      final controller = TextEditingController(text: '5');
+      addTearDown(controller.dispose);
+      await tester.pumpWidget(
+        _wrap(
+          StatStrip(
+            cells: [
+              StatCell(label: 'Water temp', unit: 'C', controller: controller),
+            ],
+          ),
+        ),
+      );
+      await tester.tap(find.text('5'));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField), '-2a8.5,:');
+      expect(controller.text, '-28.5');
+    });
+
+    testWidgets('integer cell rejects the decimal point (digits only)', (
+      tester,
+    ) async {
+      final controller = TextEditingController(text: '40');
+      addTearDown(controller.dispose);
+      await tester.pumpWidget(
+        _wrap(
+          StatStrip(
+            cells: [
+              StatCell(
+                label: 'Bottom time',
+                unit: 'min',
+                controller: controller,
+                keyboardType: TextInputType.number,
+              ),
+            ],
+          ),
+        ),
+      );
+      await tester.tap(find.text('40'));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField), '30.5');
+      expect(controller.text, '305');
+    });
   });
 
   group('StatCell profile affordance', () {

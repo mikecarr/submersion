@@ -76,14 +76,17 @@ class TheDiveSection extends StatelessWidget {
     String label,
     String? unit,
     TextEditingController controller,
-    ProfileSuggestion? suggestion,
-  ) {
+    ProfileSuggestion? suggestion, {
+    TextInputType? keyboardType,
+  }) {
     return StatCell(
       label: label,
       unit: unit,
       controller: controller,
       profileValue: suggestion?.value,
       onUseProfileValue: suggestion == null ? null : (_) => suggestion.onUse(),
+      keyboardType:
+          keyboardType ?? const TextInputType.numberWithOptions(decimal: true),
     );
   }
 
@@ -107,6 +110,8 @@ class TheDiveSection extends StatelessWidget {
             'min',
             bottomTimeController,
             bottomTimeSuggestion,
+            // Whole minutes; parsed with int.parse on save.
+            keyboardType: TextInputType.number,
           ),
           _cell(
             l10n.diveLog_edit_label_avgDepth,
