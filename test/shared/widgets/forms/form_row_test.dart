@@ -1,0 +1,150 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:submersion/shared/widgets/forms/form_row.dart';
+
+Widget _wrap(Widget child) => MaterialApp(
+  home: Scaffold(body: Material(child: child)),
+);
+
+void main() {
+  group('FormRow.text', () {
+    testWidgets('resting shows label and value; tap enters inline edit', (
+      tester,
+    ) async {
+      final controller = TextEditingController(text: 'Blue Hole');
+      addTearDown(controller.dispose);
+      await tester.pumpWidget(
+        _wrap(FormRow.text(label: 'Name', controller: controller)),
+      );
+      expect(find.text('Name'), findsOneWidget);
+      expect(find.text('Blue Hole'), findsOneWidget);
+      expect(find.byType(TextFormField), findsNothing);
+
+      await tester.tap(find.text('Blue Hole'));
+      await tester.pumpAndSettle();
+      expect(find.byType(TextFormField), findsOneWidget);
+
+      await tester.enterText(find.byType(TextFormField), 'Great Blue Hole');
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await tester.pumpAndSettle();
+      expect(controller.text, 'Great Blue Hole');
+      expect(find.byType(TextFormField), findsNothing);
+      expect(find.text('Great Blue Hole'), findsOneWidget);
+    });
+
+    testWidgets('empty value shows placeholder', (tester) async {
+      final controller = TextEditingController();
+      addTearDown(controller.dispose);
+      await tester.pumpWidget(
+        _wrap(
+          FormRow.text(
+            label: 'Name',
+            controller: controller,
+            placeholder: 'Add name',
+          ),
+        ),
+      );
+      expect(find.text('Add name'), findsOneWidget);
+    });
+
+    testWidgets('alwaysEditing renders persistent field', (tester) async {
+      final controller = TextEditingController(text: 'x');
+      addTearDown(controller.dispose);
+      await tester.pumpWidget(
+        _wrap(
+          FormRow.text(
+            label: 'Name',
+            controller: controller,
+            alwaysEditing: true,
+          ),
+        ),
+      );
+      expect(find.byType(TextFormField), findsOneWidget);
+    });
+  });
+
+  group('FormRow.picker', () {
+    testWidgets('shows value, chevron, and fires onTap', (tester) async {
+      var taps = 0;
+      await tester.pumpWidget(
+        _wrap(
+          FormRow.picker(
+            label: 'Site',
+            value: 'Blue Hole',
+            onTap: () => taps++,
+          ),
+        ),
+      );
+      expect(find.byIcon(Icons.chevron_right), findsOneWidget);
+      await tester.tap(find.text('Blue Hole'));
+      expect(taps, 1);
+    });
+
+    testWidgets('null value shows placeholder', (tester) async {
+      await tester.pumpWidget(
+        _wrap(
+          FormRow.picker(
+            label: 'Site',
+            value: null,
+            placeholder: 'Add site',
+            onTap: () {},
+          ),
+        ),
+      );
+      expect(find.text('Add site'), findsOneWidget);
+    });
+  });
+
+  group('other variants', () {
+    testWidgets('display row is not tappable', (tester) async {
+      await tester.pumpWidget(
+        _wrap(const FormRow.display(label: 'Surface interval', value: '1:42')),
+      );
+      expect(find.text('1:42'), findsOneWidget);
+      expect(find.byType(InkWell), findsNothing);
+    });
+
+    testWidgets('toggle row flips switch', (tester) async {
+      var on = false;
+      await tester.pumpWidget(
+        _wrap(
+          StatefulBuilder(
+            builder: (context, setState) => FormRow.toggle(
+              label: 'Shared',
+              value: on,
+              onChanged: (v) => setState(() => on = v),
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.byType(Switch));
+      await tester.pumpAndSettle();
+      expect(on, isTrue);
+    });
+
+    testWidgets('rating row reports tapped star', (tester) async {
+      int? rated;
+      await tester.pumpWidget(
+        _wrap(
+          FormRow.rating(
+            label: 'Rating',
+            value: 2,
+            onChanged: (v) => rated = v,
+          ),
+        ),
+      );
+      expect(find.byIcon(Icons.star), findsNWidgets(2));
+      expect(find.byIcon(Icons.star_border), findsNWidgets(3));
+      await tester.tap(find.byIcon(Icons.star_border).last);
+      expect(rated, 5);
+    });
+
+    testWidgets('custom row hosts arbitrary child', (tester) async {
+      await tester.pumpWidget(
+        _wrap(const FormRow.custom(label: 'Mode', child: Text('SEGMENTED'))),
+      );
+      expect(find.text('Mode'), findsOneWidget);
+      expect(find.text('SEGMENTED'), findsOneWidget);
+    });
+  });
+}
