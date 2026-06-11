@@ -9,6 +9,7 @@ import 'package:submersion/core/services/cloud_storage/cloud_storage_provider.da
 import 'package:submersion/core/services/cloud_storage/s3/s3_config.dart';
 import 'package:submersion/core/services/cloud_storage/s3/s3_credentials_store.dart';
 import 'package:submersion/core/services/cloud_storage/s3_storage_provider.dart';
+import 'package:submersion/core/services/sync/library_epoch.dart';
 import 'package:submersion/core/services/sync/sync_data_serializer.dart';
 import 'package:submersion/core/services/sync/sync_service.dart'
     show ConflictResolution, SyncService;
@@ -92,15 +93,27 @@ class _FakeSyncNotifier extends StateNotifier<SyncState>
   int refreshStateCalls = 0;
   int resetSyncStateCalls = 0;
   int signOutCalls = 0;
+  int adoptCalls = 0;
 
   /// Set to non-null to simulate first-contact conditions in widget tests.
   FirstSyncMergeInfo? firstSyncInfo;
+
+  /// Set to non-null to simulate a replaced cloud library awaiting adoption.
+  LibraryEpochMarker? replaceInfo;
 
   @override
   Future<void> performSync({bool auto = false}) async => performSyncCalls++;
 
   @override
   Future<FirstSyncMergeInfo?> firstSyncMergeInfo() async => firstSyncInfo;
+
+  @override
+  Future<LibraryEpochMarker?> libraryReplaceInfo() async => replaceInfo;
+
+  @override
+  Future<void> adoptReplacedLibrary() async {
+    adoptCalls++;
+  }
 
   @override
   Future<void> refreshState() async => refreshStateCalls++;
