@@ -2019,6 +2019,8 @@
   "diveLog_listPage_menuAdvancedSearch": "Advanced Search",
   "diveLog_listPage_menuDiveNumbering": "Dive Numbering",
   "diveLog_listPage_menuMatchSites": "Match Dives to Sites",
+  "forms_section_issues": "{count, plural, one{1 issue} other{{count} issues}}",
+  "@forms_section_issues": {"description": "Badge on a collapsed form section that contains validation errors", "placeholders": {"count": {"type": "int"}}},
   "siteMatchReview_title": "Match Sites",
   "siteMatchReview_diveNumber": "Dive #{number}",
   "@siteMatchReview_diveNumber": {

@@ -6928,6 +6928,12 @@ abstract class AppLocalizations {
   /// **'Match Dives to Sites'**
   String get diveLog_listPage_menuMatchSites;
 
+  /// Badge on a collapsed form section that contains validation errors
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{1 issue} other{{count} issues}}'**
+  String forms_section_issues(int count);
+
   /// No description provided for @siteMatchReview_title.
   ///
   /// In en, this message translates to:

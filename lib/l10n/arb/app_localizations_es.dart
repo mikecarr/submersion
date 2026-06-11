@@ -4070,6 +4070,17 @@ class AppLocalizationsEs extends AppLocalizations {
       'Asociar inmersiones a puntos de buceo';
 
   @override
+  String forms_section_issues(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count problemas',
+      one: '1 problema',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get siteMatchReview_title => 'Asociar puntos';
 
   @override

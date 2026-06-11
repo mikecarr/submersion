@@ -4076,6 +4076,17 @@ class AppLocalizationsIt extends AppLocalizations {
   String get diveLog_listPage_menuMatchSites => 'Associa le immersioni ai siti';
 
   @override
+  String forms_section_issues(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count problemi',
+      one: '1 problema',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get siteMatchReview_title => 'Associa siti';
 
   @override

@@ -4071,6 +4071,17 @@ class AppLocalizationsDe extends AppLocalizations {
       'Tauchgänge Tauchplätzen zuordnen';
 
   @override
+  String forms_section_issues(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Probleme',
+      one: '1 Problem',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get siteMatchReview_title => 'Tauchplätze zuordnen';
 
   @override

@@ -1329,6 +1329,7 @@
   "diveLog_listPage_menuAdvancedSearch": "חיפוש מתקדם",
   "diveLog_listPage_menuDiveNumbering": "מספור צלילות",
   "diveLog_listPage_menuMatchSites": "התאמת צלילות לאתרים",
+  "forms_section_issues": "{count, plural, one{בעיה אחת} other{{count} בעיות}}",
   "siteMatchReview_title": "התאמת אתרים",
   "siteMatchReview_diveNumber": "צלילה #{number}",
   "siteMatchReview_empty": "אין מה להתאים.",

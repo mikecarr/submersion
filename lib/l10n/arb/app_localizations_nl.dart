@@ -4041,6 +4041,17 @@ class AppLocalizationsNl extends AppLocalizations {
   String get diveLog_listPage_menuMatchSites => 'Duiken aan stekken koppelen';
 
   @override
+  String forms_section_issues(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count problemen',
+      one: '1 probleem',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get siteMatchReview_title => 'Stekken koppelen';
 
   @override

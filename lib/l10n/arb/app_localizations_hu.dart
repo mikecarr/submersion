@@ -4058,6 +4058,17 @@ class AppLocalizationsHu extends AppLocalizations {
       'Merülések hozzárendelése helyekhez';
 
   @override
+  String forms_section_issues(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count probléma',
+      one: '1 probléma',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get siteMatchReview_title => 'Helyek hozzárendelése';
 
   @override

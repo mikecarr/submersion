@@ -4094,6 +4094,17 @@ class AppLocalizationsFr extends AppLocalizations {
       'Associer les plongées aux sites';
 
   @override
+  String forms_section_issues(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count problèmes',
+      one: '1 problème',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get siteMatchReview_title => 'Associer les sites';
 
   @override

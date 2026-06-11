@@ -3971,6 +3971,17 @@ class AppLocalizationsAr extends AppLocalizations {
   String get diveLog_listPage_menuMatchSites => 'مطابقة الغوصات بالمواقع';
 
   @override
+  String forms_section_issues(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count مشاكل',
+      one: 'مشكلة واحدة',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get siteMatchReview_title => 'مطابقة المواقع';
 
   @override

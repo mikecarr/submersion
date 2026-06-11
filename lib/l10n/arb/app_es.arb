@@ -1363,6 +1363,7 @@
   "diveLog_listPage_menuAdvancedSearch": "Búsqueda avanzada",
   "diveLog_listPage_menuDiveNumbering": "Numeración de inmersiones",
   "diveLog_listPage_menuMatchSites": "Asociar inmersiones a puntos de buceo",
+  "forms_section_issues": "{count, plural, one{1 problema} other{{count} problemas}}",
   "siteMatchReview_title": "Asociar puntos",
   "siteMatchReview_diveNumber": "Inmersion #{number}",
   "siteMatchReview_empty": "Nada que asociar.",

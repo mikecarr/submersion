@@ -3874,6 +3874,17 @@ class AppLocalizationsZh extends AppLocalizations {
   String get diveLog_listPage_menuMatchSites => '将潜水匹配到潜水点';
 
   @override
+  String forms_section_issues(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 个问题',
+      one: '1 个问题',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get siteMatchReview_title => '匹配潜水点';
 
   @override

@@ -3956,6 +3956,17 @@ class AppLocalizationsHe extends AppLocalizations {
   String get diveLog_listPage_menuMatchSites => 'התאמת צלילות לאתרים';
 
   @override
+  String forms_section_issues(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count בעיות',
+      one: 'בעיה אחת',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get siteMatchReview_title => 'התאמת אתרים';
 
   @override

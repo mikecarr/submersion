@@ -1329,6 +1329,7 @@
   "diveLog_listPage_menuAdvancedSearch": "Ricerca avanzata",
   "diveLog_listPage_menuDiveNumbering": "Numerazione immersioni",
   "diveLog_listPage_menuMatchSites": "Associa le immersioni ai siti",
+  "forms_section_issues": "{count, plural, one{1 problema} other{{count} problemi}}",
   "siteMatchReview_title": "Associa siti",
   "siteMatchReview_diveNumber": "Immersione #{number}",
   "siteMatchReview_empty": "Niente da associare.",

@@ -3997,6 +3997,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get diveLog_listPage_menuMatchSites => 'Match Dives to Sites';
 
   @override
+  String forms_section_issues(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count issues',
+      one: '1 issue',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get siteMatchReview_title => 'Match Sites';
 
   @override
