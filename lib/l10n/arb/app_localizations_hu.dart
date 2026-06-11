@@ -10359,7 +10359,7 @@ class AppLocalizationsHu extends AppLocalizations {
   String get settings_cloudSync_storageSettings => 'Tarolasi beallitasok';
 
   @override
-  String get settings_cloudSync_syncNow => 'Szinkronizalas most';
+  String get settings_cloudSync_syncNow => 'Szinkronizálás most';
 
   @override
   String get settings_cloudSync_syncOnLaunch => 'Szinkronizalas inditaskor';

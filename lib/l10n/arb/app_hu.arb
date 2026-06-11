@@ -3155,7 +3155,7 @@
   "settings_cloudSync_status_syncError": "Szinkronizalasi hiba",
   "settings_cloudSync_status_syncing": "Szinkronizalas...",
   "settings_cloudSync_storageSettings": "Tarolasi beallitasok",
-  "settings_cloudSync_syncNow": "Szinkronizalas most",
+  "settings_cloudSync_syncNow": "Szinkronizálás most",
   "settings_cloudSync_syncOnLaunch": "Szinkronizalas inditaskor",
   "settings_cloudSync_syncOnLaunch_subtitle": "Frissitesek ellenorzese inditaskor",
   "settings_cloudSync_syncOnResume": "Szinkronizalas folytatáskor",
