@@ -35,10 +35,8 @@ class EditFormScaffold extends StatelessWidget {
   /// Extra actions (e.g. delete) rendered before the save button.
   final List<Widget>? actions;
 
-  Future<void> _handlePop(BuildContext context, bool didPop) async {
-    if (didPop) return;
+  Future<bool> _confirmDiscard(BuildContext context) async {
     final l10n = context.l10n;
-    final navigator = Navigator.of(context);
     final discard = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -56,7 +54,18 @@ class EditFormScaffold extends StatelessWidget {
         ],
       ),
     );
-    if (discard == true) navigator.pop();
+    return discard == true;
+  }
+
+  Future<void> _handlePop(BuildContext context, bool didPop) async {
+    if (didPop) return;
+    final navigator = Navigator.of(context);
+    if (await _confirmDiscard(context)) navigator.pop();
+  }
+
+  Future<void> _handleCancel(BuildContext context) async {
+    if (hasUnsavedChanges && !await _confirmDiscard(context)) return;
+    onCancel?.call();
   }
 
   Widget _saveButton(BuildContext context, {required bool filled}) {
@@ -113,7 +122,7 @@ class EditFormScaffold extends StatelessWidget {
                 ...?actions,
                 if (onCancel != null)
                   TextButton(
-                    onPressed: onCancel,
+                    onPressed: () => _handleCancel(context),
                     child: Text(context.l10n.forms_cancel),
                   ),
                 const SizedBox(width: 8),
