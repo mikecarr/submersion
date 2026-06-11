@@ -3530,6 +3530,26 @@ class AppLocalizationsHe extends AppLocalizations {
       'סטנדרטי: 1013 mbar בגובה פני הים';
 
   @override
+  String get diveLog_edit_tankCard_done => 'סיום';
+
+  @override
+  String get diveLog_edit_tankCard_edit => 'עריכה';
+
+  @override
+  String get diveLog_edit_tankCard_mix => 'תערובת';
+
+  @override
+  String get diveLog_edit_tankCard_pressure => 'לחץ';
+
+  @override
+  String diveLog_edit_tankCard_title(int number) {
+    return 'מיכל $number';
+  }
+
+  @override
+  String get diveLog_edit_tankCard_volume => 'נפח';
+
+  @override
   String get diveLog_edit_tooltip_calculateFromProfile =>
       'חישוב מפרופיל הצלילה';
 

@@ -6130,6 +6130,42 @@ abstract class AppLocalizations {
   /// **'Standard: 1013 mbar at sea level'**
   String get diveLog_edit_surfacePressureHint;
 
+  /// Collapse the tank editor back to the card
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get diveLog_edit_tankCard_done;
+
+  /// Expand a tank card into the full editor
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get diveLog_edit_tankCard_edit;
+
+  /// Hero label on tank card: gas mix
+  ///
+  /// In en, this message translates to:
+  /// **'Mix'**
+  String get diveLog_edit_tankCard_mix;
+
+  /// Hero label on tank card: start to end pressure
+  ///
+  /// In en, this message translates to:
+  /// **'Pressure'**
+  String get diveLog_edit_tankCard_pressure;
+
+  /// Caption on a tank card
+  ///
+  /// In en, this message translates to:
+  /// **'Tank {number}'**
+  String diveLog_edit_tankCard_title(int number);
+
+  /// Hero label on tank card: tank volume
+  ///
+  /// In en, this message translates to:
+  /// **'Volume'**
+  String get diveLog_edit_tankCard_volume;
+
   /// No description provided for @diveLog_edit_tooltip_calculateFromProfile.
   ///
   /// In en, this message translates to:

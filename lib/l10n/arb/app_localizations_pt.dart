@@ -3626,6 +3626,26 @@ class AppLocalizationsPt extends AppLocalizations {
       'Padrao: 1013 mbar ao nivel do mar';
 
   @override
+  String get diveLog_edit_tankCard_done => 'Concluído';
+
+  @override
+  String get diveLog_edit_tankCard_edit => 'Editar';
+
+  @override
+  String get diveLog_edit_tankCard_mix => 'Mistura';
+
+  @override
+  String get diveLog_edit_tankCard_pressure => 'Pressão';
+
+  @override
+  String diveLog_edit_tankCard_title(int number) {
+    return 'Cilindro $number';
+  }
+
+  @override
+  String get diveLog_edit_tankCard_volume => 'Volume';
+
+  @override
   String get diveLog_edit_tooltip_calculateFromProfile =>
       'Calcular a partir do perfil de mergulho';
 

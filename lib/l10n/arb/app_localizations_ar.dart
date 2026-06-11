@@ -3544,6 +3544,26 @@ class AppLocalizationsAr extends AppLocalizations {
       'القياسي: 1013 mbar عند مستوى سطح البحر';
 
   @override
+  String get diveLog_edit_tankCard_done => 'تم';
+
+  @override
+  String get diveLog_edit_tankCard_edit => 'تحرير';
+
+  @override
+  String get diveLog_edit_tankCard_mix => 'الخليط';
+
+  @override
+  String get diveLog_edit_tankCard_pressure => 'الضغط';
+
+  @override
+  String diveLog_edit_tankCard_title(int number) {
+    return 'أسطوانة $number';
+  }
+
+  @override
+  String get diveLog_edit_tankCard_volume => 'الحجم';
+
+  @override
   String get diveLog_edit_tooltip_calculateFromProfile => 'حساب من ملف الغوصة';
 
   @override

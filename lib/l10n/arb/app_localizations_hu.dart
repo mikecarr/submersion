@@ -3613,6 +3613,26 @@ class AppLocalizationsHu extends AppLocalizations {
       'Standard: 1013 mbar tengerszinten';
 
   @override
+  String get diveLog_edit_tankCard_done => 'Kész';
+
+  @override
+  String get diveLog_edit_tankCard_edit => 'Szerkesztés';
+
+  @override
+  String get diveLog_edit_tankCard_mix => 'Keverék';
+
+  @override
+  String get diveLog_edit_tankCard_pressure => 'Nyomás';
+
+  @override
+  String diveLog_edit_tankCard_title(int number) {
+    return '$number. palack';
+  }
+
+  @override
+  String get diveLog_edit_tankCard_volume => 'Térfogat';
+
+  @override
   String get diveLog_edit_tooltip_calculateFromProfile =>
       'Szamitas a merulesi profilbol';
 

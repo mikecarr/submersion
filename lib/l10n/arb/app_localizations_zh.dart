@@ -3455,6 +3455,26 @@ class AppLocalizationsZh extends AppLocalizations {
   String get diveLog_edit_surfacePressureHint => '标准：海平面 1013 mbar';
 
   @override
+  String get diveLog_edit_tankCard_done => '完成';
+
+  @override
+  String get diveLog_edit_tankCard_edit => '编辑';
+
+  @override
+  String get diveLog_edit_tankCard_mix => '气体';
+
+  @override
+  String get diveLog_edit_tankCard_pressure => '压力';
+
+  @override
+  String diveLog_edit_tankCard_title(int number) {
+    return '气瓶 $number';
+  }
+
+  @override
+  String get diveLog_edit_tankCard_volume => '容积';
+
+  @override
   String get diveLog_edit_tooltip_calculateFromProfile => '从潜水轮廓计算';
 
   @override

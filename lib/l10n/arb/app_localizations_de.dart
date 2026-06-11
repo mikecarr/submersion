@@ -3632,6 +3632,26 @@ class AppLocalizationsDe extends AppLocalizations {
       'Standard: 1013 mbar auf Meereshöhe';
 
   @override
+  String get diveLog_edit_tankCard_done => 'Fertig';
+
+  @override
+  String get diveLog_edit_tankCard_edit => 'Bearbeiten';
+
+  @override
+  String get diveLog_edit_tankCard_mix => 'Gemisch';
+
+  @override
+  String get diveLog_edit_tankCard_pressure => 'Druck';
+
+  @override
+  String diveLog_edit_tankCard_title(int number) {
+    return 'Flasche $number';
+  }
+
+  @override
+  String get diveLog_edit_tankCard_volume => 'Volumen';
+
+  @override
   String get diveLog_edit_tooltip_calculateFromProfile =>
       'Aus Tauchprofil berechnen';
 
