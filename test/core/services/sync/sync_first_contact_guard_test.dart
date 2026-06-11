@@ -35,11 +35,11 @@ void main() {
       ],
     );
     addTearDown(container.dispose);
-    // Trigger notifier construction and pump the event loop until
-    // _initialize() -> refreshState() completes, so its async DB reads do
-    // not race with performSync state assertions.
+    // Trigger notifier construction and wait for _initialize() ->
+    // refreshState() to complete, so its async DB reads do not race with
+    // performSync state assertions.
     container.read(syncStateProvider);
-    await Future<void>.delayed(const Duration(milliseconds: 50));
+    await container.read(syncStateProvider.notifier).refreshState();
     return container;
   }
 

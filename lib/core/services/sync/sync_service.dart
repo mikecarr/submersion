@@ -472,11 +472,19 @@ class SyncService {
               .uploadFile(localData, filename, folderId: syncFolder)
               .timeout(const Duration(seconds: 180)),
         );
-      } catch (_) {
-        await _syncInitializer?.removeUploadNonce(
-          uploadNonce,
-          provider.providerId,
-        );
+      } catch (e) {
+        // A timed-out upload may still have landed server-side; keep the
+        // speculative nonce so our own file cannot read as a foreign twin
+        // on the next sync (the ring absorbs the extra entry). Remove it
+        // only on definite failures, so repeated hard failures cannot
+        // evict the nonce of the last successful upload.
+        final cause = e is SyncStepException ? e.error : e;
+        if (cause is! TimeoutException) {
+          await _syncInitializer?.removeUploadNonce(
+            uploadNonce,
+            provider.providerId,
+          );
+        }
         rethrow;
       }
       _log.debug('Upload complete! fileId = ${result.fileId}');

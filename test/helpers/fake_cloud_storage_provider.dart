@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:submersion/core/services/cloud_storage/cloud_storage_provider.dart';
@@ -18,6 +19,11 @@ class FakeCloudStorageProvider extends CloudStorageProvider
 
   /// When true, [uploadFile] throws, modelling an offline/denied provider.
   bool failUploads = false;
+
+  /// When true, [uploadFile] WRITES the file and then throws
+  /// [TimeoutException], modelling a PUT that landed server-side while the
+  /// response was lost.
+  bool timeoutUploadsAfterWrite = false;
 
   /// When true, [deleteFile] throws, modelling an offline/denied provider.
   bool failDeletes = false;
@@ -76,6 +82,9 @@ class FakeCloudStorageProvider extends CloudStorageProvider
       throw const CloudStorageException('upload failed (test)');
     }
     _files[filename] = _FakeFile(data, DateTime.now());
+    if (timeoutUploadsAfterWrite) {
+      throw TimeoutException('upload timed out (test)');
+    }
     return UploadResult(
       fileId: filename,
       uploadTime: _files[filename]!.modified,

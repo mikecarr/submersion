@@ -251,6 +251,33 @@ void main() {
       expect(await repository.getDeviceId(), deviceIdBefore);
     });
 
+    test('a timed-out upload that landed keeps its nonce recorded', () async {
+      // Sync 1 succeeds normally.
+      final service = buildService();
+      expect((await service.performSync()).isSuccess, isTrue);
+
+      // Sync 2: the PUT lands server-side but the response is lost. The
+      // speculative nonce must STAY recorded -- the cloud file now carries
+      // it, and removing it would make our own upload read as a foreign
+      // twin on the next sync.
+      cloud.timeoutUploadsAfterWrite = true;
+      final second = await service.performSync();
+      expect(second.isSuccess, isFalse);
+
+      cloud.timeoutUploadsAfterWrite = false;
+      final deviceIdBefore = await repository.getDeviceId();
+      final third = await service.performSync();
+
+      expect(
+        third.adoptedFreshIdentity,
+        isFalse,
+        reason:
+            'the nonce of an indeterminate upload must survive the failure '
+            'path; only definite failures un-record it',
+      );
+      expect(await repository.getDeviceId(), deviceIdBefore);
+    });
+
     test('the nonce ring keeps the newest entries per provider', () async {
       for (var i = 0; i < 9; i++) {
         await initializer.recordUploadNonce('nonce-$i', 'fake');
