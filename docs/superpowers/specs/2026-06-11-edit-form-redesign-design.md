@@ -189,9 +189,10 @@ Merge mode keeps its current flow and controls, restyled to the new chrome.
 - Rare sections stay behind `AddSectionRow` until they contain data.
 
 **Validation:** field validators unchanged. On failed save: auto-expand groups
-containing errors, scroll to the first invalid field, show the error badge on
-any group the user re-collapses while still invalid. No errors are ever hidden
-silently.
+containing errors (inline errors become visible; explicit scroll-to-first-error
+is deferred — the validated fields sit in the top two groups on both pages),
+show the error badge on any group the user re-collapses while still invalid.
+No errors are ever hidden silently.
 
 **Save/cancel:** behavior unchanged, relocated into `EditFormScaffold`.
 
@@ -204,8 +205,12 @@ focus order is top-to-bottom document order.
 ```
 lib/shared/widgets/forms/            # primitives (one per file, ~100-300 lines)
 lib/features/dive_log/presentation/
-  pages/dive_edit_page.dart          # thin coordinator: state, controllers,
-                                     # load/save, expansion defaults (<~500 lines)
+  pages/dive_edit_page.dart          # coordinator: state, controllers,
+                                     # load/save, expansion defaults, and
+                                     # slot builders for complex legacy
+                                     # interiors (~2,900 lines after Phase 2;
+                                     # interior relocation into section files
+                                     # is recorded follow-up work)
   widgets/edit_sections/             # the_dive_section.dart, gas_gear_section.dart,
                                      # conditions_section.dart, trip_section.dart,
                                      # buddies_section.dart, experience_section.dart

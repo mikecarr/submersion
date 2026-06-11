@@ -64,6 +64,7 @@ import 'package:submersion/features/media/presentation/widgets/photo_gps_suggest
 import 'package:submersion/features/media/presentation/widgets/quick_site_from_gps_dialog.dart';
 import 'package:submersion/l10n/l10n_extension.dart';
 import 'package:submersion/shared/widgets/forms/add_section_row.dart';
+import 'package:submersion/shared/widgets/forms/edit_form_scaffold.dart';
 import 'package:submersion/shared/widgets/forms/form_row.dart';
 import 'package:submersion/shared/widgets/forms/form_style.dart';
 import 'package:submersion/core/constants/tank_presets.dart';
@@ -222,6 +223,31 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
   bool get _showCustomFieldsSection =>
       _customFields.isNotEmpty || _expanded['customFields'] == true;
 
+  /// Unsaved-changes guard state. The page never had one before the form
+  /// redesign; EditFormScaffold's PopScope consumes this.
+  bool _hasUnsavedChanges = false;
+
+  /// Suppressed while loading/populating so programmatic writes do not
+  /// trip the discard guard.
+  bool _suppressDirty = true;
+
+  void _markDirty() {
+    if (_suppressDirty || _hasUnsavedChanges) return;
+    _hasUnsavedChanges = true;
+    // Deferred: this is called from listeners, Form.onChanged and inside
+    // other setState callbacks; PopScope reads the flag on next build.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) setState(() {});
+    });
+  }
+
+  void _silently(VoidCallback fn) {
+    final previous = _suppressDirty;
+    _suppressDirty = true;
+    fn();
+    _suppressDirty = previous;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -253,6 +279,28 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
       // For new dives, capture GPS in the background to suggest nearby sites
       _captureLocationForNearby();
       _suggestNextDiveNumber();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _suppressDirty = false;
+      });
+    }
+
+    for (final controller in [
+      _diveNumberController,
+      _durationController,
+      _runtimeController,
+      _maxDepthController,
+      _avgDepthController,
+      _waterTempController,
+      _airTempController,
+      _notesController,
+      _swellHeightController,
+      _altitudeController,
+      _surfacePressureController,
+      _windSpeedController,
+      _humidityController,
+      _weatherDescriptionController,
+    ]) {
+      controller.addListener(_markDirty);
     }
   }
 
@@ -307,8 +355,10 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
       final repository = ref.read(diveRepositoryProvider);
       final nextNumber = await repository.getNextDiveNumber();
       if (mounted && _diveNumberController.text.isEmpty) {
-        setState(() {
-          _diveNumberController.text = nextNumber.toString();
+        _silently(() {
+          setState(() {
+            _diveNumberController.text = nextNumber.toString();
+          });
         });
       }
     } catch (_) {
@@ -396,6 +446,7 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
           // Load all tanks from the dive
           if (dive.tanks.isNotEmpty) {
             _tanks = List.from(dive.tanks);
+            _markDirty();
             _tanksDirty = true;
           }
 
@@ -478,12 +529,12 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
           _loopO2Avg = dive.loopO2Avg;
         });
         // Load existing sightings and buddies
-        _loadSightings();
-        _loadBuddies();
+        await Future.wait([_loadSightings(), _loadBuddies()]);
       }
     } finally {
       if (mounted) {
         setState(() => _isLoading = false);
+        _suppressDirty = false;
       }
     }
   }
@@ -575,6 +626,7 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
 
     final formBody = Form(
       key: _formKey,
+      onChanged: _markDirty,
       child: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -617,95 +669,17 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
       ),
     );
 
-    // Embedded mode: Return content with a compact header bar (no Scaffold)
-    if (widget.embedded) {
-      return Column(
-        children: [
-          _buildEmbeddedHeader(context, units),
-          Expanded(child: formBody),
-        ],
-      );
-    }
-
-    // Standalone mode: Full Scaffold with AppBar
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          widget.isEditing
-              ? context.l10n.diveLog_edit_appBarEdit
-              : context.l10n.diveLog_edit_appBarNew,
-        ),
-        actions: [
-          _isSaving
-              ? const Padding(
-                  padding: EdgeInsets.all(16),
-                  child: SizedBox(
-                    width: 24,
-                    height: 24,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  ),
-                )
-              : TextButton(
-                  onPressed: () => _saveDive(units),
-                  child: Text(context.l10n.diveLog_edit_save),
-                ),
-        ],
-      ),
-      body: formBody,
-    );
-  }
-
-  /// Compact header bar for embedded mode in master-detail layout.
-  Widget _buildEmbeddedHeader(BuildContext context, UnitFormatter units) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final title = widget.isEditing
-        ? context.l10n.diveLog_edit_appBarEdit
-        : context.l10n.diveLog_edit_headerNew;
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        color: colorScheme.surface,
-        border: Border(
-          bottom: BorderSide(color: colorScheme.outlineVariant, width: 1),
-        ),
-      ),
-      child: Row(
-        children: [
-          // Icon
-          Icon(
-            widget.isEditing ? Icons.edit : Icons.add_circle_outline,
-            color: colorScheme.primary,
-          ),
-          const SizedBox(width: 12),
-          // Title
-          Expanded(
-            child: Text(
-              title,
-              style: Theme.of(
-                context,
-              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
-            ),
-          ),
-          // Cancel button
-          TextButton(
-            onPressed: widget.onCancel,
-            child: Text(context.l10n.diveLog_edit_cancel),
-          ),
-          const SizedBox(width: 8),
-          // Save button
-          _isSaving
-              ? const SizedBox(
-                  width: 24,
-                  height: 24,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : FilledButton(
-                  onPressed: () => _saveDive(units),
-                  child: Text(context.l10n.diveLog_edit_save),
-                ),
-        ],
-      ),
+    return EditFormScaffold(
+      title: widget.isEditing
+          ? context.l10n.diveLog_edit_appBarEdit
+          : context.l10n.diveLog_edit_appBarNew,
+      embedded: widget.embedded,
+      isSaving: _isSaving,
+      hasUnsavedChanges: _hasUnsavedChanges,
+      onSave: () => _saveDive(units),
+      onCancel: widget.onCancel,
+      headerIcon: widget.isEditing ? Icons.edit : Icons.add_circle_outline,
+      child: formBody,
     );
   }
 
@@ -749,11 +723,13 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
                   keySuggestions: suggestions,
                   onChanged: (updated) {
                     setState(() {
+                      _markDirty();
                       _customFields[index] = updated;
                     });
                   },
                   onDelete: () {
                     setState(() {
+                      _markDirty();
                       _customFields.removeAt(index);
                     });
                   },
@@ -764,6 +740,7 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
           OutlinedButton.icon(
             onPressed: () {
               setState(() {
+                _markDirty();
                 _customFields.add(
                   DiveCustomField(
                     id: _uuid.v4(),
@@ -797,7 +774,10 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
       onEditExit: _editExit,
       siteName: _selectedSite?.name,
       onPickSite: _showSitePicker,
-      onClearSite: () => setState(() => _selectedSite = null),
+      onClearSite: () {
+        _markDirty();
+        setState(() => _selectedSite = null);
+      },
       maxDepthSuggestion: hasProfile
           ? _depthSuggestion(
               units,
@@ -1034,6 +1014,7 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
           selectedSiteId: _selectedSite?.id,
           currentLocation: _currentLocation,
           onSiteSelected: (site) {
+            _markDirty();
             setState(() => _selectedSite = site);
             Navigator.of(sheetContext).pop();
           },
@@ -1050,6 +1031,7 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
         final repo = ref.read(siteRepositoryProvider);
         final site = await repo.getSiteById(siteId);
         if (site != null && mounted) {
+          _markDirty();
           setState(() => _selectedSite = site);
         }
       }
@@ -1078,14 +1060,20 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
             )
           : null,
       onPickTrip: _showTripPicker,
-      onClearTrip: () => setState(() => _selectedTrip = null),
+      onClearTrip: () {
+        _markDirty();
+        setState(() => _selectedTrip = null);
+      },
       tripSuggestion: _selectedTrip == null
           ? _buildTripSuggestion(diveDateTime)
           : null,
       diveCenterName: _selectedDiveCenter?.name,
       centerCaption: _selectedDiveCenter?.displayLocation,
       onPickDiveCenter: _showDiveCenterPicker,
-      onClearDiveCenter: () => setState(() => _selectedDiveCenter = null),
+      onClearDiveCenter: () {
+        _markDirty();
+        setState(() => _selectedDiveCenter = null);
+      },
     );
   }
 
@@ -1107,7 +1095,10 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
             button: true,
             label: 'Use suggested trip ${suggestedTrip.name}',
             child: InkWell(
-              onTap: () => setState(() => _selectedTrip = suggestedTrip),
+              onTap: () {
+                _markDirty();
+                setState(() => _selectedTrip = suggestedTrip);
+              },
               child: Row(
                 children: [
                   Icon(
@@ -1156,6 +1147,7 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
           selectedTrip: _selectedTrip,
           onTripSelected: (trip) {
             Navigator.of(sheetContext).pop();
+            _markDirty();
             setState(() => _selectedTrip = trip);
           },
           onCreateNewTrip: () {
@@ -1170,6 +1162,7 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
       if (tripId != null && mounted) {
         final trip = await ref.read(tripRepositoryProvider).getTripById(tripId);
         if (trip != null && mounted) {
+          _markDirty();
           setState(() => _selectedTrip = trip);
         }
       }
@@ -1190,6 +1183,7 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
           selectedCenter: _selectedDiveCenter,
           onCenterSelected: (center) {
             Navigator.of(sheetContext).pop();
+            _markDirty();
             setState(() => _selectedDiveCenter = center);
           },
           onCreateNewCenter: () {
@@ -1205,6 +1199,7 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
         final repo = ref.read(diveCenterRepositoryProvider);
         final center = await repo.getDiveCenterById(centerId);
         if (center != null && mounted) {
+          _markDirty();
           setState(() => _selectedDiveCenter = center);
         }
       }
@@ -1235,6 +1230,7 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
             CoursePicker(
               selectedCourse: _selectedCourse,
               onCourseSelected: (course) {
+                _markDirty();
                 setState(() => _selectedCourse = course);
               },
             ),
@@ -1269,7 +1265,10 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
       summary: _experienceSummary(),
       isEmpty: _experienceSummary().isEmpty,
       rating: _rating,
-      onRatingChanged: (v) => setState(() => _rating = v),
+      onRatingChanged: (v) {
+        _markDirty();
+        setState(() => _rating = v);
+      },
       notesController: _notesController,
       notesPlaceholder: context.l10n.diveLog_edit_notesHint,
       sightingsChild: _sightingsChild(),
@@ -1305,6 +1304,7 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
           TagInputWidget(
             selectedTags: _selectedTags,
             onTagsChanged: (tags) {
+              _markDirty();
               setState(() => _selectedTags = tags);
             },
           ),
@@ -1449,6 +1449,7 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
       modeSelector: DiveModeSelector(
         selectedMode: _diveMode,
         onChanged: (mode) {
+          _markDirty();
           setState(() => _diveMode = mode);
         },
       ),
@@ -1462,6 +1463,7 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
             units: units,
             onChanged: (updatedTank) {
               setState(() {
+                _markDirty();
                 _tanksDirty = true;
                 _tanks[i] = updatedTank;
               });
@@ -1513,6 +1515,7 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
                 double? loopVolume,
               }) {
                 setState(() {
+                  _markDirty();
                   _setpointLow = setpointLow;
                   _setpointHigh = setpointHigh;
                   _setpointDeco = setpointDeco;
@@ -1558,6 +1561,7 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
                 int? scrubberRemainingMinutes,
               }) {
                 setState(() {
+                  _markDirty();
                   _scrType = scrType;
                   _scrInjectionRate = injectionRate;
                   _scrAdditionRatio = additionRatio;
@@ -1740,6 +1744,7 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
   void _addTank() {
     final settings = ref.read(settingsProvider);
     setState(() {
+      _markDirty();
       _tanksDirty = true;
       _tanks.add(
         DiveTank(
@@ -1760,6 +1765,7 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
 
   void _removeTank(int index) {
     setState(() {
+      _markDirty();
       _tanksDirty = true;
       _tanks.removeAt(index);
       // Update order for remaining tanks
@@ -1854,6 +1860,7 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
                   tooltip: context.l10n.diveLog_edit_tooltip_removeEquipment,
                   onPressed: () {
                     setState(() {
+                      _markDirty();
                       _selectedEquipment.removeAt(index);
                     });
                   },
@@ -1874,6 +1881,7 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
                   TextButton(
                     onPressed: () {
                       setState(() {
+                        _markDirty();
                         _selectedEquipment.clear();
                       });
                     },
@@ -2694,6 +2702,7 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
           OutlinedButton.icon(
             onPressed: () {
               setState(() {
+                _markDirty();
                 _weights.add(
                   DiveWeight(
                     id: _uuid.v4(),
@@ -2773,6 +2782,7 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
             icon: const Icon(Icons.delete_outline),
             onPressed: () {
               setState(() {
+                _markDirty();
                 _weights.removeAt(index);
               });
             },
@@ -2795,6 +2805,7 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
           diveId: widget.diveId,
           selectedBuddies: _selectedBuddies,
           onChanged: (buddies) {
+            _markDirty();
             setState(() => _selectedBuddies = buddies);
           },
         ),
@@ -2913,6 +2924,7 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
                       tooltip: context.l10n.diveLog_edit_tooltip_removeSighting,
                       onPressed: () {
                         setState(() {
+                          _markDirty();
                           _sightings.removeAt(index);
                         });
                       },
@@ -2965,6 +2977,7 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
           scrollController: scrollController,
           onSpeciesSelected: (species, count, notes) {
             setState(() {
+              _markDirty();
               _sightings.add(
                 Sighting(
                   id: DateTime.now().millisecondsSinceEpoch.toString(),
@@ -2993,12 +3006,14 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
         sighting: sighting,
         onSave: (updatedSighting) {
           setState(() {
+            _markDirty();
             _sightings[index] = updatedSighting;
           });
           Navigator.of(context).pop();
         },
         onDelete: () {
           setState(() {
+            _markDirty();
             _sightings.removeAt(index);
           });
           Navigator.of(context).pop();
@@ -3016,6 +3031,7 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
     );
     if (date != null) {
       setState(() {
+        _markDirty();
         _entryDate = date;
         // If exit date not set, default it to the same day
         _exitDate ??= date;
@@ -3029,6 +3045,7 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
       initialTime: _entryTime,
     );
     if (time != null) {
+      _markDirty();
       setState(() => _entryTime = time);
     }
   }
@@ -3068,6 +3085,7 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
       lastDate: lastDate,
     );
     if (date != null) {
+      _markDirty();
       setState(() => _exitDate = date);
     }
   }
@@ -3081,6 +3099,7 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
     );
     if (time != null) {
       setState(() {
+        _markDirty();
         _exitTime = time;
         // Also set exit date if not set
         _exitDate ??= _entryDate;
@@ -3089,6 +3108,30 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
   }
 
   Future<void> _saveDive(UnitFormatter units) async {
+    // Collapsed sections un-mount their fields, hiding them from
+    // Form.validate(); expand everything first so no error can hide.
+    final anyCollapsed = [
+      _isExpanded('gasGear', defaultValue: !widget.isEditing),
+      _isExpanded('conditions', defaultValue: false),
+      _isExpanded('trip', defaultValue: false),
+      _isExpanded('buddies', defaultValue: false),
+      _isExpanded('experience', defaultValue: false),
+    ].any((expanded) => !expanded);
+    if (anyCollapsed) {
+      setState(() {
+        for (final key in const [
+          'gasGear',
+          'conditions',
+          'trip',
+          'buddies',
+          'experience',
+        ]) {
+          _expanded[key] = true;
+        }
+      });
+      await Future<void>.delayed(Duration.zero);
+      if (!mounted) return;
+    }
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _isSaving = true);
@@ -3376,6 +3419,7 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
       }
 
       if (mounted && savedDiveId != null) {
+        _hasUnsavedChanges = false;
         if (widget.embedded && widget.onSaved != null) {
           // In embedded mode, call the callback to update selection
           widget.onSaved!(savedDiveId);
