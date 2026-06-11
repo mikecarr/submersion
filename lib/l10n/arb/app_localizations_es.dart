@@ -3356,6 +3356,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get diveLog_edit_gettingLocation => 'Obteniendo ubicación...';
 
   @override
+  String get diveLog_edit_group_buddies => 'Compañeros';
+
+  @override
   String get diveLog_edit_group_conditions => 'Condiciones';
 
   @override
@@ -3365,7 +3368,13 @@ class AppLocalizationsEs extends AppLocalizations {
   String get diveLog_edit_group_theDive => 'La inmersión';
 
   @override
+  String get diveLog_edit_group_trip => 'Viaje';
+
+  @override
   String get diveLog_edit_headerNew => 'Registrar nueva inmersión';
+
+  @override
+  String get diveLog_edit_invite_buddies => 'Añadir compañeros';
 
   @override
   String get diveLog_edit_invite_conditions =>
@@ -3374,6 +3383,9 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get diveLog_edit_invite_gasGear =>
       'Añadir gas y equipo: modo, botellas, equipo, lastre';
+
+  @override
+  String get diveLog_edit_invite_trip => 'Añadir viaje o centro de buceo';
 
   @override
   String get diveLog_edit_label_airTemp => 'Temp. del aire';
@@ -3456,6 +3468,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get diveLog_edit_row_addSite => 'Añadir punto';
 
   @override
+  String get diveLog_edit_row_diveCenter => 'Centro de buceo';
+
+  @override
   String get diveLog_edit_row_entry => 'Entrada';
 
   @override
@@ -3469,6 +3484,9 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get diveLog_edit_row_surfaceInterval => 'Intervalo en superficie';
+
+  @override
+  String get diveLog_edit_row_trip => 'Viaje';
 
   @override
   String get diveLog_edit_save => 'Guardar';

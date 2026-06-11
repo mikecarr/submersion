@@ -3198,6 +3198,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get diveLog_edit_gettingLocation => '正在获取位置...';
 
   @override
+  String get diveLog_edit_group_buddies => '潜伴';
+
+  @override
   String get diveLog_edit_group_conditions => '环境条件';
 
   @override
@@ -3207,13 +3210,22 @@ class AppLocalizationsZh extends AppLocalizations {
   String get diveLog_edit_group_theDive => '本次潜水';
 
   @override
+  String get diveLog_edit_group_trip => '行程';
+
+  @override
   String get diveLog_edit_headerNew => '记录新潜水';
+
+  @override
+  String get diveLog_edit_invite_buddies => '添加潜伴';
 
   @override
   String get diveLog_edit_invite_conditions => '添加环境条件 - 水况、能见度、天气';
 
   @override
   String get diveLog_edit_invite_gasGear => '添加气体与装备 - 模式、气瓶、装备、配重';
+
+  @override
+  String get diveLog_edit_invite_trip => '添加行程或潜水中心';
 
   @override
   String get diveLog_edit_label_airTemp => '气温';
@@ -3294,6 +3306,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get diveLog_edit_row_addSite => '添加潜点';
 
   @override
+  String get diveLog_edit_row_diveCenter => '潜水中心';
+
+  @override
   String get diveLog_edit_row_entry => '入水';
 
   @override
@@ -3307,6 +3322,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get diveLog_edit_row_surfaceInterval => '水面间隔';
+
+  @override
+  String get diveLog_edit_row_trip => '行程';
 
   @override
   String get diveLog_edit_save => '保存';

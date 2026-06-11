@@ -3362,6 +3362,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get diveLog_edit_gettingLocation => 'Standort wird ermittelt...';
 
   @override
+  String get diveLog_edit_group_buddies => 'Buddys';
+
+  @override
   String get diveLog_edit_group_conditions => 'Bedingungen';
 
   @override
@@ -3371,7 +3374,13 @@ class AppLocalizationsDe extends AppLocalizations {
   String get diveLog_edit_group_theDive => 'Der Tauchgang';
 
   @override
+  String get diveLog_edit_group_trip => 'Reise';
+
+  @override
   String get diveLog_edit_headerNew => 'Neuen Tauchgang erfassen';
+
+  @override
+  String get diveLog_edit_invite_buddies => 'Buddys hinzufügen';
 
   @override
   String get diveLog_edit_invite_conditions =>
@@ -3380,6 +3389,9 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get diveLog_edit_invite_gasGear =>
       'Gas & Ausrüstung hinzufügen - Modus, Flaschen, Ausrüstung, Blei';
+
+  @override
+  String get diveLog_edit_invite_trip => 'Reise oder Tauchbasis hinzufügen';
 
   @override
   String get diveLog_edit_label_airTemp => 'Lufttemperatur';
@@ -3463,6 +3475,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get diveLog_edit_row_addSite => 'Tauchplatz hinzufügen';
 
   @override
+  String get diveLog_edit_row_diveCenter => 'Tauchbasis';
+
+  @override
   String get diveLog_edit_row_entry => 'Einstieg';
 
   @override
@@ -3476,6 +3491,9 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get diveLog_edit_row_surfaceInterval => 'Oberflächenpause';
+
+  @override
+  String get diveLog_edit_row_trip => 'Reise';
 
   @override
   String get diveLog_edit_save => 'Speichern';

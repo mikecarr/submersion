@@ -5668,6 +5668,12 @@ abstract class AppLocalizations {
   /// **'Getting location...'**
   String get diveLog_edit_gettingLocation;
 
+  /// Form group: dive buddies
+  ///
+  /// In en, this message translates to:
+  /// **'Buddies'**
+  String get diveLog_edit_group_buddies;
+
   /// Form group: water, environment and weather
   ///
   /// In en, this message translates to:
@@ -5686,11 +5692,23 @@ abstract class AppLocalizations {
   /// **'The Dive'**
   String get diveLog_edit_group_theDive;
 
+  /// Form group: trip and dive center
+  ///
+  /// In en, this message translates to:
+  /// **'Trip'**
+  String get diveLog_edit_group_trip;
+
   /// No description provided for @diveLog_edit_headerNew.
   ///
   /// In en, this message translates to:
   /// **'Log New Dive'**
   String get diveLog_edit_headerNew;
+
+  /// Empty-state invitation for the Buddies group
+  ///
+  /// In en, this message translates to:
+  /// **'Add buddies'**
+  String get diveLog_edit_invite_buddies;
 
   /// Empty-state invitation for the Conditions group
   ///
@@ -5703,6 +5721,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Add gas & gear - mode, tanks, equipment, weight'**
   String get diveLog_edit_invite_gasGear;
+
+  /// Empty-state invitation for the Trip group
+  ///
+  /// In en, this message translates to:
+  /// **'Add trip or dive center'**
+  String get diveLog_edit_invite_trip;
 
   /// No description provided for @diveLog_edit_label_airTemp.
   ///
@@ -5860,6 +5884,12 @@ abstract class AppLocalizations {
   /// **'Add site'**
   String get diveLog_edit_row_addSite;
 
+  /// Row label: dive center picker
+  ///
+  /// In en, this message translates to:
+  /// **'Dive center'**
+  String get diveLog_edit_row_diveCenter;
+
   /// Row label: entry date and time
   ///
   /// In en, this message translates to:
@@ -5889,6 +5919,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Surface interval'**
   String get diveLog_edit_row_surfaceInterval;
+
+  /// Row label: trip picker
+  ///
+  /// In en, this message translates to:
+  /// **'Trip'**
+  String get diveLog_edit_row_trip;
 
   /// No description provided for @diveLog_edit_save.
   ///

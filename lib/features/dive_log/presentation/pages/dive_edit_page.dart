@@ -36,10 +36,12 @@ import 'package:submersion/features/dive_log/domain/entities/dive_data_source.da
 import 'package:submersion/features/dive_log/presentation/providers/dive_providers.dart';
 import 'package:submersion/features/dive_log/presentation/providers/outlier_suggestion_provider.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/custom_field_input_row.dart';
+import 'package:submersion/features/dive_log/presentation/widgets/edit_sections/buddies_section.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/edit_sections/conditions_section.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/edit_sections/gas_gear_section.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/edit_sections/tank_card.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/edit_sections/the_dive_section.dart';
+import 'package:submersion/features/dive_log/presentation/widgets/edit_sections/trip_section.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/pickers/computer_source_sheet.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/pickers/edit_sighting_sheet.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/pickers/equipment_picker_sheet.dart';
@@ -571,14 +573,12 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
           const SizedBox(height: FormStyle.sectionGap),
           _buildGasGearSection(units),
           const SizedBox(height: FormStyle.sectionGap),
-          _buildTripSection(),
-          const SizedBox(height: 16),
-          _buildDiveCenterSection(),
-          const SizedBox(height: 16),
           _buildConditionsSection(units),
           const SizedBox(height: FormStyle.sectionGap),
-          _buildBuddySection(),
-          const SizedBox(height: 16),
+          _buildTripGroupSection(units),
+          const SizedBox(height: FormStyle.sectionGap),
+          _buildBuddiesSection(),
+          const SizedBox(height: FormStyle.sectionGap),
           _buildRatingSection(),
           const SizedBox(height: 16),
           _buildSightingsSection(),
@@ -1066,10 +1066,7 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
     }
   }
 
-  Widget _buildTripSection() {
-    final settings = ref.watch(settingsProvider);
-    final units = UnitFormatter(settings);
-
+  Widget _buildTripGroupSection(UnitFormatter units) {
     final diveDateTime = DateTime(
       _entryDate.year,
       _entryDate.month,
@@ -1077,65 +1074,35 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
       _entryTime.hour,
       _entryTime.minute,
     );
-
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              context.l10n.diveLog_edit_section_trip,
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: _showTripPicker,
-                    icon: const Icon(Icons.flight_takeoff),
-                    label: Text(
-                      _selectedTrip?.name ??
-                          context.l10n.diveLog_edit_selectTrip,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    style: OutlinedButton.styleFrom(
-                      minimumSize: const Size(double.infinity, 48),
-                    ),
-                  ),
-                ),
-                if (_selectedTrip != null) ...[
-                  const SizedBox(width: 8),
-                  IconButton(
-                    icon: const Icon(Icons.clear),
-                    onPressed: () => setState(() => _selectedTrip = null),
-                    tooltip: context.l10n.diveLog_edit_tooltip_clearTrip,
-                  ),
-                ],
-              ],
-            ),
-            if (_selectedTrip != null)
-              Padding(
-                padding: const EdgeInsets.only(top: 8),
-                child: Text(
-                  units.formatDateRange(
-                    _selectedTrip!.startDate,
-                    _selectedTrip!.endDate,
-                    l10n: context.l10n,
-                  ),
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ),
-            // Show suggested trip if no trip selected and dive date matches a trip
-            if (_selectedTrip == null) _buildTripSuggestion(diveDateTime),
-          ],
-        ),
-      ),
+    return TripSection(
+      expanded: _isExpanded('trip', defaultValue: false),
+      onToggle: () => _toggleSection('trip', defaultValue: false),
+      summary: _tripSummary(),
+      isEmpty: _selectedTrip == null && _selectedDiveCenter == null,
+      tripName: _selectedTrip?.name,
+      tripCaption: _selectedTrip != null
+          ? units.formatDateRange(
+              _selectedTrip!.startDate,
+              _selectedTrip!.endDate,
+              l10n: context.l10n,
+            )
+          : null,
+      onPickTrip: _showTripPicker,
+      onClearTrip: () => setState(() => _selectedTrip = null),
+      tripSuggestion: _selectedTrip == null
+          ? _buildTripSuggestion(diveDateTime)
+          : null,
+      diveCenterName: _selectedDiveCenter?.name,
+      centerCaption: _selectedDiveCenter?.displayLocation,
+      onPickDiveCenter: _showDiveCenterPicker,
+      onClearDiveCenter: () => setState(() => _selectedDiveCenter = null),
     );
   }
+
+  String _tripSummary() => [
+    if (_selectedTrip != null) _selectedTrip!.name,
+    if (_selectedDiveCenter != null) _selectedDiveCenter!.name,
+  ].join(' · ');
 
   Widget _buildTripSuggestion(DateTime diveDateTime) {
     final suggestedTripAsync = ref.watch(tripForDateProvider(diveDateTime));
@@ -1217,60 +1184,6 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
         }
       }
     }
-  }
-
-  Widget _buildDiveCenterSection() {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              context.l10n.diveLog_edit_section_diveCenter,
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: _showDiveCenterPicker,
-                    icon: const Icon(Icons.store),
-                    label: Text(
-                      _selectedDiveCenter?.name ??
-                          context.l10n.diveLog_edit_selectDiveCenter,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    style: OutlinedButton.styleFrom(
-                      minimumSize: const Size(double.infinity, 48),
-                    ),
-                  ),
-                ),
-                if (_selectedDiveCenter != null) ...[
-                  const SizedBox(width: 8),
-                  IconButton(
-                    icon: const Icon(Icons.clear),
-                    onPressed: () => setState(() => _selectedDiveCenter = null),
-                    tooltip: context.l10n.diveLog_edit_tooltip_clearDiveCenter,
-                  ),
-                ],
-              ],
-            ),
-            if (_selectedDiveCenter?.displayLocation != null)
-              Padding(
-                padding: const EdgeInsets.only(top: 8),
-                child: Text(
-                  _selectedDiveCenter!.displayLocation!,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ),
-          ],
-        ),
-      ),
-    );
   }
 
   Future<void> _showDiveCenterPicker() async {
@@ -2809,10 +2722,14 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
     );
   }
 
-  Widget _buildBuddySection() {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
+  Widget _buildBuddiesSection() {
+    return BuddiesSection(
+      expanded: _isExpanded('buddies', defaultValue: false),
+      onToggle: () => _toggleSection('buddies', defaultValue: false),
+      summary: _buddiesSummary(),
+      isEmpty: _selectedBuddies.isEmpty,
+      buddyPicker: Padding(
+        padding: const EdgeInsets.fromLTRB(14, 10, 14, 12),
         child: BuddyPicker(
           diveId: widget.diveId,
           selectedBuddies: _selectedBuddies,
@@ -2822,6 +2739,13 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
         ),
       ),
     );
+  }
+
+  String _buddiesSummary() {
+    if (_selectedBuddies.isEmpty) return '';
+    final first = _selectedBuddies.first.buddy.name;
+    final extra = _selectedBuddies.length - 1;
+    return extra == 0 ? first : '$first +$extra';
   }
 
   Widget _buildRatingSection() {

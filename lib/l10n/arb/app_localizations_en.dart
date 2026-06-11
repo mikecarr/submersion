@@ -3299,6 +3299,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get diveLog_edit_gettingLocation => 'Getting location...';
 
   @override
+  String get diveLog_edit_group_buddies => 'Buddies';
+
+  @override
   String get diveLog_edit_group_conditions => 'Conditions';
 
   @override
@@ -3308,7 +3311,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get diveLog_edit_group_theDive => 'The Dive';
 
   @override
+  String get diveLog_edit_group_trip => 'Trip';
+
+  @override
   String get diveLog_edit_headerNew => 'Log New Dive';
+
+  @override
+  String get diveLog_edit_invite_buddies => 'Add buddies';
 
   @override
   String get diveLog_edit_invite_conditions =>
@@ -3317,6 +3326,9 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get diveLog_edit_invite_gasGear =>
       'Add gas & gear - mode, tanks, equipment, weight';
+
+  @override
+  String get diveLog_edit_invite_trip => 'Add trip or dive center';
 
   @override
   String get diveLog_edit_label_airTemp => 'Air Temp';
@@ -3397,6 +3409,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get diveLog_edit_row_addSite => 'Add site';
 
   @override
+  String get diveLog_edit_row_diveCenter => 'Dive center';
+
+  @override
   String get diveLog_edit_row_entry => 'Entry';
 
   @override
@@ -3410,6 +3425,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get diveLog_edit_row_surfaceInterval => 'Surface interval';
+
+  @override
+  String get diveLog_edit_row_trip => 'Trip';
 
   @override
   String get diveLog_edit_save => 'Save';

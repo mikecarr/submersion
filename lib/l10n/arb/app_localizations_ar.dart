@@ -3280,6 +3280,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get diveLog_edit_gettingLocation => 'جارٍ تحديد الموقع...';
 
   @override
+  String get diveLog_edit_group_buddies => 'الرفاق';
+
+  @override
   String get diveLog_edit_group_conditions => 'الظروف';
 
   @override
@@ -3289,7 +3292,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get diveLog_edit_group_theDive => 'الغوصة';
 
   @override
+  String get diveLog_edit_group_trip => 'الرحلة';
+
+  @override
   String get diveLog_edit_headerNew => 'تسجيل غوصة جديدة';
+
+  @override
+  String get diveLog_edit_invite_buddies => 'إضافة رفاق';
 
   @override
   String get diveLog_edit_invite_conditions =>
@@ -3298,6 +3307,9 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get diveLog_edit_invite_gasGear =>
       'إضافة الغاز والمعدات - الوضع والأسطوانات والمعدات والأثقال';
+
+  @override
+  String get diveLog_edit_invite_trip => 'إضافة رحلة أو مركز غوص';
 
   @override
   String get diveLog_edit_label_airTemp => 'درجة حرارة الهواء';
@@ -3378,6 +3390,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get diveLog_edit_row_addSite => 'إضافة موقع';
 
   @override
+  String get diveLog_edit_row_diveCenter => 'مركز الغوص';
+
+  @override
   String get diveLog_edit_row_entry => 'الدخول';
 
   @override
@@ -3391,6 +3406,9 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get diveLog_edit_row_surfaceInterval => 'فترة السطح';
+
+  @override
+  String get diveLog_edit_row_trip => 'الرحلة';
 
   @override
   String get diveLog_edit_save => 'حفظ';

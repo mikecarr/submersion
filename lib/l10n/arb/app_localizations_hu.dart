@@ -3343,6 +3343,9 @@ class AppLocalizationsHu extends AppLocalizations {
   String get diveLog_edit_gettingLocation => 'Helymeghatározás...';
 
   @override
+  String get diveLog_edit_group_buddies => 'Merülőtársak';
+
+  @override
   String get diveLog_edit_group_conditions => 'Körülmények';
 
   @override
@@ -3352,7 +3355,13 @@ class AppLocalizationsHu extends AppLocalizations {
   String get diveLog_edit_group_theDive => 'A merülés';
 
   @override
+  String get diveLog_edit_group_trip => 'Utazás';
+
+  @override
   String get diveLog_edit_headerNew => 'Uj merules rogzitese';
+
+  @override
+  String get diveLog_edit_invite_buddies => 'Merülőtársak hozzáadása';
 
   @override
   String get diveLog_edit_invite_conditions =>
@@ -3361,6 +3370,9 @@ class AppLocalizationsHu extends AppLocalizations {
   @override
   String get diveLog_edit_invite_gasGear =>
       'Gáz és felszerelés hozzáadása - mód, palackok, felszerelés, súly';
+
+  @override
+  String get diveLog_edit_invite_trip => 'Utazás vagy búvárközpont hozzáadása';
 
   @override
   String get diveLog_edit_label_airTemp => 'Levego hom.';
@@ -3445,6 +3457,9 @@ class AppLocalizationsHu extends AppLocalizations {
   String get diveLog_edit_row_addSite => 'Merülőhely hozzáadása';
 
   @override
+  String get diveLog_edit_row_diveCenter => 'Búvárközpont';
+
+  @override
   String get diveLog_edit_row_entry => 'Beszállás';
 
   @override
@@ -3458,6 +3473,9 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get diveLog_edit_row_surfaceInterval => 'Felszíni idő';
+
+  @override
+  String get diveLog_edit_row_trip => 'Utazás';
 
   @override
   String get diveLog_edit_save => 'Mentes';

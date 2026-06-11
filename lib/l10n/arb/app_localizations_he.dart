@@ -3266,6 +3266,9 @@ class AppLocalizationsHe extends AppLocalizations {
   String get diveLog_edit_gettingLocation => 'מקבל מיקום...';
 
   @override
+  String get diveLog_edit_group_buddies => 'שותפים';
+
+  @override
   String get diveLog_edit_group_conditions => 'תנאים';
 
   @override
@@ -3275,7 +3278,13 @@ class AppLocalizationsHe extends AppLocalizations {
   String get diveLog_edit_group_theDive => 'הצלילה';
 
   @override
+  String get diveLog_edit_group_trip => 'טיול';
+
+  @override
   String get diveLog_edit_headerNew => 'רישום צלילה חדשה';
+
+  @override
+  String get diveLog_edit_invite_buddies => 'הוספת שותפים';
 
   @override
   String get diveLog_edit_invite_conditions =>
@@ -3284,6 +3293,9 @@ class AppLocalizationsHe extends AppLocalizations {
   @override
   String get diveLog_edit_invite_gasGear =>
       'הוספת גז וציוד - מצב, מיכלים, ציוד, משקולות';
+
+  @override
+  String get diveLog_edit_invite_trip => 'הוספת טיול או מרכז צלילה';
 
   @override
   String get diveLog_edit_label_airTemp => 'טמפ\' אוויר';
@@ -3364,6 +3376,9 @@ class AppLocalizationsHe extends AppLocalizations {
   String get diveLog_edit_row_addSite => 'הוספת אתר';
 
   @override
+  String get diveLog_edit_row_diveCenter => 'מרכז צלילה';
+
+  @override
   String get diveLog_edit_row_entry => 'כניסה';
 
   @override
@@ -3377,6 +3392,9 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get diveLog_edit_row_surfaceInterval => 'זמן פני השטח';
+
+  @override
+  String get diveLog_edit_row_trip => 'טיול';
 
   @override
   String get diveLog_edit_save => 'שמירה';

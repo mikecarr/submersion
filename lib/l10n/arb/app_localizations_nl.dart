@@ -3335,6 +3335,9 @@ class AppLocalizationsNl extends AppLocalizations {
   String get diveLog_edit_gettingLocation => 'Locatie ophalen...';
 
   @override
+  String get diveLog_edit_group_buddies => 'Buddy\'s';
+
+  @override
   String get diveLog_edit_group_conditions => 'Omstandigheden';
 
   @override
@@ -3344,7 +3347,13 @@ class AppLocalizationsNl extends AppLocalizations {
   String get diveLog_edit_group_theDive => 'De duik';
 
   @override
+  String get diveLog_edit_group_trip => 'Reis';
+
+  @override
   String get diveLog_edit_headerNew => 'Nieuwe duik loggen';
+
+  @override
+  String get diveLog_edit_invite_buddies => 'Buddy\'s toevoegen';
 
   @override
   String get diveLog_edit_invite_conditions =>
@@ -3353,6 +3362,9 @@ class AppLocalizationsNl extends AppLocalizations {
   @override
   String get diveLog_edit_invite_gasGear =>
       'Gas & uitrusting toevoegen - modus, flessen, uitrusting, lood';
+
+  @override
+  String get diveLog_edit_invite_trip => 'Reis of duikcentrum toevoegen';
 
   @override
   String get diveLog_edit_label_airTemp => 'Luchttemp.';
@@ -3435,6 +3447,9 @@ class AppLocalizationsNl extends AppLocalizations {
   String get diveLog_edit_row_addSite => 'Duikstek toevoegen';
 
   @override
+  String get diveLog_edit_row_diveCenter => 'Duikcentrum';
+
+  @override
   String get diveLog_edit_row_entry => 'Te water';
 
   @override
@@ -3448,6 +3463,9 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get diveLog_edit_row_surfaceInterval => 'Oppervlakte-interval';
+
+  @override
+  String get diveLog_edit_row_trip => 'Reis';
 
   @override
   String get diveLog_edit_save => 'Opslaan';

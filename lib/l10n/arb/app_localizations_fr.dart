@@ -3374,6 +3374,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get diveLog_edit_gettingLocation => 'Obtention de la position...';
 
   @override
+  String get diveLog_edit_group_buddies => 'Binômes';
+
+  @override
   String get diveLog_edit_group_conditions => 'Conditions';
 
   @override
@@ -3383,7 +3386,13 @@ class AppLocalizationsFr extends AppLocalizations {
   String get diveLog_edit_group_theDive => 'La plongée';
 
   @override
+  String get diveLog_edit_group_trip => 'Voyage';
+
+  @override
   String get diveLog_edit_headerNew => 'Nouvelle plongee';
+
+  @override
+  String get diveLog_edit_invite_buddies => 'Ajouter des binômes';
 
   @override
   String get diveLog_edit_invite_conditions =>
@@ -3392,6 +3401,10 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get diveLog_edit_invite_gasGear =>
       'Ajouter gaz et matériel : mode, blocs, équipement, lestage';
+
+  @override
+  String get diveLog_edit_invite_trip =>
+      'Ajouter un voyage ou un centre de plongée';
 
   @override
   String get diveLog_edit_label_airTemp => 'Temp air';
@@ -3474,6 +3487,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get diveLog_edit_row_addSite => 'Ajouter un site';
 
   @override
+  String get diveLog_edit_row_diveCenter => 'Centre de plongée';
+
+  @override
   String get diveLog_edit_row_entry => 'Mise à l\'eau';
 
   @override
@@ -3487,6 +3503,9 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get diveLog_edit_row_surfaceInterval => 'Intervalle de surface';
+
+  @override
+  String get diveLog_edit_row_trip => 'Voyage';
 
   @override
   String get diveLog_edit_save => 'Enregistrer';
