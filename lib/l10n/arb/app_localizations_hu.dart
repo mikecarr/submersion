@@ -3343,6 +3343,9 @@ class AppLocalizationsHu extends AppLocalizations {
   String get diveLog_edit_gettingLocation => 'Helymeghatározás...';
 
   @override
+  String get diveLog_edit_group_conditions => 'Körülmények';
+
+  @override
   String get diveLog_edit_group_gasGear => 'Gáz és felszerelés';
 
   @override
@@ -3350,6 +3353,10 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get diveLog_edit_headerNew => 'Uj merules rogzitese';
+
+  @override
+  String get diveLog_edit_invite_conditions =>
+      'Körülmények hozzáadása - víz, látótávolság, időjárás';
 
   @override
   String get diveLog_edit_invite_gasGear =>

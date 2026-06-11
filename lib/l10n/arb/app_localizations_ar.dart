@@ -3280,6 +3280,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get diveLog_edit_gettingLocation => 'جارٍ تحديد الموقع...';
 
   @override
+  String get diveLog_edit_group_conditions => 'الظروف';
+
+  @override
   String get diveLog_edit_group_gasGear => 'الغاز والمعدات';
 
   @override
@@ -3287,6 +3290,10 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get diveLog_edit_headerNew => 'تسجيل غوصة جديدة';
+
+  @override
+  String get diveLog_edit_invite_conditions =>
+      'إضافة الظروف - الماء والرؤية والطقس';
 
   @override
   String get diveLog_edit_invite_gasGear =>

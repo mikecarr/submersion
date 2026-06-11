@@ -3198,6 +3198,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get diveLog_edit_gettingLocation => '正在获取位置...';
 
   @override
+  String get diveLog_edit_group_conditions => '环境条件';
+
+  @override
   String get diveLog_edit_group_gasGear => '气体与装备';
 
   @override
@@ -3205,6 +3208,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get diveLog_edit_headerNew => '记录新潜水';
+
+  @override
+  String get diveLog_edit_invite_conditions => '添加环境条件 - 水况、能见度、天气';
 
   @override
   String get diveLog_edit_invite_gasGear => '添加气体与装备 - 模式、气瓶、装备、配重';

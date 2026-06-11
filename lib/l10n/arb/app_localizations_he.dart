@@ -3266,6 +3266,9 @@ class AppLocalizationsHe extends AppLocalizations {
   String get diveLog_edit_gettingLocation => 'מקבל מיקום...';
 
   @override
+  String get diveLog_edit_group_conditions => 'תנאים';
+
+  @override
   String get diveLog_edit_group_gasGear => 'גז וציוד';
 
   @override
@@ -3273,6 +3276,10 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get diveLog_edit_headerNew => 'רישום צלילה חדשה';
+
+  @override
+  String get diveLog_edit_invite_conditions =>
+      'הוספת תנאים - מים, ראות, מזג אוויר';
 
   @override
   String get diveLog_edit_invite_gasGear =>

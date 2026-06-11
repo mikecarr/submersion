@@ -5668,6 +5668,12 @@ abstract class AppLocalizations {
   /// **'Getting location...'**
   String get diveLog_edit_gettingLocation;
 
+  /// Form group: water, environment and weather
+  ///
+  /// In en, this message translates to:
+  /// **'Conditions'**
+  String get diveLog_edit_group_conditions;
+
   /// Form group: mode, tanks, equipment, weight
   ///
   /// In en, this message translates to:
@@ -5685,6 +5691,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Log New Dive'**
   String get diveLog_edit_headerNew;
+
+  /// Empty-state invitation for the Conditions group
+  ///
+  /// In en, this message translates to:
+  /// **'Add conditions - water, visibility, weather'**
+  String get diveLog_edit_invite_conditions;
 
   /// Empty-state invitation for the Gas & Gear group
   ///

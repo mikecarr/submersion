@@ -3335,6 +3335,9 @@ class AppLocalizationsNl extends AppLocalizations {
   String get diveLog_edit_gettingLocation => 'Locatie ophalen...';
 
   @override
+  String get diveLog_edit_group_conditions => 'Omstandigheden';
+
+  @override
   String get diveLog_edit_group_gasGear => 'Gas & uitrusting';
 
   @override
@@ -3342,6 +3345,10 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get diveLog_edit_headerNew => 'Nieuwe duik loggen';
+
+  @override
+  String get diveLog_edit_invite_conditions =>
+      'Omstandigheden toevoegen - water, zicht, weer';
 
   @override
   String get diveLog_edit_invite_gasGear =>

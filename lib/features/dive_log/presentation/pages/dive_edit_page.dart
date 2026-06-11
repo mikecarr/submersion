@@ -36,6 +36,7 @@ import 'package:submersion/features/dive_log/domain/entities/dive_data_source.da
 import 'package:submersion/features/dive_log/presentation/providers/dive_providers.dart';
 import 'package:submersion/features/dive_log/presentation/providers/outlier_suggestion_provider.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/custom_field_input_row.dart';
+import 'package:submersion/features/dive_log/presentation/widgets/edit_sections/conditions_section.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/edit_sections/gas_gear_section.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/edit_sections/tank_card.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/edit_sections/the_dive_section.dart';
@@ -574,8 +575,8 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
           const SizedBox(height: 16),
           _buildDiveCenterSection(),
           const SizedBox(height: 16),
-          _buildEnvironmentSection(units),
-          const SizedBox(height: 16),
+          _buildConditionsSection(units),
+          const SizedBox(height: FormStyle.sectionGap),
           _buildBuddySection(),
           const SizedBox(height: 16),
           _buildRatingSection(),
@@ -2118,472 +2119,445 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
     );
   }
 
-  Widget _buildEnvironmentSection(UnitFormatter units) {
-    final canFetchWeather =
-        _selectedSite != null && _selectedSite!.hasCoordinates;
+  Widget _buildConditionsSection(UnitFormatter units) {
+    return ConditionsSection(
+      expanded: _isExpanded('conditions', defaultValue: false),
+      onToggle: () => _toggleSection('conditions', defaultValue: false),
+      summary: _conditionsSummary(units),
+      isEmpty: _conditionsIsEmpty(),
+      temperatureSymbol: units.temperatureSymbol,
+      waterTempController: _waterTempController,
+      airTempController: _airTempController,
+      visibilityValue: _selectedVisibility.displayName,
+      environmentChild: _environmentChild(units),
+      weatherChild: _weatherChild(units),
+    );
+  }
 
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Section header with Fetch Weather button
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  context.l10n.diveLog_edit_section_environment,
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                _isFetchingWeather
-                    ? const SizedBox(
-                        width: 24,
-                        height: 24,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : TextButton.icon(
-                        onPressed: canFetchWeather
-                            ? () => _fetchWeather(units)
-                            : null,
-                        icon: const Icon(Icons.cloud_download, size: 18),
-                        label: Text(
-                          context.l10n.diveLog_edit_button_fetchWeather,
-                        ),
-                      ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            // -- Weather sub-header --
-            Text(
-              context.l10n.diveLog_edit_subsection_weather,
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                color: Theme.of(context).colorScheme.primary,
-              ),
-            ),
-            const SizedBox(height: 12),
-            _buildWeatherFields(units),
-            const SizedBox(height: 16),
-            const Divider(),
-            const SizedBox(height: 12),
-            // -- Dive Conditions sub-header --
-            Text(
-              context.l10n.diveLog_edit_subsection_diveConditions,
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                color: Theme.of(context).colorScheme.primary,
-              ),
-            ),
-            const SizedBox(height: 12),
-            Consumer(
-              builder: (context, ref, child) {
-                final diveTypesAsync = ref.watch(diveTypeListNotifierProvider);
-                return diveTypesAsync.when(
-                  loading: () => const LinearProgressIndicator(),
-                  error: (e, st) => Text(
-                    context.l10n.diveLog_edit_errorLoadingDiveTypes(
-                      e.toString(),
-                    ),
-                  ),
-                  data: (diveTypes) {
-                    // Ensure selected dive type exists in the list
-                    final selectedExists = diveTypes.any(
-                      (t) => t.id == _selectedDiveTypeId,
-                    );
-                    final effectiveValue = selectedExists
-                        ? _selectedDiveTypeId
-                        : 'recreational';
+  String _conditionsSummary(UnitFormatter units) {
+    return [
+      if (_waterType != null) _waterType!.displayName,
+      if (_waterTempController.text.isNotEmpty)
+        '${_waterTempController.text} ${units.temperatureSymbol}',
+      if (_selectedVisibility != Visibility.unknown)
+        _selectedVisibility.displayName,
+    ].join(' · ');
+  }
 
-                    return DropdownButtonFormField<String>(
-                      key: ValueKey(
-                        'dive_type_${diveTypes.length}_$effectiveValue',
-                      ),
-                      initialValue: effectiveValue,
-                      decoration: InputDecoration(
-                        labelText: context.l10n.diveLog_edit_label_diveType,
-                      ),
-                      items: diveTypes.map((type) {
-                        return DropdownMenuItem(
-                          value: type.id,
-                          child: Text(type.name),
-                        );
-                      }).toList(),
-                      onChanged: (value) {
-                        if (value != null) {
-                          setState(() => _selectedDiveTypeId = value);
-                        }
-                      },
-                    );
-                  },
-                );
-              },
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: TextFormField(
-                    controller: _waterTempController,
-                    decoration: InputDecoration(
-                      labelText: context.l10n.diveLog_edit_label_waterTemp,
-                      suffixText: units.temperatureSymbol,
-                    ),
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
-                  ),
+  bool _conditionsIsEmpty() =>
+      _waterTempController.text.isEmpty &&
+      _airTempController.text.isEmpty &&
+      _selectedVisibility == Visibility.unknown &&
+      _waterType == null &&
+      _currentDirection == null &&
+      _currentStrength == null &&
+      _entryMethod == null &&
+      _exitMethod == null &&
+      _swellHeightController.text.isEmpty &&
+      _altitudeController.text.isEmpty &&
+      _humidityController.text.isEmpty &&
+      _windSpeedController.text.isEmpty &&
+      _cloudCover == null &&
+      _precipitation == null &&
+      _weatherDescriptionController.text.isEmpty;
+
+  Widget _environmentChild(UnitFormatter units) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(14, 10, 14, 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Consumer(
+            builder: (context, ref, child) {
+              final diveTypesAsync = ref.watch(diveTypeListNotifierProvider);
+              return diveTypesAsync.when(
+                loading: () => const LinearProgressIndicator(),
+                error: (e, st) => Text(
+                  context.l10n.diveLog_edit_errorLoadingDiveTypes(e.toString()),
                 ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: DropdownButtonFormField<Visibility>(
-                    initialValue: _selectedVisibility,
-                    decoration: InputDecoration(
-                      labelText: context.l10n.diveLog_edit_label_visibility,
+                data: (diveTypes) {
+                  // Ensure selected dive type exists in the list
+                  final selectedExists = diveTypes.any(
+                    (t) => t.id == _selectedDiveTypeId,
+                  );
+                  final effectiveValue = selectedExists
+                      ? _selectedDiveTypeId
+                      : 'recreational';
+
+                  return DropdownButtonFormField<String>(
+                    key: ValueKey(
+                      'dive_type_${diveTypes.length}_$effectiveValue',
                     ),
-                    items: Visibility.values.map((vis) {
+                    initialValue: effectiveValue,
+                    decoration: InputDecoration(
+                      labelText: context.l10n.diveLog_edit_label_diveType,
+                    ),
+                    items: diveTypes.map((type) {
                       return DropdownMenuItem(
-                        value: vis,
-                        child: Text(vis.displayName),
+                        value: type.id,
+                        child: Text(type.name),
                       );
                     }).toList(),
                     onChanged: (value) {
                       if (value != null) {
-                        setState(() => _selectedVisibility = value);
+                        setState(() => _selectedDiveTypeId = value);
                       }
                     },
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            DropdownButtonFormField<WaterType>(
-              initialValue: _waterType,
-              decoration: InputDecoration(
-                labelText: context.l10n.diveLog_edit_label_waterType,
-              ),
-              items: [
-                DropdownMenuItem<WaterType>(
-                  value: null,
-                  child: Text(context.l10n.diveLog_edit_notSpecified),
-                ),
-                ...WaterType.values.map((type) {
-                  return DropdownMenuItem(
-                    value: type,
-                    child: Text(type.displayName),
                   );
-                }),
-              ],
-              onChanged: (value) {
-                setState(() => _waterType = value);
-              },
+                },
+              );
+            },
+          ),
+          const SizedBox(height: 16),
+          DropdownButtonFormField<Visibility>(
+            initialValue: _selectedVisibility,
+            decoration: InputDecoration(
+              labelText: context.l10n.diveLog_edit_label_visibility,
             ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: DropdownButtonFormField<CurrentDirection>(
-                    initialValue: _currentDirection,
-                    decoration: InputDecoration(
-                      labelText:
-                          context.l10n.diveLog_edit_label_currentDirection,
-                    ),
-                    isExpanded: true,
-                    items: [
-                      DropdownMenuItem<CurrentDirection>(
-                        value: null,
-                        child: Text(context.l10n.diveLog_edit_notSpecified),
-                      ),
-                      ...CurrentDirection.values.map((dir) {
-                        return DropdownMenuItem(
-                          value: dir,
-                          child: Text(dir.displayName),
-                        );
-                      }),
-                    ],
-                    onChanged: (value) {
-                      setState(() => _currentDirection = value);
-                    },
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: DropdownButtonFormField<CurrentStrength>(
-                    initialValue: _currentStrength,
-                    decoration: InputDecoration(
-                      labelText:
-                          context.l10n.diveLog_edit_label_currentStrength,
-                    ),
-                    isExpanded: true,
-                    items: [
-                      DropdownMenuItem<CurrentStrength>(
-                        value: null,
-                        child: Text(context.l10n.diveLog_edit_notSpecified),
-                      ),
-                      ...CurrentStrength.values.map((str) {
-                        return DropdownMenuItem(
-                          value: str,
-                          child: Text(str.displayName),
-                        );
-                      }),
-                    ],
-                    onChanged: (value) {
-                      setState(() => _currentStrength = value);
-                    },
-                  ),
-                ),
-              ],
+            items: Visibility.values.map((vis) {
+              return DropdownMenuItem(value: vis, child: Text(vis.displayName));
+            }).toList(),
+            onChanged: (value) {
+              if (value != null) {
+                setState(() => _selectedVisibility = value);
+              }
+            },
+          ),
+          const SizedBox(height: 16),
+          DropdownButtonFormField<WaterType>(
+            initialValue: _waterType,
+            decoration: InputDecoration(
+              labelText: context.l10n.diveLog_edit_label_waterType,
             ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: TextFormField(
-                    controller: _swellHeightController,
-                    decoration: InputDecoration(
-                      labelText: context.l10n.diveLog_edit_label_swellHeight,
-                      suffixText: units.depthSymbol,
+            items: [
+              DropdownMenuItem<WaterType>(
+                value: null,
+                child: Text(context.l10n.diveLog_edit_notSpecified),
+              ),
+              ...WaterType.values.map((type) {
+                return DropdownMenuItem(
+                  value: type,
+                  child: Text(type.displayName),
+                );
+              }),
+            ],
+            onChanged: (value) {
+              setState(() => _waterType = value);
+            },
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: DropdownButtonFormField<CurrentDirection>(
+                  initialValue: _currentDirection,
+                  decoration: InputDecoration(
+                    labelText: context.l10n.diveLog_edit_label_currentDirection,
+                  ),
+                  isExpanded: true,
+                  items: [
+                    DropdownMenuItem<CurrentDirection>(
+                      value: null,
+                      child: Text(context.l10n.diveLog_edit_notSpecified),
                     ),
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
+                    ...CurrentDirection.values.map((dir) {
+                      return DropdownMenuItem(
+                        value: dir,
+                        child: Text(dir.displayName),
+                      );
+                    }),
+                  ],
+                  onChanged: (value) {
+                    setState(() => _currentDirection = value);
+                  },
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: DropdownButtonFormField<CurrentStrength>(
+                  initialValue: _currentStrength,
+                  decoration: InputDecoration(
+                    labelText: context.l10n.diveLog_edit_label_currentStrength,
+                  ),
+                  isExpanded: true,
+                  items: [
+                    DropdownMenuItem<CurrentStrength>(
+                      value: null,
+                      child: Text(context.l10n.diveLog_edit_notSpecified),
                     ),
+                    ...CurrentStrength.values.map((str) {
+                      return DropdownMenuItem(
+                        value: str,
+                        child: Text(str.displayName),
+                      );
+                    }),
+                  ],
+                  onChanged: (value) {
+                    setState(() => _currentStrength = value);
+                  },
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: TextFormField(
+                  controller: _swellHeightController,
+                  decoration: InputDecoration(
+                    labelText: context.l10n.diveLog_edit_label_swellHeight,
+                    suffixText: units.depthSymbol,
+                  ),
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
                   ),
                 ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: TextFormField(
-                    controller: _altitudeController,
-                    decoration: InputDecoration(
-                      labelText: context.l10n.diveLog_edit_label_altitude,
-                      suffixText: units.altitudeSymbol,
-                      helperText: _getAltitudeWarning(units),
-                      helperStyle: TextStyle(
-                        color: _getAltitudeWarningColor(units),
-                      ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: TextFormField(
+                  controller: _altitudeController,
+                  decoration: InputDecoration(
+                    labelText: context.l10n.diveLog_edit_label_altitude,
+                    suffixText: units.altitudeSymbol,
+                    helperText: _getAltitudeWarning(units),
+                    helperStyle: TextStyle(
+                      color: _getAltitudeWarningColor(units),
                     ),
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: false,
-                    ),
-                    onChanged: (_) => setState(() {}),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: DropdownButtonFormField<EntryMethod>(
-                    initialValue: _entryMethod,
-                    decoration: InputDecoration(
-                      labelText: context.l10n.diveLog_edit_label_entryMethod,
-                    ),
-                    isExpanded: true,
-                    items: [
-                      DropdownMenuItem<EntryMethod>(
-                        value: null,
-                        child: Text(context.l10n.diveLog_edit_notSpecified),
-                      ),
-                      ...EntryMethod.values.map((method) {
-                        return DropdownMenuItem(
-                          value: method,
-                          child: Text(method.displayName),
-                        );
-                      }),
-                    ],
-                    onChanged: (value) {
-                      setState(() => _entryMethod = value);
-                    },
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: false,
                   ),
+                  onChanged: (_) => setState(() {}),
                 ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: DropdownButtonFormField<EntryMethod>(
-                    initialValue: _exitMethod,
-                    decoration: InputDecoration(
-                      labelText: context.l10n.diveLog_edit_label_exitMethod,
-                    ),
-                    isExpanded: true,
-                    items: [
-                      DropdownMenuItem<EntryMethod>(
-                        value: null,
-                        child: Text(context.l10n.diveLog_edit_notSpecified),
-                      ),
-                      ...EntryMethod.values.map((method) {
-                        return DropdownMenuItem(
-                          value: method,
-                          child: Text(method.displayName),
-                        );
-                      }),
-                    ],
-                    onChanged: (value) {
-                      setState(() => _exitMethod = value);
-                    },
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: DropdownButtonFormField<EntryMethod>(
+                  initialValue: _entryMethod,
+                  decoration: InputDecoration(
+                    labelText: context.l10n.diveLog_edit_label_entryMethod,
                   ),
+                  isExpanded: true,
+                  items: [
+                    DropdownMenuItem<EntryMethod>(
+                      value: null,
+                      child: Text(context.l10n.diveLog_edit_notSpecified),
+                    ),
+                    ...EntryMethod.values.map((method) {
+                      return DropdownMenuItem(
+                        value: method,
+                        child: Text(method.displayName),
+                      );
+                    }),
+                  ],
+                  onChanged: (value) {
+                    setState(() => _entryMethod = value);
+                  },
                 ),
-              ],
-            ),
-          ],
-        ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: DropdownButtonFormField<EntryMethod>(
+                  initialValue: _exitMethod,
+                  decoration: InputDecoration(
+                    labelText: context.l10n.diveLog_edit_label_exitMethod,
+                  ),
+                  isExpanded: true,
+                  items: [
+                    DropdownMenuItem<EntryMethod>(
+                      value: null,
+                      child: Text(context.l10n.diveLog_edit_notSpecified),
+                    ),
+                    ...EntryMethod.values.map((method) {
+                      return DropdownMenuItem(
+                        value: method,
+                        child: Text(method.displayName),
+                      );
+                    }),
+                  ],
+                  onChanged: (value) {
+                    setState(() => _exitMethod = value);
+                  },
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
 
-  /// Weather fields extracted into a helper to keep the environment section
-  /// manageable given the file size.
-  Widget _buildWeatherFields(UnitFormatter units) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Air Temp and Humidity row
-        Row(
-          children: [
-            Expanded(
-              child: TextFormField(
-                controller: _airTempController,
-                decoration: InputDecoration(
-                  labelText: context.l10n.diveLog_edit_label_airTemp,
-                  suffixText: units.temperatureSymbol,
-                ),
-                keyboardType: const TextInputType.numberWithOptions(
-                  decimal: true,
+  Widget _weatherChild(UnitFormatter units) {
+    final canFetchWeather =
+        _selectedSite != null && _selectedSite!.hasCoordinates;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(14, 4, 14, 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                context.l10n.diveLog_edit_subsection_weather,
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  color: Theme.of(context).colorScheme.primary,
                 ),
               ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: TextFormField(
-                controller: _humidityController,
-                decoration: InputDecoration(
-                  labelText: context.l10n.diveLog_edit_label_humidity,
-                  suffixText: '%',
-                ),
-                keyboardType: const TextInputType.numberWithOptions(
-                  decimal: false,
-                ),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        // Wind Speed and Wind Direction row
-        Row(
-          children: [
-            Expanded(
-              child: TextFormField(
-                controller: _windSpeedController,
-                decoration: InputDecoration(
-                  labelText: context.l10n.diveLog_edit_label_windSpeed,
-                  suffixText: units.windSpeedSymbol,
-                ),
-                keyboardType: const TextInputType.numberWithOptions(
-                  decimal: true,
-                ),
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: DropdownButtonFormField<CurrentDirection>(
-                initialValue: _windDirection,
-                decoration: InputDecoration(
-                  labelText: context.l10n.diveLog_edit_label_windDirection,
-                ),
-                isExpanded: true,
-                items: [
-                  DropdownMenuItem<CurrentDirection>(
-                    value: null,
-                    child: Text(context.l10n.diveLog_edit_notSpecified),
-                  ),
-                  ...CurrentDirection.values.map((dir) {
-                    return DropdownMenuItem(
-                      value: dir,
-                      child: Text(dir.displayName),
-                    );
-                  }),
-                ],
-                onChanged: (value) {
-                  setState(() => _windDirection = value);
-                },
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        // Surface Pressure field (always in mbar)
-        TextFormField(
-          controller: _surfacePressureController,
-          decoration: InputDecoration(
-            labelText: context.l10n.diveLog_edit_label_surfacePressure,
-            suffixText: 'mbar',
-            helperText: context.l10n.diveLog_edit_surfacePressureHint,
-            hintText: context.l10n.diveLog_edit_surfacePressureDefault,
-            prefixIcon: const Icon(Icons.speed),
+              _isFetchingWeather
+                  ? const SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : TextButton.icon(
+                      onPressed: canFetchWeather
+                          ? () => _fetchWeather(units)
+                          : null,
+                      icon: const Icon(Icons.cloud_download, size: 18),
+                      label: Text(
+                        context.l10n.diveLog_edit_button_fetchWeather,
+                      ),
+                    ),
+            ],
           ),
-          keyboardType: TextInputType.number,
-        ),
-        const SizedBox(height: 16),
-        // Cloud Cover and Precipitation row
-        Row(
-          children: [
-            Expanded(
-              child: DropdownButtonFormField<CloudCover>(
-                initialValue: _cloudCover,
-                decoration: InputDecoration(
-                  labelText: context.l10n.diveLog_edit_label_cloudCover,
-                ),
-                isExpanded: true,
-                items: [
-                  DropdownMenuItem<CloudCover>(
-                    value: null,
-                    child: Text(context.l10n.diveLog_edit_notSpecified),
-                  ),
-                  ...CloudCover.values.map((cover) {
-                    return DropdownMenuItem(
-                      value: cover,
-                      child: Text(cover.displayName),
-                    );
-                  }),
-                ],
-                onChanged: (value) {
-                  setState(() => _cloudCover = value);
-                },
-              ),
+          const SizedBox(height: 8),
+          TextFormField(
+            controller: _humidityController,
+            decoration: InputDecoration(
+              labelText: context.l10n.diveLog_edit_label_humidity,
+              suffixText: '%',
             ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: DropdownButtonFormField<Precipitation>(
-                initialValue: _precipitation,
-                decoration: InputDecoration(
-                  labelText: context.l10n.diveLog_edit_label_precipitation,
-                ),
-                isExpanded: true,
-                items: [
-                  DropdownMenuItem<Precipitation>(
-                    value: null,
-                    child: Text(context.l10n.diveLog_edit_notSpecified),
-                  ),
-                  ...Precipitation.values.map((precip) {
-                    return DropdownMenuItem(
-                      value: precip,
-                      child: Text(precip.displayName),
-                    );
-                  }),
-                ],
-                onChanged: (value) {
-                  setState(() => _precipitation = value);
-                },
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        // Weather Description
-        TextFormField(
-          controller: _weatherDescriptionController,
-          decoration: InputDecoration(
-            labelText: context.l10n.diveLog_edit_label_weatherDescription,
+            keyboardType: const TextInputType.numberWithOptions(decimal: false),
           ),
-          maxLines: 2,
-        ),
-      ],
+          const SizedBox(height: 16),
+          // Wind Speed and Wind Direction row
+          Row(
+            children: [
+              Expanded(
+                child: TextFormField(
+                  controller: _windSpeedController,
+                  decoration: InputDecoration(
+                    labelText: context.l10n.diveLog_edit_label_windSpeed,
+                    suffixText: units.windSpeedSymbol,
+                  ),
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: DropdownButtonFormField<CurrentDirection>(
+                  initialValue: _windDirection,
+                  decoration: InputDecoration(
+                    labelText: context.l10n.diveLog_edit_label_windDirection,
+                  ),
+                  isExpanded: true,
+                  items: [
+                    DropdownMenuItem<CurrentDirection>(
+                      value: null,
+                      child: Text(context.l10n.diveLog_edit_notSpecified),
+                    ),
+                    ...CurrentDirection.values.map((dir) {
+                      return DropdownMenuItem(
+                        value: dir,
+                        child: Text(dir.displayName),
+                      );
+                    }),
+                  ],
+                  onChanged: (value) {
+                    setState(() => _windDirection = value);
+                  },
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          // Surface Pressure field (always in mbar)
+          TextFormField(
+            controller: _surfacePressureController,
+            decoration: InputDecoration(
+              labelText: context.l10n.diveLog_edit_label_surfacePressure,
+              suffixText: 'mbar',
+              helperText: context.l10n.diveLog_edit_surfacePressureHint,
+              hintText: context.l10n.diveLog_edit_surfacePressureDefault,
+              prefixIcon: const Icon(Icons.speed),
+            ),
+            keyboardType: TextInputType.number,
+          ),
+          const SizedBox(height: 16),
+          // Cloud Cover and Precipitation row
+          Row(
+            children: [
+              Expanded(
+                child: DropdownButtonFormField<CloudCover>(
+                  initialValue: _cloudCover,
+                  decoration: InputDecoration(
+                    labelText: context.l10n.diveLog_edit_label_cloudCover,
+                  ),
+                  isExpanded: true,
+                  items: [
+                    DropdownMenuItem<CloudCover>(
+                      value: null,
+                      child: Text(context.l10n.diveLog_edit_notSpecified),
+                    ),
+                    ...CloudCover.values.map((cover) {
+                      return DropdownMenuItem(
+                        value: cover,
+                        child: Text(cover.displayName),
+                      );
+                    }),
+                  ],
+                  onChanged: (value) {
+                    setState(() => _cloudCover = value);
+                  },
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: DropdownButtonFormField<Precipitation>(
+                  initialValue: _precipitation,
+                  decoration: InputDecoration(
+                    labelText: context.l10n.diveLog_edit_label_precipitation,
+                  ),
+                  isExpanded: true,
+                  items: [
+                    DropdownMenuItem<Precipitation>(
+                      value: null,
+                      child: Text(context.l10n.diveLog_edit_notSpecified),
+                    ),
+                    ...Precipitation.values.map((precip) {
+                      return DropdownMenuItem(
+                        value: precip,
+                        child: Text(precip.displayName),
+                      );
+                    }),
+                  ],
+                  onChanged: (value) {
+                    setState(() => _precipitation = value);
+                  },
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          // Weather Description
+          TextFormField(
+            controller: _weatherDescriptionController,
+            decoration: InputDecoration(
+              labelText: context.l10n.diveLog_edit_label_weatherDescription,
+            ),
+            maxLines: 2,
+          ),
+        ],
+      ),
     );
   }
 

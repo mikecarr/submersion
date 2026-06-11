@@ -3299,6 +3299,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get diveLog_edit_gettingLocation => 'Getting location...';
 
   @override
+  String get diveLog_edit_group_conditions => 'Conditions';
+
+  @override
   String get diveLog_edit_group_gasGear => 'Gas & Gear';
 
   @override
@@ -3306,6 +3309,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get diveLog_edit_headerNew => 'Log New Dive';
+
+  @override
+  String get diveLog_edit_invite_conditions =>
+      'Add conditions - water, visibility, weather';
 
   @override
   String get diveLog_edit_invite_gasGear =>
