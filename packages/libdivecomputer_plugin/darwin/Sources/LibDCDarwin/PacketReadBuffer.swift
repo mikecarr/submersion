@@ -20,12 +20,25 @@ final class PacketReadBuffer {
 
     /// Append one notification payload. Empty payloads are ignored because a
     /// zero-byte read is treated as a protocol error by the parsers.
+    ///
+    /// The semaphore is signaled only on the empty -> non-empty transition,
+    /// so it behaves as an edge-triggered wakeup event rather than a counter
+    /// of notifications. Without this, a consumer that drains chunks faster
+    /// than they arrive (the steady state during a flash dump) would leave
+    /// one stale signal per notification, producing O(N) spurious wakeups
+    /// on the next empty-buffer wait and an O(N) drain in purge(). The
+    /// single-consumer contract documented on the type means a missed
+    /// wakeup is impossible: any later append from an empty queue will
+    /// itself signal.
     func append(_ data: Data) {
         guard !data.isEmpty else { return }
         lock.lock()
+        let wasEmpty = chunks.isEmpty
         chunks.append(data)
         lock.unlock()
-        semaphore.signal()
+        if wasEmpty {
+            semaphore.signal()
+        }
     }
 
     /// True if any notification data is buffered.
