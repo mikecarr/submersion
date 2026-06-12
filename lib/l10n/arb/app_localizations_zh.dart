@@ -9983,6 +9983,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_cloudSync_disabledBanner_title => '云同步已禁用';
 
   @override
+  String get settings_cloudSync_entry_subtitle => '通过云存储同步';
+
+  @override
   String get settings_cloudSync_adopt_confirm => '采用恢复的资料库';
 
   @override
@@ -10024,6 +10027,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get settings_cloudSync_header_advanced => '高级';
+
+  @override
+  String get settings_cloudSync_signOut_backupWarning => '云备份将被关闭，备份将保存到默认位置。';
 
   @override
   String get settings_cloudSync_header_cloudProvider => '云服务提供商';
@@ -10077,10 +10083,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get settings_cloudSync_provider_icloud => 'iCloud';
-
-  @override
-  String get settings_cloudSync_provider_icloud_subtitle =>
-      '通过 Apple iCloud 同步';
 
   @override
   String settings_cloudSync_provider_initFailed(Object providerName) {

@@ -57,13 +57,28 @@ class BackupSettingsNotifier extends StateNotifier<BackupSettings> {
     state = state.copyWith(retentionCount: count);
   }
 
+  /// Cloud backup and a custom backup location are mutually exclusive
+  /// destinations: enabling cloud backup reverts the location to the
+  /// default, and choosing a custom location turns cloud backup off.
   Future<void> setCloudBackupEnabled(bool value) async {
     await _prefs.setCloudBackupEnabled(value);
-    state = state.copyWith(cloudBackupEnabled: value);
+    if (value) await _prefs.setBackupLocation(null);
+    state = _prefs.getSettings();
   }
 
   Future<void> setBackupLocation(String? path) async {
     await _prefs.setBackupLocation(path);
+    if (path != null) await _prefs.setCloudBackupEnabled(false);
+    state = _prefs.getSettings();
+  }
+
+  /// Sign-out hook: cloud sync is being disabled, so cloud backup loses its
+  /// destination. Resets the location to default only when cloud backup was
+  /// actually on -- an unrelated custom location is none of sync's business.
+  Future<void> disableCloudBackup() async {
+    if (!state.cloudBackupEnabled) return;
+    await _prefs.setCloudBackupEnabled(false);
+    await _prefs.setBackupLocation(null);
     state = _prefs.getSettings();
   }
 

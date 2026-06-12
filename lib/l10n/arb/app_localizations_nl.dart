@@ -10386,6 +10386,10 @@ class AppLocalizationsNl extends AppLocalizations {
       'Cloudsynchronisatie uitgeschakeld';
 
   @override
+  String get settings_cloudSync_entry_subtitle =>
+      'Synchroniseren via cloudopslag';
+
+  @override
   String get settings_cloudSync_adopt_confirm =>
       'Herstelde bibliotheek overnemen';
 
@@ -10431,6 +10435,10 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get settings_cloudSync_header_advanced => 'Geavanceerd';
+
+  @override
+  String get settings_cloudSync_signOut_backupWarning =>
+      'Cloudback-up wordt uitgeschakeld en back-ups worden op de standaardlocatie opgeslagen.';
 
   @override
   String get settings_cloudSync_header_cloudProvider => 'Cloudprovider';
@@ -10484,10 +10492,6 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get settings_cloudSync_provider_icloud => 'iCloud';
-
-  @override
-  String get settings_cloudSync_provider_icloud_subtitle =>
-      'Synchroniseren via Apple iCloud';
 
   @override
   String settings_cloudSync_provider_initFailed(Object providerName) {

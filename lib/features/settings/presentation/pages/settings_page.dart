@@ -1901,7 +1901,7 @@ class _DataSectionContent extends ConsumerWidget {
                     leading: const Icon(Icons.cloud_sync),
                     title: Text(context.l10n.settings_cloudSync_appBar_title),
                     subtitle: Text(
-                      context.l10n.settings_cloudSync_provider_icloud_subtitle,
+                      context.l10n.settings_cloudSync_entry_subtitle,
                     ),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () => context.push('/settings/cloud-sync'),

@@ -22,7 +22,7 @@ void main() {
       expect(settings.frequency, BackupFrequency.weekly);
       expect(settings.retentionCount, 10);
       expect(settings.lastBackupTime, isNull);
-      expect(settings.cloudBackupEnabled, true);
+      expect(settings.cloudBackupEnabled, false);
     });
 
     test('setEnabled persists value', () async {
@@ -65,10 +65,10 @@ void main() {
     });
 
     test('setCloudBackupEnabled persists value', () async {
-      await backupPreferences.setCloudBackupEnabled(false);
+      await backupPreferences.setCloudBackupEnabled(true);
 
       final settings = backupPreferences.getSettings();
-      expect(settings.cloudBackupEnabled, false);
+      expect(settings.cloudBackupEnabled, true);
     });
 
     test('getSettings returns null backupLocation by default', () {

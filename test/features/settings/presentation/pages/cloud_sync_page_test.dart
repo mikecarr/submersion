@@ -946,6 +946,42 @@ void main() {
       expect(handles.sync.signOutCalls, 1);
       expect(find.text('Signed out from cloud provider'), findsOneWidget);
     });
+
+    testWidgets('warns about cloud backup and disables it on confirm', (
+      tester,
+    ) async {
+      final handles = await pumpPage(tester);
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('backup_cloud_enabled', true);
+
+      await tester.tap(find.text('Sign Out'));
+      await tester.pumpAndSettle();
+      expect(
+        find.textContaining('Cloud backup will be turned off'),
+        findsOneWidget,
+      );
+
+      await tester.tap(find.widgetWithText(TextButton, 'Sign Out'));
+      await tester.pumpAndSettle();
+
+      expect(handles.sync.signOutCalls, 1);
+      expect(prefs.getBool('backup_cloud_enabled'), isFalse);
+    });
+
+    testWidgets('no cloud backup warning when it was already off', (
+      tester,
+    ) async {
+      await pumpPage(tester);
+
+      await tester.tap(find.text('Sign Out'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Sign Out?'), findsOneWidget);
+      expect(
+        find.textContaining('Cloud backup will be turned off'),
+        findsNothing,
+      );
+    });
   });
 
   group('CloudSyncPage - duplicate divers banner', () {

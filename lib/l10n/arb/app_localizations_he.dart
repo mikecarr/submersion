@@ -10193,6 +10193,9 @@ class AppLocalizationsHe extends AppLocalizations {
   String get settings_cloudSync_disabledBanner_title => 'סנכרון ענן מושבת';
 
   @override
+  String get settings_cloudSync_entry_subtitle => 'סנכרון באמצעות אחסון ענן';
+
+  @override
   String get settings_cloudSync_adopt_confirm => 'אימוץ הספרייה המשוחזרת';
 
   @override
@@ -10235,6 +10238,10 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get settings_cloudSync_header_advanced => 'מתקדם';
+
+  @override
+  String get settings_cloudSync_signOut_backupWarning =>
+      'גיבוי הענן יכובה והגיבויים יישמרו במיקום ברירת המחדל.';
 
   @override
   String get settings_cloudSync_header_cloudProvider => 'ספק ענן';
@@ -10288,10 +10295,6 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get settings_cloudSync_provider_icloud => 'iCloud';
-
-  @override
-  String get settings_cloudSync_provider_icloud_subtitle =>
-      'סנכרון באמצעות Apple iCloud';
 
   @override
   String settings_cloudSync_provider_initFailed(Object providerName) {

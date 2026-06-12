@@ -10454,6 +10454,10 @@ class AppLocalizationsEs extends AppLocalizations {
       'Sincronizacion en la nube desactivada';
 
   @override
+  String get settings_cloudSync_entry_subtitle =>
+      'Sincronización mediante almacenamiento en la nube';
+
+  @override
   String get settings_cloudSync_adopt_confirm =>
       'Adoptar la biblioteca restaurada';
 
@@ -10499,6 +10503,10 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get settings_cloudSync_header_advanced => 'Avanzado';
+
+  @override
+  String get settings_cloudSync_signOut_backupWarning =>
+      'La copia de seguridad en la nube se desactivará y las copias se guardarán en la ubicación predeterminada.';
 
   @override
   String get settings_cloudSync_header_cloudProvider => 'Proveedor en la nube';
@@ -10553,10 +10561,6 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get settings_cloudSync_provider_icloud => 'iCloud';
-
-  @override
-  String get settings_cloudSync_provider_icloud_subtitle =>
-      'Sincronizar via Apple iCloud';
 
   @override
   String settings_cloudSync_provider_initFailed(Object providerName) {

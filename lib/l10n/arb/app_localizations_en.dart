@@ -10297,6 +10297,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settings_cloudSync_disabledBanner_title => 'Cloud Sync Disabled';
 
   @override
+  String get settings_cloudSync_entry_subtitle => 'Sync via cloud storage';
+
+  @override
   String get settings_cloudSync_adopt_confirm => 'Adopt Restored Library';
 
   @override
@@ -10338,6 +10341,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settings_cloudSync_header_advanced => 'Advanced';
+
+  @override
+  String get settings_cloudSync_signOut_backupWarning =>
+      'Cloud backup will be turned off and backups will be saved to the default location.';
 
   @override
   String get settings_cloudSync_header_cloudProvider => 'Cloud Provider';
@@ -10391,10 +10398,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settings_cloudSync_provider_icloud => 'iCloud';
-
-  @override
-  String get settings_cloudSync_provider_icloud_subtitle =>
-      'Sync via Apple iCloud';
 
   @override
   String settings_cloudSync_provider_initFailed(Object providerName) {

@@ -368,6 +368,32 @@ void main() {
     expect(container.read(selectedCloudProviderTypeProvider), isNull);
   });
 
+  testWidgets('removing while S3 is selected warns about and disables '
+      'cloud backup', (tester) async {
+    store.stored = S3Config(
+      endpoint: 'http://nas.local:9000',
+      bucket: 'dive-sync',
+      accessKeyId: 'ak',
+      secretAccessKey: 'sk',
+    );
+    await pumpPage(tester, selected: CloudProviderType.s3);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('backup_cloud_enabled', true);
+
+    await tester.ensureVisible(find.byKey(const Key('s3-remove')));
+    await tester.tap(find.byKey(const Key('s3-remove')));
+    await tester.pumpAndSettle();
+    expect(
+      find.textContaining('Cloud backup will be turned off'),
+      findsOneWidget,
+    );
+
+    await tester.tap(find.byKey(const Key('s3-remove-confirm')));
+    await tester.pumpAndSettle();
+
+    expect(prefs.getBool('backup_cloud_enabled'), isFalse);
+  });
+
   testWidgets('removing while S3 is selected deselects the provider', (
     tester,
   ) async {

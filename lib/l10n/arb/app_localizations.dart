@@ -17864,6 +17864,12 @@ abstract class AppLocalizations {
   /// **'Cloud Sync Disabled'**
   String get settings_cloudSync_disabledBanner_title;
 
+  /// No description provided for @settings_cloudSync_entry_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync via cloud storage'**
+  String get settings_cloudSync_entry_subtitle;
+
   /// No description provided for @settings_cloudSync_adopt_confirm.
   ///
   /// In en, this message translates to:
@@ -17926,6 +17932,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Advanced'**
   String get settings_cloudSync_header_advanced;
+
+  /// No description provided for @settings_cloudSync_signOut_backupWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Cloud backup will be turned off and backups will be saved to the default location.'**
+  String get settings_cloudSync_signOut_backupWarning;
 
   /// No description provided for @settings_cloudSync_header_cloudProvider.
   ///
@@ -17995,12 +18007,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'iCloud'**
   String get settings_cloudSync_provider_icloud;
-
-  /// No description provided for @settings_cloudSync_provider_icloud_subtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Sync via Apple iCloud'**
-  String get settings_cloudSync_provider_icloud_subtitle;
 
   /// No description provided for @settings_cloudSync_provider_initFailed.
   ///

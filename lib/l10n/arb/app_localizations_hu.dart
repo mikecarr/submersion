@@ -10432,6 +10432,10 @@ class AppLocalizationsHu extends AppLocalizations {
       'Felho szinkronizalas letiltva';
 
   @override
+  String get settings_cloudSync_entry_subtitle =>
+      'Szinkronizálás felhőtárhelyen keresztül';
+
+  @override
   String get settings_cloudSync_adopt_confirm =>
       'Visszaállított könyvtár átvétele';
 
@@ -10477,6 +10481,10 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get settings_cloudSync_header_advanced => 'Halado';
+
+  @override
+  String get settings_cloudSync_signOut_backupWarning =>
+      'A felhőalapú biztonsági mentés kikapcsol, és a mentések az alapértelmezett helyre kerülnek.';
 
   @override
   String get settings_cloudSync_header_cloudProvider => 'Felho szolgaltato';
@@ -10531,10 +10539,6 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get settings_cloudSync_provider_icloud => 'iCloud';
-
-  @override
-  String get settings_cloudSync_provider_icloud_subtitle =>
-      'Szinkronizalas Apple iCloud-on keresztül';
 
   @override
   String settings_cloudSync_provider_initFailed(Object providerName) {

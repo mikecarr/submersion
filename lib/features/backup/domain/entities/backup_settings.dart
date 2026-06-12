@@ -17,7 +17,7 @@ class BackupSettings extends Equatable {
     this.frequency = BackupFrequency.weekly,
     this.retentionCount = 10,
     this.lastBackupTime,
-    this.cloudBackupEnabled = true,
+    this.cloudBackupEnabled = false,
     this.backupLocation,
   });
 

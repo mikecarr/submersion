@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:submersion/core/database/database.dart';
 import 'package:submersion/core/providers/provider.dart';
+import 'package:submersion/core/services/cloud_storage/cloud_storage_provider.dart';
 import 'package:submersion/features/backup/data/repositories/backup_preferences.dart';
 import 'package:submersion/features/backup/data/services/backup_service.dart';
 import 'package:submersion/features/backup/domain/entities/backup_record.dart';
@@ -427,6 +428,115 @@ void main() {
       },
     );
   });
+
+  // ---------------------------------------------------------------------------
+  // Backup destination coupling — cloud backup vs custom location
+  // ---------------------------------------------------------------------------
+  group('Backup destination coupling', () {
+    late SharedPreferences prefs;
+    late BackupPreferences backupPrefs;
+    late FilePickerPlatform originalPicker;
+    late MockFilePickerPlatform mockPicker;
+
+    setUp(() {
+      originalPicker = FilePickerPlatform.instance;
+      mockPicker = MockFilePickerPlatform();
+      FilePickerPlatform.instance = mockPicker;
+    });
+
+    tearDown(() {
+      FilePickerPlatform.instance = originalPicker;
+    });
+
+    Future<void> pumpApp(
+      WidgetTester tester, {
+      Map<String, Object> initialPrefs = const {},
+    }) async {
+      tester.view.physicalSize = const Size(1200, 2400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+      SharedPreferences.setMockInitialValues(initialPrefs);
+      prefs = await SharedPreferences.getInstance();
+      backupPrefs = BackupPreferences(prefs);
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            sharedPreferencesProvider.overrideWithValue(prefs),
+            backupServiceProvider.overrideWithValue(
+              _RecordingRestoreService(
+                dbAdapter: _FakeBackupDatabaseAdapter(),
+                preferences: backupPrefs,
+              ),
+            ),
+            cloudStorageProviderProvider.overrideWithValue(
+              _FakeCloudProvider(),
+            ),
+            backupHistoryProvider.overrideWith((ref) async => const []),
+          ],
+          child: const MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: BackupSettingsPage(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    SwitchListTile cloudSwitch(WidgetTester tester) =>
+        tester.widget<SwitchListTile>(
+          find.ancestor(
+            of: find.text('Cloud backup'),
+            matching: find.byType(SwitchListTile),
+          ),
+        );
+
+    testWidgets('cloud backup is off by default', (tester) async {
+      await pumpApp(tester);
+      expect(cloudSwitch(tester).value, isFalse);
+      expect(find.text('Default location'), findsOneWidget);
+    });
+
+    testWidgets('cloud backup on shows the provider as the location', (
+      tester,
+    ) async {
+      await pumpApp(tester, initialPrefs: {'backup_cloud_enabled': true});
+      expect(cloudSwitch(tester).value, isTrue);
+      expect(find.text('Test Cloud'), findsOneWidget);
+      expect(find.text('Default location'), findsNothing);
+    });
+
+    testWidgets('choosing a custom directory turns cloud backup off', (
+      tester,
+    ) async {
+      await pumpApp(tester, initialPrefs: {'backup_cloud_enabled': true});
+      mockPicker.directoryPathResult = '/custom/dir';
+
+      await tester.tap(find.text('Change'));
+      await tester.pumpAndSettle();
+
+      expect(cloudSwitch(tester).value, isFalse);
+      expect(find.text('/custom/dir'), findsOneWidget);
+      expect(find.text('Test Cloud'), findsNothing);
+    });
+
+    testWidgets('enabling cloud backup clears a custom location', (
+      tester,
+    ) async {
+      await pumpApp(tester, initialPrefs: {'backup_location': '/custom/dir'});
+      expect(find.text('/custom/dir'), findsOneWidget);
+
+      await tester.tap(find.text('Cloud backup'));
+      await tester.pumpAndSettle();
+
+      expect(cloudSwitch(tester).value, isTrue);
+      expect(find.text('Test Cloud'), findsOneWidget);
+      expect(find.text('/custom/dir'), findsNothing);
+    });
+  });
 }
 
 // Fixed timestamp used across tests.
@@ -482,6 +592,16 @@ class _RecordingRestoreService extends BackupService {
     calls.add('restoreFromFile');
     lastMode = mode;
   }
+}
+
+/// Cloud provider stub: the page only reads [providerName] for the backup
+/// location display; everything else throws via noSuchMethod.
+class _FakeCloudProvider implements CloudStorageProvider {
+  @override
+  String get providerName => 'Test Cloud';
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
 /// BackupService override that throws on pin/unpin to exercise the error path.

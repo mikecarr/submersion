@@ -10267,6 +10267,10 @@ class AppLocalizationsAr extends AppLocalizations {
       'المزامنة السحابية معطلة';
 
   @override
+  String get settings_cloudSync_entry_subtitle =>
+      'المزامنة عبر التخزين السحابي';
+
+  @override
   String get settings_cloudSync_adopt_confirm => 'اعتماد المكتبة المستعادة';
 
   @override
@@ -10309,6 +10313,10 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get settings_cloudSync_header_advanced => 'متقدم';
+
+  @override
+  String get settings_cloudSync_signOut_backupWarning =>
+      'سيتم إيقاف النسخ الاحتياطي السحابي وسيتم حفظ النسخ الاحتياطية في الموقع الافتراضي.';
 
   @override
   String get settings_cloudSync_header_cloudProvider => 'مزود السحابة';
@@ -10362,10 +10370,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get settings_cloudSync_provider_icloud => 'iCloud';
-
-  @override
-  String get settings_cloudSync_provider_icloud_subtitle =>
-      'المزامنة عبر Apple iCloud';
 
   @override
   String settings_cloudSync_provider_initFailed(Object providerName) {

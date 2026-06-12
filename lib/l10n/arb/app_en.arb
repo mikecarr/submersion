@@ -5657,6 +5657,7 @@
   "settings_cloudSync_conflictItems": "{count, plural, =1{1 item needs attention} other{{count} items need attention}}",
   "settings_cloudSync_disabledBanner_content": "App-managed cloud sync is disabled because you're using a custom storage folder. Your folder's sync service (Dropbox, Google Drive, OneDrive, etc.) handles synchronization.",
   "settings_cloudSync_disabledBanner_title": "Cloud Sync Disabled",
+  "settings_cloudSync_entry_subtitle": "Sync via cloud storage",
   "settings_cloudSync_adopt_confirm": "Adopt Restored Library",
   "settings_cloudSync_adopt_dialogContent": "The library was replaced from a backup on \"{deviceName}\" ({date}). Adopting replaces this device's data with the restored library. A safety backup of this device's current data will be created first.",
   "@settings_cloudSync_adopt_dialogContent": {
@@ -5694,6 +5695,7 @@
     }
   },
   "settings_cloudSync_header_advanced": "Advanced",
+  "settings_cloudSync_signOut_backupWarning": "Cloud backup will be turned off and backups will be saved to the default location.",
   "settings_cloudSync_header_cloudProvider": "Cloud Provider",
   "settings_cloudSync_header_conflicts": "Conflicts ({count})",
   "settings_cloudSync_header_syncBehavior": "Sync Behavior",
@@ -5705,7 +5707,6 @@
   "settings_cloudSync_provider_googleDrive": "Google Drive",
   "settings_cloudSync_provider_googleDrive_subtitle": "Sync via Google Drive",
   "settings_cloudSync_provider_icloud": "iCloud",
-  "settings_cloudSync_provider_icloud_subtitle": "Sync via Apple iCloud",
   "settings_cloudSync_provider_initFailed": "Failed to initialize {providerName} provider",
   "settings_cloudSync_provider_notAvailable": "Not available on this platform",
   "settings_cloudSync_provider_s3_edit": "Edit S3 configuration",

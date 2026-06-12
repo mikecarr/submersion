@@ -919,13 +919,18 @@ class CloudSyncPage extends ConsumerWidget {
   }
 
   Future<void> _confirmSignOut(BuildContext context, WidgetRef ref) async {
+    // Cloud backup uploads ride on the sync provider; losing it changes
+    // where backups land, which the user must hear about before agreeing.
+    final backupWarning = ref.read(backupSettingsProvider).cloudBackupEnabled
+        ? '\n\n${context.l10n.settings_cloudSync_signOut_backupWarning}'
+        : '';
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Sign Out?'),
-        content: const Text(
+        content: Text(
           'This will disconnect from the cloud provider. '
-          'Your local data will remain intact.',
+          'Your local data will remain intact.$backupWarning',
         ),
         actions: [
           TextButton(
@@ -942,6 +947,7 @@ class CloudSyncPage extends ConsumerWidget {
 
     if (confirmed == true) {
       await ref.read(syncStateProvider.notifier).signOut();
+      await ref.read(backupSettingsProvider.notifier).disableCloudBackup();
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Signed out from cloud provider')),

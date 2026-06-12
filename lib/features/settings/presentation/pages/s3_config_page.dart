@@ -6,6 +6,7 @@ import 'package:submersion/core/providers/provider.dart';
 import 'package:submersion/core/services/cloud_storage/cloud_storage_provider.dart';
 import 'package:submersion/core/services/cloud_storage/s3/s3_config.dart';
 import 'package:submersion/core/services/cloud_storage/s3/s3_region.dart';
+import 'package:submersion/features/backup/presentation/providers/backup_providers.dart';
 import 'package:submersion/features/settings/presentation/providers/sync_providers.dart';
 import 'package:submersion/l10n/l10n_extension.dart';
 
@@ -205,11 +206,20 @@ class _S3ConfigPageState extends ConsumerState<S3ConfigPage> {
   Future<void> _remove() async {
     final l10n = context.l10n;
     final storageMessage = l10n.settings_s3Config_error_secureStorage;
+    // Removing the active sync provider also takes cloud backup's
+    // destination away; surface that in the same confirmation.
+    final warnBackup =
+        ref.read(selectedCloudProviderTypeProvider) == CloudProviderType.s3 &&
+        ref.read(backupSettingsProvider).cloudBackupEnabled;
+    final removeBody = warnBackup
+        ? '${l10n.settings_s3Config_remove_confirm_body}\n\n'
+              '${l10n.settings_cloudSync_signOut_backupWarning}'
+        : l10n.settings_s3Config_remove_confirm_body;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: Text(l10n.settings_s3Config_remove_confirm_title),
-        content: Text(l10n.settings_s3Config_remove_confirm_body),
+        content: Text(removeBody),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, false),
@@ -231,6 +241,7 @@ class _S3ConfigPageState extends ConsumerState<S3ConfigPage> {
       if (ref.read(selectedCloudProviderTypeProvider) == CloudProviderType.s3) {
         // Resets selection, persisted provider, and sync state in one place.
         await ref.read(syncStateProvider.notifier).signOut();
+        await ref.read(backupSettingsProvider.notifier).disableCloudBackup();
       }
       ref.invalidate(s3ConfigProvider);
       if (!mounted) return;
