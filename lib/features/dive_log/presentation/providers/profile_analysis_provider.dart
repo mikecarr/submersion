@@ -290,7 +290,7 @@ ProfileAnalysisService _resolveAnalysisService(
     ttsCurve: useTts
         ? List<int>.generate(profile.length, (i) {
             final computerTts = profile[i].tts;
-            if (computerTts != null && computerTts > 0) return computerTts;
+            if (computerTts != null) return computerTts;
             if (analysis.ttsCurve != null && i < analysis.ttsCurve!.length) {
               return analysis.ttsCurve![i];
             }
