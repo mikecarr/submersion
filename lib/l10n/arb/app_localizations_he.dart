@@ -10306,7 +10306,7 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get settings_cloudSync_provider_s3_subtitle =>
-      'Amazon S3, MinIO, Cloudflare R2, Backblaze B2 ועוד';
+      'עובד עם כל שירות אחסון תואם S3';
 
   @override
   String get settings_cloudSync_provider_s3_title => 'אחסון תואם S3';
@@ -11090,7 +11090,7 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get settings_s3Config_field_endpoint_helper =>
-      'עבור Amazon S3, הזינו https://s3.amazonaws.com';
+      'לדוגמה: https://s3.example.com';
 
   @override
   String get settings_s3Config_field_endpoint_label =>
@@ -11102,7 +11102,7 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get settings_s3Config_field_pathStyle_subtitle =>
-      'נדרש על ידי רוב שרתי MinIO ו-NAS';
+      'נדרש על ידי רוב השרתים באירוח עצמי';
 
   @override
   String get settings_s3Config_field_prefix_label => 'קידומת מפתחות';

@@ -404,7 +404,7 @@ void main() {
     // as describing the neighboring Bucket field.
     expect(
       endpointField.decoration!.hintText,
-      'For Amazon S3, enter https://s3.amazonaws.com',
+      'For example: https://s3.example.com',
     );
     expect(endpointField.decoration!.helperText, isNull);
   });

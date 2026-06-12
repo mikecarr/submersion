@@ -1060,7 +1060,7 @@ void main() {
 
       expect(find.text('S3-Compatible Storage'), findsOneWidget);
       expect(
-        find.text('Amazon S3, MinIO, Cloudflare R2, Backblaze B2, and more'),
+        find.text('Works with any S3-compatible storage service'),
         findsOneWidget,
       );
     });

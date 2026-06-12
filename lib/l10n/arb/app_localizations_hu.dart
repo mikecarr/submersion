@@ -10551,7 +10551,7 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get settings_cloudSync_provider_s3_subtitle =>
-      'Amazon S3, MinIO, Cloudflare R2, Backblaze B2 és továbbiak';
+      'Bármely S3-kompatibilis tárolószolgáltatással működik';
 
   @override
   String get settings_cloudSync_provider_s3_title => 'S3-kompatibilis tároló';
@@ -11363,7 +11363,7 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get settings_s3Config_field_endpoint_helper =>
-      'Amazon S3 esetén adja meg: https://s3.amazonaws.com';
+      'Például: https://s3.example.com';
 
   @override
   String get settings_s3Config_field_endpoint_label => 'Végpont URL';
@@ -11374,7 +11374,7 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get settings_s3Config_field_pathStyle_subtitle =>
-      'A legtöbb MinIO- és NAS-kiszolgálóhoz szükséges';
+      'A legtöbb saját üzemeltetésű kiszolgálóhoz szükséges';
 
   @override
   String get settings_s3Config_field_prefix_label => 'Kulcs-előtag';

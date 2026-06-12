@@ -18023,7 +18023,7 @@ abstract class AppLocalizations {
   /// No description provided for @settings_cloudSync_provider_s3_subtitle.
   ///
   /// In en, this message translates to:
-  /// **'Amazon S3, MinIO, Cloudflare R2, Backblaze B2, and more'**
+  /// **'Works with any S3-compatible storage service'**
   String get settings_cloudSync_provider_s3_subtitle;
 
   /// No description provided for @settings_cloudSync_provider_s3_title.
@@ -19359,7 +19359,7 @@ abstract class AppLocalizations {
   /// No description provided for @settings_s3Config_field_endpoint_helper.
   ///
   /// In en, this message translates to:
-  /// **'For Amazon S3, enter https://s3.amazonaws.com'**
+  /// **'For example: https://s3.example.com'**
   String get settings_s3Config_field_endpoint_helper;
 
   /// No description provided for @settings_s3Config_field_endpoint_label.
@@ -19377,7 +19377,7 @@ abstract class AppLocalizations {
   /// No description provided for @settings_s3Config_field_pathStyle_subtitle.
   ///
   /// In en, this message translates to:
-  /// **'Required by most MinIO and NAS servers'**
+  /// **'Required by most self-hosted servers'**
   String get settings_s3Config_field_pathStyle_subtitle;
 
   /// No description provided for @settings_s3Config_field_prefix_label.

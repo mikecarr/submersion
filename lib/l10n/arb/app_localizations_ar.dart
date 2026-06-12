@@ -10381,7 +10381,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get settings_cloudSync_provider_s3_subtitle =>
-      'Amazon S3 وMinIO وCloudflare R2 وBackblaze B2 وغيرها';
+      'يعمل مع أي خدمة تخزين متوافقة مع S3';
 
   @override
   String get settings_cloudSync_provider_s3_title => 'تخزين متوافق مع S3';
@@ -11171,7 +11171,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get settings_s3Config_field_endpoint_helper =>
-      'بالنسبة إلى Amazon S3، أدخل https://s3.amazonaws.com';
+      'على سبيل المثال: https://s3.example.com';
 
   @override
   String get settings_s3Config_field_endpoint_label =>
@@ -11183,7 +11183,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get settings_s3Config_field_pathStyle_subtitle =>
-      'مطلوب لمعظم خوادم MinIO وNAS';
+      'مطلوب لمعظم الخوادم المستضافة ذاتيًا';
 
   @override
   String get settings_s3Config_field_prefix_label => 'بادئة المفاتيح';

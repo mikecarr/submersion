@@ -10622,7 +10622,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get settings_cloudSync_provider_s3_subtitle =>
-      'Amazon S3, MinIO, Cloudflare R2, Backblaze B2 et plus';
+      'Fonctionne avec tout service de stockage compatible S3';
 
   @override
   String get settings_cloudSync_provider_s3_title => 'Stockage compatible S3';
@@ -11437,7 +11437,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get settings_s3Config_field_endpoint_helper =>
-      'Pour Amazon S3, saisissez https://s3.amazonaws.com';
+      'Par exemple : https://s3.example.com';
 
   @override
   String get settings_s3Config_field_endpoint_label =>
@@ -11449,7 +11449,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get settings_s3Config_field_pathStyle_subtitle =>
-      'Requis par la plupart des serveurs MinIO et NAS';
+      'Requis par la plupart des serveurs auto-hébergés';
 
   @override
   String get settings_s3Config_field_prefix_label => 'Préfixe de clés';

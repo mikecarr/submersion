@@ -10094,8 +10094,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_cloudSync_provider_s3_edit => '编辑 S3 配置';
 
   @override
-  String get settings_cloudSync_provider_s3_subtitle =>
-      'Amazon S3、MinIO、Cloudflare R2、Backblaze B2 等';
+  String get settings_cloudSync_provider_s3_subtitle => '适用于任何兼容 S3 的存储服务';
 
   @override
   String get settings_cloudSync_provider_s3_title => 'S3 兼容存储';
@@ -10853,7 +10852,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get settings_s3Config_field_endpoint_helper =>
-      '如使用 Amazon S3，请输入 https://s3.amazonaws.com';
+      '例如：https://s3.example.com';
 
   @override
   String get settings_s3Config_field_endpoint_label => '终端节点 URL';
@@ -10862,8 +10861,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_s3Config_field_pathStyle_label => '使用路径样式寻址';
 
   @override
-  String get settings_s3Config_field_pathStyle_subtitle =>
-      '大多数 MinIO 和 NAS 服务器需要此项';
+  String get settings_s3Config_field_pathStyle_subtitle => '大多数自托管服务器需要此选项';
 
   @override
   String get settings_s3Config_field_prefix_label => '键前缀';
