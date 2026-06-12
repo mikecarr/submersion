@@ -10340,6 +10340,42 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get settings_cloudSync_switch_dialogTitle => 'Switch sync backend?';
+
+  @override
+  String settings_cloudSync_switch_dialogContent(
+    String fromName,
+    String toName,
+  ) {
+    return 'Your data will not be moved off $fromName -- it stays there until you delete it. After switching, this device\'s next sync combines its data with whatever already exists on $toName. Your other devices keep using $fromName until you switch each of them too.';
+  }
+
+  @override
+  String get settings_cloudSync_switch_confirm => 'Switch';
+
+  @override
+  String settings_cloudSync_moved_banner(
+    String deviceName,
+    String destination,
+  ) {
+    return '$deviceName moved this library to $destination. This backend is no longer being updated by it. Select $destination below to follow the move.';
+  }
+
+  @override
+  String get settings_cloudSync_moved_dismiss => 'Dismiss';
+
+  @override
+  String settings_cloudSync_cleanup_banner(String backend) {
+    return 'Old sync data is still stored on $backend from before you switched backends. It is no longer used.';
+  }
+
+  @override
+  String get settings_cloudSync_cleanup_delete => 'Delete old data';
+
+  @override
+  String get settings_cloudSync_cleanup_keep => 'Keep';
+
+  @override
   String get settings_cloudSync_header_advanced => 'Advanced';
 
   @override

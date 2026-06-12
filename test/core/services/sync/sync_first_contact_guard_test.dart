@@ -89,6 +89,39 @@ void main() {
       expect(info, isNull, reason: 'the guard protects only the FIRST contact');
     });
 
+    test('fires again when the cursor was minted against a different '
+        'backend', () async {
+      final container = await makeContainer();
+      final cloud =
+          container.read(cloudStorageProviderProvider)
+              as FakeCloudStorageProvider;
+
+      await seedLocalDive('local-7');
+      cloud.seedFile(
+        'submersion_sync_peer-device.json',
+        Uint8List.fromList([1, 2, 3]),
+      );
+      // The device synced before -- but against the backend it just switched
+      // away from. For THIS backend the next sync is still first contact.
+      await SyncRepository().updateLastSyncTime(
+        DateTime(2026, 1, 1),
+        providerId: 'old-backend',
+      );
+
+      final info = await container
+          .read(syncStateProvider.notifier)
+          .firstSyncMergeInfo();
+
+      expect(
+        info,
+        isNotNull,
+        reason:
+            'a cursor carried over from another backend must not mask first '
+            'contact with this one -- that bypass silently merges whatever '
+            'library lives on the new backend',
+      );
+    });
+
     test('returns null with no local data', () async {
       final container = await makeContainer();
       final cloud =

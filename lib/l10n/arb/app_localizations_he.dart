@@ -10237,6 +10237,42 @@ class AppLocalizationsHe extends AppLocalizations {
   }
 
   @override
+  String get settings_cloudSync_switch_dialogTitle => 'להחליף שירות סנכרון?';
+
+  @override
+  String settings_cloudSync_switch_dialogContent(
+    String fromName,
+    String toName,
+  ) {
+    return 'הנתונים שלך לא יועברו מ-$fromName -- הם יישארו שם עד שתמחק אותם. לאחר ההחלפה, הסנכרון הבא של מכשיר זה ישלב את הנתונים שלו עם מה שכבר קיים ב-$toName. המכשירים האחרים שלך ימשיכו להשתמש ב-$fromName עד שתחליף גם כל אחד מהם.';
+  }
+
+  @override
+  String get settings_cloudSync_switch_confirm => 'החלף';
+
+  @override
+  String settings_cloudSync_moved_banner(
+    String deviceName,
+    String destination,
+  ) {
+    return '$deviceName העביר ספרייה זו אל $destination. שירות זה כבר אינו מתעדכן על ידיו. בחר $destination למטה כדי לעקוב אחר ההעברה.';
+  }
+
+  @override
+  String get settings_cloudSync_moved_dismiss => 'התעלם';
+
+  @override
+  String settings_cloudSync_cleanup_banner(String backend) {
+    return 'נתוני סנכרון ישנים עדיין מאוחסנים ב-$backend מהזמן שלפני שהחלפת שירותים. הם כבר אינם בשימוש.';
+  }
+
+  @override
+  String get settings_cloudSync_cleanup_delete => 'מחק נתונים ישנים';
+
+  @override
+  String get settings_cloudSync_cleanup_keep => 'שמור';
+
+  @override
   String get settings_cloudSync_header_advanced => 'מתקדם';
 
   @override

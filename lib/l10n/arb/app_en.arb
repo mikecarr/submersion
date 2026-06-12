@@ -5694,6 +5694,41 @@
       }
     }
   },
+  "settings_cloudSync_switch_dialogTitle": "Switch sync backend?",
+  "settings_cloudSync_switch_dialogContent": "Your data will not be moved off {fromName} -- it stays there until you delete it. After switching, this device's next sync combines its data with whatever already exists on {toName}. Your other devices keep using {fromName} until you switch each of them too.",
+  "@settings_cloudSync_switch_dialogContent": {
+    "placeholders": {
+      "fromName": {
+        "type": "String"
+      },
+      "toName": {
+        "type": "String"
+      }
+    }
+  },
+  "settings_cloudSync_switch_confirm": "Switch",
+  "settings_cloudSync_moved_banner": "{deviceName} moved this library to {destination}. This backend is no longer being updated by it. Select {destination} below to follow the move.",
+  "@settings_cloudSync_moved_banner": {
+    "placeholders": {
+      "deviceName": {
+        "type": "String"
+      },
+      "destination": {
+        "type": "String"
+      }
+    }
+  },
+  "settings_cloudSync_moved_dismiss": "Dismiss",
+  "settings_cloudSync_cleanup_banner": "Old sync data is still stored on {backend} from before you switched backends. It is no longer used.",
+  "@settings_cloudSync_cleanup_banner": {
+    "placeholders": {
+      "backend": {
+        "type": "String"
+      }
+    }
+  },
+  "settings_cloudSync_cleanup_delete": "Delete old data",
+  "settings_cloudSync_cleanup_keep": "Keep",
   "settings_cloudSync_header_advanced": "Advanced",
   "settings_cloudSync_signOut_backupWarning": "Cloud backup will be turned off and backups will be saved to the default location.",
   "settings_cloudSync_header_cloudProvider": "Cloud Provider",

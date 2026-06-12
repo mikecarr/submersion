@@ -10480,6 +10480,43 @@ class AppLocalizationsHu extends AppLocalizations {
   }
 
   @override
+  String get settings_cloudSync_switch_dialogTitle =>
+      'Vált a szinkronizálási szolgáltatón?';
+
+  @override
+  String settings_cloudSync_switch_dialogContent(
+    String fromName,
+    String toName,
+  ) {
+    return 'Az adatai nem kerülnek el a(z) $fromName szolgáltatóról – ott maradnak, amíg nem törli őket. A váltás után ennek az eszköznek a következő szinkronizálása összevonja az adatait azzal, ami már a(z) $toName szolgáltatón található. A többi eszköze továbbra is a(z) $fromName szolgáltatót használja, amíg azokon is át nem vált.';
+  }
+
+  @override
+  String get settings_cloudSync_switch_confirm => 'Váltás';
+
+  @override
+  String settings_cloudSync_moved_banner(
+    String deviceName,
+    String destination,
+  ) {
+    return 'A(z) $deviceName áthelyezte ezt a könyvtárat ide: $destination. Ezt a szolgáltatót már nem frissíti. Válassza a(z) $destination lehetőséget alább a költözés követéséhez.';
+  }
+
+  @override
+  String get settings_cloudSync_moved_dismiss => 'Elvetés';
+
+  @override
+  String settings_cloudSync_cleanup_banner(String backend) {
+    return 'Régi szinkronizálási adatok vannak még tárolva a(z) $backend szolgáltatón a szolgáltatóváltás előttről. Ezeket már nem használja a rendszer.';
+  }
+
+  @override
+  String get settings_cloudSync_cleanup_delete => 'Régi adatok törlése';
+
+  @override
+  String get settings_cloudSync_cleanup_keep => 'Megtartás';
+
+  @override
   String get settings_cloudSync_header_advanced => 'Halado';
 
   @override

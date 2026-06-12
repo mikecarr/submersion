@@ -1326,6 +1326,12 @@ class SyncMetadata extends Table {
   /// cannot silently rewind it. Null means the pre-epoch world.
   TextColumn get lastAcceptedEpochId => text().nullable()();
 
+  /// The provider [lastSyncTimestamp] was minted against. A cursor read for a
+  /// different provider returns null, so first contact with a newly switched
+  /// backend is detectable. Null means a legacy cursor (pre-stamp rows),
+  /// valid for any provider. Written only together with the cursor.
+  TextColumn get lastSyncProvider => text().nullable()();
+
   @override
   Set<Column> get primaryKey => {id};
 }
@@ -1561,7 +1567,7 @@ class AppDatabase extends _$AppDatabase {
 
   /// The current schema version as a static constant so that pre-open checks
   /// (e.g. version-mismatch guard) can reference it without an instance.
-  static const int currentSchemaVersion = 80;
+  static const int currentSchemaVersion = 81;
 
   /// Every schema version that has a migration block in onUpgrade.
   /// Used to calculate progress step counts. When adding a new migration,
@@ -1644,6 +1650,8 @@ class AppDatabase extends _$AppDatabase {
     77,
     78,
     79,
+    80,
+    81,
   ];
 
   /// Returns the number of migration steps that will execute when upgrading
@@ -3864,6 +3872,22 @@ class AppDatabase extends _$AppDatabase {
           }
         }
         if (from < 80) await reportProgress();
+        if (from < 81) {
+          // Provider stamp for the sync cursor: lastSyncTimestamp minted
+          // against one backend must read as absent for another, so first
+          // contact with a switched backend stays detectable. Nullable so
+          // existing cursors read as legacy (valid for any provider).
+          final cols = await customSelect(
+            "PRAGMA table_info('sync_metadata')",
+          ).get();
+          final existing = cols.map((c) => c.read<String>('name')).toSet();
+          if (cols.isNotEmpty && !existing.contains('last_sync_provider')) {
+            await customStatement(
+              'ALTER TABLE sync_metadata ADD COLUMN last_sync_provider TEXT',
+            );
+          }
+        }
+        if (from < 81) await reportProgress();
       },
       beforeOpen: (details) async {
         // Enable foreign keys

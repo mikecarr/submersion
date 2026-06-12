@@ -447,6 +447,84 @@ void main() {
       },
     );
   });
+
+  // The library epoch is committed per-device (lastAcceptedEpochId), but the
+  // marker lives per-backend. These tests pin how a device that accepted an
+  // epoch on one backend behaves when it first syncs against a DIFFERENT one
+  // -- the interaction between backend switching (concern) and the epoch
+  // protocol.
+  group('epoch across a backend switch', () {
+    const marker = LibraryEpochMarker(
+      epochId: 'e1',
+      replacedAt: 1,
+      deviceId: 'replacer',
+    );
+
+    SyncService serviceFor(FakeCloudStorageProvider provider) => SyncService(
+      syncRepository: SyncRepository(),
+      serializer: SyncDataSerializer(),
+      cloudProvider: provider,
+      epochStore: epochStore,
+    );
+
+    test('a device carrying an accepted epoch self-heals the marker onto a '
+        'fresh new backend and stamps its upload', () async {
+      // The device accepted e1 (on the old backend) and switched to a new,
+      // empty backend that carries no marker yet.
+      await SyncRepository().setLastAcceptedEpochId('e1');
+      await epochStore.setLastAccepted(marker);
+      final newBackend = FakeCloudStorageProvider(
+        providerId: 'icloud',
+        providerName: 'iCloud',
+      );
+
+      final result = await serviceFor(newBackend).performSync();
+
+      expect(result.isSuccess, isTrue);
+      expect(
+        (await serviceFor(
+          newBackend,
+        ).readLibraryEpochMarker(newBackend))?.epochId,
+        'e1',
+        reason: 'the accepted epoch must be re-stamped onto the new backend',
+      );
+      final uploaded = SyncDataSerializer().deserializePayload(
+        utf8.decode(newBackend.syncFileBytes()!),
+      );
+      expect(uploaded.epochId, 'e1');
+    });
+
+    test('a conflicting epoch already on the new backend halts for adoption '
+        'rather than merging across generations', () async {
+      // The device accepted e1 on the old backend; the new backend was
+      // independently replaced under e2 by some other device.
+      await SyncRepository().setLastAcceptedEpochId('e1');
+      await epochStore.setLastAccepted(marker);
+      final newBackend = FakeCloudStorageProvider(
+        providerId: 'icloud',
+        providerName: 'iCloud',
+      );
+      await serviceFor(newBackend).writeLibraryEpochMarker(
+        newBackend,
+        const LibraryEpochMarker(
+          epochId: 'e2',
+          replacedAt: 2,
+          deviceId: 'other',
+        ),
+      );
+      newBackend.operationLog.clear();
+
+      final result = await serviceFor(newBackend).performSync();
+
+      expect(result.status, SyncResultStatus.awaitingAdoption);
+      expect(result.replaceMarker?.epochId, 'e2');
+      expect(
+        newBackend.operationLog.where((op) => op.startsWith('upload:')),
+        isEmpty,
+        reason: 'no file may be uploaded into a not-yet-adopted epoch',
+      );
+    });
+  });
 }
 
 /// Fails only the sync-file-stem listing, leaving marker IO working, to

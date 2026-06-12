@@ -10551,6 +10551,44 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String get settings_cloudSync_switch_dialogTitle =>
+      'Changer de service de synchronisation ?';
+
+  @override
+  String settings_cloudSync_switch_dialogContent(
+    String fromName,
+    String toName,
+  ) {
+    return 'Vos données ne seront pas retirées de $fromName : elles y restent jusqu\'à ce que vous les supprimiez. Après le changement, la prochaine synchronisation de cet appareil combine ses données avec ce qui existe déjà sur $toName. Vos autres appareils continuent d\'utiliser $fromName jusqu\'à ce que vous changiez chacun d\'eux également.';
+  }
+
+  @override
+  String get settings_cloudSync_switch_confirm => 'Changer';
+
+  @override
+  String settings_cloudSync_moved_banner(
+    String deviceName,
+    String destination,
+  ) {
+    return '$deviceName a déplacé cette bibliothèque vers $destination. Ce service n\'est plus mis à jour par celui-ci. Sélectionnez $destination ci-dessous pour suivre le déplacement.';
+  }
+
+  @override
+  String get settings_cloudSync_moved_dismiss => 'Ignorer';
+
+  @override
+  String settings_cloudSync_cleanup_banner(String backend) {
+    return 'D\'anciennes données de synchronisation, datant d\'avant votre changement de service, sont toujours stockées sur $backend. Elles ne sont plus utilisées.';
+  }
+
+  @override
+  String get settings_cloudSync_cleanup_delete =>
+      'Supprimer les anciennes données';
+
+  @override
+  String get settings_cloudSync_cleanup_keep => 'Conserver';
+
+  @override
   String get settings_cloudSync_header_advanced => 'Avance';
 
   @override

@@ -247,8 +247,13 @@ class SyncInitializer {
         );
       }
 
-      // Get local last sync time
-      final localLastSync = await _syncRepository.getLastSyncTime();
+      // Get local last sync time, scoped to this provider: a cursor from a
+      // backend we switched away from must not read as "synced here", or the
+      // launch check would report up-to-date against a backend we have never
+      // actually synced with.
+      final localLastSync = await _syncRepository.getLastSyncTime(
+        forProvider: provider.providerId,
+      );
 
       // Per-device sync files: every device writes its own
       // submersion_sync_<deviceId>.json. Whether a launch sync is worthwhile is

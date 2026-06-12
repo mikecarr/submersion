@@ -10434,6 +10434,43 @@ class AppLocalizationsNl extends AppLocalizations {
   }
 
   @override
+  String get settings_cloudSync_switch_dialogTitle =>
+      'Synchronisatieprovider wijzigen?';
+
+  @override
+  String settings_cloudSync_switch_dialogContent(
+    String fromName,
+    String toName,
+  ) {
+    return 'Je gegevens worden niet van $fromName verplaatst — ze blijven daar staan totdat je ze verwijdert. Na het wijzigen voegt de volgende synchronisatie van dit apparaat zijn gegevens samen met wat er al op $toName staat. Je andere apparaten blijven $fromName gebruiken totdat je ze ook elk wijzigt.';
+  }
+
+  @override
+  String get settings_cloudSync_switch_confirm => 'Wijzigen';
+
+  @override
+  String settings_cloudSync_moved_banner(
+    String deviceName,
+    String destination,
+  ) {
+    return '$deviceName heeft deze bibliotheek naar $destination verplaatst. Deze provider wordt er niet langer door bijgewerkt. Selecteer $destination hieronder om de verplaatsing te volgen.';
+  }
+
+  @override
+  String get settings_cloudSync_moved_dismiss => 'Sluiten';
+
+  @override
+  String settings_cloudSync_cleanup_banner(String backend) {
+    return 'Er staan nog oude synchronisatiegegevens op $backend van voordat je van provider wisselde. Ze worden niet meer gebruikt.';
+  }
+
+  @override
+  String get settings_cloudSync_cleanup_delete => 'Oude gegevens verwijderen';
+
+  @override
+  String get settings_cloudSync_cleanup_keep => 'Behouden';
+
+  @override
   String get settings_cloudSync_header_advanced => 'Geavanceerd';
 
   @override

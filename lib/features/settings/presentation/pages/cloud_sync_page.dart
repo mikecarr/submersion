@@ -9,6 +9,7 @@ import 'package:submersion/core/data/repositories/sync_repository.dart'
     show CloudProviderType;
 import 'package:submersion/core/services/cloud_storage/s3/s3_config.dart';
 import 'package:submersion/core/services/sync/library_epoch.dart';
+import 'package:submersion/core/services/sync/library_moved.dart';
 import 'package:submersion/features/backup/presentation/providers/backup_providers.dart';
 import 'package:submersion/features/divers/data/repositories/diver_merge_repository.dart';
 import 'package:submersion/features/divers/presentation/providers/diver_providers.dart';
@@ -515,6 +516,38 @@ class CloudSyncPage extends ConsumerWidget {
     WidgetRef ref,
     CloudProviderType provider,
   ) async {
+    // Switching AWAY from a backend this device has synced with is a
+    // consequential, easy-to-misunderstand action (data is not migrated, peers
+    // do not follow automatically, the next sync combines with whatever lives
+    // on the new backend). Confirm first, and record the departure so the old
+    // backend is marked moved-from and armed for cleanup.
+    final current = ref.read(selectedCloudProviderTypeProvider);
+    final currentProvider = ref.read(cloudStorageProviderProvider);
+    final hasHistory = ref.read(syncStateProvider).lastSync != null;
+    if (current != null &&
+        current != provider &&
+        currentProvider != null &&
+        hasHistory) {
+      // Resolve the display name before the first await so context is not used
+      // across an async gap.
+      final toName = _providerDisplayName(context, provider);
+      final confirmed = await _confirmBackendSwitch(
+        context,
+        ref,
+        from: current,
+        to: provider,
+      );
+      if (confirmed != true) return;
+      await ref
+          .read(syncStateProvider.notifier)
+          .recordBackendDeparture(
+            oldProvider: currentProvider,
+            toProviderId: provider.name,
+            toProviderName: toName,
+          );
+      if (!context.mounted) return;
+    }
+
     // Set the provider first so cloudStorageProviderProvider returns the correct instance
     ref.read(selectedCloudProviderTypeProvider.notifier).state = provider;
 
@@ -563,6 +596,59 @@ class CloudSyncPage extends ConsumerWidget {
         );
       }
     }
+  }
+
+  /// Display name for a provider type, for dialogs and banners.
+  String _providerDisplayName(BuildContext context, CloudProviderType type) {
+    final l10n = context.l10n;
+    switch (type) {
+      case CloudProviderType.icloud:
+        return l10n.settings_cloudSync_provider_icloud;
+      case CloudProviderType.googledrive:
+        return l10n.settings_cloudSync_provider_googleDrive;
+      case CloudProviderType.s3:
+        return l10n.settings_cloudSync_provider_s3_title;
+    }
+  }
+
+  /// Map a stored providerId back to a display name (for the cleanup banner,
+  /// which only has the id of the old backend).
+  String _providerDisplayNameForId(BuildContext context, String providerId) {
+    final type = CloudProviderType.values
+        .where((t) => t.name == providerId)
+        .firstOrNull;
+    return type == null ? providerId : _providerDisplayName(context, type);
+  }
+
+  Future<bool?> _confirmBackendSwitch(
+    BuildContext context,
+    WidgetRef ref, {
+    required CloudProviderType from,
+    required CloudProviderType to,
+  }) {
+    final l10n = context.l10n;
+    return showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.settings_cloudSync_switch_dialogTitle),
+        content: Text(
+          l10n.settings_cloudSync_switch_dialogContent(
+            _providerDisplayName(context, from),
+            _providerDisplayName(context, to),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(MaterialLocalizations.of(context).cancelButtonLabel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(l10n.settings_cloudSync_switch_confirm),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildSyncActions(
@@ -632,6 +718,14 @@ class CloudSyncPage extends ConsumerWidget {
                 ),
               ),
             ),
+          if (syncState.movedMarker != null)
+            _buildMovedBanner(context, ref, syncState.movedMarker!),
+          if (syncState.cleanupOldBackendProviderId != null)
+            _buildCleanupOfferBanner(
+              context,
+              ref,
+              syncState.cleanupOldBackendProviderId!,
+            ),
           FilledButton.icon(
             onPressed: isSyncing || !hasProvider
                 ? null
@@ -660,6 +754,107 @@ class CloudSyncPage extends ConsumerWidget {
               ),
             ),
         ],
+      ),
+    );
+  }
+
+  /// Advisory banner shown to a straggler still pointed at a backend another
+  /// device moved away from. Informational + dismissible: the user follows the
+  /// move by selecting the destination provider tile themselves (a one-tap
+  /// switch is not offered because some destinations, e.g. S3, need config).
+  Widget _buildMovedBanner(
+    BuildContext context,
+    WidgetRef ref,
+    LibraryMovedMarker marker,
+  ) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Card(
+        color: theme.colorScheme.secondaryContainer,
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(
+                    Icons.drive_file_move_outline,
+                    color: theme.colorScheme.onSecondaryContainer,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      context.l10n.settings_cloudSync_moved_banner(
+                        marker.displayName,
+                        marker.toProviderDisplay,
+                      ),
+                      style: theme.textTheme.bodyMedium,
+                    ),
+                  ),
+                ],
+              ),
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  onPressed: () =>
+                      ref.read(syncStateProvider.notifier).acknowledgeMoved(),
+                  child: Text(context.l10n.settings_cloudSync_moved_dismiss),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Offer to delete the orphaned data left on a backend the user switched
+  /// away from, shown after the first successful sync on the new backend.
+  Widget _buildCleanupOfferBanner(
+    BuildContext context,
+    WidgetRef ref,
+    String oldProviderId,
+  ) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Card(
+        color: theme.colorScheme.surfaceContainerHighest,
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                context.l10n.settings_cloudSync_cleanup_banner(
+                  _providerDisplayNameForId(context, oldProviderId),
+                ),
+                style: theme.textTheme.bodyMedium,
+              ),
+              const SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: () => ref
+                        .read(syncStateProvider.notifier)
+                        .dismissOldBackendCleanup(),
+                    child: Text(context.l10n.settings_cloudSync_cleanup_keep),
+                  ),
+                  const SizedBox(width: 8),
+                  FilledButton(
+                    onPressed: () => ref
+                        .read(syncStateProvider.notifier)
+                        .cleanupOldBackendData(),
+                    child: Text(context.l10n.settings_cloudSync_cleanup_delete),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

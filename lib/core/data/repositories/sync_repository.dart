@@ -185,16 +185,33 @@ class SyncRepository {
     return token;
   }
 
-  /// Get the last sync timestamp
-  Future<DateTime?> getLastSyncTime() async {
+  /// Get the last sync timestamp.
+  ///
+  /// With [forProvider], the cursor is returned only if it was minted against
+  /// that provider (or is a legacy unstamped cursor). A cursor belonging to a
+  /// different backend reads as null -- "never synced here" -- so first
+  /// contact with a switched backend stays detectable. Pass null only for
+  /// display contexts that want the raw timestamp regardless of backend.
+  Future<DateTime?> getLastSyncTime({String? forProvider}) async {
     final metadata = await getOrCreateMetadata();
     if (metadata.lastSyncTimestamp == null) return null;
+    if (forProvider != null &&
+        metadata.lastSyncProvider != null &&
+        metadata.lastSyncProvider != forProvider) {
+      return null;
+    }
     return DateTime.fromMillisecondsSinceEpoch(metadata.lastSyncTimestamp!);
   }
 
-  /// Update the last sync timestamp
-  Future<void> updateLastSyncTime(DateTime syncTime) async {
+  /// Update the last sync timestamp, stamping the provider it was minted
+  /// against. [providerId] should only be omitted by legacy-path tests; every
+  /// production writer knows its provider.
+  Future<void> updateLastSyncTime(
+    DateTime syncTime, {
+    String? providerId,
+  }) async {
     try {
+      await getOrCreateMetadata();
       final now = DateTime.now().millisecondsSinceEpoch;
 
       await (_db.update(
@@ -202,6 +219,7 @@ class SyncRepository {
       )..where((t) => t.id.equals(_globalMetadataId))).write(
         SyncMetadataCompanion(
           lastSyncTimestamp: Value(syncTime.millisecondsSinceEpoch),
+          lastSyncProvider: Value(providerId),
           updatedAt: Value(now),
         ),
       );
@@ -215,6 +233,26 @@ class SyncRepository {
       );
       rethrow;
     }
+  }
+
+  /// Claim a legacy (unstamped) cursor for [providerId]. Used at backend
+  /// switch time: an unstamped cursor is valid for any provider, so without
+  /// claiming it for the backend it was actually minted against, switching
+  /// right after upgrading would carry it to the new backend.
+  /// No-op when the cursor is absent or already stamped.
+  Future<void> stampLegacyCursorProvider(String providerId) async {
+    final metadata = await getOrCreateMetadata();
+    if (metadata.lastSyncTimestamp == null) return;
+    if (metadata.lastSyncProvider != null) return;
+    final now = DateTime.now().millisecondsSinceEpoch;
+    await (_db.update(
+      _db.syncMetadata,
+    )..where((t) => t.id.equals(_globalMetadataId))).write(
+      SyncMetadataCompanion(
+        lastSyncProvider: Value(providerId),
+        updatedAt: Value(now),
+      ),
+    );
   }
 
   /// Set the cloud provider
@@ -823,6 +861,7 @@ class SyncRepository {
       )..where((t) => t.id.equals(_globalMetadataId))).write(
         SyncMetadataCompanion(
           lastSyncTimestamp: const Value(null),
+          lastSyncProvider: const Value(null),
           remoteFileId: const Value(null),
           updatedAt: Value(now),
         ),

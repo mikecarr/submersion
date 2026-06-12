@@ -10,6 +10,7 @@ import 'package:submersion/core/services/logger_service.dart';
 import 'package:submersion/core/services/sync/hlc.dart';
 import 'package:submersion/core/services/sync/library_epoch.dart';
 import 'package:submersion/core/services/sync/library_epoch_store.dart';
+import 'package:submersion/core/services/sync/library_moved.dart';
 import 'package:submersion/core/services/sync/sync_clock.dart';
 import 'package:submersion/core/services/sync/sync_data_serializer.dart';
 import 'package:submersion/core/services/sync/sync_initializer.dart';
@@ -295,9 +296,13 @@ class SyncService {
         'load device id',
         () => _syncRepository.getDeviceId(),
       );
+      // Scoped to this provider: a cursor minted against the backend we just
+      // switched away from must read as null here, so the first sync on the
+      // new backend does a full reconcile (mirrors rebaselineAfterRestore)
+      // rather than replaying a foreign baseline.
       final lastSyncTime = await _withStep(
         'load last sync time',
-        () => _syncRepository.getLastSyncTime(),
+        () => _syncRepository.getLastSyncTime(forProvider: provider.providerId),
       );
       // Make sure the HLC clock is live before merging so receiving remote
       // payloads advances it (and any writes during the sync get stamped).
@@ -591,7 +596,10 @@ class SyncService {
       if (recordsFailed == 0) {
         await _withStep(
           'store last sync time',
-          () => _syncRepository.updateLastSyncTime(result.uploadTime),
+          () => _syncRepository.updateLastSyncTime(
+            result.uploadTime,
+            providerId: provider.providerId,
+          ),
         );
       }
       // Retire the legacy shared sync file once its content is merged and
@@ -1639,7 +1647,10 @@ class SyncService {
 
       await _syncRepository.setLastAcceptedEpochId(marker.epochId);
       await store.setLastAccepted(marker);
-      await _syncRepository.updateLastSyncTime(upload.uploadTime);
+      await _syncRepository.updateLastSyncTime(
+        upload.uploadTime,
+        providerId: provider.providerId,
+      );
       await _syncRepository.persistSyncClock();
       await store.clearPendingReplace();
       _log.info('Library replace executed under epoch ${marker.epochId}');
@@ -1821,6 +1832,70 @@ class SyncService {
         .uploadFile(bytes, libraryEpochFileName, folderId: folderId)
         .timeout(const Duration(seconds: 60));
     _log.info('Wrote library epoch marker ${marker.epochId}');
+  }
+
+  /// Download and parse the cloud "library moved" marker, or null when absent.
+  /// Unlike the epoch marker this returns null on any failure rather than
+  /// throwing: the moved marker is purely advisory, so an unreadable one must
+  /// never fail a sync closed.
+  Future<LibraryMovedMarker?> readLibraryMovedMarker(
+    CloudStorageProvider provider,
+  ) async {
+    try {
+      final files = await provider
+          .listFiles(namePattern: libraryMovedFileName)
+          .timeout(const Duration(seconds: 8));
+      final candidates = files
+          .where((f) => !_isConflictCopy(f.name))
+          .where((f) => f.name == libraryMovedFileName)
+          .toList();
+      if (candidates.isEmpty) return null;
+      candidates.sort((a, b) => b.modifiedTime.compareTo(a.modifiedTime));
+      final bytes = await provider
+          .downloadFile(candidates.first.id)
+          .timeout(const Duration(seconds: 30));
+      final decoded = jsonDecode(utf8.decode(bytes));
+      if (decoded is! Map<String, dynamic>) return null;
+      return LibraryMovedMarker.fromJson(decoded);
+    } catch (e) {
+      _log.warning('Could not read library moved marker: $e');
+      return null;
+    }
+  }
+
+  /// Write the "library moved" marker to [provider] (the OLD backend). Left
+  /// behind on switch so a straggler still pointed at this backend learns the
+  /// library moved on. Best-effort: never throws.
+  Future<void> writeLibraryMovedMarker(
+    CloudStorageProvider provider,
+    LibraryMovedMarker marker,
+  ) async {
+    try {
+      final bytes = Uint8List.fromList(
+        utf8.encode(jsonEncode(marker.toJson())),
+      );
+      String? folderId;
+      try {
+        folderId = await provider.getOrCreateSyncFolder();
+      } catch (_) {
+        folderId = null;
+      }
+      await provider
+          .uploadFile(bytes, libraryMovedFileName, folderId: folderId)
+          .timeout(const Duration(seconds: 60));
+      _log.info('Wrote library moved marker -> ${marker.toProviderId}');
+    } catch (e) {
+      _log.warning('Could not write library moved marker: $e');
+    }
+  }
+
+  /// Remove the orphaned sync payload files from a backend the user switched
+  /// away from. Deletes the dive-library data files (the privacy/cost concern)
+  /// but deliberately KEEPS the moved marker: it carries no dive data and
+  /// still tells any not-yet-migrated straggler where the library went.
+  /// Best-effort; never throws.
+  Future<void> cleanupOldBackend(CloudStorageProvider provider) async {
+    await deleteAllSyncFiles(provider);
   }
 
   /// Sign out from the current cloud provider

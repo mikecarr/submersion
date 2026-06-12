@@ -139,6 +139,25 @@ class _FakeSyncNotifier extends StateNotifier<SyncState>
     String recordId,
     ConflictResolution resolution,
   ) async {}
+
+  @override
+  Future<void> acknowledgeMoved() async {}
+
+  @override
+  Future<void> checkLibraryMoved() async {}
+
+  @override
+  Future<void> cleanupOldBackendData() async {}
+
+  @override
+  Future<void> dismissOldBackendCleanup() async {}
+
+  @override
+  Future<void> recordBackendDeparture({
+    required CloudStorageProvider oldProvider,
+    required String toProviderId,
+    String? toProviderName,
+  }) async {}
 }
 
 void main() {

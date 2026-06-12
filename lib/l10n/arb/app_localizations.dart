@@ -17927,6 +17927,57 @@ abstract class AppLocalizations {
   /// **'Sync is paused: the library was replaced from a backup on \"{deviceName}\". Tap Sync Now to review.'**
   String settings_cloudSync_replace_banner(String deviceName);
 
+  /// No description provided for @settings_cloudSync_switch_dialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch sync backend?'**
+  String get settings_cloudSync_switch_dialogTitle;
+
+  /// No description provided for @settings_cloudSync_switch_dialogContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Your data will not be moved off {fromName} -- it stays there until you delete it. After switching, this device\'s next sync combines its data with whatever already exists on {toName}. Your other devices keep using {fromName} until you switch each of them too.'**
+  String settings_cloudSync_switch_dialogContent(
+    String fromName,
+    String toName,
+  );
+
+  /// No description provided for @settings_cloudSync_switch_confirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch'**
+  String get settings_cloudSync_switch_confirm;
+
+  /// No description provided for @settings_cloudSync_moved_banner.
+  ///
+  /// In en, this message translates to:
+  /// **'{deviceName} moved this library to {destination}. This backend is no longer being updated by it. Select {destination} below to follow the move.'**
+  String settings_cloudSync_moved_banner(String deviceName, String destination);
+
+  /// No description provided for @settings_cloudSync_moved_dismiss.
+  ///
+  /// In en, this message translates to:
+  /// **'Dismiss'**
+  String get settings_cloudSync_moved_dismiss;
+
+  /// No description provided for @settings_cloudSync_cleanup_banner.
+  ///
+  /// In en, this message translates to:
+  /// **'Old sync data is still stored on {backend} from before you switched backends. It is no longer used.'**
+  String settings_cloudSync_cleanup_banner(String backend);
+
+  /// No description provided for @settings_cloudSync_cleanup_delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete old data'**
+  String get settings_cloudSync_cleanup_delete;
+
+  /// No description provided for @settings_cloudSync_cleanup_keep.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep'**
+  String get settings_cloudSync_cleanup_keep;
+
   /// No description provided for @settings_cloudSync_header_advanced.
   ///
   /// In en, this message translates to:

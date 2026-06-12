@@ -7,6 +7,18 @@ import 'package:submersion/core/services/cloud_storage/cloud_storage_provider.da
 /// canonical sync file maps to a single stable id across uploads.
 class FakeCloudStorageProvider extends CloudStorageProvider
     with CloudStorageProviderMixin {
+  /// Overridable so tests can model two distinct backends (e.g. an old 's3'
+  /// and a new 'icloud') for backend-switch scenarios. Defaults preserve the
+  /// long-standing 'fake' identity for existing callers.
+  FakeCloudStorageProvider({
+    String providerId = 'fake',
+    String providerName = 'Fake',
+  }) : _providerId = providerId,
+       _providerName = providerName;
+
+  final String _providerId;
+  final String _providerName;
+
   final Map<String, _FakeFile> _files = {};
   bool authenticated = true;
   bool available = true;
@@ -52,10 +64,10 @@ class FakeCloudStorageProvider extends CloudStorageProvider
   }
 
   @override
-  String get providerName => 'Fake';
+  String get providerName => _providerName;
 
   @override
-  String get providerId => 'fake';
+  String get providerId => _providerId;
 
   @override
   Future<bool> isAvailable() async => available;

@@ -1,4 +1,7 @@
 import 'dart:async';
+import 'dart:io' show Platform;
+
+import 'package:package_info_plus/package_info_plus.dart';
 
 import 'package:submersion/core/providers/provider.dart';
 
@@ -12,6 +15,8 @@ import 'package:submersion/core/services/cloud_storage/s3/s3_config.dart';
 import 'package:submersion/core/services/cloud_storage/s3_storage_provider.dart';
 import 'package:submersion/core/services/sync/library_epoch.dart';
 import 'package:submersion/core/services/sync/library_epoch_store.dart';
+import 'package:submersion/core/services/sync/library_moved.dart';
+import 'package:submersion/core/services/sync/library_moved_store.dart';
 import 'package:submersion/core/services/sync/sync_data_serializer.dart';
 import 'package:submersion/core/services/sync/sync_event_bus.dart';
 import 'package:submersion/core/services/sync/sync_initializer.dart';
@@ -41,6 +46,12 @@ final syncPreferencesProvider = Provider<SyncPreferences>((ref) {
 /// Library epoch persistence (mirror + pending replace intent).
 final libraryEpochStoreProvider = Provider<LibraryEpochStore>((ref) {
   return LibraryEpochStore(ref.watch(sharedPreferencesProvider));
+});
+
+/// "Library moved" persistence (acknowledged-move signature + pending
+/// old-backend cleanup target) for backend switches.
+final libraryMovedStoreProvider = Provider<LibraryMovedStore>((ref) {
+  return LibraryMovedStore(ref.watch(sharedPreferencesProvider));
 });
 
 /// Behavior settings for auto-sync
@@ -111,6 +122,21 @@ final _googleDriveProvider = GoogleDriveStorageProvider();
 final _icloudProvider = ICloudStorageProvider();
 final _s3Provider = S3StorageProvider();
 
+/// The singleton instance backing a [CloudProviderType]. Shared by the active
+/// provider resolution and by old-backend cleanup, which must reach a backend
+/// the user has already switched away from (so it is no longer the active
+/// provider).
+CloudStorageProvider cloudProviderInstanceFor(CloudProviderType type) {
+  switch (type) {
+    case CloudProviderType.icloud:
+      return _icloudProvider;
+    case CloudProviderType.googledrive:
+      return _googleDriveProvider;
+    case CloudProviderType.s3:
+      return _s3Provider;
+  }
+}
+
 /// Cloud storage provider instance (null if none selected or custom folder mode)
 ///
 /// When using custom folder mode, app-managed cloud sync is disabled to prevent
@@ -125,14 +151,7 @@ final cloudStorageProviderProvider = Provider<CloudStorageProvider?>((ref) {
   final providerType = ref.watch(selectedCloudProviderTypeProvider);
   if (providerType == null) return null;
 
-  switch (providerType) {
-    case CloudProviderType.icloud:
-      return _icloudProvider;
-    case CloudProviderType.googledrive:
-      return _googleDriveProvider;
-    case CloudProviderType.s3:
-      return _s3Provider;
-  }
+  return cloudProviderInstanceFor(providerType);
 });
 
 /// Sync service provider
@@ -166,8 +185,22 @@ class SyncState {
 
   /// The replacement marker behind [replaceAwaitingAdoption] (who/when).
   final LibraryEpochMarker? replaceMarker;
+
+  /// Non-null when the backend this device is on carries a "library moved"
+  /// marker pointing elsewhere that the user has not yet acknowledged -- a
+  /// straggler left behind by another device's backend switch. Advisory only:
+  /// sync still works, but the banner offers to follow the move.
+  final LibraryMovedMarker? movedMarker;
+
+  /// Non-null after the first successful sync on a freshly switched-to backend
+  /// when an old backend is still armed for cleanup: the providerId of that
+  /// old backend, whose orphaned data the user can now choose to delete.
+  final String? cleanupOldBackendProviderId;
+
   static const Object _messageSentinel = Object();
   static const Object _markerSentinel = Object();
+  static const Object _movedSentinel = Object();
+  static const Object _cleanupSentinel = Object();
 
   const SyncState({
     this.status = SyncStatus.idle,
@@ -180,6 +213,8 @@ class SyncState {
     this.firstSyncAwaitingConfirmation = false,
     this.replaceAwaitingAdoption = false,
     this.replaceMarker,
+    this.movedMarker,
+    this.cleanupOldBackendProviderId,
   });
 
   SyncState copyWith({
@@ -193,6 +228,8 @@ class SyncState {
     bool? firstSyncAwaitingConfirmation,
     bool? replaceAwaitingAdoption,
     Object? replaceMarker = _markerSentinel,
+    Object? movedMarker = _movedSentinel,
+    Object? cleanupOldBackendProviderId = _cleanupSentinel,
   }) {
     return SyncState(
       status: status ?? this.status,
@@ -211,6 +248,13 @@ class SyncState {
       replaceMarker: identical(replaceMarker, _markerSentinel)
           ? this.replaceMarker
           : replaceMarker as LibraryEpochMarker?,
+      movedMarker: identical(movedMarker, _movedSentinel)
+          ? this.movedMarker
+          : movedMarker as LibraryMovedMarker?,
+      cleanupOldBackendProviderId:
+          identical(cleanupOldBackendProviderId, _cleanupSentinel)
+          ? this.cleanupOldBackendProviderId
+          : cleanupOldBackendProviderId as String?,
     );
   }
 }
@@ -288,7 +332,13 @@ class SyncNotifier extends StateNotifier<SyncState> {
   /// Refresh the sync state from the database
   Future<void> refreshState() async {
     try {
-      final lastSync = await _syncRepository.getLastSyncTime();
+      // Scope the displayed "last synced" to the active backend: after a
+      // switch, showing the cursor from the old backend would claim we are
+      // synced with a backend we have never contacted.
+      final activeProvider = _ref.read(cloudStorageProviderProvider);
+      final lastSync = await _syncRepository.getLastSyncTime(
+        forProvider: activeProvider?.providerId,
+      );
       final pendingCount = await _syncRepository.getPendingCount();
       final conflictCount = await _syncRepository.getConflictCount();
       final isAvailable = await _syncService.isSyncAvailable();
@@ -320,7 +370,12 @@ class SyncNotifier extends StateNotifier<SyncState> {
     try {
       final provider = _ref.read(cloudStorageProviderProvider);
       if (provider == null) return null;
-      final lastSync = await _syncRepository.getLastSyncTime();
+      // Scoped: first contact is per-backend. A cursor minted against a
+      // backend the user switched away from must not mask the first,
+      // library-combining sync against the new one.
+      final lastSync = await _syncRepository.getLastSyncTime(
+        forProvider: provider.providerId,
+      );
       if (lastSync != null) return null;
       final localDives = await _ref.read(diveRepositoryProvider).getDiveCount();
       if (localDives == 0) return null;
@@ -364,6 +419,148 @@ class SyncNotifier extends StateNotifier<SyncState> {
       _log.warning('Library replace pre-check failed: $e');
       return null;
     }
+  }
+
+  /// After a successful sync, if an old backend is armed for cleanup and we
+  /// just synced against a DIFFERENT backend, surface the cleanup offer. The
+  /// different-backend guard means the first real sync on the new backend has
+  /// landed -- only then is deleting the old copy safe.
+  Future<void> _surfaceOldBackendCleanupOffer() async {
+    final pending = _ref.read(libraryMovedStoreProvider).pendingCleanup;
+    if (pending == null) return;
+    final active = _ref.read(cloudStorageProviderProvider);
+    if (active == null || active.providerId == pending) return;
+    if (!mounted) return;
+    state = state.copyWith(cleanupOldBackendProviderId: pending);
+  }
+
+  /// Record this device leaving [oldProvider] for the backend [toProviderId].
+  /// Called when the user confirms a backend switch, BEFORE the active
+  /// provider selection changes (so [oldProvider] is still reachable):
+  ///
+  /// - stamps the (possibly legacy/unstamped) cursor for the old backend, so
+  ///   it cannot read as "synced here" against the new one;
+  /// - leaves a "library moved" marker on the old backend so a straggler still
+  ///   pointed there learns where the library went instead of syncing into an
+  ///   abandoned copy forever;
+  /// - arms the old backend for optional cleanup after the first successful
+  ///   sync on the new one.
+  ///
+  /// All steps are best-effort: a switch must never be blocked by the old
+  /// backend being unreachable.
+  Future<void> recordBackendDeparture({
+    required CloudStorageProvider oldProvider,
+    required String toProviderId,
+    String? toProviderName,
+  }) async {
+    final oldId = oldProvider.providerId;
+    try {
+      await _syncRepository.stampLegacyCursorProvider(oldId);
+    } catch (e) {
+      _log.warning('Could not stamp cursor for old backend $oldId: $e');
+    }
+
+    final meta = await _deviceMetadata();
+    final marker = LibraryMovedMarker(
+      movedAt: DateTime.now().millisecondsSinceEpoch,
+      toProviderId: toProviderId,
+      toProviderName: toProviderName,
+      deviceId: meta.$1,
+      deviceName: meta.$2,
+      appVersion: meta.$3,
+    );
+    await _syncService.writeLibraryMovedMarker(oldProvider, marker);
+    await _ref.read(libraryMovedStoreProvider).setPendingCleanup(oldId);
+    _log.info('Recorded backend departure $oldId -> $toProviderId');
+  }
+
+  /// Network pre-check: does the backend we are on carry a "moved" marker
+  /// pointing at a DIFFERENT backend that we have not acknowledged? If so,
+  /// surface it; the banner offers to follow the move. Never throws.
+  Future<void> checkLibraryMoved() async {
+    try {
+      final provider = _ref.read(cloudStorageProviderProvider);
+      if (provider == null) return;
+      final marker = await _syncService.readLibraryMovedMarker(provider);
+      if (!mounted) return;
+      final store = _ref.read(libraryMovedStoreProvider);
+      // A marker pointing at the backend we are already on is not a move away
+      // from us; ignore it. So is one the user already dismissed.
+      if (marker == null ||
+          marker.toProviderId == provider.providerId ||
+          store.isAcknowledged(marker)) {
+        if (state.movedMarker != null) {
+          state = state.copyWith(movedMarker: null);
+        }
+        return;
+      }
+      state = state.copyWith(movedMarker: marker);
+    } catch (e) {
+      _log.warning('Library moved pre-check failed: $e');
+    }
+  }
+
+  /// Dismiss the "library moved" banner and remember the dismissal so the
+  /// same move does not re-notify on the next sync.
+  Future<void> acknowledgeMoved() async {
+    final marker = state.movedMarker;
+    if (marker != null) {
+      await _ref.read(libraryMovedStoreProvider).acknowledge(marker);
+    }
+    if (!mounted) return;
+    state = state.copyWith(movedMarker: null);
+  }
+
+  /// Delete the orphaned data left on a backend the user switched away from,
+  /// in response to the post-switch cleanup offer. Best-effort; clears the
+  /// offer regardless so it is not presented again.
+  Future<void> cleanupOldBackendData() async {
+    final id = state.cleanupOldBackendProviderId;
+    final store = _ref.read(libraryMovedStoreProvider);
+    if (id != null) {
+      try {
+        final type = CloudProviderType.values.firstWhere((t) => t.name == id);
+        await _syncService.cleanupOldBackend(cloudProviderInstanceFor(type));
+      } catch (e) {
+        _log.warning('Old-backend cleanup failed for $id: $e');
+      }
+    }
+    await store.clearPendingCleanup();
+    if (!mounted) return;
+    state = state.copyWith(cleanupOldBackendProviderId: null);
+  }
+
+  /// Decline the post-switch cleanup offer: leave the old backend's data in
+  /// place (the user may still want it) and stop offering.
+  Future<void> dismissOldBackendCleanup() async {
+    await _ref.read(libraryMovedStoreProvider).clearPendingCleanup();
+    if (!mounted) return;
+    state = state.copyWith(cleanupOldBackendProviderId: null);
+  }
+
+  /// Device identity for a marker: (deviceId, deviceName, appVersion). Each
+  /// piece degrades to a safe default; markers are shown in banners so the
+  /// origin must always be displayable.
+  Future<(String, String?, String?)> _deviceMetadata() async {
+    String deviceId;
+    try {
+      deviceId = await _syncRepository.getDeviceId();
+    } catch (_) {
+      deviceId = 'unknown';
+    }
+    String? deviceName;
+    try {
+      deviceName = Platform.localHostname;
+    } catch (_) {
+      deviceName = null;
+    }
+    String? appVersion;
+    try {
+      appVersion = (await PackageInfo.fromPlatform()).version;
+    } catch (_) {
+      appVersion = null;
+    }
+    return (deviceId, deviceName, appVersion);
   }
 
   /// Adopt the replaced cloud library. The CALLER is responsible for the
@@ -489,6 +686,11 @@ class SyncNotifier extends StateNotifier<SyncState> {
             conflicts: result.conflictsFound,
             progress: 1.0,
           );
+          await _surfaceOldBackendCleanupOffer();
+          // A straggler syncing into a backend another device moved away from
+          // learns of the move here -- the moment it is actively writing into
+          // the now-orphaned copy.
+          await checkLibraryMoved();
         } else {
           state = state.copyWith(
             status: SyncStatus.error,

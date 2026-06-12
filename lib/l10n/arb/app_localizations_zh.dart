@@ -10026,6 +10026,42 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get settings_cloudSync_switch_dialogTitle => '切换同步后端？';
+
+  @override
+  String settings_cloudSync_switch_dialogContent(
+    String fromName,
+    String toName,
+  ) {
+    return '您的数据不会从 $fromName 移走：在您删除之前它会一直保留在那里。切换后，此设备的下次同步会将其数据与 $toName 上已有的内容合并。您的其他设备会继续使用 $fromName，直到您也逐一切换它们。';
+  }
+
+  @override
+  String get settings_cloudSync_switch_confirm => '切换';
+
+  @override
+  String settings_cloudSync_moved_banner(
+    String deviceName,
+    String destination,
+  ) {
+    return '$deviceName 已将此资料库移至 $destination。该后端不再由它更新。请在下方选择 $destination 以跟随此次移动。';
+  }
+
+  @override
+  String get settings_cloudSync_moved_dismiss => '忽略';
+
+  @override
+  String settings_cloudSync_cleanup_banner(String backend) {
+    return '$backend 上仍存有您切换后端之前的旧同步数据。这些数据已不再使用。';
+  }
+
+  @override
+  String get settings_cloudSync_cleanup_delete => '删除旧数据';
+
+  @override
+  String get settings_cloudSync_cleanup_keep => '保留';
+
+  @override
   String get settings_cloudSync_header_advanced => '高级';
 
   @override

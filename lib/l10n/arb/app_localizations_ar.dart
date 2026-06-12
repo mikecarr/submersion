@@ -10312,6 +10312,42 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
+  String get settings_cloudSync_switch_dialogTitle => 'تبديل خدمة المزامنة؟';
+
+  @override
+  String settings_cloudSync_switch_dialogContent(
+    String fromName,
+    String toName,
+  ) {
+    return 'لن يتم نقل بياناتك من $fromName -- ستبقى هناك حتى تحذفها. بعد التبديل، ستدمج المزامنة التالية لهذا الجهاز بياناته مع ما هو موجود بالفعل على $toName. ستظل أجهزتك الأخرى تستخدم $fromName حتى تبدّل كلاً منها أيضًا.';
+  }
+
+  @override
+  String get settings_cloudSync_switch_confirm => 'تبديل';
+
+  @override
+  String settings_cloudSync_moved_banner(
+    String deviceName,
+    String destination,
+  ) {
+    return 'قام $deviceName بنقل هذه المكتبة إلى $destination. لم تعد هذه الخدمة تُحدَّث بواسطته. اختر $destination أدناه لمتابعة النقل.';
+  }
+
+  @override
+  String get settings_cloudSync_moved_dismiss => 'تجاهل';
+
+  @override
+  String settings_cloudSync_cleanup_banner(String backend) {
+    return 'لا تزال بيانات المزامنة القديمة مخزّنة على $backend من قبل أن تبدّل الخدمات. لم تعد مستخدمة.';
+  }
+
+  @override
+  String get settings_cloudSync_cleanup_delete => 'حذف البيانات القديمة';
+
+  @override
+  String get settings_cloudSync_cleanup_keep => 'الاحتفاظ';
+
+  @override
   String get settings_cloudSync_header_advanced => 'متقدم';
 
   @override

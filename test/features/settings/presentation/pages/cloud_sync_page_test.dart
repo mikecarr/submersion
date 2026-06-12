@@ -53,7 +53,7 @@ class _FakeSyncRepository extends SyncRepository {
   int signOutCalls = 0;
 
   @override
-  Future<DateTime?> getLastSyncTime() async => null;
+  Future<DateTime?> getLastSyncTime({String? forProvider}) async => null;
 
   @override
   Future<int> getPendingCount() async => 0;
@@ -136,6 +136,11 @@ class _FakeSyncNotifier extends StateNotifier<SyncState>
   int resetSyncStateCalls = 0;
   int signOutCalls = 0;
   int adoptCalls = 0;
+  int acknowledgeMovedCalls = 0;
+  int checkLibraryMovedCalls = 0;
+  int cleanupOldBackendDataCalls = 0;
+  int dismissOldBackendCleanupCalls = 0;
+  int recordBackendDepartureCalls = 0;
 
   /// Set to non-null to simulate first-contact conditions in widget tests.
   FirstSyncMergeInfo? firstSyncInfo;
@@ -156,6 +161,26 @@ class _FakeSyncNotifier extends StateNotifier<SyncState>
   Future<void> adoptReplacedLibrary() async {
     adoptCalls++;
   }
+
+  @override
+  Future<void> acknowledgeMoved() async => acknowledgeMovedCalls++;
+
+  @override
+  Future<void> checkLibraryMoved() async => checkLibraryMovedCalls++;
+
+  @override
+  Future<void> cleanupOldBackendData() async => cleanupOldBackendDataCalls++;
+
+  @override
+  Future<void> dismissOldBackendCleanup() async =>
+      dismissOldBackendCleanupCalls++;
+
+  @override
+  Future<void> recordBackendDeparture({
+    required CloudStorageProvider oldProvider,
+    required String toProviderId,
+    String? toProviderName,
+  }) async => recordBackendDepartureCalls++;
 
   @override
   Future<void> refreshState() async => refreshStateCalls++;
