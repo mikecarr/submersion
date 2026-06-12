@@ -570,6 +570,62 @@ void main() {
       expect(profile[1]['decoType'], 2);
     });
 
+    test('carries delta-encoded ndl, tts, cns, and in_deco forward across '
+        'samples that omit them', () async {
+      // Subsurface only writes these attributes when the value changes
+      // from the previous sample; omission means "unchanged".
+      final result = await parser.parse(
+        xmlBytes('''
+<divelog program='subsurface' version='3'>
+<dives>
+<dive number='1' date='2025-01-15' time='10:00:00' duration='6:00 min'>
+  <divecomputer model='Test'>
+  <depth max='20.0 m' mean='15.0 m' />
+  <sample time='1:00 min' depth='20.0 m' />
+  <sample time='2:00 min' depth='20.0 m' ndl='0:00 min' tts='8:00 min' cns='12%' in_deco='1' />
+  <sample time='3:00 min' depth='18.0 m' />
+  <sample time='4:00 min' depth='15.0 m' tts='5:00 min' />
+  <sample time='5:00 min' depth='6.0 m' tts='0:00 min' in_deco='0' />
+  <sample time='6:00 min' depth='3.0 m' />
+  </divecomputer>
+</dive>
+</dives>
+</divelog>
+'''),
+      );
+
+      final dive = result.entitiesOf(ImportEntityType.dives).first;
+      final profile = dive['profile'] as List<Map<String, dynamic>>;
+
+      // Before the first occurrence the values are genuinely unknown
+      expect(profile[0]['tts'], isNull);
+      expect(profile[0]['ndl'], isNull);
+      expect(profile[0]['cns'], isNull);
+      expect(profile[0]['decoType'], isNull);
+
+      // Explicit values
+      expect(profile[1]['tts'], 480);
+      expect(profile[1]['ndl'], 0);
+      expect(profile[1]['cns'], 12.0);
+      expect(profile[1]['decoType'], 2);
+
+      // Omitted attributes hold the previous value
+      expect(profile[2]['tts'], 480);
+      expect(profile[2]['ndl'], 0);
+      expect(profile[2]['cns'], 12.0);
+      expect(profile[2]['decoType'], 2);
+
+      expect(profile[3]['tts'], 300);
+
+      // Explicit tts=0 with in_deco=0 ends the obligation
+      expect(profile[4]['tts'], 0);
+      expect(profile[4]['decoType'], isNull);
+
+      // And the zero/cleared state also carries forward
+      expect(profile[5]['tts'], 0);
+      expect(profile[5]['decoType'], isNull);
+    });
+
     test('maps sample po2 to ppO2', () async {
       final result = await parser.parse(
         xmlBytes('''
