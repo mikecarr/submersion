@@ -1008,6 +1008,7 @@ class UddfEntityImporter {
                   heartRate: p['heartRate'] as int?,
                   cns: asDoubleOrNull(p['cns']),
                   ndl: p['ndl'] as int?,
+                  tts: p['tts'] as int?,
                   rbt: p['rbt'] as int?,
                   decoType: p['decoType'] as int?,
                   setpoint: asDoubleOrNull(p['setpoint']),
