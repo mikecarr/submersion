@@ -237,13 +237,16 @@ class BackupSettingsPage extends ConsumerWidget {
 
     if (!context.mounted) return;
 
-    final confirmed = await RestoreConfirmationDialog.show(
+    final mode = await RestoreConfirmationDialog.show(
       context,
       record,
       currentSchemaVersion: AppDatabase.currentSchemaVersion,
+      offerReplace: ref.read(cloudStorageProviderProvider) != null,
     );
-    if (confirmed) {
-      ref.read(backupOperationProvider.notifier).restoreFromFilePath(filePath);
+    if (mode != null) {
+      ref
+          .read(backupOperationProvider.notifier)
+          .restoreFromFilePath(filePath, mode: mode);
     }
   }
 
@@ -353,13 +356,16 @@ class BackupSettingsPage extends ConsumerWidget {
   ) async {
     switch (action) {
       case 'restore':
-        final confirmed = await RestoreConfirmationDialog.show(
+        final mode = await RestoreConfirmationDialog.show(
           context,
           record,
           currentSchemaVersion: AppDatabase.currentSchemaVersion,
+          offerReplace: ref.read(cloudStorageProviderProvider) != null,
         );
-        if (confirmed) {
-          ref.read(backupOperationProvider.notifier).restoreFromBackup(record);
+        if (mode != null) {
+          ref
+              .read(backupOperationProvider.notifier)
+              .restoreFromBackup(record, mode: mode);
         }
       case 'delete':
         final confirmed = await _showDeleteConfirmation(context);

@@ -59,6 +59,37 @@ final diverByIdProvider = FutureProvider.family<Diver?, String>((
 /// Public so the backup restore flow can sync this value.
 const String currentDiverIdKey = 'current_diver_id';
 
+/// After the local database content has been replaced wholesale (backup
+/// restore, or adopting a replaced sync library), realign the active diver:
+/// validate the restored settings' active diver against the divers table,
+/// fall back to the default diver, and persist the result to
+/// SharedPreferences so startup picks up the right diver.
+Future<void> realignActiveDiverAfterDataReplace(SharedPreferences prefs) async {
+  try {
+    final repository = DiverRepository();
+
+    var restoredId = await repository.getActiveDiverIdFromSettings();
+
+    if (restoredId != null) {
+      final diver = await repository.getDiverById(restoredId);
+      if (diver == null) {
+        restoredId = null;
+      }
+    }
+
+    if (restoredId == null) {
+      final defaultDiver = await repository.getDefaultDiver();
+      restoredId = defaultDiver?.id;
+    }
+
+    if (restoredId != null) {
+      await prefs.setString(currentDiverIdKey, restoredId);
+    }
+  } catch (_) {
+    // Non-fatal: startup validation in CurrentDiverIdNotifier handles it.
+  }
+}
+
 /// Current diver ID provider (persisted to both SharedPreferences and DB)
 final currentDiverIdProvider =
     StateNotifierProvider<CurrentDiverIdNotifier, String?>((ref) {

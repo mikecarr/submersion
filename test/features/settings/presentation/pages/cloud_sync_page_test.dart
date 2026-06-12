@@ -9,7 +9,13 @@ import 'package:submersion/core/services/cloud_storage/cloud_storage_provider.da
 import 'package:submersion/core/services/cloud_storage/s3/s3_config.dart';
 import 'package:submersion/core/services/cloud_storage/s3/s3_credentials_store.dart';
 import 'package:submersion/core/services/cloud_storage/s3_storage_provider.dart';
+import 'package:submersion/core/database/database.dart' show AppDatabase;
+import 'package:submersion/core/services/sync/library_epoch.dart';
 import 'package:submersion/core/services/sync/sync_data_serializer.dart';
+import 'package:submersion/features/backup/data/repositories/backup_preferences.dart';
+import 'package:submersion/features/backup/data/services/backup_service.dart';
+import 'package:submersion/features/backup/domain/entities/backup_record.dart';
+import 'package:submersion/features/backup/presentation/providers/backup_providers.dart';
 import 'package:submersion/core/services/sync/sync_service.dart'
     show ConflictResolution, SyncService;
 import 'package:submersion/features/divers/data/repositories/diver_merge_repository.dart';
@@ -82,6 +88,41 @@ class _FakeSyncService extends SyncService {
   }
 }
 
+/// No-op database adapter so [_FakeBackupService] never touches a real DB.
+class _NoopBackupAdapter implements BackupDatabaseAdapter {
+  @override
+  Future<void> backup(String destinationPath) async {}
+
+  @override
+  Future<void> restore(String backupPath) async {}
+
+  @override
+  Future<String> get databasePath async => '/noop';
+
+  @override
+  AppDatabase get database => throw UnimplementedError();
+}
+
+/// Fake [BackupService] recording safety-backup calls from the adopt flow.
+class _FakeBackupService extends BackupService {
+  int performBackupCalls = 0;
+
+  _FakeBackupService(BackupPreferences prefs)
+    : super(dbAdapter: _NoopBackupAdapter(), preferences: prefs);
+
+  @override
+  Future<BackupRecord> performBackup({bool isAutomatic = false}) async {
+    performBackupCalls++;
+    return BackupRecord(
+      id: 'fake-safety',
+      filename: 'fake.db',
+      timestamp: DateTime(2026),
+      sizeBytes: 1,
+      location: BackupLocation.local,
+    );
+  }
+}
+
 /// Fake [SyncNotifier] that holds an arbitrary [SyncState] and records calls to
 /// the mutating methods the page invokes, without touching the database.
 class _FakeSyncNotifier extends StateNotifier<SyncState>
@@ -92,15 +133,27 @@ class _FakeSyncNotifier extends StateNotifier<SyncState>
   int refreshStateCalls = 0;
   int resetSyncStateCalls = 0;
   int signOutCalls = 0;
+  int adoptCalls = 0;
 
   /// Set to non-null to simulate first-contact conditions in widget tests.
   FirstSyncMergeInfo? firstSyncInfo;
+
+  /// Set to non-null to simulate a replaced cloud library awaiting adoption.
+  LibraryEpochMarker? replaceInfo;
 
   @override
   Future<void> performSync({bool auto = false}) async => performSyncCalls++;
 
   @override
   Future<FirstSyncMergeInfo?> firstSyncMergeInfo() async => firstSyncInfo;
+
+  @override
+  Future<LibraryEpochMarker?> libraryReplaceInfo() async => replaceInfo;
+
+  @override
+  Future<void> adoptReplacedLibrary() async {
+    adoptCalls++;
+  }
 
   @override
   Future<void> refreshState() async => refreshStateCalls++;
@@ -218,7 +271,14 @@ void main() {
   /// [s3Config] controls what [s3ConfigProvider] resolves to. Defaults to
   /// null (unconfigured) so tests that do not care about S3 exercise the
   /// intended unconfigured state rather than hitting FlutterSecureStorage.
-  Future<({_FakeSyncNotifier sync, _FakeDiverMergeRepository merge})> pumpPage(
+  Future<
+    ({
+      _FakeSyncNotifier sync,
+      _FakeDiverMergeRepository merge,
+      _FakeBackupService backup,
+    })
+  >
+  pumpPage(
     WidgetTester tester, {
     SyncState syncState = const SyncState(),
     CloudProviderType? selectedProvider,
@@ -238,6 +298,9 @@ void main() {
     final base = await getBaseOverrides();
     final fakeSync = _FakeSyncNotifier(syncState);
     final fakeMerge = _FakeDiverMergeRepository()..throwOnMerge = mergeThrows;
+    final fakeBackup = _FakeBackupService(
+      BackupPreferences(await SharedPreferences.getInstance()),
+    );
 
     await tester.binding.setSurfaceSize(const Size(500, 2400));
     addTearDown(() => tester.binding.setSurfaceSize(null));
@@ -267,6 +330,9 @@ void main() {
                 : (cloudProvider ?? FakeCloudStorageProvider()),
           ),
           conflictsProvider.overrideWith((ref) async => const []),
+          // The adopt flow's safety backup must never construct the real
+          // BackupService (it would touch the DatabaseService singleton).
+          backupServiceProvider.overrideWithValue(fakeBackup),
           // Override s3ConfigProvider so existing tests never hit
           // FlutterSecureStorage; individual tests can supply a config.
           s3ConfigProvider.overrideWith((ref) async => s3Config),
@@ -286,7 +352,7 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 50));
     }
-    return (sync: fakeSync, merge: fakeMerge);
+    return (sync: fakeSync, merge: fakeMerge, backup: fakeBackup);
   }
 
   group('CloudSyncPage - base render', () {
@@ -679,6 +745,86 @@ void main() {
       );
 
       expect(find.textContaining('First sync is waiting'), findsOneWidget);
+    });
+
+    testWidgets('shows the replace banner while adoption is pending', (
+      tester,
+    ) async {
+      await pumpPage(
+        tester,
+        selectedProvider: CloudProviderType.icloud,
+        syncState: const SyncState(
+          replaceAwaitingAdoption: true,
+          replaceMarker: LibraryEpochMarker(
+            epochId: 'e1',
+            replacedAt: 1,
+            deviceId: 'd1',
+            deviceName: 'Eric Mac',
+          ),
+        ),
+      );
+
+      expect(
+        find.textContaining('library was replaced from a backup'),
+        findsOneWidget,
+      );
+      expect(find.textContaining('Eric Mac'), findsOneWidget);
+    });
+
+    testWidgets(
+      'Sync Now offers the adopt dialog; adopting backs up then adopts',
+      (tester) async {
+        final handles = await pumpPage(
+          tester,
+          selectedProvider: CloudProviderType.icloud,
+        );
+        handles.sync.replaceInfo = const LibraryEpochMarker(
+          epochId: 'e1',
+          replacedAt: 1764000000000,
+          deviceId: 'd1',
+          deviceName: 'Eric Mac',
+        );
+
+        await tester.tap(find.widgetWithText(FilledButton, 'Sync Now'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Adopt Restored Library?'), findsOneWidget);
+        expect(handles.sync.adoptCalls, 0);
+
+        await tester.tap(find.text('Adopt Restored Library'));
+        await tester.pumpAndSettle();
+
+        expect(
+          handles.backup.performBackupCalls,
+          1,
+          reason: 'a safety backup must precede adoption',
+        );
+        expect(handles.sync.adoptCalls, 1);
+      },
+    );
+
+    testWidgets('Not Now defers adoption without backing up', (tester) async {
+      final handles = await pumpPage(
+        tester,
+        selectedProvider: CloudProviderType.icloud,
+      );
+      handles.sync.replaceInfo = const LibraryEpochMarker(
+        epochId: 'e1',
+        replacedAt: 1764000000000,
+        deviceId: 'd1',
+      );
+
+      await tester.tap(find.widgetWithText(FilledButton, 'Sync Now'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Adopt Restored Library?'), findsOneWidget);
+
+      await tester.tap(find.text('Not Now'));
+      await tester.pumpAndSettle();
+
+      expect(handles.sync.adoptCalls, 0);
+      expect(handles.backup.performBackupCalls, 0);
+      expect(handles.sync.performSyncCalls, 0);
     });
   });
 

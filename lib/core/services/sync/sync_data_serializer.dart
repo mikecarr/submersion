@@ -101,6 +101,10 @@ class SyncPayload {
   /// migration). Null in payloads written by older builds.
   final String? uploadNonce;
 
+  /// Library epoch this payload was written under (see library_epoch.dart).
+  /// Null on legacy files, which become stale the moment any epoch exists.
+  final String? epochId;
+
   const SyncPayload({
     required this.version,
     required this.exportedAt,
@@ -111,6 +115,7 @@ class SyncPayload {
     required this.deletions,
     this.rawDataJson,
     this.uploadNonce,
+    this.epochId,
   });
 
   Map<String, dynamic> toJson() => {
@@ -124,6 +129,7 @@ class SyncPayload {
       (key, value) => MapEntry(key, value.map((d) => d.toJson()).toList()),
     ),
     'uploadNonce': uploadNonce,
+    'epochId': epochId,
   };
 
   factory SyncPayload.fromJson(Map<String, dynamic> json) {
@@ -138,6 +144,7 @@ class SyncPayload {
       data: SyncData.fromJson(json['data'] as Map<String, dynamic>),
       rawDataJson: jsonEncode(json['data']),
       uploadNonce: json['uploadNonce'] as String?,
+      epochId: json['epochId'] as String?,
       deletions: rawDeletions.map((key, value) {
         final list = value as List? ?? [];
         final deletions = list
@@ -363,6 +370,7 @@ class SyncDataSerializer {
     int? lastSyncTimestamp,
     required List<DeletionLogData> deletions,
     String? uploadNonce,
+    String? epochId,
   }) async {
     try {
       final sinceMs = since?.millisecondsSinceEpoch;
@@ -517,6 +525,7 @@ class SyncDataSerializer {
         data: data,
         deletions: deletionMap,
         uploadNonce: uploadNonce,
+        epochId: epochId,
       );
     } catch (e, stackTrace) {
       _log.error(

@@ -4,6 +4,7 @@ import 'package:uuid/uuid.dart';
 import 'package:submersion/core/data/repositories/sync_repository.dart';
 import 'package:submersion/core/services/cloud_storage/cloud_storage_provider.dart';
 import 'package:submersion/core/services/logger_service.dart';
+import 'package:submersion/core/services/sync/library_epoch_store.dart';
 import 'package:submersion/core/services/sync/sync_clock.dart';
 
 /// Handles sync initialization and checks on app launch
@@ -128,6 +129,7 @@ class SyncInitializer {
         );
         await _syncRepository.rebaselineAfterRestore(
           preserveDeviceId: sentinelDeviceId,
+          preserveEpochId: LibraryEpochStore(_prefs).lastAcceptedEpochId,
         );
         // Re-establish anchors on the restored DB, mirroring the preserved id.
         await _establishAnchors(sentinelDeviceId);

@@ -11,6 +11,7 @@ import 'package:submersion/core/services/cloud_storage/s3/s3_api_client.dart';
 import 'package:submersion/core/services/cloud_storage/s3/s3_config.dart';
 import 'package:submersion/core/services/cloud_storage/s3/s3_credentials_store.dart';
 import 'package:submersion/core/services/cloud_storage/s3_storage_provider.dart';
+import 'package:submersion/core/services/sync/library_epoch.dart';
 import 'package:submersion/core/services/sync/sync_service.dart'
     show ConflictResolution;
 import 'package:submersion/features/settings/presentation/pages/s3_config_page.dart';
@@ -94,6 +95,12 @@ class _FakeSyncNotifier extends StateNotifier<SyncState>
 
   @override
   Future<FirstSyncMergeInfo?> firstSyncMergeInfo() async => null;
+
+  @override
+  Future<LibraryEpochMarker?> libraryReplaceInfo() async => null;
+
+  @override
+  Future<void> adoptReplacedLibrary() async {}
 
   @override
   Future<void> refreshState() async {}

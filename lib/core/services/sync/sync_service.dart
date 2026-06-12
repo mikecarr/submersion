@@ -8,6 +8,8 @@ import 'package:submersion/core/database/database.dart' show SyncRecord;
 import 'package:submersion/core/services/cloud_storage/cloud_storage_provider.dart';
 import 'package:submersion/core/services/logger_service.dart';
 import 'package:submersion/core/services/sync/hlc.dart';
+import 'package:submersion/core/services/sync/library_epoch.dart';
+import 'package:submersion/core/services/sync/library_epoch_store.dart';
 import 'package:submersion/core/services/sync/sync_clock.dart';
 import 'package:submersion/core/services/sync/sync_data_serializer.dart';
 import 'package:submersion/core/services/sync/sync_initializer.dart';
@@ -20,6 +22,7 @@ enum SyncResultStatus {
   hasConflicts,
   networkError,
   authError,
+  awaitingAdoption,
   error,
 }
 
@@ -32,6 +35,11 @@ class SyncResult {
   final DateTime? lastSyncTime;
   final bool adoptedFreshIdentity;
 
+  /// Set with [SyncResultStatus.awaitingAdoption]: the cloud library was
+  /// replaced under this marker's epoch and the user must adopt (or defer)
+  /// before any sync can proceed.
+  final LibraryEpochMarker? replaceMarker;
+
   const SyncResult({
     required this.status,
     this.message,
@@ -39,6 +47,7 @@ class SyncResult {
     this.conflictsFound = 0,
     this.lastSyncTime,
     this.adoptedFreshIdentity = false,
+    this.replaceMarker,
   });
 
   bool get isSuccess =>
@@ -129,6 +138,10 @@ class SyncService {
   final SyncDataSerializer _serializer;
   final CloudStorageProvider? _cloudProvider;
   final SyncInitializer? _syncInitializer;
+
+  /// Library epoch persistence (restore Replace mode). Nullable so existing
+  /// constructions keep working; epoch gating activates only when provided.
+  final LibraryEpochStore? _epochStore;
   final _log = LoggerService.forClass(SyncService);
   final _uuid = const Uuid();
 
@@ -139,10 +152,12 @@ class SyncService {
     required SyncDataSerializer serializer,
     CloudStorageProvider? cloudProvider,
     SyncInitializer? syncInitializer,
+    LibraryEpochStore? epochStore,
   }) : _syncRepository = syncRepository,
        _serializer = serializer,
        _cloudProvider = cloudProvider,
-       _syncInitializer = syncInitializer;
+       _syncInitializer = syncInitializer,
+       _epochStore = epochStore;
 
   /// Set a callback to receive progress updates during sync
   void setProgressCallback(SyncProgressCallback? callback) {
@@ -291,6 +306,60 @@ class SyncService {
         () => _syncRepository.ensureSyncClockConfigured(),
       );
 
+      // ---- Library epoch gate (restore Replace mode) ----
+      // Order matters: a pending replace must run INSTEAD of a merge (merging
+      // would pull back the data the user just replaced away), and a marker
+      // from an unknown epoch must halt everything until the user adopts.
+      String? currentEpochId;
+      final epochStore = _epochStore;
+      if (epochStore != null) {
+        final pending = epochStore.pendingReplace;
+        if (pending != null) {
+          return await executeLibraryReplace(pending);
+        }
+        final accepted =
+            await _syncRepository.getLastAcceptedEpochId() ??
+            epochStore.lastAcceptedEpochId;
+        LibraryEpochMarker? marker;
+        try {
+          marker = await readLibraryEpochMarker(provider);
+        } catch (e) {
+          _log.warning('Library epoch marker unreadable; failing closed: $e');
+          return const SyncResult(
+            status: SyncResultStatus.error,
+            message: 'Could not read the library epoch marker',
+          );
+        }
+        if (marker == null) {
+          if (accepted != null) {
+            // We are on an epoch but the marker vanished: self-heal it from
+            // the mirrored copy and continue as current.
+            final stored = epochStore.lastAcceptedMarker;
+            if (stored != null) {
+              try {
+                await writeLibraryEpochMarker(provider, stored);
+              } catch (e) {
+                _log.warning('Could not self-heal epoch marker: $e');
+              }
+            }
+            currentEpochId = accepted;
+          }
+          // accepted == null: pre-epoch world, proceed exactly as today.
+        } else if (marker.epochId == accepted) {
+          currentEpochId = accepted;
+        } else {
+          _log.info(
+            'Cloud library was replaced (epoch ${marker.epochId}); '
+            'halting sync until the user adopts',
+          );
+          return SyncResult(
+            status: SyncResultStatus.awaitingAdoption,
+            message: 'The cloud library was replaced from a backup',
+            replaceMarker: marker,
+          );
+        }
+      }
+
       // Try to download existing remote file
       _reportProgress(
         SyncPhase.downloading,
@@ -388,6 +457,24 @@ class SyncService {
           continue;
         }
 
+        // Stale-epoch filter: a file written under an older library epoch
+        // (or none, once an epoch exists) is inert -- merging it would leak
+        // the replaced-away library back in. Best-effort delete it.
+        if (currentEpochId != null && payload.epochId != currentEpochId) {
+          _log.info(
+            'Ignoring stale-epoch sync file ${file.name} '
+            '(${payload.epochId ?? 'unstamped'} != $currentEpochId)',
+          );
+          try {
+            await provider
+                .deleteFile(file.id)
+                .timeout(const Duration(seconds: 8));
+          } catch (e) {
+            _log.warning('Could not delete stale sync file ${file.name}: $e');
+          }
+          continue;
+        }
+
         if (file.name == CloudStorageProviderMixin.canonicalSyncFileName) {
           // Parsed fine: its content is either our own pre-upgrade upload or
           // about to be merged below. Either way it is fully represented by
@@ -427,6 +514,7 @@ class SyncService {
           lastSyncTimestamp: lastSyncTime?.millisecondsSinceEpoch,
           deletions: deletions,
           uploadNonce: uploadNonce,
+          epochId: currentEpochId,
         ),
       );
 
@@ -1467,6 +1555,272 @@ class SyncService {
     } catch (e) {
       _log.warning('Could not retire sync file for $deviceId: $e');
     }
+  }
+
+  /// Best-effort deletion of EVERY sync file in the cloud folder: all peers'
+  /// per-device files, our own, the legacy shared file, and conflict copies.
+  /// Failures are logged and skipped -- files that survive carry a stale (or
+  /// missing) epoch stamp and are inert to every current-epoch device.
+  Future<void> deleteAllSyncFiles(CloudStorageProvider provider) async {
+    try {
+      final files = await provider
+          .listFiles(namePattern: CloudStorageProviderMixin.syncFileStem)
+          .timeout(const Duration(seconds: 8));
+      for (final f in files) {
+        try {
+          await provider.deleteFile(f.id).timeout(const Duration(seconds: 8));
+          _log.info('Deleted sync file ${f.name} for library replace');
+        } catch (e) {
+          _log.warning('Could not delete sync file ${f.name}: $e');
+        }
+      }
+    } catch (e) {
+      _log.warning('Could not list sync files for replace wipe: $e');
+    }
+  }
+
+  /// Execute the cloud side of a Replace restore: write the new epoch marker
+  /// FIRST (a peer syncing mid-replace must learn the new epoch before it can
+  /// misread a half-empty folder), wipe every sync file, upload our library
+  /// stamped with the new epoch, then commit the epoch locally and clear the
+  /// pending intent. On any failure the intent is kept so the next sync
+  /// retries instead of merging.
+  Future<SyncResult> executeLibraryReplace(LibraryEpochMarker marker) async {
+    final provider = _cloudProvider;
+    final store = _epochStore;
+    if (provider == null || store == null) {
+      return const SyncResult(
+        status: SyncResultStatus.error,
+        message: 'No cloud provider configured',
+      );
+    }
+    try {
+      if (!await provider.isAuthenticated()) {
+        return const SyncResult(
+          status: SyncResultStatus.authError,
+          message: 'Not authenticated with cloud provider',
+        );
+      }
+      final deviceId = await _syncRepository.getDeviceId();
+      await _syncRepository.ensureSyncClockConfigured();
+
+      await writeLibraryEpochMarker(provider, marker);
+      await deleteAllSyncFiles(provider);
+
+      final deletions = await _syncRepository.getAllDeletions();
+      final uploadNonce = _uuid.v4();
+      final localPayload = await _serializer.exportData(
+        deviceId: deviceId,
+        since: null,
+        lastSyncTimestamp: null,
+        deletions: deletions,
+        uploadNonce: uploadNonce,
+        epochId: marker.epochId,
+      );
+      final localJson = _serializer.serializePayload(localPayload);
+      final localData = Uint8List.fromList(utf8.encode(localJson));
+      String? syncFolder;
+      try {
+        syncFolder = await provider.getOrCreateSyncFolder();
+      } catch (_) {
+        syncFolder = null;
+      }
+      await _syncInitializer?.recordUploadNonce(
+        uploadNonce,
+        provider.providerId,
+      );
+      final upload = await provider
+          .uploadFile(
+            localData,
+            _deviceSyncFileName(deviceId),
+            folderId: syncFolder,
+          )
+          .timeout(const Duration(seconds: 180));
+
+      await _syncRepository.setLastAcceptedEpochId(marker.epochId);
+      await store.setLastAccepted(marker);
+      await _syncRepository.updateLastSyncTime(upload.uploadTime);
+      await _syncRepository.persistSyncClock();
+      await store.clearPendingReplace();
+      _log.info('Library replace executed under epoch ${marker.epochId}');
+      return SyncResult(
+        status: SyncResultStatus.success,
+        message: 'Library replaced',
+        lastSyncTime: upload.uploadTime,
+      );
+    } catch (e, stackTrace) {
+      _log.error(
+        'Library replace failed; pending intent kept for retry',
+        error: e,
+        stackTrace: stackTrace,
+      );
+      return SyncResult(
+        status: SyncResultStatus.error,
+        message: 'Library replace failed: $e',
+      );
+    }
+  }
+
+  /// Adopt the replaced library: apply the current-epoch cloud files as
+  /// authoritative -- upsert every record they contain and delete every
+  /// local record (of synced entity types) they do not. Device identity is
+  /// deliberately untouched: adoption changes data, not identity. The caller
+  /// is responsible for the pre-adoption safety backup and any post-adoption
+  /// fix-ups (active diver, follow-up sync).
+  Future<SyncResult> adoptReplacedLibrary() async {
+    final provider = _cloudProvider;
+    final store = _epochStore;
+    if (provider == null || store == null) {
+      return const SyncResult(
+        status: SyncResultStatus.error,
+        message: 'No cloud provider configured',
+      );
+    }
+    try {
+      final marker = await readLibraryEpochMarker(provider);
+      if (marker == null) {
+        return const SyncResult(
+          status: SyncResultStatus.error,
+          message: 'No library replacement marker found',
+        );
+      }
+
+      final files = await _listSyncFiles(
+        provider,
+      ).timeout(const Duration(seconds: 8));
+      final payloads = <SyncPayload>[];
+      for (final file in files) {
+        final payload = await _downloadAndParsePayload(provider, file);
+        if (payload != null && payload.epochId == marker.epochId) {
+          payloads.add(payload);
+        }
+      }
+      if (payloads.isEmpty) {
+        // Replace still in flight (marker written, stamped upload pending).
+        // Applying an empty set would wipe this library to zero -- abort.
+        return const SyncResult(
+          status: SyncResultStatus.error,
+          message:
+              'The replaced library is still uploading. Try again shortly.',
+        );
+      }
+      payloads.sort((a, b) => a.exportedAt.compareTo(b.exportedAt));
+
+      final deviceId = await _syncRepository.getDeviceId();
+      final localSnapshot = await _serializer.exportData(
+        deviceId: deviceId,
+        since: null,
+        lastSyncTimestamp: null,
+        deletions: const [],
+        uploadNonce: null,
+      );
+
+      await _serializer.applyInDeferredFkTransaction(() async {
+        // Union the restored records; for ids present in several files the
+        // latest export wins (payloads are sorted ascending).
+        final cloudIds = <String, Set<String>>{};
+        final restored = <String, Map<String, Map<String, dynamic>>>{};
+        for (final payload in payloads) {
+          for (final entry in payload.data.toJson().entries) {
+            final entityType = entry.key;
+            final records = (entry.value as List).cast<Map<String, dynamic>>();
+            for (final record in records) {
+              final id = _recordIdForEntity(entityType, record);
+              if (id == null) continue;
+              (cloudIds[entityType] ??= <String>{}).add(id);
+              (restored[entityType] ??= {})[id] = record;
+            }
+          }
+        }
+
+        // Delete local rows the restored library does not contain.
+        for (final entry in localSnapshot.data.toJson().entries) {
+          final entityType = entry.key;
+          final records = (entry.value as List).cast<Map<String, dynamic>>();
+          for (final record in records) {
+            final id = _recordIdForEntity(entityType, record);
+            if (id == null) continue;
+            if (!(cloudIds[entityType]?.contains(id) ?? false)) {
+              await _serializer.deleteRecord(entityType, id);
+            }
+          }
+        }
+
+        // Upsert every restored record.
+        for (final entry in restored.entries) {
+          for (final record in entry.value.values) {
+            await _serializer.upsertRecord(entry.key, record);
+          }
+        }
+
+        await _serializer.repairDanglingForeignKeys();
+      });
+
+      // Re-baseline under the adopted epoch. Our tombstones are obsolete --
+      // the restored library is authoritative.
+      await _syncRepository.resetSyncState(clearDeletionLog: true);
+      await _syncRepository.setLastAcceptedEpochId(marker.epochId);
+      await store.setLastAccepted(marker);
+      SyncClock.instance.reset();
+      _log.info('Adopted replaced library (epoch ${marker.epochId})');
+      return const SyncResult(
+        status: SyncResultStatus.success,
+        message: 'Adopted the restored library',
+      );
+    } catch (e, stackTrace) {
+      _log.error(
+        'Failed to adopt replaced library',
+        error: e,
+        stackTrace: stackTrace,
+      );
+      return SyncResult(
+        status: SyncResultStatus.error,
+        message: 'Failed to adopt the restored library: $e',
+      );
+    }
+  }
+
+  /// Download and parse the cloud epoch marker. Returns null when absent.
+  /// Throws on listing/parse failure: "unreadable" must be distinguishable
+  /// from "absent" -- the caller fails the sync closed rather than guessing.
+  Future<LibraryEpochMarker?> readLibraryEpochMarker(
+    CloudStorageProvider provider,
+  ) async {
+    final files = await provider
+        .listFiles(namePattern: libraryEpochFileName)
+        .timeout(const Duration(seconds: 8));
+    final candidates = files
+        .where((f) => !_isConflictCopy(f.name))
+        .where((f) => f.name == libraryEpochFileName)
+        .toList();
+    if (candidates.isEmpty) return null;
+    candidates.sort((a, b) => b.modifiedTime.compareTo(a.modifiedTime));
+    final bytes = await provider
+        .downloadFile(candidates.first.id)
+        .timeout(const Duration(seconds: 30));
+    final decoded = jsonDecode(utf8.decode(bytes));
+    if (decoded is! Map<String, dynamic>) {
+      throw const FormatException('Library epoch marker is not a JSON object');
+    }
+    return LibraryEpochMarker.fromJson(decoded);
+  }
+
+  /// Upload (or overwrite) the cloud epoch marker.
+  Future<void> writeLibraryEpochMarker(
+    CloudStorageProvider provider,
+    LibraryEpochMarker marker,
+  ) async {
+    final bytes = Uint8List.fromList(utf8.encode(jsonEncode(marker.toJson())));
+    String? folderId;
+    try {
+      folderId = await provider.getOrCreateSyncFolder();
+    } catch (_) {
+      folderId = null;
+    }
+    await provider
+        .uploadFile(bytes, libraryEpochFileName, folderId: folderId)
+        .timeout(const Duration(seconds: 60));
+    _log.info('Wrote library epoch marker ${marker.epochId}');
   }
 
   /// Sign out from the current cloud provider

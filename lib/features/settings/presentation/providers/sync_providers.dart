@@ -10,12 +10,15 @@ import 'package:submersion/core/services/cloud_storage/google_drive_storage_prov
 import 'package:submersion/core/services/cloud_storage/icloud_storage_provider.dart';
 import 'package:submersion/core/services/cloud_storage/s3/s3_config.dart';
 import 'package:submersion/core/services/cloud_storage/s3_storage_provider.dart';
+import 'package:submersion/core/services/sync/library_epoch.dart';
+import 'package:submersion/core/services/sync/library_epoch_store.dart';
 import 'package:submersion/core/services/sync/sync_data_serializer.dart';
 import 'package:submersion/core/services/sync/sync_event_bus.dart';
 import 'package:submersion/core/services/sync/sync_initializer.dart';
 import 'package:submersion/core/services/sync/sync_preferences.dart';
 import 'package:submersion/core/services/sync/sync_service.dart';
 import 'package:submersion/features/dive_log/presentation/providers/dive_repository_provider.dart';
+import 'package:submersion/features/divers/presentation/providers/diver_providers.dart';
 import 'package:submersion/features/settings/presentation/providers/settings_providers.dart';
 import 'package:submersion/features/settings/presentation/providers/storage_providers.dart';
 
@@ -33,6 +36,11 @@ final syncDataSerializerProvider = Provider<SyncDataSerializer>((ref) {
 final syncPreferencesProvider = Provider<SyncPreferences>((ref) {
   final prefs = ref.watch(sharedPreferencesProvider);
   return SyncPreferences(prefs);
+});
+
+/// Library epoch persistence (mirror + pending replace intent).
+final libraryEpochStoreProvider = Provider<LibraryEpochStore>((ref) {
+  return LibraryEpochStore(ref.watch(sharedPreferencesProvider));
 });
 
 /// Behavior settings for auto-sync
@@ -134,6 +142,7 @@ final syncServiceProvider = Provider<SyncService>((ref) {
     serializer: ref.watch(syncDataSerializerProvider),
     cloudProvider: ref.watch(cloudStorageProviderProvider),
     syncInitializer: ref.watch(syncInitializerProvider),
+    epochStore: ref.watch(libraryEpochStoreProvider),
   );
 });
 
@@ -150,7 +159,15 @@ class SyncState {
   final int conflicts;
   final bool isAuthenticated;
   final bool firstSyncAwaitingConfirmation;
+
+  /// True when the cloud library was replaced from a backup under an epoch
+  /// this device has not accepted; sync is paused until the user adopts.
+  final bool replaceAwaitingAdoption;
+
+  /// The replacement marker behind [replaceAwaitingAdoption] (who/when).
+  final LibraryEpochMarker? replaceMarker;
   static const Object _messageSentinel = Object();
+  static const Object _markerSentinel = Object();
 
   const SyncState({
     this.status = SyncStatus.idle,
@@ -161,6 +178,8 @@ class SyncState {
     this.conflicts = 0,
     this.isAuthenticated = false,
     this.firstSyncAwaitingConfirmation = false,
+    this.replaceAwaitingAdoption = false,
+    this.replaceMarker,
   });
 
   SyncState copyWith({
@@ -172,6 +191,8 @@ class SyncState {
     int? conflicts,
     bool? isAuthenticated,
     bool? firstSyncAwaitingConfirmation,
+    bool? replaceAwaitingAdoption,
+    Object? replaceMarker = _markerSentinel,
   }) {
     return SyncState(
       status: status ?? this.status,
@@ -185,6 +206,11 @@ class SyncState {
       isAuthenticated: isAuthenticated ?? this.isAuthenticated,
       firstSyncAwaitingConfirmation:
           firstSyncAwaitingConfirmation ?? this.firstSyncAwaitingConfirmation,
+      replaceAwaitingAdoption:
+          replaceAwaitingAdoption ?? this.replaceAwaitingAdoption,
+      replaceMarker: identical(replaceMarker, _markerSentinel)
+          ? this.replaceMarker
+          : replaceMarker as LibraryEpochMarker?,
     );
   }
 }
@@ -222,6 +248,12 @@ class SyncNotifier extends StateNotifier<SyncState> {
     // Load initial state
     if (!mounted) return;
     await refreshState();
+    // A Replace restore persists its cloud side as a pending intent; execute
+    // it as soon as the app is back up, regardless of auto-sync settings.
+    if (mounted &&
+        _ref.read(libraryEpochStoreProvider).pendingReplace != null) {
+      unawaited(performSync());
+    }
   }
 
   void _listenForChanges() {
@@ -243,6 +275,9 @@ class SyncNotifier extends StateNotifier<SyncState> {
 
   void _setupProgressCallback() {
     _syncService.setProgressCallback((progress) {
+      // A launch-triggered sync can outlive this notifier (container torn
+      // down mid-upload); progress ticks must not touch a disposed notifier.
+      if (!mounted) return;
       state = state.copyWith(
         progress: progress.progress,
         message: progress.message,
@@ -306,6 +341,61 @@ class SyncNotifier extends StateNotifier<SyncState> {
     }
   }
 
+  /// Non-null when the cloud library was replaced under an epoch this device
+  /// has not accepted -- the next sync would halt for adoption. Mirrors the
+  /// [firstSyncMergeInfo] pre-check pattern for the Sync Now button.
+  Future<LibraryEpochMarker?> libraryReplaceInfo() async {
+    try {
+      final provider = _ref.read(cloudStorageProviderProvider);
+      if (provider == null) return null;
+      final store = _ref.read(libraryEpochStoreProvider);
+      if (store.pendingReplace != null) return null; // we ARE the replacer
+      final marker = await _syncService
+          .readLibraryEpochMarker(provider)
+          .timeout(const Duration(seconds: 8));
+      if (marker == null) return null;
+      final accepted =
+          await _syncRepository.getLastAcceptedEpochId() ??
+          store.lastAcceptedEpochId;
+      if (marker.epochId == accepted) return null;
+      return marker;
+    } catch (e) {
+      // Never block the button on this pre-check; performSync gates anyway.
+      _log.warning('Library replace pre-check failed: $e');
+      return null;
+    }
+  }
+
+  /// Adopt the replaced cloud library. The CALLER is responsible for the
+  /// safety backup (cloud_sync_page runs it via backupServiceProvider to
+  /// avoid a provider import cycle). Ends with a follow-up sync that uploads
+  /// this device's freshly stamped file.
+  Future<void> adoptReplacedLibrary() async {
+    if (_syncInFlight || state.status == SyncStatus.syncing) return;
+    state = state.copyWith(
+      status: SyncStatus.syncing,
+      message: 'Adopting the restored library...',
+    );
+    final result = await _syncService.adoptReplacedLibrary();
+    if (!result.isSuccess) {
+      state = state.copyWith(
+        status: SyncStatus.error,
+        message: result.message ?? 'Failed to adopt the restored library',
+      );
+      return;
+    }
+    await realignActiveDiverAfterDataReplace(
+      _ref.read(sharedPreferencesProvider),
+    );
+    state = state.copyWith(
+      status: SyncStatus.idle,
+      replaceAwaitingAdoption: false,
+      replaceMarker: null,
+      message: null,
+    );
+    await performSync();
+  }
+
   /// Perform a sync operation.
   ///
   /// [auto] marks unattended triggers (launch, resume, post-write debounce).
@@ -339,6 +429,8 @@ class SyncNotifier extends StateNotifier<SyncState> {
         message: 'Starting sync...',
         progress: 0.0,
         firstSyncAwaitingConfirmation: false,
+        replaceAwaitingAdoption: false,
+        replaceMarker: null,
       );
 
       // Set up progress callback on the current sync service
@@ -346,8 +438,43 @@ class SyncNotifier extends StateNotifier<SyncState> {
 
       _log.debug('Calling _syncService.performSync()...');
       try {
-        final result = await _syncService.performSync();
+        var result = await _syncService.performSync();
         _log.debug('Result: ${result.status}, message: ${result.message}');
+        // This notifier can be disposed while a launch-triggered sync is in
+        // flight; never touch state after an await without re-checking.
+        if (!mounted) return;
+
+        if (result.status == SyncResultStatus.awaitingAdoption) {
+          final diveCount = await _ref
+              .read(diveRepositoryProvider)
+              .getDiveCount();
+          if (!mounted) return;
+          if (diveCount == 0) {
+            // Nothing local to lose: adopt silently, like an empty device
+            // joining sync, then run the normal sync to upload our file.
+            final adopt = await _syncService.adoptReplacedLibrary();
+            if (adopt.isSuccess) {
+              await realignActiveDiverAfterDataReplace(
+                _ref.read(sharedPreferencesProvider),
+              );
+              result = await _syncService.performSync();
+            } else {
+              result = adopt;
+            }
+            if (!mounted) return;
+          } else {
+            state = state.copyWith(
+              status: SyncStatus.idle,
+              replaceAwaitingAdoption: true,
+              replaceMarker: result.replaceMarker,
+              message:
+                  'Sync paused: the library was replaced from a backup. '
+                  'Tap Sync Now to review.',
+              progress: null,
+            );
+            return;
+          }
+        }
 
         if (result.isSuccess) {
           final defaultMessage = result.conflictsFound > 0
@@ -370,6 +497,7 @@ class SyncNotifier extends StateNotifier<SyncState> {
           );
         }
       } catch (e) {
+        if (!mounted) return;
         final phase = state.message ?? 'sync';
         state = state.copyWith(
           status: SyncStatus.error,
@@ -382,6 +510,7 @@ class SyncNotifier extends StateNotifier<SyncState> {
       if (state.status == SyncStatus.success ||
           state.status == SyncStatus.hasConflicts) {
         await Future.delayed(const Duration(seconds: 2));
+        if (!mounted) return;
         await refreshState();
       }
     } finally {
@@ -438,6 +567,10 @@ class SyncNotifier extends StateNotifier<SyncState> {
     await _syncService.resetSyncState();
     await _ref.read(syncInitializerProvider).adoptFreshIdentity();
     await _syncService.deleteDeviceSyncFile(oldDeviceId);
+    // Reset is the manual escape hatch: drop any stuck replace intent and
+    // un-pause an awaiting-adoption state.
+    await _ref.read(libraryEpochStoreProvider).clearPendingReplace();
+    state = state.copyWith(replaceAwaitingAdoption: false, replaceMarker: null);
     await refreshState();
   }
 
