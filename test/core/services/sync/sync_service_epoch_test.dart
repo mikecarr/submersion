@@ -9,6 +9,7 @@ import 'package:submersion/core/services/database_service.dart';
 import 'package:submersion/core/services/sync/library_epoch.dart';
 import 'package:submersion/core/services/sync/library_epoch_store.dart';
 import 'package:submersion/core/services/sync/sync_data_serializer.dart';
+import 'package:submersion/core/services/sync/sync_initializer.dart';
 import 'package:submersion/core/services/sync/sync_service.dart';
 import 'package:submersion/features/dive_log/data/repositories/dive_repository_impl.dart';
 
@@ -341,5 +342,124 @@ void main() {
       expect(first.isSuccess, isTrue);
       expect(second.isSuccess, isTrue);
     });
+
+    test('adopt surfaces an error when sync files cannot be listed', () async {
+      final listFail = _SyncListFailCloud();
+      final service = SyncService(
+        syncRepository: SyncRepository(),
+        serializer: SyncDataSerializer(),
+        cloudProvider: listFail,
+        epochStore: epochStore,
+      );
+      await service.writeLibraryEpochMarker(listFail, marker);
+
+      final result = await service.adoptReplacedLibrary();
+
+      expect(result.isSuccess, isFalse);
+      expect(result.message, contains('Failed to adopt'));
+      expect(await SyncRepository().getLastAcceptedEpochId(), isNull);
+    });
   });
+
+  group('failure tolerance', () {
+    const marker = LibraryEpochMarker(
+      epochId: 'e1',
+      replacedAt: 1,
+      deviceId: 'd1',
+    );
+
+    test('a failed marker self-heal does not block the sync attempt', () async {
+      await SyncRepository().setLastAcceptedEpochId('e1');
+      await epochStore.setLastAccepted(marker);
+      cloud.failUploads = true; // self-heal rewrite (and any upload) fails
+
+      final result = await buildService().performSync();
+
+      // The gate proceeded as current-epoch; only the upload itself failed.
+      expect(result.status, isNot(SyncResultStatus.awaitingAdoption));
+    });
+
+    test(
+      'a failed stale-file delete is tolerated (file stays inert)',
+      () async {
+        final service = buildService();
+        await service.writeLibraryEpochMarker(cloud, marker);
+        await SyncRepository().setLastAcceptedEpochId('e1');
+        await epochStore.setLastAccepted(marker);
+        await seedPeerFile(peerDeviceId: 'stale-peer'); // unstamped = stale
+        cloud.failDeletes = true;
+
+        final result = await service.performSync();
+
+        expect(result.isSuccess, isTrue);
+        final files = await cloud.listFiles(
+          namePattern: CloudStorageProviderMixin.syncFileStem,
+        );
+        expect(files.any((f) => f.name.contains('stale-peer')), isTrue);
+      },
+    );
+
+    test(
+      'replace tolerates per-file delete failures during the wipe',
+      () async {
+        await seedPeerFile(peerDeviceId: 'peer-1');
+        cloud.failDeletes = true;
+
+        final result = await buildService().executeLibraryReplace(marker);
+
+        expect(result.isSuccess, isTrue);
+        expect(await SyncRepository().getLastAcceptedEpochId(), 'e1');
+      },
+    );
+
+    test('replace tolerates a listing failure during the wipe', () async {
+      final listFail = _SyncListFailCloud();
+      final service = SyncService(
+        syncRepository: SyncRepository(),
+        serializer: SyncDataSerializer(),
+        cloudProvider: listFail,
+        epochStore: epochStore,
+      );
+
+      final result = await service.executeLibraryReplace(marker);
+
+      expect(result.isSuccess, isTrue);
+      expect(epochStore.lastAcceptedEpochId, 'e1');
+    });
+
+    test(
+      'replace records the upload nonce when an initializer is wired',
+      () async {
+        final service = SyncService(
+          syncRepository: SyncRepository(),
+          serializer: SyncDataSerializer(),
+          cloudProvider: cloud,
+          syncInitializer: SyncInitializer(
+            syncRepository: SyncRepository(),
+            prefs: await SharedPreferences.getInstance(),
+          ),
+          epochStore: epochStore,
+        );
+
+        final result = await service.executeLibraryReplace(marker);
+
+        expect(result.isSuccess, isTrue);
+      },
+    );
+  });
+}
+
+/// Fails only the sync-file-stem listing, leaving marker IO working, to
+/// exercise the wipe/adopt listing-failure branches.
+class _SyncListFailCloud extends FakeCloudStorageProvider {
+  @override
+  Future<List<CloudFileInfo>> listFiles({
+    String? folderId,
+    String? namePattern,
+  }) {
+    if (namePattern == CloudStorageProviderMixin.syncFileStem) {
+      throw const CloudStorageException('list failed (test)');
+    }
+    return super.listFiles(folderId: folderId, namePattern: namePattern);
+  }
 }

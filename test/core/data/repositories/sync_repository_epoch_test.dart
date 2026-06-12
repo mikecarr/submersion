@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:submersion/core/data/repositories/sync_repository.dart';
+import 'package:submersion/core/data/repositories/sync_repository.dart'
+    show SyncRepository;
 import 'package:submersion/core/services/database_service.dart';
 
 import '../../../helpers/test_database.dart';
@@ -25,6 +26,15 @@ void main() {
       expect(await repo.getLastAcceptedEpochId(), isNull);
       await repo.setLastAcceptedEpochId('epoch-1');
       expect(await repo.getLastAcceptedEpochId(), 'epoch-1');
+
+      // Reference the column in a query so the generated getter is
+      // exercised (Drift column getters are not covered by row reads).
+      final db = DatabaseService.instance.database;
+      final rows = await (db.select(
+        db.syncMetadata,
+      )..where((t) => t.lastAcceptedEpochId.equals('epoch-1'))).get();
+      expect(rows, hasLength(1));
+
       await repo.setLastAcceptedEpochId(null);
       expect(await repo.getLastAcceptedEpochId(), isNull);
     });

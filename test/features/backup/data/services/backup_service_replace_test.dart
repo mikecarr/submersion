@@ -168,6 +168,49 @@ void main() {
       );
     });
 
+    test('history restore in replace mode mints a pending replace', () async {
+      final dbFile = File('${tempDir.path}/valid_replace.db');
+      final db = sqlite3.sqlite3.open(dbFile.path);
+      db.execute('CREATE TABLE dives (id TEXT PRIMARY KEY)');
+      db.execute('CREATE TABLE dive_sites (id TEXT PRIMARY KEY)');
+      db.dispose();
+      final record = BackupRecord(
+        id: 'r3',
+        filename: 'valid_replace.db',
+        timestamp: DateTime(2026),
+        sizeBytes: 10,
+        location: BackupLocation.local,
+        localPath: dbFile.path,
+      );
+
+      final service = BackupService(
+        dbAdapter: fakeDb,
+        preferences: preferences,
+        syncRepository: _EpochSpySyncRepository(),
+        epochStore: epochStore,
+      );
+
+      await service.restoreFromBackup(record, mode: RestoreMode.replace);
+
+      expect(epochStore.pendingReplace, isNotNull);
+    });
+
+    test('replace mode without an epoch store is a safe no-op', () async {
+      final service = BackupService(
+        dbAdapter: fakeDb,
+        preferences: preferences,
+        syncRepository: _EpochSpySyncRepository(),
+        // no epochStore
+      );
+
+      await service.restoreFromFile(
+        await writeRestoreSource(),
+        mode: RestoreMode.replace,
+      );
+
+      expect(epochStore.pendingReplace, isNull);
+    });
+
     test('restoreFromBackup accepts a valid backup file', () async {
       final dbFile = File('${tempDir.path}/valid.db');
       final db = sqlite3.sqlite3.open(dbFile.path);

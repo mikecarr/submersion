@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -10,6 +11,7 @@ import 'package:submersion/features/backup/data/repositories/backup_preferences.
 import 'package:submersion/features/backup/data/services/backup_service.dart';
 import 'package:submersion/features/backup/domain/entities/backup_record.dart';
 import 'package:submersion/features/backup/domain/entities/backup_type.dart';
+import 'package:submersion/features/backup/domain/entities/restore_mode.dart';
 import 'package:submersion/features/backup/presentation/pages/backup_settings_page.dart';
 import 'package:submersion/features/backup/presentation/providers/backup_providers.dart';
 import 'package:submersion/features/backup/presentation/widgets/backup_history_tile.dart';
@@ -17,6 +19,8 @@ import 'package:submersion/features/backup/presentation/widgets/pre_migration_ba
 import 'package:submersion/features/settings/presentation/providers/settings_providers.dart';
 import 'package:submersion/features/settings/presentation/providers/sync_providers.dart';
 import 'package:submersion/l10n/arb/app_localizations.dart';
+
+import '../../../../helpers/mock_file_picker_platform.dart';
 
 void main() {
   // ---------------------------------------------------------------------------
@@ -277,6 +281,152 @@ void main() {
       expect(backupPrefs.getHistory().single.pinned, isFalse);
     });
   });
+
+  // ---------------------------------------------------------------------------
+  // BackupSettingsPage integration — restore entry points (picker + history)
+  // ---------------------------------------------------------------------------
+  group('BackupSettingsPage restore flows', () {
+    late Directory tempDir;
+    late SharedPreferences prefs;
+    late BackupPreferences backupPrefs;
+    late _RecordingRestoreService service;
+    late FilePickerPlatform originalPicker;
+    late MockFilePickerPlatform mockPicker;
+    late String pickedPath;
+
+    setUp(() async {
+      tempDir = await Directory.systemTemp.createTemp('bsp_restore_');
+      // Created synchronously here: real file IO started inside a
+      // testWidgets body never completes (fake-async zone).
+      pickedPath = '${tempDir.path}/picked.db';
+      File(pickedPath).writeAsStringSync('db');
+      SharedPreferences.setMockInitialValues({});
+      prefs = await SharedPreferences.getInstance();
+      backupPrefs = BackupPreferences(prefs);
+      service = _RecordingRestoreService(
+        dbAdapter: _FakeBackupDatabaseAdapter(),
+        preferences: backupPrefs,
+      );
+      await backupPrefs.addRecord(
+        BackupRecord(
+          id: 'rec-1',
+          filename: 'manual.db',
+          timestamp: _kNow,
+          sizeBytes: 2048,
+          location: BackupLocation.local,
+          localPath: '${tempDir.path}/manual.db',
+          diveCount: 0,
+          siteCount: 0,
+        ),
+      );
+      originalPicker = FilePickerPlatform.instance;
+      mockPicker = MockFilePickerPlatform();
+      FilePickerPlatform.instance = mockPicker;
+    });
+
+    tearDown(() async {
+      FilePickerPlatform.instance = originalPicker;
+      if (tempDir.existsSync()) await tempDir.delete(recursive: true);
+    });
+
+    Widget buildApp() {
+      return ProviderScope(
+        overrides: [
+          sharedPreferencesProvider.overrideWithValue(prefs),
+          backupServiceProvider.overrideWithValue(service),
+          cloudStorageProviderProvider.overrideWithValue(null),
+          backupHistoryProvider.overrideWith(
+            (ref) async => backupPrefs.getHistory(),
+          ),
+        ],
+        child: const MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: BackupSettingsPage(),
+        ),
+      );
+    }
+
+    /// Taps the import card inside a [WidgetTester.runAsync] window:
+    /// `_handleImport` awaits real file IO (length/lastModified), which only
+    /// completes while real async is enabled.
+    Future<void> tapImportCard(WidgetTester tester) async {
+      await tester.runAsync(() async {
+        await tester.tap(find.text('Restore from File'));
+        await Future<void>.delayed(const Duration(milliseconds: 100));
+      });
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets(
+      'restore-from-file confirms via the dialog and threads merge mode',
+      (tester) async {
+        mockPicker.pickFilesResult = FilePickerResult([
+          PlatformFile(name: 'picked.db', size: 2, path: pickedPath),
+        ]);
+
+        await tester.pumpWidget(buildApp());
+        await tester.pumpAndSettle();
+
+        await tapImportCard(tester);
+
+        expect(find.text('Restore Backup'), findsOneWidget);
+        // _handleImport's continuation resumes in runAsync's real zone, so
+        // the confirm tap needs the same real-async window to flush it.
+        await tester.runAsync(() async {
+          await tester.tap(find.text('Restore'));
+          await Future<void>.delayed(const Duration(milliseconds: 100));
+        });
+        await tester.pumpAndSettle();
+
+        expect(service.calls, ['restoreFromFile']);
+        expect(service.lastMode, RestoreMode.merge);
+      },
+    );
+
+    testWidgets('cancelling the file-restore dialog restores nothing', (
+      tester,
+    ) async {
+      mockPicker.pickFilesResult = FilePickerResult([
+        PlatformFile(name: 'picked.db', size: 2, path: pickedPath),
+      ]);
+
+      await tester.pumpWidget(buildApp());
+      await tester.pumpAndSettle();
+
+      await tapImportCard(tester);
+
+      expect(find.text('Restore Backup'), findsOneWidget);
+      await tester.runAsync(() async {
+        await tester.tap(find.text('Cancel'));
+        await Future<void>.delayed(const Duration(milliseconds: 100));
+      });
+      await tester.pumpAndSettle();
+
+      expect(service.calls, isEmpty);
+    });
+
+    testWidgets(
+      'history restore confirms via the dialog and threads merge mode',
+      (tester) async {
+        await tester.pumpWidget(buildApp());
+        await tester.pumpAndSettle();
+
+        expect(find.byType(BackupHistoryTile), findsOneWidget);
+        await tester.tap(find.byType(PopupMenuButton<String>));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Restore'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Restore Backup'), findsOneWidget);
+        await tester.tap(find.text('Restore'));
+        await tester.pumpAndSettle();
+
+        expect(service.calls, ['restoreFromBackup']);
+        expect(service.lastMode, RestoreMode.merge);
+      },
+    );
+  });
 }
 
 // Fixed timestamp used across tests.
@@ -298,6 +448,40 @@ class _FakeBackupDatabaseAdapter implements BackupDatabaseAdapter {
   @override
   AppDatabase get database =>
       throw UnimplementedError('Fake does not support direct queries');
+}
+
+/// BackupService override recording restore calls so page-level wiring can be
+/// asserted without real file IO or database swaps.
+class _RecordingRestoreService extends BackupService {
+  final List<String> calls = [];
+  RestoreMode? lastMode;
+
+  _RecordingRestoreService({
+    required super.dbAdapter,
+    required super.preferences,
+  });
+
+  @override
+  Future<BackupValidationResult> validateBackupFile(String filePath) async =>
+      const BackupValidationResult.valid(sizeBytes: 1);
+
+  @override
+  Future<void> restoreFromBackup(
+    BackupRecord record, {
+    RestoreMode mode = RestoreMode.merge,
+  }) async {
+    calls.add('restoreFromBackup');
+    lastMode = mode;
+  }
+
+  @override
+  Future<void> restoreFromFile(
+    String filePath, {
+    RestoreMode mode = RestoreMode.merge,
+  }) async {
+    calls.add('restoreFromFile');
+    lastMode = mode;
+  }
 }
 
 /// BackupService override that throws on pin/unpin to exercise the error path.

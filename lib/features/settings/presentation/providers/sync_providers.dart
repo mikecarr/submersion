@@ -275,6 +275,9 @@ class SyncNotifier extends StateNotifier<SyncState> {
 
   void _setupProgressCallback() {
     _syncService.setProgressCallback((progress) {
+      // A launch-triggered sync can outlive this notifier (container torn
+      // down mid-upload); progress ticks must not touch a disposed notifier.
+      if (!mounted) return;
       state = state.copyWith(
         progress: progress.progress,
         message: progress.message,
@@ -437,11 +440,15 @@ class SyncNotifier extends StateNotifier<SyncState> {
       try {
         var result = await _syncService.performSync();
         _log.debug('Result: ${result.status}, message: ${result.message}');
+        // This notifier can be disposed while a launch-triggered sync is in
+        // flight; never touch state after an await without re-checking.
+        if (!mounted) return;
 
         if (result.status == SyncResultStatus.awaitingAdoption) {
           final diveCount = await _ref
               .read(diveRepositoryProvider)
               .getDiveCount();
+          if (!mounted) return;
           if (diveCount == 0) {
             // Nothing local to lose: adopt silently, like an empty device
             // joining sync, then run the normal sync to upload our file.
@@ -454,6 +461,7 @@ class SyncNotifier extends StateNotifier<SyncState> {
             } else {
               result = adopt;
             }
+            if (!mounted) return;
           } else {
             state = state.copyWith(
               status: SyncStatus.idle,
@@ -489,6 +497,7 @@ class SyncNotifier extends StateNotifier<SyncState> {
           );
         }
       } catch (e) {
+        if (!mounted) return;
         final phase = state.message ?? 'sync';
         state = state.copyWith(
           status: SyncStatus.error,
@@ -501,6 +510,7 @@ class SyncNotifier extends StateNotifier<SyncState> {
       if (state.status == SyncStatus.success ||
           state.status == SyncStatus.hasConflicts) {
         await Future.delayed(const Duration(seconds: 2));
+        if (!mounted) return;
         await refreshState();
       }
     } finally {
