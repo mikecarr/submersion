@@ -31,6 +31,9 @@ class _FakeS3ApiClient implements S3ApiClient {
   List<S3ObjectInfo> listing = [];
   bool closed = false;
 
+  @override
+  void Function(String region)? onRegionCorrected;
+
   void _assertOpen() {
     if (closed) throw const CloudStorageException('client closed');
   }

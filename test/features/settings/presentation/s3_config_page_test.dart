@@ -45,6 +45,9 @@ class _FakeS3ApiClient implements S3ApiClient {
   CloudStorageException? failListWith;
 
   @override
+  void Function(String region)? onRegionCorrected;
+
+  @override
   Future<void> putObject(String key, Uint8List bytes) async {
     calls.add('put:$key');
     _objects[key] = bytes;
