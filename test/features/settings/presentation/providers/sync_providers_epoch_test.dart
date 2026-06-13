@@ -1,0 +1,282 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:submersion/core/data/repositories/sync_repository.dart'
+    show SyncRepository;
+import 'package:submersion/core/services/cloud_storage/cloud_storage_provider.dart';
+import 'package:submersion/core/services/database_service.dart';
+import 'package:submersion/core/services/sync/library_epoch.dart';
+import 'package:submersion/core/services/sync/library_epoch_store.dart';
+import 'package:submersion/core/services/sync/sync_data_serializer.dart';
+import 'package:submersion/features/dive_log/data/repositories/dive_repository_impl.dart';
+import 'package:submersion/features/settings/presentation/providers/settings_providers.dart';
+import 'package:submersion/features/settings/presentation/providers/sync_providers.dart';
+
+import '../../../../helpers/fake_cloud_storage_provider.dart';
+import '../../../../helpers/mock_providers.dart';
+import '../../../../helpers/test_database.dart';
+
+/// Coverage for the REAL SyncNotifier's library-epoch paths (the cloud sync
+/// page widget tests exercise a fake notifier, not this code): replace-info
+/// pre-check, adoption orchestration, awaiting-adoption state mapping, the
+/// silent empty-library adopt, the pending-replace launch trigger, and the
+/// Reset Sync State escape hatch.
+void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
+  const marker = LibraryEpochMarker(
+    epochId: 'e1',
+    replacedAt: 1764000000000,
+    deviceId: 'replacer-device',
+    deviceName: 'Eric Mac',
+  );
+
+  late SharedPreferences prefs;
+  late FakeCloudStorageProvider cloud;
+
+  setUp(() async {
+    await setUpTestDatabase();
+    SharedPreferences.setMockInitialValues({});
+    prefs = await SharedPreferences.getInstance();
+    cloud = FakeCloudStorageProvider();
+  });
+
+  tearDown(() {
+    DatabaseService.instance.resetForTesting();
+  });
+
+  Future<ProviderContainer> makeContainer({bool cloudConfigured = true}) async {
+    final container = ProviderContainer(
+      overrides: [
+        sharedPreferencesProvider.overrideWithValue(prefs),
+        cloudStorageProviderProvider.overrideWithValue(
+          cloudConfigured ? cloud : null,
+        ),
+      ],
+    );
+    addTearDown(container.dispose);
+    container.read(syncStateProvider);
+    await container.read(syncStateProvider.notifier).refreshState();
+    return container;
+  }
+
+  void seedMarker(LibraryEpochMarker m) {
+    cloud.seedFile(
+      libraryEpochFileName,
+      Uint8List.fromList(utf8.encode(jsonEncode(m.toJson()))),
+    );
+  }
+
+  /// Seed a current-epoch sync file from the replacer, snapshotting the
+  /// CURRENT local database content.
+  Future<void> seedReplacerFile({String? epochId = 'e1'}) async {
+    final serializer = SyncDataSerializer();
+    final payload = await serializer.exportData(
+      deviceId: 'replacer-device',
+      deletions: const [],
+      epochId: epochId,
+    );
+    cloud.seedFile(
+      '${CloudStorageProviderMixin.syncFilePrefix}replacer-device'
+      '${CloudStorageProviderMixin.syncFileExtension}',
+      Uint8List.fromList(utf8.encode(serializer.serializePayload(payload))),
+    );
+  }
+
+  Future<void> seedLocalDive(String id) async {
+    await DiveRepository().createDive(createTestDiveWithBottomTime(id: id));
+  }
+
+  group('libraryReplaceInfo', () {
+    test('null when no cloud provider is configured', () async {
+      final container = await makeContainer(cloudConfigured: false);
+      final info = await container
+          .read(syncStateProvider.notifier)
+          .libraryReplaceInfo();
+      expect(info, isNull);
+    });
+
+    test('null when this device holds the pending replace intent', () async {
+      final container = await makeContainer();
+      await LibraryEpochStore(prefs).setPendingReplace(marker);
+      seedMarker(marker);
+
+      final info = await container
+          .read(syncStateProvider.notifier)
+          .libraryReplaceInfo();
+      expect(info, isNull, reason: 'the replacer must not prompt itself');
+    });
+
+    test('null when no marker exists', () async {
+      final container = await makeContainer();
+      final info = await container
+          .read(syncStateProvider.notifier)
+          .libraryReplaceInfo();
+      expect(info, isNull);
+    });
+
+    test('null when the marker matches the accepted epoch', () async {
+      final container = await makeContainer();
+      seedMarker(marker);
+      await SyncRepository().setLastAcceptedEpochId('e1');
+
+      final info = await container
+          .read(syncStateProvider.notifier)
+          .libraryReplaceInfo();
+      expect(info, isNull);
+    });
+
+    test('returns the marker on an unaccepted epoch', () async {
+      final container = await makeContainer();
+      seedMarker(marker);
+
+      final info = await container
+          .read(syncStateProvider.notifier)
+          .libraryReplaceInfo();
+      expect(info?.epochId, 'e1');
+      expect(info?.displayName, 'Eric Mac');
+    });
+
+    test('null (never throws) when the marker is unreadable', () async {
+      final container = await makeContainer();
+      cloud.seedFile(
+        libraryEpochFileName,
+        Uint8List.fromList(utf8.encode('not json')),
+      );
+
+      final info = await container
+          .read(syncStateProvider.notifier)
+          .libraryReplaceInfo();
+      expect(info, isNull);
+    });
+  });
+
+  group('performSync awaiting-adoption mapping', () {
+    test('pauses with banner state when the device holds dives', () async {
+      final container = await makeContainer();
+      await seedLocalDive('mine-1');
+      seedMarker(marker);
+
+      await container.read(syncStateProvider.notifier).performSync();
+
+      final state = container.read(syncStateProvider);
+      expect(state.replaceAwaitingAdoption, isTrue);
+      expect(state.replaceMarker?.epochId, 'e1');
+      expect(state.status, SyncStatus.idle);
+      // Nothing was uploaded while paused.
+      expect(
+        cloud.operationLog.where((op) => op.startsWith('upload:')),
+        isEmpty,
+      );
+    });
+
+    test('adopts silently when the local library is empty', () async {
+      await seedReplacerFile(); // snapshot of the (empty) library, stamped e1
+      seedMarker(marker);
+      final container = await makeContainer();
+
+      await container.read(syncStateProvider.notifier).performSync();
+
+      final state = container.read(syncStateProvider);
+      expect(state.replaceAwaitingAdoption, isFalse);
+      expect(await SyncRepository().getLastAcceptedEpochId(), 'e1');
+      // The follow-up sync uploaded this device's stamped file.
+      final deviceId = await SyncRepository().getDeviceId();
+      final ownName =
+          '${CloudStorageProviderMixin.syncFilePrefix}$deviceId'
+          '${CloudStorageProviderMixin.syncFileExtension}';
+      expect(cloud.bytesOf(ownName), isNotNull);
+    });
+  });
+
+  group('adoptReplacedLibrary', () {
+    test(
+      'adopts the restored library, clears the pause, and re-syncs',
+      () async {
+        // Stage the restored library (dive A), snapshot it to the cloud,
+        // then diverge locally: drop A, add B.
+        await seedLocalDive('dive-a');
+        await seedReplacerFile();
+        final serializer = SyncDataSerializer();
+        await serializer.deleteRecord('dives', 'dive-a');
+        await seedLocalDive('dive-b');
+        seedMarker(marker);
+
+        final container = await makeContainer();
+        final notifier = container.read(syncStateProvider.notifier);
+
+        // Land in the paused state first, as the UI flow would.
+        await notifier.performSync();
+        expect(container.read(syncStateProvider).replaceAwaitingAdoption, true);
+
+        await notifier.adoptReplacedLibrary();
+
+        final state = container.read(syncStateProvider);
+        expect(state.replaceAwaitingAdoption, isFalse);
+        expect(state.replaceMarker, isNull);
+        expect(await serializer.fetchRecord('dives', 'dive-a'), isNotNull);
+        expect(await serializer.fetchRecord('dives', 'dive-b'), isNull);
+        expect(await SyncRepository().getLastAcceptedEpochId(), 'e1');
+        // Follow-up sync uploaded our stamped file.
+        final deviceId = await SyncRepository().getDeviceId();
+        final ownName =
+            '${CloudStorageProviderMixin.syncFilePrefix}$deviceId'
+            '${CloudStorageProviderMixin.syncFileExtension}';
+        final uploaded = serializer.deserializePayload(
+          utf8.decode(cloud.bytesOf(ownName)!),
+        );
+        expect(uploaded.epochId, 'e1');
+      },
+    );
+
+    test('surfaces an error when no current-epoch file exists yet', () async {
+      seedMarker(marker); // replace in flight: marker only, no stamped file
+      final container = await makeContainer();
+      final notifier = container.read(syncStateProvider.notifier);
+
+      await notifier.adoptReplacedLibrary();
+
+      final state = container.read(syncStateProvider);
+      expect(state.status, SyncStatus.error);
+      expect(await SyncRepository().getLastAcceptedEpochId(), isNull);
+    });
+  });
+
+  group('pending replace launch trigger', () {
+    test('executes a persisted replace intent on notifier startup', () async {
+      await LibraryEpochStore(prefs).setPendingReplace(marker);
+      await seedLocalDive('restored-dive');
+
+      await makeContainer(); // constructing the notifier fires the trigger
+
+      final store = LibraryEpochStore(prefs);
+      for (var i = 0; i < 100 && store.pendingReplace != null; i++) {
+        await Future<void>.delayed(const Duration(milliseconds: 20));
+      }
+
+      expect(store.pendingReplace, isNull);
+      expect(await SyncRepository().getLastAcceptedEpochId(), 'e1');
+      expect(
+        (await cloud.listFiles(namePattern: libraryEpochFileName)),
+        isNotEmpty,
+        reason: 'the replace wrote the marker',
+      );
+    });
+  });
+
+  group('resetSyncState escape hatch', () {
+    test('clears a stuck pending replace intent', () async {
+      final container = await makeContainer();
+      await LibraryEpochStore(prefs).setPendingReplace(marker);
+
+      await container.read(syncStateProvider.notifier).resetSyncState();
+
+      expect(LibraryEpochStore(prefs).pendingReplace, isNull);
+      final state = container.read(syncStateProvider);
+      expect(state.replaceAwaitingAdoption, isFalse);
+    });
+  });
+}

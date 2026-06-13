@@ -2,11 +2,18 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:submersion/core/data/repositories/sync_repository.dart';
 import 'package:submersion/core/database/database.dart' show SyncRecord;
 import 'package:submersion/core/services/cloud_storage/cloud_storage_provider.dart';
 import 'package:submersion/core/services/logger_service.dart';
+import 'package:submersion/core/services/sync/hlc.dart';
+import 'package:submersion/core/services/sync/library_epoch.dart';
+import 'package:submersion/core/services/sync/library_epoch_store.dart';
+import 'package:submersion/core/services/sync/library_moved.dart';
+import 'package:submersion/core/services/sync/sync_clock.dart';
 import 'package:submersion/core/services/sync/sync_data_serializer.dart';
+import 'package:submersion/core/services/sync/sync_initializer.dart';
 import 'package:uuid/uuid.dart';
 
 /// Sync operation result
@@ -16,6 +23,7 @@ enum SyncResultStatus {
   hasConflicts,
   networkError,
   authError,
+  awaitingAdoption,
   error,
 }
 
@@ -26,6 +34,12 @@ class SyncResult {
   final int recordsSynced;
   final int conflictsFound;
   final DateTime? lastSyncTime;
+  final bool adoptedFreshIdentity;
+
+  /// Set with [SyncResultStatus.awaitingAdoption]: the cloud library was
+  /// replaced under this marker's epoch and the user must adopt (or defer)
+  /// before any sync can proceed.
+  final LibraryEpochMarker? replaceMarker;
 
   const SyncResult({
     required this.status,
@@ -33,6 +47,8 @@ class SyncResult {
     this.recordsSynced = 0,
     this.conflictsFound = 0,
     this.lastSyncTime,
+    this.adoptedFreshIdentity = false,
+    this.replaceMarker,
   });
 
   bool get isSuccess =>
@@ -111,11 +127,22 @@ class SyncConflict {
 /// Resolution choice for a conflict
 enum ConflictResolution { keepLocal, keepRemote, keepBoth }
 
+/// A foreign-key reference from a synced child record to a parent whose
+/// deletion is tracked in the deletion log. [nullable] distinguishes a cascade
+/// child (NOT NULL -> the row cannot exist without the parent) from a set-null
+/// reference (nullable -> the row survives with the reference cleared).
+typedef ParentRef = ({String field, String parent, bool nullable});
+
 /// Core sync service that orchestrates cloud sync operations
 class SyncService {
   final SyncRepository _syncRepository;
   final SyncDataSerializer _serializer;
   final CloudStorageProvider? _cloudProvider;
+  final SyncInitializer? _syncInitializer;
+
+  /// Library epoch persistence (restore Replace mode). Nullable so existing
+  /// constructions keep working; epoch gating activates only when provided.
+  final LibraryEpochStore? _epochStore;
   final _log = LoggerService.forClass(SyncService);
   final _uuid = const Uuid();
 
@@ -125,9 +152,13 @@ class SyncService {
     required SyncRepository syncRepository,
     required SyncDataSerializer serializer,
     CloudStorageProvider? cloudProvider,
+    SyncInitializer? syncInitializer,
+    LibraryEpochStore? epochStore,
   }) : _syncRepository = syncRepository,
        _serializer = serializer,
-       _cloudProvider = cloudProvider;
+       _cloudProvider = cloudProvider,
+       _syncInitializer = syncInitializer,
+       _epochStore = epochStore;
 
   /// Set a callback to receive progress updates during sync
   void setProgressCallback(SyncProgressCallback? callback) {
@@ -261,14 +292,78 @@ class SyncService {
       }
 
       // Get device ID and last sync time
-      final deviceId = await _withStep(
+      var deviceId = await _withStep(
         'load device id',
         () => _syncRepository.getDeviceId(),
       );
+      // Scoped to this provider: a cursor minted against the backend we just
+      // switched away from must read as null here, so the first sync on the
+      // new backend does a full reconcile (mirrors rebaselineAfterRestore)
+      // rather than replaying a foreign baseline.
       final lastSyncTime = await _withStep(
         'load last sync time',
-        () => _syncRepository.getLastSyncTime(),
+        () => _syncRepository.getLastSyncTime(forProvider: provider.providerId),
       );
+      // Make sure the HLC clock is live before merging so receiving remote
+      // payloads advances it (and any writes during the sync get stamped).
+      await _withStep(
+        'configure sync clock',
+        () => _syncRepository.ensureSyncClockConfigured(),
+      );
+
+      // ---- Library epoch gate (restore Replace mode) ----
+      // Order matters: a pending replace must run INSTEAD of a merge (merging
+      // would pull back the data the user just replaced away), and a marker
+      // from an unknown epoch must halt everything until the user adopts.
+      String? currentEpochId;
+      final epochStore = _epochStore;
+      if (epochStore != null) {
+        final pending = epochStore.pendingReplace;
+        if (pending != null) {
+          return await executeLibraryReplace(pending);
+        }
+        final accepted =
+            await _syncRepository.getLastAcceptedEpochId() ??
+            epochStore.lastAcceptedEpochId;
+        LibraryEpochMarker? marker;
+        try {
+          marker = await readLibraryEpochMarker(provider);
+        } catch (e) {
+          _log.warning('Library epoch marker unreadable; failing closed: $e');
+          return const SyncResult(
+            status: SyncResultStatus.error,
+            message: 'Could not read the library epoch marker',
+          );
+        }
+        if (marker == null) {
+          if (accepted != null) {
+            // We are on an epoch but the marker vanished: self-heal it from
+            // the mirrored copy and continue as current.
+            final stored = epochStore.lastAcceptedMarker;
+            if (stored != null) {
+              try {
+                await writeLibraryEpochMarker(provider, stored);
+              } catch (e) {
+                _log.warning('Could not self-heal epoch marker: $e');
+              }
+            }
+            currentEpochId = accepted;
+          }
+          // accepted == null: pre-epoch world, proceed exactly as today.
+        } else if (marker.epochId == accepted) {
+          currentEpochId = accepted;
+        } else {
+          _log.info(
+            'Cloud library was replaced (epoch ${marker.epochId}); '
+            'halting sync until the user adopts',
+          );
+          return SyncResult(
+            status: SyncResultStatus.awaitingAdoption,
+            message: 'The cloud library was replaced from a backup',
+            replaceMarker: marker,
+          );
+        }
+      }
 
       // Try to download existing remote file
       _reportProgress(
@@ -277,102 +372,136 @@ class SyncService {
         'Checking for remote data...',
       );
 
-      SyncPayload? remotePayload;
-      String? remoteFileId;
+      // List every sync file in the folder. We need the full list (not just
+      // peers) so we can inspect our OWN file for a twin-identity signal
+      // before deciding which files to merge.
+      List<CloudFileInfo> allFiles;
       try {
-        remoteFileId = await _resolveRemoteFileId(
+        allFiles = await _listSyncFiles(
           provider,
         ).timeout(const Duration(seconds: 8));
       } on TimeoutException {
-        _log.warning('Timed out checking for remote sync file');
-        remoteFileId = null;
+        _log.warning('Timed out listing remote sync files');
+        allFiles = const [];
       } catch (e, stackTrace) {
         _log.warning(
-          'Failed to check remote sync file: $e',
+          'Failed to list remote sync files: $e',
           stackTrace: stackTrace,
         );
-        remoteFileId = null;
+        allFiles = const [];
       }
 
-      if (remoteFileId != null) {
-        try {
-          if (lastSyncTime != null) {
-            final info = await provider.getFileInfo(remoteFileId);
-            if (info != null && !info.modifiedTime.isAfter(lastSyncTime)) {
-              _log.debug(
-                'Remote sync file not newer than last sync; skipping.',
-              );
-              remoteFileId = null;
-            }
-          }
-        } catch (e, stackTrace) {
+      var adoptedFreshIdentity = false;
+      var ownFileName = _deviceSyncFileName(deviceId);
+      final ownFile = allFiles.where((f) => f.name == ownFileName).firstOrNull;
+
+      // Twin-identity check: our own cloud file carrying a nonce we never
+      // minted means another install is syncing as this device (a clone from
+      // whole-container OS migration). The launch-time anchor reconcile is
+      // structurally blind to that (both installs' anchors match their own
+      // DBs), so this in-band signal is the only detection point. Recovery:
+      // adopt a fresh identity NOW and keep going -- the shared file then
+      // counts as a peer below and the twins converge in this same sync.
+      //
+      // Accepted trade-off: a SharedPreferences wipe with the database kept
+      // (rare outside dev machines) is indistinguishable from a DB clone and
+      // reads as a twin. The design errs toward detection -- an identity
+      // change is cheap and converges, silent twinning corrupts both sides.
+      final initializer = _syncInitializer;
+      if (ownFile != null && initializer != null) {
+        final ownIdentity = await _peekPayloadIdentity(provider, ownFile);
+        if (ownIdentity != null &&
+            ownIdentity.deviceId == deviceId &&
+            initializer.isForeignUploadNonce(
+              ownIdentity.uploadNonce,
+              provider.providerId,
+            )) {
           _log.warning(
-            'Failed to check remote file info: $e',
-            stackTrace: stackTrace,
+            'Another install is uploading as this device id; adopting a '
+            'fresh sync identity to split the twins',
+          );
+          deviceId = await _withStep(
+            'adopt fresh identity',
+            () => initializer.adoptFreshIdentity(),
+          );
+          ownFileName = _deviceSyncFileName(deviceId);
+          adoptedFreshIdentity = true;
+          // Re-seed the HLC clock under the new node id now, so remote HLCs
+          // received while merging the converging files below advance it
+          // instead of no-opping against an unconfigured clock.
+          await _withStep(
+            'configure sync clock',
+            () => _syncRepository.ensureSyncClockConfigured(),
           );
         }
       }
 
-      if (remoteFileId != null) {
-        try {
-          final remoteData = await provider
-              .downloadFile(remoteFileId)
-              .timeout(const Duration(seconds: 15));
-          final remoteJson = _decodePayloadBytes(remoteData);
-          try {
-            remotePayload = _serializer.deserializePayload(remoteJson);
-          } catch (e, stackTrace) {
-            _log.warning(
-              'Failed to parse remote sync payload: $e',
-              stackTrace: stackTrace,
-            );
-            remotePayload = null;
-          }
-
-          // Validate checksum
-          if (remotePayload != null &&
-              !_serializer.validateChecksum(remotePayload)) {
-            _log.warning('Remote sync file has invalid checksum');
-            remotePayload = null;
-          }
-          if (remotePayload != null &&
-              remotePayload.deviceId == deviceId &&
-              lastSyncTime != null) {
-            final lastSyncMs = lastSyncTime.millisecondsSinceEpoch;
-            if (remotePayload.exportedAt <= lastSyncMs) {
-              _log.debug(
-                'Remote payload from this device is not newer; skipping apply.',
-              );
-              remotePayload = null;
-            }
-          }
-        } on TimeoutException {
-          _log.warning('Timed out downloading remote sync file');
-        } catch (e) {
-          _log.warning('Failed to download remote sync file: $e');
-          // Continue with upload-only sync
-        }
-      }
+      // Resolve every sync file we should apply: all OTHER devices'
+      // per-device files plus any legacy shared file. Our own per-device file
+      // is excluded (it is our data, already local). Listing all files (rather
+      // than a single canonical file) is what lets per-device files coexist
+      // without a write-write race.
+      final remoteFiles = allFiles.where((f) => f.name != ownFileName).toList();
 
       _reportProgress(SyncPhase.importing, 0.6, 'Processing changes...');
 
       var recordsSynced = 0;
       var conflictsFound = 0;
+      var recordsFailed = 0;
+      CloudFileInfo? mergedLegacyFile;
 
-      if (remotePayload != null && remotePayload.deviceId != deviceId) {
-        _log.info(
-          'Remote data from different device: ${remotePayload.deviceId}',
-        );
-      }
+      for (final file in remoteFiles) {
+        // NOTE: we intentionally do NOT skip files by their cloud
+        // modifiedTime. iCloud Drive can fail to advance that metadata after a
+        // conflict-copy merge, which would silently skip a file containing new
+        // records; and skipping a file whose record failed to apply once would
+        // drop it forever. Re-applying is idempotent (upsert + HLC), so we
+        // always download and merge every foreign file.
+        final payload = await _downloadAndParsePayload(provider, file);
+        if (payload == null) {
+          continue;
+        }
 
-      if (remotePayload != null) {
-        final payload = remotePayload;
+        // Stale-epoch filter: a file written under an older library epoch
+        // (or none, once an epoch exists) is inert -- merging it would leak
+        // the replaced-away library back in. Best-effort delete it.
+        if (currentEpochId != null && payload.epochId != currentEpochId) {
+          _log.info(
+            'Ignoring stale-epoch sync file ${file.name} '
+            '(${payload.epochId ?? 'unstamped'} != $currentEpochId)',
+          );
+          try {
+            await provider
+                .deleteFile(file.id)
+                .timeout(const Duration(seconds: 8));
+          } catch (e) {
+            _log.warning('Could not delete stale sync file ${file.name}: $e');
+          }
+          continue;
+        }
+
+        if (file.name == CloudStorageProviderMixin.canonicalSyncFileName) {
+          // Parsed fine: its content is either our own pre-upgrade upload or
+          // about to be merged below. Either way it is fully represented by
+          // the per-device file we upload at the end of this sync, so it can
+          // be retired afterwards.
+          mergedLegacyFile = file;
+        }
+
+        // Skip our own data by payload identity (covers a legacy shared file
+        // or an iCloud conflict-copy this device authored) -- applying it to
+        // ourselves is a no-op that only inflates counts.
+        if (payload.deviceId == deviceId) {
+          continue;
+        }
+
         final mergeResult = await _withStep(
           'apply remote data',
           () => _applyRemotePayload(payload, lastSyncTime),
         );
         recordsSynced += mergeResult.recordsApplied;
         conflictsFound += mergeResult.conflictsFound;
+        recordsFailed += mergeResult.recordsFailed;
       }
 
       _reportProgress(SyncPhase.exporting, 0.7, 'Exporting local data...');
@@ -381,6 +510,7 @@ class SyncService {
         'load deletions',
         () => _syncRepository.getAllDeletions(),
       );
+      final uploadNonce = _uuid.v4();
       final localPayload = await _withStep(
         'export local data',
         () => _serializer.exportData(
@@ -388,6 +518,8 @@ class SyncService {
           since: null, // Full export for now
           lastSyncTimestamp: lastSyncTime?.millisecondsSinceEpoch,
           deletions: deletions,
+          uploadNonce: uploadNonce,
+          epochId: currentEpochId,
         ),
       );
 
@@ -407,27 +539,90 @@ class SyncService {
           const Duration(seconds: 10),
         ),
       );
-      const filename = CloudStorageProviderMixin.canonicalSyncFileName;
+      // Write to this device's own file so two devices never contend for the
+      // same file (the iCloud "conflicted copy" race). Other devices pick this
+      // up by listing the folder on their next sync.
+      final filename = _deviceSyncFileName(deviceId);
 
       _log.debug(
         'Uploading ${localData.length} bytes to $syncFolder/$filename...',
       );
-      final result = await _withStep(
-        'upload sync file',
-        () => provider
-            .uploadFile(localData, filename, folderId: syncFolder)
-            .timeout(const Duration(seconds: 180)),
+      // Record the nonce BEFORE uploading: if the upload succeeds but the
+      // response is lost (timeout, app death), the cloud file carries this
+      // nonce -- an unrecorded copy of it would read as a twin on the next
+      // sync and force a needless identity change. The failure branch removes
+      // the speculative entry so repeated failed uploads cannot evict the
+      // nonce of the last successful upload from the ring.
+      await _syncInitializer?.recordUploadNonce(
+        uploadNonce,
+        provider.providerId,
       );
+      UploadResult result;
+      try {
+        result = await _withStep(
+          'upload sync file',
+          () => provider
+              .uploadFile(localData, filename, folderId: syncFolder)
+              .timeout(const Duration(seconds: 180)),
+        );
+      } catch (e) {
+        // A timed-out upload may still have landed server-side; keep the
+        // speculative nonce so our own file cannot read as a foreign twin
+        // on the next sync (the ring absorbs the extra entry). Remove it
+        // only on definite failures, so repeated hard failures cannot
+        // evict the nonce of the last successful upload.
+        final cause = e is SyncStepException ? e.error : e;
+        if (cause is! TimeoutException) {
+          await _syncInitializer?.removeUploadNonce(
+            uploadNonce,
+            provider.providerId,
+          );
+        }
+        rethrow;
+      }
       _log.debug('Upload complete! fileId = ${result.fileId}');
 
-      // Update sync state
+      // Deliberately do NOT persist result.fileId as "the remote file id":
+      // under per-device files it is *our own* file, and the only consumer
+      // (SyncInitializer.checkSyncOnLaunch) now inspects every peer file's
+      // mtime directly. Persisting our own id made the launch check compare our
+      // own upload time and miss other devices' changes.
+
+      // Only advance lastSyncTime when every record applied. A failed apply
+      // leaves no per-record retry marker, so advancing lastSync would let the
+      // conflict-detection window move past it and the record would never be
+      // retried -- permanent loss. Leaving lastSync unchanged means the next
+      // sync re-pulls and re-applies (idempotent) so the failure is retried.
+      if (recordsFailed == 0) {
+        await _withStep(
+          'store last sync time',
+          () => _syncRepository.updateLastSyncTime(
+            result.uploadTime,
+            providerId: provider.providerId,
+          ),
+        );
+      }
+      // Retire the legacy shared sync file once its content is merged and
+      // re-published in this device's per-device file. Only when every record
+      // applied: a failed apply relies on re-pulling the same file next sync.
+      // Best-effort -- a still-active pre-per-device build recreates the file
+      // on its next sync (uploads are full snapshots), so deletion never
+      // loses data.
+      if (recordsFailed == 0 && mergedLegacyFile != null) {
+        try {
+          await provider
+              .deleteFile(mergedLegacyFile.id)
+              .timeout(const Duration(seconds: 8));
+          _log.info('Retired legacy shared sync file after merging it');
+        } catch (e) {
+          _log.warning('Could not retire legacy sync file: $e');
+        }
+      }
+      // Persist the HLC so the logical counter survives an app restart (it
+      // was advanced by SyncClock.receive() while applying remote payloads).
       await _withStep(
-        'store remote file id',
-        () => _syncRepository.setRemoteFileId(result.fileId),
-      );
-      await _withStep(
-        'store last sync time',
-        () => _syncRepository.updateLastSyncTime(result.uploadTime),
+        'persist sync clock',
+        () => _syncRepository.persistSyncClock(),
       );
 
       // Keep deletions for propagation, but prune old entries
@@ -450,13 +645,31 @@ class SyncService {
 
       _log.info('Sync completed successfully');
 
+      if (recordsFailed > 0) {
+        _log.error('$recordsFailed record(s) failed to apply during sync');
+      }
       return SyncResult(
-        status: conflictsFound > 0
-            ? SyncResultStatus.hasConflicts
-            : SyncResultStatus.success,
+        status: recordsFailed > 0
+            ? SyncResultStatus.error
+            : (conflictsFound > 0
+                  ? SyncResultStatus.hasConflicts
+                  : SyncResultStatus.success),
+        message: recordsFailed > 0
+            ? '$recordsFailed record(s) failed to apply'
+            : (adoptedFreshIdentity
+                  ? 'Another device was syncing with this device\'s '
+                        'identity. This device adopted a new identity and '
+                        'merged the cloud data.'
+                  : null),
         recordsSynced: recordsSynced,
         conflictsFound: conflictsFound,
-        lastSyncTime: result.uploadTime,
+        // Mirror the persistence decision above: only report an advanced
+        // lastSyncTime when every record applied (and we actually wrote it to
+        // the DB). On a partial-apply failure lastSync is intentionally left
+        // unchanged, so returning it here would make the result disagree with
+        // stored state.
+        lastSyncTime: recordsFailed == 0 ? result.uploadTime : null,
+        adoptedFreshIdentity: adoptedFreshIdentity,
       );
     } on TimeoutException {
       _log.warning('Sync timed out while uploading');
@@ -524,49 +737,113 @@ class SyncService {
     }
   }
 
-  Future<String?> _resolveRemoteFileId(CloudStorageProvider provider) async {
-    var remoteFileId = await _syncRepository.getRemoteFileId();
-    if (remoteFileId != null) {
-      final exists = await provider.fileExists(remoteFileId);
-      if (exists) {
-        return remoteFileId;
-      }
-      await _syncRepository.setRemoteFileId(null);
-      remoteFileId = null;
-    }
-
+  /// Read just the envelope identity of a sync file: who wrote it and with
+  /// which upload nonce. Used by the twin check on our OWN file, where the
+  /// full parse (checksum over the whole data section, SyncData
+  /// construction) would be pure overhead -- integrity is irrelevant to the
+  /// question "did another install write this?", and after an adoption the
+  /// file is re-downloaded and fully validated as a peer anyway. Returns
+  /// null on any failure.
+  Future<({String deviceId, String? uploadNonce})?> _peekPayloadIdentity(
+    CloudStorageProvider provider,
+    CloudFileInfo file,
+  ) async {
     try {
-      final files = await provider.listFiles(
-        namePattern: CloudStorageProviderMixin.syncFileStem,
-      );
-      if (files.isEmpty) return null;
-
-      CloudFileInfo? selected = files.firstWhere(
-        (f) => f.name == CloudStorageProviderMixin.canonicalSyncFileName,
-        orElse: () => files.first,
-      );
-
-      final candidates = files.where((f) => !_isConflictCopy(f.name)).toList();
-      if (candidates.isNotEmpty) {
-        candidates.sort((a, b) => b.modifiedTime.compareTo(a.modifiedTime));
-        selected = candidates.first;
-      }
-
-      await _syncRepository.setRemoteFileId(selected.id);
-      return selected.id;
+      final bytes = await provider
+          .downloadFile(file.id)
+          .timeout(const Duration(seconds: 15));
+      final decoded = jsonDecode(_decodePayloadBytes(bytes));
+      if (decoded is! Map<String, dynamic>) return null;
+      final deviceId = decoded['deviceId'];
+      if (deviceId is! String) return null;
+      final nonce = decoded['uploadNonce'];
+      return (deviceId: deviceId, uploadNonce: nonce is String ? nonce : null);
     } catch (e) {
-      _log.warning('Failed to resolve remote sync file: $e');
+      _log.warning('Could not inspect own sync file ${file.name}: $e');
       return null;
     }
+  }
+
+  /// Download and parse one remote sync file. Returns null (after logging)
+  /// when the file cannot be fetched, fails checksum validation, or was
+  /// written by a NEWER format version than this build understands --
+  /// applying a future format would have undefined semantics, so it is
+  /// skipped until the app is updated.
+  Future<SyncPayload?> _downloadAndParsePayload(
+    CloudStorageProvider provider,
+    CloudFileInfo file,
+  ) async {
+    try {
+      final remoteData = await provider
+          .downloadFile(file.id)
+          .timeout(const Duration(seconds: 15));
+      final remoteJson = _decodePayloadBytes(remoteData);
+      final parsed = _serializer.deserializePayload(remoteJson);
+      if (parsed.version > syncFormatVersion) {
+        _log.warning(
+          'Remote sync file ${file.name} uses format v${parsed.version} '
+          '(this build understands v$syncFormatVersion); update the app on '
+          'this device to merge it',
+        );
+        return null;
+      }
+      if (!_serializer.validateChecksum(parsed)) {
+        _log.warning('Remote sync file ${file.name} has invalid checksum');
+        return null;
+      }
+      return parsed;
+    } on TimeoutException {
+      _log.warning('Timed out downloading ${file.name}');
+      return null;
+    } catch (e, stackTrace) {
+      _log.warning(
+        'Failed to download/parse ${file.name}: $e',
+        stackTrace: stackTrace,
+      );
+      return null;
+    }
+  }
+
+  /// This device's own per-device sync filename.
+  String _deviceSyncFileName(String deviceId) =>
+      '${CloudStorageProviderMixin.syncFilePrefix}$deviceId'
+      '${CloudStorageProviderMixin.syncFileExtension}';
+
+  /// List every sync file in the folder (excluding iCloud conflict copies).
+  /// Returns the full list including this device's own file so callers can
+  /// inspect it before deciding which files to merge.
+  Future<List<CloudFileInfo>> _listSyncFiles(
+    CloudStorageProvider provider,
+  ) async {
+    final files = await provider.listFiles(
+      namePattern: CloudStorageProviderMixin.syncFileStem,
+    );
+    return files.where((f) => !_isConflictCopy(f.name)).toList();
   }
 
   Future<_MergeResult> _applyRemotePayload(
     SyncPayload remotePayload,
     DateTime? localLastSync,
   ) async {
+    // Wrap deletions + merge in a single transaction with deferred FK checks.
+    // Without this, intra-payload references (e.g. a dive whose siteId points
+    // at a dive site appearing later in the apply order, or a dive whose
+    // courseId points at a course in the same payload) fail immediately and
+    // the affected rows never reach the receiving DB. See
+    // docs/superpowers/findings/2026-06-02-icloud-sync-diagnosis.md.
+    return _serializer.applyInDeferredFkTransaction(
+      () => _applyRemotePayloadInner(remotePayload, localLastSync),
+    );
+  }
+
+  Future<_MergeResult> _applyRemotePayloadInner(
+    SyncPayload remotePayload,
+    DateTime? localLastSync,
+  ) async {
     final lastSyncMs = localLastSync?.millisecondsSinceEpoch;
     var recordsApplied = 0;
     var conflictsFound = 0;
+    var recordsFailed = 0;
     final pendingByEntity = await _pendingRecordMap();
 
     final deletionResult = await _applyRemoteDeletions(
@@ -577,6 +854,15 @@ class SyncService {
     );
     recordsApplied += deletionResult.recordsApplied;
     conflictsFound += deletionResult.conflictsFound;
+    recordsFailed += deletionResult.recordsFailed;
+
+    // Local tombstones (including any just applied from this payload's
+    // deletions) guard the merge below: a remote LIVE record must not
+    // resurrect a record we have deleted unless the remote edit is newer than
+    // our deletion. Loaded after _applyRemoteDeletions so a tombstone arriving
+    // in the same payload also protects against a self-contradictory payload
+    // that carries both a delete and a stale live copy of the same record.
+    final tombstonesByEntity = await _deletionMap();
 
     final data = remotePayload.data;
 
@@ -623,6 +909,10 @@ class SyncService {
           ),
           (type: 'species', records: data.species, hasUpdatedAt: false),
           (type: 'tags', records: data.tags, hasUpdatedAt: true),
+          // Courses must apply before dives/certifications that reference them.
+          // (Deferred FK already covers ordering, but keep the logical sequence
+          // so a future read of this list still tells the dependency story.)
+          (type: 'courses', records: data.courses, hasUpdatedAt: true),
           (type: 'dives', records: data.dives, hasUpdatedAt: true),
           (type: 'diveSites', records: data.diveSites, hasUpdatedAt: true),
           (type: 'diveTanks', records: data.diveTanks, hasUpdatedAt: false),
@@ -645,6 +935,30 @@ class SyncService {
             hasUpdatedAt: false,
           ),
           (type: 'gasSwitches', records: data.gasSwitches, hasUpdatedAt: false),
+          // Extra entities added in the SyncData expansion. Four are
+          // append-only and use the blind-upsert merge path (no updatedAt
+          // column: diveCustomFields, diveDataSources, siteSpecies,
+          // fieldPresets). Two carry updatedAt and use the standard
+          // conflict-detection path (csvPresets, viewConfigs). FK ordering
+          // is handled by the deferred-FK transaction wrapping this loop.
+          (
+            type: 'diveCustomFields',
+            records: data.diveCustomFields,
+            hasUpdatedAt: false,
+          ),
+          (
+            type: 'diveDataSources',
+            records: data.diveDataSources,
+            hasUpdatedAt: false,
+          ),
+          (type: 'siteSpecies', records: data.siteSpecies, hasUpdatedAt: false),
+          (type: 'csvPresets', records: data.csvPresets, hasUpdatedAt: true),
+          (type: 'viewConfigs', records: data.viewConfigs, hasUpdatedAt: true),
+          (
+            type: 'fieldPresets',
+            records: data.fieldPresets,
+            hasUpdatedAt: false,
+          ),
           (
             type: 'tankPressureProfiles',
             records: data.tankPressureProfiles,
@@ -666,6 +980,39 @@ class SyncService {
           (type: 'media', records: data.media, hasUpdatedAt: false),
         ];
 
+    // Precompute the locally-tombstoned parents this payload will REVIVE (a
+    // remote edit strictly newer than our deletion). A child must not be
+    // dropped/cleared for a parent that is coming back. The merge order does
+    // not guarantee a parent is processed before its children, and a revival
+    // only clears the tombstone in the DB (not the in-memory snapshot used by
+    // the guard below), so this is computed up front to stay order-independent.
+    final recordsByType = {for (final e in mergeOrder) e.type: e};
+    final revivedParents = <String, Set<String>>{};
+    final parentTypes = <String>{
+      for (final refs in parentRefs.values)
+        for (final ref in refs) ref.parent,
+    };
+    for (final parentType in parentTypes) {
+      final tombs = tombstonesByEntity[parentType];
+      final entry = recordsByType[parentType];
+      if (tombs == null ||
+          tombs.isEmpty ||
+          entry == null ||
+          !entry.hasUpdatedAt) {
+        continue;
+      }
+      for (final rec in entry.records) {
+        final id = _recordIdForEntity(parentType, rec);
+        if (id == null) continue;
+        final deletedAt = tombs[id];
+        if (deletedAt == null) continue;
+        final remoteUpdatedAt = _extractUpdatedAtMillis(rec);
+        if (remoteUpdatedAt != null && remoteUpdatedAt > deletedAt) {
+          revivedParents.putIfAbsent(parentType, () => <String>{}).add(id);
+        }
+      }
+    }
+
     for (final entry in mergeOrder) {
       final result = await _mergeEntity(
         entityType: entry.type,
@@ -673,14 +1020,25 @@ class SyncService {
         hasUpdatedAt: entry.hasUpdatedAt,
         lastSyncMs: lastSyncMs,
         pendingRecordIds: pendingByEntity[entry.type] ?? const <String>{},
+        allTombstones: tombstonesByEntity,
+        revivedParents: revivedParents,
       );
       recordsApplied += result.recordsApplied;
       conflictsFound += result.conflictsFound;
+      recordsFailed += result.recordsFailed;
     }
+
+    // Integrity backstop: applying a remote deletion of a parent can leave a
+    // local row pointing at it via a non-cascading FK, which would fail the
+    // deferred-FK COMMIT and abort the whole sync. Clear or delete any such
+    // dangling reference before the transaction commits. (The merge guard
+    // above stops a peer's orphan from being re-added, so this does not loop.)
+    await _serializer.repairDanglingForeignKeys();
 
     return _MergeResult(
       recordsApplied: recordsApplied,
       conflictsFound: conflictsFound,
+      recordsFailed: recordsFailed,
     );
   }
 
@@ -692,52 +1050,156 @@ class SyncService {
   ) async {
     var applied = 0;
     var conflicts = 0;
+    var failed = 0;
 
     for (final entry in deletions.entries) {
       final entityType = entry.key;
       for (final deletion in entry.value) {
         final recordId = deletion.id;
-        if (pendingByEntity[entityType]?.contains(recordId) == true) {
-          continue;
-        }
-        final local = await _serializer.fetchRecord(entityType, recordId);
-        final localUpdatedAt = _extractUpdatedAtMillis(local);
-        final deletionTimestamp = deletion.deletedAt > 0
-            ? deletion.deletedAt
-            : remoteExportedAt;
+        try {
+          if (pendingByEntity[entityType]?.contains(recordId) == true) {
+            continue;
+          }
+          final local = await _serializer.fetchRecord(entityType, recordId);
+          // _extractUpdatedAtMillis falls back to createdAt, so a row that was
+          // created locally after our last sync is protected from a stale
+          // remote tombstone even on append-only child tables that have a
+          // createdAt. The handful of child tables with neither updatedAt nor
+          // createdAt (dive_profiles, dive_tanks, dive_equipment,
+          // tank_pressure_profiles, sightings) have no age signal; they are
+          // regenerated wholesale with fresh ids on re-import, so a stale
+          // tombstone won't match a current row.
+          final localUpdatedAt = _extractUpdatedAtMillis(local);
+          final deletionTimestamp = deletion.deletedAt > 0
+              ? deletion.deletedAt
+              : remoteExportedAt;
 
-        final hasConflict =
-            localUpdatedAt != null &&
-            lastSyncMs != null &&
-            localUpdatedAt > lastSyncMs;
+          final hasConflict =
+              localUpdatedAt != null &&
+              lastSyncMs != null &&
+              localUpdatedAt > lastSyncMs;
 
-        if (hasConflict) {
-          conflicts += 1;
-          await _syncRepository.markRecordConflict(
+          if (hasConflict) {
+            conflicts += 1;
+            await _syncRepository.markRecordConflict(
+              entityType: entityType,
+              recordId: recordId,
+              conflictDataJson: jsonEncode({
+                '_deleted': true,
+                'deletedAt': deletionTimestamp,
+                'recordId': recordId,
+              }),
+              localUpdatedAt: localUpdatedAt,
+            );
+            continue;
+          }
+
+          await _serializer.deleteRecord(entityType, recordId);
+          await _syncRepository.logDeletionIfMissing(
             entityType: entityType,
             recordId: recordId,
-            conflictDataJson: jsonEncode({
-              '_deleted': true,
-              'deletedAt': deletionTimestamp,
-              'recordId': recordId,
-            }),
-            localUpdatedAt: localUpdatedAt,
+            deletedAt: deletionTimestamp,
           );
-          continue;
+          applied += 1;
+        } catch (e, stackTrace) {
+          // A failed deletion is a real failure (surfaced via recordsFailed),
+          // not a conflict, and must not abort the rest of the batch.
+          _log.error(
+            'Failed to apply deletion $entityType/$recordId',
+            error: e,
+            stackTrace: stackTrace,
+          );
+          failed += 1;
         }
-
-        await _serializer.deleteRecord(entityType, recordId);
-        await _syncRepository.logDeletionIfMissing(
-          entityType: entityType,
-          recordId: recordId,
-          deletedAt: deletionTimestamp,
-        );
-        applied += 1;
       }
     }
 
-    return _MergeResult(recordsApplied: applied, conflictsFound: conflicts);
+    return _MergeResult(
+      recordsApplied: applied,
+      conflictsFound: conflicts,
+      recordsFailed: failed,
+    );
   }
+
+  /// Every synced child -> parent FK whose parent can be deleted (and thus
+  /// tombstoned in the deletion log). Used by [_mergeEntity] to keep a peer's
+  /// live child from dangling its FK against a parent we have deleted -- which
+  /// would otherwise fail the deferred-FK COMMIT and abort the whole sync.
+  /// NOT NULL (nullable: false) children are skipped; nullable references are
+  /// cleared so the row survives detached.
+  ///
+  /// Generated from every `references(<deletable parent>, ...)` in the schema;
+  /// completeness (and column nullability) is asserted against the live schema
+  /// by sync_parent_refs_completeness_test.dart, so a new FK to a deletable
+  /// parent fails that test until it is added here. (diverId is intentionally
+  /// absent: diver deletion goes through DiverMergeRepository, which repoints
+  /// FKs rather than orphaning them.)
+  @visibleForTesting
+  static const Map<String, List<ParentRef>> parentRefs = {
+    'dives': [
+      (field: 'siteId', parent: 'diveSites', nullable: true),
+      (field: 'tripId', parent: 'trips', nullable: true),
+      (field: 'courseId', parent: 'courses', nullable: true),
+      (field: 'computerId', parent: 'diveComputers', nullable: true),
+      (field: 'diveCenterId', parent: 'diveCenters', nullable: true),
+    ],
+    'diveProfiles': [
+      (field: 'diveId', parent: 'dives', nullable: false),
+      (field: 'computerId', parent: 'diveComputers', nullable: true),
+    ],
+    'diveTanks': [
+      (field: 'diveId', parent: 'dives', nullable: false),
+      (field: 'equipmentId', parent: 'equipment', nullable: true),
+    ],
+    'diveWeights': [(field: 'diveId', parent: 'dives', nullable: false)],
+    'diveEquipment': [
+      (field: 'diveId', parent: 'dives', nullable: false),
+      (field: 'equipmentId', parent: 'equipment', nullable: false),
+    ],
+    'diveBuddies': [
+      (field: 'diveId', parent: 'dives', nullable: false),
+      (field: 'buddyId', parent: 'buddies', nullable: false),
+    ],
+    'diveTags': [
+      (field: 'diveId', parent: 'dives', nullable: false),
+      (field: 'tagId', parent: 'tags', nullable: false),
+    ],
+    'diveProfileEvents': [(field: 'diveId', parent: 'dives', nullable: false)],
+    'gasSwitches': [(field: 'diveId', parent: 'dives', nullable: false)],
+    'diveCustomFields': [(field: 'diveId', parent: 'dives', nullable: false)],
+    'tankPressureProfiles': [
+      (field: 'diveId', parent: 'dives', nullable: false),
+    ],
+    'tideRecords': [(field: 'diveId', parent: 'dives', nullable: false)],
+    'diveDataSources': [
+      (field: 'diveId', parent: 'dives', nullable: false),
+      (field: 'computerId', parent: 'diveComputers', nullable: true),
+    ],
+    'sightings': [
+      (field: 'diveId', parent: 'dives', nullable: false),
+      (field: 'speciesId', parent: 'species', nullable: false),
+    ],
+    'media': [
+      (field: 'diveId', parent: 'dives', nullable: true),
+      (field: 'siteId', parent: 'diveSites', nullable: true),
+      (field: 'signerId', parent: 'buddies', nullable: true),
+    ],
+    'siteSpecies': [
+      (field: 'siteId', parent: 'diveSites', nullable: false),
+      (field: 'speciesId', parent: 'species', nullable: false),
+    ],
+    'liveaboardDetails': [(field: 'tripId', parent: 'trips', nullable: false)],
+    'itineraryDays': [(field: 'tripId', parent: 'trips', nullable: false)],
+    'certifications': [(field: 'courseId', parent: 'courses', nullable: true)],
+    'courses': [(field: 'instructorId', parent: 'buddies', nullable: true)],
+    'equipmentSetItems': [
+      (field: 'setId', parent: 'equipmentSets', nullable: false),
+      (field: 'equipmentId', parent: 'equipment', nullable: false),
+    ],
+    'serviceRecords': [
+      (field: 'equipmentId', parent: 'equipment', nullable: false),
+    ],
+  };
 
   Future<_MergeResult> _mergeEntity({
     required String entityType,
@@ -745,6 +1207,8 @@ class SyncService {
     required bool hasUpdatedAt,
     required int? lastSyncMs,
     required Set<String> pendingRecordIds,
+    required Map<String, Map<String, int>> allTombstones,
+    required Map<String, Set<String>> revivedParents,
   }) async {
     if (records.isEmpty) {
       return const _MergeResult(recordsApplied: 0, conflictsFound: 0);
@@ -752,6 +1216,10 @@ class SyncService {
 
     var applied = 0;
     var conflicts = 0;
+    var failed = 0;
+
+    final selfTombstones = allTombstones[entityType] ?? const <String, int>{};
+    final entityParentRefs = parentRefs[entityType] ?? const <ParentRef>[];
 
     for (final record in records) {
       String? recordId;
@@ -759,7 +1227,10 @@ class SyncService {
       try {
         recordId = _recordIdForEntity(entityType, record);
         if (recordId == null) {
-          conflicts += 1;
+          // A record with no resolvable id is malformed data, not a two-sided
+          // conflict -- count it as a failure so performSync surfaces an error.
+          _log.error('Skipping $entityType record with no resolvable id');
+          failed += 1;
           continue;
         }
 
@@ -767,8 +1238,53 @@ class SyncService {
           continue;
         }
 
+        // Parent-deletion guard: a record pointing at a locally-tombstoned
+        // parent would otherwise dangle its FK (failing the deferred-FK commit)
+        // or resurrect an orphan. A NOT NULL (cascade) child is skipped; a
+        // nullable (set-null) reference is cleared so the row survives detached
+        // (e.g. a photo whose dive was deleted keeps the photo, sans dive link).
+        var recordToApply = record;
+        var droppedByParent = false;
+        for (final ref in entityParentRefs) {
+          final parentId = record[ref.field];
+          if (parentId is String &&
+              (allTombstones[ref.parent]?.containsKey(parentId) ?? false) &&
+              // A parent being revived in this same payload is NOT gone; keep
+              // the child's reference intact regardless of merge order.
+              (revivedParents[ref.parent]?.contains(parentId) != true)) {
+            if (ref.nullable) {
+              recordToApply = {...recordToApply, ref.field: null};
+            } else {
+              droppedByParent = true;
+              break;
+            }
+          }
+        }
+        if (droppedByParent) continue;
+
+        // Local-deletion guard: if we deleted this record, a remote LIVE copy
+        // must not resurrect it unless the remote edit is newer than our
+        // deletion (a genuine revival). Without this, a peer that has not yet
+        // seen our delete re-introduces the record on every sync.
+        final deletedAt = selfTombstones[recordId];
+        if (deletedAt != null) {
+          final remoteUpdatedAt = hasUpdatedAt
+              ? _extractUpdatedAtMillis(record)
+              : null;
+          if (remoteUpdatedAt == null || remoteUpdatedAt <= deletedAt) {
+            // No newer remote edit -- the deletion wins; stay deleted.
+            continue;
+          }
+          // Remote edit is newer than the deletion: revive the record and drop
+          // the now-obsolete tombstone so it stops re-deleting it.
+          await _syncRepository.removeDeletion(
+            entityType: entityType,
+            recordId: recordId,
+          );
+        }
+
         if (!hasUpdatedAt) {
-          await _serializer.upsertRecord(entityType, record);
+          await _serializer.upsertRecord(entityType, recordToApply);
           applied += 1;
           continue;
         }
@@ -777,6 +1293,29 @@ class SyncService {
         localUpdatedAt = _extractUpdatedAtMillis(local);
         final remoteUpdatedAt = _extractUpdatedAtMillis(record);
 
+        final localHlc = _extractHlc(local);
+        final remoteHlc = _extractHlc(record);
+        // Advance our clock past every remote HLC we observe, so this device's
+        // next local write is ordered after what it has seen (the skew fix).
+        if (remoteHlc != null) {
+          SyncClock.instance.receive(remoteHlc);
+        }
+
+        // When BOTH sides carry an HLC it is the authoritative, deterministic
+        // resolution -- it already encodes causal order across devices, so we
+        // do NOT raise a manual conflict (that would defeat the purpose of the
+        // clock for the common concurrent-edit case). A strictly-greater
+        // remote HLC wins; an exact tie or a local-newer HLC keeps local.
+        if (localHlc != null && remoteHlc != null) {
+          if (remoteHlc.compareTo(localHlc) > 0) {
+            await _serializer.upsertRecord(entityType, recordToApply);
+            applied += 1;
+          }
+          continue;
+        }
+
+        // Pre-HLC fallback (one or both sides lack an HLC): use updatedAt, and
+        // surface a true two-sided edit since the last sync as a conflict.
         if (localUpdatedAt != null &&
             remoteUpdatedAt != null &&
             lastSyncMs != null &&
@@ -796,7 +1335,7 @@ class SyncService {
         if (remoteUpdatedAt == null ||
             localUpdatedAt == null ||
             remoteUpdatedAt >= localUpdatedAt) {
-          await _serializer.upsertRecord(entityType, record);
+          await _serializer.upsertRecord(entityType, recordToApply);
           applied += 1;
         }
       } catch (e, stackTrace) {
@@ -805,20 +1344,18 @@ class SyncService {
           error: e,
           stackTrace: stackTrace,
         );
-        conflicts += 1;
-        if (recordId != null) {
-          await _syncRepository.markRecordConflict(
-            entityType: entityType,
-            recordId: recordId,
-            conflictDataJson: jsonEncode(record),
-            localUpdatedAt:
-                localUpdatedAt ?? DateTime.now().millisecondsSinceEpoch,
-          );
-        }
+        // An apply error is a real failure, not a "conflict" (which means both
+        // sides edited the same record). Masking apply errors as conflicts is
+        // what hid the cross-device no-op; count it so performSync surfaces it.
+        failed += 1;
       }
     }
 
-    return _MergeResult(recordsApplied: applied, conflictsFound: conflicts);
+    return _MergeResult(
+      recordsApplied: applied,
+      conflictsFound: conflicts,
+      recordsFailed: failed,
+    );
   }
 
   Future<Map<String, Set<String>>> _pendingRecordMap() async {
@@ -830,6 +1367,23 @@ class SyncService {
     return map;
   }
 
+  /// Local deletion tombstones as entityType -> (recordId -> latest deletedAt).
+  /// Used by [_mergeEntity] to keep a remote live copy from resurrecting a
+  /// record we have deleted.
+  Future<Map<String, Map<String, int>>> _deletionMap() async {
+    final deletions = await _syncRepository.getAllDeletions();
+    final map = <String, Map<String, int>>{};
+    for (final d in deletions) {
+      final byId = map.putIfAbsent(d.entityType, () => <String, int>{});
+      final existing = byId[d.recordId];
+      // Keep the most recent deletion if duplicate tombstones exist.
+      if (existing == null || d.deletedAt > existing) {
+        byId[d.recordId] = d.deletedAt;
+      }
+    }
+    return map;
+  }
+
   int? _extractUpdatedAtMillis(Map<String, dynamic>? data) {
     if (data == null) return null;
     final updatedAt = data['updatedAt'];
@@ -837,6 +1391,19 @@ class SyncService {
     final createdAt = data['createdAt'];
     if (createdAt is int) return createdAt;
     return null;
+  }
+
+  /// Parse a record's Hybrid Logical Clock, or null if absent/blank (rows
+  /// written before the HLC rollout). Malformed values are treated as absent
+  /// so a bad value can never crash the merge.
+  Hlc? _extractHlc(Map<String, dynamic>? data) {
+    final raw = data?['hlc'];
+    if (raw is! String || raw.isEmpty) return null;
+    try {
+      return Hlc.parse(raw);
+    } catch (_) {
+      return null;
+    }
   }
 
   String? _recordIdForEntity(String entityType, Map<String, dynamic> record) {
@@ -964,10 +1531,371 @@ class SyncService {
     return _uuid.v4();
   }
 
-  /// Reset sync state (for debugging or account changes)
+  /// Reset sync state (for debugging or account changes).
+  ///
+  /// Keeps the deletion log: this reset is the user-facing recovery path,
+  /// and the next sync after it runs with a null baseline, where a wiped
+  /// log would let stale peer files resurrect every deleted record.
   Future<void> resetSyncState() async {
-    await _syncRepository.resetSyncState();
+    await _syncRepository.resetSyncState(clearDeletionLog: false);
     _log.info('Sync state reset');
+  }
+
+  /// Best-effort removal of [deviceId]'s per-device sync file from the
+  /// cloud. Used when this install retires an identity (Reset Sync State):
+  /// once the device id changes, its old file would otherwise be merged
+  /// back as a "peer" forever. Never throws; if the provider is offline the
+  /// file lingers indefinitely as a stale peer.
+  Future<void> deleteDeviceSyncFile(String deviceId) async {
+    final provider = _cloudProvider;
+    if (provider == null) return;
+    try {
+      final filename = _deviceSyncFileName(deviceId);
+      final files = await provider
+          .listFiles(namePattern: CloudStorageProviderMixin.syncFileStem)
+          .timeout(const Duration(seconds: 8));
+      for (final f in files) {
+        if (f.name == filename) {
+          await provider.deleteFile(f.id).timeout(const Duration(seconds: 8));
+          _log.info('Retired per-device sync file $filename');
+        }
+      }
+    } catch (e) {
+      _log.warning('Could not retire sync file for $deviceId: $e');
+    }
+  }
+
+  /// Best-effort deletion of EVERY sync file in the cloud folder: all peers'
+  /// per-device files, our own, the legacy shared file, and conflict copies.
+  /// Failures are logged and skipped -- files that survive carry a stale (or
+  /// missing) epoch stamp and are inert to every current-epoch device.
+  Future<void> deleteAllSyncFiles(CloudStorageProvider provider) async {
+    try {
+      final files = await provider
+          .listFiles(namePattern: CloudStorageProviderMixin.syncFileStem)
+          .timeout(const Duration(seconds: 8));
+      for (final f in files) {
+        try {
+          await provider.deleteFile(f.id).timeout(const Duration(seconds: 8));
+          _log.info('Deleted sync file ${f.name} for library replace');
+        } catch (e) {
+          _log.warning('Could not delete sync file ${f.name}: $e');
+        }
+      }
+    } catch (e) {
+      _log.warning('Could not list sync files for replace wipe: $e');
+    }
+  }
+
+  /// Execute the cloud side of a Replace restore: write the new epoch marker
+  /// FIRST (a peer syncing mid-replace must learn the new epoch before it can
+  /// misread a half-empty folder), wipe every sync file, upload our library
+  /// stamped with the new epoch, then commit the epoch locally and clear the
+  /// pending intent. On any failure the intent is kept so the next sync
+  /// retries instead of merging.
+  Future<SyncResult> executeLibraryReplace(LibraryEpochMarker marker) async {
+    final provider = _cloudProvider;
+    final store = _epochStore;
+    if (provider == null || store == null) {
+      return const SyncResult(
+        status: SyncResultStatus.error,
+        message: 'No cloud provider configured',
+      );
+    }
+    try {
+      if (!await provider.isAuthenticated()) {
+        return const SyncResult(
+          status: SyncResultStatus.authError,
+          message: 'Not authenticated with cloud provider',
+        );
+      }
+      final deviceId = await _syncRepository.getDeviceId();
+      await _syncRepository.ensureSyncClockConfigured();
+
+      await writeLibraryEpochMarker(provider, marker);
+      await deleteAllSyncFiles(provider);
+
+      final deletions = await _syncRepository.getAllDeletions();
+      final uploadNonce = _uuid.v4();
+      final localPayload = await _serializer.exportData(
+        deviceId: deviceId,
+        since: null,
+        lastSyncTimestamp: null,
+        deletions: deletions,
+        uploadNonce: uploadNonce,
+        epochId: marker.epochId,
+      );
+      final localJson = _serializer.serializePayload(localPayload);
+      final localData = Uint8List.fromList(utf8.encode(localJson));
+      String? syncFolder;
+      try {
+        syncFolder = await provider.getOrCreateSyncFolder();
+      } catch (_) {
+        syncFolder = null;
+      }
+      await _syncInitializer?.recordUploadNonce(
+        uploadNonce,
+        provider.providerId,
+      );
+      final upload = await provider
+          .uploadFile(
+            localData,
+            _deviceSyncFileName(deviceId),
+            folderId: syncFolder,
+          )
+          .timeout(const Duration(seconds: 180));
+
+      await _syncRepository.setLastAcceptedEpochId(marker.epochId);
+      await store.setLastAccepted(marker);
+      await _syncRepository.updateLastSyncTime(
+        upload.uploadTime,
+        providerId: provider.providerId,
+      );
+      await _syncRepository.persistSyncClock();
+      await store.clearPendingReplace();
+      _log.info('Library replace executed under epoch ${marker.epochId}');
+      return SyncResult(
+        status: SyncResultStatus.success,
+        message: 'Library replaced',
+        lastSyncTime: upload.uploadTime,
+      );
+    } catch (e, stackTrace) {
+      _log.error(
+        'Library replace failed; pending intent kept for retry',
+        error: e,
+        stackTrace: stackTrace,
+      );
+      return SyncResult(
+        status: SyncResultStatus.error,
+        message: 'Library replace failed: $e',
+      );
+    }
+  }
+
+  /// Adopt the replaced library: apply the current-epoch cloud files as
+  /// authoritative -- upsert every record they contain and delete every
+  /// local record (of synced entity types) they do not. Device identity is
+  /// deliberately untouched: adoption changes data, not identity. The caller
+  /// is responsible for the pre-adoption safety backup and any post-adoption
+  /// fix-ups (active diver, follow-up sync).
+  Future<SyncResult> adoptReplacedLibrary() async {
+    final provider = _cloudProvider;
+    final store = _epochStore;
+    if (provider == null || store == null) {
+      return const SyncResult(
+        status: SyncResultStatus.error,
+        message: 'No cloud provider configured',
+      );
+    }
+    try {
+      final marker = await readLibraryEpochMarker(provider);
+      if (marker == null) {
+        return const SyncResult(
+          status: SyncResultStatus.error,
+          message: 'No library replacement marker found',
+        );
+      }
+
+      final files = await _listSyncFiles(
+        provider,
+      ).timeout(const Duration(seconds: 8));
+      final payloads = <SyncPayload>[];
+      for (final file in files) {
+        final payload = await _downloadAndParsePayload(provider, file);
+        if (payload != null && payload.epochId == marker.epochId) {
+          payloads.add(payload);
+        }
+      }
+      if (payloads.isEmpty) {
+        // Replace still in flight (marker written, stamped upload pending).
+        // Applying an empty set would wipe this library to zero -- abort.
+        return const SyncResult(
+          status: SyncResultStatus.error,
+          message:
+              'The replaced library is still uploading. Try again shortly.',
+        );
+      }
+      payloads.sort((a, b) => a.exportedAt.compareTo(b.exportedAt));
+
+      final deviceId = await _syncRepository.getDeviceId();
+      final localSnapshot = await _serializer.exportData(
+        deviceId: deviceId,
+        since: null,
+        lastSyncTimestamp: null,
+        deletions: const [],
+        uploadNonce: null,
+      );
+
+      await _serializer.applyInDeferredFkTransaction(() async {
+        // Union the restored records; for ids present in several files the
+        // latest export wins (payloads are sorted ascending).
+        final cloudIds = <String, Set<String>>{};
+        final restored = <String, Map<String, Map<String, dynamic>>>{};
+        for (final payload in payloads) {
+          for (final entry in payload.data.toJson().entries) {
+            final entityType = entry.key;
+            final records = (entry.value as List).cast<Map<String, dynamic>>();
+            for (final record in records) {
+              final id = _recordIdForEntity(entityType, record);
+              if (id == null) continue;
+              (cloudIds[entityType] ??= <String>{}).add(id);
+              (restored[entityType] ??= {})[id] = record;
+            }
+          }
+        }
+
+        // Delete local rows the restored library does not contain.
+        for (final entry in localSnapshot.data.toJson().entries) {
+          final entityType = entry.key;
+          final records = (entry.value as List).cast<Map<String, dynamic>>();
+          for (final record in records) {
+            final id = _recordIdForEntity(entityType, record);
+            if (id == null) continue;
+            if (!(cloudIds[entityType]?.contains(id) ?? false)) {
+              await _serializer.deleteRecord(entityType, id);
+            }
+          }
+        }
+
+        // Upsert every restored record.
+        for (final entry in restored.entries) {
+          for (final record in entry.value.values) {
+            await _serializer.upsertRecord(entry.key, record);
+          }
+        }
+
+        await _serializer.repairDanglingForeignKeys();
+      });
+
+      // Re-baseline under the adopted epoch. Our tombstones are obsolete --
+      // the restored library is authoritative.
+      await _syncRepository.resetSyncState(clearDeletionLog: true);
+      await _syncRepository.setLastAcceptedEpochId(marker.epochId);
+      await store.setLastAccepted(marker);
+      SyncClock.instance.reset();
+      _log.info('Adopted replaced library (epoch ${marker.epochId})');
+      return const SyncResult(
+        status: SyncResultStatus.success,
+        message: 'Adopted the restored library',
+      );
+    } catch (e, stackTrace) {
+      _log.error(
+        'Failed to adopt replaced library',
+        error: e,
+        stackTrace: stackTrace,
+      );
+      return SyncResult(
+        status: SyncResultStatus.error,
+        message: 'Failed to adopt the restored library: $e',
+      );
+    }
+  }
+
+  /// Download and parse the cloud epoch marker. Returns null when absent.
+  /// Throws on listing/parse failure: "unreadable" must be distinguishable
+  /// from "absent" -- the caller fails the sync closed rather than guessing.
+  Future<LibraryEpochMarker?> readLibraryEpochMarker(
+    CloudStorageProvider provider,
+  ) async {
+    final files = await provider
+        .listFiles(namePattern: libraryEpochFileName)
+        .timeout(const Duration(seconds: 8));
+    final candidates = files
+        .where((f) => !_isConflictCopy(f.name))
+        .where((f) => f.name == libraryEpochFileName)
+        .toList();
+    if (candidates.isEmpty) return null;
+    candidates.sort((a, b) => b.modifiedTime.compareTo(a.modifiedTime));
+    final bytes = await provider
+        .downloadFile(candidates.first.id)
+        .timeout(const Duration(seconds: 30));
+    final decoded = jsonDecode(utf8.decode(bytes));
+    if (decoded is! Map<String, dynamic>) {
+      throw const FormatException('Library epoch marker is not a JSON object');
+    }
+    return LibraryEpochMarker.fromJson(decoded);
+  }
+
+  /// Upload (or overwrite) the cloud epoch marker.
+  Future<void> writeLibraryEpochMarker(
+    CloudStorageProvider provider,
+    LibraryEpochMarker marker,
+  ) async {
+    final bytes = Uint8List.fromList(utf8.encode(jsonEncode(marker.toJson())));
+    String? folderId;
+    try {
+      folderId = await provider.getOrCreateSyncFolder();
+    } catch (_) {
+      folderId = null;
+    }
+    await provider
+        .uploadFile(bytes, libraryEpochFileName, folderId: folderId)
+        .timeout(const Duration(seconds: 60));
+    _log.info('Wrote library epoch marker ${marker.epochId}');
+  }
+
+  /// Download and parse the cloud "library moved" marker, or null when absent.
+  /// Unlike the epoch marker this returns null on any failure rather than
+  /// throwing: the moved marker is purely advisory, so an unreadable one must
+  /// never fail a sync closed.
+  Future<LibraryMovedMarker?> readLibraryMovedMarker(
+    CloudStorageProvider provider,
+  ) async {
+    try {
+      final files = await provider
+          .listFiles(namePattern: libraryMovedFileName)
+          .timeout(const Duration(seconds: 8));
+      final candidates = files
+          .where((f) => !_isConflictCopy(f.name))
+          .where((f) => f.name == libraryMovedFileName)
+          .toList();
+      if (candidates.isEmpty) return null;
+      candidates.sort((a, b) => b.modifiedTime.compareTo(a.modifiedTime));
+      final bytes = await provider
+          .downloadFile(candidates.first.id)
+          .timeout(const Duration(seconds: 30));
+      final decoded = jsonDecode(utf8.decode(bytes));
+      if (decoded is! Map<String, dynamic>) return null;
+      return LibraryMovedMarker.fromJson(decoded);
+    } catch (e) {
+      _log.warning('Could not read library moved marker: $e');
+      return null;
+    }
+  }
+
+  /// Write the "library moved" marker to [provider] (the OLD backend). Left
+  /// behind on switch so a straggler still pointed at this backend learns the
+  /// library moved on. Best-effort: never throws.
+  Future<void> writeLibraryMovedMarker(
+    CloudStorageProvider provider,
+    LibraryMovedMarker marker,
+  ) async {
+    try {
+      final bytes = Uint8List.fromList(
+        utf8.encode(jsonEncode(marker.toJson())),
+      );
+      String? folderId;
+      try {
+        folderId = await provider.getOrCreateSyncFolder();
+      } catch (_) {
+        folderId = null;
+      }
+      await provider
+          .uploadFile(bytes, libraryMovedFileName, folderId: folderId)
+          .timeout(const Duration(seconds: 60));
+      _log.info('Wrote library moved marker -> ${marker.toProviderId}');
+    } catch (e) {
+      _log.warning('Could not write library moved marker: $e');
+    }
+  }
+
+  /// Remove the orphaned sync payload files from a backend the user switched
+  /// away from. Deletes the dive-library data files (the privacy/cost concern)
+  /// but deliberately KEEPS the moved marker: it carries no dive data and
+  /// still tells any not-yet-migrated straggler where the library went.
+  /// Best-effort; never throws.
+  Future<void> cleanupOldBackend(CloudStorageProvider provider) async {
+    await deleteAllSyncFiles(provider);
   }
 
   /// Sign out from the current cloud provider
@@ -982,9 +1910,11 @@ class SyncService {
 class _MergeResult {
   final int recordsApplied;
   final int conflictsFound;
+  final int recordsFailed;
 
   const _MergeResult({
     required this.recordsApplied,
     required this.conflictsFound,
+    this.recordsFailed = 0,
   });
 }

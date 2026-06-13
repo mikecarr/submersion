@@ -9,6 +9,7 @@ import 'package:submersion/features/dive_log/presentation/providers/view_config_
 import 'package:submersion/features/dive_sites/domain/entities/dive_site.dart'
     as domain;
 import 'package:submersion/features/divers/presentation/providers/diver_providers.dart';
+import 'package:submersion/features/dive_log/presentation/providers/dive_repository_provider.dart';
 import 'package:submersion/features/equipment/data/repositories/equipment_repository_impl.dart';
 import 'package:submersion/features/trips/data/repositories/trip_repository.dart';
 import 'package:submersion/features/trips/domain/constants/trip_field.dart';
@@ -45,12 +46,23 @@ final tripRepositoryProvider = Provider<TripRepository>((ref) {
   return TripRepository();
 });
 
-/// All trips provider
+/// All trips provider.
+///
+/// A one-shot read that self-invalidates whenever the `trips` table changes
+/// (a sync apply, a local create/edit/delete, ...), so list UIs refresh
+/// automatically while imperative `ref.read(allTripsProvider.future)` reads
+/// still resolve.
 final allTripsProvider = FutureProvider<List<Trip>>((ref) async {
   final repository = ref.watch(tripRepositoryProvider);
   final validatedDiverId = await ref.watch(
     validatedCurrentDiverIdProvider.future,
   );
+
+  final sub = repository.watchTripsChanges().listen(
+    (_) => ref.invalidateSelf(),
+  );
+  ref.onDispose(sub.cancel);
+
   return repository.getAllTrips(diverId: validatedDiverId);
 });
 
@@ -260,6 +272,20 @@ class TripListNotifier extends StateNotifier<AsyncValue<List<TripWithStats>>> {
         _initializeAndLoad();
       }
     });
+
+    // Auto-refresh when the underlying tables change (e.g. after a sync).
+    // Subscribe to both the trips table and the dives table: the stats query
+    // LEFT JOINs dives, so a synced dive can change the per-trip counts even
+    // when no trip row changed.
+    final tripsChangeSub = _repository.watchTripsChanges().listen(
+      (_) => _silentReload(),
+    );
+    final divesChangeSub = _ref
+        .read(diveRepositoryProvider)
+        .watchDivesChanges()
+        .listen((_) => _silentReload());
+    _ref.onDispose(tripsChangeSub.cancel);
+    _ref.onDispose(divesChangeSub.cancel);
   }
 
   Future<void> _initializeAndLoad() async {
@@ -284,6 +310,28 @@ class TripListNotifier extends StateNotifier<AsyncValue<List<TripWithStats>>> {
       state = AsyncValue.data(trips);
     } catch (e, st) {
       state = AsyncValue.error(e, st);
+    }
+  }
+
+  /// Silent reload used when the underlying tables change (e.g. after a sync).
+  ///
+  /// Mirrors [_loadTrips] but never flips state to loading, so the list
+  /// refreshes in place without flashing a spinner. The trip stats LEFT JOIN
+  /// the dives table, so this fires for both trip and dive table changes.
+  Future<void> _silentReload() async {
+    try {
+      // Resolve the validated diver id first: a tick can arrive before
+      // _initializeAndLoad() has populated _validatedDiverId, which would
+      // otherwise query with diverId: null and show unscoped stats.
+      _validatedDiverId = await _ref.read(
+        validatedCurrentDiverIdProvider.future,
+      );
+      final trips = await _repository.getAllTripsWithStats(
+        diverId: _validatedDiverId,
+      );
+      if (mounted) state = AsyncValue.data(trips);
+    } catch (e, st) {
+      if (mounted) state = AsyncValue.error(e, st);
     }
   }
 

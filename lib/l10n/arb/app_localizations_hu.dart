@@ -275,10 +275,39 @@ class AppLocalizationsHu extends AppLocalizations {
   String get backup_location_title => 'Mentés helye';
 
   @override
+  String get backup_replaceConfirm_confirm => 'Csere mindenhol';
+
+  @override
+  String get backup_replaceConfirm_content =>
+      'Az összes szinkronizált eszközön lévő könyvtár erre a biztonsági mentésre cserélődik. Minden eszköz először biztonsági mentést készít a jelenlegi adatairól. Ez nem vonható vissza.';
+
+  @override
+  String get backup_replaceConfirm_title => 'Könyvtár cseréje mindenhol?';
+
+  @override
   String get backup_restore_dialog_cancel => 'Mégse';
 
   @override
+  String get backup_restore_dialog_modeMerge_subtitle =>
+      'Visszaállítás erre az eszközre. A következő szinkronizálás egyesíti a visszaállított adatokat a felhőkönyvtárral.';
+
+  @override
+  String get backup_restore_dialog_modeMerge_title =>
+      'Egyesítés a következő szinkronizáláskor';
+
+  @override
+  String get backup_restore_dialog_modeReplace_subtitle =>
+      'A biztonsági mentés lesz a könyvtár ezen az eszközön, a felhőben és minden szinkronizált eszközön.';
+
+  @override
+  String get backup_restore_dialog_modeReplace_title => 'Csere mindenhol';
+
+  @override
   String get backup_restore_dialog_restore => 'Visszaállítás';
+
+  @override
+  String get backup_restore_dialog_restoreReplace =>
+      'Visszaállítás és csere mindenhol';
 
   @override
   String get backup_restore_dialog_safetyNote =>
@@ -2800,6 +2829,13 @@ class AppLocalizationsHu extends AppLocalizations {
   }
 
   @override
+  String get diveLog_computerSheet_description =>
+      'Válaszd ki, melyik számítógép profiljából szerkesztesz.';
+
+  @override
+  String get diveLog_computerSheet_title => 'Kiindulási profil kiválasztása';
+
+  @override
   String diveLog_cylinderSac_avgDepth(Object depth) {
     return 'Atlag: $depth';
   }
@@ -3343,7 +3379,43 @@ class AppLocalizationsHu extends AppLocalizations {
   String get diveLog_edit_gettingLocation => 'Helymeghatározás...';
 
   @override
+  String get diveLog_edit_group_buddies => 'Merülőtársak';
+
+  @override
+  String get diveLog_edit_group_conditions => 'Körülmények';
+
+  @override
+  String get diveLog_edit_group_experience => 'Élmény';
+
+  @override
+  String get diveLog_edit_group_gasGear => 'Gáz és felszerelés';
+
+  @override
+  String get diveLog_edit_group_theDive => 'A merülés';
+
+  @override
+  String get diveLog_edit_group_trip => 'Utazás';
+
+  @override
   String get diveLog_edit_headerNew => 'Uj merules rogzitese';
+
+  @override
+  String get diveLog_edit_invite_buddies => 'Merülőtársak hozzáadása';
+
+  @override
+  String get diveLog_edit_invite_conditions =>
+      'Körülmények hozzáadása - víz, látótávolság, időjárás';
+
+  @override
+  String get diveLog_edit_invite_experience =>
+      'Értékelés, észlelések, jegyzetek vagy címkék hozzáadása';
+
+  @override
+  String get diveLog_edit_invite_gasGear =>
+      'Gáz és felszerelés hozzáadása - mód, palackok, felszerelés, súly';
+
+  @override
+  String get diveLog_edit_invite_trip => 'Utazás vagy búvárközpont hozzáadása';
 
   @override
   String get diveLog_edit_label_airTemp => 'Levego hom.';
@@ -3423,6 +3495,30 @@ class AppLocalizationsHu extends AppLocalizations {
   @override
   String get diveLog_edit_notesHint =>
       'Jegyzetek hozzaadasa ehhez a meruleshez...';
+
+  @override
+  String get diveLog_edit_row_addSite => 'Merülőhely hozzáadása';
+
+  @override
+  String get diveLog_edit_row_diveCenter => 'Búvárközpont';
+
+  @override
+  String get diveLog_edit_row_entry => 'Beszállás';
+
+  @override
+  String get diveLog_edit_row_exit => 'Kiszállás';
+
+  @override
+  String get diveLog_edit_row_notSet => 'Nincs megadva';
+
+  @override
+  String get diveLog_edit_row_site => 'Merülőhely';
+
+  @override
+  String get diveLog_edit_row_surfaceInterval => 'Felszíni idő';
+
+  @override
+  String get diveLog_edit_row_trip => 'Utazás';
 
   @override
   String get diveLog_edit_save => 'Mentes';
@@ -3580,6 +3676,42 @@ class AppLocalizationsHu extends AppLocalizations {
       'A futásidő nem számítható ki a profilból';
 
   @override
+  String diveLog_edit_summary_items(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count elem',
+      one: '1 elem',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get diveLog_edit_summary_notes => 'jegyzetek';
+
+  @override
+  String diveLog_edit_summary_species(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count faj',
+      one: '1 faj',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String diveLog_edit_summary_tanks(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count palack',
+      one: '1 palack',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String diveLog_edit_surfaceInterval(Object interval) {
     return 'Felszini szunet: $interval';
   }
@@ -3590,6 +3722,26 @@ class AppLocalizationsHu extends AppLocalizations {
   @override
   String get diveLog_edit_surfacePressureHint =>
       'Standard: 1013 mbar tengerszinten';
+
+  @override
+  String get diveLog_edit_tankCard_done => 'Kész';
+
+  @override
+  String get diveLog_edit_tankCard_edit => 'Szerkesztés';
+
+  @override
+  String get diveLog_edit_tankCard_mix => 'Keverék';
+
+  @override
+  String get diveLog_edit_tankCard_pressure => 'Nyomás';
+
+  @override
+  String diveLog_edit_tankCard_title(int number) {
+    return '$number. palack';
+  }
+
+  @override
+  String get diveLog_edit_tankCard_volume => 'Térfogat';
 
   @override
   String get diveLog_edit_tooltip_calculateFromProfile =>
@@ -3691,6 +3843,17 @@ class AppLocalizationsHu extends AppLocalizations {
   @override
   String diveLog_equipmentSetPicker_errorLoading(Object error) {
     return 'Hiba a felszereléskészletek betoltesekor: $error';
+  }
+
+  @override
+  String diveLog_equipmentSetPicker_itemsSummary(int count, String names) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count elem',
+      one: '1 elem',
+    );
+    return '$_temp0: $names';
   }
 
   @override
@@ -4056,6 +4219,95 @@ class AppLocalizationsHu extends AppLocalizations {
   @override
   String get diveLog_listPage_menuMatchSites =>
       'Merülések hozzárendelése helyekhez';
+
+  @override
+  String get diveLog_sighting_decreaseCount => 'Darabszám csökkentése';
+
+  @override
+  String get diveLog_sighting_increaseCount => 'Darabszám növelése';
+
+  @override
+  String diveLog_speciesPicker_errorLoading(String error) {
+    return 'Hiba a fajok betöltésekor: $error';
+  }
+
+  @override
+  String get diveSites_edit_depth_heroMax => 'Max. mélység';
+
+  @override
+  String get diveSites_edit_depth_heroMin => 'Min. mélység';
+
+  @override
+  String get diveSites_edit_group_accessSafety => 'Megközelítés és biztonság';
+
+  @override
+  String get diveSites_edit_group_diveInfo => 'Merülési adatok';
+
+  @override
+  String get diveSites_edit_group_identity => 'Azonosítás';
+
+  @override
+  String get diveSites_edit_group_lifeNotes => 'Élővilág és jegyzetek';
+
+  @override
+  String get diveSites_edit_group_location => 'Helyzet';
+
+  @override
+  String get diveSites_edit_invite_accessSafety =>
+      'Megközelítés, parkolás, kikötés vagy veszélyek hozzáadása';
+
+  @override
+  String get diveSites_edit_invite_diveInfo =>
+      'Mélységtartomány, nehézség vagy értékelés hozzáadása';
+
+  @override
+  String get diveSites_edit_invite_lifeNotes =>
+      'Élővilág, jegyzetek vagy megosztás hozzáadása';
+
+  @override
+  String get diveSites_edit_invite_location =>
+      'GPS-pozíció vagy magasság hozzáadása';
+
+  @override
+  String get diveSites_edit_summary_shared => 'megosztva';
+
+  @override
+  String get forms_addSection_prefix => 'Hozzáadás:';
+
+  @override
+  String get forms_cancel => 'Mégse';
+
+  @override
+  String get forms_discard_body =>
+      'Nem mentett módosításai vannak. Ha most kilép, elvesznek.';
+
+  @override
+  String get forms_discard_discard => 'Elvetés';
+
+  @override
+  String get forms_discard_keepEditing => 'Szerkesztés folytatása';
+
+  @override
+  String get forms_discard_title => 'Elveti a módosításokat?';
+
+  @override
+  String get forms_save => 'Mentés';
+
+  @override
+  String forms_section_issues(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count probléma',
+      one: '1 probléma',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String forms_statCell_useProfileValue(String value) {
+    return '$value átvétele a merülési profilból';
+  }
 
   @override
   String get siteMatchReview_title => 'Helyek hozzárendelése';
@@ -10180,7 +10432,96 @@ class AppLocalizationsHu extends AppLocalizations {
       'Felho szinkronizalas letiltva';
 
   @override
+  String get settings_cloudSync_entry_subtitle =>
+      'Szinkronizálás felhőtárhelyen keresztül';
+
+  @override
+  String get settings_cloudSync_adopt_confirm =>
+      'Visszaállított könyvtár átvétele';
+
+  @override
+  String settings_cloudSync_adopt_dialogContent(
+    String deviceName,
+    String date,
+  ) {
+    return 'A könyvtárat egy biztonsági mentésből cserélték le a(z) \"$deviceName\" eszközön ($date). Az átvétellel ennek az eszköznek az adatai a visszaállított könyvtárra cserélődnek. Először biztonsági mentés készül az eszköz jelenlegi adatairól.';
+  }
+
+  @override
+  String get settings_cloudSync_adopt_dialogTitle =>
+      'Átveszi a visszaállított könyvtárat?';
+
+  @override
+  String get settings_cloudSync_adopt_notNow => 'Most nem';
+
+  @override
+  String get settings_cloudSync_firstSync_banner =>
+      'Az első szinkronizálás megerősítésre vár. Koppintson a \'Szinkronizálás most\' gombra, hogy átnézze, mi kerül összevonásra.';
+
+  @override
+  String get settings_cloudSync_firstSync_dialogConfirm =>
+      'Összevonás és szinkronizálás';
+
+  @override
+  String settings_cloudSync_firstSync_dialogContent(
+    int deviceCount,
+    int diveCount,
+  ) {
+    return 'Meglévő szinkronizálási adatok találhatók a felhőben ($deviceCount szinkronizálási fájl). Az első szinkronizálás ezeket az adatokat összevonja az ezen az eszközön található $diveCount merüléssel, minden szinkronizált eszközön.\n\nHa ugyanazokat a merüléseket minden eszközön külön adták hozzá, kétszer fognak megjelenni.';
+  }
+
+  @override
+  String get settings_cloudSync_firstSync_dialogTitle =>
+      'Könyvtárak összevonása?';
+
+  @override
+  String settings_cloudSync_replace_banner(String deviceName) {
+    return 'A szinkronizálás szünetel: a könyvtárat egy biztonsági mentésből cserélték le a(z) \"$deviceName\" eszközön. Koppintson a Szinkronizálás most gombra az áttekintéshez.';
+  }
+
+  @override
+  String get settings_cloudSync_switch_dialogTitle =>
+      'Vált a szinkronizálási szolgáltatón?';
+
+  @override
+  String settings_cloudSync_switch_dialogContent(
+    String fromName,
+    String toName,
+  ) {
+    return 'Az adatai nem kerülnek el a(z) $fromName szolgáltatóról – ott maradnak, amíg nem törli őket. A váltás után ennek az eszköznek a következő szinkronizálása összevonja az adatait azzal, ami már a(z) $toName szolgáltatón található. A többi eszköze továbbra is a(z) $fromName szolgáltatót használja, amíg azokon is át nem vált.';
+  }
+
+  @override
+  String get settings_cloudSync_switch_confirm => 'Váltás';
+
+  @override
+  String settings_cloudSync_moved_banner(
+    String deviceName,
+    String destination,
+  ) {
+    return 'A(z) $deviceName áthelyezte ezt a könyvtárat ide: $destination. Ezt a szolgáltatót már nem frissíti. Válassza a(z) $destination lehetőséget alább a költözés követéséhez.';
+  }
+
+  @override
+  String get settings_cloudSync_moved_dismiss => 'Elvetés';
+
+  @override
+  String settings_cloudSync_cleanup_banner(String backend) {
+    return 'Régi szinkronizálási adatok vannak még tárolva a(z) $backend szolgáltatón a szolgáltatóváltás előttről. Ezeket már nem használja a rendszer.';
+  }
+
+  @override
+  String get settings_cloudSync_cleanup_delete => 'Régi adatok törlése';
+
+  @override
+  String get settings_cloudSync_cleanup_keep => 'Megtartás';
+
+  @override
   String get settings_cloudSync_header_advanced => 'Halado';
+
+  @override
+  String get settings_cloudSync_signOut_backupWarning =>
+      'A felhőalapú biztonsági mentés kikapcsol, és a mentések az alapértelmezett helyre kerülnek.';
 
   @override
   String get settings_cloudSync_header_cloudProvider => 'Felho szolgaltato';
@@ -10237,10 +10578,6 @@ class AppLocalizationsHu extends AppLocalizations {
   String get settings_cloudSync_provider_icloud => 'iCloud';
 
   @override
-  String get settings_cloudSync_provider_icloud_subtitle =>
-      'Szinkronizalas Apple iCloud-on keresztül';
-
-  @override
   String settings_cloudSync_provider_initFailed(Object providerName) {
     return 'Nem sikerült a(z) $providerName szolgaltato inicializalasa';
   }
@@ -10248,6 +10585,17 @@ class AppLocalizationsHu extends AppLocalizations {
   @override
   String get settings_cloudSync_provider_notAvailable =>
       'Nem erheto el ezen a platformon';
+
+  @override
+  String get settings_cloudSync_provider_s3_edit =>
+      'S3-konfiguráció szerkesztése';
+
+  @override
+  String get settings_cloudSync_provider_s3_subtitle =>
+      'Bármely S3-kompatibilis tárolószolgáltatással működik';
+
+  @override
+  String get settings_cloudSync_provider_s3_title => 'S3-kompatibilis tároló';
 
   @override
   String get settings_cloudSync_resetDialog_cancel => 'Megse';
@@ -10328,7 +10676,7 @@ class AppLocalizationsHu extends AppLocalizations {
   String get settings_cloudSync_storageSettings => 'Tarolasi beallitasok';
 
   @override
-  String get settings_cloudSync_syncNow => 'Szinkronizalas most';
+  String get settings_cloudSync_syncNow => 'Szinkronizálás most';
 
   @override
   String get settings_cloudSync_syncOnLaunch => 'Szinkronizalas inditaskor';
@@ -11031,6 +11379,98 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get settings_profileHub_switchDiver => 'Búvár váltása';
+
+  @override
+  String get settings_s3Config_action_remove => 'Konfiguráció eltávolítása';
+
+  @override
+  String get settings_s3Config_action_testConnection => 'Kapcsolat tesztelése';
+
+  @override
+  String get settings_s3Config_advanced_title => 'Speciális';
+
+  @override
+  String get settings_s3Config_appBar_title => 'S3-kompatibilis tároló';
+
+  @override
+  String get settings_s3Config_error_secureStorage =>
+      'Nem sikerült hozzáférni a biztonságos tárolóhoz';
+
+  @override
+  String get settings_s3Config_field_accessKeyId_label => 'Access Key ID';
+
+  @override
+  String get settings_s3Config_field_bucket_label => 'Bucket';
+
+  @override
+  String get settings_s3Config_field_endpoint_helper =>
+      'Például: https://s3.example.com';
+
+  @override
+  String get settings_s3Config_field_endpoint_label => 'Végpont URL';
+
+  @override
+  String get settings_s3Config_field_pathStyle_label =>
+      'Path-style címzés használata';
+
+  @override
+  String get settings_s3Config_field_pathStyle_subtitle =>
+      'A legtöbb saját üzemeltetésű kiszolgálóhoz szükséges';
+
+  @override
+  String get settings_s3Config_field_prefix_label => 'Kulcs-előtag';
+
+  @override
+  String settings_s3Config_field_region_helperAuto(String region) {
+    return 'Automatikusan észlelve: $region';
+  }
+
+  @override
+  String get settings_s3Config_field_region_label => 'Régió';
+
+  @override
+  String get settings_s3Config_field_secretAccessKey_label =>
+      'Secret Access Key';
+
+  @override
+  String get settings_s3Config_remove_confirm_action => 'Eltávolítás';
+
+  @override
+  String get settings_s3Config_remove_confirm_body =>
+      'Az S3-on keresztüli szinkronizálás leáll ezen az eszközön. A bucketben lévő adatok nem törlődnek.';
+
+  @override
+  String get settings_s3Config_remove_confirm_title =>
+      'Eltávolítja az S3-konfigurációt?';
+
+  @override
+  String get settings_s3Config_removed => 'S3-konfiguráció eltávolítva';
+
+  @override
+  String get settings_s3Config_saved => 'S3-konfiguráció mentve';
+
+  @override
+  String settings_s3Config_test_regionDetected(String region) {
+    return 'Észlelt régió: $region';
+  }
+
+  @override
+  String get settings_s3Config_test_success => 'Sikeres kapcsolat';
+
+  @override
+  String get settings_s3Config_validation_endpointInvalid =>
+      'Adjon meg érvényes http:// vagy https:// URL-t';
+
+  @override
+  String get settings_s3Config_validation_endpointPath =>
+      'A végpont URL-je nem tartalmazhat elérési utat';
+
+  @override
+  String get settings_s3Config_validation_required => 'Kötelező';
+
+  @override
+  String get settings_s3Config_warning_http =>
+      'Ez a végpont titkosítatlan HTTP-t használ. A hitelesítő adatok és a merülési adatok titkosítatlanul utaznak; csak megbízható hálózaton használja.';
 
   @override
   String get settings_section_about_subtitle => 'Alkalmazas info es licencek';
@@ -16600,4 +17040,57 @@ class AppLocalizationsHu extends AppLocalizations {
     );
     return 'Búvár törölve. $trips megosztott $_temp0 és $sites megosztott $_temp1 átrendelve ehhez: $name.';
   }
+
+  @override
+  String get settings_cloudSync_duplicateDivers_title =>
+      'Duplikált búvárprofilok';
+
+  @override
+  String get settings_cloudSync_duplicateDivers_description =>
+      'A szinkronizálás több profilt talált ugyanazzal a névvel. Ez általában akkor fordul elő, amikor minden eszköz létrehozta a saját profilját a szinkronizálás előtt. Az összevonás az összes merülést és adatot egyetlen profilba helyezi át.';
+
+  @override
+  String settings_cloudSync_duplicateDivers_groupLabel(String name, int count) {
+    return '$name ($count profil)';
+  }
+
+  @override
+  String get settings_cloudSync_duplicateDivers_mergeButton => 'Összevon';
+
+  @override
+  String get settings_cloudSync_duplicateDivers_confirmTitle =>
+      'Búvárprofilok összevonása?';
+
+  @override
+  String settings_cloudSync_duplicateDivers_confirmBody(
+    int count,
+    String name,
+  ) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count duplikált profilból',
+      one: 'egy duplikált profilból',
+    );
+    return 'Az összes merülés, tanúsítvány, felszerelés és egyéb adat $_temp0 áthelyezésre kerül ide: \"$name\". Ez nem vonható vissza automatikusan.';
+  }
+
+  @override
+  String get settings_cloudSync_duplicateDivers_confirmCancel => 'Mégse';
+
+  @override
+  String get settings_cloudSync_duplicateDivers_confirmAction => 'Összevon';
+
+  @override
+  String settings_cloudSync_duplicateDivers_successSnack(String name) {
+    return 'Összevonva ide: $name';
+  }
+
+  @override
+  String settings_cloudSync_duplicateDivers_failureSnack(String error) {
+    return 'Összevonás sikertelen: $error';
+  }
+
+  @override
+  String get settings_cloudSync_duplicateDivers_undo => 'Visszavonás';
 }

@@ -10,6 +10,54 @@ import 'package:submersion/core/services/logger_service.dart';
 /// Sync data format version for compatibility checking
 const int syncFormatVersion = 2;
 
+/// Value serializer used only for sync export/import of BLOB-bearing entities.
+///
+/// Drift's default serializer encodes a `Uint8List` as a JSON array of byte
+/// ints (`[1,2,3,...]`), which is ~3x the size of the raw bytes once rendered
+/// as text. Dive-computer fingerprints and embedded photos make that the
+/// dominant cost of the sync file. This serializer encodes BLOBs as base64
+/// strings instead (~1.33x), delegating every other type to the default.
+///
+/// `fromJson` accepts BOTH formats so this is a non-breaking change: a payload
+/// already in iCloud that used the old array encoding still decodes, while new
+/// payloads are written as base64.
+class _SyncBlobValueSerializer extends ValueSerializer {
+  const _SyncBlobValueSerializer();
+
+  static const _default = ValueSerializer.defaults();
+
+  @override
+  T fromJson<T>(dynamic json) {
+    // Special-case BLOB columns: accept both base64 strings (the current
+    // sync format) and JSON byte arrays (the legacy format). The check is
+    // true for both `Uint8List` and `Uint8List?` (since `List<Uint8List>` is
+    // a subtype of `List<Uint8List?>`), so a future non-nullable BLOB column
+    // would still hit this branch instead of leaking back to the default
+    // serializer's array-of-bytes path.
+    final typeList = <T>[];
+    if (typeList is List<Uint8List?>) {
+      if (json == null) return null as T;
+      if (json is String) {
+        return base64Decode(json) as T;
+      }
+      if (json is List) {
+        return Uint8List.fromList(json.cast<int>()) as T;
+      }
+    }
+    return _default.fromJson<T>(json);
+  }
+
+  @override
+  dynamic toJson<T>(T value) {
+    if (value is Uint8List) {
+      return base64Encode(value);
+    }
+    return _default.toJson<T>(value);
+  }
+}
+
+const _syncBlobSerializer = _SyncBlobValueSerializer();
+
 /// Represents a record deletion to sync across devices.
 class SyncDeletion {
   final String id;
@@ -37,6 +85,26 @@ class SyncPayload {
   final SyncData data;
   final Map<String, List<SyncDeletion>> deletions;
 
+  /// The `data` section exactly as it appeared in the received document,
+  /// re-encoded from the decoded map (Dart maps preserve key order, and the
+  /// writer used compact jsonEncode, so this reproduces the writer's bytes).
+  /// Checksums must be verified against the WRITER's encoding: re-serializing
+  /// through this build's [SyncData.toJson] adds entity keys older builds
+  /// never wrote, which made every released build's payload "invalid".
+  /// Null for locally constructed payloads (export path).
+  final String? rawDataJson;
+
+  /// Random nonce minted for each upload. An install records its own recent
+  /// nonces (SharedPreferences); finding a nonce it never minted in its OWN
+  /// per-device cloud file means another install is syncing with this
+  /// device's identity (a "twin", typically created by whole-container OS
+  /// migration). Null in payloads written by older builds.
+  final String? uploadNonce;
+
+  /// Library epoch this payload was written under (see library_epoch.dart).
+  /// Null on legacy files, which become stale the moment any epoch exists.
+  final String? epochId;
+
   const SyncPayload({
     required this.version,
     required this.exportedAt,
@@ -45,6 +113,9 @@ class SyncPayload {
     required this.checksum,
     required this.data,
     required this.deletions,
+    this.rawDataJson,
+    this.uploadNonce,
+    this.epochId,
   });
 
   Map<String, dynamic> toJson() => {
@@ -57,6 +128,8 @@ class SyncPayload {
     'deletions': deletions.map(
       (key, value) => MapEntry(key, value.map((d) => d.toJson()).toList()),
     ),
+    'uploadNonce': uploadNonce,
+    'epochId': epochId,
   };
 
   factory SyncPayload.fromJson(Map<String, dynamic> json) {
@@ -69,6 +142,9 @@ class SyncPayload {
       lastSyncTimestamp: json['lastSyncTimestamp'] as int?,
       checksum: json['checksum'] as String,
       data: SyncData.fromJson(json['data'] as Map<String, dynamic>),
+      rawDataJson: jsonEncode(json['data']),
+      uploadNonce: json['uploadNonce'] as String?,
+      epochId: json['epochId'] as String?,
       deletions: rawDeletions.map((key, value) {
         final list = value as List? ?? [];
         final deletions = list
@@ -109,6 +185,7 @@ class SyncData {
   final List<Map<String, dynamic>> buddies;
   final List<Map<String, dynamic>> diveBuddies;
   final List<Map<String, dynamic>> certifications;
+  final List<Map<String, dynamic>> courses;
   final List<Map<String, dynamic>> serviceRecords;
   final List<Map<String, dynamic>> diveCenters;
   final List<Map<String, dynamic>> trips;
@@ -126,6 +203,12 @@ class SyncData {
   final List<Map<String, dynamic>> sightings;
   final List<Map<String, dynamic>> diveProfileEvents;
   final List<Map<String, dynamic>> gasSwitches;
+  final List<Map<String, dynamic>> diveCustomFields;
+  final List<Map<String, dynamic>> diveDataSources;
+  final List<Map<String, dynamic>> siteSpecies;
+  final List<Map<String, dynamic>> csvPresets;
+  final List<Map<String, dynamic>> viewConfigs;
+  final List<Map<String, dynamic>> fieldPresets;
 
   const SyncData({
     this.divers = const [],
@@ -143,6 +226,7 @@ class SyncData {
     this.buddies = const [],
     this.diveBuddies = const [],
     this.certifications = const [],
+    this.courses = const [],
     this.serviceRecords = const [],
     this.diveCenters = const [],
     this.trips = const [],
@@ -160,6 +244,12 @@ class SyncData {
     this.sightings = const [],
     this.diveProfileEvents = const [],
     this.gasSwitches = const [],
+    this.diveCustomFields = const [],
+    this.diveDataSources = const [],
+    this.siteSpecies = const [],
+    this.csvPresets = const [],
+    this.viewConfigs = const [],
+    this.fieldPresets = const [],
   });
 
   Map<String, dynamic> toJson() => {
@@ -178,6 +268,7 @@ class SyncData {
     'buddies': buddies,
     'diveBuddies': diveBuddies,
     'certifications': certifications,
+    'courses': courses,
     'serviceRecords': serviceRecords,
     'diveCenters': diveCenters,
     'trips': trips,
@@ -195,6 +286,12 @@ class SyncData {
     'sightings': sightings,
     'diveProfileEvents': diveProfileEvents,
     'gasSwitches': gasSwitches,
+    'diveCustomFields': diveCustomFields,
+    'diveDataSources': diveDataSources,
+    'siteSpecies': siteSpecies,
+    'csvPresets': csvPresets,
+    'viewConfigs': viewConfigs,
+    'fieldPresets': fieldPresets,
   };
 
   factory SyncData.fromJson(Map<String, dynamic> json) {
@@ -214,6 +311,7 @@ class SyncData {
       buddies: _parseList(json['buddies']),
       diveBuddies: _parseList(json['diveBuddies']),
       certifications: _parseList(json['certifications']),
+      courses: _parseList(json['courses']),
       serviceRecords: _parseList(json['serviceRecords']),
       diveCenters: _parseList(json['diveCenters']),
       trips: _parseList(json['trips']),
@@ -231,6 +329,12 @@ class SyncData {
       sightings: _parseList(json['sightings']),
       diveProfileEvents: _parseList(json['diveProfileEvents']),
       gasSwitches: _parseList(json['gasSwitches']),
+      diveCustomFields: _parseList(json['diveCustomFields']),
+      diveDataSources: _parseList(json['diveDataSources']),
+      siteSpecies: _parseList(json['siteSpecies']),
+      csvPresets: _parseList(json['csvPresets']),
+      viewConfigs: _parseList(json['viewConfigs']),
+      fieldPresets: _parseList(json['fieldPresets']),
     );
   }
 
@@ -238,16 +342,6 @@ class SyncData {
     if (value == null) return [];
     return (value as List).map((e) => e as Map<String, dynamic>).toList();
   }
-
-  /// Check if this sync data is empty
-  bool get isEmpty =>
-      divers.isEmpty &&
-      dives.isEmpty &&
-      diveSites.isEmpty &&
-      equipment.isEmpty &&
-      buddies.isEmpty &&
-      tankPresets.isEmpty &&
-      media.isEmpty;
 }
 
 /// Service for serializing and deserializing sync data
@@ -275,6 +369,8 @@ class SyncDataSerializer {
     DateTime? since,
     int? lastSyncTimestamp,
     required List<DeletionLogData> deletions,
+    String? uploadNonce,
+    String? epochId,
   }) async {
     try {
       final sinceMs = since?.millisecondsSinceEpoch;
@@ -330,6 +426,7 @@ class SyncDataSerializer {
           'certifications',
           () => _exportCertifications(sinceMs),
         ),
+        courses: await _safeExport('courses', () => _exportCourses(sinceMs)),
         serviceRecords: await _safeExport(
           'serviceRecords',
           () => _exportServiceRecords(sinceMs),
@@ -380,6 +477,24 @@ class SyncDataSerializer {
           'gasSwitches',
           () => _exportGasSwitches(sinceMs),
         ),
+        diveCustomFields: await _safeExport(
+          'diveCustomFields',
+          _exportDiveCustomFields,
+        ),
+        diveDataSources: await _safeExport(
+          'diveDataSources',
+          _exportDiveDataSources,
+        ),
+        siteSpecies: await _safeExport('siteSpecies', _exportSiteSpecies),
+        csvPresets: await _safeExport(
+          'csvPresets',
+          () => _exportCsvPresets(sinceMs),
+        ),
+        viewConfigs: await _safeExport(
+          'viewConfigs',
+          () => _exportViewConfigs(sinceMs),
+        ),
+        fieldPresets: await _safeExport('fieldPresets', _exportFieldPresets),
       );
 
       // Group deletions by entity type
@@ -409,6 +524,8 @@ class SyncDataSerializer {
         checksum: checksum,
         data: data,
         deletions: deletionMap,
+        uploadNonce: uploadNonce,
+        epochId: epochId,
       );
     } catch (e, stackTrace) {
       _log.error(
@@ -431,9 +548,13 @@ class SyncDataSerializer {
     return SyncPayload.fromJson(map);
   }
 
-  /// Validate checksum of payload
+  /// Validate checksum of payload.
+  ///
+  /// Verified over the data section as received ([SyncPayload.rawDataJson])
+  /// so payloads written by builds with fewer/more entity keys still
+  /// validate; falls back to re-serializing for locally built payloads.
   bool validateChecksum(SyncPayload payload) {
-    final dataJson = jsonEncode(payload.data.toJson());
+    final dataJson = payload.rawDataJson ?? jsonEncode(payload.data.toJson());
     final computed = _computeChecksum(dataJson);
     return computed == payload.checksum;
   }
@@ -449,6 +570,84 @@ class SyncDataSerializer {
   // Import / Apply Methods
   // ============================================================================
 
+  /// Runs [body] inside a single DB transaction with deferred FK checks.
+  ///
+  /// `PRAGMA defer_foreign_keys = ON` is per-transaction in SQLite, so it must
+  /// be set as the first statement inside this transaction. It auto-resets at
+  /// commit/rollback. Required for `_applyRemotePayload`: a single payload can
+  /// contain rows that reference siblings appearing later in the merge order
+  /// (e.g. a dive whose `siteId` points at a `diveSites` row applied after).
+  Future<T> applyInDeferredFkTransaction<T>(Future<T> Function() body) async {
+    return _db.transaction(() async {
+      await _db.customStatement('PRAGMA defer_foreign_keys = ON');
+      return await body();
+    });
+  }
+
+  /// Repairs every foreign key left dangling after a sync apply: a nullable
+  /// reference is cleared; a non-nullable orphan is deleted (a manual cascade).
+  /// Applying a remote deletion of a parent can leave a local row pointing at
+  /// it via a non-cascading FK, which would otherwise fail the deferred-FK
+  /// COMMIT and abort the whole sync. Must run inside
+  /// [applyInDeferredFkTransaction] so COMMIT sees a consistent graph. Loops
+  /// because deleting an orphan can in turn dangle its own children.
+  Future<void> repairDanglingForeignKeys() async {
+    for (var pass = 0; pass < 5; pass++) {
+      final violations = await _db
+          .customSelect('PRAGMA foreign_key_check')
+          .get();
+      if (violations.isEmpty) return;
+
+      for (final v in violations) {
+        final table = v.read<String>('table');
+        final rowid = v.data['rowid'] as int?;
+        if (rowid == null) continue; // WITHOUT ROWID tables: not in sync schema
+        final fkid = v.read<int>('fkid');
+
+        final fkList = await _db
+            .customSelect('PRAGMA foreign_key_list("$table")')
+            .get();
+        final fk = fkList.where((f) => f.read<int>('id') == fkid).toList();
+        if (fk.isEmpty) continue;
+        final column = fk.first.read<String>('from');
+
+        final info = await _db
+            .customSelect('PRAGMA table_info("$table")')
+            .get();
+        final col = info
+            .where((c) => c.read<String>('name') == column)
+            .toList();
+        final notNull = col.isNotEmpty && col.first.read<int>('notnull') == 1;
+
+        if (notNull) {
+          _log.warning(
+            'Sync repair: deleting orphaned $table row (no parent for "$column")',
+          );
+          await _db.customStatement('DELETE FROM "$table" WHERE rowid = ?', [
+            rowid,
+          ]);
+        } else {
+          _log.warning('Sync repair: clearing dangling $table."$column"');
+          await _db.customStatement(
+            'UPDATE "$table" SET "$column" = NULL WHERE rowid = ?',
+            [rowid],
+          );
+        }
+      }
+    }
+    // Still inconsistent after the cap: fail now with a targeted error rather
+    // than letting the deferred-FK COMMIT throw a context-free 787.
+    final remaining = await _db.customSelect('PRAGMA foreign_key_check').get();
+    _log.error(
+      'Foreign-key repair did not converge after 5 passes; '
+      '${remaining.length} violation(s) remain',
+    );
+    throw StateError(
+      'Sync foreign-key repair did not converge: '
+      '${remaining.length} dangling reference(s) remain after 5 passes',
+    );
+  }
+
   Future<Map<String, dynamic>?> fetchRecord(
     String entityType,
     String recordId,
@@ -458,27 +657,27 @@ class SyncDataSerializer {
         final row = await (_db.select(
           _db.divers,
         )..where((t) => t.id.equals(recordId))).getSingleOrNull();
-        return row == null ? null : _diverToJson(row);
+        return row?.toJson();
       case 'diverSettings':
         final row = await (_db.select(
           _db.diverSettings,
         )..where((t) => t.id.equals(recordId))).getSingleOrNull();
-        return row == null ? null : _diverSettingToJson(row);
+        return row?.toJson();
       case 'dives':
         final row = await (_db.select(
           _db.dives,
         )..where((t) => t.id.equals(recordId))).getSingleOrNull();
-        return row == null ? null : _diveToJson(row);
+        return row?.toJson();
       case 'diveProfiles':
         final row = await (_db.select(
           _db.diveProfiles,
         )..where((t) => t.id.equals(recordId))).getSingleOrNull();
-        return row == null ? null : _diveProfileToJson(row);
+        return row?.toJson();
       case 'diveTanks':
         final row = await (_db.select(
           _db.diveTanks,
         )..where((t) => t.id.equals(recordId))).getSingleOrNull();
-        return row == null ? null : _diveTankToJson(row);
+        return row?.toJson();
       case 'diveEquipment':
         final parts = _splitCompositeId(recordId);
         if (parts.length != 2) return null;
@@ -487,27 +686,27 @@ class SyncDataSerializer {
                   ..where((t) => t.diveId.equals(parts[0]))
                   ..where((t) => t.equipmentId.equals(parts[1])))
                 .getSingleOrNull();
-        return row == null ? null : _diveEquipmentToJson(row);
+        return row?.toJson();
       case 'diveWeights':
         final row = await (_db.select(
           _db.diveWeights,
         )..where((t) => t.id.equals(recordId))).getSingleOrNull();
-        return row == null ? null : _diveWeightToJson(row);
+        return row?.toJson();
       case 'diveSites':
         final row = await (_db.select(
           _db.diveSites,
         )..where((t) => t.id.equals(recordId))).getSingleOrNull();
-        return row == null ? null : _diveSiteToJson(row);
+        return row?.toJson();
       case 'equipment':
         final row = await (_db.select(
           _db.equipment,
         )..where((t) => t.id.equals(recordId))).getSingleOrNull();
-        return row == null ? null : _equipmentToJson(row);
+        return row?.toJson();
       case 'equipmentSets':
         final row = await (_db.select(
           _db.equipmentSets,
         )..where((t) => t.id.equals(recordId))).getSingleOrNull();
-        return row == null ? null : _equipmentSetToJson(row);
+        return row?.toJson();
       case 'equipmentSetItems':
         final parts = _splitCompositeId(recordId);
         if (parts.length != 2) return null;
@@ -523,107 +722,143 @@ class SyncDataSerializer {
         final row = await (_db.select(
           _db.media,
         )..where((t) => t.id.equals(recordId))).getSingleOrNull();
-        return row == null ? null : _mediaToJson(row);
+        return row?.toJson(serializer: _syncBlobSerializer);
       case 'buddies':
         final row = await (_db.select(
           _db.buddies,
         )..where((t) => t.id.equals(recordId))).getSingleOrNull();
-        return row == null ? null : _buddyToJson(row);
+        return row?.toJson();
       case 'diveBuddies':
         final row = await (_db.select(
           _db.diveBuddies,
         )..where((t) => t.id.equals(recordId))).getSingleOrNull();
-        return row == null ? null : _diveBuddyToJson(row);
+        return row?.toJson();
       case 'certifications':
         final row = await (_db.select(
           _db.certifications,
         )..where((t) => t.id.equals(recordId))).getSingleOrNull();
-        return row == null ? null : _certificationToJson(row);
+        return row?.toJson(serializer: _syncBlobSerializer);
+      case 'courses':
+        final row = await (_db.select(
+          _db.courses,
+        )..where((t) => t.id.equals(recordId))).getSingleOrNull();
+        // Drift-generated toJson keeps fetch symmetric with import.
+        return row?.toJson();
       case 'serviceRecords':
         final row = await (_db.select(
           _db.serviceRecords,
         )..where((t) => t.id.equals(recordId))).getSingleOrNull();
-        return row == null ? null : _serviceRecordToJson(row);
+        return row?.toJson();
       case 'diveCenters':
         final row = await (_db.select(
           _db.diveCenters,
         )..where((t) => t.id.equals(recordId))).getSingleOrNull();
-        return row == null ? null : _diveCenterToJson(row);
+        return row?.toJson();
       case 'trips':
         final row = await (_db.select(
           _db.trips,
         )..where((t) => t.id.equals(recordId))).getSingleOrNull();
-        return row == null ? null : _tripToJson(row);
+        return row?.toJson();
       case 'liveaboardDetails':
         final row = await (_db.select(
           _db.liveaboardDetailRecords,
         )..where((t) => t.id.equals(recordId))).getSingleOrNull();
-        return row == null ? null : _liveaboardDetailToJson(row);
+        return row?.toJson();
       case 'itineraryDays':
         final row = await (_db.select(
           _db.tripItineraryDays,
         )..where((t) => t.id.equals(recordId))).getSingleOrNull();
-        return row == null ? null : _itineraryDayToJson(row);
+        return row?.toJson();
       case 'tags':
         final row = await (_db.select(
           _db.tags,
         )..where((t) => t.id.equals(recordId))).getSingleOrNull();
-        return row == null ? null : _tagToJson(row);
+        return row?.toJson();
       case 'diveTags':
         final row = await (_db.select(
           _db.diveTags,
         )..where((t) => t.id.equals(recordId))).getSingleOrNull();
-        return row == null ? null : _diveTagToJson(row);
+        return row?.toJson();
       case 'diveTypes':
         final row = await (_db.select(
           _db.diveTypes,
         )..where((t) => t.id.equals(recordId))).getSingleOrNull();
-        return row == null ? null : _diveTypeToJson(row);
+        return row?.toJson();
       case 'tankPresets':
         final row = await (_db.select(
           _db.tankPresets,
         )..where((t) => t.id.equals(recordId))).getSingleOrNull();
-        return row == null ? null : _tankPresetToJson(row);
+        return row?.toJson();
       case 'diveComputers':
         final row = await (_db.select(
           _db.diveComputers,
         )..where((t) => t.id.equals(recordId))).getSingleOrNull();
-        return row == null ? null : _diveComputerToJson(row);
+        return row?.toJson();
       case 'tankPressureProfiles':
         final row = await (_db.select(
           _db.tankPressureProfiles,
         )..where((t) => t.id.equals(recordId))).getSingleOrNull();
-        return row == null ? null : _tankPressureProfileToJson(row);
+        return row?.toJson();
       case 'tideRecords':
         final row = await (_db.select(
           _db.tideRecords,
         )..where((t) => t.id.equals(recordId))).getSingleOrNull();
-        return row == null ? null : _tideRecordToJson(row);
+        return row?.toJson();
       case 'settings':
         final row = await (_db.select(
           _db.settings,
         )..where((t) => t.key.equals(recordId))).getSingleOrNull();
-        return row == null ? null : _settingsToJson(row);
+        return row?.toJson();
       case 'species':
         final row = await (_db.select(
           _db.species,
         )..where((t) => t.id.equals(recordId))).getSingleOrNull();
-        return row == null ? null : _speciesToJson(row);
+        return row?.toJson();
       case 'sightings':
         final row = await (_db.select(
           _db.sightings,
         )..where((t) => t.id.equals(recordId))).getSingleOrNull();
-        return row == null ? null : _sightingToJson(row);
+        return row?.toJson();
       case 'diveProfileEvents':
         final row = await (_db.select(
           _db.diveProfileEvents,
         )..where((t) => t.id.equals(recordId))).getSingleOrNull();
-        return row == null ? null : _diveProfileEventToJson(row);
+        return row?.toJson();
       case 'gasSwitches':
         final row = await (_db.select(
           _db.gasSwitches,
         )..where((t) => t.id.equals(recordId))).getSingleOrNull();
-        return row == null ? null : _gasSwitchToJson(row);
+        return row?.toJson();
+      case 'diveCustomFields':
+        final row = await (_db.select(
+          _db.diveCustomFields,
+        )..where((t) => t.id.equals(recordId))).getSingleOrNull();
+        return row?.toJson();
+      case 'diveDataSources':
+        final row = await (_db.select(
+          _db.diveDataSources,
+        )..where((t) => t.id.equals(recordId))).getSingleOrNull();
+        return row?.toJson(serializer: _syncBlobSerializer);
+      case 'siteSpecies':
+        final row = await (_db.select(
+          _db.siteSpecies,
+        )..where((t) => t.id.equals(recordId))).getSingleOrNull();
+        return row?.toJson();
+      case 'csvPresets':
+        final row = await (_db.select(
+          _db.csvPresets,
+        )..where((t) => t.id.equals(recordId))).getSingleOrNull();
+        return row?.toJson();
+      case 'viewConfigs':
+        final row = await (_db.select(
+          _db.viewConfigs,
+        )..where((t) => t.id.equals(recordId))).getSingleOrNull();
+        return row?.toJson();
+      case 'fieldPresets':
+        final row = await (_db.select(
+          _db.fieldPresets,
+        )..where((t) => t.id.equals(recordId))).getSingleOrNull();
+        return row?.toJson();
     }
     return null;
   }
@@ -689,7 +924,9 @@ class SyncDataSerializer {
       case 'media':
         await _db
             .into(_db.media)
-            .insertOnConflictUpdate(MediaData.fromJson(data));
+            .insertOnConflictUpdate(
+              MediaData.fromJson(data, serializer: _syncBlobSerializer),
+            );
         return;
       case 'buddies':
         await _db
@@ -704,7 +941,14 @@ class SyncDataSerializer {
       case 'certifications':
         await _db
             .into(_db.certifications)
-            .insertOnConflictUpdate(Certification.fromJson(data));
+            .insertOnConflictUpdate(
+              Certification.fromJson(data, serializer: _syncBlobSerializer),
+            );
+        return;
+      case 'courses':
+        await _db
+            .into(_db.courses)
+            .insertOnConflictUpdate(Course.fromJson(data));
         return;
       case 'serviceRecords':
         await _db
@@ -763,6 +1007,13 @@ class SyncDataSerializer {
             .insertOnConflictUpdate(TideRecord.fromJson(data));
         return;
       case 'settings':
+        // Never let an incoming payload overwrite a device-local settings key
+        // (e.g. active_diver_id). Export filters these, but a peer on an older
+        // build may still ship them; applying would switch this device's
+        // active diver. Symmetric with _exportSettings.
+        if (_deviceLocalSettingsKeys.contains(data['key'])) {
+          return;
+        }
         await _db
             .into(_db.settings)
             .insertOnConflictUpdate(Setting.fromJson(data));
@@ -793,6 +1044,51 @@ class SyncDataSerializer {
         await _db
             .into(_db.gasSwitches)
             .insertOnConflictUpdate(GasSwitche.fromJson(data));
+        return;
+      case 'diveCustomFields':
+        await _db
+            .into(_db.diveCustomFields)
+            .insertOnConflictUpdate(
+              DiveCustomField.fromJson(_withTimestampDefaults(data)),
+            );
+        return;
+      case 'diveDataSources':
+        await _db
+            .into(_db.diveDataSources)
+            .insertOnConflictUpdate(
+              DiveDataSourcesData.fromJson(
+                _withTimestampDefaults(data),
+                serializer: _syncBlobSerializer,
+              ),
+            );
+        return;
+      case 'siteSpecies':
+        await _db
+            .into(_db.siteSpecies)
+            .insertOnConflictUpdate(
+              SiteSpecy.fromJson(_withTimestampDefaults(data)),
+            );
+        return;
+      case 'csvPresets':
+        await _db
+            .into(_db.csvPresets)
+            .insertOnConflictUpdate(
+              CsvPreset.fromJson(_withTimestampDefaults(data)),
+            );
+        return;
+      case 'viewConfigs':
+        await _db
+            .into(_db.viewConfigs)
+            .insertOnConflictUpdate(
+              ViewConfig.fromJson(_withTimestampDefaults(data)),
+            );
+        return;
+      case 'fieldPresets':
+        await _db
+            .into(_db.fieldPresets)
+            .insertOnConflictUpdate(
+              FieldPreset.fromJson(_withTimestampDefaults(data)),
+            );
         return;
     }
   }
@@ -878,6 +1174,11 @@ class SyncDataSerializer {
           _db.certifications,
         )..where((t) => t.id.equals(recordId))).go();
         return;
+      case 'courses':
+        await (_db.delete(
+          _db.courses,
+        )..where((t) => t.id.equals(recordId))).go();
+        return;
       case 'serviceRecords':
         await (_db.delete(
           _db.serviceRecords,
@@ -959,6 +1260,36 @@ class SyncDataSerializer {
           _db.gasSwitches,
         )..where((t) => t.id.equals(recordId))).go();
         return;
+      case 'diveCustomFields':
+        await (_db.delete(
+          _db.diveCustomFields,
+        )..where((t) => t.id.equals(recordId))).go();
+        return;
+      case 'diveDataSources':
+        await (_db.delete(
+          _db.diveDataSources,
+        )..where((t) => t.id.equals(recordId))).go();
+        return;
+      case 'siteSpecies':
+        await (_db.delete(
+          _db.siteSpecies,
+        )..where((t) => t.id.equals(recordId))).go();
+        return;
+      case 'csvPresets':
+        await (_db.delete(
+          _db.csvPresets,
+        )..where((t) => t.id.equals(recordId))).go();
+        return;
+      case 'viewConfigs':
+        await (_db.delete(
+          _db.viewConfigs,
+        )..where((t) => t.id.equals(recordId))).go();
+        return;
+      case 'fieldPresets':
+        await (_db.delete(
+          _db.fieldPresets,
+        )..where((t) => t.id.equals(recordId))).go();
+        return;
     }
   }
 
@@ -976,7 +1307,7 @@ class SyncDataSerializer {
       query.where((t) => t.updatedAt.isBiggerOrEqualValue(since));
     }
     final rows = await query.get();
-    return rows.map((r) => _diverToJson(r)).toList();
+    return rows.map((r) => r.toJson()).toList();
   }
 
   Future<List<Map<String, dynamic>>> _exportDiverSettings(int? since) async {
@@ -985,7 +1316,7 @@ class SyncDataSerializer {
       query.where((t) => t.updatedAt.isBiggerOrEqualValue(since));
     }
     final rows = await query.get();
-    return rows.map((r) => _diverSettingToJson(r)).toList();
+    return rows.map((r) => r.toJson()).toList();
   }
 
   Future<List<Map<String, dynamic>>> _exportDives(int? since) async {
@@ -994,7 +1325,10 @@ class SyncDataSerializer {
       query.where((t) => t.updatedAt.isBiggerOrEqualValue(since));
     }
     final rows = await query.get();
-    return rows.map((r) => _diveToJson(r)).toList();
+    // Export via the generated data-class toJson() so the keys are symmetric
+    // with Dive.fromJson used on import. A hand-maintained map silently drops
+    // fields (e.g. bottomTime, GPS) and breaks cross-device sync.
+    return rows.map((r) => r.toJson()).toList();
   }
 
   Future<List<Map<String, dynamic>>> _exportDiveProfiles(int? since) async {
@@ -1009,10 +1343,10 @@ class SyncDataSerializer {
       final rows = await (_db.select(
         _db.diveProfiles,
       )..where((t) => t.diveId.isIn(diveIds))).get();
-      return rows.map((r) => _diveProfileToJson(r)).toList();
+      return rows.map((r) => r.toJson()).toList();
     }
     final rows = await _db.select(_db.diveProfiles).get();
-    return rows.map((r) => _diveProfileToJson(r)).toList();
+    return rows.map((r) => r.toJson()).toList();
   }
 
   Future<List<Map<String, dynamic>>> _exportDiveTanks(int? since) async {
@@ -1027,10 +1361,10 @@ class SyncDataSerializer {
       final rows = await (_db.select(
         _db.diveTanks,
       )..where((t) => t.diveId.isIn(diveIds))).get();
-      return rows.map((r) => _diveTankToJson(r)).toList();
+      return rows.map((r) => r.toJson()).toList();
     }
     final rows = await _db.select(_db.diveTanks).get();
-    return rows.map((r) => _diveTankToJson(r)).toList();
+    return rows.map((r) => r.toJson()).toList();
   }
 
   Future<List<Map<String, dynamic>>> _exportDiveEquipment(int? since) async {
@@ -1044,10 +1378,10 @@ class SyncDataSerializer {
       final rows = await (_db.select(
         _db.diveEquipment,
       )..where((t) => t.diveId.isIn(diveIds))).get();
-      return rows.map((r) => _diveEquipmentToJson(r)).toList();
+      return rows.map((r) => r.toJson()).toList();
     }
     final rows = await _db.select(_db.diveEquipment).get();
-    return rows.map((r) => _diveEquipmentToJson(r)).toList();
+    return rows.map((r) => r.toJson()).toList();
   }
 
   Future<List<Map<String, dynamic>>> _exportDiveWeights(int? since) async {
@@ -1061,10 +1395,10 @@ class SyncDataSerializer {
       final rows = await (_db.select(
         _db.diveWeights,
       )..where((t) => t.diveId.isIn(diveIds))).get();
-      return rows.map((r) => _diveWeightToJson(r)).toList();
+      return rows.map((r) => r.toJson()).toList();
     }
     final rows = await _db.select(_db.diveWeights).get();
-    return rows.map((r) => _diveWeightToJson(r)).toList();
+    return rows.map((r) => r.toJson()).toList();
   }
 
   Future<List<Map<String, dynamic>>> _exportDiveSites(int? since) async {
@@ -1073,7 +1407,7 @@ class SyncDataSerializer {
       query.where((t) => t.updatedAt.isBiggerOrEqualValue(since));
     }
     final rows = await query.get();
-    return rows.map((r) => _diveSiteToJson(r)).toList();
+    return rows.map((r) => r.toJson()).toList();
   }
 
   Future<List<Map<String, dynamic>>> _exportEquipment(int? since) async {
@@ -1082,7 +1416,7 @@ class SyncDataSerializer {
       query.where((t) => t.updatedAt.isBiggerOrEqualValue(since));
     }
     final rows = await query.get();
-    return rows.map((r) => _equipmentToJson(r)).toList();
+    return rows.map((r) => r.toJson()).toList();
   }
 
   Future<List<Map<String, dynamic>>> _exportEquipmentSets(int? since) async {
@@ -1091,7 +1425,7 @@ class SyncDataSerializer {
       query.where((t) => t.updatedAt.isBiggerOrEqualValue(since));
     }
     final rows = await query.get();
-    return rows.map((r) => _equipmentSetToJson(r)).toList();
+    return rows.map((r) => r.toJson()).toList();
   }
 
   Future<List<Map<String, dynamic>>> _exportEquipmentSetItems() async {
@@ -1107,7 +1441,8 @@ class SyncDataSerializer {
       query.where((t) => t.takenAt.isBiggerOrEqualValue(since));
     }
     final rows = await query.get();
-    return rows.map((r) => _mediaToJson(r)).toList();
+    // Media carries the imageData BLOB; encode it as base64, not a byte array.
+    return rows.map((r) => r.toJson(serializer: _syncBlobSerializer)).toList();
   }
 
   Future<List<Map<String, dynamic>>> _exportBuddies(int? since) async {
@@ -1116,7 +1451,7 @@ class SyncDataSerializer {
       query.where((t) => t.updatedAt.isBiggerOrEqualValue(since));
     }
     final rows = await query.get();
-    return rows.map((r) => _buddyToJson(r)).toList();
+    return rows.map((r) => r.toJson()).toList();
   }
 
   Future<List<Map<String, dynamic>>> _exportDiveBuddies(int? since) async {
@@ -1130,10 +1465,10 @@ class SyncDataSerializer {
       final rows = await (_db.select(
         _db.diveBuddies,
       )..where((t) => t.diveId.isIn(diveIds))).get();
-      return rows.map((r) => _diveBuddyToJson(r)).toList();
+      return rows.map((r) => r.toJson()).toList();
     }
     final rows = await _db.select(_db.diveBuddies).get();
-    return rows.map((r) => _diveBuddyToJson(r)).toList();
+    return rows.map((r) => r.toJson()).toList();
   }
 
   Future<List<Map<String, dynamic>>> _exportCertifications(int? since) async {
@@ -1142,7 +1477,17 @@ class SyncDataSerializer {
       query.where((t) => t.updatedAt.isBiggerOrEqualValue(since));
     }
     final rows = await query.get();
-    return rows.map((r) => _certificationToJson(r)).toList();
+    // Certifications carry photoFront/photoBack BLOBs; base64-encode them.
+    return rows.map((r) => r.toJson(serializer: _syncBlobSerializer)).toList();
+  }
+
+  Future<List<Map<String, dynamic>>> _exportCourses(int? since) async {
+    final query = _db.select(_db.courses);
+    if (since != null) {
+      query.where((t) => t.updatedAt.isBiggerOrEqualValue(since));
+    }
+    final rows = await query.get();
+    return rows.map((r) => r.toJson()).toList();
   }
 
   Future<List<Map<String, dynamic>>> _exportServiceRecords(int? since) async {
@@ -1151,7 +1496,7 @@ class SyncDataSerializer {
       query.where((t) => t.updatedAt.isBiggerOrEqualValue(since));
     }
     final rows = await query.get();
-    return rows.map((r) => _serviceRecordToJson(r)).toList();
+    return rows.map((r) => r.toJson()).toList();
   }
 
   Future<List<Map<String, dynamic>>> _exportDiveCenters(int? since) async {
@@ -1160,7 +1505,7 @@ class SyncDataSerializer {
       query.where((t) => t.updatedAt.isBiggerOrEqualValue(since));
     }
     final rows = await query.get();
-    return rows.map((r) => _diveCenterToJson(r)).toList();
+    return rows.map((r) => r.toJson()).toList();
   }
 
   Future<List<Map<String, dynamic>>> _exportTrips(int? since) async {
@@ -1169,7 +1514,7 @@ class SyncDataSerializer {
       query.where((t) => t.updatedAt.isBiggerOrEqualValue(since));
     }
     final rows = await query.get();
-    return rows.map((r) => _tripToJson(r)).toList();
+    return rows.map((r) => r.toJson()).toList();
   }
 
   Future<List<Map<String, dynamic>>> _exportLiveaboardDetails(
@@ -1180,7 +1525,7 @@ class SyncDataSerializer {
       query.where((t) => t.updatedAt.isBiggerOrEqualValue(since));
     }
     final rows = await query.get();
-    return rows.map((r) => _liveaboardDetailToJson(r)).toList();
+    return rows.map((r) => r.toJson()).toList();
   }
 
   Future<List<Map<String, dynamic>>> _exportItineraryDays(int? since) async {
@@ -1189,7 +1534,7 @@ class SyncDataSerializer {
       query.where((t) => t.updatedAt.isBiggerOrEqualValue(since));
     }
     final rows = await query.get();
-    return rows.map((r) => _itineraryDayToJson(r)).toList();
+    return rows.map((r) => r.toJson()).toList();
   }
 
   Future<List<Map<String, dynamic>>> _exportTags(int? since) async {
@@ -1198,7 +1543,7 @@ class SyncDataSerializer {
       query.where((t) => t.updatedAt.isBiggerOrEqualValue(since));
     }
     final rows = await query.get();
-    return rows.map((r) => _tagToJson(r)).toList();
+    return rows.map((r) => r.toJson()).toList();
   }
 
   Future<List<Map<String, dynamic>>> _exportDiveTags(int? since) async {
@@ -1212,19 +1557,23 @@ class SyncDataSerializer {
       final rows = await (_db.select(
         _db.diveTags,
       )..where((t) => t.diveId.isIn(diveIds))).get();
-      return rows.map((r) => _diveTagToJson(r)).toList();
+      return rows.map((r) => r.toJson()).toList();
     }
     final rows = await _db.select(_db.diveTags).get();
-    return rows.map((r) => _diveTagToJson(r)).toList();
+    return rows.map((r) => r.toJson()).toList();
   }
 
   Future<List<Map<String, dynamic>>> _exportDiveTypes(int? since) async {
-    final query = _db.select(_db.diveTypes);
+    // Built-in dive types are re-seeded identically on every device at first
+    // launch and cannot be edited, so syncing them only risks cross-device
+    // ID collisions and payload bloat. Export custom types only.
+    final query = _db.select(_db.diveTypes)
+      ..where((t) => t.isBuiltIn.equals(false));
     if (since != null) {
       query.where((t) => t.updatedAt.isBiggerOrEqualValue(since));
     }
     final rows = await query.get();
-    return rows.map((r) => _diveTypeToJson(r)).toList();
+    return rows.map((r) => r.toJson()).toList();
   }
 
   Future<List<Map<String, dynamic>>> _exportTankPresets(int? since) async {
@@ -1233,7 +1582,7 @@ class SyncDataSerializer {
       query.where((t) => t.updatedAt.isBiggerOrEqualValue(since));
     }
     final rows = await query.get();
-    return rows.map((r) => _tankPresetToJson(r)).toList();
+    return rows.map((r) => r.toJson()).toList();
   }
 
   Future<List<Map<String, dynamic>>> _exportDiveComputers(int? since) async {
@@ -1242,7 +1591,7 @@ class SyncDataSerializer {
       query.where((t) => t.updatedAt.isBiggerOrEqualValue(since));
     }
     final rows = await query.get();
-    return rows.map((r) => _diveComputerToJson(r)).toList();
+    return rows.map((r) => r.toJson()).toList();
   }
 
   Future<List<Map<String, dynamic>>> _exportTankPressureProfiles(
@@ -1258,10 +1607,10 @@ class SyncDataSerializer {
       final rows = await (_db.select(
         _db.tankPressureProfiles,
       )..where((t) => t.diveId.isIn(diveIds))).get();
-      return rows.map((r) => _tankPressureProfileToJson(r)).toList();
+      return rows.map((r) => r.toJson()).toList();
     }
     final rows = await _db.select(_db.tankPressureProfiles).get();
-    return rows.map((r) => _tankPressureProfileToJson(r)).toList();
+    return rows.map((r) => r.toJson()).toList();
   }
 
   Future<List<Map<String, dynamic>>> _exportTideRecords(int? since) async {
@@ -1275,11 +1624,27 @@ class SyncDataSerializer {
       final rows = await (_db.select(
         _db.tideRecords,
       )..where((t) => t.diveId.isIn(diveIds))).get();
-      return rows.map((r) => _tideRecordToJson(r)).toList();
+      return rows.map((r) => r.toJson()).toList();
     }
     final rows = await _db.select(_db.tideRecords).get();
-    return rows.map((r) => _tideRecordToJson(r)).toList();
+    return rows.map((r) => r.toJson()).toList();
   }
+
+  /// Settings keys that hold per-device state and must never sync.
+  ///
+  /// Including these in the payload causes the receiving device to flag a
+  /// conflict on every cross-device pull (same `key` row, different value
+  /// per device).
+  ///
+  /// Audit (last reviewed when [SyncData] grew to ~39 entities): only three
+  /// keys are ever written to the `settings` table in app code:
+  ///   - `active_diver_id` (per-device — each device auto-creates its own
+  ///     owner diver at first launch). FILTERED.
+  ///   - `share_new_records_by_default` (global user preference). Syncs.
+  ///   - `nav_primary_ids` (user's preferred top-level nav). Syncs.
+  /// New keys should be assessed against the rule: "is this answer the same
+  /// across all of one user's devices?" If no, add it here.
+  static const Set<String> _deviceLocalSettingsKeys = {'active_diver_id'};
 
   Future<List<Map<String, dynamic>>> _exportSettings(int? since) async {
     final query = _db.select(_db.settings);
@@ -1287,17 +1652,68 @@ class SyncDataSerializer {
       query.where((t) => t.updatedAt.isBiggerOrEqualValue(since));
     }
     final rows = await query.get();
-    return rows.map((r) => _settingsToJson(r)).toList();
+    return rows
+        .where((r) => !_deviceLocalSettingsKeys.contains(r.key))
+        .map((r) => r.toJson())
+        .toList();
   }
 
   Future<List<Map<String, dynamic>>> _exportSpecies() async {
-    final rows = await _db.select(_db.species).get();
-    return rows.map((r) => _speciesToJson(r)).toList();
+    // Built-in species come from a bundled asset re-seeded on every device;
+    // only export user-created species. (Built-ins use stable bundled IDs so
+    // they would not collide, but there is no value in shipping them.)
+    final rows = await (_db.select(
+      _db.species,
+    )..where((t) => t.isBuiltIn.equals(false))).get();
+    return rows.map((r) => r.toJson()).toList();
   }
 
   Future<List<Map<String, dynamic>>> _exportSightings() async {
     final rows = await _db.select(_db.sightings).get();
-    return rows.map((r) => _sightingToJson(r)).toList();
+    return rows.map((r) => r.toJson()).toList();
+  }
+
+  Future<List<Map<String, dynamic>>> _exportDiveCustomFields() async {
+    final rows = await _db.select(_db.diveCustomFields).get();
+    return rows.map((r) => r.toJson()).toList();
+  }
+
+  Future<List<Map<String, dynamic>>> _exportDiveDataSources() async {
+    final rows = await _db.select(_db.diveDataSources).get();
+    // Carries rawData/rawFingerprint BLOBs; base64-encode them.
+    return rows.map((r) => r.toJson(serializer: _syncBlobSerializer)).toList();
+  }
+
+  Future<List<Map<String, dynamic>>> _exportSiteSpecies() async {
+    final rows = await _db.select(_db.siteSpecies).get();
+    return rows.map((r) => r.toJson()).toList();
+  }
+
+  Future<List<Map<String, dynamic>>> _exportCsvPresets(int? since) async {
+    final query = _db.select(_db.csvPresets);
+    if (since != null) {
+      query.where((t) => t.updatedAt.isBiggerOrEqualValue(since));
+    }
+    final rows = await query.get();
+    return rows.map((r) => r.toJson()).toList();
+  }
+
+  Future<List<Map<String, dynamic>>> _exportViewConfigs(int? since) async {
+    final query = _db.select(_db.viewConfigs);
+    if (since != null) {
+      query.where((t) => t.updatedAt.isBiggerOrEqualValue(since));
+    }
+    final rows = await query.get();
+    return rows.map((r) => r.toJson()).toList();
+  }
+
+  Future<List<Map<String, dynamic>>> _exportFieldPresets() async {
+    // Built-in field presets are re-seeded per diver on every device; export
+    // only user-created presets.
+    final rows = await (_db.select(
+      _db.fieldPresets,
+    )..where((t) => t.isBuiltIn.equals(false))).get();
+    return rows.map((r) => r.toJson()).toList();
   }
 
   Future<List<Map<String, dynamic>>> _exportDiveProfileEvents(
@@ -1313,10 +1729,10 @@ class SyncDataSerializer {
       final rows = await (_db.select(
         _db.diveProfileEvents,
       )..where((t) => t.diveId.isIn(diveIds))).get();
-      return rows.map((r) => _diveProfileEventToJson(r)).toList();
+      return rows.map((r) => r.toJson()).toList();
     }
     final rows = await _db.select(_db.diveProfileEvents).get();
-    return rows.map((r) => _diveProfileEventToJson(r)).toList();
+    return rows.map((r) => r.toJson()).toList();
   }
 
   Future<List<Map<String, dynamic>>> _exportGasSwitches(int? since) async {
@@ -1330,10 +1746,10 @@ class SyncDataSerializer {
       final rows = await (_db.select(
         _db.gasSwitches,
       )..where((t) => t.diveId.isIn(diveIds))).get();
-      return rows.map((r) => _gasSwitchToJson(r)).toList();
+      return rows.map((r) => r.toJson()).toList();
     }
     final rows = await _db.select(_db.gasSwitches).get();
-    return rows.map((r) => _gasSwitchToJson(r)).toList();
+    return rows.map((r) => r.toJson()).toList();
   }
 
   // ============================================================================
@@ -1342,6 +1758,16 @@ class SyncDataSerializer {
 
   /// Applies default values for DiverSettings fields that may be missing
   /// from older sync data or incomplete conflict records.
+  /// Defensive back-compat for the entities most recently added to SyncData:
+  /// if a peer ever ships a partial record missing `createdAt`/`updatedAt`,
+  /// fall back to "now" rather than letting Drift's strict `fromJson` throw
+  /// when it sees `null` where `int` was expected. The new entities all use
+  /// Unix-milliseconds for their timestamp columns.
+  Map<String, dynamic> _withTimestampDefaults(Map<String, dynamic> data) {
+    final now = DateTime.now().millisecondsSinceEpoch;
+    return {'createdAt': now, 'updatedAt': now, 'importedAt': now, ...data};
+  }
+
   Map<String, dynamic> _applyDiverSettingDefaults(Map<String, dynamic> data) {
     final merged = {
       // Unit settings
@@ -1401,490 +1827,4 @@ class SyncDataSerializer {
     }
     return merged;
   }
-
-  // ============================================================================
-  // Row to JSON Converters
-  // ============================================================================
-
-  Map<String, dynamic> _diverToJson(Diver r) => {
-    'id': r.id,
-    'name': r.name,
-    'email': r.email,
-    'phone': r.phone,
-    'photoPath': r.photoPath,
-    'emergencyContactName': r.emergencyContactName,
-    'emergencyContactPhone': r.emergencyContactPhone,
-    'emergencyContactRelation': r.emergencyContactRelation,
-    'medicalNotes': r.medicalNotes,
-    'bloodType': r.bloodType,
-    'allergies': r.allergies,
-    'insuranceProvider': r.insuranceProvider,
-    'insurancePolicyNumber': r.insurancePolicyNumber,
-    'insuranceExpiryDate': r.insuranceExpiryDate,
-    'notes': r.notes,
-    'isDefault': r.isDefault,
-    'createdAt': r.createdAt,
-    'updatedAt': r.updatedAt,
-  };
-
-  Map<String, dynamic> _diverSettingToJson(DiverSetting r) => {
-    'id': r.id,
-    'diverId': r.diverId,
-    'depthUnit': r.depthUnit,
-    'temperatureUnit': r.temperatureUnit,
-    'pressureUnit': r.pressureUnit,
-    'volumeUnit': r.volumeUnit,
-    'weightUnit': r.weightUnit,
-    'altitudeUnit': r.altitudeUnit,
-    'sacUnit': r.sacUnit,
-    'timeFormat': r.timeFormat,
-    'dateFormat': r.dateFormat,
-    'themeMode': r.themeMode,
-    'themePreset': r.themePreset,
-    'defaultDiveType': r.defaultDiveType,
-    'defaultTankVolume': r.defaultTankVolume,
-    'defaultStartPressure': r.defaultStartPressure,
-    'defaultTankPreset': r.defaultTankPreset,
-    'applyDefaultTankToImports': r.applyDefaultTankToImports,
-    'gfLow': r.gfLow,
-    'gfHigh': r.gfHigh,
-    'ppO2MaxWorking': r.ppO2MaxWorking,
-    'ppO2MaxDeco': r.ppO2MaxDeco,
-    'cnsWarningThreshold': r.cnsWarningThreshold,
-    'ascentRateWarning': r.ascentRateWarning,
-    'ascentRateCritical': r.ascentRateCritical,
-    'showCeilingOnProfile': r.showCeilingOnProfile,
-    'showAscentRateColors': r.showAscentRateColors,
-    'showNdlOnProfile': r.showNdlOnProfile,
-    'lastStopDepth': r.lastStopDepth,
-    'decoStopIncrement': r.decoStopIncrement,
-    'showDepthColoredDiveCards': r.showDepthColoredDiveCards,
-    'cardColorAttribute': r.cardColorAttribute,
-    'cardColorGradientPreset': r.cardColorGradientPreset,
-    'cardColorGradientStart': r.cardColorGradientStart,
-    'cardColorGradientEnd': r.cardColorGradientEnd,
-    'showMapBackgroundOnDiveCards': r.showMapBackgroundOnDiveCards,
-    'showMapBackgroundOnSiteCards': r.showMapBackgroundOnSiteCards,
-    'showMaxDepthMarker': r.showMaxDepthMarker,
-    'showPressureThresholdMarkers': r.showPressureThresholdMarkers,
-    'createdAt': r.createdAt,
-    'updatedAt': r.updatedAt,
-  };
-
-  Map<String, dynamic> _diveToJson(Dive r) => {
-    'id': r.id,
-    'diverId': r.diverId,
-    'diveNumber': r.diveNumber,
-    'diveDateTime': r.diveDateTime,
-    'entryTime': r.entryTime,
-    'exitTime': r.exitTime,
-    'duration': r.bottomTime,
-    'runtime': r.runtime,
-    'maxDepth': r.maxDepth,
-    'avgDepth': r.avgDepth,
-    'waterTemp': r.waterTemp,
-    'airTemp': r.airTemp,
-    'visibility': r.visibility,
-    'diveType': r.diveType,
-    'buddy': r.buddy,
-    'diveMaster': r.diveMaster,
-    'notes': r.notes,
-    'siteId': r.siteId,
-    'rating': r.rating,
-    'diveCenterId': r.diveCenterId,
-    'tripId': r.tripId,
-    'currentDirection': r.currentDirection,
-    'currentStrength': r.currentStrength,
-    'swellHeight': r.swellHeight,
-    'entryMethod': r.entryMethod,
-    'exitMethod': r.exitMethod,
-    'waterType': r.waterType,
-    'altitude': r.altitude,
-    'surfacePressure': r.surfacePressure,
-    'surfaceIntervalSeconds': r.surfaceIntervalSeconds,
-    'gradientFactorLow': r.gradientFactorLow,
-    'gradientFactorHigh': r.gradientFactorHigh,
-    'diveComputerModel': r.diveComputerModel,
-    'diveComputerSerial': r.diveComputerSerial,
-    'diveComputerFirmware': r.diveComputerFirmware,
-    'weightAmount': r.weightAmount,
-    'weightType': r.weightType,
-    'isFavorite': r.isFavorite,
-    'diveMode': r.diveMode,
-    'cnsStart': r.cnsStart,
-    'cnsEnd': r.cnsEnd,
-    'otu': r.otu,
-    'computerId': r.computerId,
-    'createdAt': r.createdAt,
-    'updatedAt': r.updatedAt,
-    'windSpeed': r.windSpeed,
-    'windDirection': r.windDirection,
-    'cloudCover': r.cloudCover,
-    'precipitation': r.precipitation,
-    'humidity': r.humidity,
-    'weatherDescription': r.weatherDescription,
-    'weatherSource': r.weatherSource,
-    'weatherFetchedAt': r.weatherFetchedAt,
-  };
-
-  Map<String, dynamic> _diveProfileToJson(DiveProfile r) => {
-    'id': r.id,
-    'diveId': r.diveId,
-    'computerId': r.computerId,
-    'isPrimary': r.isPrimary,
-    'timestamp': r.timestamp,
-    'depth': r.depth,
-    'pressure': r.pressure,
-    'temperature': r.temperature,
-    'heartRate': r.heartRate,
-    'ascentRate': r.ascentRate,
-    'ceiling': r.ceiling,
-    'ndl': r.ndl,
-  };
-
-  Map<String, dynamic> _diveTankToJson(DiveTank r) => {
-    'id': r.id,
-    'diveId': r.diveId,
-    'equipmentId': r.equipmentId,
-    'volume': r.volume,
-    'workingPressure': r.workingPressure,
-    'startPressure': r.startPressure,
-    'endPressure': r.endPressure,
-    'o2Percent': r.o2Percent,
-    'hePercent': r.hePercent,
-    'tankOrder': r.tankOrder,
-    'tankRole': r.tankRole,
-    'tankMaterial': r.tankMaterial,
-    'tankName': r.tankName,
-    'presetName': r.presetName,
-  };
-
-  Map<String, dynamic> _diveEquipmentToJson(DiveEquipmentData r) => {
-    'id': '${r.diveId}|${r.equipmentId}',
-    'diveId': r.diveId,
-    'equipmentId': r.equipmentId,
-  };
-
-  Map<String, dynamic> _diveWeightToJson(DiveWeight r) => {
-    'id': r.id,
-    'diveId': r.diveId,
-    'weightType': r.weightType,
-    'amountKg': r.amountKg,
-    'notes': r.notes,
-    'createdAt': r.createdAt,
-  };
-
-  Map<String, dynamic> _diveSiteToJson(DiveSite r) => {
-    'id': r.id,
-    'diverId': r.diverId,
-    'name': r.name,
-    'description': r.description,
-    'latitude': r.latitude,
-    'longitude': r.longitude,
-    'minDepth': r.minDepth,
-    'maxDepth': r.maxDepth,
-    'difficulty': r.difficulty,
-    'country': r.country,
-    'region': r.region,
-    'rating': r.rating,
-    'notes': r.notes,
-    'hazards': r.hazards,
-    'accessNotes': r.accessNotes,
-    'mooringNumber': r.mooringNumber,
-    'parkingInfo': r.parkingInfo,
-    'createdAt': r.createdAt,
-    'updatedAt': r.updatedAt,
-  };
-
-  Map<String, dynamic> _equipmentToJson(EquipmentData r) => {
-    'id': r.id,
-    'diverId': r.diverId,
-    'name': r.name,
-    'type': r.type,
-    'brand': r.brand,
-    'model': r.model,
-    'serialNumber': r.serialNumber,
-    'size': r.size,
-    'status': r.status,
-    'purchaseDate': r.purchaseDate,
-    'purchasePrice': r.purchasePrice,
-    'purchaseCurrency': r.purchaseCurrency,
-    'lastServiceDate': r.lastServiceDate,
-    'serviceIntervalDays': r.serviceIntervalDays,
-    'notes': r.notes,
-    'isActive': r.isActive,
-    'createdAt': r.createdAt,
-    'updatedAt': r.updatedAt,
-  };
-
-  Map<String, dynamic> _equipmentSetToJson(EquipmentSet r) => {
-    'id': r.id,
-    'diverId': r.diverId,
-    'name': r.name,
-    'description': r.description,
-    'createdAt': r.createdAt,
-    'updatedAt': r.updatedAt,
-  };
-
-  Map<String, dynamic> _mediaToJson(MediaData r) => {
-    'id': r.id,
-    'diveId': r.diveId,
-    'siteId': r.siteId,
-    'filePath': r.filePath,
-    'fileType': r.fileType,
-    'latitude': r.latitude,
-    'longitude': r.longitude,
-    'takenAt': r.takenAt,
-    'caption': r.caption,
-    // BLOB field for signatures - base64 encoded for sync
-    if (r.imageData != null) 'imageData': base64Encode(r.imageData!),
-  };
-
-  Map<String, dynamic> _buddyToJson(Buddy r) => {
-    'id': r.id,
-    'diverId': r.diverId,
-    'name': r.name,
-    'email': r.email,
-    'phone': r.phone,
-    'certificationLevel': r.certificationLevel,
-    'certificationAgency': r.certificationAgency,
-    'photoPath': r.photoPath,
-    'notes': r.notes,
-    'createdAt': r.createdAt,
-    'updatedAt': r.updatedAt,
-  };
-
-  Map<String, dynamic> _diveBuddyToJson(DiveBuddy r) => {
-    'id': r.id,
-    'diveId': r.diveId,
-    'buddyId': r.buddyId,
-    'role': r.role,
-    'createdAt': r.createdAt,
-  };
-
-  Map<String, dynamic> _certificationToJson(Certification r) => {
-    'id': r.id,
-    'diverId': r.diverId,
-    'name': r.name,
-    'agency': r.agency,
-    'level': r.level,
-    'cardNumber': r.cardNumber,
-    'issueDate': r.issueDate,
-    'expiryDate': r.expiryDate,
-    'instructorName': r.instructorName,
-    'instructorNumber': r.instructorNumber,
-    // BLOB fields - base64 encoded for sync
-    if (r.photoFront != null) 'photoFront': base64Encode(r.photoFront!),
-    if (r.photoBack != null) 'photoBack': base64Encode(r.photoBack!),
-    'notes': r.notes,
-    'createdAt': r.createdAt,
-    'updatedAt': r.updatedAt,
-  };
-
-  Map<String, dynamic> _serviceRecordToJson(ServiceRecord r) => {
-    'id': r.id,
-    'equipmentId': r.equipmentId,
-    'serviceType': r.serviceType,
-    'serviceDate': r.serviceDate,
-    'provider': r.provider,
-    'cost': r.cost,
-    'currency': r.currency,
-    'nextServiceDue': r.nextServiceDue,
-    'notes': r.notes,
-    'createdAt': r.createdAt,
-    'updatedAt': r.updatedAt,
-  };
-
-  Map<String, dynamic> _diveCenterToJson(DiveCenter r) => {
-    'id': r.id,
-    'diverId': r.diverId,
-    'name': r.name,
-    'street': r.street,
-    'city': r.city,
-    'stateProvince': r.stateProvince,
-    'postalCode': r.postalCode,
-    'latitude': r.latitude,
-    'longitude': r.longitude,
-    'country': r.country,
-    'phone': r.phone,
-    'email': r.email,
-    'website': r.website,
-    'affiliations': r.affiliations,
-    'rating': r.rating,
-    'notes': r.notes,
-    'createdAt': r.createdAt,
-    'updatedAt': r.updatedAt,
-  };
-
-  Map<String, dynamic> _tripToJson(Trip r) => {
-    'id': r.id,
-    'diverId': r.diverId,
-    'name': r.name,
-    'startDate': r.startDate,
-    'endDate': r.endDate,
-    'location': r.location,
-    'resortName': r.resortName,
-    'liveaboardName': r.liveaboardName,
-    'tripType': r.tripType,
-    'notes': r.notes,
-    'createdAt': r.createdAt,
-    'updatedAt': r.updatedAt,
-  };
-
-  Map<String, dynamic> _liveaboardDetailToJson(LiveaboardDetailRecord r) => {
-    'id': r.id,
-    'tripId': r.tripId,
-    'vesselName': r.vesselName,
-    'operatorName': r.operatorName,
-    'vesselType': r.vesselType,
-    'cabinType': r.cabinType,
-    'capacity': r.capacity,
-    'embarkPort': r.embarkPort,
-    'embarkLatitude': r.embarkLatitude,
-    'embarkLongitude': r.embarkLongitude,
-    'disembarkPort': r.disembarkPort,
-    'disembarkLatitude': r.disembarkLatitude,
-    'disembarkLongitude': r.disembarkLongitude,
-    'createdAt': r.createdAt,
-    'updatedAt': r.updatedAt,
-  };
-
-  Map<String, dynamic> _itineraryDayToJson(TripItineraryDay r) => {
-    'id': r.id,
-    'tripId': r.tripId,
-    'dayNumber': r.dayNumber,
-    'date': r.date,
-    'dayType': r.dayType,
-    'portName': r.portName,
-    'latitude': r.latitude,
-    'longitude': r.longitude,
-    'notes': r.notes,
-    'createdAt': r.createdAt,
-    'updatedAt': r.updatedAt,
-  };
-
-  Map<String, dynamic> _tagToJson(Tag r) => {
-    'id': r.id,
-    'diverId': r.diverId,
-    'name': r.name,
-    'color': r.color,
-    'createdAt': r.createdAt,
-    'updatedAt': r.updatedAt,
-  };
-
-  Map<String, dynamic> _diveTagToJson(DiveTag r) => {
-    'id': r.id,
-    'diveId': r.diveId,
-    'tagId': r.tagId,
-    'createdAt': r.createdAt,
-  };
-
-  Map<String, dynamic> _diveTypeToJson(DiveType r) => {
-    'id': r.id,
-    'diverId': r.diverId,
-    'name': r.name,
-    'isBuiltIn': r.isBuiltIn,
-    'sortOrder': r.sortOrder,
-    'createdAt': r.createdAt,
-    'updatedAt': r.updatedAt,
-  };
-
-  Map<String, dynamic> _tankPresetToJson(TankPreset r) => {
-    'id': r.id,
-    'diverId': r.diverId,
-    'name': r.name,
-    'displayName': r.displayName,
-    'volumeLiters': r.volumeLiters,
-    'workingPressureBar': r.workingPressureBar,
-    'material': r.material,
-    'description': r.description,
-    'sortOrder': r.sortOrder,
-    'createdAt': r.createdAt,
-    'updatedAt': r.updatedAt,
-  };
-
-  Map<String, dynamic> _diveComputerToJson(DiveComputer r) => {
-    'id': r.id,
-    'diverId': r.diverId,
-    'name': r.name,
-    'manufacturer': r.manufacturer,
-    'model': r.model,
-    'serialNumber': r.serialNumber,
-    'firmwareVersion': r.firmwareVersion,
-    'connectionType': r.connectionType,
-    'bluetoothAddress': r.bluetoothAddress,
-    'lastDownloadTimestamp': r.lastDownloadTimestamp,
-    'diveCount': r.diveCount,
-    'isFavorite': r.isFavorite,
-    'notes': r.notes,
-    'createdAt': r.createdAt,
-    'updatedAt': r.updatedAt,
-  };
-
-  Map<String, dynamic> _tankPressureProfileToJson(TankPressureProfile r) => {
-    'id': r.id,
-    'diveId': r.diveId,
-    'tankId': r.tankId,
-    'timestamp': r.timestamp,
-    'pressure': r.pressure,
-  };
-
-  Map<String, dynamic> _tideRecordToJson(TideRecord r) => {
-    'id': r.id,
-    'diveId': r.diveId,
-    'heightMeters': r.heightMeters,
-    'tideState': r.tideState,
-    'rateOfChange': r.rateOfChange,
-    'highTideHeight': r.highTideHeight,
-    'highTideTime': r.highTideTime,
-    'lowTideHeight': r.lowTideHeight,
-    'lowTideTime': r.lowTideTime,
-    'createdAt': r.createdAt,
-  };
-
-  Map<String, dynamic> _settingsToJson(Setting r) => {
-    'key': r.key,
-    'value': r.value,
-    'updatedAt': r.updatedAt,
-  };
-
-  Map<String, dynamic> _speciesToJson(Specy r) => {
-    'id': r.id,
-    'commonName': r.commonName,
-    'scientificName': r.scientificName,
-    'category': r.category,
-    'description': r.description,
-    'photoPath': r.photoPath,
-  };
-
-  Map<String, dynamic> _sightingToJson(Sighting r) => {
-    'id': r.id,
-    'diveId': r.diveId,
-    'speciesId': r.speciesId,
-    'count': r.count,
-    'notes': r.notes,
-  };
-
-  Map<String, dynamic> _diveProfileEventToJson(DiveProfileEvent r) => {
-    'id': r.id,
-    'diveId': r.diveId,
-    'timestamp': r.timestamp,
-    'eventType': r.eventType,
-    'severity': r.severity,
-    'description': r.description,
-    'depth': r.depth,
-    'value': r.value,
-    'tankId': r.tankId,
-    'source': r.source,
-    'createdAt': r.createdAt,
-  };
-
-  Map<String, dynamic> _gasSwitchToJson(GasSwitche r) => {
-    'id': r.id,
-    'diveId': r.diveId,
-    'timestamp': r.timestamp,
-    'tankId': r.tankId,
-    'depth': r.depth,
-    'createdAt': r.createdAt,
-  };
 }

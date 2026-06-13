@@ -19,6 +19,11 @@ class DiveTypeRepository {
   // CRUD Operations
   // ============================================================================
 
+  /// Emits whenever the `dive_types` table changes so list providers can
+  /// refresh after a sync or any other write.
+  Stream<void> watchDiveTypesChanges() =>
+      _db.tableUpdates(TableUpdateQuery.onTable(_db.diveTypes));
+
   /// Get all dive types, ordered by sort order then name
   /// Returns built-in types plus custom types for the specified diver
   /// If no diverId is provided, returns only built-in types

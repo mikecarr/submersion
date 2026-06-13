@@ -16,6 +16,11 @@ class CertificationRepository {
   final _uuid = const Uuid();
   final _log = LoggerService.forClass(CertificationRepository);
 
+  /// Emits whenever the `certifications` table changes so list providers can
+  /// refresh after a sync or any other write.
+  Stream<void> watchCertificationsChanges() =>
+      _db.tableUpdates(TableUpdateQuery.onTable(_db.certifications));
+
   /// Get all certifications ordered by issue date (newest first)
   Future<List<domain.Certification>> getAllCertifications({
     String? diverId,

@@ -18,6 +18,11 @@ class TagRepository {
   // CRUD Operations
   // ============================================================================
 
+  /// Emits whenever the `tags` table changes so list providers can
+  /// refresh after a sync or any other write.
+  Stream<void> watchTagsChanges() =>
+      _db.tableUpdates(TableUpdateQuery.onTable(_db.tags));
+
   /// Get all tags, ordered by name
   Future<List<domain.Tag>> getAllTags({String? diverId}) async {
     try {

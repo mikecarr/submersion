@@ -21,12 +21,23 @@ final buddyRepositoryProvider = Provider<BuddyRepository>((ref) {
   return BuddyRepository();
 });
 
-/// All buddies provider
+/// All buddies provider (filtered by current diver).
+///
+/// A one-shot read that self-invalidates whenever the `buddies` table changes
+/// (a sync apply, a local create/edit/delete, ...), so list UIs refresh
+/// automatically while imperative `ref.read(allBuddiesProvider.future)` reads
+/// still resolve.
 final allBuddiesProvider = FutureProvider<List<Buddy>>((ref) async {
   final repository = ref.watch(buddyRepositoryProvider);
   final validatedDiverId = await ref.watch(
     validatedCurrentDiverIdProvider.future,
   );
+
+  final sub = repository.watchBuddiesChanges().listen(
+    (_) => ref.invalidateSelf(),
+  );
+  ref.onDispose(sub.cancel);
+
   return repository.getAllBuddies(diverId: validatedDiverId);
 });
 
@@ -45,6 +56,15 @@ final allBuddiesWithDiveCountProvider =
       final validatedDiverId = await ref.watch(
         validatedCurrentDiverIdProvider.future,
       );
+      final buddiesSub = repository.watchBuddiesChanges().listen(
+        (_) => ref.invalidateSelf(),
+      );
+      ref.onDispose(buddiesSub.cancel);
+      final divesSub = ref
+          .read(diveRepositoryProvider)
+          .watchDivesChanges()
+          .listen((_) => ref.invalidateSelf());
+      ref.onDispose(divesSub.cancel);
       return repository.getAllBuddiesWithDiveCount(diverId: validatedDiverId);
     });
 
@@ -202,6 +222,14 @@ class BuddyListNotifier extends StateNotifier<AsyncValue<List<Buddy>>> {
         _initializeAndLoad();
       }
     });
+
+    // Reload when the `buddies` table changes (e.g. a sync writes rows
+    // directly) so surfaces watching this notifier (e.g. the buddy summary)
+    // refresh too.
+    final tableChangeSub = _repository.watchBuddiesChanges().listen(
+      (_) => _silentReloadBuddies(),
+    );
+    _ref.onDispose(tableChangeSub.cancel);
   }
 
   Future<void> _initializeAndLoad() async {
@@ -220,6 +248,23 @@ class BuddyListNotifier extends StateNotifier<AsyncValue<List<Buddy>>> {
       state = AsyncValue.data(buddies);
     } catch (e, st) {
       state = AsyncValue.error(e, st);
+    }
+  }
+
+  /// Reload without flipping to a loading state, for table-change ticks (e.g.
+  /// a sync). Resolves the validated diver id first so an early tick scopes
+  /// correctly.
+  Future<void> _silentReloadBuddies() async {
+    try {
+      _validatedDiverId = await _ref.read(
+        validatedCurrentDiverIdProvider.future,
+      );
+      final buddies = await _repository.getAllBuddies(
+        diverId: _validatedDiverId,
+      );
+      if (mounted) state = AsyncValue.data(buddies);
+    } catch (e, st) {
+      if (mounted) state = AsyncValue.error(e, st);
     }
   }
 

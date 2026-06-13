@@ -20,6 +20,11 @@ class TripRepository {
   final _uuid = const Uuid();
   final _log = LoggerService.forClass(TripRepository);
 
+  /// Emits whenever the `trips` table changes so list providers can
+  /// refresh after a sync or any other write.
+  Stream<void> watchTripsChanges() =>
+      _db.tableUpdates(TableUpdateQuery.onTable(_db.trips));
+
   /// Get all trips ordered by start date (most recent first)
   Future<List<domain.Trip>> getAllTrips({String? diverId}) async {
     try {

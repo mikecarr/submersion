@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqlite3/sqlite3.dart' as sqlite3;
 
+import 'package:submersion/core/data/repositories/sync_repository.dart';
 import 'package:submersion/core/database/database.dart';
 import 'package:submersion/core/services/cloud_storage/cloud_storage_provider.dart';
 import 'package:submersion/features/backup/data/repositories/backup_preferences.dart';
@@ -46,6 +47,53 @@ class FakeBackupDatabaseAdapter implements BackupDatabaseAdapter {
   @override
   AppDatabase get database =>
       throw UnimplementedError('Fake database does not support direct queries');
+}
+
+/// Spy sync repository: records the post-restore re-baseline without touching a
+/// database, so the restore wiring can be asserted in isolation.
+class _SpySyncRepository extends SyncRepository {
+  int rebaselineCalls = 0;
+  String? preservedDeviceId;
+  String? preservedEpochId;
+
+  @override
+  Future<String> getDeviceId() async => 'live-device-id';
+
+  @override
+  Future<String?> getLastAcceptedEpochId() async => null;
+
+  @override
+  Future<void> rebaselineAfterRestore({
+    String? preserveDeviceId,
+    String? preserveEpochId,
+  }) async {
+    rebaselineCalls++;
+    preservedDeviceId = preserveDeviceId;
+    preservedEpochId = preserveEpochId;
+  }
+}
+
+/// A spy whose [getDeviceId] throws, to exercise the restore path's fallback
+/// when the live device id cannot be captured before the swap.
+class _CaptureFailSyncRepository extends SyncRepository {
+  int rebaselineCalls = 0;
+  String? preservedDeviceId;
+
+  @override
+  Future<String> getDeviceId() async => throw StateError('cannot read id');
+
+  @override
+  Future<String?> getLastAcceptedEpochId() async =>
+      throw StateError('cannot read epoch');
+
+  @override
+  Future<void> rebaselineAfterRestore({
+    String? preserveDeviceId,
+    String? preserveEpochId,
+  }) async {
+    rebaselineCalls++;
+    preservedDeviceId = preserveDeviceId;
+  }
 }
 
 /// Fake cloud storage provider for testing
@@ -169,6 +217,85 @@ void main() {
       preferences = BackupPreferences(prefs);
       fakeCloud = FakeCloudStorageProvider();
       fakeDb = FakeBackupDatabaseAdapter();
+    });
+
+    group('restore re-baselines sync', () {
+      test('restoreFromFile replaces the DB and re-baselines sync, preserving '
+          'the live device id', () async {
+        final spy = _SpySyncRepository();
+        final service = BackupService(
+          dbAdapter: fakeDb,
+          preferences: preferences,
+          syncRepository: spy,
+        );
+
+        final src = File(
+          '${Directory.systemTemp.path}/restore_src_'
+          '${DateTime.now().microsecondsSinceEpoch}.db',
+        );
+        await src.writeAsString('db');
+        addTearDown(() async {
+          if (await src.exists()) await src.delete();
+        });
+
+        await service.restoreFromFile(src.path);
+
+        expect(
+          fakeDb.restoreCallCount,
+          1,
+          reason: 'the database is replaced from the restore source',
+        );
+        expect(
+          spy.rebaselineCalls,
+          1,
+          reason:
+              'sync must be re-baselined after the DB is replaced, otherwise '
+              "the backup's stale sync position stalls sync and resurrects "
+              'deletes',
+        );
+        expect(
+          spy.preservedDeviceId,
+          'live-device-id',
+          reason:
+              'the live device identity captured before the restore must be '
+              "preserved, not overwritten by the backup's device id",
+        );
+      });
+
+      test('preserves a fresh device id when the live id cannot be captured '
+          '(never adopts the backup id)', () async {
+        final spy = _CaptureFailSyncRepository();
+        final service = BackupService(
+          dbAdapter: fakeDb,
+          preferences: preferences,
+          syncRepository: spy,
+        );
+
+        final src = File(
+          '${Directory.systemTemp.path}/restore_src_'
+          '${DateTime.now().microsecondsSinceEpoch}.db',
+        );
+        await src.writeAsString('db');
+        addTearDown(() async {
+          if (await src.exists()) await src.delete();
+        });
+
+        await service.restoreFromFile(src.path);
+
+        expect(spy.rebaselineCalls, 1);
+        expect(
+          spy.preservedDeviceId,
+          isNotNull,
+          reason:
+              'a capture failure must still preserve a device id, not pass '
+              'null (which would let the restore adopt the backup id)',
+        );
+        expect(
+          spy.preservedDeviceId,
+          isNotEmpty,
+          reason: 'the fallback must be a fresh, non-empty device id',
+        );
+      });
     });
 
     group('pruneOldBackups', () {

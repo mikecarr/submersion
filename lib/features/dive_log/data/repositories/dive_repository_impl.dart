@@ -45,6 +45,11 @@ class DiveRepository {
   // CRUD Operations
   // ============================================================================
 
+  /// Emits whenever the `dives` table changes so list providers can
+  /// refresh after a sync or any other write.
+  Stream<void> watchDivesChanges() =>
+      _db.tableUpdates(TableUpdateQuery.onTable(_db.dives));
+
   /// Get all dives, ordered by date (newest first)
   /// This method is optimized to avoid N+1 queries by batch loading related data
   /// Optionally filter by [diverId] for multi-diver support

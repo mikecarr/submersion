@@ -271,10 +271,38 @@ class AppLocalizationsEn extends AppLocalizations {
   String get backup_location_title => 'Backup Location';
 
   @override
+  String get backup_replaceConfirm_confirm => 'Replace Everywhere';
+
+  @override
+  String get backup_replaceConfirm_content =>
+      'The library on all synced devices will be replaced with this backup. Each device creates a safety backup of its current data first. This cannot be undone.';
+
+  @override
+  String get backup_replaceConfirm_title => 'Replace Library Everywhere?';
+
+  @override
   String get backup_restore_dialog_cancel => 'Cancel';
 
   @override
+  String get backup_restore_dialog_modeMerge_subtitle =>
+      'Restore to this device. Your next sync combines the restored data with the cloud library.';
+
+  @override
+  String get backup_restore_dialog_modeMerge_title => 'Merge on next sync';
+
+  @override
+  String get backup_restore_dialog_modeReplace_subtitle =>
+      'The backup becomes the library on this device, in the cloud, and on every synced device.';
+
+  @override
+  String get backup_restore_dialog_modeReplace_title => 'Replace everywhere';
+
+  @override
   String get backup_restore_dialog_restore => 'Restore';
+
+  @override
+  String get backup_restore_dialog_restoreReplace =>
+      'Restore and Replace Everywhere';
 
   @override
   String get backup_restore_dialog_safetyNote =>
@@ -2761,6 +2789,13 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get diveLog_computerSheet_description =>
+      'Select which computer\'s profile to edit from.';
+
+  @override
+  String get diveLog_computerSheet_title => 'Choose starting profile';
+
+  @override
   String diveLog_cylinderSac_avgDepth(Object depth) {
     return 'Avg: $depth';
   }
@@ -3299,7 +3334,43 @@ class AppLocalizationsEn extends AppLocalizations {
   String get diveLog_edit_gettingLocation => 'Getting location...';
 
   @override
+  String get diveLog_edit_group_buddies => 'Buddies';
+
+  @override
+  String get diveLog_edit_group_conditions => 'Conditions';
+
+  @override
+  String get diveLog_edit_group_experience => 'Experience';
+
+  @override
+  String get diveLog_edit_group_gasGear => 'Gas & Gear';
+
+  @override
+  String get diveLog_edit_group_theDive => 'The Dive';
+
+  @override
+  String get diveLog_edit_group_trip => 'Trip';
+
+  @override
   String get diveLog_edit_headerNew => 'Log New Dive';
+
+  @override
+  String get diveLog_edit_invite_buddies => 'Add buddies';
+
+  @override
+  String get diveLog_edit_invite_conditions =>
+      'Add conditions - water, visibility, weather';
+
+  @override
+  String get diveLog_edit_invite_experience =>
+      'Add rating, sightings, notes or tags';
+
+  @override
+  String get diveLog_edit_invite_gasGear =>
+      'Add gas & gear - mode, tanks, equipment, weight';
+
+  @override
+  String get diveLog_edit_invite_trip => 'Add trip or dive center';
 
   @override
   String get diveLog_edit_label_airTemp => 'Air Temp';
@@ -3375,6 +3446,30 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get diveLog_edit_notesHint => 'Add notes about this dive...';
+
+  @override
+  String get diveLog_edit_row_addSite => 'Add site';
+
+  @override
+  String get diveLog_edit_row_diveCenter => 'Dive center';
+
+  @override
+  String get diveLog_edit_row_entry => 'Entry';
+
+  @override
+  String get diveLog_edit_row_exit => 'Exit';
+
+  @override
+  String get diveLog_edit_row_notSet => 'Not set';
+
+  @override
+  String get diveLog_edit_row_site => 'Site';
+
+  @override
+  String get diveLog_edit_row_surfaceInterval => 'Surface interval';
+
+  @override
+  String get diveLog_edit_row_trip => 'Trip';
 
   @override
   String get diveLog_edit_save => 'Save';
@@ -3533,6 +3628,42 @@ class AppLocalizationsEn extends AppLocalizations {
       'Unable to calculate runtime from profile';
 
   @override
+  String diveLog_edit_summary_items(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items',
+      one: '1 item',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get diveLog_edit_summary_notes => 'notes';
+
+  @override
+  String diveLog_edit_summary_species(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count species',
+      one: '1 species',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String diveLog_edit_summary_tanks(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count tanks',
+      one: '1 tank',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String diveLog_edit_surfaceInterval(Object interval) {
     return 'Surface Interval: $interval';
   }
@@ -3543,6 +3674,26 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get diveLog_edit_surfacePressureHint =>
       'Standard: 1013 mbar at sea level';
+
+  @override
+  String get diveLog_edit_tankCard_done => 'Done';
+
+  @override
+  String get diveLog_edit_tankCard_edit => 'Edit';
+
+  @override
+  String get diveLog_edit_tankCard_mix => 'Mix';
+
+  @override
+  String get diveLog_edit_tankCard_pressure => 'Pressure';
+
+  @override
+  String diveLog_edit_tankCard_title(int number) {
+    return 'Tank $number';
+  }
+
+  @override
+  String get diveLog_edit_tankCard_volume => 'Volume';
 
   @override
   String get diveLog_edit_tooltip_calculateFromProfile =>
@@ -3642,6 +3793,17 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String diveLog_equipmentSetPicker_errorLoading(Object error) {
     return 'Error loading equipment sets: $error';
+  }
+
+  @override
+  String diveLog_equipmentSetPicker_itemsSummary(int count, String names) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items',
+      one: '1 item',
+    );
+    return '$_temp0: $names';
   }
 
   @override
@@ -3995,6 +4157,94 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get diveLog_listPage_menuMatchSites => 'Match Dives to Sites';
+
+  @override
+  String get diveLog_sighting_decreaseCount => 'Decrease count';
+
+  @override
+  String get diveLog_sighting_increaseCount => 'Increase count';
+
+  @override
+  String diveLog_speciesPicker_errorLoading(String error) {
+    return 'Error loading species: $error';
+  }
+
+  @override
+  String get diveSites_edit_depth_heroMax => 'Max depth';
+
+  @override
+  String get diveSites_edit_depth_heroMin => 'Min depth';
+
+  @override
+  String get diveSites_edit_group_accessSafety => 'Access & safety';
+
+  @override
+  String get diveSites_edit_group_diveInfo => 'Dive info';
+
+  @override
+  String get diveSites_edit_group_identity => 'Identity';
+
+  @override
+  String get diveSites_edit_group_lifeNotes => 'Life & notes';
+
+  @override
+  String get diveSites_edit_group_location => 'Location';
+
+  @override
+  String get diveSites_edit_invite_accessSafety =>
+      'Add access, parking, mooring or hazards';
+
+  @override
+  String get diveSites_edit_invite_diveInfo =>
+      'Add depth range, difficulty or rating';
+
+  @override
+  String get diveSites_edit_invite_lifeNotes =>
+      'Add marine life, notes or sharing';
+
+  @override
+  String get diveSites_edit_invite_location => 'Add GPS position or altitude';
+
+  @override
+  String get diveSites_edit_summary_shared => 'shared';
+
+  @override
+  String get forms_addSection_prefix => 'Add:';
+
+  @override
+  String get forms_cancel => 'Cancel';
+
+  @override
+  String get forms_discard_body =>
+      'You have unsaved changes. If you leave now they will be lost.';
+
+  @override
+  String get forms_discard_discard => 'Discard';
+
+  @override
+  String get forms_discard_keepEditing => 'Keep editing';
+
+  @override
+  String get forms_discard_title => 'Discard changes?';
+
+  @override
+  String get forms_save => 'Save';
+
+  @override
+  String forms_section_issues(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count issues',
+      one: '1 issue',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String forms_statCell_useProfileValue(String value) {
+    return 'Use $value from profile';
+  }
 
   @override
   String get siteMatchReview_title => 'Match Sites';
@@ -10047,7 +10297,90 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settings_cloudSync_disabledBanner_title => 'Cloud Sync Disabled';
 
   @override
+  String get settings_cloudSync_entry_subtitle => 'Sync via cloud storage';
+
+  @override
+  String get settings_cloudSync_adopt_confirm => 'Adopt Restored Library';
+
+  @override
+  String settings_cloudSync_adopt_dialogContent(
+    String deviceName,
+    String date,
+  ) {
+    return 'The library was replaced from a backup on \"$deviceName\" ($date). Adopting replaces this device\'s data with the restored library. A safety backup of this device\'s current data will be created first.';
+  }
+
+  @override
+  String get settings_cloudSync_adopt_dialogTitle => 'Adopt Restored Library?';
+
+  @override
+  String get settings_cloudSync_adopt_notNow => 'Not Now';
+
+  @override
+  String get settings_cloudSync_firstSync_banner =>
+      'First sync is waiting for confirmation. Tap Sync Now to review what will be combined.';
+
+  @override
+  String get settings_cloudSync_firstSync_dialogConfirm => 'Merge and Sync';
+
+  @override
+  String settings_cloudSync_firstSync_dialogContent(
+    int deviceCount,
+    int diveCount,
+  ) {
+    return 'Existing sync data was found in the cloud ($deviceCount sync file(s)). Your first sync will combine that data with the $diveCount dive(s) on this device, across every synced device.\n\nIf the same dives were added separately on each device, they will appear twice.';
+  }
+
+  @override
+  String get settings_cloudSync_firstSync_dialogTitle => 'Combine Libraries?';
+
+  @override
+  String settings_cloudSync_replace_banner(String deviceName) {
+    return 'Sync is paused: the library was replaced from a backup on \"$deviceName\". Tap Sync Now to review.';
+  }
+
+  @override
+  String get settings_cloudSync_switch_dialogTitle => 'Switch sync backend?';
+
+  @override
+  String settings_cloudSync_switch_dialogContent(
+    String fromName,
+    String toName,
+  ) {
+    return 'Your data will not be moved off $fromName -- it stays there until you delete it. After switching, this device\'s next sync combines its data with whatever already exists on $toName. Your other devices keep using $fromName until you switch each of them too.';
+  }
+
+  @override
+  String get settings_cloudSync_switch_confirm => 'Switch';
+
+  @override
+  String settings_cloudSync_moved_banner(
+    String deviceName,
+    String destination,
+  ) {
+    return '$deviceName moved this library to $destination. This backend is no longer being updated by it. Select $destination below to follow the move.';
+  }
+
+  @override
+  String get settings_cloudSync_moved_dismiss => 'Dismiss';
+
+  @override
+  String settings_cloudSync_cleanup_banner(String backend) {
+    return 'Old sync data is still stored on $backend from before you switched backends. It is no longer used.';
+  }
+
+  @override
+  String get settings_cloudSync_cleanup_delete => 'Delete old data';
+
+  @override
+  String get settings_cloudSync_cleanup_keep => 'Keep';
+
+  @override
   String get settings_cloudSync_header_advanced => 'Advanced';
+
+  @override
+  String get settings_cloudSync_signOut_backupWarning =>
+      'Cloud backup will be turned off and backups will be saved to the default location.';
 
   @override
   String get settings_cloudSync_header_cloudProvider => 'Cloud Provider';
@@ -10103,10 +10436,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settings_cloudSync_provider_icloud => 'iCloud';
 
   @override
-  String get settings_cloudSync_provider_icloud_subtitle =>
-      'Sync via Apple iCloud';
-
-  @override
   String settings_cloudSync_provider_initFailed(Object providerName) {
     return 'Failed to initialize $providerName provider';
   }
@@ -10114,6 +10443,16 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get settings_cloudSync_provider_notAvailable =>
       'Not available on this platform';
+
+  @override
+  String get settings_cloudSync_provider_s3_edit => 'Edit S3 configuration';
+
+  @override
+  String get settings_cloudSync_provider_s3_subtitle =>
+      'Works with any S3-compatible storage service';
+
+  @override
+  String get settings_cloudSync_provider_s3_title => 'S3-Compatible Storage';
 
   @override
   String get settings_cloudSync_resetDialog_cancel => 'Cancel';
@@ -10878,6 +11217,98 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settings_profileHub_switchDiver => 'Switch Diver';
+
+  @override
+  String get settings_s3Config_action_remove => 'Remove Configuration';
+
+  @override
+  String get settings_s3Config_action_testConnection => 'Test Connection';
+
+  @override
+  String get settings_s3Config_advanced_title => 'Advanced';
+
+  @override
+  String get settings_s3Config_appBar_title => 'S3-Compatible Storage';
+
+  @override
+  String get settings_s3Config_error_secureStorage =>
+      'Could not access secure storage';
+
+  @override
+  String get settings_s3Config_field_accessKeyId_label => 'Access Key ID';
+
+  @override
+  String get settings_s3Config_field_bucket_label => 'Bucket';
+
+  @override
+  String get settings_s3Config_field_endpoint_helper =>
+      'For example: https://s3.example.com';
+
+  @override
+  String get settings_s3Config_field_endpoint_label => 'Endpoint URL';
+
+  @override
+  String get settings_s3Config_field_pathStyle_label =>
+      'Use path-style addressing';
+
+  @override
+  String get settings_s3Config_field_pathStyle_subtitle =>
+      'Required by most self-hosted servers';
+
+  @override
+  String get settings_s3Config_field_prefix_label => 'Key prefix';
+
+  @override
+  String settings_s3Config_field_region_helperAuto(String region) {
+    return 'Auto-detected: $region';
+  }
+
+  @override
+  String get settings_s3Config_field_region_label => 'Region';
+
+  @override
+  String get settings_s3Config_field_secretAccessKey_label =>
+      'Secret Access Key';
+
+  @override
+  String get settings_s3Config_remove_confirm_action => 'Remove';
+
+  @override
+  String get settings_s3Config_remove_confirm_body =>
+      'Sync via S3 will stop on this device. Your data in the bucket is not deleted.';
+
+  @override
+  String get settings_s3Config_remove_confirm_title =>
+      'Remove S3 configuration?';
+
+  @override
+  String get settings_s3Config_removed => 'S3 configuration removed';
+
+  @override
+  String get settings_s3Config_saved => 'S3 configuration saved';
+
+  @override
+  String settings_s3Config_test_regionDetected(String region) {
+    return 'Region detected: $region';
+  }
+
+  @override
+  String get settings_s3Config_test_success => 'Connection successful';
+
+  @override
+  String get settings_s3Config_validation_endpointInvalid =>
+      'Enter a valid http:// or https:// URL';
+
+  @override
+  String get settings_s3Config_validation_endpointPath =>
+      'Endpoint URL must not include a path';
+
+  @override
+  String get settings_s3Config_validation_required => 'Required';
+
+  @override
+  String get settings_s3Config_warning_http =>
+      'This endpoint uses plain HTTP. Credentials and dive data will travel unencrypted; use only on a trusted network.';
 
   @override
   String get settings_section_about_subtitle => 'App info & licenses';
@@ -16368,4 +16799,57 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return 'Diver deleted. $trips shared $_temp0 and $sites shared $_temp1 reassigned to $name.';
   }
+
+  @override
+  String get settings_cloudSync_duplicateDivers_title =>
+      'Duplicate diver profiles';
+
+  @override
+  String get settings_cloudSync_duplicateDivers_description =>
+      'Sync found more than one profile with the same name. This usually happens when each device created its own profile before syncing. Merging moves all dives and data onto one profile.';
+
+  @override
+  String settings_cloudSync_duplicateDivers_groupLabel(String name, int count) {
+    return '$name ($count profiles)';
+  }
+
+  @override
+  String get settings_cloudSync_duplicateDivers_mergeButton => 'Merge';
+
+  @override
+  String get settings_cloudSync_duplicateDivers_confirmTitle =>
+      'Merge diver profiles?';
+
+  @override
+  String settings_cloudSync_duplicateDivers_confirmBody(
+    int count,
+    String name,
+  ) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'profiles',
+      one: 'profile',
+    );
+    return 'All dives, certifications, gear, and other data from $count duplicate $_temp0 will be moved onto \"$name\". This cannot be undone automatically.';
+  }
+
+  @override
+  String get settings_cloudSync_duplicateDivers_confirmCancel => 'Cancel';
+
+  @override
+  String get settings_cloudSync_duplicateDivers_confirmAction => 'Merge';
+
+  @override
+  String settings_cloudSync_duplicateDivers_successSnack(String name) {
+    return 'Merged into $name';
+  }
+
+  @override
+  String settings_cloudSync_duplicateDivers_failureSnack(String error) {
+    return 'Merge failed: $error';
+  }
+
+  @override
+  String get settings_cloudSync_duplicateDivers_undo => 'Undo';
 }

@@ -770,7 +770,7 @@ void main() {
     });
 
     test(
-      'persists UDDF sample cns, ndl, rbt and stores dive-level cns and otu in the source snapshot',
+      'persists UDDF sample cns, ndl, tts, rbt and stores dive-level cns and otu in the source snapshot',
       () async {
         when(mockDiveRepo.createDive(any)).thenAnswer(
           (invocation) async => invocation.positionalArguments[0] as Dive,
@@ -790,9 +790,16 @@ void main() {
                   'depth': 0.0,
                   'cns': 3.0,
                   'ndl': 1200,
+                  'tts': 300,
                   'rbt': 1500,
                 },
-                {'timestamp': 60, 'depth': 12.0, 'cns': 8.5, 'rbt': 900},
+                {
+                  'timestamp': 60,
+                  'depth': 12.0,
+                  'cns': 8.5,
+                  'tts': 480,
+                  'rbt': 900,
+                },
               ],
             },
           ],
@@ -812,9 +819,11 @@ void main() {
         expect(dive.profile, hasLength(2));
         expect(dive.profile[0].cns, 3.0);
         expect(dive.profile[0].ndl, 1200);
+        expect(dive.profile[0].tts, 300);
         expect(dive.profile[0].rbt, 1500);
         expect(dive.profile[1].cns, 8.5);
         expect(dive.profile[1].ndl, isNull);
+        expect(dive.profile[1].tts, 480);
         expect(dive.profile[1].rbt, 900);
 
         final capturedReadings = verify(

@@ -124,16 +124,28 @@ class _SubmersionAppState extends ConsumerState<SubmersionApp>
     }
   }
 
-  void _maybeSyncOnLaunch() {
+  Future<void> _maybeSyncOnLaunch() async {
     final settings = ref.read(syncBehaviorProvider);
     if (!settings.autoSyncEnabled || !settings.syncOnLaunch) return;
-    ref.read(syncStateProvider.notifier).performSync();
+    // Wait for the launch reconcile (watched in build) to finish before the
+    // first sync reads sync state. A restore-triggered rebaseline may still be
+    // in flight; syncing mid-rebaseline would read a rewound lastSync/tombstone
+    // set and defeat the "rebaseline before anything reads sync state"
+    // guarantee. Reconcile is launch-safe (resolves with a status, never
+    // throws), but guard anyway so a failure can't block launch sync forever.
+    try {
+      await ref.read(reconcileDeviceIdentityProvider.future);
+    } catch (_) {
+      // Already logged inside reconcileDeviceIdentity; proceed with the sync.
+    }
+    if (!mounted) return;
+    ref.read(syncStateProvider.notifier).performSync(auto: true);
   }
 
   void _maybeSyncOnResume() {
     final settings = ref.read(syncBehaviorProvider);
     if (!settings.autoSyncEnabled || !settings.syncOnResume) return;
-    ref.read(syncStateProvider.notifier).performSync();
+    ref.read(syncStateProvider.notifier).performSync(auto: true);
   }
 
   Future<void> _handleIncomingFile(Uint8List bytes, String fileName) async {
@@ -170,6 +182,10 @@ class _SubmersionAppState extends ConsumerState<SubmersionApp>
     final themeMode = ref.watch(themeModeProvider);
     final themePreset = ref.watch(themePresetProvider);
     final localeSetting = ref.watch(localeProvider);
+
+    // Detect a database restore and re-baseline sync before anything reads
+    // sync state, so a rewound baseline can't stall sync or resurrect deletes.
+    ref.watch(reconcileDeviceIdentityProvider);
 
     // Restore the last used cloud sync provider on app startup
     ref.watch(restoreLastProviderProvider);

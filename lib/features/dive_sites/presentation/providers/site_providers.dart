@@ -173,11 +173,19 @@ final siteRepositoryProvider = Provider<SiteRepository>((ref) {
 });
 
 /// All sites provider
+///
+/// A [FutureProvider] that self-invalidates whenever the `dive_sites` table is
+/// written (e.g. after a sync applies remote changes), so the list refreshes
+/// while imperative `ref.read(sitesProvider.future)` reads still resolve.
 final sitesProvider = FutureProvider<List<domain.DiveSite>>((ref) async {
   final repository = ref.watch(siteRepositoryProvider);
   final validatedDiverId = await ref.watch(
     validatedCurrentDiverIdProvider.future,
   );
+  final sub = repository.watchSitesChanges().listen(
+    (_) => ref.invalidateSelf(),
+  );
+  ref.onDispose(sub.cancel);
   return repository.getAllSites(diverId: validatedDiverId);
 });
 
@@ -189,6 +197,15 @@ final sitesWithCountsProvider = FutureProvider<List<SiteWithDiveCount>>((
   final validatedDiverId = await ref.watch(
     validatedCurrentDiverIdProvider.future,
   );
+  final sitesSub = repository.watchSitesChanges().listen(
+    (_) => ref.invalidateSelf(),
+  );
+  ref.onDispose(sitesSub.cancel);
+  final divesSub = ref
+      .read(diveRepositoryProvider)
+      .watchDivesChanges()
+      .listen((_) => ref.invalidateSelf());
+  ref.onDispose(divesSub.cancel);
   return repository.getSitesWithDiveCounts(diverId: validatedDiverId);
 });
 

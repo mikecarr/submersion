@@ -19,12 +19,20 @@ final courseRepositoryProvider = Provider<CourseRepository>((ref) {
   return CourseRepository();
 });
 
-/// All courses provider
+/// All courses provider.
+///
+/// Self-invalidates whenever the `courses` table changes (e.g. after a sync)
+/// so the list refreshes automatically, while remaining a [FutureProvider] so
+/// imperative `ref.read(provider.future)` reads still resolve.
 final allCoursesProvider = FutureProvider<List<Course>>((ref) async {
   final repository = ref.watch(courseRepositoryProvider);
   final validatedDiverId = await ref.watch(
     validatedCurrentDiverIdProvider.future,
   );
+  final sub = repository.watchCoursesChanges().listen(
+    (_) => ref.invalidateSelf(),
+  );
+  ref.onDispose(sub.cancel);
   return repository.getAllCourses(diverId: validatedDiverId);
 });
 
@@ -193,6 +201,13 @@ class CourseListNotifier extends StateNotifier<AsyncValue<List<Course>>> {
         _initializeAndLoad();
       }
     });
+
+    // Refresh when the courses table changes (e.g. a sync writes rows
+    // directly).
+    final tableChangeSub = _repository.watchCoursesChanges().listen(
+      (_) => _silentReloadCourses(),
+    );
+    _ref.onDispose(tableChangeSub.cancel);
   }
 
   Future<void> _initializeAndLoad() async {
@@ -211,6 +226,24 @@ class CourseListNotifier extends StateNotifier<AsyncValue<List<Course>>> {
       state = AsyncValue.data(courses);
     } catch (e, st) {
       state = AsyncValue.error(e, st);
+    }
+  }
+
+  /// Reload without flipping to a loading state, so table-driven refreshes
+  /// (e.g. after a sync write) do not flash a spinner over existing data.
+  /// Resolves the validated diver id first so a tick arriving before
+  /// initialization completes still scopes the query correctly.
+  Future<void> _silentReloadCourses() async {
+    try {
+      _validatedDiverId = await _ref.read(
+        validatedCurrentDiverIdProvider.future,
+      );
+      final courses = await _repository.getAllCourses(
+        diverId: _validatedDiverId,
+      );
+      if (mounted) state = AsyncValue.data(courses);
+    } catch (e, st) {
+      if (mounted) state = AsyncValue.error(e, st);
     }
   }
 

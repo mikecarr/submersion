@@ -51,18 +51,33 @@ final equipmentByStatusProvider =
       final validatedDiverId = await ref.watch(
         validatedCurrentDiverIdProvider.future,
       );
+      final sub = repository.watchEquipmentChanges().listen(
+        (_) => ref.invalidateSelf(),
+      );
+      ref.onDispose(sub.cancel);
       if (status == null) {
         return repository.getAllEquipment(diverId: validatedDiverId);
       }
       return repository.getEquipmentByStatus(status, diverId: validatedDiverId);
     });
 
-/// All equipment provider
+/// All equipment provider (filtered by current diver).
+///
+/// A one-shot read that self-invalidates whenever the `equipment` table
+/// changes (a sync apply, a local create/edit/delete, ...), so list UIs
+/// refresh automatically while imperative
+/// `ref.read(allEquipmentProvider.future)` reads still resolve.
 final allEquipmentProvider = FutureProvider<List<EquipmentItem>>((ref) async {
   final repository = ref.watch(equipmentRepositoryProvider);
   final validatedDiverId = await ref.watch(
     validatedCurrentDiverIdProvider.future,
   );
+
+  final sub = repository.watchEquipmentChanges().listen(
+    (_) => ref.invalidateSelf(),
+  );
+  ref.onDispose(sub.cancel);
+
   return repository.getAllEquipment(diverId: validatedDiverId);
 });
 
@@ -158,6 +173,10 @@ final serviceDueEquipmentProvider = FutureProvider<List<EquipmentItem>>((
   final validatedDiverId = await ref.watch(
     validatedCurrentDiverIdProvider.future,
   );
+  final sub = repository.watchEquipmentChanges().listen(
+    (_) => ref.invalidateSelf(),
+  );
+  ref.onDispose(sub.cancel);
   return repository.getEquipmentWithServiceDue(diverId: validatedDiverId);
 });
 

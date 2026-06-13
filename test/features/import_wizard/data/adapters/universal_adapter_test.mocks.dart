@@ -200,6 +200,15 @@ class _FakeUddfEntityImportResult_18 extends _i1.SmartFake
 /// See the documentation for Mockito's code generation for more information.
 class MockDiveRepository extends _i1.Mock implements _i3.DiveRepository {
   @override
+  _i18.Stream<void> watchDivesChanges() =>
+      (super.noSuchMethod(
+            Invocation.method(#watchDivesChanges, []),
+            returnValue: _i18.Stream<void>.empty(),
+            returnValueForMissingStub: _i18.Stream<void>.empty(),
+          )
+          as _i18.Stream<void>);
+
+  @override
   _i18.Future<List<_i2.Dive>> getAllDives({String? diverId}) =>
       (super.noSuchMethod(
             Invocation.method(#getAllDives, [], {#diverId: diverId}),
@@ -1000,6 +1009,15 @@ class MockSiteRepository extends _i1.Mock implements _i27.SiteRepository {
           as _i18.Future<List<_i5.DiveSite>>);
 
   @override
+  _i18.Stream<void> watchSitesChanges() =>
+      (super.noSuchMethod(
+            Invocation.method(#watchSitesChanges, []),
+            returnValue: _i18.Stream<void>.empty(),
+            returnValueForMissingStub: _i18.Stream<void>.empty(),
+          )
+          as _i18.Stream<void>);
+
+  @override
   _i18.Future<_i5.DiveSite?> getSiteById(String? id) =>
       (super.noSuchMethod(
             Invocation.method(#getSiteById, [id]),
@@ -1163,6 +1181,15 @@ class MockSiteRepository extends _i1.Mock implements _i27.SiteRepository {
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockTripRepository extends _i1.Mock implements _i28.TripRepository {
+  @override
+  _i18.Stream<void> watchTripsChanges() =>
+      (super.noSuchMethod(
+            Invocation.method(#watchTripsChanges, []),
+            returnValue: _i18.Stream<void>.empty(),
+            returnValueForMissingStub: _i18.Stream<void>.empty(),
+          )
+          as _i18.Stream<void>);
+
   @override
   _i18.Future<List<_i6.Trip>> getAllTrips({String? diverId}) =>
       (super.noSuchMethod(
@@ -1413,6 +1440,15 @@ class MockEquipmentRepository extends _i1.Mock
                 ),
           )
           as _i18.Future<List<_i7.EquipmentItem>>);
+
+  @override
+  _i18.Stream<void> watchEquipmentChanges() =>
+      (super.noSuchMethod(
+            Invocation.method(#watchEquipmentChanges, []),
+            returnValue: _i18.Stream<void>.empty(),
+            returnValueForMissingStub: _i18.Stream<void>.empty(),
+          )
+          as _i18.Stream<void>);
 
   @override
   _i18.Future<List<_i7.EquipmentItem>> getAllEquipment({String? diverId}) =>
@@ -1716,6 +1752,15 @@ class MockEquipmentSetRepository extends _i1.Mock
 /// See the documentation for Mockito's code generation for more information.
 class MockBuddyRepository extends _i1.Mock implements _i10.BuddyRepository {
   @override
+  _i18.Stream<void> watchBuddiesChanges() =>
+      (super.noSuchMethod(
+            Invocation.method(#watchBuddiesChanges, []),
+            returnValue: _i18.Stream<void>.empty(),
+            returnValueForMissingStub: _i18.Stream<void>.empty(),
+          )
+          as _i18.Stream<void>);
+
+  @override
   _i18.Future<List<_i9.Buddy>> getAllBuddies({String? diverId}) =>
       (super.noSuchMethod(
             Invocation.method(#getAllBuddies, [], {#diverId: diverId}),
@@ -1945,6 +1990,15 @@ class MockBuddyRepository extends _i1.Mock implements _i10.BuddyRepository {
 class MockDiveCenterRepository extends _i1.Mock
     implements _i34.DiveCenterRepository {
   @override
+  _i18.Stream<void> watchDiveCentersChanges() =>
+      (super.noSuchMethod(
+            Invocation.method(#watchDiveCentersChanges, []),
+            returnValue: _i18.Stream<void>.empty(),
+            returnValueForMissingStub: _i18.Stream<void>.empty(),
+          )
+          as _i18.Stream<void>);
+
+  @override
   _i18.Future<List<_i11.DiveCenter>> getAllDiveCenters({String? diverId}) =>
       (super.noSuchMethod(
             Invocation.method(#getAllDiveCenters, [], {#diverId: diverId}),
@@ -2082,6 +2136,15 @@ class MockDiveCenterRepository extends _i1.Mock
 /// See the documentation for Mockito's code generation for more information.
 class MockCertificationRepository extends _i1.Mock
     implements _i35.CertificationRepository {
+  @override
+  _i18.Stream<void> watchCertificationsChanges() =>
+      (super.noSuchMethod(
+            Invocation.method(#watchCertificationsChanges, []),
+            returnValue: _i18.Stream<void>.empty(),
+            returnValueForMissingStub: _i18.Stream<void>.empty(),
+          )
+          as _i18.Stream<void>);
+
   @override
   _i18.Future<List<_i12.Certification>> getAllCertifications({
     String? diverId,
@@ -2227,6 +2290,15 @@ class MockCertificationRepository extends _i1.Mock
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockTagRepository extends _i1.Mock implements _i36.TagRepository {
+  @override
+  _i18.Stream<void> watchTagsChanges() =>
+      (super.noSuchMethod(
+            Invocation.method(#watchTagsChanges, []),
+            returnValue: _i18.Stream<void>.empty(),
+            returnValueForMissingStub: _i18.Stream<void>.empty(),
+          )
+          as _i18.Stream<void>);
+
   @override
   _i18.Future<List<_i13.Tag>> getAllTags({String? diverId}) =>
       (super.noSuchMethod(
@@ -2444,6 +2516,15 @@ class MockTagRepository extends _i1.Mock implements _i36.TagRepository {
 /// See the documentation for Mockito's code generation for more information.
 class MockDiveTypeRepository extends _i1.Mock
     implements _i37.DiveTypeRepository {
+  @override
+  _i18.Stream<void> watchDiveTypesChanges() =>
+      (super.noSuchMethod(
+            Invocation.method(#watchDiveTypesChanges, []),
+            returnValue: _i18.Stream<void>.empty(),
+            returnValueForMissingStub: _i18.Stream<void>.empty(),
+          )
+          as _i18.Stream<void>);
+
   @override
   _i18.Future<List<_i14.DiveTypeEntity>> getAllDiveTypes({String? diverId}) =>
       (super.noSuchMethod(
@@ -2671,6 +2752,15 @@ class MockCourseRepository extends _i1.Mock implements _i39.CourseRepository {
           as _i18.Future<List<_i15.Course>>);
 
   @override
+  _i18.Stream<void> watchCoursesChanges() =>
+      (super.noSuchMethod(
+            Invocation.method(#watchCoursesChanges, []),
+            returnValue: _i18.Stream<void>.empty(),
+            returnValueForMissingStub: _i18.Stream<void>.empty(),
+          )
+          as _i18.Stream<void>);
+
+  @override
   _i18.Future<_i15.Course?> getCourseById(String? id) =>
       (super.noSuchMethod(
             Invocation.method(#getCourseById, [id]),
@@ -2843,6 +2933,15 @@ class MockCourseRepository extends _i1.Mock implements _i39.CourseRepository {
 /// See the documentation for Mockito's code generation for more information.
 class MockTankPresetRepository extends _i1.Mock
     implements _i40.TankPresetRepository {
+  @override
+  _i18.Stream<void> watchTankPresetsChanges() =>
+      (super.noSuchMethod(
+            Invocation.method(#watchTankPresetsChanges, []),
+            returnValue: _i18.Stream<void>.empty(),
+            returnValueForMissingStub: _i18.Stream<void>.empty(),
+          )
+          as _i18.Stream<void>);
+
   @override
   _i18.Future<List<_i16.TankPresetEntity>> getAllPresets({String? diverId}) =>
       (super.noSuchMethod(

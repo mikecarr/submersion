@@ -66,6 +66,11 @@ class EquipmentRepository {
     }
   }
 
+  /// Emits whenever the `equipment` table changes so list providers can
+  /// refresh after a sync or any other write.
+  Stream<void> watchEquipmentChanges() =>
+      _db.tableUpdates(TableUpdateQuery.onTable(_db.equipment));
+
   /// Get all equipment
   Future<List<EquipmentItem>> getAllEquipment({String? diverId}) async {
     try {

@@ -35,6 +35,11 @@ class SiteRepository {
     }
   }
 
+  /// Emits whenever the `dive_sites` table changes so list providers can
+  /// refresh after a sync or any other write.
+  Stream<void> watchSitesChanges() =>
+      _db.tableUpdates(TableUpdateQuery.onTable(_db.diveSites));
+
   /// Get a single site by ID
   Future<domain.DiveSite?> getSiteById(String id) async {
     try {
@@ -558,7 +563,7 @@ class SiteRepository {
                 ),
               );
           await _syncRepository.markRecordPending(
-            entityType: 'site_species',
+            entityType: 'siteSpecies',
             recordId: entry.id,
             localUpdatedAt: now,
           );
@@ -575,7 +580,7 @@ class SiteRepository {
             ),
           );
           await _syncRepository.markRecordPending(
-            entityType: 'site_species',
+            entityType: 'siteSpecies',
             recordId: entry.id,
             localUpdatedAt: now,
           );
@@ -825,7 +830,7 @@ class SiteRepository {
           ),
         );
         await _syncRepository.markRecordPending(
-          entityType: 'site_species',
+          entityType: 'siteSpecies',
           recordId: primary.id,
           localUpdatedAt: now,
         );
@@ -836,7 +841,7 @@ class SiteRepository {
           _db.siteSpecies,
         )..where((t) => t.id.equals(duplicate.id))).go();
         await _syncRepository.logDeletion(
-          entityType: 'site_species',
+          entityType: 'siteSpecies',
           recordId: duplicate.id,
         );
       }

@@ -36,7 +36,7 @@ class BackupPreferences {
       lastBackupTime: lastBackupMs != null
           ? DateTime.fromMillisecondsSinceEpoch(lastBackupMs)
           : null,
-      cloudBackupEnabled: _prefs.getBool(_cloudBackupEnabledKey) ?? true,
+      cloudBackupEnabled: _prefs.getBool(_cloudBackupEnabledKey) ?? false,
       backupLocation: _prefs.getString(_backupLocationKey),
     );
   }

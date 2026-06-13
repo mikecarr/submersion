@@ -6,6 +6,7 @@ import 'package:share_plus/share_plus.dart';
 
 import 'package:submersion/core/database/database.dart';
 import 'package:submersion/core/providers/provider.dart';
+import 'package:submersion/core/services/cloud_storage/cloud_storage_provider.dart';
 import 'package:submersion/features/backup/domain/entities/backup_record.dart';
 import 'package:submersion/features/backup/domain/entities/backup_settings.dart';
 import 'package:submersion/features/backup/presentation/pages/restore_complete_page.dart';
@@ -237,13 +238,16 @@ class BackupSettingsPage extends ConsumerWidget {
 
     if (!context.mounted) return;
 
-    final confirmed = await RestoreConfirmationDialog.show(
+    final mode = await RestoreConfirmationDialog.show(
       context,
       record,
       currentSchemaVersion: AppDatabase.currentSchemaVersion,
+      offerReplace: ref.read(cloudStorageProviderProvider) != null,
     );
-    if (confirmed) {
-      ref.read(backupOperationProvider.notifier).restoreFromFilePath(filePath);
+    if (mode != null) {
+      ref
+          .read(backupOperationProvider.notifier)
+          .restoreFromFilePath(filePath, mode: mode);
     }
   }
 
@@ -353,13 +357,16 @@ class BackupSettingsPage extends ConsumerWidget {
   ) async {
     switch (action) {
       case 'restore':
-        final confirmed = await RestoreConfirmationDialog.show(
+        final mode = await RestoreConfirmationDialog.show(
           context,
           record,
           currentSchemaVersion: AppDatabase.currentSchemaVersion,
+          offerReplace: ref.read(cloudStorageProviderProvider) != null,
         );
-        if (confirmed) {
-          ref.read(backupOperationProvider.notifier).restoreFromBackup(record);
+        if (mode != null) {
+          ref
+              .read(backupOperationProvider.notifier)
+              .restoreFromBackup(record, mode: mode);
         }
       case 'delete':
         final confirmed = await _showDeleteConfirmation(context);
@@ -401,8 +408,15 @@ class BackupSettingsPage extends ConsumerWidget {
     BuildContext context,
     WidgetRef ref,
     BackupSettings settings,
-    dynamic cloudProvider,
+    CloudStorageProvider? cloudProvider,
   ) {
+    // Cloud backup and a custom location are mutually exclusive
+    // destinations; while cloud backup is on, the location row names the
+    // configured cloud service instead of a folder.
+    final cloudDestination =
+        settings.cloudBackupEnabled && cloudProvider != null
+        ? cloudProvider.providerName
+        : null;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -420,28 +434,6 @@ class BackupSettingsPage extends ConsumerWidget {
           value: settings.enabled,
           onChanged: (value) =>
               ref.read(backupSettingsProvider.notifier).setEnabled(value),
-        ),
-        // Backup location
-        ListTile(
-          title: Text(context.l10n.backup_location_title),
-          subtitle: Text(
-            settings.backupLocation ?? context.l10n.backup_location_default,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-          trailing: TextButton(
-            onPressed: () async {
-              final path = await FilePicker.getDirectoryPath(
-                dialogTitle: context.l10n.backup_location_title,
-              );
-              if (path != null) {
-                ref
-                    .read(backupSettingsProvider.notifier)
-                    .setBackupLocation(path);
-              }
-            },
-            child: Text(context.l10n.backup_location_change),
-          ),
         ),
         // Frequency
         if (settings.enabled)
@@ -483,6 +475,31 @@ class BackupSettingsPage extends ConsumerWidget {
               }).toList(),
             ),
           ),
+        // Backup location: the destination row sits directly above the
+        // Cloud backup switch it is mutually exclusive with.
+        ListTile(
+          title: Text(context.l10n.backup_location_title),
+          subtitle: Text(
+            cloudDestination ??
+                settings.backupLocation ??
+                context.l10n.backup_location_default,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          trailing: TextButton(
+            onPressed: () async {
+              final path = await FilePicker.getDirectoryPath(
+                dialogTitle: context.l10n.backup_location_title,
+              );
+              if (path != null) {
+                ref
+                    .read(backupSettingsProvider.notifier)
+                    .setBackupLocation(path);
+              }
+            },
+            child: Text(context.l10n.backup_location_change),
+          ),
+        ),
         // Cloud sync
         if (cloudProvider != null)
           SwitchListTile(

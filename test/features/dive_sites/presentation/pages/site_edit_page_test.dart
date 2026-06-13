@@ -96,6 +96,9 @@ void main() {
     testWidgets('shows toggle reflecting AppSettings default with 2+ divers', (
       tester,
     ) async {
+      tester.view.physicalSize = const Size(900, 3200);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
       final twoDivers = [
         Diver(
           id: 'd1',
@@ -117,7 +120,15 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      // Scroll until the share toggle is visible (it appears near the end of the form).
+      // The Life & notes group rests collapsed; its summary reads 'shared'
+      // because share-by-default is on. Expand it to reach the toggle.
+      await tester.scrollUntilVisible(
+        find.text('shared'),
+        50.0,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.tap(find.text('shared'));
+      await tester.pumpAndSettle();
       await tester.scrollUntilVisible(
         find.text('Share with all dive profiles'),
         50.0,
@@ -125,14 +136,9 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      final switchFinder = find.byWidgetPredicate(
-        (w) =>
-            w is SwitchListTile &&
-            w.title is Text &&
-            (w.title as Text).data == 'Share with all dive profiles',
-      );
+      final switchFinder = find.byType(Switch);
       expect(switchFinder, findsOneWidget);
-      expect(tester.widget<SwitchListTile>(switchFinder).value, isTrue);
+      expect(tester.widget<Switch>(switchFinder).value, isTrue);
     });
   });
 
@@ -140,6 +146,9 @@ void main() {
     testWidgets('un-share on existing shared site shows confirmation dialog', (
       tester,
     ) async {
+      tester.view.physicalSize = const Size(900, 3200);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
       final twoDivers = [
         Diver(
           id: 'd1',
@@ -179,7 +188,15 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      // Scroll until the share toggle is visible.
+      // The Life & notes group rests collapsed with a 'shared' summary;
+      // expand it to reach the toggle.
+      await tester.scrollUntilVisible(
+        find.text('shared'),
+        50.0,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.tap(find.text('shared'));
+      await tester.pumpAndSettle();
       await tester.scrollUntilVisible(
         find.text('Share with all dive profiles'),
         50.0,
@@ -187,13 +204,8 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      final switchFinder = find.byWidgetPredicate(
-        (w) =>
-            w is SwitchListTile &&
-            w.title is Text &&
-            (w.title as Text).data == 'Share with all dive profiles',
-      );
-      expect(tester.widget<SwitchListTile>(switchFinder).value, isTrue);
+      final switchFinder = find.byType(Switch);
+      expect(tester.widget<Switch>(switchFinder).value, isTrue);
 
       // Tapping OFF should present the unshare confirmation dialog.
       await tester.tap(switchFinder);
@@ -226,17 +238,21 @@ void main() {
     testWidgets('renders depth/difficulty/rating/gps/altitude sections', (
       tester,
     ) async {
+      tester.view.physicalSize = const Size(900, 3200);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
       await tester.pumpWidget(
         _buildHarness(prefs: prefs, divers: const [], shareByDefault: false),
       );
       await tester.pumpAndSettle();
-      // Depth Range is visible before Access & Logistics.
+      // Depth now renders as the Dive info hero stat strip.
       await tester.scrollUntilVisible(
-        find.text('Depth Range'),
+        find.text('MIN DEPTH'),
         100,
         scrollable: find.byType(Scrollable).first,
       );
-      expect(find.text('Depth Range'), findsOneWidget);
+      expect(find.text('MIN DEPTH'), findsOneWidget);
+      expect(find.text('MAX DEPTH'), findsOneWidget);
       await tester.scrollUntilVisible(
         find.text('Difficulty Level'),
         100,
@@ -252,6 +268,9 @@ void main() {
     });
 
     testWidgets('tapping a rating star updates rating', (tester) async {
+      tester.view.physicalSize = const Size(900, 3200);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
       await tester.pumpWidget(
         _buildHarness(prefs: prefs, divers: const [], shareByDefault: false),
       );
@@ -277,6 +296,9 @@ void main() {
     });
 
     testWidgets('selecting a difficulty chip updates state', (tester) async {
+      tester.view.physicalSize = const Size(900, 3200);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
       await tester.pumpWidget(
         _buildHarness(prefs: prefs, divers: const [], shareByDefault: false),
       );
@@ -527,7 +549,7 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.text('Cancel'));
       await tester.pumpAndSettle();
-      expect(find.text('Discard Changes?'), findsOneWidget);
+      expect(find.text('Discard changes?'), findsOneWidget);
       await tester.tap(find.widgetWithText(FilledButton, 'Discard'));
       await tester.pumpAndSettle();
       expect(cancelCalled, isTrue);
@@ -722,15 +744,10 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      final switchFinder = find.byWidgetPredicate(
-        (w) =>
-            w is SwitchListTile &&
-            w.title is Text &&
-            (w.title as Text).data == 'Share with all dive profiles',
-      );
+      final switchFinder = find.byType(Switch);
       expect(switchFinder, findsOneWidget);
       expect(
-        tester.widget<SwitchListTile>(switchFinder).value,
+        tester.widget<Switch>(switchFinder).value,
         isTrue,
         reason:
             'Merging a shared primary site must preserve isShared=true; '

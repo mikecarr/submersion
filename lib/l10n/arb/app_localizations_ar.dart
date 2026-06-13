@@ -274,10 +274,39 @@ class AppLocalizationsAr extends AppLocalizations {
   String get backup_location_title => 'موقع النسخة الاحتياطية';
 
   @override
+  String get backup_replaceConfirm_confirm => 'استبدال في كل مكان';
+
+  @override
+  String get backup_replaceConfirm_content =>
+      'سيتم استبدال المكتبة على جميع الأجهزة المتزامنة بهذه النسخة الاحتياطية. يقوم كل جهاز أولاً بإنشاء نسخة احتياطية آمنة من بياناته الحالية. لا يمكن التراجع عن هذا الإجراء.';
+
+  @override
+  String get backup_replaceConfirm_title => 'استبدال المكتبة في كل مكان؟';
+
+  @override
   String get backup_restore_dialog_cancel => 'إلغاء';
 
   @override
+  String get backup_restore_dialog_modeMerge_subtitle =>
+      'الاستعادة على هذا الجهاز. ستدمج المزامنة التالية البيانات المستعادة مع مكتبة السحابة.';
+
+  @override
+  String get backup_restore_dialog_modeMerge_title =>
+      'الدمج عند المزامنة التالية';
+
+  @override
+  String get backup_restore_dialog_modeReplace_subtitle =>
+      'تصبح النسخة الاحتياطية هي المكتبة على هذا الجهاز وفي السحابة وعلى كل جهاز متزامن.';
+
+  @override
+  String get backup_restore_dialog_modeReplace_title => 'استبدال في كل مكان';
+
+  @override
   String get backup_restore_dialog_restore => 'استعادة';
+
+  @override
+  String get backup_restore_dialog_restoreReplace =>
+      'استعادة واستبدال في كل مكان';
 
   @override
   String get backup_restore_dialog_safetyNote =>
@@ -2744,6 +2773,13 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
+  String get diveLog_computerSheet_description =>
+      'اختر ملف أي كمبيوتر تريد التحرير منه.';
+
+  @override
+  String get diveLog_computerSheet_title => 'اختيار الملف الأولي';
+
+  @override
   String diveLog_cylinderSac_avgDepth(Object depth) {
     return 'متوسط: $depth';
   }
@@ -3280,7 +3316,43 @@ class AppLocalizationsAr extends AppLocalizations {
   String get diveLog_edit_gettingLocation => 'جارٍ تحديد الموقع...';
 
   @override
+  String get diveLog_edit_group_buddies => 'الرفاق';
+
+  @override
+  String get diveLog_edit_group_conditions => 'الظروف';
+
+  @override
+  String get diveLog_edit_group_experience => 'التجربة';
+
+  @override
+  String get diveLog_edit_group_gasGear => 'الغاز والمعدات';
+
+  @override
+  String get diveLog_edit_group_theDive => 'الغوصة';
+
+  @override
+  String get diveLog_edit_group_trip => 'الرحلة';
+
+  @override
   String get diveLog_edit_headerNew => 'تسجيل غوصة جديدة';
+
+  @override
+  String get diveLog_edit_invite_buddies => 'إضافة رفاق';
+
+  @override
+  String get diveLog_edit_invite_conditions =>
+      'إضافة الظروف - الماء والرؤية والطقس';
+
+  @override
+  String get diveLog_edit_invite_experience =>
+      'إضافة تقييم أو مشاهدات أو ملاحظات أو وسوم';
+
+  @override
+  String get diveLog_edit_invite_gasGear =>
+      'إضافة الغاز والمعدات - الوضع والأسطوانات والمعدات والأثقال';
+
+  @override
+  String get diveLog_edit_invite_trip => 'إضافة رحلة أو مركز غوص';
 
   @override
   String get diveLog_edit_label_airTemp => 'درجة حرارة الهواء';
@@ -3356,6 +3428,30 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get diveLog_edit_notesHint => 'أضف ملاحظات حول هذه الغوصة...';
+
+  @override
+  String get diveLog_edit_row_addSite => 'إضافة موقع';
+
+  @override
+  String get diveLog_edit_row_diveCenter => 'مركز الغوص';
+
+  @override
+  String get diveLog_edit_row_entry => 'الدخول';
+
+  @override
+  String get diveLog_edit_row_exit => 'الخروج';
+
+  @override
+  String get diveLog_edit_row_notSet => 'غير محدد';
+
+  @override
+  String get diveLog_edit_row_site => 'الموقع';
+
+  @override
+  String get diveLog_edit_row_surfaceInterval => 'فترة السطح';
+
+  @override
+  String get diveLog_edit_row_trip => 'الرحلة';
 
   @override
   String get diveLog_edit_save => 'حفظ';
@@ -3511,6 +3607,42 @@ class AppLocalizationsAr extends AppLocalizations {
       'تعذر حساب وقت التشغيل من الملف';
 
   @override
+  String diveLog_edit_summary_items(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count عناصر',
+      one: 'عنصر واحد',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get diveLog_edit_summary_notes => 'ملاحظات';
+
+  @override
+  String diveLog_edit_summary_species(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count أنواع',
+      one: 'نوع واحد',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String diveLog_edit_summary_tanks(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count أسطوانات',
+      one: 'أسطوانة واحدة',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String diveLog_edit_surfaceInterval(Object interval) {
     return 'فترة السطح: $interval';
   }
@@ -3521,6 +3653,26 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get diveLog_edit_surfacePressureHint =>
       'القياسي: 1013 mbar عند مستوى سطح البحر';
+
+  @override
+  String get diveLog_edit_tankCard_done => 'تم';
+
+  @override
+  String get diveLog_edit_tankCard_edit => 'تحرير';
+
+  @override
+  String get diveLog_edit_tankCard_mix => 'الخليط';
+
+  @override
+  String get diveLog_edit_tankCard_pressure => 'الضغط';
+
+  @override
+  String diveLog_edit_tankCard_title(int number) {
+    return 'أسطوانة $number';
+  }
+
+  @override
+  String get diveLog_edit_tankCard_volume => 'الحجم';
 
   @override
   String get diveLog_edit_tooltip_calculateFromProfile => 'حساب من ملف الغوصة';
@@ -3616,6 +3768,17 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String diveLog_equipmentSetPicker_errorLoading(Object error) {
     return 'خطأ في تحميل أطقم المعدات: $error';
+  }
+
+  @override
+  String diveLog_equipmentSetPicker_itemsSummary(int count, String names) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count عناصر',
+      one: 'عنصر واحد',
+    );
+    return '$_temp0: $names';
   }
 
   @override
@@ -3969,6 +4132,94 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get diveLog_listPage_menuMatchSites => 'مطابقة الغوصات بالمواقع';
+
+  @override
+  String get diveLog_sighting_decreaseCount => 'تقليل العدد';
+
+  @override
+  String get diveLog_sighting_increaseCount => 'زيادة العدد';
+
+  @override
+  String diveLog_speciesPicker_errorLoading(String error) {
+    return 'خطأ في تحميل الأنواع: $error';
+  }
+
+  @override
+  String get diveSites_edit_depth_heroMax => 'أقصى عمق';
+
+  @override
+  String get diveSites_edit_depth_heroMin => 'أدنى عمق';
+
+  @override
+  String get diveSites_edit_group_accessSafety => 'الوصول والسلامة';
+
+  @override
+  String get diveSites_edit_group_diveInfo => 'معلومات الغوص';
+
+  @override
+  String get diveSites_edit_group_identity => 'الهوية';
+
+  @override
+  String get diveSites_edit_group_lifeNotes => 'الحياة البحرية والملاحظات';
+
+  @override
+  String get diveSites_edit_group_location => 'الموقع الجغرافي';
+
+  @override
+  String get diveSites_edit_invite_accessSafety =>
+      'إضافة الوصول أو المواقف أو المرساة أو المخاطر';
+
+  @override
+  String get diveSites_edit_invite_diveInfo =>
+      'إضافة نطاق العمق أو الصعوبة أو التقييم';
+
+  @override
+  String get diveSites_edit_invite_lifeNotes =>
+      'إضافة الحياة البحرية أو الملاحظات أو المشاركة';
+
+  @override
+  String get diveSites_edit_invite_location => 'إضافة إحداثيات GPS أو الارتفاع';
+
+  @override
+  String get diveSites_edit_summary_shared => 'مشترك';
+
+  @override
+  String get forms_addSection_prefix => 'إضافة:';
+
+  @override
+  String get forms_cancel => 'إلغاء';
+
+  @override
+  String get forms_discard_body =>
+      'لديك تغييرات غير محفوظة. إذا غادرت الآن فستفقد.';
+
+  @override
+  String get forms_discard_discard => 'تجاهل';
+
+  @override
+  String get forms_discard_keepEditing => 'متابعة التحرير';
+
+  @override
+  String get forms_discard_title => 'تجاهل التغييرات؟';
+
+  @override
+  String get forms_save => 'حفظ';
+
+  @override
+  String forms_section_issues(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count مشاكل',
+      one: 'مشكلة واحدة',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String forms_statCell_useProfileValue(String value) {
+    return 'استخدام $value من ملف الغوصة';
+  }
 
   @override
   String get siteMatchReview_title => 'مطابقة المواقع';
@@ -10016,7 +10267,92 @@ class AppLocalizationsAr extends AppLocalizations {
       'المزامنة السحابية معطلة';
 
   @override
+  String get settings_cloudSync_entry_subtitle =>
+      'المزامنة عبر التخزين السحابي';
+
+  @override
+  String get settings_cloudSync_adopt_confirm => 'اعتماد المكتبة المستعادة';
+
+  @override
+  String settings_cloudSync_adopt_dialogContent(
+    String deviceName,
+    String date,
+  ) {
+    return 'تم استبدال المكتبة من نسخة احتياطية على \"$deviceName\" ($date). عند الاعتماد، سيتم استبدال بيانات هذا الجهاز بالمكتبة المستعادة. سيتم أولاً إنشاء نسخة احتياطية آمنة من البيانات الحالية لهذا الجهاز.';
+  }
+
+  @override
+  String get settings_cloudSync_adopt_dialogTitle =>
+      'اعتماد المكتبة المستعادة؟';
+
+  @override
+  String get settings_cloudSync_adopt_notNow => 'ليس الآن';
+
+  @override
+  String get settings_cloudSync_firstSync_banner =>
+      'المزامنة الأولى في انتظار التأكيد. اضغط على \'مزامنة الآن\' لمراجعة ما سيتم دمجه.';
+
+  @override
+  String get settings_cloudSync_firstSync_dialogConfirm => 'دمج ومزامنة';
+
+  @override
+  String settings_cloudSync_firstSync_dialogContent(
+    int deviceCount,
+    int diveCount,
+  ) {
+    return 'تم العثور على بيانات مزامنة موجودة في السحابة ($deviceCount من ملفات المزامنة). ستدمج المزامنة الأولى تلك البيانات مع $diveCount من الغطسات على هذا الجهاز، وذلك عبر جميع الأجهزة المتزامنة.\n\nإذا تمت إضافة الغطسات نفسها بشكل منفصل على كل جهاز، فستظهر مرتين.';
+  }
+
+  @override
+  String get settings_cloudSync_firstSync_dialogTitle => 'دمج المكتبات؟';
+
+  @override
+  String settings_cloudSync_replace_banner(String deviceName) {
+    return 'المزامنة متوقفة مؤقتًا: تم استبدال المكتبة من نسخة احتياطية على \"$deviceName\". اضغط على \"مزامنة الآن\" للمراجعة.';
+  }
+
+  @override
+  String get settings_cloudSync_switch_dialogTitle => 'تبديل خدمة المزامنة؟';
+
+  @override
+  String settings_cloudSync_switch_dialogContent(
+    String fromName,
+    String toName,
+  ) {
+    return 'لن يتم نقل بياناتك من $fromName -- ستبقى هناك حتى تحذفها. بعد التبديل، ستدمج المزامنة التالية لهذا الجهاز بياناته مع ما هو موجود بالفعل على $toName. ستظل أجهزتك الأخرى تستخدم $fromName حتى تبدّل كلاً منها أيضًا.';
+  }
+
+  @override
+  String get settings_cloudSync_switch_confirm => 'تبديل';
+
+  @override
+  String settings_cloudSync_moved_banner(
+    String deviceName,
+    String destination,
+  ) {
+    return 'قام $deviceName بنقل هذه المكتبة إلى $destination. لم تعد هذه الخدمة تُحدَّث بواسطته. اختر $destination أدناه لمتابعة النقل.';
+  }
+
+  @override
+  String get settings_cloudSync_moved_dismiss => 'تجاهل';
+
+  @override
+  String settings_cloudSync_cleanup_banner(String backend) {
+    return 'لا تزال بيانات المزامنة القديمة مخزّنة على $backend من قبل أن تبدّل الخدمات. لم تعد مستخدمة.';
+  }
+
+  @override
+  String get settings_cloudSync_cleanup_delete => 'حذف البيانات القديمة';
+
+  @override
+  String get settings_cloudSync_cleanup_keep => 'الاحتفاظ';
+
+  @override
   String get settings_cloudSync_header_advanced => 'متقدم';
+
+  @override
+  String get settings_cloudSync_signOut_backupWarning =>
+      'سيتم إيقاف النسخ الاحتياطي السحابي وسيتم حفظ النسخ الاحتياطية في الموقع الافتراضي.';
 
   @override
   String get settings_cloudSync_header_cloudProvider => 'مزود السحابة';
@@ -10072,10 +10408,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get settings_cloudSync_provider_icloud => 'iCloud';
 
   @override
-  String get settings_cloudSync_provider_icloud_subtitle =>
-      'المزامنة عبر Apple iCloud';
-
-  @override
   String settings_cloudSync_provider_initFailed(Object providerName) {
     return 'فشل في تهيئة مزود $providerName';
   }
@@ -10083,6 +10415,16 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get settings_cloudSync_provider_notAvailable =>
       'غير متاح على هذه المنصة';
+
+  @override
+  String get settings_cloudSync_provider_s3_edit => 'تحرير إعدادات S3';
+
+  @override
+  String get settings_cloudSync_provider_s3_subtitle =>
+      'يعمل مع أي خدمة تخزين متوافقة مع S3';
+
+  @override
+  String get settings_cloudSync_provider_s3_title => 'تخزين متوافق مع S3';
 
   @override
   String get settings_cloudSync_resetDialog_cancel => 'إلغاء';
@@ -10844,6 +11186,99 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get settings_profileHub_switchDiver => 'تبديل الغواص';
+
+  @override
+  String get settings_s3Config_action_remove => 'إزالة الإعدادات';
+
+  @override
+  String get settings_s3Config_action_testConnection => 'اختبار الاتصال';
+
+  @override
+  String get settings_s3Config_advanced_title => 'متقدم';
+
+  @override
+  String get settings_s3Config_appBar_title => 'تخزين متوافق مع S3';
+
+  @override
+  String get settings_s3Config_error_secureStorage =>
+      'تعذر الوصول إلى التخزين الآمن';
+
+  @override
+  String get settings_s3Config_field_accessKeyId_label => 'Access Key ID';
+
+  @override
+  String get settings_s3Config_field_bucket_label => 'الحاوية (Bucket)';
+
+  @override
+  String get settings_s3Config_field_endpoint_helper =>
+      'على سبيل المثال: https://s3.example.com';
+
+  @override
+  String get settings_s3Config_field_endpoint_label =>
+      'عنوان URL لنقطة النهاية';
+
+  @override
+  String get settings_s3Config_field_pathStyle_label =>
+      'استخدام العنونة بنمط المسار (path-style)';
+
+  @override
+  String get settings_s3Config_field_pathStyle_subtitle =>
+      'مطلوب لمعظم الخوادم المستضافة ذاتيًا';
+
+  @override
+  String get settings_s3Config_field_prefix_label => 'بادئة المفاتيح';
+
+  @override
+  String settings_s3Config_field_region_helperAuto(String region) {
+    return 'تم الاكتشاف تلقائيًا: $region';
+  }
+
+  @override
+  String get settings_s3Config_field_region_label => 'المنطقة';
+
+  @override
+  String get settings_s3Config_field_secretAccessKey_label =>
+      'Secret Access Key';
+
+  @override
+  String get settings_s3Config_remove_confirm_action => 'إزالة';
+
+  @override
+  String get settings_s3Config_remove_confirm_body =>
+      'ستتوقف المزامنة عبر S3 على هذا الجهاز. لن تُحذف بياناتك في الحاوية.';
+
+  @override
+  String get settings_s3Config_remove_confirm_title =>
+      'هل تريد إزالة إعدادات S3؟';
+
+  @override
+  String get settings_s3Config_removed => 'تمت إزالة إعدادات S3';
+
+  @override
+  String get settings_s3Config_saved => 'تم حفظ إعدادات S3';
+
+  @override
+  String settings_s3Config_test_regionDetected(String region) {
+    return 'تم اكتشاف المنطقة: $region';
+  }
+
+  @override
+  String get settings_s3Config_test_success => 'نجح الاتصال';
+
+  @override
+  String get settings_s3Config_validation_endpointInvalid =>
+      'أدخل عنوان URL صالحًا يبدأ بـ http:// أو https://';
+
+  @override
+  String get settings_s3Config_validation_endpointPath =>
+      'يجب ألا يتضمن عنوان URL لنقطة النهاية مسارًا';
+
+  @override
+  String get settings_s3Config_validation_required => 'مطلوب';
+
+  @override
+  String get settings_s3Config_warning_http =>
+      'تستخدم نقطة النهاية هذه HTTP غير مشفّر. ستنتقل بيانات الاعتماد وبيانات الغوص دون تشفير؛ استخدمه فقط على شبكة موثوقة.';
 
   @override
   String get settings_section_about_subtitle => 'معلومات التطبيق والتراخيص';
@@ -16329,4 +16764,56 @@ class AppLocalizationsAr extends AppLocalizations {
     );
     return 'تم حذف الغواص. $trips $_temp0 و$sites $_temp1 أُعيد تعيينها إلى $name.';
   }
+
+  @override
+  String get settings_cloudSync_duplicateDivers_title => 'ملفات غواصين مكررة';
+
+  @override
+  String get settings_cloudSync_duplicateDivers_description =>
+      'وجد المزامنة أكثر من ملف شخصي بالاسم نفسه. يحدث ذلك عادةً عندما أنشأ كل جهاز ملفه الشخصي قبل المزامنة. يؤدي الدمج إلى نقل جميع الغطسات والبيانات إلى ملف واحد.';
+
+  @override
+  String settings_cloudSync_duplicateDivers_groupLabel(String name, int count) {
+    return '$name ($count ملفات)';
+  }
+
+  @override
+  String get settings_cloudSync_duplicateDivers_mergeButton => 'دمج';
+
+  @override
+  String get settings_cloudSync_duplicateDivers_confirmTitle =>
+      'دمج ملفات الغواصين؟';
+
+  @override
+  String settings_cloudSync_duplicateDivers_confirmBody(
+    int count,
+    String name,
+  ) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count ملفات مكررة',
+      one: 'ملف مكرر',
+    );
+    return 'سيتم نقل جميع الغطسات والشهادات والمعدات والبيانات الأخرى من $_temp0 إلى \"$name\". لا يمكن التراجع عن هذا تلقائيًا.';
+  }
+
+  @override
+  String get settings_cloudSync_duplicateDivers_confirmCancel => 'إلغاء';
+
+  @override
+  String get settings_cloudSync_duplicateDivers_confirmAction => 'دمج';
+
+  @override
+  String settings_cloudSync_duplicateDivers_successSnack(String name) {
+    return 'تم الدمج في $name';
+  }
+
+  @override
+  String settings_cloudSync_duplicateDivers_failureSnack(String error) {
+    return 'فشل الدمج: $error';
+  }
+
+  @override
+  String get settings_cloudSync_duplicateDivers_undo => 'تراجع';
 }

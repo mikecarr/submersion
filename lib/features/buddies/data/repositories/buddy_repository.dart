@@ -21,6 +21,11 @@ class BuddyRepository {
   final _uuid = const Uuid();
   final _log = LoggerService.forClass(BuddyRepository);
 
+  /// Emits whenever the `buddies` table changes so list providers can
+  /// refresh after a sync or any other write.
+  Stream<void> watchBuddiesChanges() =>
+      _db.tableUpdates(TableUpdateQuery.onTable(_db.buddies));
+
   /// Get all buddies ordered by name
   Future<List<domain.Buddy>> getAllBuddies({String? diverId}) async {
     try {

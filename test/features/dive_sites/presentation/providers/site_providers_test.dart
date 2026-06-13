@@ -202,6 +202,48 @@ void main() {
       expect(undoDive.first.site?.id, equals('um-2'));
     });
   });
+
+  group('sitesWithCountsProvider auto-refresh', () {
+    test('refreshes dive counts when a dive is written directly to the DB '
+        '(sync scenario)', () async {
+      final site = await siteRepository.createSite(
+        const DiveSite(id: 'count-site', name: 'Count Site'),
+      );
+
+      // An active listener keeps the provider (and both its sites and dives
+      // table-change subscriptions) alive, mirroring a widget that watches
+      // the list.
+      final sub = container.listen(sitesWithCountsProvider, (_, _) {});
+      addTearDown(sub.close);
+
+      // Initially the site exists with a zero dive count.
+      final initial = await container.read(sitesWithCountsProvider.future);
+      final initialEntry = initial.firstWhere((s) => s.site.id == site.id);
+      expect(initialEntry.diveCount, equals(0));
+
+      // A sync applies a remote dive for this site straight to the DB. The
+      // watchDivesChanges tick must invalidate the provider so the count
+      // refreshes.
+      await _insertDive(database, id: 'count-dive', siteId: site.id);
+
+      var count = 0;
+      for (var i = 0; i < 50; i++) {
+        await Future<void>.delayed(const Duration(milliseconds: 10));
+        final sites = await container.read(sitesWithCountsProvider.future);
+        final entry = sites.where((s) => s.site.id == site.id);
+        count = entry.isEmpty ? 0 : entry.first.diveCount;
+        if (count >= 1) break;
+      }
+
+      expect(
+        count,
+        equals(1),
+        reason:
+            'sitesWithCountsProvider should auto-refresh dive counts after a '
+            'direct dives-table write without any manual invalidation',
+      );
+    });
+  });
 }
 
 Future<void> _insertDive(

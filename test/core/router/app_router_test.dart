@@ -351,6 +351,42 @@ void main() {
       // MediaSourcesPage class (avoids over-coupling the router test).
       expect(widget.runtimeType.toString(), 'MediaSourcesPage');
     });
+
+    test('cloudSync route path is /settings/cloud-sync', () {
+      final paths = _collectRoutePaths(router.configuration.routes);
+      expect(paths, contains('cloud-sync'));
+    });
+
+    testWidgets('cloudSync route builder returns CloudSyncPage', (
+      tester,
+    ) async {
+      final config = router.configuration;
+      final route = _findRouteByName(config.routes, 'cloudSync');
+      expect(route, isNotNull);
+
+      late BuildContext capturedContext;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Builder(
+            builder: (context) {
+              capturedContext = context;
+              return const SizedBox.shrink();
+            },
+          ),
+        ),
+      );
+
+      final state = GoRouterState(
+        config,
+        uri: Uri.parse('/settings/cloud-sync'),
+        matchedLocation: '/settings/cloud-sync',
+        fullPath: '/settings/cloud-sync',
+        pathParameters: const {},
+        pageKey: const ValueKey('/settings/cloud-sync'),
+      );
+      final widget = route!.builder!(capturedContext, state);
+      expect(widget.runtimeType.toString(), 'CloudSyncPage');
+    });
   });
 
   group('app_router initialLocation', () {

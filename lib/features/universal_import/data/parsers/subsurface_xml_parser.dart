@@ -450,6 +450,17 @@ class SubsurfaceXmlParser implements ImportParser {
     // Track which tank indices have pressure data across all samples
     final tankIndicesWithPressure = <int>{};
 
+    // Subsurface delta-encodes sample attributes: ndl, tts, rbt, cns and
+    // in_deco are only written when the value changes from the previous
+    // sample, so an omitted attribute means "unchanged", not "unknown".
+    // Carry the last seen value forward; samples before the first
+    // occurrence stay null.
+    int? lastNdl;
+    int? lastTts;
+    int? lastRbt;
+    double? lastCns;
+    bool inDeco = false;
+
     for (final sample in divecomputer.findElements('sample')) {
       final timestamp = _parseDurationSeconds(sample.getAttribute('time'));
       final depth = _parseDouble(sample.getAttribute('depth'));
@@ -459,14 +470,18 @@ class SubsurfaceXmlParser implements ImportParser {
       if (temp != null) point['temperature'] = temp;
       final heartRate = _parseInt(sample.getAttribute('heartbeat'));
       if (heartRate != null) point['heartRate'] = heartRate;
-      final ndl = _parseDurationSeconds(sample.getAttribute('ndl'));
+      final ndl = _parseDurationSeconds(sample.getAttribute('ndl')) ?? lastNdl;
       if (ndl != null) point['ndl'] = ndl;
-      final tts = _parseDurationSeconds(sample.getAttribute('tts'));
+      lastNdl = ndl;
+      final tts = _parseDurationSeconds(sample.getAttribute('tts')) ?? lastTts;
       if (tts != null) point['tts'] = tts;
-      final rbt = _parseDurationSeconds(sample.getAttribute('rbt'));
+      lastTts = tts;
+      final rbt = _parseDurationSeconds(sample.getAttribute('rbt')) ?? lastRbt;
       if (rbt != null) point['rbt'] = rbt;
-      final cns = _parseDouble(sample.getAttribute('cns'));
+      lastRbt = rbt;
+      final cns = _parseDouble(sample.getAttribute('cns')) ?? lastCns;
       if (cns != null) point['cns'] = cns;
+      lastCns = cns;
       final ppo2 = _parseDouble(sample.getAttribute('po2'));
       if (ppo2 != null) point['ppO2'] = ppo2;
       // Direct sample `setpoint` attribute is treated as bar — Subsurface
@@ -479,9 +494,9 @@ class SubsurfaceXmlParser implements ImportParser {
       // keep the direct-attribute path predictable.
       final setpoint = _parseDouble(sample.getAttribute('setpoint'));
       if (setpoint != null) point['setpoint'] = setpoint;
-      if (_parseInt(sample.getAttribute('in_deco')) == 1) {
-        point['decoType'] = 2;
-      }
+      final inDecoAttr = _parseInt(sample.getAttribute('in_deco'));
+      if (inDecoAttr != null) inDeco = inDecoAttr == 1;
+      if (inDeco) point['decoType'] = 2;
 
       // Read pressure0, pressure1, ... for each tank
       for (var tankIdx = 0; tankIdx < 10; tankIdx++) {

@@ -52,6 +52,11 @@ class DiverRepository {
     }
   }
 
+  /// Emits whenever the `divers` table changes so list providers can
+  /// refresh after a sync or any other write.
+  Stream<void> watchDiversChanges() =>
+      _db.tableUpdates(TableUpdateQuery.onTable(_db.divers));
+
   /// Get the default diver (or first if none marked default)
   Future<domain.Diver?> getDefaultDiver() async {
     try {

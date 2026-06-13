@@ -1300,6 +1300,9 @@ class _MockTripRepository implements TripRepository {
 
   @override
   Future<int> shareAllForDiver(String diverId) async => 0;
+
+  @override
+  Stream<void> watchTripsChanges() => const Stream<void>.empty();
 }
 
 /// Mock repository that returns a test trip
@@ -1378,6 +1381,9 @@ class _MockTripRepositoryWithTrip implements TripRepository {
 
   @override
   Future<int> shareAllForDiver(String diverId) async => 0;
+
+  @override
+  Stream<void> watchTripsChanges() => const Stream<void>.empty();
 }
 
 /// Mock repository that returns a SHARED test trip (for unshare confirmation tests).
@@ -1456,6 +1462,9 @@ class _MockTripRepositoryWithSharedTrip implements TripRepository {
 
   @override
   Future<int> shareAllForDiver(String diverId) async => 0;
+
+  @override
+  Stream<void> watchTripsChanges() => const Stream<void>.empty();
 }
 
 /// Mock notifier
@@ -1609,6 +1618,9 @@ class _SlowTripRepository implements TripRepository {
 
   @override
   Future<int> shareAllForDiver(String diverId) async => 0;
+
+  @override
+  Stream<void> watchTripsChanges() => const Stream<void>.empty();
 }
 
 /// Repository that throws when getTripById is called.
@@ -1679,4 +1691,7 @@ class _ErrorTripRepository implements TripRepository {
 
   @override
   Future<int> shareAllForDiver(String diverId) async => 0;
+
+  @override
+  Stream<void> watchTripsChanges() => const Stream<void>.empty();
 }

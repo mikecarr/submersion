@@ -4,6 +4,8 @@ import 'package:submersion/core/models/sort_state.dart';
 import 'package:submersion/core/constants/sort_options.dart';
 import 'package:submersion/core/providers/provider.dart';
 
+import 'package:submersion/features/dive_log/data/repositories/dive_repository_impl.dart';
+import 'package:submersion/features/dive_log/domain/entities/dive.dart';
 import 'package:submersion/features/divers/data/repositories/diver_repository.dart';
 import 'package:submersion/features/divers/domain/entities/diver.dart';
 import 'package:submersion/features/divers/presentation/providers/diver_providers.dart';
@@ -39,6 +41,7 @@ void main() {
   late SharedPreferences prefs;
   late TripRepository tripRepo;
   late DiverRepository diverRepo;
+  late DiveRepository diveRepo;
 
   setUp(() async {
     SharedPreferences.setMockInitialValues({});
@@ -46,6 +49,7 @@ void main() {
     await setUpTestDatabase();
     tripRepo = TripRepository();
     diverRepo = DiverRepository();
+    diveRepo = DiveRepository();
   });
 
   tearDown(() async {
@@ -108,6 +112,52 @@ void main() {
         expect(trips.map((t) => t.name), contains('Owned'));
       },
     );
+
+    test('allTripsProvider self-invalidates after a write to the trips table '
+        '(sync scenario)', () async {
+      final diver = await diverRepo.createDiver(
+        Diver(
+          id: '',
+          name: 'D',
+          isDefault: true,
+          createdAt: DateTime(2024),
+          updatedAt: DateTime(2024),
+        ),
+      );
+      await prefs.setString(currentDiverIdKey, diver.id);
+
+      final container = makeContainer();
+      addTearDown(container.dispose);
+      // Active listener keeps the FutureProvider (and its trips-table
+      // subscription) alive, mirroring a widget watching the list.
+      final sub = container.listen(allTripsProvider, (_, _) {});
+      addTearDown(sub.close);
+
+      expect(await container.read(allTripsProvider.future), isEmpty);
+
+      // A sync applies a remote trip straight to the DB. The watchTripsChanges
+      // tick must invalidate the provider so the next read includes it.
+      await tripRepo.createTrip(
+        _makeTrip(name: 'Synced Trip').copyWith(diverId: diver.id),
+      );
+
+      var names = <String>[];
+      for (var i = 0; i < 50; i++) {
+        await Future<void>.delayed(const Duration(milliseconds: 10));
+        names = (await container.read(
+          allTripsProvider.future,
+        )).map((t) => t.name).toList();
+        if (names.contains('Synced Trip')) break;
+      }
+
+      expect(
+        names,
+        contains('Synced Trip'),
+        reason:
+            'allTripsProvider should auto-refresh after the table write '
+            'without any manual invalidation',
+      );
+    });
 
     test('tripByIdProvider returns the matching trip', () async {
       final created = await tripRepo.createTrip(_makeTrip(name: 'Find'));
@@ -331,6 +381,121 @@ void main() {
       expect(newTrip.name, equals('Added'));
       expect(newTrip.id, isNotEmpty);
       expect(newTrip.diverId, equals(diver.id));
+    });
+
+    test('auto-refreshes the list when a trip is written directly to the DB '
+        '(sync scenario)', () async {
+      final diver = await diverRepo.createDiver(
+        Diver(
+          id: '',
+          name: 'D',
+          isDefault: true,
+          createdAt: DateTime(2024),
+          updatedAt: DateTime(2024),
+        ),
+      );
+      await prefs.setString(currentDiverIdKey, diver.id);
+
+      final container = makeContainer();
+      addTearDown(container.dispose);
+      // Active listener keeps the notifier (and its table-change subscription)
+      // alive, mirroring the on-screen list.
+      final sub = container.listen(tripListNotifierProvider, (_, _) {});
+      addTearDown(sub.close);
+
+      while (container.read(tripListNotifierProvider).isLoading) {
+        await Future<void>.delayed(Duration.zero);
+      }
+      expect(container.read(tripListNotifierProvider).value, isEmpty);
+
+      // A sync applies a remote trip straight to the DB (no notifier mutation
+      // call). The watchTripsChanges tick must silently reload the list.
+      await tripRepo.createTrip(
+        _makeTrip(name: 'Synced').copyWith(diverId: diver.id),
+      );
+
+      var names = <String>[];
+      for (var i = 0; i < 50; i++) {
+        await Future<void>.delayed(const Duration(milliseconds: 10));
+        names = (container.read(tripListNotifierProvider).value ?? [])
+            .map((t) => t.trip.name)
+            .toList();
+        if (names.contains('Synced')) break;
+      }
+
+      expect(
+        names,
+        contains('Synced'),
+        reason:
+            'TripListNotifier should auto-refresh after a direct DB write '
+            'without any manual refresh() call',
+      );
+    });
+
+    test('auto-refreshes the trip list when a DIVE is written directly to the '
+        'DB (trip stats LEFT JOIN dives)', () async {
+      final diver = await diverRepo.createDiver(
+        Diver(
+          id: '',
+          name: 'D',
+          isDefault: true,
+          createdAt: DateTime(2024),
+          updatedAt: DateTime(2024),
+        ),
+      );
+      await prefs.setString(currentDiverIdKey, diver.id);
+
+      final trip = await tripRepo.createTrip(
+        _makeTrip(
+          name: 'Counting',
+          start: DateTime(2024, 6, 1),
+          end: DateTime(2024, 6, 10),
+        ).copyWith(diverId: diver.id),
+      );
+
+      final container = makeContainer();
+      addTearDown(container.dispose);
+      // Active listener keeps the notifier (and its dives-table subscription)
+      // alive, mirroring the on-screen list.
+      final sub = container.listen(tripListNotifierProvider, (_, _) {});
+      addTearDown(sub.close);
+
+      while (container.read(tripListNotifierProvider).isLoading) {
+        await Future<void>.delayed(Duration.zero);
+      }
+      // Trip starts with zero dives.
+      final initial = container.read(tripListNotifierProvider).value!;
+      expect(initial.firstWhere((s) => s.trip.id == trip.id).diveCount, 0);
+
+      // A sync applies a dive (assigned to the trip) straight to the DB. The
+      // watchDivesChanges tick on the trip notifier must reload the stats,
+      // because diveCount is computed by a LEFT JOIN against the dives table.
+      await diveRepo.createDive(
+        Dive(
+          id: '',
+          diverId: diver.id,
+          dateTime: DateTime(2024, 6, 5),
+          tripId: trip.id,
+          notes: 'In-trip dive',
+        ),
+      );
+
+      var diveCount = 0;
+      for (var i = 0; i < 50; i++) {
+        await Future<void>.delayed(const Duration(milliseconds: 10));
+        final stats = container.read(tripListNotifierProvider).value ?? [];
+        final match = stats.where((s) => s.trip.id == trip.id);
+        diveCount = match.isEmpty ? 0 : match.first.diveCount;
+        if (diveCount >= 1) break;
+      }
+
+      expect(
+        diveCount,
+        equals(1),
+        reason:
+            'TripListNotifier should reload trip stats after a direct dive '
+            'write, since the dives-table subscription drives the refresh',
+      );
     });
 
     test('updateTrip persists changes', () async {

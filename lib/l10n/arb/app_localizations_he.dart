@@ -270,10 +270,37 @@ class AppLocalizationsHe extends AppLocalizations {
   String get backup_location_title => 'מיקום הגיבוי';
 
   @override
+  String get backup_replaceConfirm_confirm => 'החלפה בכל מקום';
+
+  @override
+  String get backup_replaceConfirm_content =>
+      'הספרייה בכל המכשירים המסונכרנים תוחלף בגיבוי זה. כל מכשיר יוצר תחילה גיבוי בטיחות של הנתונים הנוכחיים שלו. לא ניתן לבטל פעולה זו.';
+
+  @override
+  String get backup_replaceConfirm_title => 'להחליף את הספרייה בכל מקום?';
+
+  @override
   String get backup_restore_dialog_cancel => 'ביטול';
 
   @override
+  String get backup_restore_dialog_modeMerge_subtitle =>
+      'שחזור במכשיר זה. הסנכרון הבא ישלב את הנתונים המשוחזרים עם ספריית הענן.';
+
+  @override
+  String get backup_restore_dialog_modeMerge_title => 'מיזוג בסנכרון הבא';
+
+  @override
+  String get backup_restore_dialog_modeReplace_subtitle =>
+      'הגיבוי הופך לספרייה במכשיר זה, בענן ובכל מכשיר מסונכרן.';
+
+  @override
+  String get backup_restore_dialog_modeReplace_title => 'החלפה בכל מקום';
+
+  @override
   String get backup_restore_dialog_restore => 'שחזור';
+
+  @override
+  String get backup_restore_dialog_restoreReplace => 'שחזור והחלפה בכל מקום';
 
   @override
   String get backup_restore_dialog_safetyNote =>
@@ -2731,6 +2758,13 @@ class AppLocalizationsHe extends AppLocalizations {
   }
 
   @override
+  String get diveLog_computerSheet_description =>
+      'בחר מאיזה פרופיל מחשב לערוך.';
+
+  @override
+  String get diveLog_computerSheet_title => 'בחירת פרופיל התחלתי';
+
+  @override
   String diveLog_cylinderSac_avgDepth(Object depth) {
     return 'ממוצע: $depth';
   }
@@ -3266,7 +3300,43 @@ class AppLocalizationsHe extends AppLocalizations {
   String get diveLog_edit_gettingLocation => 'מקבל מיקום...';
 
   @override
+  String get diveLog_edit_group_buddies => 'שותפים';
+
+  @override
+  String get diveLog_edit_group_conditions => 'תנאים';
+
+  @override
+  String get diveLog_edit_group_experience => 'חוויה';
+
+  @override
+  String get diveLog_edit_group_gasGear => 'גז וציוד';
+
+  @override
+  String get diveLog_edit_group_theDive => 'הצלילה';
+
+  @override
+  String get diveLog_edit_group_trip => 'טיול';
+
+  @override
   String get diveLog_edit_headerNew => 'רישום צלילה חדשה';
+
+  @override
+  String get diveLog_edit_invite_buddies => 'הוספת שותפים';
+
+  @override
+  String get diveLog_edit_invite_conditions =>
+      'הוספת תנאים - מים, ראות, מזג אוויר';
+
+  @override
+  String get diveLog_edit_invite_experience =>
+      'הוספת דירוג, תצפיות, הערות או תגיות';
+
+  @override
+  String get diveLog_edit_invite_gasGear =>
+      'הוספת גז וציוד - מצב, מיכלים, ציוד, משקולות';
+
+  @override
+  String get diveLog_edit_invite_trip => 'הוספת טיול או מרכז צלילה';
 
   @override
   String get diveLog_edit_label_airTemp => 'טמפ\' אוויר';
@@ -3342,6 +3412,30 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get diveLog_edit_notesHint => 'הוסף הערות לצלילה זו...';
+
+  @override
+  String get diveLog_edit_row_addSite => 'הוספת אתר';
+
+  @override
+  String get diveLog_edit_row_diveCenter => 'מרכז צלילה';
+
+  @override
+  String get diveLog_edit_row_entry => 'כניסה';
+
+  @override
+  String get diveLog_edit_row_exit => 'יציאה';
+
+  @override
+  String get diveLog_edit_row_notSet => 'לא הוגדר';
+
+  @override
+  String get diveLog_edit_row_site => 'אתר';
+
+  @override
+  String get diveLog_edit_row_surfaceInterval => 'זמן פני השטח';
+
+  @override
+  String get diveLog_edit_row_trip => 'טיול';
 
   @override
   String get diveLog_edit_save => 'שמירה';
@@ -3497,6 +3591,42 @@ class AppLocalizationsHe extends AppLocalizations {
       'לא ניתן לחשב זמן ריצה מהפרופיל';
 
   @override
+  String diveLog_edit_summary_items(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count פריטים',
+      one: 'פריט אחד',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get diveLog_edit_summary_notes => 'הערות';
+
+  @override
+  String diveLog_edit_summary_species(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count מינים',
+      one: 'מין אחד',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String diveLog_edit_summary_tanks(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count מיכלים',
+      one: 'מיכל אחד',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String diveLog_edit_surfaceInterval(Object interval) {
     return 'מרווח פני שטח: $interval';
   }
@@ -3507,6 +3637,26 @@ class AppLocalizationsHe extends AppLocalizations {
   @override
   String get diveLog_edit_surfacePressureHint =>
       'סטנדרטי: 1013 mbar בגובה פני הים';
+
+  @override
+  String get diveLog_edit_tankCard_done => 'סיום';
+
+  @override
+  String get diveLog_edit_tankCard_edit => 'עריכה';
+
+  @override
+  String get diveLog_edit_tankCard_mix => 'תערובת';
+
+  @override
+  String get diveLog_edit_tankCard_pressure => 'לחץ';
+
+  @override
+  String diveLog_edit_tankCard_title(int number) {
+    return 'מיכל $number';
+  }
+
+  @override
+  String get diveLog_edit_tankCard_volume => 'נפח';
 
   @override
   String get diveLog_edit_tooltip_calculateFromProfile =>
@@ -3600,6 +3750,17 @@ class AppLocalizationsHe extends AppLocalizations {
   @override
   String diveLog_equipmentSetPicker_errorLoading(Object error) {
     return 'שגיאה בטעינת סטי ציוד: $error';
+  }
+
+  @override
+  String diveLog_equipmentSetPicker_itemsSummary(int count, String names) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count פריטים',
+      one: 'פריט אחד',
+    );
+    return '$_temp0: $names';
   }
 
   @override
@@ -3954,6 +4115,94 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get diveLog_listPage_menuMatchSites => 'התאמת צלילות לאתרים';
+
+  @override
+  String get diveLog_sighting_decreaseCount => 'הקטנת הכמות';
+
+  @override
+  String get diveLog_sighting_increaseCount => 'הגדלת הכמות';
+
+  @override
+  String diveLog_speciesPicker_errorLoading(String error) {
+    return 'שגיאה בטעינת מינים: $error';
+  }
+
+  @override
+  String get diveSites_edit_depth_heroMax => 'עומק מקס\'';
+
+  @override
+  String get diveSites_edit_depth_heroMin => 'עומק מינ\'';
+
+  @override
+  String get diveSites_edit_group_accessSafety => 'גישה ובטיחות';
+
+  @override
+  String get diveSites_edit_group_diveInfo => 'פרטי צלילה';
+
+  @override
+  String get diveSites_edit_group_identity => 'זהות';
+
+  @override
+  String get diveSites_edit_group_lifeNotes => 'חיים ימיים והערות';
+
+  @override
+  String get diveSites_edit_group_location => 'מיקום';
+
+  @override
+  String get diveSites_edit_invite_accessSafety =>
+      'הוספת גישה, חניה, עגינה או סכנות';
+
+  @override
+  String get diveSites_edit_invite_diveInfo =>
+      'הוספת טווח עומק, רמת קושי או דירוג';
+
+  @override
+  String get diveSites_edit_invite_lifeNotes =>
+      'הוספת חיים ימיים, הערות או שיתוף';
+
+  @override
+  String get diveSites_edit_invite_location => 'הוספת מיקום GPS או גובה';
+
+  @override
+  String get diveSites_edit_summary_shared => 'משותף';
+
+  @override
+  String get forms_addSection_prefix => 'הוספה:';
+
+  @override
+  String get forms_cancel => 'ביטול';
+
+  @override
+  String get forms_discard_body =>
+      'יש לך שינויים שלא נשמרו. אם תצא עכשיו הם יאבדו.';
+
+  @override
+  String get forms_discard_discard => 'ביטול שינויים';
+
+  @override
+  String get forms_discard_keepEditing => 'המשך עריכה';
+
+  @override
+  String get forms_discard_title => 'לבטל את השינויים?';
+
+  @override
+  String get forms_save => 'שמירה';
+
+  @override
+  String forms_section_issues(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count בעיות',
+      one: 'בעיה אחת',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String forms_statCell_useProfileValue(String value) {
+    return 'שימוש ב-$value מפרופיל הצלילה';
+  }
 
   @override
   String get siteMatchReview_title => 'התאמת אתרים';
@@ -9944,7 +10193,91 @@ class AppLocalizationsHe extends AppLocalizations {
   String get settings_cloudSync_disabledBanner_title => 'סנכרון ענן מושבת';
 
   @override
+  String get settings_cloudSync_entry_subtitle => 'סנכרון באמצעות אחסון ענן';
+
+  @override
+  String get settings_cloudSync_adopt_confirm => 'אימוץ הספרייה המשוחזרת';
+
+  @override
+  String settings_cloudSync_adopt_dialogContent(
+    String deviceName,
+    String date,
+  ) {
+    return 'הספרייה הוחלפה מגיבוי במכשיר \"$deviceName\" ($date). אימוץ יחליף את נתוני מכשיר זה בספרייה המשוחזרת. תחילה ייווצר גיבוי בטיחות של הנתונים הנוכחיים של מכשיר זה.';
+  }
+
+  @override
+  String get settings_cloudSync_adopt_dialogTitle =>
+      'לאמץ את הספרייה המשוחזרת?';
+
+  @override
+  String get settings_cloudSync_adopt_notNow => 'לא עכשיו';
+
+  @override
+  String get settings_cloudSync_firstSync_banner =>
+      'הסנכרון הראשון ממתין לאישור. הקש על \'סנכרן עכשיו\' כדי לבדוק מה ישולב.';
+
+  @override
+  String get settings_cloudSync_firstSync_dialogConfirm => 'מזג וסנכרן';
+
+  @override
+  String settings_cloudSync_firstSync_dialogContent(
+    int deviceCount,
+    int diveCount,
+  ) {
+    return 'נמצאו נתוני סנכרון קיימים בענן ($deviceCount קובצי סנכרון). הסנכרון הראשון ישלב נתונים אלה עם $diveCount הצלילות שבמכשיר זה, בכל המכשירים המסונכרנים.\n\nאם אותן צלילות נוספו בנפרד בכל מכשיר, הן יופיעו פעמיים.';
+  }
+
+  @override
+  String get settings_cloudSync_firstSync_dialogTitle => 'לשלב ספריות?';
+
+  @override
+  String settings_cloudSync_replace_banner(String deviceName) {
+    return 'הסנכרון מושהה: הספרייה הוחלפה מגיבוי במכשיר \"$deviceName\". יש להקיש על \"סנכרן עכשיו\" לבדיקה.';
+  }
+
+  @override
+  String get settings_cloudSync_switch_dialogTitle => 'להחליף שירות סנכרון?';
+
+  @override
+  String settings_cloudSync_switch_dialogContent(
+    String fromName,
+    String toName,
+  ) {
+    return 'הנתונים שלך לא יועברו מ-$fromName -- הם יישארו שם עד שתמחק אותם. לאחר ההחלפה, הסנכרון הבא של מכשיר זה ישלב את הנתונים שלו עם מה שכבר קיים ב-$toName. המכשירים האחרים שלך ימשיכו להשתמש ב-$fromName עד שתחליף גם כל אחד מהם.';
+  }
+
+  @override
+  String get settings_cloudSync_switch_confirm => 'החלף';
+
+  @override
+  String settings_cloudSync_moved_banner(
+    String deviceName,
+    String destination,
+  ) {
+    return '$deviceName העביר ספרייה זו אל $destination. שירות זה כבר אינו מתעדכן על ידיו. בחר $destination למטה כדי לעקוב אחר ההעברה.';
+  }
+
+  @override
+  String get settings_cloudSync_moved_dismiss => 'התעלם';
+
+  @override
+  String settings_cloudSync_cleanup_banner(String backend) {
+    return 'נתוני סנכרון ישנים עדיין מאוחסנים ב-$backend מהזמן שלפני שהחלפת שירותים. הם כבר אינם בשימוש.';
+  }
+
+  @override
+  String get settings_cloudSync_cleanup_delete => 'מחק נתונים ישנים';
+
+  @override
+  String get settings_cloudSync_cleanup_keep => 'שמור';
+
+  @override
   String get settings_cloudSync_header_advanced => 'מתקדם';
+
+  @override
+  String get settings_cloudSync_signOut_backupWarning =>
+      'גיבוי הענן יכובה והגיבויים יישמרו במיקום ברירת המחדל.';
 
   @override
   String get settings_cloudSync_header_cloudProvider => 'ספק ענן';
@@ -10000,16 +10333,22 @@ class AppLocalizationsHe extends AppLocalizations {
   String get settings_cloudSync_provider_icloud => 'iCloud';
 
   @override
-  String get settings_cloudSync_provider_icloud_subtitle =>
-      'סנכרון באמצעות Apple iCloud';
-
-  @override
   String settings_cloudSync_provider_initFailed(Object providerName) {
     return 'אתחול ספק $providerName נכשל';
   }
 
   @override
   String get settings_cloudSync_provider_notAvailable => 'לא זמין בפלטפורמה זו';
+
+  @override
+  String get settings_cloudSync_provider_s3_edit => 'עריכת תצורת S3';
+
+  @override
+  String get settings_cloudSync_provider_s3_subtitle =>
+      'עובד עם כל שירות אחסון תואם S3';
+
+  @override
+  String get settings_cloudSync_provider_s3_title => 'אחסון תואם S3';
 
   @override
   String get settings_cloudSync_resetDialog_cancel => 'ביטול';
@@ -10765,6 +11104,98 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get settings_profileHub_switchDiver => 'החלף צולל';
+
+  @override
+  String get settings_s3Config_action_remove => 'הסרת התצורה';
+
+  @override
+  String get settings_s3Config_action_testConnection => 'בדיקת חיבור';
+
+  @override
+  String get settings_s3Config_advanced_title => 'מתקדם';
+
+  @override
+  String get settings_s3Config_appBar_title => 'אחסון תואם S3';
+
+  @override
+  String get settings_s3Config_error_secureStorage =>
+      'לא ניתן לגשת לאחסון המאובטח';
+
+  @override
+  String get settings_s3Config_field_accessKeyId_label => 'Access Key ID';
+
+  @override
+  String get settings_s3Config_field_bucket_label => 'Bucket';
+
+  @override
+  String get settings_s3Config_field_endpoint_helper =>
+      'לדוגמה: https://s3.example.com';
+
+  @override
+  String get settings_s3Config_field_endpoint_label =>
+      'כתובת URL של נקודת הקצה';
+
+  @override
+  String get settings_s3Config_field_pathStyle_label =>
+      'שימוש במיעון path-style';
+
+  @override
+  String get settings_s3Config_field_pathStyle_subtitle =>
+      'נדרש על ידי רוב השרתים באירוח עצמי';
+
+  @override
+  String get settings_s3Config_field_prefix_label => 'קידומת מפתחות';
+
+  @override
+  String settings_s3Config_field_region_helperAuto(String region) {
+    return 'זוהה אוטומטית: $region';
+  }
+
+  @override
+  String get settings_s3Config_field_region_label => 'אזור';
+
+  @override
+  String get settings_s3Config_field_secretAccessKey_label =>
+      'Secret Access Key';
+
+  @override
+  String get settings_s3Config_remove_confirm_action => 'הסרה';
+
+  @override
+  String get settings_s3Config_remove_confirm_body =>
+      'הסנכרון דרך S3 ייפסק במכשיר זה. הנתונים שלכם ב-bucket לא יימחקו.';
+
+  @override
+  String get settings_s3Config_remove_confirm_title => 'להסיר את תצורת S3?';
+
+  @override
+  String get settings_s3Config_removed => 'תצורת S3 הוסרה';
+
+  @override
+  String get settings_s3Config_saved => 'תצורת S3 נשמרה';
+
+  @override
+  String settings_s3Config_test_regionDetected(String region) {
+    return 'זוהה אזור: $region';
+  }
+
+  @override
+  String get settings_s3Config_test_success => 'החיבור הצליח';
+
+  @override
+  String get settings_s3Config_validation_endpointInvalid =>
+      'יש להזין כתובת http:// או https:// תקינה';
+
+  @override
+  String get settings_s3Config_validation_endpointPath =>
+      'כתובת ה-URL של נקודת הקצה לא יכולה לכלול נתיב';
+
+  @override
+  String get settings_s3Config_validation_required => 'שדה חובה';
+
+  @override
+  String get settings_s3Config_warning_http =>
+      'נקודת קצה זו משתמשת ב-HTTP לא מוצפן. פרטי הגישה ונתוני הצלילה יועברו ללא הצפנה; השתמשו רק ברשת מהימנה.';
 
   @override
   String get settings_section_about_subtitle => 'מידע על האפליקציה ורישיונות';
@@ -16212,4 +16643,57 @@ class AppLocalizationsHe extends AppLocalizations {
     );
     return 'הצולל נמחק. $trips $_temp0 ו-$sites $_temp1 אל $name.';
   }
+
+  @override
+  String get settings_cloudSync_duplicateDivers_title =>
+      'פרופילי צוללים כפולים';
+
+  @override
+  String get settings_cloudSync_duplicateDivers_description =>
+      'המזכור מצא יותר מפרופיל אחד עם אותו שם. זה קורה בדרך כלל כשכל מכשיר יצר פרופיל משלו לפני הסנכרון. המיזוג מעביר את כל הצלילות והנתונים לפרופיל אחד.';
+
+  @override
+  String settings_cloudSync_duplicateDivers_groupLabel(String name, int count) {
+    return '$name ($count פרופילים)';
+  }
+
+  @override
+  String get settings_cloudSync_duplicateDivers_mergeButton => 'מזג';
+
+  @override
+  String get settings_cloudSync_duplicateDivers_confirmTitle =>
+      'למזג פרופילי צוללים?';
+
+  @override
+  String settings_cloudSync_duplicateDivers_confirmBody(
+    int count,
+    String name,
+  ) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count פרופילים כפולים',
+      one: 'פרופיל כפול אחד',
+    );
+    return 'כל הצלילות, הסמכות, הציוד ושאר הנתונים מ-$_temp0 יועברו אל \"$name\". לא ניתן לבטל פעולה זו באופן אוטומטי.';
+  }
+
+  @override
+  String get settings_cloudSync_duplicateDivers_confirmCancel => 'ביטול';
+
+  @override
+  String get settings_cloudSync_duplicateDivers_confirmAction => 'מזג';
+
+  @override
+  String settings_cloudSync_duplicateDivers_successSnack(String name) {
+    return 'מוזג אל $name';
+  }
+
+  @override
+  String settings_cloudSync_duplicateDivers_failureSnack(String error) {
+    return 'המיזוג נכשל: $error';
+  }
+
+  @override
+  String get settings_cloudSync_duplicateDivers_undo => 'בטל';
 }

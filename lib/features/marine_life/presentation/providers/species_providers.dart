@@ -12,6 +12,10 @@ final speciesRepositoryProvider = Provider<SpeciesRepository>((ref) {
 /// All species provider
 final allSpeciesProvider = FutureProvider<List<Species>>((ref) async {
   final repository = ref.watch(speciesRepositoryProvider);
+  final sub = repository.watchSpeciesChanges().listen(
+    (_) => ref.invalidateSelf(),
+  );
+  ref.onDispose(sub.cancel);
   return repository.getAllSpecies();
 });
 
@@ -163,14 +167,22 @@ class SpeciesListNotifier extends StateNotifier<AsyncValue<List<Species>>> {
   SpeciesListNotifier(this._repository, this._ref)
     : super(const AsyncValue.loading()) {
     _loadSpecies();
+
+    // Reload when the `species` table changes (e.g. a sync writes rows
+    // directly), not just on local mutations. _loadSpecies() updates in place
+    // without a loading flash, so it doubles as the silent reload.
+    final tableChangeSub = _repository.watchSpeciesChanges().listen(
+      (_) => _loadSpecies(),
+    );
+    _ref.onDispose(tableChangeSub.cancel);
   }
 
   Future<void> _loadSpecies() async {
     try {
       final species = await _repository.getAllSpecies();
-      state = AsyncValue.data(species);
+      if (mounted) state = AsyncValue.data(species);
     } catch (e, st) {
-      state = AsyncValue.error(e, st);
+      if (mounted) state = AsyncValue.error(e, st);
     }
   }
 

@@ -265,10 +265,37 @@ class AppLocalizationsZh extends AppLocalizations {
   String get backup_location_title => '备份位置';
 
   @override
+  String get backup_replaceConfirm_confirm => '全部替换';
+
+  @override
+  String get backup_replaceConfirm_content =>
+      '所有已同步设备上的资料库都将被此备份替换。每台设备会先为其当前数据创建安全备份。此操作无法撤销。';
+
+  @override
+  String get backup_replaceConfirm_title => '在所有设备上替换资料库？';
+
+  @override
   String get backup_restore_dialog_cancel => '取消';
 
   @override
+  String get backup_restore_dialog_modeMerge_subtitle =>
+      '恢复到此设备。下次同步时会将恢复的数据与云端资料库合并。';
+
+  @override
+  String get backup_restore_dialog_modeMerge_title => '下次同步时合并';
+
+  @override
+  String get backup_restore_dialog_modeReplace_subtitle =>
+      '此备份将成为本设备、云端及所有已同步设备上的资料库。';
+
+  @override
+  String get backup_restore_dialog_modeReplace_title => '全部替换';
+
+  @override
   String get backup_restore_dialog_restore => '恢复';
+
+  @override
+  String get backup_restore_dialog_restoreReplace => '恢复并全部替换';
 
   @override
   String get backup_restore_dialog_safetyNote => '恢复前将自动创建当前数据的安全备份。';
@@ -2673,6 +2700,12 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get diveLog_computerSheet_description => '选择要从哪台电脑的轮廓开始编辑。';
+
+  @override
+  String get diveLog_computerSheet_title => '选择起始轮廓';
+
+  @override
   String diveLog_cylinderSac_avgDepth(Object depth) {
     return '平均：$depth';
   }
@@ -3198,7 +3231,40 @@ class AppLocalizationsZh extends AppLocalizations {
   String get diveLog_edit_gettingLocation => '正在获取位置...';
 
   @override
+  String get diveLog_edit_group_buddies => '潜伴';
+
+  @override
+  String get diveLog_edit_group_conditions => '环境条件';
+
+  @override
+  String get diveLog_edit_group_experience => '潜水体验';
+
+  @override
+  String get diveLog_edit_group_gasGear => '气体与装备';
+
+  @override
+  String get diveLog_edit_group_theDive => '本次潜水';
+
+  @override
+  String get diveLog_edit_group_trip => '行程';
+
+  @override
   String get diveLog_edit_headerNew => '记录新潜水';
+
+  @override
+  String get diveLog_edit_invite_buddies => '添加潜伴';
+
+  @override
+  String get diveLog_edit_invite_conditions => '添加环境条件 - 水况、能见度、天气';
+
+  @override
+  String get diveLog_edit_invite_experience => '添加评分、生物目击、笔记或标签';
+
+  @override
+  String get diveLog_edit_invite_gasGear => '添加气体与装备 - 模式、气瓶、装备、配重';
+
+  @override
+  String get diveLog_edit_invite_trip => '添加行程或潜水中心';
 
   @override
   String get diveLog_edit_label_airTemp => '气温';
@@ -3274,6 +3340,30 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get diveLog_edit_notesHint => '添加关于此次潜水的备注...';
+
+  @override
+  String get diveLog_edit_row_addSite => '添加潜点';
+
+  @override
+  String get diveLog_edit_row_diveCenter => '潜水中心';
+
+  @override
+  String get diveLog_edit_row_entry => '入水';
+
+  @override
+  String get diveLog_edit_row_exit => '出水';
+
+  @override
+  String get diveLog_edit_row_notSet => '未设置';
+
+  @override
+  String get diveLog_edit_row_site => '潜点';
+
+  @override
+  String get diveLog_edit_row_surfaceInterval => '水面间隔';
+
+  @override
+  String get diveLog_edit_row_trip => '行程';
 
   @override
   String get diveLog_edit_save => '保存';
@@ -3423,6 +3513,42 @@ class AppLocalizationsZh extends AppLocalizations {
   String get diveLog_edit_snackbar_unableToCalculateRuntime => '无法从轮廓计算运行时间';
 
   @override
+  String diveLog_edit_summary_items(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 件装备',
+      one: '1 件装备',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get diveLog_edit_summary_notes => '笔记';
+
+  @override
+  String diveLog_edit_summary_species(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 个物种',
+      one: '1 个物种',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String diveLog_edit_summary_tanks(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 个气瓶',
+      one: '1 个气瓶',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String diveLog_edit_surfaceInterval(Object interval) {
     return '水面间隔：$interval';
   }
@@ -3432,6 +3558,26 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get diveLog_edit_surfacePressureHint => '标准：海平面 1013 mbar';
+
+  @override
+  String get diveLog_edit_tankCard_done => '完成';
+
+  @override
+  String get diveLog_edit_tankCard_edit => '编辑';
+
+  @override
+  String get diveLog_edit_tankCard_mix => '气体';
+
+  @override
+  String get diveLog_edit_tankCard_pressure => '压力';
+
+  @override
+  String diveLog_edit_tankCard_title(int number) {
+    return '气瓶 $number';
+  }
+
+  @override
+  String get diveLog_edit_tankCard_volume => '容积';
 
   @override
   String get diveLog_edit_tooltip_calculateFromProfile => '从潜水轮廓计算';
@@ -3523,6 +3669,17 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String diveLog_equipmentSetPicker_errorLoading(Object error) {
     return '加载装备套装出错：$error';
+  }
+
+  @override
+  String diveLog_equipmentSetPicker_itemsSummary(int count, String names) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 件装备',
+      one: '1 件装备',
+    );
+    return '$_temp0：$names';
   }
 
   @override
@@ -3872,6 +4029,90 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get diveLog_listPage_menuMatchSites => '将潜水匹配到潜水点';
+
+  @override
+  String get diveLog_sighting_decreaseCount => '减少数量';
+
+  @override
+  String get diveLog_sighting_increaseCount => '增加数量';
+
+  @override
+  String diveLog_speciesPicker_errorLoading(String error) {
+    return '加载物种时出错：$error';
+  }
+
+  @override
+  String get diveSites_edit_depth_heroMax => '最大深度';
+
+  @override
+  String get diveSites_edit_depth_heroMin => '最小深度';
+
+  @override
+  String get diveSites_edit_group_accessSafety => '通行与安全';
+
+  @override
+  String get diveSites_edit_group_diveInfo => '潜水信息';
+
+  @override
+  String get diveSites_edit_group_identity => '基本信息';
+
+  @override
+  String get diveSites_edit_group_lifeNotes => '生物与笔记';
+
+  @override
+  String get diveSites_edit_group_location => '位置';
+
+  @override
+  String get diveSites_edit_invite_accessSafety => '添加通行、停车、系泊或危险信息';
+
+  @override
+  String get diveSites_edit_invite_diveInfo => '添加深度范围、难度或评分';
+
+  @override
+  String get diveSites_edit_invite_lifeNotes => '添加海洋生物、笔记或共享';
+
+  @override
+  String get diveSites_edit_invite_location => '添加 GPS 位置或海拔';
+
+  @override
+  String get diveSites_edit_summary_shared => '已共享';
+
+  @override
+  String get forms_addSection_prefix => '添加：';
+
+  @override
+  String get forms_cancel => '取消';
+
+  @override
+  String get forms_discard_body => '您有未保存的更改。如果现在离开，更改将丢失。';
+
+  @override
+  String get forms_discard_discard => '放弃';
+
+  @override
+  String get forms_discard_keepEditing => '继续编辑';
+
+  @override
+  String get forms_discard_title => '放弃更改？';
+
+  @override
+  String get forms_save => '保存';
+
+  @override
+  String forms_section_issues(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 个问题',
+      one: '1 个问题',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String forms_statCell_useProfileValue(String value) {
+    return '使用潜水轮廓中的 $value';
+  }
 
   @override
   String get siteMatchReview_title => '匹配潜水点';
@@ -9742,7 +9983,89 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_cloudSync_disabledBanner_title => '云同步已禁用';
 
   @override
+  String get settings_cloudSync_entry_subtitle => '通过云存储同步';
+
+  @override
+  String get settings_cloudSync_adopt_confirm => '采用恢复的资料库';
+
+  @override
+  String settings_cloudSync_adopt_dialogContent(
+    String deviceName,
+    String date,
+  ) {
+    return '资料库已被 \"$deviceName\" 上的备份替换（$date）。采用后，此设备的数据将被恢复的资料库替换。系统会先为此设备的当前数据创建安全备份。';
+  }
+
+  @override
+  String get settings_cloudSync_adopt_dialogTitle => '采用恢复的资料库？';
+
+  @override
+  String get settings_cloudSync_adopt_notNow => '暂不';
+
+  @override
+  String get settings_cloudSync_firstSync_banner =>
+      '首次同步正在等待确认。点击「立即同步」以查看将要合并的内容。';
+
+  @override
+  String get settings_cloudSync_firstSync_dialogConfirm => '合并并同步';
+
+  @override
+  String settings_cloudSync_firstSync_dialogContent(
+    int deviceCount,
+    int diveCount,
+  ) {
+    return '在云端发现了已有的同步数据（$deviceCount 个同步文件）。首次同步会将这些数据与此设备上的 $diveCount 次潜水合并，并应用到所有已同步的设备。\n\n如果相同的潜水是在每台设备上分别添加的，它们将出现两次。';
+  }
+
+  @override
+  String get settings_cloudSync_firstSync_dialogTitle => '合并资料库？';
+
+  @override
+  String settings_cloudSync_replace_banner(String deviceName) {
+    return '同步已暂停：资料库已被 \"$deviceName\" 上的备份替换。点按\"立即同步\"以查看。';
+  }
+
+  @override
+  String get settings_cloudSync_switch_dialogTitle => '切换同步后端？';
+
+  @override
+  String settings_cloudSync_switch_dialogContent(
+    String fromName,
+    String toName,
+  ) {
+    return '您的数据不会从 $fromName 移走：在您删除之前它会一直保留在那里。切换后，此设备的下次同步会将其数据与 $toName 上已有的内容合并。您的其他设备会继续使用 $fromName，直到您也逐一切换它们。';
+  }
+
+  @override
+  String get settings_cloudSync_switch_confirm => '切换';
+
+  @override
+  String settings_cloudSync_moved_banner(
+    String deviceName,
+    String destination,
+  ) {
+    return '$deviceName 已将此资料库移至 $destination。该后端不再由它更新。请在下方选择 $destination 以跟随此次移动。';
+  }
+
+  @override
+  String get settings_cloudSync_moved_dismiss => '忽略';
+
+  @override
+  String settings_cloudSync_cleanup_banner(String backend) {
+    return '$backend 上仍存有您切换后端之前的旧同步数据。这些数据已不再使用。';
+  }
+
+  @override
+  String get settings_cloudSync_cleanup_delete => '删除旧数据';
+
+  @override
+  String get settings_cloudSync_cleanup_keep => '保留';
+
+  @override
   String get settings_cloudSync_header_advanced => '高级';
+
+  @override
+  String get settings_cloudSync_signOut_backupWarning => '云备份将被关闭，备份将保存到默认位置。';
 
   @override
   String get settings_cloudSync_header_cloudProvider => '云服务提供商';
@@ -9798,16 +10121,21 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_cloudSync_provider_icloud => 'iCloud';
 
   @override
-  String get settings_cloudSync_provider_icloud_subtitle =>
-      '通过 Apple iCloud 同步';
-
-  @override
   String settings_cloudSync_provider_initFailed(Object providerName) {
     return '无法初始化 $providerName 提供商';
   }
 
   @override
   String get settings_cloudSync_provider_notAvailable => '在此平台上不可用';
+
+  @override
+  String get settings_cloudSync_provider_s3_edit => '编辑 S3 配置';
+
+  @override
+  String get settings_cloudSync_provider_s3_subtitle => '适用于任何兼容 S3 的存储服务';
+
+  @override
+  String get settings_cloudSync_provider_s3_title => 'S3 兼容存储';
 
   @override
   String get settings_cloudSync_resetDialog_cancel => '取消';
@@ -10538,6 +10866,93 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get settings_profileHub_switchDiver => '切换潜水员';
+
+  @override
+  String get settings_s3Config_action_remove => '移除配置';
+
+  @override
+  String get settings_s3Config_action_testConnection => '测试连接';
+
+  @override
+  String get settings_s3Config_advanced_title => '高级';
+
+  @override
+  String get settings_s3Config_appBar_title => 'S3 兼容存储';
+
+  @override
+  String get settings_s3Config_error_secureStorage => '无法访问安全存储';
+
+  @override
+  String get settings_s3Config_field_accessKeyId_label => 'Access Key ID';
+
+  @override
+  String get settings_s3Config_field_bucket_label => '存储桶';
+
+  @override
+  String get settings_s3Config_field_endpoint_helper =>
+      '例如：https://s3.example.com';
+
+  @override
+  String get settings_s3Config_field_endpoint_label => '终端节点 URL';
+
+  @override
+  String get settings_s3Config_field_pathStyle_label => '使用路径样式寻址';
+
+  @override
+  String get settings_s3Config_field_pathStyle_subtitle => '大多数自托管服务器需要此选项';
+
+  @override
+  String get settings_s3Config_field_prefix_label => '键前缀';
+
+  @override
+  String settings_s3Config_field_region_helperAuto(String region) {
+    return '自动检测：$region';
+  }
+
+  @override
+  String get settings_s3Config_field_region_label => '区域';
+
+  @override
+  String get settings_s3Config_field_secretAccessKey_label =>
+      'Secret Access Key';
+
+  @override
+  String get settings_s3Config_remove_confirm_action => '移除';
+
+  @override
+  String get settings_s3Config_remove_confirm_body =>
+      '此设备上将停止通过 S3 同步。存储桶中的数据不会被删除。';
+
+  @override
+  String get settings_s3Config_remove_confirm_title => '移除 S3 配置？';
+
+  @override
+  String get settings_s3Config_removed => 'S3 配置已移除';
+
+  @override
+  String get settings_s3Config_saved => 'S3 配置已保存';
+
+  @override
+  String settings_s3Config_test_regionDetected(String region) {
+    return '检测到区域：$region';
+  }
+
+  @override
+  String get settings_s3Config_test_success => '连接成功';
+
+  @override
+  String get settings_s3Config_validation_endpointInvalid =>
+      '请输入有效的 http:// 或 https:// URL';
+
+  @override
+  String get settings_s3Config_validation_endpointPath => '终端节点 URL 不能包含路径';
+
+  @override
+  String get settings_s3Config_validation_required => '必填';
+
+  @override
+  String get settings_s3Config_warning_http =>
+      '此终端节点使用未加密的 HTTP。凭证和潜水数据将以明文传输；仅在可信网络中使用。';
 
   @override
   String get settings_section_about_subtitle => '应用信息与许可证';
@@ -15845,4 +16260,55 @@ class AppLocalizationsZh extends AppLocalizations {
     );
     return '已删除潜水员。$trips 个共享$_temp0和 $sites 个共享$_temp1已重新分配给 $name。';
   }
+
+  @override
+  String get settings_cloudSync_duplicateDivers_title => '重复的潜水员档案';
+
+  @override
+  String get settings_cloudSync_duplicateDivers_description =>
+      '同步发现多个同名档案。这通常发生在每台设备在同步之前各自创建了档案时。合并会将所有潜水记录和数据迁移到一个档案中。';
+
+  @override
+  String settings_cloudSync_duplicateDivers_groupLabel(String name, int count) {
+    return '$name（$count 个档案）';
+  }
+
+  @override
+  String get settings_cloudSync_duplicateDivers_mergeButton => '合并';
+
+  @override
+  String get settings_cloudSync_duplicateDivers_confirmTitle => '合并潜水员档案？';
+
+  @override
+  String settings_cloudSync_duplicateDivers_confirmBody(
+    int count,
+    String name,
+  ) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 个重复档案',
+      one: '1 个重复档案',
+    );
+    return '$_temp0中的所有潜水记录、认证、装备及其他数据将被移入「$name」。此操作无法自动撤销。';
+  }
+
+  @override
+  String get settings_cloudSync_duplicateDivers_confirmCancel => '取消';
+
+  @override
+  String get settings_cloudSync_duplicateDivers_confirmAction => '合并';
+
+  @override
+  String settings_cloudSync_duplicateDivers_successSnack(String name) {
+    return '已合并到 $name';
+  }
+
+  @override
+  String settings_cloudSync_duplicateDivers_failureSnack(String error) {
+    return '合并失败：$error';
+  }
+
+  @override
+  String get settings_cloudSync_duplicateDivers_undo => '撤销';
 }

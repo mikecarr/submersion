@@ -590,17 +590,65 @@ abstract class AppLocalizations {
   /// **'Backup Location'**
   String get backup_location_title;
 
+  /// No description provided for @backup_replaceConfirm_confirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace Everywhere'**
+  String get backup_replaceConfirm_confirm;
+
+  /// No description provided for @backup_replaceConfirm_content.
+  ///
+  /// In en, this message translates to:
+  /// **'The library on all synced devices will be replaced with this backup. Each device creates a safety backup of its current data first. This cannot be undone.'**
+  String get backup_replaceConfirm_content;
+
+  /// No description provided for @backup_replaceConfirm_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace Library Everywhere?'**
+  String get backup_replaceConfirm_title;
+
   /// No description provided for @backup_restore_dialog_cancel.
   ///
   /// In en, this message translates to:
   /// **'Cancel'**
   String get backup_restore_dialog_cancel;
 
+  /// No description provided for @backup_restore_dialog_modeMerge_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore to this device. Your next sync combines the restored data with the cloud library.'**
+  String get backup_restore_dialog_modeMerge_subtitle;
+
+  /// No description provided for @backup_restore_dialog_modeMerge_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Merge on next sync'**
+  String get backup_restore_dialog_modeMerge_title;
+
+  /// No description provided for @backup_restore_dialog_modeReplace_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'The backup becomes the library on this device, in the cloud, and on every synced device.'**
+  String get backup_restore_dialog_modeReplace_subtitle;
+
+  /// No description provided for @backup_restore_dialog_modeReplace_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace everywhere'**
+  String get backup_restore_dialog_modeReplace_title;
+
   /// No description provided for @backup_restore_dialog_restore.
   ///
   /// In en, this message translates to:
   /// **'Restore'**
   String get backup_restore_dialog_restore;
+
+  /// No description provided for @backup_restore_dialog_restoreReplace.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore and Replace Everywhere'**
+  String get backup_restore_dialog_restoreReplace;
 
   /// No description provided for @backup_restore_dialog_safetyNote.
   ///
@@ -4769,6 +4817,18 @@ abstract class AppLocalizations {
   /// **'Expand {title} section'**
   String diveLog_collapsible_semantics_expand(Object title);
 
+  /// Description of the computer profile selection sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Select which computer\'s profile to edit from.'**
+  String get diveLog_computerSheet_description;
+
+  /// Title of the sheet choosing which computer profile to edit from
+  ///
+  /// In en, this message translates to:
+  /// **'Choose starting profile'**
+  String get diveLog_computerSheet_title;
+
   /// No description provided for @diveLog_cylinderSac_avgDepth.
   ///
   /// In en, this message translates to:
@@ -5668,11 +5728,77 @@ abstract class AppLocalizations {
   /// **'Getting location...'**
   String get diveLog_edit_gettingLocation;
 
+  /// Form group: dive buddies
+  ///
+  /// In en, this message translates to:
+  /// **'Buddies'**
+  String get diveLog_edit_group_buddies;
+
+  /// Form group: water, environment and weather
+  ///
+  /// In en, this message translates to:
+  /// **'Conditions'**
+  String get diveLog_edit_group_conditions;
+
+  /// Form group: rating, marine life, notes, tags
+  ///
+  /// In en, this message translates to:
+  /// **'Experience'**
+  String get diveLog_edit_group_experience;
+
+  /// Form group: mode, tanks, equipment, weight
+  ///
+  /// In en, this message translates to:
+  /// **'Gas & Gear'**
+  String get diveLog_edit_group_gasGear;
+
+  /// Form group: core dive facts
+  ///
+  /// In en, this message translates to:
+  /// **'The Dive'**
+  String get diveLog_edit_group_theDive;
+
+  /// Form group: trip and dive center
+  ///
+  /// In en, this message translates to:
+  /// **'Trip'**
+  String get diveLog_edit_group_trip;
+
   /// No description provided for @diveLog_edit_headerNew.
   ///
   /// In en, this message translates to:
   /// **'Log New Dive'**
   String get diveLog_edit_headerNew;
+
+  /// Empty-state invitation for the Buddies group
+  ///
+  /// In en, this message translates to:
+  /// **'Add buddies'**
+  String get diveLog_edit_invite_buddies;
+
+  /// Empty-state invitation for the Conditions group
+  ///
+  /// In en, this message translates to:
+  /// **'Add conditions - water, visibility, weather'**
+  String get diveLog_edit_invite_conditions;
+
+  /// Empty-state invitation for the Experience group
+  ///
+  /// In en, this message translates to:
+  /// **'Add rating, sightings, notes or tags'**
+  String get diveLog_edit_invite_experience;
+
+  /// Empty-state invitation for the Gas & Gear group
+  ///
+  /// In en, this message translates to:
+  /// **'Add gas & gear - mode, tanks, equipment, weight'**
+  String get diveLog_edit_invite_gasGear;
+
+  /// Empty-state invitation for the Trip group
+  ///
+  /// In en, this message translates to:
+  /// **'Add trip or dive center'**
+  String get diveLog_edit_invite_trip;
 
   /// No description provided for @diveLog_edit_label_airTemp.
   ///
@@ -5823,6 +5949,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Add notes about this dive...'**
   String get diveLog_edit_notesHint;
+
+  /// Placeholder when no site selected
+  ///
+  /// In en, this message translates to:
+  /// **'Add site'**
+  String get diveLog_edit_row_addSite;
+
+  /// Row label: dive center picker
+  ///
+  /// In en, this message translates to:
+  /// **'Dive center'**
+  String get diveLog_edit_row_diveCenter;
+
+  /// Row label: entry date and time
+  ///
+  /// In en, this message translates to:
+  /// **'Entry'**
+  String get diveLog_edit_row_entry;
+
+  /// Row label: exit date and time
+  ///
+  /// In en, this message translates to:
+  /// **'Exit'**
+  String get diveLog_edit_row_exit;
+
+  /// Placeholder for unset picker rows
+  ///
+  /// In en, this message translates to:
+  /// **'Not set'**
+  String get diveLog_edit_row_notSet;
+
+  /// Row label: dive site picker
+  ///
+  /// In en, this message translates to:
+  /// **'Site'**
+  String get diveLog_edit_row_site;
+
+  /// Row label: surface interval since previous dive
+  ///
+  /// In en, this message translates to:
+  /// **'Surface interval'**
+  String get diveLog_edit_row_surfaceInterval;
+
+  /// Row label: trip picker
+  ///
+  /// In en, this message translates to:
+  /// **'Trip'**
+  String get diveLog_edit_row_trip;
 
   /// No description provided for @diveLog_edit_save.
   ///
@@ -6070,6 +6244,30 @@ abstract class AppLocalizations {
   /// **'Unable to calculate runtime from profile'**
   String get diveLog_edit_snackbar_unableToCalculateRuntime;
 
+  /// Collapsed summary fragment: equipment count
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{1 item} other{{count} items}}'**
+  String diveLog_edit_summary_items(int count);
+
+  /// Collapsed summary fragment indicating notes exist
+  ///
+  /// In en, this message translates to:
+  /// **'notes'**
+  String get diveLog_edit_summary_notes;
+
+  /// Collapsed summary fragment: sighting species count
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{1 species} other{{count} species}}'**
+  String diveLog_edit_summary_species(int count);
+
+  /// Collapsed summary fragment: tank count
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{1 tank} other{{count} tanks}}'**
+  String diveLog_edit_summary_tanks(int count);
+
   /// No description provided for @diveLog_edit_surfaceInterval.
   ///
   /// In en, this message translates to:
@@ -6087,6 +6285,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Standard: 1013 mbar at sea level'**
   String get diveLog_edit_surfacePressureHint;
+
+  /// Collapse the tank editor back to the card
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get diveLog_edit_tankCard_done;
+
+  /// Expand a tank card into the full editor
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get diveLog_edit_tankCard_edit;
+
+  /// Hero label on tank card: gas mix
+  ///
+  /// In en, this message translates to:
+  /// **'Mix'**
+  String get diveLog_edit_tankCard_mix;
+
+  /// Hero label on tank card: start to end pressure
+  ///
+  /// In en, this message translates to:
+  /// **'Pressure'**
+  String get diveLog_edit_tankCard_pressure;
+
+  /// Caption on a tank card
+  ///
+  /// In en, this message translates to:
+  /// **'Tank {number}'**
+  String diveLog_edit_tankCard_title(int number);
+
+  /// Hero label on tank card: tank volume
+  ///
+  /// In en, this message translates to:
+  /// **'Volume'**
+  String get diveLog_edit_tankCard_volume;
 
   /// No description provided for @diveLog_edit_tooltip_calculateFromProfile.
   ///
@@ -6255,6 +6489,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Error loading equipment sets: {error}'**
   String diveLog_equipmentSetPicker_errorLoading(Object error);
+
+  /// Equipment set subtitle: item count and names
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{1 item} other{{count} items}}: {names}'**
+  String diveLog_equipmentSetPicker_itemsSummary(int count, String names);
 
   /// No description provided for @diveLog_equipmentSetPicker_loading.
   ///
@@ -6927,6 +7167,150 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Match Dives to Sites'**
   String get diveLog_listPage_menuMatchSites;
+
+  /// Tooltip: decrease the sighting count
+  ///
+  /// In en, this message translates to:
+  /// **'Decrease count'**
+  String get diveLog_sighting_decreaseCount;
+
+  /// Tooltip: increase the sighting count
+  ///
+  /// In en, this message translates to:
+  /// **'Increase count'**
+  String get diveLog_sighting_increaseCount;
+
+  /// Error shown when the species list fails to load
+  ///
+  /// In en, this message translates to:
+  /// **'Error loading species: {error}'**
+  String diveLog_speciesPicker_errorLoading(String error);
+
+  /// Hero stat label: maximum site depth
+  ///
+  /// In en, this message translates to:
+  /// **'Max depth'**
+  String get diveSites_edit_depth_heroMax;
+
+  /// Hero stat label: minimum site depth
+  ///
+  /// In en, this message translates to:
+  /// **'Min depth'**
+  String get diveSites_edit_depth_heroMin;
+
+  /// Site form group: access, mooring, parking, hazards
+  ///
+  /// In en, this message translates to:
+  /// **'Access & safety'**
+  String get diveSites_edit_group_accessSafety;
+
+  /// Site form group: depth, difficulty, rating
+  ///
+  /// In en, this message translates to:
+  /// **'Dive info'**
+  String get diveSites_edit_group_diveInfo;
+
+  /// Site form group: name, description, country, region
+  ///
+  /// In en, this message translates to:
+  /// **'Identity'**
+  String get diveSites_edit_group_identity;
+
+  /// Site form group: species, notes, sharing
+  ///
+  /// In en, this message translates to:
+  /// **'Life & notes'**
+  String get diveSites_edit_group_lifeNotes;
+
+  /// Site form group: GPS and altitude
+  ///
+  /// In en, this message translates to:
+  /// **'Location'**
+  String get diveSites_edit_group_location;
+
+  /// Empty-state invitation for the Access & safety group
+  ///
+  /// In en, this message translates to:
+  /// **'Add access, parking, mooring or hazards'**
+  String get diveSites_edit_invite_accessSafety;
+
+  /// Empty-state invitation for the Dive info group
+  ///
+  /// In en, this message translates to:
+  /// **'Add depth range, difficulty or rating'**
+  String get diveSites_edit_invite_diveInfo;
+
+  /// Empty-state invitation for the Life & notes group
+  ///
+  /// In en, this message translates to:
+  /// **'Add marine life, notes or sharing'**
+  String get diveSites_edit_invite_lifeNotes;
+
+  /// Empty-state invitation for the Location group
+  ///
+  /// In en, this message translates to:
+  /// **'Add GPS position or altitude'**
+  String get diveSites_edit_invite_location;
+
+  /// Collapsed summary fragment indicating the site is shared
+  ///
+  /// In en, this message translates to:
+  /// **'shared'**
+  String get diveSites_edit_summary_shared;
+
+  /// Prefix of the trailing row listing unused optional form sections, e.g. '+ Add: Course / Custom fields'
+  ///
+  /// In en, this message translates to:
+  /// **'Add:'**
+  String get forms_addSection_prefix;
+
+  /// Cancel action on shared edit form scaffold
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get forms_cancel;
+
+  /// Body of the unsaved-changes dialog
+  ///
+  /// In en, this message translates to:
+  /// **'You have unsaved changes. If you leave now they will be lost.'**
+  String get forms_discard_body;
+
+  /// Leave the form, losing changes
+  ///
+  /// In en, this message translates to:
+  /// **'Discard'**
+  String get forms_discard_discard;
+
+  /// Stay on the form
+  ///
+  /// In en, this message translates to:
+  /// **'Keep editing'**
+  String get forms_discard_keepEditing;
+
+  /// Title of the unsaved-changes dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Discard changes?'**
+  String get forms_discard_title;
+
+  /// Save action on shared edit form scaffold
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get forms_save;
+
+  /// Badge on a collapsed form section that contains validation errors
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{1 issue} other{{count} issues}}'**
+  String forms_section_issues(int count);
+
+  /// Menu action offering to replace a stat with the value computed from the dive profile
+  ///
+  /// In en, this message translates to:
+  /// **'Use {value} from profile'**
+  String forms_statCell_useProfileValue(String value);
 
   /// No description provided for @siteMatchReview_title.
   ///
@@ -17480,11 +17864,131 @@ abstract class AppLocalizations {
   /// **'Cloud Sync Disabled'**
   String get settings_cloudSync_disabledBanner_title;
 
+  /// No description provided for @settings_cloudSync_entry_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync via cloud storage'**
+  String get settings_cloudSync_entry_subtitle;
+
+  /// No description provided for @settings_cloudSync_adopt_confirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Adopt Restored Library'**
+  String get settings_cloudSync_adopt_confirm;
+
+  /// No description provided for @settings_cloudSync_adopt_dialogContent.
+  ///
+  /// In en, this message translates to:
+  /// **'The library was replaced from a backup on \"{deviceName}\" ({date}). Adopting replaces this device\'s data with the restored library. A safety backup of this device\'s current data will be created first.'**
+  String settings_cloudSync_adopt_dialogContent(String deviceName, String date);
+
+  /// No description provided for @settings_cloudSync_adopt_dialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Adopt Restored Library?'**
+  String get settings_cloudSync_adopt_dialogTitle;
+
+  /// No description provided for @settings_cloudSync_adopt_notNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Not Now'**
+  String get settings_cloudSync_adopt_notNow;
+
+  /// No description provided for @settings_cloudSync_firstSync_banner.
+  ///
+  /// In en, this message translates to:
+  /// **'First sync is waiting for confirmation. Tap Sync Now to review what will be combined.'**
+  String get settings_cloudSync_firstSync_banner;
+
+  /// No description provided for @settings_cloudSync_firstSync_dialogConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Merge and Sync'**
+  String get settings_cloudSync_firstSync_dialogConfirm;
+
+  /// No description provided for @settings_cloudSync_firstSync_dialogContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Existing sync data was found in the cloud ({deviceCount} sync file(s)). Your first sync will combine that data with the {diveCount} dive(s) on this device, across every synced device.\n\nIf the same dives were added separately on each device, they will appear twice.'**
+  String settings_cloudSync_firstSync_dialogContent(
+    int deviceCount,
+    int diveCount,
+  );
+
+  /// No description provided for @settings_cloudSync_firstSync_dialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Combine Libraries?'**
+  String get settings_cloudSync_firstSync_dialogTitle;
+
+  /// No description provided for @settings_cloudSync_replace_banner.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync is paused: the library was replaced from a backup on \"{deviceName}\". Tap Sync Now to review.'**
+  String settings_cloudSync_replace_banner(String deviceName);
+
+  /// No description provided for @settings_cloudSync_switch_dialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch sync backend?'**
+  String get settings_cloudSync_switch_dialogTitle;
+
+  /// No description provided for @settings_cloudSync_switch_dialogContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Your data will not be moved off {fromName} -- it stays there until you delete it. After switching, this device\'s next sync combines its data with whatever already exists on {toName}. Your other devices keep using {fromName} until you switch each of them too.'**
+  String settings_cloudSync_switch_dialogContent(
+    String fromName,
+    String toName,
+  );
+
+  /// No description provided for @settings_cloudSync_switch_confirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch'**
+  String get settings_cloudSync_switch_confirm;
+
+  /// No description provided for @settings_cloudSync_moved_banner.
+  ///
+  /// In en, this message translates to:
+  /// **'{deviceName} moved this library to {destination}. This backend is no longer being updated by it. Select {destination} below to follow the move.'**
+  String settings_cloudSync_moved_banner(String deviceName, String destination);
+
+  /// No description provided for @settings_cloudSync_moved_dismiss.
+  ///
+  /// In en, this message translates to:
+  /// **'Dismiss'**
+  String get settings_cloudSync_moved_dismiss;
+
+  /// No description provided for @settings_cloudSync_cleanup_banner.
+  ///
+  /// In en, this message translates to:
+  /// **'Old sync data is still stored on {backend} from before you switched backends. It is no longer used.'**
+  String settings_cloudSync_cleanup_banner(String backend);
+
+  /// No description provided for @settings_cloudSync_cleanup_delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete old data'**
+  String get settings_cloudSync_cleanup_delete;
+
+  /// No description provided for @settings_cloudSync_cleanup_keep.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep'**
+  String get settings_cloudSync_cleanup_keep;
+
   /// No description provided for @settings_cloudSync_header_advanced.
   ///
   /// In en, this message translates to:
   /// **'Advanced'**
   String get settings_cloudSync_header_advanced;
+
+  /// No description provided for @settings_cloudSync_signOut_backupWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Cloud backup will be turned off and backups will be saved to the default location.'**
+  String get settings_cloudSync_signOut_backupWarning;
 
   /// No description provided for @settings_cloudSync_header_cloudProvider.
   ///
@@ -17555,12 +18059,6 @@ abstract class AppLocalizations {
   /// **'iCloud'**
   String get settings_cloudSync_provider_icloud;
 
-  /// No description provided for @settings_cloudSync_provider_icloud_subtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Sync via Apple iCloud'**
-  String get settings_cloudSync_provider_icloud_subtitle;
-
   /// No description provided for @settings_cloudSync_provider_initFailed.
   ///
   /// In en, this message translates to:
@@ -17572,6 +18070,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Not available on this platform'**
   String get settings_cloudSync_provider_notAvailable;
+
+  /// No description provided for @settings_cloudSync_provider_s3_edit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit S3 configuration'**
+  String get settings_cloudSync_provider_s3_edit;
+
+  /// No description provided for @settings_cloudSync_provider_s3_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Works with any S3-compatible storage service'**
+  String get settings_cloudSync_provider_s3_subtitle;
+
+  /// No description provided for @settings_cloudSync_provider_s3_title.
+  ///
+  /// In en, this message translates to:
+  /// **'S3-Compatible Storage'**
+  String get settings_cloudSync_provider_s3_title;
 
   /// No description provided for @settings_cloudSync_resetDialog_cancel.
   ///
@@ -18854,6 +19370,162 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Switch Diver'**
   String get settings_profileHub_switchDiver;
+
+  /// No description provided for @settings_s3Config_action_remove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove Configuration'**
+  String get settings_s3Config_action_remove;
+
+  /// No description provided for @settings_s3Config_action_testConnection.
+  ///
+  /// In en, this message translates to:
+  /// **'Test Connection'**
+  String get settings_s3Config_action_testConnection;
+
+  /// No description provided for @settings_s3Config_advanced_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Advanced'**
+  String get settings_s3Config_advanced_title;
+
+  /// No description provided for @settings_s3Config_appBar_title.
+  ///
+  /// In en, this message translates to:
+  /// **'S3-Compatible Storage'**
+  String get settings_s3Config_appBar_title;
+
+  /// No description provided for @settings_s3Config_error_secureStorage.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not access secure storage'**
+  String get settings_s3Config_error_secureStorage;
+
+  /// No description provided for @settings_s3Config_field_accessKeyId_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Access Key ID'**
+  String get settings_s3Config_field_accessKeyId_label;
+
+  /// No description provided for @settings_s3Config_field_bucket_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Bucket'**
+  String get settings_s3Config_field_bucket_label;
+
+  /// No description provided for @settings_s3Config_field_endpoint_helper.
+  ///
+  /// In en, this message translates to:
+  /// **'For example: https://s3.example.com'**
+  String get settings_s3Config_field_endpoint_helper;
+
+  /// No description provided for @settings_s3Config_field_endpoint_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Endpoint URL'**
+  String get settings_s3Config_field_endpoint_label;
+
+  /// No description provided for @settings_s3Config_field_pathStyle_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Use path-style addressing'**
+  String get settings_s3Config_field_pathStyle_label;
+
+  /// No description provided for @settings_s3Config_field_pathStyle_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Required by most self-hosted servers'**
+  String get settings_s3Config_field_pathStyle_subtitle;
+
+  /// No description provided for @settings_s3Config_field_prefix_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Key prefix'**
+  String get settings_s3Config_field_prefix_label;
+
+  /// No description provided for @settings_s3Config_field_region_helperAuto.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto-detected: {region}'**
+  String settings_s3Config_field_region_helperAuto(String region);
+
+  /// No description provided for @settings_s3Config_field_region_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Region'**
+  String get settings_s3Config_field_region_label;
+
+  /// No description provided for @settings_s3Config_field_secretAccessKey_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Secret Access Key'**
+  String get settings_s3Config_field_secretAccessKey_label;
+
+  /// No description provided for @settings_s3Config_remove_confirm_action.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get settings_s3Config_remove_confirm_action;
+
+  /// No description provided for @settings_s3Config_remove_confirm_body.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync via S3 will stop on this device. Your data in the bucket is not deleted.'**
+  String get settings_s3Config_remove_confirm_body;
+
+  /// No description provided for @settings_s3Config_remove_confirm_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove S3 configuration?'**
+  String get settings_s3Config_remove_confirm_title;
+
+  /// No description provided for @settings_s3Config_removed.
+  ///
+  /// In en, this message translates to:
+  /// **'S3 configuration removed'**
+  String get settings_s3Config_removed;
+
+  /// No description provided for @settings_s3Config_saved.
+  ///
+  /// In en, this message translates to:
+  /// **'S3 configuration saved'**
+  String get settings_s3Config_saved;
+
+  /// No description provided for @settings_s3Config_test_regionDetected.
+  ///
+  /// In en, this message translates to:
+  /// **'Region detected: {region}'**
+  String settings_s3Config_test_regionDetected(String region);
+
+  /// No description provided for @settings_s3Config_test_success.
+  ///
+  /// In en, this message translates to:
+  /// **'Connection successful'**
+  String get settings_s3Config_test_success;
+
+  /// No description provided for @settings_s3Config_validation_endpointInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid http:// or https:// URL'**
+  String get settings_s3Config_validation_endpointInvalid;
+
+  /// No description provided for @settings_s3Config_validation_endpointPath.
+  ///
+  /// In en, this message translates to:
+  /// **'Endpoint URL must not include a path'**
+  String get settings_s3Config_validation_endpointPath;
+
+  /// No description provided for @settings_s3Config_validation_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Required'**
+  String get settings_s3Config_validation_required;
+
+  /// No description provided for @settings_s3Config_warning_http.
+  ///
+  /// In en, this message translates to:
+  /// **'This endpoint uses plain HTTP. Credentials and dive data will travel unencrypted; use only on a trusted network.'**
+  String get settings_s3Config_warning_http;
 
   /// No description provided for @settings_section_about_subtitle.
   ///
@@ -28059,6 +28731,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Diver deleted. {trips} shared {trips, plural, one{trip} other{trips}} and {sites} shared {sites, plural, one{site} other{sites}} reassigned to {name}.'**
   String divers_delete_reassigned_snackbar(int trips, int sites, String name);
+
+  /// Title of the banner on the Cloud Sync page when two or more diver profiles share a name.
+  ///
+  /// In en, this message translates to:
+  /// **'Duplicate diver profiles'**
+  String get settings_cloudSync_duplicateDivers_title;
+
+  /// Explanatory text below the duplicate-divers banner title.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync found more than one profile with the same name. This usually happens when each device created its own profile before syncing. Merging moves all dives and data onto one profile.'**
+  String get settings_cloudSync_duplicateDivers_description;
+
+  /// Label for a single duplicate group, e.g. 'Eric (2 profiles)'.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} ({count} profiles)'**
+  String settings_cloudSync_duplicateDivers_groupLabel(String name, int count);
+
+  /// Button label that triggers the merge confirmation dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Merge'**
+  String get settings_cloudSync_duplicateDivers_mergeButton;
+
+  /// Title of the merge confirmation dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Merge diver profiles?'**
+  String get settings_cloudSync_duplicateDivers_confirmTitle;
+
+  /// Body text of the merge confirmation dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'All dives, certifications, gear, and other data from {count} duplicate {count, plural, one{profile} other{profiles}} will be moved onto \"{name}\". This cannot be undone automatically.'**
+  String settings_cloudSync_duplicateDivers_confirmBody(int count, String name);
+
+  /// Cancel button on the merge confirmation dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get settings_cloudSync_duplicateDivers_confirmCancel;
+
+  /// Confirmation (destructive) button on the merge dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Merge'**
+  String get settings_cloudSync_duplicateDivers_confirmAction;
+
+  /// Snackbar shown after a successful diver merge.
+  ///
+  /// In en, this message translates to:
+  /// **'Merged into {name}'**
+  String settings_cloudSync_duplicateDivers_successSnack(String name);
+
+  /// Snackbar shown when a diver merge throws an exception.
+  ///
+  /// In en, this message translates to:
+  /// **'Merge failed: {error}'**
+  String settings_cloudSync_duplicateDivers_failureSnack(String error);
+
+  /// Snackbar action that reverses a just-performed diver merge.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get settings_cloudSync_duplicateDivers_undo;
 }
 
 class _AppLocalizationsDelegate

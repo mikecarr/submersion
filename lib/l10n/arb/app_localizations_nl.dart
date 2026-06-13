@@ -272,10 +272,39 @@ class AppLocalizationsNl extends AppLocalizations {
   String get backup_location_title => 'Back-uplocatie';
 
   @override
+  String get backup_replaceConfirm_confirm => 'Overal vervangen';
+
+  @override
+  String get backup_replaceConfirm_content =>
+      'De bibliotheek op alle gesynchroniseerde apparaten wordt vervangen door deze back-up. Elk apparaat maakt eerst een veiligheidsback-up van zijn huidige gegevens. Dit kan niet ongedaan worden gemaakt.';
+
+  @override
+  String get backup_replaceConfirm_title => 'Bibliotheek overal vervangen?';
+
+  @override
   String get backup_restore_dialog_cancel => 'Annuleren';
 
   @override
+  String get backup_restore_dialog_modeMerge_subtitle =>
+      'Herstel op dit apparaat. Bij de volgende synchronisatie worden de herstelde gegevens samengevoegd met de cloudbibliotheek.';
+
+  @override
+  String get backup_restore_dialog_modeMerge_title =>
+      'Samenvoegen bij volgende synchronisatie';
+
+  @override
+  String get backup_restore_dialog_modeReplace_subtitle =>
+      'De back-up wordt de bibliotheek op dit apparaat, in de cloud en op elk gesynchroniseerd apparaat.';
+
+  @override
+  String get backup_restore_dialog_modeReplace_title => 'Overal vervangen';
+
+  @override
   String get backup_restore_dialog_restore => 'Herstellen';
+
+  @override
+  String get backup_restore_dialog_restoreReplace =>
+      'Herstellen en overal vervangen';
 
   @override
   String get backup_restore_dialog_safetyNote =>
@@ -2790,6 +2819,13 @@ class AppLocalizationsNl extends AppLocalizations {
   }
 
   @override
+  String get diveLog_computerSheet_description =>
+      'Kies vanaf welk computerprofiel je wilt bewerken.';
+
+  @override
+  String get diveLog_computerSheet_title => 'Startprofiel kiezen';
+
+  @override
   String diveLog_cylinderSac_avgDepth(Object depth) {
     return 'Gem.: $depth';
   }
@@ -3335,7 +3371,43 @@ class AppLocalizationsNl extends AppLocalizations {
   String get diveLog_edit_gettingLocation => 'Locatie ophalen...';
 
   @override
+  String get diveLog_edit_group_buddies => 'Buddy\'s';
+
+  @override
+  String get diveLog_edit_group_conditions => 'Omstandigheden';
+
+  @override
+  String get diveLog_edit_group_experience => 'Ervaring';
+
+  @override
+  String get diveLog_edit_group_gasGear => 'Gas & uitrusting';
+
+  @override
+  String get diveLog_edit_group_theDive => 'De duik';
+
+  @override
+  String get diveLog_edit_group_trip => 'Reis';
+
+  @override
   String get diveLog_edit_headerNew => 'Nieuwe duik loggen';
+
+  @override
+  String get diveLog_edit_invite_buddies => 'Buddy\'s toevoegen';
+
+  @override
+  String get diveLog_edit_invite_conditions =>
+      'Omstandigheden toevoegen - water, zicht, weer';
+
+  @override
+  String get diveLog_edit_invite_experience =>
+      'Beoordeling, waarnemingen, notities of tags toevoegen';
+
+  @override
+  String get diveLog_edit_invite_gasGear =>
+      'Gas & uitrusting toevoegen - modus, flessen, uitrusting, lood';
+
+  @override
+  String get diveLog_edit_invite_trip => 'Reis of duikcentrum toevoegen';
 
   @override
   String get diveLog_edit_label_airTemp => 'Luchttemp.';
@@ -3413,6 +3485,30 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get diveLog_edit_notesHint => 'Voeg notities toe over deze duik...';
+
+  @override
+  String get diveLog_edit_row_addSite => 'Duikstek toevoegen';
+
+  @override
+  String get diveLog_edit_row_diveCenter => 'Duikcentrum';
+
+  @override
+  String get diveLog_edit_row_entry => 'Te water';
+
+  @override
+  String get diveLog_edit_row_exit => 'Uit het water';
+
+  @override
+  String get diveLog_edit_row_notSet => 'Niet ingesteld';
+
+  @override
+  String get diveLog_edit_row_site => 'Duikstek';
+
+  @override
+  String get diveLog_edit_row_surfaceInterval => 'Oppervlakte-interval';
+
+  @override
+  String get diveLog_edit_row_trip => 'Reis';
 
   @override
   String get diveLog_edit_save => 'Opslaan';
@@ -3570,6 +3666,42 @@ class AppLocalizationsNl extends AppLocalizations {
       'Kan looptijd niet berekenen uit profiel';
 
   @override
+  String diveLog_edit_summary_items(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items',
+      one: '1 item',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get diveLog_edit_summary_notes => 'notities';
+
+  @override
+  String diveLog_edit_summary_species(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count soorten',
+      one: '1 soort',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String diveLog_edit_summary_tanks(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count flessen',
+      one: '1 fles',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String diveLog_edit_surfaceInterval(Object interval) {
     return 'Oppervlakte-interval: $interval';
   }
@@ -3580,6 +3712,26 @@ class AppLocalizationsNl extends AppLocalizations {
   @override
   String get diveLog_edit_surfacePressureHint =>
       'Standaard: 1013 mbar op zeeniveau';
+
+  @override
+  String get diveLog_edit_tankCard_done => 'Klaar';
+
+  @override
+  String get diveLog_edit_tankCard_edit => 'Bewerken';
+
+  @override
+  String get diveLog_edit_tankCard_mix => 'Mengsel';
+
+  @override
+  String get diveLog_edit_tankCard_pressure => 'Druk';
+
+  @override
+  String diveLog_edit_tankCard_title(int number) {
+    return 'Fles $number';
+  }
+
+  @override
+  String get diveLog_edit_tankCard_volume => 'Volume';
 
   @override
   String get diveLog_edit_tooltip_calculateFromProfile =>
@@ -3681,6 +3833,17 @@ class AppLocalizationsNl extends AppLocalizations {
   @override
   String diveLog_equipmentSetPicker_errorLoading(Object error) {
     return 'Fout bij laden van uitrustingssets: $error';
+  }
+
+  @override
+  String diveLog_equipmentSetPicker_itemsSummary(int count, String names) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items',
+      one: '1 item',
+    );
+    return '$_temp0: $names';
   }
 
   @override
@@ -4039,6 +4202,95 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get diveLog_listPage_menuMatchSites => 'Duiken aan stekken koppelen';
+
+  @override
+  String get diveLog_sighting_decreaseCount => 'Aantal verlagen';
+
+  @override
+  String get diveLog_sighting_increaseCount => 'Aantal verhogen';
+
+  @override
+  String diveLog_speciesPicker_errorLoading(String error) {
+    return 'Fout bij laden van soorten: $error';
+  }
+
+  @override
+  String get diveSites_edit_depth_heroMax => 'Max. diepte';
+
+  @override
+  String get diveSites_edit_depth_heroMin => 'Min. diepte';
+
+  @override
+  String get diveSites_edit_group_accessSafety => 'Toegang & veiligheid';
+
+  @override
+  String get diveSites_edit_group_diveInfo => 'Duikinfo';
+
+  @override
+  String get diveSites_edit_group_identity => 'Identiteit';
+
+  @override
+  String get diveSites_edit_group_lifeNotes => 'Leven & notities';
+
+  @override
+  String get diveSites_edit_group_location => 'Locatie';
+
+  @override
+  String get diveSites_edit_invite_accessSafety =>
+      'Toegang, parkeren, afmeren of gevaren toevoegen';
+
+  @override
+  String get diveSites_edit_invite_diveInfo =>
+      'Dieptebereik, moeilijkheid of beoordeling toevoegen';
+
+  @override
+  String get diveSites_edit_invite_lifeNotes =>
+      'Zeeleven, notities of delen toevoegen';
+
+  @override
+  String get diveSites_edit_invite_location =>
+      'GPS-positie of hoogte toevoegen';
+
+  @override
+  String get diveSites_edit_summary_shared => 'gedeeld';
+
+  @override
+  String get forms_addSection_prefix => 'Toevoegen:';
+
+  @override
+  String get forms_cancel => 'Annuleren';
+
+  @override
+  String get forms_discard_body =>
+      'Je hebt niet-opgeslagen wijzigingen. Als je nu weggaat, gaan ze verloren.';
+
+  @override
+  String get forms_discard_discard => 'Verwerpen';
+
+  @override
+  String get forms_discard_keepEditing => 'Doorgaan met bewerken';
+
+  @override
+  String get forms_discard_title => 'Wijzigingen verwerpen?';
+
+  @override
+  String get forms_save => 'Opslaan';
+
+  @override
+  String forms_section_issues(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count problemen',
+      one: '1 probleem',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String forms_statCell_useProfileValue(String value) {
+    return '$value uit duikprofiel overnemen';
+  }
 
   @override
   String get siteMatchReview_title => 'Stekken koppelen';
@@ -10134,7 +10386,96 @@ class AppLocalizationsNl extends AppLocalizations {
       'Cloudsynchronisatie uitgeschakeld';
 
   @override
+  String get settings_cloudSync_entry_subtitle =>
+      'Synchroniseren via cloudopslag';
+
+  @override
+  String get settings_cloudSync_adopt_confirm =>
+      'Herstelde bibliotheek overnemen';
+
+  @override
+  String settings_cloudSync_adopt_dialogContent(
+    String deviceName,
+    String date,
+  ) {
+    return 'De bibliotheek is vervangen vanuit een back-up op \"$deviceName\" ($date). Bij overname worden de gegevens van dit apparaat vervangen door de herstelde bibliotheek. Eerst wordt een veiligheidsback-up van de huidige gegevens van dit apparaat gemaakt.';
+  }
+
+  @override
+  String get settings_cloudSync_adopt_dialogTitle =>
+      'Herstelde bibliotheek overnemen?';
+
+  @override
+  String get settings_cloudSync_adopt_notNow => 'Niet nu';
+
+  @override
+  String get settings_cloudSync_firstSync_banner =>
+      'De eerste synchronisatie wacht op bevestiging. Tik op \'Nu synchroniseren\' om te bekijken wat er wordt samengevoegd.';
+
+  @override
+  String get settings_cloudSync_firstSync_dialogConfirm =>
+      'Samenvoegen en synchroniseren';
+
+  @override
+  String settings_cloudSync_firstSync_dialogContent(
+    int deviceCount,
+    int diveCount,
+  ) {
+    return 'Er zijn bestaande synchronisatiegegevens gevonden in de cloud ($deviceCount synchronisatiebestand(en)). Je eerste synchronisatie voegt die gegevens samen met de $diveCount duik(en) op dit apparaat, op alle gesynchroniseerde apparaten.\n\nAls dezelfde duiken op elk apparaat afzonderlijk zijn toegevoegd, verschijnen ze dubbel.';
+  }
+
+  @override
+  String get settings_cloudSync_firstSync_dialogTitle =>
+      'Bibliotheken samenvoegen?';
+
+  @override
+  String settings_cloudSync_replace_banner(String deviceName) {
+    return 'Synchronisatie gepauzeerd: de bibliotheek is vervangen vanuit een back-up op \"$deviceName\". Tik op Nu synchroniseren om te controleren.';
+  }
+
+  @override
+  String get settings_cloudSync_switch_dialogTitle =>
+      'Synchronisatieprovider wijzigen?';
+
+  @override
+  String settings_cloudSync_switch_dialogContent(
+    String fromName,
+    String toName,
+  ) {
+    return 'Je gegevens worden niet van $fromName verplaatst — ze blijven daar staan totdat je ze verwijdert. Na het wijzigen voegt de volgende synchronisatie van dit apparaat zijn gegevens samen met wat er al op $toName staat. Je andere apparaten blijven $fromName gebruiken totdat je ze ook elk wijzigt.';
+  }
+
+  @override
+  String get settings_cloudSync_switch_confirm => 'Wijzigen';
+
+  @override
+  String settings_cloudSync_moved_banner(
+    String deviceName,
+    String destination,
+  ) {
+    return '$deviceName heeft deze bibliotheek naar $destination verplaatst. Deze provider wordt er niet langer door bijgewerkt. Selecteer $destination hieronder om de verplaatsing te volgen.';
+  }
+
+  @override
+  String get settings_cloudSync_moved_dismiss => 'Sluiten';
+
+  @override
+  String settings_cloudSync_cleanup_banner(String backend) {
+    return 'Er staan nog oude synchronisatiegegevens op $backend van voordat je van provider wisselde. Ze worden niet meer gebruikt.';
+  }
+
+  @override
+  String get settings_cloudSync_cleanup_delete => 'Oude gegevens verwijderen';
+
+  @override
+  String get settings_cloudSync_cleanup_keep => 'Behouden';
+
+  @override
   String get settings_cloudSync_header_advanced => 'Geavanceerd';
+
+  @override
+  String get settings_cloudSync_signOut_backupWarning =>
+      'Cloudback-up wordt uitgeschakeld en back-ups worden op de standaardlocatie opgeslagen.';
 
   @override
   String get settings_cloudSync_header_cloudProvider => 'Cloudprovider';
@@ -10190,10 +10531,6 @@ class AppLocalizationsNl extends AppLocalizations {
   String get settings_cloudSync_provider_icloud => 'iCloud';
 
   @override
-  String get settings_cloudSync_provider_icloud_subtitle =>
-      'Synchroniseren via Apple iCloud';
-
-  @override
   String settings_cloudSync_provider_initFailed(Object providerName) {
     return 'Initialisatie van $providerName-provider mislukt';
   }
@@ -10201,6 +10538,16 @@ class AppLocalizationsNl extends AppLocalizations {
   @override
   String get settings_cloudSync_provider_notAvailable =>
       'Niet beschikbaar op dit platform';
+
+  @override
+  String get settings_cloudSync_provider_s3_edit => 'S3-configuratie bewerken';
+
+  @override
+  String get settings_cloudSync_provider_s3_subtitle =>
+      'Werkt met elke S3-compatibele opslagdienst';
+
+  @override
+  String get settings_cloudSync_provider_s3_title => 'S3-compatibele opslag';
 
   @override
   String get settings_cloudSync_resetDialog_cancel => 'Annuleren';
@@ -10971,6 +11318,98 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get settings_profileHub_switchDiver => 'Duiker wisselen';
+
+  @override
+  String get settings_s3Config_action_remove => 'Configuratie verwijderen';
+
+  @override
+  String get settings_s3Config_action_testConnection => 'Verbinding testen';
+
+  @override
+  String get settings_s3Config_advanced_title => 'Geavanceerd';
+
+  @override
+  String get settings_s3Config_appBar_title => 'S3-compatibele opslag';
+
+  @override
+  String get settings_s3Config_error_secureStorage =>
+      'Kon geen toegang krijgen tot de beveiligde opslag';
+
+  @override
+  String get settings_s3Config_field_accessKeyId_label => 'Access Key ID';
+
+  @override
+  String get settings_s3Config_field_bucket_label => 'Bucket';
+
+  @override
+  String get settings_s3Config_field_endpoint_helper =>
+      'Bijvoorbeeld: https://s3.example.com';
+
+  @override
+  String get settings_s3Config_field_endpoint_label => 'Endpoint-URL';
+
+  @override
+  String get settings_s3Config_field_pathStyle_label =>
+      'Path-style-adressering gebruiken';
+
+  @override
+  String get settings_s3Config_field_pathStyle_subtitle =>
+      'Vereist door de meeste zelf-gehoste servers';
+
+  @override
+  String get settings_s3Config_field_prefix_label => 'Sleutelvoorvoegsel';
+
+  @override
+  String settings_s3Config_field_region_helperAuto(String region) {
+    return 'Automatisch gedetecteerd: $region';
+  }
+
+  @override
+  String get settings_s3Config_field_region_label => 'Regio';
+
+  @override
+  String get settings_s3Config_field_secretAccessKey_label =>
+      'Secret Access Key';
+
+  @override
+  String get settings_s3Config_remove_confirm_action => 'Verwijderen';
+
+  @override
+  String get settings_s3Config_remove_confirm_body =>
+      'Synchronisatie via S3 stopt op dit apparaat. Je gegevens in de bucket worden niet verwijderd.';
+
+  @override
+  String get settings_s3Config_remove_confirm_title =>
+      'S3-configuratie verwijderen?';
+
+  @override
+  String get settings_s3Config_removed => 'S3-configuratie verwijderd';
+
+  @override
+  String get settings_s3Config_saved => 'S3-configuratie opgeslagen';
+
+  @override
+  String settings_s3Config_test_regionDetected(String region) {
+    return 'Regio gedetecteerd: $region';
+  }
+
+  @override
+  String get settings_s3Config_test_success => 'Verbinding geslaagd';
+
+  @override
+  String get settings_s3Config_validation_endpointInvalid =>
+      'Voer een geldige http://- of https://-URL in';
+
+  @override
+  String get settings_s3Config_validation_endpointPath =>
+      'De endpoint-URL mag geen pad bevatten';
+
+  @override
+  String get settings_s3Config_validation_required => 'Verplicht';
+
+  @override
+  String get settings_s3Config_warning_http =>
+      'Dit endpoint gebruikt onversleuteld HTTP. Inloggegevens en duikgegevens worden onversleuteld verzonden; gebruik dit alleen op een vertrouwd netwerk.';
 
   @override
   String get settings_section_about_subtitle => 'App-info & licenties';
@@ -16513,4 +16952,57 @@ class AppLocalizationsNl extends AppLocalizations {
     );
     return 'Duiker verwijderd. $trips gedeelde $_temp0 en $sites gedeelde $_temp1 toegewezen aan $name.';
   }
+
+  @override
+  String get settings_cloudSync_duplicateDivers_title =>
+      'Dubbele duikersprofielen';
+
+  @override
+  String get settings_cloudSync_duplicateDivers_description =>
+      'De synchronisatie vond meer dan één profiel met dezelfde naam. Dit gebeurt gewoonlijk wanneer elk apparaat zijn eigen profiel heeft aangemaakt vóór de synchronisatie. Door samen te voegen worden alle duiken en gegevens naar één profiel verplaatst.';
+
+  @override
+  String settings_cloudSync_duplicateDivers_groupLabel(String name, int count) {
+    return '$name ($count profielen)';
+  }
+
+  @override
+  String get settings_cloudSync_duplicateDivers_mergeButton => 'Samenvoegen';
+
+  @override
+  String get settings_cloudSync_duplicateDivers_confirmTitle =>
+      'Duikersprofielen samenvoegen?';
+
+  @override
+  String settings_cloudSync_duplicateDivers_confirmBody(
+    int count,
+    String name,
+  ) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count dubbele profielen',
+      one: 'één dubbel profiel',
+    );
+    return 'Alle duiken, certificeringen, uitrusting en andere gegevens van $_temp0 worden verplaatst naar \"$name\". Dit kan niet automatisch ongedaan worden gemaakt.';
+  }
+
+  @override
+  String get settings_cloudSync_duplicateDivers_confirmCancel => 'Annuleren';
+
+  @override
+  String get settings_cloudSync_duplicateDivers_confirmAction => 'Samenvoegen';
+
+  @override
+  String settings_cloudSync_duplicateDivers_successSnack(String name) {
+    return 'Samengevoegd in $name';
+  }
+
+  @override
+  String settings_cloudSync_duplicateDivers_failureSnack(String error) {
+    return 'Samenvoegen mislukt: $error';
+  }
+
+  @override
+  String get settings_cloudSync_duplicateDivers_undo => 'Ongedaan maken';
 }

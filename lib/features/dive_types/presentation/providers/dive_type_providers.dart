@@ -11,11 +11,20 @@ final diveTypeRepositoryProvider = Provider<DiveTypeRepository>((ref) {
 
 /// All dive types list provider (sorted by sort order, then name)
 /// Includes built-in types plus custom types for the current diver
+///
+/// Stays a [FutureProvider] so imperative `ref.read(diveTypesProvider.future)`
+/// reads still resolve, while self-invalidating whenever the `dive_types` table
+/// changes -- including when a sync applies remote changes -- so list UIs
+/// refresh instead of serving a cached one-shot snapshot.
 final diveTypesProvider = FutureProvider<List<DiveTypeEntity>>((ref) async {
   final repository = ref.watch(diveTypeRepositoryProvider);
   final validatedDiverId = await ref.watch(
     validatedCurrentDiverIdProvider.future,
   );
+  final sub = repository.watchDiveTypesChanges().listen(
+    (_) => ref.invalidateSelf(),
+  );
+  ref.onDispose(sub.cancel);
   return repository.getAllDiveTypes(diverId: validatedDiverId);
 });
 
@@ -83,6 +92,13 @@ class DiveTypeListNotifier
         _initializeAndLoad();
       }
     });
+
+    // Refresh when the dive_types table changes (e.g. a sync writes rows
+    // directly). Cancelled on dispose (provider is autoDispose).
+    final tableChangeSub = _repository.watchDiveTypesChanges().listen(
+      (_) => _silentReloadDiveTypes(),
+    );
+    _ref.onDispose(tableChangeSub.cancel);
   }
 
   Future<void> _initializeAndLoad() async {
@@ -101,6 +117,25 @@ class DiveTypeListNotifier
       state = AsyncValue.data(diveTypes);
     } catch (e, st) {
       state = AsyncValue.error(e, st);
+    }
+  }
+
+  /// Reload without flipping to a loading state, so table-driven refreshes
+  /// (e.g. after a sync write) do not flash a spinner over existing data.
+  /// Resolves the validated diver id first so a tick arriving before
+  /// initialization completes still scopes the query correctly (otherwise a
+  /// null diver id would drop custom dive types).
+  Future<void> _silentReloadDiveTypes() async {
+    try {
+      _validatedDiverId = await _ref.read(
+        validatedCurrentDiverIdProvider.future,
+      );
+      final diveTypes = await _repository.getAllDiveTypes(
+        diverId: _validatedDiverId,
+      );
+      if (mounted) state = AsyncValue.data(diveTypes);
+    } catch (e, st) {
+      if (mounted) state = AsyncValue.error(e, st);
     }
   }
 

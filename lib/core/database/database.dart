@@ -40,6 +40,10 @@ class Divers extends Table {
   IntColumn get createdAt => integer()();
   IntColumn get updatedAt => integer()();
 
+  /// Hybrid Logical Clock for cross-device conflict resolution
+  /// (nullable: rows written before HLC rollout fall back to updatedAt).
+  TextColumn get hlc => text().nullable()();
+
   @override
   Set<Column> get primaryKey => {id};
 }
@@ -59,6 +63,10 @@ class Trips extends Table {
   BoolColumn get isShared => boolean().withDefault(const Constant(false))();
   IntColumn get createdAt => integer()();
   IntColumn get updatedAt => integer()();
+
+  /// Hybrid Logical Clock for cross-device conflict resolution
+  /// (nullable: rows written before HLC rollout fall back to updatedAt).
+  TextColumn get hlc => text().nullable()();
 
   @override
   Set<Column> get primaryKey => {id};
@@ -82,6 +90,10 @@ class LiveaboardDetailRecords extends Table {
   IntColumn get createdAt => integer()();
   IntColumn get updatedAt => integer()();
 
+  /// Hybrid Logical Clock for cross-device conflict resolution
+  /// (nullable: rows written before HLC rollout fall back to updatedAt).
+  TextColumn get hlc => text().nullable()();
+
   @override
   Set<Column> get primaryKey => {id};
 }
@@ -99,6 +111,10 @@ class TripItineraryDays extends Table {
   TextColumn get notes => text().withDefault(const Constant(''))();
   IntColumn get createdAt => integer()();
   IntColumn get updatedAt => integer()();
+
+  /// Hybrid Logical Clock for cross-device conflict resolution
+  /// (nullable: rows written before HLC rollout fall back to updatedAt).
+  TextColumn get hlc => text().nullable()();
 
   @override
   Set<Column> get primaryKey => {id};
@@ -253,6 +269,10 @@ class Dives extends Table {
   IntColumn get createdAt => integer()();
   IntColumn get updatedAt => integer()();
 
+  /// Hybrid Logical Clock for cross-device conflict resolution
+  /// (nullable: rows written before HLC rollout fall back to updatedAt).
+  TextColumn get hlc => text().nullable()();
+
   @override
   Set<Column> get primaryKey => {id};
 }
@@ -332,6 +352,10 @@ class DiveSites extends Table {
   IntColumn get createdAt => integer()();
   IntColumn get updatedAt => integer()();
 
+  /// Hybrid Logical Clock for cross-device conflict resolution
+  /// (nullable: rows written before HLC rollout fall back to updatedAt).
+  TextColumn get hlc => text().nullable()();
+
   @override
   Set<Column> get primaryKey => {id};
 }
@@ -392,6 +416,10 @@ class Equipment extends Table {
   IntColumn get createdAt => integer()();
   IntColumn get updatedAt => integer()();
 
+  /// Hybrid Logical Clock for cross-device conflict resolution
+  /// (nullable: rows written before HLC rollout fall back to updatedAt).
+  TextColumn get hlc => text().nullable()();
+
   @override
   Set<Column> get primaryKey => {id};
 }
@@ -430,6 +458,10 @@ class EquipmentSets extends Table {
   TextColumn get description => text().withDefault(const Constant(''))();
   IntColumn get createdAt => integer()();
   IntColumn get updatedAt => integer()();
+
+  /// Hybrid Logical Clock for cross-device conflict resolution
+  /// (nullable: rows written before HLC rollout fall back to updatedAt).
+  TextColumn get hlc => text().nullable()();
 
   @override
   Set<Column> get primaryKey => {id};
@@ -692,6 +724,10 @@ class Settings extends Table {
   TextColumn get value => text().nullable()();
   IntColumn get updatedAt => integer()();
 
+  /// Hybrid Logical Clock for cross-device conflict resolution
+  /// (nullable: rows written before HLC rollout fall back to updatedAt).
+  TextColumn get hlc => text().nullable()();
+
   @override
   Set<Column> get primaryKey => {key};
 }
@@ -875,6 +911,10 @@ class DiverSettings extends Table {
   IntColumn get createdAt => integer()();
   IntColumn get updatedAt => integer()();
 
+  /// Hybrid Logical Clock for cross-device conflict resolution
+  /// (nullable: rows written before HLC rollout fall back to updatedAt).
+  TextColumn get hlc => text().nullable()();
+
   @override
   Set<Column> get primaryKey => {id};
 }
@@ -892,6 +932,10 @@ class Buddies extends Table {
   TextColumn get notes => text().withDefault(const Constant(''))();
   IntColumn get createdAt => integer()();
   IntColumn get updatedAt => integer()();
+
+  /// Hybrid Logical Clock for cross-device conflict resolution
+  /// (nullable: rows written before HLC rollout fall back to updatedAt).
+  TextColumn get hlc => text().nullable()();
 
   @override
   Set<Column> get primaryKey => {id};
@@ -936,6 +980,10 @@ class Certifications extends Table {
   IntColumn get createdAt => integer()();
   IntColumn get updatedAt => integer()();
 
+  /// Hybrid Logical Clock for cross-device conflict resolution
+  /// (nullable: rows written before HLC rollout fall back to updatedAt).
+  TextColumn get hlc => text().nullable()();
+
   @override
   Set<Column> get primaryKey => {id};
 }
@@ -954,6 +1002,10 @@ class ServiceRecords extends Table {
   TextColumn get notes => text().withDefault(const Constant(''))();
   IntColumn get createdAt => integer()();
   IntColumn get updatedAt => integer()();
+
+  /// Hybrid Logical Clock for cross-device conflict resolution
+  /// (nullable: rows written before HLC rollout fall back to updatedAt).
+  TextColumn get hlc => text().nullable()();
 
   @override
   Set<Column> get primaryKey => {id};
@@ -982,6 +1034,10 @@ class DiveCenters extends Table {
   IntColumn get createdAt => integer()();
   IntColumn get updatedAt => integer()();
 
+  /// Hybrid Logical Clock for cross-device conflict resolution
+  /// (nullable: rows written before HLC rollout fall back to updatedAt).
+  TextColumn get hlc => text().nullable()();
+
   @override
   Set<Column> get primaryKey => {id};
 }
@@ -994,6 +1050,10 @@ class Tags extends Table {
   TextColumn get color => text().nullable()(); // Hex color code for UI
   IntColumn get createdAt => integer()();
   IntColumn get updatedAt => integer()();
+
+  /// Hybrid Logical Clock for cross-device conflict resolution
+  /// (nullable: rows written before HLC rollout fall back to updatedAt).
+  TextColumn get hlc => text().nullable()();
 
   @override
   Set<Column> get primaryKey => {id};
@@ -1010,6 +1070,10 @@ class DiveTypes extends Table {
   IntColumn get sortOrder => integer().withDefault(const Constant(0))();
   IntColumn get createdAt => integer()();
   IntColumn get updatedAt => integer()();
+
+  /// Hybrid Logical Clock for cross-device conflict resolution
+  /// (nullable: rows written before HLC rollout fall back to updatedAt).
+  TextColumn get hlc => text().nullable()();
 
   @override
   Set<Column> get primaryKey => {id};
@@ -1044,6 +1108,10 @@ class TankPresets extends Table {
   IntColumn get createdAt => integer()();
   IntColumn get updatedAt => integer()();
 
+  /// Hybrid Logical Clock for cross-device conflict resolution
+  /// (nullable: rows written before HLC rollout fall back to updatedAt).
+  TextColumn get hlc => text().nullable()();
+
   @override
   Set<Column> get primaryKey => {id};
 }
@@ -1068,6 +1136,10 @@ class DiveComputers extends Table {
   TextColumn get notes => text().withDefault(const Constant(''))();
   IntColumn get createdAt => integer()();
   IntColumn get updatedAt => integer()();
+
+  /// Hybrid Logical Clock for cross-device conflict resolution
+  /// (nullable: rows written before HLC rollout fall back to updatedAt).
+  TextColumn get hlc => text().nullable()();
 
   @override
   Set<Column> get primaryKey => {id};
@@ -1231,13 +1303,34 @@ class SyncMetadata extends Table {
       integer().nullable()(); // Unix timestamp ms of last successful sync
   TextColumn get deviceId => text()(); // This device's unique UUID
   TextColumn get syncProvider =>
-      text().nullable()(); // 'icloud' or 'googledrive'
+      text().nullable()(); // 'icloud', 'googledrive', or 's3'
   TextColumn get remoteFileId =>
       text().nullable()(); // Provider-specific file reference
   IntColumn get syncVersion =>
       integer().withDefault(const Constant(1))(); // Sync format version
   IntColumn get createdAt => integer()();
   IntColumn get updatedAt => integer()();
+
+  /// Hybrid Logical Clock for cross-device conflict resolution
+  /// (nullable: rows written before HLC rollout fall back to updatedAt).
+  TextColumn get hlc => text().nullable()();
+
+  /// Opaque per-database token, rotated on each launch and mirrored outside the
+  /// database. A mismatch between this and the mirrored copy means the on-disk
+  /// database was replaced (restore/overwrite), even when the device id is
+  /// unchanged. Nullable: rows predating this column read as "no token yet".
+  TextColumn get instanceToken => text().nullable()();
+
+  /// The library epoch this device last accepted (see library_epoch.dart).
+  /// Dual-anchored: mirrored in SharedPreferences so a database restore
+  /// cannot silently rewind it. Null means the pre-epoch world.
+  TextColumn get lastAcceptedEpochId => text().nullable()();
+
+  /// The provider [lastSyncTimestamp] was minted against. A cursor read for a
+  /// different provider returns null, so first contact with a newly switched
+  /// backend is detectable. Null means a legacy cursor (pre-stamp rows),
+  /// valid for any provider. Written only together with the cursor.
+  TextColumn get lastSyncProvider => text().nullable()();
 
   @override
   Set<Column> get primaryKey => {id};
@@ -1314,6 +1407,10 @@ class Courses extends Table {
   IntColumn get createdAt => integer()();
   IntColumn get updatedAt => integer()();
 
+  /// Hybrid Logical Clock for cross-device conflict resolution
+  /// (nullable: rows written before HLC rollout fall back to updatedAt).
+  TextColumn get hlc => text().nullable()();
+
   @override
   Set<Column> get primaryKey => {id};
 }
@@ -1346,13 +1443,17 @@ class ScheduledNotifications extends Table {
   Set<Column> get primaryKey => {id};
 }
 
-/// User-saved CSV import presets (local-only, not synced)
+/// User-saved CSV import presets (synced across devices; carries an hlc column)
 class CsvPresets extends Table {
   TextColumn get id => text()();
   TextColumn get name => text()();
   TextColumn get presetJson => text()();
   IntColumn get createdAt => integer()();
   IntColumn get updatedAt => integer()();
+
+  /// Hybrid Logical Clock for cross-device conflict resolution
+  /// (nullable: rows written before HLC rollout fall back to updatedAt).
+  TextColumn get hlc => text().nullable()();
 
   @override
   Set<Column> get primaryKey => {id};
@@ -1366,6 +1467,10 @@ class ViewConfigs extends Table {
   TextColumn get viewMode => text()();
   TextColumn get configJson => text()();
   IntColumn get updatedAt => integer()();
+
+  /// Hybrid Logical Clock for cross-device conflict resolution
+  /// (nullable: rows written before HLC rollout fall back to updatedAt).
+  TextColumn get hlc => text().nullable()();
 
   @override
   Set<Column> get primaryKey => {id};
@@ -1462,7 +1567,7 @@ class AppDatabase extends _$AppDatabase {
 
   /// The current schema version as a static constant so that pre-open checks
   /// (e.g. version-mismatch guard) can reference it without an instance.
-  static const int currentSchemaVersion = 77;
+  static const int currentSchemaVersion = 84;
 
   /// Every schema version that has a migration block in onUpgrade.
   /// Used to calculate progress step counts. When adding a new migration,
@@ -1543,6 +1648,45 @@ class AppDatabase extends _$AppDatabase {
     75,
     76,
     77,
+    78,
+    79,
+    80,
+    81,
+    82,
+    83,
+    84,
+  ];
+
+  /// Tables that carry a per-row Hybrid Logical Clock for cross-device conflict
+  /// resolution (plus sync_metadata for the device clock). Shared between the
+  /// v77 backfill (original add), the v82 backfill (recovery for databases that
+  /// landed at user_version = 77 via the schema-version collision with PR #302's
+  /// surface-interval index migration) and the v83 backfill (comprehensive
+  /// recovery for databases stranded past v77 by the wider set of sync-branch
+  /// version collisions — see the v82 and v83 blocks below).
+  static const List<String> _hlcTables = [
+    'divers',
+    'diver_settings',
+    'buddies',
+    'dive_centers',
+    'trips',
+    'liveaboard_detail_records',
+    'trip_itinerary_days',
+    'equipment',
+    'equipment_sets',
+    'dive_types',
+    'tank_presets',
+    'dive_computers',
+    'tags',
+    'courses',
+    'dives',
+    'dive_sites',
+    'certifications',
+    'service_records',
+    'settings',
+    'csv_presets',
+    'view_configs',
+    'sync_metadata',
   ];
 
   /// Returns the number of migration steps that will execute when upgrading
@@ -3672,6 +3816,177 @@ class AppDatabase extends _$AppDatabase {
         }
         if (from < 76) await reportProgress();
         if (from < 77) {
+          // Add nullable Hybrid Logical Clock column to every conflict-capable
+          // syncable table (and sync_metadata for the device clock). Nullable
+          // so existing rows fall back to updatedAt ordering until rewritten.
+          for (final table in _hlcTables) {
+            final cols = await customSelect(
+              "PRAGMA table_info('$table')",
+            ).get();
+            final existing = cols.map((c) => c.read<String>('name')).toSet();
+            if (cols.isNotEmpty && !existing.contains('hlc')) {
+              await customStatement('ALTER TABLE $table ADD COLUMN hlc TEXT');
+            }
+          }
+        }
+        if (from < 77) await reportProgress();
+        if (from < 78) {
+          // Add the nullable per-database instance token to sync_metadata. Used
+          // to detect a database restore/overwrite that leaves the device id
+          // unchanged (a same-device backup). Nullable so existing rows read as
+          // "no token yet" and are treated like a first-run seed.
+          final cols = await customSelect(
+            "PRAGMA table_info('sync_metadata')",
+          ).get();
+          final existing = cols.map((c) => c.read<String>('name')).toSet();
+          if (cols.isNotEmpty && !existing.contains('instance_token')) {
+            await customStatement(
+              'ALTER TABLE sync_metadata ADD COLUMN instance_token TEXT',
+            );
+          }
+        }
+        if (from < 78) await reportProgress();
+        if (from < 79) {
+          // Support surface-interval derivation from timestamps (issue #235):
+          // the correlated subquery SELECT MAX(exit_time) WHERE diver_id AND
+          // exit_time < entry_time needs this index to stay fast at scale.
+          // Guard with PRAGMA in case partial-schema migration fixtures are
+          // used in tests where dives may not yet have these columns.
+          final divesCols = await customSelect(
+            "PRAGMA table_info('dives')",
+          ).get();
+          if (divesCols.isNotEmpty) {
+            final colNames = divesCols
+                .map((c) => c.read<String>('name'))
+                .toSet();
+            if (colNames.contains('diver_id') &&
+                colNames.contains('exit_time')) {
+              await customStatement('''
+                CREATE INDEX IF NOT EXISTS idx_dives_diver_exittime
+                ON dives(diver_id, exit_time DESC)
+              ''');
+            }
+          }
+        }
+        if (from < 79) await reportProgress();
+        if (from < 80) {
+          // Library epoch anchor for restore Replace mode: the epoch this
+          // device last accepted, dual-anchored with a SharedPreferences
+          // mirror (see library_epoch_store.dart).
+          final cols = await customSelect(
+            "PRAGMA table_info('sync_metadata')",
+          ).get();
+          final existing = cols.map((c) => c.read<String>('name')).toSet();
+          if (cols.isNotEmpty && !existing.contains('last_accepted_epoch_id')) {
+            await customStatement(
+              'ALTER TABLE sync_metadata ADD COLUMN last_accepted_epoch_id TEXT',
+            );
+          }
+        }
+        if (from < 80) await reportProgress();
+        if (from < 81) {
+          // Provider stamp for the sync cursor: lastSyncTimestamp minted
+          // against one backend must read as absent for another, so first
+          // contact with a switched backend stays detectable. Nullable so
+          // existing cursors read as legacy (valid for any provider).
+          final cols = await customSelect(
+            "PRAGMA table_info('sync_metadata')",
+          ).get();
+          final existing = cols.map((c) => c.read<String>('name')).toSet();
+          if (cols.isNotEmpty && !existing.contains('last_sync_provider')) {
+            await customStatement(
+              'ALTER TABLE sync_metadata ADD COLUMN last_sync_provider TEXT',
+            );
+          }
+        }
+        if (from < 81) await reportProgress();
+        if (from < 82) {
+          // Recover databases stranded by the v77 schema-version collision:
+          // PR #302 (surface-interval index) shipped a v77 that only created
+          // an index, while the HLC backfill also claimed v77. Any database
+          // that upgraded under the index-only v77 sits at user_version >= 77
+          // with no hlc columns, so the v77 guard above (from < 77) is false
+          // and the backfill is skipped — leaving every sync UNION query
+          // (e.g. SELECT MAX(hlc) FROM "equipment") failing at prepare time.
+          //
+          // Re-run the same PRAGMA-guarded ALTER: healthy databases that
+          // already have hlc no-op on every table; affected databases get the
+          // missing columns added and sync starts working again.
+          for (final table in _hlcTables) {
+            final cols = await customSelect(
+              "PRAGMA table_info('$table')",
+            ).get();
+            final existing = cols.map((c) => c.read<String>('name')).toSet();
+            if (cols.isNotEmpty && !existing.contains('hlc')) {
+              await customStatement('ALTER TABLE $table ADD COLUMN hlc TEXT');
+            }
+          }
+        }
+        if (from < 82) await reportProgress();
+        if (from < 83) {
+          // Comprehensive recovery for databases stranded past v77 by the wider
+          // set of sync-branch schema-version collisions. The v77 HLC / PR #302
+          // index collision (healed by the v82 block above) was only the first:
+          // the abandoned encrypted-sync and iCloud-diagnostic lineages also
+          // reused v78-v81 for unrelated migrations. A database that reached
+          // user_version >= 78 via one of those branches skipped the canonical
+          // sync_metadata ALTERs — instance_token (v78), last_accepted_epoch_id
+          // (v80), last_sync_provider (v81) — because their `from < N` guards
+          // are false once `from` already passed N. The v82 block re-added only
+          // hlc, so the three text columns stayed missing once the database sat
+          // at the current version and stopped running onUpgrade. Every identity
+          // write then failed at prepare time with "no such column:
+          // instance_token" (launch-time reconcile and the twin-split
+          // adopt-fresh-identity path), so sync could never start.
+          //
+          // Re-assert every post-v76 sync_metadata column with PRAGMA-guarded
+          // ALTERs: healthy databases no-op, stranded databases are healed. The
+          // columns are all nullable, so existing rows read as "not yet set"
+          // exactly as they did on the original add.
+          const syncMetadataColumns = <String, String>{
+            'instance_token': 'TEXT',
+            'last_accepted_epoch_id': 'TEXT',
+            'last_sync_provider': 'TEXT',
+          };
+          final smCols = await customSelect(
+            "PRAGMA table_info('sync_metadata')",
+          ).get();
+          if (smCols.isNotEmpty) {
+            final existing = smCols.map((c) => c.read<String>('name')).toSet();
+            for (final entry in syncMetadataColumns.entries) {
+              if (!existing.contains(entry.key)) {
+                await customStatement(
+                  'ALTER TABLE sync_metadata '
+                  'ADD COLUMN ${entry.key} ${entry.value}',
+                );
+              }
+            }
+          }
+          // Re-run the hlc backfill as well, covering any database that reached
+          // user_version 82 (so the v82 block no longer fires) while still
+          // missing hlc on some table via a collision that also claimed v82.
+          for (final table in _hlcTables) {
+            final cols = await customSelect(
+              "PRAGMA table_info('$table')",
+            ).get();
+            final existing = cols.map((c) => c.read<String>('name')).toSet();
+            if (cols.isNotEmpty && !existing.contains('hlc')) {
+              await customStatement('ALTER TABLE $table ADD COLUMN hlc TEXT');
+            }
+          }
+        }
+        if (from < 83) await reportProgress();
+        if (from < 84) {
+          // Add 'Cavern' as a built-in dive type. Cavern diving (light-zone
+          // only, cavern cert) is a distinct discipline from Cave (beyond
+          // light zone, full cave cert). Guarded by a sqlite_master check so
+          // minimal-schema test databases without dive_types are not affected;
+          // INSERT OR IGNORE preserves any user-created 'cavern' row.
+          //
+          // Renumbered from the originally-proposed v77 because main already
+          // claimed v77 for the HLC backfill (see the v77 block above) and
+          // v78-v83 for the recovery migrations that healed the v77 schema-
+          // version collisions.
           final tables = await customSelect(
             "SELECT name FROM sqlite_master WHERE type='table' AND name='dive_types'",
           ).get();
@@ -3683,7 +3998,7 @@ class AppDatabase extends _$AppDatabase {
             ''');
           }
         }
-        if (from < 77) await reportProgress();
+        if (from < 84) await reportProgress();
       },
       beforeOpen: (details) async {
         // Enable foreign keys

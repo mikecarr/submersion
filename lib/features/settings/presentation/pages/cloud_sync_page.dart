@@ -7,6 +7,12 @@ import 'package:intl/intl.dart';
 
 import 'package:submersion/core/data/repositories/sync_repository.dart'
     show CloudProviderType;
+import 'package:submersion/core/services/cloud_storage/s3/s3_config.dart';
+import 'package:submersion/core/services/sync/library_epoch.dart';
+import 'package:submersion/core/services/sync/library_moved.dart';
+import 'package:submersion/features/backup/presentation/providers/backup_providers.dart';
+import 'package:submersion/features/divers/data/repositories/diver_merge_repository.dart';
+import 'package:submersion/features/divers/presentation/providers/diver_providers.dart';
 import 'package:submersion/features/settings/presentation/providers/sync_providers.dart';
 import 'package:submersion/features/settings/presentation/widgets/conflict_resolution_dialog.dart';
 import 'package:submersion/l10n/l10n_extension.dart';
@@ -17,7 +23,15 @@ class CloudSyncPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final syncState = ref.watch(syncStateProvider);
-    final selectedProvider = ref.watch(selectedCloudProviderTypeProvider);
+    // Google Drive is hidden until its integration is implemented, but a
+    // persisted selection or SyncRepository's fallback can still surface
+    // `googledrive`. Treat it as no provider so the page can never show
+    // Sync Now enabled with no selected tile.
+    final rawProvider = ref.watch(selectedCloudProviderTypeProvider);
+    final selectedProvider = rawProvider == CloudProviderType.googledrive
+        ? null
+        : rawProvider;
+    final hasProvider = selectedProvider != null;
     final isCustomFolderMode = ref.watch(
       isCloudSyncDisabledByCustomFolderProvider,
     );
@@ -29,11 +43,13 @@ class CloudSyncPage extends ConsumerWidget {
         children: [
           // Show banner when custom folder mode is active
           if (isCustomFolderMode) _buildCustomFolderBanner(context),
+          // Surface apparent duplicate diver profiles created across devices.
+          _buildDuplicateDiversBanner(context, ref),
           _buildSyncStatusCard(context, ref, syncState),
           const Divider(),
           _buildProviderSection(context, ref, selectedProvider),
           const Divider(),
-          _buildSyncActions(context, ref, syncState),
+          _buildSyncActions(context, ref, syncState, hasProvider),
           if (syncState.conflicts > 0) ...[
             const Divider(),
             _buildConflictsSection(context, ref, syncState),
@@ -101,6 +117,169 @@ class CloudSyncPage extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  /// Banner shown when two or more diver profiles share a name -- the typical
+  /// result of each device auto-creating its own owner diver before the first
+  /// sync. Offers a one-tap merge per duplicate group.
+  Widget _buildDuplicateDiversBanner(BuildContext context, WidgetRef ref) {
+    final groupsAsync = ref.watch(duplicateDiverGroupsProvider);
+    final groups = groupsAsync.asData?.value ?? const [];
+    if (groups.isEmpty) return const SizedBox.shrink();
+
+    final theme = Theme.of(context);
+    final l10n = context.l10n;
+    return Container(
+      margin: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.primaryContainer.withValues(alpha: 0.4),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: theme.colorScheme.primary.withValues(alpha: 0.3),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.merge_type, color: theme.colorScheme.primary),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  l10n.settings_cloudSync_duplicateDivers_title,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            l10n.settings_cloudSync_duplicateDivers_description,
+            style: theme.textTheme.bodyMedium,
+          ),
+          const SizedBox(height: 12),
+          for (final group in groups)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      l10n.settings_cloudSync_duplicateDivers_groupLabel(
+                        group.displayName,
+                        group.duplicates.length + 1,
+                      ),
+                      style: theme.textTheme.bodyLarge,
+                    ),
+                  ),
+                  FilledButton.tonal(
+                    onPressed: () => _confirmAndMerge(context, ref, group),
+                    child: Text(
+                      l10n.settings_cloudSync_duplicateDivers_mergeButton,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _confirmAndMerge(
+    BuildContext context,
+    WidgetRef ref,
+    DuplicateDiverGroup group,
+  ) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final l10n = context.l10n;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        final dialogL10n = context.l10n;
+        return AlertDialog(
+          title: Text(
+            dialogL10n.settings_cloudSync_duplicateDivers_confirmTitle,
+          ),
+          content: Text(
+            dialogL10n.settings_cloudSync_duplicateDivers_confirmBody(
+              group.duplicates.length,
+              group.displayName,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: Text(
+                dialogL10n.settings_cloudSync_duplicateDivers_confirmCancel,
+              ),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: Text(
+                dialogL10n.settings_cloudSync_duplicateDivers_confirmAction,
+              ),
+            ),
+          ],
+        );
+      },
+    );
+    if (confirmed != true) return;
+    if (!context.mounted) return;
+
+    final repo = ref.read(diverMergeRepositoryProvider);
+    try {
+      // Collect every snapshot so the whole group merge can be undone, not
+      // just the last duplicate.
+      final snapshots = <DiverMergeSnapshot>[];
+      for (final duplicate in group.duplicates) {
+        snapshots.add(
+          await repo.mergeDivers(
+            keeperId: group.keeper.id,
+            duplicateId: duplicate.id,
+          ),
+        );
+      }
+      ref.invalidate(allDiversProvider);
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(
+            l10n.settings_cloudSync_duplicateDivers_successSnack(
+              group.displayName,
+            ),
+          ),
+          action: SnackBarAction(
+            label: l10n.settings_cloudSync_duplicateDivers_undo,
+            onPressed: () => _undoMerge(ref, repo, snapshots),
+          ),
+        ),
+      );
+    } catch (e) {
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(
+            l10n.settings_cloudSync_duplicateDivers_failureSnack(e.toString()),
+          ),
+        ),
+      );
+    }
+  }
+
+  /// Reverse every snapshot from a group merge, newest first (so a row touched
+  /// by two duplicates is restored to its true original).
+  Future<void> _undoMerge(
+    WidgetRef ref,
+    DiverMergeRepository repo,
+    List<DiverMergeSnapshot> snapshots,
+  ) async {
+    for (final snapshot in snapshots.reversed) {
+      await repo.undoMerge(snapshot);
+    }
+    ref.invalidate(allDiversProvider);
   }
 
   Widget _buildSyncStatusCard(
@@ -244,16 +423,10 @@ class CloudSyncPage extends ConsumerWidget {
           isSelected: selectedProvider == CloudProviderType.icloud,
           isAvailable: Platform.isIOS || Platform.isMacOS,
         ),
-        _buildProviderTile(
-          context,
-          ref,
-          provider: CloudProviderType.googledrive,
-          title: 'Google Drive',
-          subtitle: 'Sync via Google Drive',
-          icon: Icons.cloud_circle,
-          isSelected: selectedProvider == CloudProviderType.googledrive,
-          isAvailable: true,
-        ),
+        // Google Drive is hidden until its integration is fully
+        // implemented; the CloudProviderType and provider plumbing remain
+        // so re-enabling is just restoring this tile.
+        _buildS3ProviderTile(context, ref, selectedProvider),
       ],
     );
   }
@@ -291,11 +464,90 @@ class CloudSyncPage extends ConsumerWidget {
     );
   }
 
+  Widget _buildS3ProviderTile(
+    BuildContext context,
+    WidgetRef ref,
+    CloudProviderType? selectedProvider,
+  ) {
+    final l10n = context.l10n;
+    final S3Config? config = ref.watch(s3ConfigProvider).valueOrNull;
+    final isSelected = selectedProvider == CloudProviderType.s3;
+    final isConfigured = config != null;
+
+    return Semantics(
+      selected: isSelected,
+      child: ListTile(
+        leading: const Icon(Icons.dns),
+        title: Text(l10n.settings_cloudSync_provider_s3_title),
+        subtitle: Text(
+          isConfigured
+              ? '${config.bucket} @ ${config.displayHost}'
+              : l10n.settings_cloudSync_provider_s3_subtitle,
+        ),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (isSelected)
+              const Icon(
+                Icons.check_circle,
+                color: Colors.green,
+                semanticLabel: 'Connected',
+              ),
+            IconButton(
+              icon: const Icon(Icons.settings_outlined),
+              tooltip: l10n.settings_cloudSync_provider_s3_edit,
+              onPressed: () => context.push('/settings/cloud-sync/s3-config'),
+            ),
+          ],
+        ),
+        onTap: () {
+          if (isConfigured) {
+            _selectProvider(context, ref, CloudProviderType.s3);
+          } else {
+            context.push('/settings/cloud-sync/s3-config');
+          }
+        },
+      ),
+    );
+  }
+
   Future<void> _selectProvider(
     BuildContext context,
     WidgetRef ref,
     CloudProviderType provider,
   ) async {
+    // Switching AWAY from a backend this device has synced with is a
+    // consequential, easy-to-misunderstand action (data is not migrated, peers
+    // do not follow automatically, the next sync combines with whatever lives
+    // on the new backend). Confirm first, and record the departure so the old
+    // backend is marked moved-from and armed for cleanup.
+    final current = ref.read(selectedCloudProviderTypeProvider);
+    final currentProvider = ref.read(cloudStorageProviderProvider);
+    final hasHistory = ref.read(syncStateProvider).lastSync != null;
+    if (current != null &&
+        current != provider &&
+        currentProvider != null &&
+        hasHistory) {
+      // Resolve the display name before the first await so context is not used
+      // across an async gap.
+      final toName = _providerDisplayName(context, provider);
+      final confirmed = await _confirmBackendSwitch(
+        context,
+        ref,
+        from: current,
+        to: provider,
+      );
+      if (confirmed != true) return;
+      await ref
+          .read(syncStateProvider.notifier)
+          .recordBackendDeparture(
+            oldProvider: currentProvider,
+            toProviderId: provider.name,
+            toProviderName: toName,
+          );
+      if (!context.mounted) return;
+    }
+
     // Set the provider first so cloudStorageProviderProvider returns the correct instance
     ref.read(selectedCloudProviderTypeProvider.notifier).state = provider;
 
@@ -346,23 +598,138 @@ class CloudSyncPage extends ConsumerWidget {
     }
   }
 
+  /// Display name for a provider type, for dialogs and banners.
+  String _providerDisplayName(BuildContext context, CloudProviderType type) {
+    final l10n = context.l10n;
+    switch (type) {
+      case CloudProviderType.icloud:
+        return l10n.settings_cloudSync_provider_icloud;
+      case CloudProviderType.googledrive:
+        return l10n.settings_cloudSync_provider_googleDrive;
+      case CloudProviderType.s3:
+        return l10n.settings_cloudSync_provider_s3_title;
+    }
+  }
+
+  /// Map a stored providerId back to a display name (for the cleanup banner,
+  /// which only has the id of the old backend).
+  String _providerDisplayNameForId(BuildContext context, String providerId) {
+    final type = CloudProviderType.values
+        .where((t) => t.name == providerId)
+        .firstOrNull;
+    return type == null ? providerId : _providerDisplayName(context, type);
+  }
+
+  Future<bool?> _confirmBackendSwitch(
+    BuildContext context,
+    WidgetRef ref, {
+    required CloudProviderType from,
+    required CloudProviderType to,
+  }) {
+    final l10n = context.l10n;
+    return showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.settings_cloudSync_switch_dialogTitle),
+        content: Text(
+          l10n.settings_cloudSync_switch_dialogContent(
+            _providerDisplayName(context, from),
+            _providerDisplayName(context, to),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(MaterialLocalizations.of(context).cancelButtonLabel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(l10n.settings_cloudSync_switch_confirm),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildSyncActions(
     BuildContext context,
     WidgetRef ref,
     SyncState syncState,
+    bool hasProvider,
   ) {
     final isSyncing = syncState.status == SyncStatus.syncing;
-    final hasProvider = ref.watch(selectedCloudProviderTypeProvider) != null;
 
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          if (syncState.replaceAwaitingAdoption)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: Card(
+                color: Theme.of(context).colorScheme.errorContainer,
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.restore_page_outlined,
+                        color: Theme.of(context).colorScheme.onErrorContainer,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          context.l10n.settings_cloudSync_replace_banner(
+                            syncState.replaceMarker?.displayName ?? '?',
+                          ),
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          if (syncState.firstSyncAwaitingConfirmation)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: Card(
+                color: Theme.of(context).colorScheme.tertiaryContainer,
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.info_outline,
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onTertiaryContainer,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          context.l10n.settings_cloudSync_firstSync_banner,
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          if (syncState.movedMarker != null)
+            _buildMovedBanner(context, ref, syncState.movedMarker!),
+          if (syncState.cleanupOldBackendProviderId != null)
+            _buildCleanupOfferBanner(
+              context,
+              ref,
+              syncState.cleanupOldBackendProviderId!,
+            ),
           FilledButton.icon(
             onPressed: isSyncing || !hasProvider
                 ? null
-                : () => ref.read(syncStateProvider.notifier).performSync(),
+                : () => _onSyncNowPressed(context, ref),
             icon: isSyncing
                 ? const ExcludeSemantics(
                     child: SizedBox(
@@ -387,6 +754,107 @@ class CloudSyncPage extends ConsumerWidget {
               ),
             ),
         ],
+      ),
+    );
+  }
+
+  /// Advisory banner shown to a straggler still pointed at a backend another
+  /// device moved away from. Informational + dismissible: the user follows the
+  /// move by selecting the destination provider tile themselves (a one-tap
+  /// switch is not offered because some destinations, e.g. S3, need config).
+  Widget _buildMovedBanner(
+    BuildContext context,
+    WidgetRef ref,
+    LibraryMovedMarker marker,
+  ) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Card(
+        color: theme.colorScheme.secondaryContainer,
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(
+                    Icons.drive_file_move_outline,
+                    color: theme.colorScheme.onSecondaryContainer,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      context.l10n.settings_cloudSync_moved_banner(
+                        marker.displayName,
+                        marker.toProviderDisplay,
+                      ),
+                      style: theme.textTheme.bodyMedium,
+                    ),
+                  ),
+                ],
+              ),
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  onPressed: () =>
+                      ref.read(syncStateProvider.notifier).acknowledgeMoved(),
+                  child: Text(context.l10n.settings_cloudSync_moved_dismiss),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Offer to delete the orphaned data left on a backend the user switched
+  /// away from, shown after the first successful sync on the new backend.
+  Widget _buildCleanupOfferBanner(
+    BuildContext context,
+    WidgetRef ref,
+    String oldProviderId,
+  ) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Card(
+        color: theme.colorScheme.surfaceContainerHighest,
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                context.l10n.settings_cloudSync_cleanup_banner(
+                  _providerDisplayNameForId(context, oldProviderId),
+                ),
+                style: theme.textTheme.bodyMedium,
+              ),
+              const SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: () => ref
+                        .read(syncStateProvider.notifier)
+                        .dismissOldBackendCleanup(),
+                    child: Text(context.l10n.settings_cloudSync_cleanup_keep),
+                  ),
+                  const SizedBox(width: 8),
+                  FilledButton(
+                    onPressed: () => ref
+                        .read(syncStateProvider.notifier)
+                        .cleanupOldBackendData(),
+                    child: Text(context.l10n.settings_cloudSync_cleanup_delete),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -494,6 +962,7 @@ class CloudSyncPage extends ConsumerWidget {
   }
 
   Widget _buildAdvancedSection(BuildContext context, WidgetRef ref) {
+    final isSyncing = ref.watch(syncStateProvider).status == SyncStatus.syncing;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -510,7 +979,8 @@ class CloudSyncPage extends ConsumerWidget {
           leading: const Icon(Icons.refresh),
           title: const Text('Reset Sync State'),
           subtitle: const Text('Clear sync history and start fresh'),
-          onTap: () => _confirmResetSyncState(context, ref),
+          enabled: !isSyncing,
+          onTap: isSyncing ? null : () => _confirmResetSyncState(context, ref),
         ),
         ListTile(
           leading: const Icon(Icons.logout),
@@ -522,6 +992,92 @@ class CloudSyncPage extends ConsumerWidget {
     );
   }
 
+  /// Run a sync, first handling the two gated cases: a replaced cloud
+  /// library awaiting adoption, and the device's first library-combining
+  /// contact with existing cloud data.
+  Future<void> _onSyncNowPressed(BuildContext context, WidgetRef ref) async {
+    final notifier = ref.read(syncStateProvider.notifier);
+    final replaceInfo = await notifier.libraryReplaceInfo();
+    if (replaceInfo != null) {
+      if (!context.mounted) return;
+      await _showAdoptDialog(context, ref, replaceInfo);
+      return;
+    }
+    final info = await notifier.firstSyncMergeInfo();
+    if (info == null) {
+      await notifier.performSync();
+      return;
+    }
+    if (!context.mounted) return;
+    final l10n = context.l10n;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.settings_cloudSync_firstSync_dialogTitle),
+        content: Text(
+          l10n.settings_cloudSync_firstSync_dialogContent(
+            info.peerFileCount,
+            info.localDiveCount,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(MaterialLocalizations.of(context).cancelButtonLabel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(l10n.settings_cloudSync_firstSync_dialogConfirm),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true) {
+      await notifier.performSync();
+    }
+  }
+
+  /// Confirm and run adoption of a replaced cloud library. The safety backup
+  /// runs here (not in SyncNotifier) because backup providers import sync
+  /// providers; the page is the layer that may import both.
+  Future<void> _showAdoptDialog(
+    BuildContext context,
+    WidgetRef ref,
+    LibraryEpochMarker marker,
+  ) async {
+    final l10n = context.l10n;
+    final date = marker.replacedAt > 0
+        ? DateFormat.yMMMd().add_jm().format(
+            DateTime.fromMillisecondsSinceEpoch(marker.replacedAt),
+          )
+        : '?';
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.settings_cloudSync_adopt_dialogTitle),
+        content: Text(
+          l10n.settings_cloudSync_adopt_dialogContent(marker.displayName, date),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(l10n.settings_cloudSync_adopt_notNow),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(l10n.settings_cloudSync_adopt_confirm),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    // Safety backup of this device's current data BEFORE it is overwritten.
+    // Marked automatic: it is system-initiated, like the pre-migration
+    // safety backups, so the history list labels it accordingly.
+    await ref.read(backupServiceProvider).performBackup(isAutomatic: true);
+    await ref.read(syncStateProvider.notifier).adoptReplacedLibrary();
+  }
+
   Future<void> _confirmResetSyncState(
     BuildContext context,
     WidgetRef ref,
@@ -531,9 +1087,9 @@ class CloudSyncPage extends ConsumerWidget {
       builder: (context) => AlertDialog(
         title: const Text('Reset Sync State?'),
         content: const Text(
-          'This will clear all sync history and start fresh. '
-          'Your data will not be deleted, but you may need to resolve '
-          'conflicts on the next sync.',
+          'This will clear sync history and give this device a new '
+          'sync identity. Your data is not deleted, and the record of '
+          'past deletions is kept so deleted items do not come back.',
         ),
         actions: [
           TextButton(
@@ -559,22 +1115,27 @@ class CloudSyncPage extends ConsumerWidget {
   }
 
   Future<void> _confirmSignOut(BuildContext context, WidgetRef ref) async {
+    // Cloud backup uploads ride on the sync provider; losing it changes
+    // where backups land, which the user must hear about before agreeing.
+    final backupWarning = ref.read(backupSettingsProvider).cloudBackupEnabled
+        ? '\n\n${context.l10n.settings_cloudSync_signOut_backupWarning}'
+        : '';
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Sign Out?'),
-        content: const Text(
-          'This will disconnect from the cloud provider. '
-          'Your local data will remain intact.',
+        title: Text(context.l10n.settings_cloudSync_signOutDialog_title),
+        content: Text(
+          '${context.l10n.settings_cloudSync_signOutDialog_content}'
+          '$backupWarning',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text(context.l10n.settings_cloudSync_signOutDialog_cancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Sign Out'),
+            child: Text(context.l10n.settings_cloudSync_signOutDialog_signOut),
           ),
         ],
       ),
@@ -582,6 +1143,7 @@ class CloudSyncPage extends ConsumerWidget {
 
     if (confirmed == true) {
       await ref.read(syncStateProvider.notifier).signOut();
+      await ref.read(backupSettingsProvider.notifier).disableCloudBackup();
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Signed out from cloud provider')),
