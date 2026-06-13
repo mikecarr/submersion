@@ -6,14 +6,18 @@
 
 *Own your dive log. Free and open-source, forever.*
 
-[![License: GPL-3.0](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
-[![Build macOS](https://img.shields.io/github/actions/workflow/status/submersion-app/submersion/ci.yaml?branch=main&label=macOS&logo=apple)](https://github.com/submersion-app/submersion/actions/workflows/ci.yaml)
-[![Build Windows](https://img.shields.io/github/actions/workflow/status/submersion-app/submersion/ci.yaml?branch=main&label=Windows&logo=windows)](https://github.com/submersion-app/submersion/actions/workflows/ci.yaml)
-[![Build Linux](https://img.shields.io/github/actions/workflow/status/submersion-app/submersion/ci.yaml?branch=main&label=Linux&logo=linux)](https://github.com/submersion-app/submersion/actions/workflows/ci.yaml)
-[![Build Android](https://img.shields.io/github/actions/workflow/status/submersion-app/submersion/ci.yaml?branch=main&label=Android&logo=android)](https://github.com/submersion-app/submersion/actions/workflows/ci.yaml)
-[![Build iOS](https://img.shields.io/github/actions/workflow/status/submersion-app/submersion/ci.yaml?branch=main&label=iOS&logo=apple)](https://github.com/submersion-app/submersion/actions/workflows/ci.yaml)
+**Download**
 
-[![Download macOS](https://img.shields.io/badge/Download-macOS-2ea44f?logo=apple)](https://github.com/submersion-app/submersion/releases) [![Download Windows](https://img.shields.io/badge/Download-Windows-2ea44f?logo=windows)](https://github.com/submersion-app/submersion/releases) [![Download Linux](https://img.shields.io/badge/Download-Linux-2ea44f?logo=linux)](https://github.com/submersion-app/submersion/releases) [![Download Android](https://img.shields.io/badge/Download-Android-2ea44f?logo=android)](https://github.com/submersion-app/submersion/releases) [![Download iOS](https://img.shields.io/badge/Download-iOS-2ea44f?logo=apple)](https://apps.apple.com/us/app/submersion-dive-log/id6757456915)
+[![macOS](https://img.shields.io/badge/macOS-2ea44f?logo=apple&logoColor=white&style=for-the-badge)](https://github.com/submersion-app/submersion/releases)
+[![Windows](https://img.shields.io/badge/Windows-2ea44f?logo=windows&logoColor=white&style=for-the-badge)](https://github.com/submersion-app/submersion/releases)
+[![Linux](https://img.shields.io/badge/Linux-2ea44f?logo=linux&logoColor=white&style=for-the-badge)](https://github.com/submersion-app/submersion/releases)
+[![Android](https://img.shields.io/badge/Android-2ea44f?logo=android&logoColor=white&style=for-the-badge)](https://github.com/submersion-app/submersion/releases)
+[![iOS](https://img.shields.io/badge/iOS-2ea44f?logo=apple&logoColor=white&style=for-the-badge)](https://apps.apple.com/us/app/submersion-dive-log/id6757456915)
+
+<sub>License &amp; build status</sub>
+
+[![License: GPL-3.0](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
+[![CI](https://img.shields.io/github/actions/workflow/status/submersion-app/submersion/ci.yaml?branch=main&label=CI&logo=githubactions&logoColor=white)](https://github.com/submersion-app/submersion/actions/workflows/ci.yaml)
 
 <img src="docs/assets/screenshots/readme/hero.png" alt="Submersion on macOS and iOS" width="900">
 
