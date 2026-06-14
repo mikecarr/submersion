@@ -3,7 +3,7 @@ import 'dart:typed_data';
 import 'package:submersion/core/services/cloud_storage/cloud_storage_provider.dart';
 
 /// In-memory CloudStorageProvider for deterministic sync tests. Keys are
-/// "<folderId>/<filename>". A monotonic counter stands in for modified time so
+/// `<folderId>/<filename>`. A monotonic counter stands in for modified time so
 /// tests never depend on the wall clock. Optionally simulates list lag (a
 /// just-written file invisible to listFiles for N calls) to exercise the
 /// eventual-consistency / transient-missing paths in later phases.

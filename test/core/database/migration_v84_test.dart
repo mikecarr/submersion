@@ -27,12 +27,12 @@ void main() {
       await db
           .into(db.syncPeerCursors)
           .insert(
-            SyncPeerCursorsCompanion(
-              peerDeviceId: const Value('peer-1'),
-              provider: const Value('s3'),
-              baseSeqApplied: const Value(12),
-              lastSeqApplied: const Value(20),
-              updatedAt: const Value(111),
+            const SyncPeerCursorsCompanion(
+              peerDeviceId: Value('peer-1'),
+              provider: Value('s3'),
+              baseSeqApplied: Value(12),
+              lastSeqApplied: Value(20),
+              updatedAt: Value(111),
             ),
           );
       final row =
@@ -55,9 +55,9 @@ void main() {
       await db
           .into(db.localPublishStates)
           .insert(
-            LocalPublishStatesCompanion(
-              provider: const Value('s3'),
-              updatedAt: const Value(1),
+            const LocalPublishStatesCompanion(
+              provider: Value('s3'),
+              updatedAt: Value(1),
             ),
           );
       final row = await (db.select(

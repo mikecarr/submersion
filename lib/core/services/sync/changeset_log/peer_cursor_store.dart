@@ -1,6 +1,6 @@
 import 'package:drift/drift.dart';
 
-import '../../../database/database.dart';
+import 'package:submersion/core/database/database.dart';
 
 /// Reads and writes per-peer download cursors (one row per peer x provider):
 /// how far this device has consumed each peer's changeset log.

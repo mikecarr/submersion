@@ -20,13 +20,13 @@ void main() {
 
   test('upsert round-trips and overwrites', () async {
     await store.upsert(
-      LocalPublishStatesCompanion(
-        provider: const Value('s3'),
-        baseSeq: const Value(10),
-        headSeq: const Value(12),
-        publishedHlcHigh: const Value('000000000000100:000000:dev'),
-        changesetBytesSinceBase: const Value(2048),
-        updatedAt: const Value(1),
+      const LocalPublishStatesCompanion(
+        provider: Value('s3'),
+        baseSeq: Value(10),
+        headSeq: Value(12),
+        publishedHlcHigh: Value('000000000000100:000000:dev'),
+        changesetBytesSinceBase: Value(2048),
+        updatedAt: Value(1),
       ),
     );
     var s = await store.get('s3');
@@ -34,10 +34,10 @@ void main() {
     expect(s.publishedHlcHigh, '000000000000100:000000:dev');
 
     await store.upsert(
-      LocalPublishStatesCompanion(
-        provider: const Value('s3'),
-        headSeq: const Value(15),
-        updatedAt: const Value(2),
+      const LocalPublishStatesCompanion(
+        provider: Value('s3'),
+        headSeq: Value(15),
+        updatedAt: Value(2),
       ),
     );
     s = await store.get('s3');
@@ -46,15 +46,15 @@ void main() {
 
   test('resetForProvider clears only that provider', () async {
     await store.upsert(
-      LocalPublishStatesCompanion(
-        provider: const Value('s3'),
-        updatedAt: const Value(1),
+      const LocalPublishStatesCompanion(
+        provider: Value('s3'),
+        updatedAt: Value(1),
       ),
     );
     await store.upsert(
-      LocalPublishStatesCompanion(
-        provider: const Value('icloud'),
-        updatedAt: const Value(1),
+      const LocalPublishStatesCompanion(
+        provider: Value('icloud'),
+        updatedAt: Value(1),
       ),
     );
     await store.resetForProvider('s3');

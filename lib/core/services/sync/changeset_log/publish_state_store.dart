@@ -1,6 +1,4 @@
-import 'package:drift/drift.dart';
-
-import '../../../database/database.dart';
+import 'package:submersion/core/database/database.dart';
 
 /// Reads and writes this device's per-provider publish position (the upload
 /// side of sync state; per-peer cursors are the download side).
