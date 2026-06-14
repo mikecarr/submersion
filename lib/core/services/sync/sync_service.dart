@@ -515,7 +515,6 @@ class SyncService {
         'export local data',
         () => _serializer.exportData(
           deviceId: deviceId,
-          since: null, // Full export for now
           lastSyncTimestamp: lastSyncTime?.millisecondsSinceEpoch,
           deletions: deletions,
           uploadNonce: uploadNonce,
@@ -1619,7 +1618,6 @@ class SyncService {
       final uploadNonce = _uuid.v4();
       final localPayload = await _serializer.exportData(
         deviceId: deviceId,
-        since: null,
         lastSyncTimestamp: null,
         deletions: deletions,
         uploadNonce: uploadNonce,
@@ -1720,7 +1718,6 @@ class SyncService {
       final deviceId = await _syncRepository.getDeviceId();
       final localSnapshot = await _serializer.exportData(
         deviceId: deviceId,
-        since: null,
         lastSyncTimestamp: null,
         deletions: const [],
         uploadNonce: null,
