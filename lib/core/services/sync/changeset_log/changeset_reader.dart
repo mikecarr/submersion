@@ -1,0 +1,132 @@
+import 'dart:typed_data';
+
+import 'package:submersion/core/services/cloud_storage/cloud_storage_provider.dart';
+import 'package:submersion/core/services/sync/sync_data_serializer.dart';
+import 'package:submersion/core/services/sync/changeset_log/changeset_codec.dart';
+import 'package:submersion/core/services/sync/changeset_log/changeset_log_layout.dart';
+import 'package:submersion/core/services/sync/changeset_log/peer_cursor_store.dart';
+import 'package:submersion/core/services/sync/changeset_log/sync_manifest.dart';
+
+/// Applies one decoded payload (base or changeset). The real implementation is
+/// SyncService._applyRemotePayload (HLC LWW + tombstones + FK repair), injected
+/// so the merge stays the single source of truth.
+typedef ApplyPayload = Future<void> Function(SyncPayload payload);
+
+class ChangesetReadResult {
+  const ChangesetReadResult({
+    required this.peersProcessed,
+    required this.payloadsApplied,
+  });
+  final int peersProcessed;
+  final int payloadsApplied;
+}
+
+/// Consumes peers' changeset logs: discovers peers, decides per-peer what to
+/// fetch against [PeerCursorStore], applies in seq order via [ApplyPayload],
+/// and advances the cursor. Stops at the first missing file (transient gap)
+/// and retries next sync; application is idempotent so re-reads are safe.
+class ChangesetReader {
+  ChangesetReader(this._codec, this._peerCursors);
+
+  final ChangesetCodec _codec;
+  final PeerCursorStore _peerCursors;
+
+  Future<ChangesetReadResult> pull({
+    required CloudStorageProvider provider,
+    required String selfDeviceId,
+    required String folderId,
+    required ApplyPayload apply,
+  }) async {
+    final providerId = provider.providerId;
+    final files = await provider.listFiles(
+      folderId: folderId,
+      namePattern: ChangesetLogLayout.prefix,
+    );
+    final byName = {for (final f in files) f.name: f};
+    final peerIds = ChangesetLogLayout.peerDeviceIds(
+      files.map((f) => f.name),
+      selfDeviceId,
+    );
+
+    var peersProcessed = 0;
+    var payloadsApplied = 0;
+
+    for (final peerId in peerIds) {
+      try {
+        final manifestFile = byName[ChangesetLogLayout.manifestName(peerId)];
+        if (manifestFile == null) continue; // files but no manifest yet
+        final manifest = SyncManifest.fromBytes(
+          await provider.downloadFile(manifestFile.id),
+        );
+        peersProcessed++;
+
+        final cursor = await _peerCursors.get(peerId, providerId);
+        final lastApplied = cursor?.lastSeqApplied ?? 0;
+        if (lastApplied >= manifest.headSeq) continue; // up to date
+
+        var appliedThrough = lastApplied;
+        var baseSeqApplied = cursor?.baseSeqApplied;
+
+        // Cold-start, or lapped by the peer's compaction: adopt the base.
+        final baseSeq = manifest.baseSeq;
+        if (baseSeq != null && lastApplied < baseSeq) {
+          final base = await _fetchBase(provider, peerId, manifest, byName);
+          if (base == null) continue; // missing part -> transient, retry later
+          await apply(base);
+          payloadsApplied++;
+          appliedThrough = baseSeq;
+          baseSeqApplied = baseSeq;
+        }
+
+        // Changesets (appliedThrough+1 .. headSeq], stopping at the first gap.
+        for (var seq = appliedThrough + 1; seq <= manifest.headSeq; seq++) {
+          final csFile = byName[ChangesetLogLayout.changesetName(peerId, seq)];
+          if (csFile == null) break; // gap -> apply what we have, retry later
+          final cs = _codec.decodeChangeset(
+            await provider.downloadFile(csFile.id),
+          );
+          await apply(cs);
+          payloadsApplied++;
+          appliedThrough = seq;
+        }
+
+        // Advance only forward, after applying, so an interrupted apply
+        // re-pulls next time rather than skipping a seq.
+        if (appliedThrough > lastApplied) {
+          await _peerCursors.upsert(
+            peerDeviceId: peerId,
+            provider: providerId,
+            baseSeqApplied: baseSeqApplied,
+            lastSeqApplied: appliedThrough,
+          );
+        }
+      } catch (_) {
+        // One bad peer must not block the others; its cursor stays put so the
+        // next sync retries it.
+        continue;
+      }
+    }
+
+    return ChangesetReadResult(
+      peersProcessed: peersProcessed,
+      payloadsApplied: payloadsApplied,
+    );
+  }
+
+  Future<SyncPayload?> _fetchBase(
+    CloudStorageProvider provider,
+    String peerId,
+    SyncManifest manifest,
+    Map<String, CloudFileInfo> byName,
+  ) async {
+    final count = manifest.basePartCount ?? 0;
+    final baseSeq = manifest.baseSeq!;
+    final parts = <Uint8List>[];
+    for (var i = 0; i < count; i++) {
+      final pf = byName[ChangesetLogLayout.basePartName(peerId, baseSeq, i)];
+      if (pf == null) return null;
+      parts.add(await provider.downloadFile(pf.id));
+    }
+    return _codec.decodeBaseParts(parts);
+  }
+}
