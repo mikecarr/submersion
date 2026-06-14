@@ -105,6 +105,18 @@ class SyncPayload {
   /// Null on legacy files, which become stale the moment any epoch exists.
   final String? epochId;
 
+  /// Changeset sequence number (null for a base/full payload).
+  final int? seq;
+
+  /// The base seq this changeset layers on (optional bookkeeping).
+  final int? baseSeq;
+
+  /// HLC watermark this delta starts after (null = full export).
+  final String? sinceHlc;
+
+  /// HLC watermark this delta advances to (== publishedHlcHigh after apply).
+  final String? toHlc;
+
   const SyncPayload({
     required this.version,
     required this.exportedAt,
@@ -116,6 +128,10 @@ class SyncPayload {
     this.rawDataJson,
     this.uploadNonce,
     this.epochId,
+    this.seq,
+    this.baseSeq,
+    this.sinceHlc,
+    this.toHlc,
   });
 
   Map<String, dynamic> toJson() => {
@@ -130,6 +146,10 @@ class SyncPayload {
     ),
     'uploadNonce': uploadNonce,
     'epochId': epochId,
+    'seq': seq,
+    'baseSeq': baseSeq,
+    'sinceHlc': sinceHlc,
+    'toHlc': toHlc,
   };
 
   factory SyncPayload.fromJson(Map<String, dynamic> json) {
@@ -145,6 +165,10 @@ class SyncPayload {
       rawDataJson: jsonEncode(json['data']),
       uploadNonce: json['uploadNonce'] as String?,
       epochId: json['epochId'] as String?,
+      seq: json['seq'] as int?,
+      baseSeq: json['baseSeq'] as int?,
+      sinceHlc: json['sinceHlc'] as String?,
+      toHlc: json['toHlc'] as String?,
       deletions: rawDeletions.map((key, value) {
         final list = value as List? ?? [];
         final deletions = list
