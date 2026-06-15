@@ -21,7 +21,7 @@ void main() {
     'a corrupt changeset is not applied and the cursor stays below it',
     () async {
       await setUpTestDatabase();
-      addTearDown(() => DatabaseService.instance.resetForTesting());
+      addTearDown(() => tearDownTestDatabase());
       final db = DatabaseService.instance.database;
       final serializer = SyncDataSerializer();
       final codec = ChangesetCodec(serializer);
@@ -100,7 +100,7 @@ void main() {
 
   test('a base part failing the manifest checksum is not applied', () async {
     await setUpTestDatabase();
-    addTearDown(() => DatabaseService.instance.resetForTesting());
+    addTearDown(() => tearDownTestDatabase());
     final db = DatabaseService.instance.database;
     final serializer = SyncDataSerializer();
     final codec = ChangesetCodec(serializer);

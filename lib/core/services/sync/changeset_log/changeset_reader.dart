@@ -155,7 +155,10 @@ class ChangesetReader {
     final full = BaseChunker.reassemble(parts);
     final whole = manifest.baseChecksum;
     if (whole != null && BaseChunker.checksum(full) != whole) {
-      return null; // reassembled base fails the manifest checksum -> retry
+      // The writer checksums the exact bytes it slices into parts, so a
+      // mismatch here is real transport corruption (not a serialization
+      // divergence): drop the base and retry on the next sync.
+      return null;
     }
     return _codec.decodeChangeset(full);
   }

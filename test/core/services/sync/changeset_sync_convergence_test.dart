@@ -28,7 +28,7 @@ void main() {
     );
     final ra = await svc.performSync();
     expect(ra.status, SyncResultStatus.success);
-    DatabaseService.instance.resetForTesting();
+    await tearDownTestDatabase();
 
     // --- Device B: fresh DB, same cloud; sync should pull A's dive in ---
     await setUpTestDatabase();
@@ -48,5 +48,6 @@ void main() {
       isNotNull,
       reason: "device B must receive device A's dive via changeset sync",
     );
+    await tearDownTestDatabase();
   });
 }

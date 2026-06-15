@@ -41,7 +41,7 @@ void main() {
     folder = await provider.getOrCreateSyncFolder();
     applied.clear();
   });
-  tearDown(() => DatabaseService.instance.resetForTesting());
+  tearDown(() => tearDownTestDatabase());
 
   Future<void> spyApply(SyncPayload p) async => applied.add(p);
 

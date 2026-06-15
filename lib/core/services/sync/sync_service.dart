@@ -357,6 +357,13 @@ class SyncService {
         final db = DatabaseService.instance.database;
         await PeerCursorStore(db).resetForProvider(provider.providerId);
         await PublishStateStore(db).resetForProvider(provider.providerId);
+        // NOTE: deliberately do NOT clear the deletion log here. This detector
+        // is a coarse backstop that also fires when the user legitimately
+        // deletes their last HLC-bearing row (local max HLC drops below the
+        // published watermark with no actual restore). Wiping tombstones then
+        // would let a peer's stale live copy resurrect a just-deleted record.
+        // Stale-tombstone safety is already handled by the merge's deletedAt-vs-
+        // updatedAt LWW, so no clear is needed (or safe) here.
       }
 
       // ---- Download: pull peers, applying through the existing merge ----

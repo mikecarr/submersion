@@ -692,6 +692,16 @@ class SyncRepository {
       final id = _uuid.v4();
       final now = deletedAt ?? DateTime.now().millisecondsSinceEpoch;
 
+      // Stamp a monotonic HLC so the changeset writer can publish only NEW
+      // tombstones (filtered by hlc > publishedHlcHigh) instead of re-sending
+      // the whole deletion log every sync. Deliberately NOT gated on
+      // _hlcTargets: write-once child deletions (diveTanks, diveProfileEvents,
+      // ...) have no row hlc but their tombstones still need one. Configure the
+      // clock first -- deletes routinely fire outside a sync. A null hlc (clock
+      // unconfigurable) still rides every full base, so no tombstone is lost.
+      await ensureSyncClockConfigured();
+      final hlc = SyncClock.instance.issue();
+
       await _db
           .into(_db.deletionLog)
           .insert(
@@ -700,6 +710,7 @@ class SyncRepository {
               entityType: Value(entityType),
               recordId: Value(recordId),
               deletedAt: Value(now),
+              hlc: Value(hlc),
             ),
           );
 

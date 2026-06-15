@@ -1,6 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:submersion/core/data/repositories/sync_repository.dart';
-import 'package:submersion/core/services/database_service.dart';
 import 'package:submersion/core/services/sync/sync_data_serializer.dart';
 import 'package:submersion/core/services/sync/changeset_log/changeset_codec.dart';
 
@@ -15,7 +14,7 @@ void main() {
     serializer = SyncDataSerializer();
     codec = ChangesetCodec(serializer);
   });
-  tearDown(() => DatabaseService.instance.resetForTesting());
+  tearDown(() => tearDownTestDatabase());
 
   test('changeset encode -> decode round-trips the payload', () async {
     final deviceId = await SyncRepository().getDeviceId();

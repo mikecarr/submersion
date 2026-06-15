@@ -31,7 +31,7 @@ void main() {
     provider = FakeCloudStorageProvider();
     folder = await provider.getOrCreateSyncFolder();
   });
-  tearDown(() => DatabaseService.instance.resetForTesting());
+  tearDown(() => tearDownTestDatabase());
 
   Future<void> publish() async {
     final deviceId = await SyncRepository().getDeviceId();

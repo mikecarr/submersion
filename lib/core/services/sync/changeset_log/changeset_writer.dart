@@ -79,7 +79,11 @@ class ChangesetWriter {
 
     if (!hasBase) {
       final fullBytes = _codec.encodeChangeset(payload);
-      final parts = _codec.encodeBaseParts(payload);
+      // Slice the SAME bytes we checksum (serialize once): the base parts and
+      // baseChecksum are then guaranteed consistent, so a reader's whole-base
+      // checksum can only fail on real transport corruption, never on a
+      // re-serialization divergence.
+      final parts = BaseChunker.slice(fullBytes);
       for (var i = 0; i < parts.length; i++) {
         await provider.uploadFile(
           parts[i],
@@ -222,9 +226,12 @@ class ChangesetWriter {
   int _max(int a, int b) => a > b ? a : b;
 
   /// Rewrite a fresh full base at [afterSeq] + 1, repoint the manifest, reset
-  /// publish state, and prune superseded files. Pruning is inline: the reader
-  /// cold-starts from the new base if it was mid-fetch, so this is correct
-  /// without a grace window (a time-based grace is a future optimization).
+  /// publish state, and prune superseded files. Pruning is inline with no grace
+  /// window: this intentionally diverges from the spec's 14-day grace, which
+  /// only existed to spare an in-flight reader a re-fetch. It is safe because a
+  /// reader mid-fetch of now-pruned files cold-starts from the new base (their
+  /// superset) on the next sync -- self-healing, with no data loss. A time-based
+  /// grace remains a possible future optimization to avoid that single re-fetch.
   Future<int> _compact({
     required CloudStorageProvider provider,
     required String deviceId,
@@ -247,7 +254,8 @@ class ChangesetWriter {
       uploadNonce: uploadNonce,
     );
     final fullBytes = _codec.encodeChangeset(full);
-    final parts = _codec.encodeBaseParts(full);
+    // Slice the same bytes we checksum (serialize once) -- see publish().
+    final parts = BaseChunker.slice(fullBytes);
     final compSeq = afterSeq + 1;
     for (var i = 0; i < parts.length; i++) {
       await provider.uploadFile(

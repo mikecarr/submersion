@@ -355,15 +355,17 @@ files). Process:
    point) → `baseSeq = newBaseSeq`.
 4. Reset `baseBytes`, `changesetBytesSinceBase = 0`.
 5. **Reconcile-delete** superseded files (old `base-*`; `cs-(oldBaseSeq+1 …
-   newBaseSeq]`) after a **grace window** (default 14 days). They are redundant
-   the instant the new base lands (the base is their superset); the grace is
-   only so an in-flight reader that already began fetching old changesets can
-   finish.
+   newBaseSeq]`). **As implemented, this prune is immediate (no grace window).**
+   The superseded files are redundant the instant the new base lands (the base
+   is their superset), so an in-flight reader that was mid-fetch of a now-pruned
+   file simply cold-starts from the new base on its next sync -- self-healing,
+   with no data loss. A time-based **grace window** (the original 14-day default)
+   would only spare that reader a single re-fetch; it is deferred as a future
+   optimization rather than a correctness requirement.
 
 Crash safety follows from manifest-last + reconcile-delete: interrupted part
 uploads are unreferenced and invisible; cleanup is an idempotent sweep ("delete
-my own `base`<`baseSeq` and `cs`≤`baseSeq` older than the grace window") that any
-later sync re-runs.
+my own `base`<`baseSeq` and `cs`≤`baseSeq`") that any later sync re-runs.
 
 Expected frequency for the target heavy user: roughly once or twice a year
 (active daily-syncing diver) down to rarely (casual user). Each compaction is a
@@ -540,5 +542,8 @@ it; nothing here builds it.
   former's documented "restore predating anchors → manual Reset Sync State" blind
   spot. Implementation must confirm the two compose and add a test that restores
   a pre-anchor backup and asserts automatic recovery (no manual reset).
-- Default grace window (14 days) and part size (~8 MB): approved as starting
-  defaults; tune against real backend latency/rate limits if needed.
+- Part size (~8 MB): approved as a starting default; tune against real backend
+  latency/rate limits if needed. The prune grace window (originally a 14-day
+  default) is deferred: compaction prunes superseded files immediately because a
+  mid-fetch reader self-heals by cold-starting from the new base (see section
+  10, step 5).

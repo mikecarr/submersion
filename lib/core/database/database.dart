@@ -1363,6 +1363,12 @@ class DeletionLog extends Table {
   TextColumn get entityType => text()(); // Which table the record was in
   TextColumn get recordId => text()(); // Primary key of deleted record
   IntColumn get deletedAt => integer()(); // Unix timestamp of deletion
+  // Monotonic HLC stamped at deletion time (local filter metadata only, not on
+  // the wire). Lets an incremental changeset carry only tombstones newer than
+  // the published watermark instead of re-sending the whole log every sync.
+  // Nullable: legacy rows predate the column and a pre-clock-config delete can
+  // leave it null; both are handled as "always include in a base".
+  TextColumn get hlc => text().nullable()();
 
   @override
   Set<Column> get primaryKey => {id};
@@ -1606,7 +1612,7 @@ class AppDatabase extends _$AppDatabase {
 
   /// The current schema version as a static constant so that pre-open checks
   /// (e.g. version-mismatch guard) can reference it without an instance.
-  static const int currentSchemaVersion = 85;
+  static const int currentSchemaVersion = 86;
 
   /// Every schema version that has a migration block in onUpgrade.
   /// Used to calculate progress step counts. When adding a new migration,
@@ -1695,6 +1701,7 @@ class AppDatabase extends _$AppDatabase {
     83,
     84,
     85,
+    86,
   ];
 
   /// Tables that carry a per-row Hybrid Logical Clock for cross-device conflict
@@ -4048,6 +4055,9 @@ class AppDatabase extends _$AppDatabase {
         if (from < 85) {
           // media, species, field_presets become first-class HLC entities so
           // they delta by their own hlc instead of being exported in full.
+          // Table/column identifiers cannot be SQL-parameterized; these names
+          // are a fixed compile-time const list (no user input), so the string
+          // interpolation below is injection-safe.
           for (final table in const ['media', 'species', 'field_presets']) {
             final cols = await customSelect(
               "PRAGMA table_info('$table')",
@@ -4059,6 +4069,30 @@ class AppDatabase extends _$AppDatabase {
           }
         }
         if (from < 85) await reportProgress();
+        if (from < 86) {
+          // Deletions become HLC-versioned like rows: logDeletion now stamps a
+          // monotonic hlc so an incremental changeset can carry only NEW
+          // tombstones instead of re-publishing the whole deletion log every
+          // sync. Backfill pre-existing tombstones with a minimal sentinel so
+          // they read as already-published (excluded from incrementals) while
+          // still riding every full base -- no re-publish, no resurrection.
+          final cols = await customSelect(
+            "PRAGMA table_info('deletion_log')",
+          ).get();
+          if (cols.isNotEmpty) {
+            final existing = cols.map((c) => c.read<String>('name')).toSet();
+            if (!existing.contains('hlc')) {
+              await customStatement(
+                'ALTER TABLE deletion_log ADD COLUMN hlc TEXT',
+              );
+            }
+            await customStatement(
+              "UPDATE deletion_log SET hlc = '000000000000000:000000:legacy' "
+              'WHERE hlc IS NULL',
+            );
+          }
+        }
+        if (from < 86) await reportProgress();
       },
       beforeOpen: (details) async {
         // Enable foreign keys

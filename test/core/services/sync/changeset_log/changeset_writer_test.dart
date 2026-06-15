@@ -32,7 +32,7 @@ void main() {
     provider = FakeCloudStorageProvider();
     folder = await provider.getOrCreateSyncFolder();
   });
-  tearDown(() => DatabaseService.instance.resetForTesting());
+  tearDown(() => tearDownTestDatabase());
 
   Future<ChangesetWriteResult> publish() async {
     final deviceId = await SyncRepository().getDeviceId();
@@ -202,6 +202,41 @@ void main() {
         result.seq,
         3,
         reason: 'seq must continue from the cloud manifest, not reset to 1',
+      );
+    },
+  );
+
+  test(
+    'a deletion publishes once as a changeset, then the next sync no-ops',
+    () async {
+      await DiveRepository().createDive(
+        createTestDiveWithBottomTime(id: 'd1', diveNumber: 1),
+      );
+      await publish(); // base @1; publishedHlcHigh = d1's hlc
+
+      await DiveRepository().deleteDive(
+        'd1',
+      ); // tombstone stamped with a fresh hlc
+      final r1 = await publish();
+      expect(
+        r1.kind,
+        ChangesetWriteKind.changeset,
+        reason: 'a new tombstone (hlc > watermark) publishes once',
+      );
+
+      final before = (await names()).length;
+      final r2 = await publish();
+      expect(
+        r2.kind,
+        ChangesetWriteKind.noop,
+        reason:
+            'the tombstone is now <= the published watermark, so it must NOT '
+            're-publish a fresh changeset on every subsequent sync (B1)',
+      );
+      expect(
+        (await names()).length,
+        before,
+        reason: 'a no-op writes no new file',
       );
     },
   );

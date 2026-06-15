@@ -385,11 +385,14 @@ class SyncDataSerializer {
     }
   }
 
-  /// Export all data modified since the given timestamp
+  /// Full export of the entire library, used by the restore/adopt (Replace
+  /// mode) path that re-materializes everything.
   ///
-  /// If [since] is null, exports all data.
-  /// Full export of all data (the base snapshot). For an incremental delta use
-  /// [exportChangeset]. The base is always full: there is no partial `since`.
+  /// This is NOT the changeset-log base publisher: a changeset-log base is
+  /// published via [exportChangeset] with a null `hlcWatermark` -- that yields
+  /// the same full snapshot but carries the changeset header fields (seq,
+  /// sinceHlc, toHlc) the transport needs. Use [exportChangeset] for an
+  /// incremental delta (non-null watermark).
   Future<SyncPayload> exportData({
     required String deviceId,
     int? lastSyncTimestamp,
@@ -434,6 +437,17 @@ class SyncDataSerializer {
     String? epochId,
   }) async {
     final data = await _buildSyncData(hlcWatermark);
+    // A base (null watermark) carries the FULL deletion log so a cold-start
+    // reader can never miss a tombstone. An incremental changeset carries only
+    // tombstones newer than the watermark; a null/legacy hlc is always included
+    // (safety net), and since it is also in every base this can never drop one.
+    // Comparison is String.compareTo on the canonical zero-padded HLC form,
+    // matching _maxHlcInData and the row-level isBiggerThanValue data filter.
+    final includedDeletions = hlcWatermark == null
+        ? deletions
+        : deletions
+              .where((d) => d.hlc == null || d.hlc!.compareTo(hlcWatermark) > 0)
+              .toList();
     final dataJson = jsonEncode(data.toJson());
     return SyncPayload(
       version: syncFormatVersion,
@@ -441,10 +455,18 @@ class SyncDataSerializer {
       deviceId: deviceId,
       checksum: _computeChecksum(dataJson),
       data: data,
-      deletions: _groupDeletions(deletions),
+      deletions: _groupDeletions(includedDeletions),
       seq: seq,
       sinceHlc: hlcWatermark,
-      toHlc: _maxHlcInData(data) ?? hlcWatermark,
+      // Advance past BOTH data rows and included deletions so a deletion-only
+      // changeset still lifts publishedHlcHigh -- otherwise the same tombstone
+      // would re-publish on every sync. Keep the watermark as a floor so it can
+      // never regress.
+      toHlc: _maxHlc([
+        _maxHlcInData(data),
+        ...includedDeletions.map((d) => d.hlc),
+        hlcWatermark,
+      ]),
       uploadNonce: uploadNonce,
       epochId: epochId,
     );
@@ -477,6 +499,18 @@ class SyncDataSerializer {
           if (maxHlc == null || h.compareTo(maxHlc) > 0) maxHlc = h;
         }
       }
+    }
+    return maxHlc;
+  }
+
+  /// The greatest of several nullable HLC strings (nulls skipped), or null when
+  /// all are null. Uses String.compareTo on the canonical zero-padded form,
+  /// consistent with [_maxHlcInData] and the row-level hlc filter.
+  String? _maxHlc(Iterable<String?> hlcs) {
+    String? maxHlc;
+    for (final h in hlcs) {
+      if (h == null) continue;
+      if (maxHlc == null || h.compareTo(maxHlc) > 0) maxHlc = h;
     }
     return maxHlc;
   }

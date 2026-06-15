@@ -13,8 +13,8 @@ void main() {
   setUp(() async {
     await setUpTestDatabase();
   });
-  tearDown(() {
-    DatabaseService.instance.resetForTesting();
+  tearDown(() async {
+    await tearDownTestDatabase();
   });
 
   test(
