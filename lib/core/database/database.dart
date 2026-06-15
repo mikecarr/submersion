@@ -44,6 +44,12 @@ class Divers extends Table {
   /// (nullable: rows written before HLC rollout fall back to updatedAt).
   TextColumn get hlc => text().nullable()();
 
+  // Prior dive experience (issue #331): per-diver lifetime offsets for dives
+  // logged before the diver started using Submersion. Null = none.
+  IntColumn get priorDiveCount => integer().nullable()();
+  IntColumn get priorDiveTimeSeconds => integer().nullable()();
+  IntColumn get divingSince => integer().nullable()(); // Unix ms timestamp
+
   @override
   Set<Column> get primaryKey => {id};
 }
@@ -1567,7 +1573,7 @@ class AppDatabase extends _$AppDatabase {
 
   /// The current schema version as a static constant so that pre-open checks
   /// (e.g. version-mismatch guard) can reference it without an instance.
-  static const int currentSchemaVersion = 83;
+  static const int currentSchemaVersion = 84;
 
   /// Every schema version that has a migration block in onUpgrade.
   /// Used to calculate progress step counts. When adding a new migration,
@@ -1654,6 +1660,7 @@ class AppDatabase extends _$AppDatabase {
     81,
     82,
     83,
+    84,
   ];
 
   /// Tables that carry a per-row Hybrid Logical Clock for cross-device conflict
@@ -3974,6 +3981,31 @@ class AppDatabase extends _$AppDatabase {
           }
         }
         if (from < 83) await reportProgress();
+        if (from < 84) {
+          // Prior dive experience (issue #331): three nullable columns on
+          // `divers`. PRAGMA-guarded so a healthy database no-ops; existing
+          // rows read as NULL = "no prior experience".
+          final cols = await customSelect("PRAGMA table_info('divers')").get();
+          if (cols.isNotEmpty) {
+            final existing = cols.map((c) => c.read<String>('name')).toSet();
+            if (!existing.contains('prior_dive_count')) {
+              await customStatement(
+                'ALTER TABLE divers ADD COLUMN prior_dive_count INTEGER',
+              );
+            }
+            if (!existing.contains('prior_dive_time_seconds')) {
+              await customStatement(
+                'ALTER TABLE divers ADD COLUMN prior_dive_time_seconds INTEGER',
+              );
+            }
+            if (!existing.contains('diving_since')) {
+              await customStatement(
+                'ALTER TABLE divers ADD COLUMN diving_since INTEGER',
+              );
+            }
+          }
+        }
+        if (from < 84) await reportProgress();
       },
       beforeOpen: (details) async {
         // Enable foreign keys
