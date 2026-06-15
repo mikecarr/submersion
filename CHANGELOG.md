@@ -3,6 +3,171 @@
 All notable changes to Submersion are documented in this file.
 
 
+## 1.5.0 (2026-06-15)
+
+### Features
+
+- surface post-restore notice and replaced-library adopt at the app root
+- expose a root navigator key for app-wide dialogs
+- detect a replaced library on launch regardless of auto-sync toggles
+- post-restore sync notice + replace review action in all locales
+- arm the post-restore sync intent on a Merge restore
+- Reset Sync State clears the established anchor and post-restore intent
+- force a gate-bypassing sync after a Merge restore
+- anchor the provider and clear the post-restore intent on sync success
+- add SyncState.postRestoreSyncing flag
+- expose post-restore intent and established-provider store providers
+- add EstablishedProviderStore anchor (survives restore)
+- add PostRestoreSyncStore for the Merge-restore sync intent
+- show combined career totals with logged+prior breakdown (#331)
+- add prior-experience entry to diver edit form (#331)
+- add prior-experience strings in all locales (#331)
+- add pure CareerTotals combine logic (#331)
+- persist prior-experience fields in diver repository (#331)
+- add prior-experience fields to Diver entity (#331)
+- add prior dive experience columns to divers (v84, #331)
+- translate Surface GPS + gas-timeline strings into all locales
+- complete the changeset cutover (replace/adopt + peer discovery)
+- cut performSync over to the changeset transport (steady-state)
+- epoch-filter the changeset reader
+- integrate changeset transport into SyncService.performChangesetSync
+- add stale-restore detector (HLC-vs-cloud-manifest backstop)
+- verify changeset/base checksums on read
+- add changeset-log compaction (threshold + base rewrite + inline prune)
+- add ChangesetReader (peer discovery, fetch decision, cursor advance)
+- add ChangesetWriter (base + changeset publish, no-op, manifest-authority seq recovery)
+- add ChangesetCodec (encode/decode changesets and chunked bases)
+- HLC-watermark delta export (exportChangeset) with parent-gathered children
+- add changeset header fields to SyncPayload
+- make media, species, field_presets first-class HLC entities (v85)
+- add BaseChunker for resumable base slicing
+- add SyncManifest model
+- add ChangesetLogLayout flat naming and peer discovery
+- add PublishStateStore for per-provider publish position
+- add PeerCursorStore for per-peer download cursors
+- add v84 schema for changeset-log cursors and publish state
+- make downloads prominent buttons, collapse CI badges to one
+- redesign with hero banner, feature showcase, and collapsible build docs
+- add showcase image script and generated feature-row images
+- add hero banner compose script and generated banner
+- harden backend switching against data-loss and split-brain
+- hide Google Drive provider until fully implemented
+- cloud backup off by default and coupled to sync state
+- provider-neutral wording in S3 settings strings
+- require S3 endpoint URL and fix form clarity issues
+- simplify S3 config form with auto-detected region
+- l10n strings for simplified S3 config form
+- persist server-corrected S3 region
+- self-heal S3 region from server hints
+- derive S3 region from endpoint hostname
+- replace banner and adopt-restored-library dialog
+- awaiting-adoption state, silent empty adopt, pending replace launch trigger
+- restore dialog offers merge vs replace-everywhere
+- strings for restore Replace mode and library adoption
+- restore modes, pending replace intent, history validation parity
+- adopt replaced library as authoritative apply
+- gate every sync on the library epoch marker
+- execute library replace (marker-first wipe and re-seed)
+- library epoch marker read/write on SyncService
+- realign library epoch from mirror when launch detects a restore
+- stamp sync payloads with their library epoch
+- add library epoch store (mirror + pending replace intent)
+- add library epoch marker model
+- add last-accepted library epoch to sync metadata
+
+### Bug Fixes
+
+- gate the pending-replace launch intent on a configured provider
+- make replaced-library detection surface-only (no auto-sync)
+- dedicated app-root replaced-library banner string; bump en @@last_modified
+- await provider restoration in _initialize so post-restore work runs on launch
+- address second Copilot review round on PR #332
+- address PR #332 review feedback
+- established provider is not first-contact (restore no longer re-gates)
+- watch base-entity tables in watchDiveDetailChanges; drop redundant watch
+- refresh the whole dive detail page after a sync
+- make changeset compaction pruning best-effort
+- version deletions with HLCs + address PR #330 review findings
+- verify base integrity against the manifest checksums on read
+- cold-start a base instead of crashing when the cloud manifest is missing
+- recover instead of bricking when a backend's marked library is unreadable
+- correct ARCHITECTURE.md link path to docs/ARCHITECTURE.md
+- recover sync_metadata columns stranded past v77 collisions (v83)
+- recover databases stranded by the v77 schema-version collision (v82)
+- platform-aware libdc cache and revert Xcode 26.5 upgrade
+- address PR review + raise patch coverage
+- assign gas from reported gas mixes when no tank records exist
+- await region-correction persist on signOut/saveConfig
+- treat persisted googledrive selection as no provider
+- move backup location below frequency and retention
+- address PR review feedback round 2
+- route corrected-region replays through the 5xx retry path
+- explain S3 region mismatch instead of access denied
+- edge-trigger PacketReadBuffer semaphore on empty->non-empty
+- persist recorded per-sample TTS so the divecomputer TTS source works
+- address PR review feedback
+- migrate pre-migration dialog compat tests to RestoreMode contract
+
+### Refactoring
+
+- extract reusable adopt-replaced-library dialog
+- keep RGBA through trim in prepare_showcase for clean edges
+- wrap compose_hero in main(), add makedirs guard
+- extract active-diver realign for reuse by sync adoption
+
+### Documentation
+
+- add wiki documentation redesign design spec
+- spec + plan for smoother database restore
+- add prior dive experience design + implementation plan (#331)
+- correct DeletionLog.hlc nullability comment
+- reflect incremental sync in the multi-device guide
+- reconcile spec section 4 to the implemented flat ssv1 layout
+- add Phase 6 (restore + coexistence + performSync wiring) plan
+- add Phase 5 (resumability + compaction) implementation plan
+- add Phase 4 (read path) implementation plan
+- add Phase 3 (write path) implementation plan
+- add Phase 2 (serialization) implementation plan
+- add Phase 1 (foundation) implementation plan
+- add incremental changeset-log sync design spec
+- add multi-device sync guide with Cloudflare R2 walkthrough
+- document README asset regeneration scripts
+- add README redesign spec and implementation plan
+- add S3 config simplification plan and design spec
+- spec and plan for S3 config simplification
+- restore Replace mode implementation plan
+- add restore Replace mode (library epoch) design
+
+### Tests
+
+- cover the app-root sync-state listener
+- poll for conditions instead of fixed sleeps; close test DBs; pin widget-test locale
+- restore-resume two-device convergence
+- address PR review feedback on test doubles
+- add in-memory FakeCloudStorageProvider test double
+- skip backend-switch widget tests on non-Apple platforms
+- raise patch coverage to 98.8 percent
+
+### CI/CD
+
+- remove Claude Code and Claude Code Review workflows
+
+### Chores
+
+- bump version to 1.5.0+97
+- satisfy analyzer (package imports, const companions, doc comment)
+- remove old unused January screenshot sets (iPad/iPhone/macOS)
+- adopt Xcode 26.5 recommended project settings
+
+### Other
+
+- dart format post-restore store tests
+- scope screenshots gitignore negation to readme/ to keep junk ignored
+- stop gitignoring committed docs/assets/screenshots
+- Potential fix for pull request finding
+- fix const and doc-comment lints in epoch tests
+
+
 ## 1.4.9+96 (2026-06-11)
 
 ### Features
