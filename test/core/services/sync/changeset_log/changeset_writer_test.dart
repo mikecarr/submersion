@@ -82,6 +82,49 @@ void main() {
     expect(await names(), isEmpty);
   });
 
+  test(
+    'cold-starts a fresh base (no crash) when local state has a base but the '
+    'cloud manifest is missing',
+    () async {
+      await DiveRepository().createDive(
+        createTestDiveWithBottomTime(id: 'd1', diveNumber: 1),
+      );
+      await DiveRepository().createDive(
+        createTestDiveWithBottomTime(id: 'd2', diveNumber: 2),
+      );
+      await publish(); // base @1, manifest + local publish state
+
+      // The cloud manifest becomes un-listable (eventual-consistency lag, or
+      // wiped by another device) while local publish state still says a base
+      // exists. Regression: the changeset branch did `ownManifest!` and threw
+      // "Null check operator used on a null value" on the next publish.
+      final deviceId = await SyncRepository().getDeviceId();
+      await provider.deleteFile(
+        '$folder/${ChangesetLogLayout.manifestName(deviceId)}',
+      );
+
+      // Delete a dive and publish -- must recover, not throw.
+      await DiveRepository().deleteDive('d1');
+      final result = await publish();
+
+      expect(
+        result.kind,
+        ChangesetWriteKind.base,
+        reason: 'a missing cloud manifest must cold-start a fresh base',
+      );
+      final manifest = SyncManifest.fromBytes(
+        await provider.downloadFile(
+          '$folder/${ChangesetLogLayout.manifestName(deviceId)}',
+        ),
+      );
+      expect(
+        manifest.baseSeq,
+        greaterThan(1),
+        reason: 'the fresh base uses a non-reused seq recovered from state',
+      );
+    },
+  );
+
   test('second publish writes a changeset with only the new dive', () async {
     await DiveRepository().createDive(
       createTestDiveWithBottomTime(id: 'd1', diveNumber: 1),

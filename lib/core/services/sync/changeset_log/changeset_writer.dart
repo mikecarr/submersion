@@ -51,7 +51,14 @@ class ChangesetWriter {
     final state = await _publishState.get(providerId);
 
     final knownHeadSeq = _max(state?.headSeq ?? 0, ownManifest?.headSeq ?? 0);
-    final hasBase = ownManifest?.baseSeq != null || state?.baseSeq != null;
+    // The cloud manifest is the authority for whether a base exists in the
+    // cloud: a changeset can only be appended to a base we can actually read.
+    // Local state alone is NOT enough -- if the manifest is missing (listing
+    // lag on an eventually-consistent backend, or wiped by another device),
+    // there is nothing to append to, so cold-start a fresh base. `state` still
+    // recovers the seq counter (knownHeadSeq) so the new base never reuses a
+    // number.
+    final hasBase = ownManifest?.baseSeq != null;
     final watermark = ownManifest?.publishedHlcHigh ?? state?.publishedHlcHigh;
 
     final payload = await _serializer.exportChangeset(
