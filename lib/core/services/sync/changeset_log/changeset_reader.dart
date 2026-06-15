@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:submersion/core/services/cloud_storage/cloud_storage_provider.dart';
 import 'package:submersion/core/services/sync/sync_data_serializer.dart';
+import 'package:submersion/core/services/sync/changeset_log/base_chunker.dart';
 import 'package:submersion/core/services/sync/changeset_log/changeset_codec.dart';
 import 'package:submersion/core/services/sync/changeset_log/changeset_log_layout.dart';
 import 'package:submersion/core/services/sync/changeset_log/peer_cursor_store.dart';
@@ -136,12 +137,26 @@ class ChangesetReader {
   ) async {
     final count = manifest.basePartCount ?? 0;
     final baseSeq = manifest.baseSeq!;
+    final partChecksums = manifest.basePartChecksums;
     final parts = <Uint8List>[];
     for (var i = 0; i < count; i++) {
       final pf = byName[ChangesetLogLayout.basePartName(peerId, baseSeq, i)];
-      if (pf == null) return null;
-      parts.add(await provider.downloadFile(pf.id));
+      if (pf == null) return null; // missing part -> transient, retry next sync
+      final bytes = await provider.downloadFile(pf.id);
+      // Verify each part against the manifest's checksum (when present): a
+      // byte-level integrity guard independent of -- and stronger than -- the
+      // decoded payload's data checksum, which ignores headers and deletions.
+      if (i < partChecksums.length &&
+          BaseChunker.checksum(bytes) != partChecksums[i]) {
+        return null; // corrupt part -> treat as missing, retry next sync
+      }
+      parts.add(bytes);
     }
-    return _codec.decodeBaseParts(parts);
+    final full = BaseChunker.reassemble(parts);
+    final whole = manifest.baseChecksum;
+    if (whole != null && BaseChunker.checksum(full) != whole) {
+      return null; // reassembled base fails the manifest checksum -> retry
+    }
+    return _codec.decodeChangeset(full);
   }
 }

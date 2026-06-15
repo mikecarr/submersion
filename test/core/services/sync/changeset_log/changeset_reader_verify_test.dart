@@ -97,4 +97,71 @@ void main() {
       );
     },
   );
+
+  test('a base part failing the manifest checksum is not applied', () async {
+    await setUpTestDatabase();
+    addTearDown(() => DatabaseService.instance.resetForTesting());
+    final db = DatabaseService.instance.database;
+    final serializer = SyncDataSerializer();
+    final codec = ChangesetCodec(serializer);
+    final writer = ChangesetWriter(
+      serializer,
+      codec,
+      PublishStateStore(db),
+      compactionByteRatio: 1000.0,
+      compactionMaxChangesets: 1 << 30,
+    );
+    final reader = ChangesetReader(codec, PeerCursorStore(db));
+    final provider = FakeCloudStorageProvider();
+    final folder = await provider.getOrCreateSyncFolder();
+
+    final peerId = await SyncRepository().getDeviceId();
+    await DiveRepository().createDive(
+      createTestDiveWithBottomTime(id: 'd1', diveNumber: 1),
+    );
+    await writer.publish(
+      provider: provider,
+      deviceId: peerId,
+      folderId: folder,
+      deletions: const [],
+    );
+
+    // Tamper the base part's DELETIONS only. The payload's data checksum is
+    // computed over `data`, so it still matches and would let this base
+    // through on its own -- but the bytes no longer match the manifest's
+    // part/base checksums, which must reject it.
+    final partName = ChangesetLogLayout.basePartName(peerId, 1, 0);
+    final original = await provider.downloadFile('$folder/$partName');
+    final tampered = jsonDecode(utf8.decode(original)) as Map<String, dynamic>;
+    tampered['deletions'] = {
+      'dives': [
+        {'id': 'INJECTED-TOMBSTONE', 'deletedAt': 1},
+      ],
+    };
+    await provider.uploadFile(
+      Uint8List.fromList(utf8.encode(jsonEncode(tampered))),
+      partName,
+      folderId: folder,
+    );
+
+    final applied = <SyncPayload>[];
+    await reader.pull(
+      provider: provider,
+      selfDeviceId: 'reader-x',
+      folderId: folder,
+      apply: (p) async => applied.add(p),
+    );
+
+    expect(
+      applied,
+      isEmpty,
+      reason: 'a base failing the manifest checksum must not be applied',
+    );
+    final cursor = await PeerCursorStore(db).get(peerId, provider.providerId);
+    expect(
+      cursor,
+      isNull,
+      reason: 'the cursor must not advance past an unverified base',
+    );
+  });
 }
