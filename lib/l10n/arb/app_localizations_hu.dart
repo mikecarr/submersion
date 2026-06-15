@@ -9,6 +9,11 @@ class AppLocalizationsHu extends AppLocalizations {
   AppLocalizationsHu([String locale = 'hu']) : super(locale);
 
   @override
+  String settings_cloudSync_replace_globalBanner(String deviceName) {
+    return 'A szinkronizálás szünetel — a könyvtárat egy biztonsági másolatból cserélték itt: \"$deviceName\".';
+  }
+
+  @override
   String get settings_cloudSync_postRestore_syncing =>
       'A visszaállított könyvtár szinkronizálása a felhővel…';
 

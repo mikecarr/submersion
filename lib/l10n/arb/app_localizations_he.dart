@@ -9,6 +9,11 @@ class AppLocalizationsHe extends AppLocalizations {
   AppLocalizationsHe([String locale = 'he']) : super(locale);
 
   @override
+  String settings_cloudSync_replace_globalBanner(String deviceName) {
+    return 'הסנכרון מושהה — הספרייה הוחלפה מגיבוי במכשיר \"$deviceName\".';
+  }
+
+  @override
   String get settings_cloudSync_postRestore_syncing =>
       'מסנכרן את הספרייה המשוחזרת שלך עם הענן…';
 

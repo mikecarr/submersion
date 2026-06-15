@@ -9,6 +9,11 @@ class AppLocalizationsEs extends AppLocalizations {
   AppLocalizationsEs([String locale = 'es']) : super(locale);
 
   @override
+  String settings_cloudSync_replace_globalBanner(String deviceName) {
+    return 'Sincronización en pausa: la biblioteca se reemplazó desde una copia de seguridad en \"$deviceName\".';
+  }
+
+  @override
   String get settings_cloudSync_postRestore_syncing =>
       'Sincronizando tu biblioteca restaurada con la nube…';
 

@@ -9,6 +9,11 @@ class AppLocalizationsAr extends AppLocalizations {
   AppLocalizationsAr([String locale = 'ar']) : super(locale);
 
   @override
+  String settings_cloudSync_replace_globalBanner(String deviceName) {
+    return 'المزامنة متوقفة مؤقتًا — تم استبدال المكتبة من نسخة احتياطية على \"$deviceName\".';
+  }
+
+  @override
   String get settings_cloudSync_postRestore_syncing =>
       'تتم مزامنة مكتبتك المستعادة مع السحابة…';
 

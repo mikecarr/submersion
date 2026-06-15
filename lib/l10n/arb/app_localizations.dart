@@ -116,6 +116,12 @@ abstract class AppLocalizations {
     Locale('zh'),
   ];
 
+  /// No description provided for @settings_cloudSync_replace_globalBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync is paused — the library was replaced from a backup on \"{deviceName}\".'**
+  String settings_cloudSync_replace_globalBanner(String deviceName);
+
   /// No description provided for @settings_cloudSync_postRestore_syncing.
   ///
   /// In en, this message translates to:

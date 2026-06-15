@@ -203,8 +203,8 @@ class _SubmersionAppState extends ConsumerState<SubmersionApp>
     messenger?.showMaterialBanner(
       MaterialBanner(
         content: Text(
-          l10n?.settings_cloudSync_replace_banner(marker.displayName) ??
-              'Sync paused: the library was replaced from a backup. Tap Review.',
+          l10n?.settings_cloudSync_replace_globalBanner(marker.displayName) ??
+              'Sync is paused — the library was replaced from a backup.',
         ),
         leading: const Icon(Icons.restore_page_outlined),
         actions: [
