@@ -59,9 +59,14 @@ class DiveRepository {
   /// refreshes after a sync the same way the dive list already does.
   ///
   /// Broader than [watchDivesChanges] because a single `Dive` entity hydrates
-  /// tanks, tank pressures, profile, and equipment (see [_mapRowToDive]) and
-  /// the detail page also renders gas switches, data sources, dive sites,
-  /// course, buddies, marine-life sightings, media, and tide records.
+  /// tanks, tank pressures, profile, and equipment (see [_mapRowToDive]) and the
+  /// detail page also renders gas switches, data sources, buddies, marine-life
+  /// sightings, media, and tide records. Watches BOTH the link tables and the
+  /// base-entity tables they join against (dive_tags + tags, dive_buddies +
+  /// buddies, sightings + species, dive_equipment + equipment, dive_data_sources
+  /// + dive_computers, plus dive_sites/dive_centers/trips/courses) so a synced
+  /// edit to a tag/buddy/species/equipment/site/center/trip/computer NAME also
+  /// refreshes the rendered detail, not just changes to the link rows.
   Stream<void> watchDiveDetailChanges() => _db.tableUpdates(
     TableUpdateQuery.allOf([
       TableUpdateQuery.onTable(_db.dives),
@@ -69,13 +74,20 @@ class DiveRepository {
       TableUpdateQuery.onTable(_db.diveTanks),
       TableUpdateQuery.onTable(_db.tankPressureProfiles),
       TableUpdateQuery.onTable(_db.diveEquipment),
+      TableUpdateQuery.onTable(_db.equipment),
       TableUpdateQuery.onTable(_db.gasSwitches),
       TableUpdateQuery.onTable(_db.diveDataSources),
+      TableUpdateQuery.onTable(_db.diveComputers),
       TableUpdateQuery.onTable(_db.diveTags),
+      TableUpdateQuery.onTable(_db.tags),
       TableUpdateQuery.onTable(_db.diveSites),
+      TableUpdateQuery.onTable(_db.diveCenters),
+      TableUpdateQuery.onTable(_db.trips),
       TableUpdateQuery.onTable(_db.courses),
       TableUpdateQuery.onTable(_db.diveBuddies),
+      TableUpdateQuery.onTable(_db.buddies),
       TableUpdateQuery.onTable(_db.sightings),
+      TableUpdateQuery.onTable(_db.species),
       TableUpdateQuery.onTable(_db.media),
       TableUpdateQuery.onTable(_db.tideRecords),
     ]),
