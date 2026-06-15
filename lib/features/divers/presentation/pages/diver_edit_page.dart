@@ -64,6 +64,12 @@ class _DiverEditPageState extends ConsumerState<DiverEditPage> {
   // Notes controller
   final _notesController = TextEditingController();
 
+  // Prior experience (issue #331)
+  final _priorDiveCountController = TextEditingController();
+  final _priorDiveHoursController = TextEditingController();
+  final _priorDiveMinutesController = TextEditingController();
+  DateTime? _divingSince;
+
   bool _isLoading = false;
   bool _isSaving = false;
   bool _hasChanges = false;
@@ -97,6 +103,9 @@ class _DiverEditPageState extends ConsumerState<DiverEditPage> {
     _insuranceProviderController.addListener(_onFieldChanged);
     _insurancePolicyController.addListener(_onFieldChanged);
     _notesController.addListener(_onFieldChanged);
+    _priorDiveCountController.addListener(_onFieldChanged);
+    _priorDiveHoursController.addListener(_onFieldChanged);
+    _priorDiveMinutesController.addListener(_onFieldChanged);
   }
 
   void _onFieldChanged() {
@@ -137,6 +146,14 @@ class _DiverEditPageState extends ConsumerState<DiverEditPage> {
         _insurancePolicyController.text = diver.insurance.policyNumber ?? '';
         _insuranceExpiry = diver.insurance.expiryDate;
         _notesController.text = diver.notes;
+        _priorDiveCountController.text = diver.priorDiveCount?.toString() ?? '';
+        if (diver.priorDiveTimeSeconds != null) {
+          _priorDiveHoursController.text = (diver.priorDiveTimeSeconds! ~/ 3600)
+              .toString();
+          _priorDiveMinutesController.text =
+              ((diver.priorDiveTimeSeconds! % 3600) ~/ 60).toString();
+        }
+        _divingSince = diver.divingSince;
         setState(() {
           _isLoading = false;
           _hasChanges = false;
@@ -170,6 +187,9 @@ class _DiverEditPageState extends ConsumerState<DiverEditPage> {
     _insuranceProviderController.dispose();
     _insurancePolicyController.dispose();
     _notesController.dispose();
+    _priorDiveCountController.dispose();
+    _priorDiveHoursController.dispose();
+    _priorDiveMinutesController.dispose();
     super.dispose();
   }
 
@@ -218,6 +238,14 @@ class _DiverEditPageState extends ConsumerState<DiverEditPage> {
                     context.l10n.divers_edit_insuranceSection,
                   ),
                   _buildInsuranceSection(),
+                  const SizedBox(height: 24),
+
+                  // Prior Experience Section
+                  _buildSectionHeader(
+                    context,
+                    context.l10n.divers_edit_priorExperienceSection,
+                  ),
+                  _buildPriorExperienceSection(),
                   const SizedBox(height: 24),
 
                   // Notes Section
@@ -741,6 +769,110 @@ class _DiverEditPageState extends ConsumerState<DiverEditPage> {
     );
   }
 
+  Future<void> _pickDivingSince() async {
+    final now = DateTime.now();
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _divingSince ?? DateTime(now.year - 10),
+      firstDate: DateTime(1900),
+      lastDate: DateTime(now.year, 12, 31),
+      initialDatePickerMode: DatePickerMode.year,
+    );
+    if (picked != null) {
+      setState(() {
+        _divingSince = DateTime(picked.year);
+        _hasChanges = true;
+      });
+    }
+  }
+
+  Widget _buildPriorExperienceSection() {
+    String? nonNegativeInt(String? v, {int? max}) {
+      if (v == null || v.trim().isEmpty) return null;
+      final n = int.tryParse(v.trim());
+      if (n == null || n < 0) {
+        return context.l10n.divers_edit_priorInvalidNumber;
+      }
+      if (max != null && n > max) {
+        return context.l10n.divers_edit_priorInvalidNumber;
+      }
+      return null;
+    }
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              context.l10n.divers_edit_priorExperienceHelp,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _priorDiveCountController,
+              decoration: InputDecoration(
+                labelText: context.l10n.divers_edit_priorDivesLabel,
+                prefixIcon: const Icon(Icons.waves),
+              ),
+              keyboardType: TextInputType.number,
+              validator: (v) => nonNegativeInt(v),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: TextFormField(
+                    controller: _priorDiveHoursController,
+                    decoration: InputDecoration(
+                      labelText: context.l10n.divers_edit_priorHoursLabel,
+                      prefixIcon: const Icon(Icons.timer),
+                    ),
+                    keyboardType: TextInputType.number,
+                    validator: (v) => nonNegativeInt(v),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: TextFormField(
+                    controller: _priorDiveMinutesController,
+                    decoration: InputDecoration(
+                      labelText: context.l10n.divers_edit_priorMinutesLabel,
+                    ),
+                    keyboardType: TextInputType.number,
+                    validator: (v) => nonNegativeInt(v, max: 59),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: const Icon(Icons.event),
+              title: Text(context.l10n.divers_edit_divingSinceLabel),
+              subtitle: Text(
+                _divingSince != null
+                    ? '${_divingSince!.year}'
+                    : context.l10n.divers_edit_divingSinceNotSet,
+              ),
+              trailing: _divingSince != null
+                  ? IconButton(
+                      icon: const Icon(Icons.clear),
+                      onPressed: () => setState(() {
+                        _divingSince = null;
+                        _hasChanges = true;
+                      }),
+                    )
+                  : null,
+              onTap: _pickDivingSince,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildNotesSection() {
     return Card(
       child: Padding(
@@ -782,6 +914,12 @@ class _DiverEditPageState extends ConsumerState<DiverEditPage> {
 
     try {
       final now = DateTime.now();
+      final priorCount = int.tryParse(_priorDiveCountController.text.trim());
+      final hStr = _priorDiveHoursController.text.trim();
+      final mStr = _priorDiveMinutesController.text.trim();
+      final priorSeconds = (hStr.isEmpty && mStr.isEmpty)
+          ? null
+          : (int.tryParse(hStr) ?? 0) * 3600 + (int.tryParse(mStr) ?? 0) * 60;
       final diver = Diver(
         id: _originalDiver?.id ?? '',
         name: _nameController.text.trim(),
@@ -837,6 +975,9 @@ class _DiverEditPageState extends ConsumerState<DiverEditPage> {
         isDefault: _originalDiver?.isDefault ?? false,
         createdAt: _originalDiver?.createdAt ?? now,
         updatedAt: now,
+        priorDiveCount: priorCount,
+        priorDiveTimeSeconds: priorSeconds,
+        divingSince: _divingSince,
       );
 
       String savedId;
