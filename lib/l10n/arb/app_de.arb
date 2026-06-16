@@ -1,4 +1,8 @@
 {
+  "settings_cloudSync_error_icloudSignedOut": "iCloud ist nicht verfügbar. Bitte melde dich in den Geräteeinstellungen bei iCloud an.",
+  "settings_cloudSync_error_icloudUnknown": "iCloud konnte nicht erreicht werden. Bitte versuche es erneut.",
+  "settings_cloudSync_error_icloudUnsupported": "iCloud-Synchronisierung ist in diesem Build von Submersion nicht verfügbar. Verwende die S3-Synchronisierung oder die App-Store-Version.",
+  "settings_cloudSync_provider_icloud_unsupportedSubtitle": "In diesem Build nicht verfügbar – verwende S3 oder die App-Store-Version",
   "@@last_modified": "2026-06-15",
   "@@locale": "de",
   "settings_cloudSync_replace_globalBanner": "Synchronisierung pausiert — die Bibliothek wurde aus einem Backup auf \"{deviceName}\" ersetzt.",

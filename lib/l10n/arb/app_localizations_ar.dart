@@ -9,6 +9,22 @@ class AppLocalizationsAr extends AppLocalizations {
   AppLocalizationsAr([String locale = 'ar']) : super(locale);
 
   @override
+  String get settings_cloudSync_error_icloudSignedOut =>
+      'iCloud غير متوفر. يُرجى تسجيل الدخول إلى iCloud من إعدادات جهازك.';
+
+  @override
+  String get settings_cloudSync_error_icloudUnknown =>
+      'تعذّر الوصول إلى iCloud. حاول مرة أخرى.';
+
+  @override
+  String get settings_cloudSync_error_icloudUnsupported =>
+      'مزامنة iCloud غير متوفرة في هذا الإصدار من Submersion. استخدم مزامنة S3 أو نسخة App Store.';
+
+  @override
+  String get settings_cloudSync_provider_icloud_unsupportedSubtitle =>
+      'غير متوفر في هذا الإصدار — استخدم S3 أو نسخة App Store';
+
+  @override
   String settings_cloudSync_replace_globalBanner(String deviceName) {
     return 'المزامنة متوقفة مؤقتًا — تم استبدال المكتبة من نسخة احتياطية على \"$deviceName\".';
   }

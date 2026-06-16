@@ -9,6 +9,22 @@ class AppLocalizationsNl extends AppLocalizations {
   AppLocalizationsNl([String locale = 'nl']) : super(locale);
 
   @override
+  String get settings_cloudSync_error_icloudSignedOut =>
+      'iCloud is niet beschikbaar. Log in bij iCloud in de instellingen van je apparaat.';
+
+  @override
+  String get settings_cloudSync_error_icloudUnknown =>
+      'Kan iCloud niet bereiken. Probeer het opnieuw.';
+
+  @override
+  String get settings_cloudSync_error_icloudUnsupported =>
+      'iCloud-synchronisatie is niet beschikbaar in deze build van Submersion. Gebruik S3-synchronisatie of de App Store-versie.';
+
+  @override
+  String get settings_cloudSync_provider_icloud_unsupportedSubtitle =>
+      'Niet beschikbaar in deze build — gebruik S3 of de App Store-versie';
+
+  @override
   String settings_cloudSync_replace_globalBanner(String deviceName) {
     return 'Synchronisatie onderbroken — de bibliotheek is vervangen vanaf een back-up op \"$deviceName\".';
   }

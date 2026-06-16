@@ -9,6 +9,22 @@ class AppLocalizationsIt extends AppLocalizations {
   AppLocalizationsIt([String locale = 'it']) : super(locale);
 
   @override
+  String get settings_cloudSync_error_icloudSignedOut =>
+      'iCloud non è disponibile. Accedi a iCloud nelle impostazioni del dispositivo.';
+
+  @override
+  String get settings_cloudSync_error_icloudUnknown =>
+      'Impossibile raggiungere iCloud. Riprova.';
+
+  @override
+  String get settings_cloudSync_error_icloudUnsupported =>
+      'La sincronizzazione iCloud non è disponibile in questa build di Submersion. Usa la sincronizzazione S3 o la versione dell\'App Store.';
+
+  @override
+  String get settings_cloudSync_provider_icloud_unsupportedSubtitle =>
+      'Non disponibile in questa build: usa S3 o la versione dell\'App Store';
+
+  @override
   String settings_cloudSync_replace_globalBanner(String deviceName) {
     return 'Sincronizzazione in pausa: la libreria è stata sostituita da un backup su \"$deviceName\".';
   }

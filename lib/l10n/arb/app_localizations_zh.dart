@@ -9,6 +9,21 @@ class AppLocalizationsZh extends AppLocalizations {
   AppLocalizationsZh([String locale = 'zh']) : super(locale);
 
   @override
+  String get settings_cloudSync_error_icloudSignedOut =>
+      'iCloud 不可用。请在设备设置中登录 iCloud。';
+
+  @override
+  String get settings_cloudSync_error_icloudUnknown => '无法连接 iCloud。请重试。';
+
+  @override
+  String get settings_cloudSync_error_icloudUnsupported =>
+      '此 Submersion 版本不支持 iCloud 同步。请使用 S3 同步或 App Store 版本。';
+
+  @override
+  String get settings_cloudSync_provider_icloud_unsupportedSubtitle =>
+      '此版本不可用 — 请使用 S3 或 App Store 版本';
+
+  @override
   String settings_cloudSync_replace_globalBanner(String deviceName) {
     return '同步已暂停 — 资料库已从 \"$deviceName\" 上的备份替换。';
   }

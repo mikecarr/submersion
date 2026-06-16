@@ -9,6 +9,22 @@ class AppLocalizationsHe extends AppLocalizations {
   AppLocalizationsHe([String locale = 'he']) : super(locale);
 
   @override
+  String get settings_cloudSync_error_icloudSignedOut =>
+      'iCloud אינו זמין. היכנס ל-iCloud דרך הגדרות המכשיר.';
+
+  @override
+  String get settings_cloudSync_error_icloudUnknown =>
+      'לא ניתן היה להגיע ל-iCloud. נסה שוב.';
+
+  @override
+  String get settings_cloudSync_error_icloudUnsupported =>
+      'סנכרון iCloud אינו זמין בגרסה זו של Submersion. השתמש בסנכרון S3 או בגרסת App Store.';
+
+  @override
+  String get settings_cloudSync_provider_icloud_unsupportedSubtitle =>
+      'לא זמין בגרסה זו — השתמש ב-S3 או בגרסת App Store';
+
+  @override
   String settings_cloudSync_replace_globalBanner(String deviceName) {
     return 'הסנכרון מושהה — הספרייה הוחלפה מגיבוי במכשיר \"$deviceName\".';
   }

@@ -9,6 +9,22 @@ class AppLocalizationsHu extends AppLocalizations {
   AppLocalizationsHu([String locale = 'hu']) : super(locale);
 
   @override
+  String get settings_cloudSync_error_icloudSignedOut =>
+      'Az iCloud nem érhető el. Jelentkezz be az iCloudba a készülék beállításaiban.';
+
+  @override
+  String get settings_cloudSync_error_icloudUnknown =>
+      'Nem sikerült elérni az iCloudot. Próbáld újra.';
+
+  @override
+  String get settings_cloudSync_error_icloudUnsupported =>
+      'Az iCloud-szinkronizálás nem érhető el a Submersion ezen buildjében. Használd az S3-szinkronizálást vagy az App Store-verziót.';
+
+  @override
+  String get settings_cloudSync_provider_icloud_unsupportedSubtitle =>
+      'Ebben a buildben nem érhető el – használj S3-at vagy az App Store-verziót';
+
+  @override
   String settings_cloudSync_replace_globalBanner(String deviceName) {
     return 'A szinkronizálás szünetel — a könyvtárat egy biztonsági másolatból cserélték itt: \"$deviceName\".';
   }

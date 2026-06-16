@@ -116,6 +116,30 @@ abstract class AppLocalizations {
     Locale('zh'),
   ];
 
+  /// No description provided for @settings_cloudSync_error_icloudSignedOut.
+  ///
+  /// In en, this message translates to:
+  /// **'iCloud is not available. Please sign in to iCloud in your device settings.'**
+  String get settings_cloudSync_error_icloudSignedOut;
+
+  /// No description provided for @settings_cloudSync_error_icloudUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t reach iCloud. Please try again.'**
+  String get settings_cloudSync_error_icloudUnknown;
+
+  /// No description provided for @settings_cloudSync_error_icloudUnsupported.
+  ///
+  /// In en, this message translates to:
+  /// **'iCloud sync isn\'t available in this build of Submersion. Use S3 sync, or the App Store version.'**
+  String get settings_cloudSync_error_icloudUnsupported;
+
+  /// No description provided for @settings_cloudSync_provider_icloud_unsupportedSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Not available in this build — use S3 or the App Store version'**
+  String get settings_cloudSync_provider_icloud_unsupportedSubtitle;
+
   /// No description provided for @settings_cloudSync_replace_globalBanner.
   ///
   /// In en, this message translates to:

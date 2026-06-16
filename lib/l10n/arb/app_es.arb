@@ -1,4 +1,8 @@
 {
+  "settings_cloudSync_error_icloudSignedOut": "iCloud no está disponible. Inicia sesión en iCloud en los ajustes de tu dispositivo.",
+  "settings_cloudSync_error_icloudUnknown": "No se pudo conectar con iCloud. Inténtalo de nuevo.",
+  "settings_cloudSync_error_icloudUnsupported": "La sincronización con iCloud no está disponible en esta versión de Submersion. Usa la sincronización S3 o la versión de la App Store.",
+  "settings_cloudSync_provider_icloud_unsupportedSubtitle": "No disponible en esta versión: usa S3 o la versión de la App Store",
   "@@last_modified": "2026-06-15",
   "@@locale": "es",
   "settings_cloudSync_replace_globalBanner": "Sincronización en pausa: la biblioteca se reemplazó desde una copia de seguridad en \"{deviceName}\".",

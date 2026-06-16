@@ -11,6 +11,7 @@ import 'package:submersion/core/services/logger_service.dart';
 import 'package:submersion/core/services/cloud_storage/cloud_storage_provider.dart';
 import 'package:submersion/core/services/cloud_storage/google_drive_storage_provider.dart';
 import 'package:submersion/core/services/cloud_storage/icloud_storage_provider.dart';
+import 'package:submersion/core/services/cloud_storage/icloud_native_service.dart';
 import 'package:submersion/core/services/cloud_storage/s3/s3_config.dart';
 import 'package:submersion/core/services/cloud_storage/s3_storage_provider.dart';
 import 'package:submersion/core/services/sync/established_provider_store.dart';
@@ -38,6 +39,22 @@ final syncRepositoryProvider = Provider<SyncRepository>((ref) {
 final syncDataSerializerProvider = Provider<SyncDataSerializer>((ref) {
   return SyncDataSerializer();
 });
+
+/// Runtime iCloud availability for the current build/device. Drives the iCloud
+/// provider tile's enabled state and its connection-failure messaging.
+final iCloudAvailabilityProvider = FutureProvider<ICloudAvailability>((
+  ref,
+) async {
+  return ICloudNativeService.getAvailability();
+});
+
+/// Whether the host is an Apple platform (iOS/macOS), where iCloud can exist at
+/// all. Exposed as a provider so the iCloud tile is never enabled on non-Apple
+/// platforms (even transiently while [iCloudAvailabilityProvider] loads), and so
+/// widget tests can simulate an Apple platform on a non-Apple CI host.
+final isApplePlatformProvider = Provider<bool>(
+  (ref) => Platform.isIOS || Platform.isMacOS,
+);
 
 /// Sync preferences provider
 final syncPreferencesProvider = Provider<SyncPreferences>((ref) {
