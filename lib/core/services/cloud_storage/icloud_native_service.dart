@@ -4,6 +4,13 @@ import 'package:flutter/services.dart';
 
 import 'package:submersion/core/services/logger_service.dart';
 
+/// Runtime iCloud availability for the current build/device.
+///
+/// `unsupported` means this build lacks the iCloud (ubiquity-container)
+/// entitlement — e.g. a Developer ID / no-sandbox distribution build — so
+/// iCloud can never work here regardless of the user's iCloud account.
+enum ICloudAvailability { available, signedOut, unsupported, unknown }
+
 /// Platform channel helpers for iCloud container access and file download.
 class ICloudNativeService {
   static const MethodChannel _channel = MethodChannel(
@@ -28,6 +35,40 @@ class ICloudNativeService {
         stackTrace: stackTrace,
       );
       return null;
+    }
+  }
+
+  /// Pure mapping from the native status string to [ICloudAvailability].
+  /// Extracted so it can be unit-tested independently of `dart:io` Platform.
+  static ICloudAvailability availabilityFromStatus(String? status) {
+    return switch (status) {
+      'available' => ICloudAvailability.available,
+      'signedOut' => ICloudAvailability.signedOut,
+      'unsupported' => ICloudAvailability.unsupported,
+      _ => ICloudAvailability.unknown,
+    };
+  }
+
+  /// Reports iCloud availability for the current build/device.
+  ///
+  /// Non-blocking on the native side (it does not resolve the container URL),
+  /// so it cannot hang. Returns [ICloudAvailability.unknown] on any channel
+  /// error or unmirrored platform, which the UI treats optimistically.
+  static Future<ICloudAvailability> getAvailability() async {
+    if (!Platform.isIOS && !Platform.isMacOS) {
+      return ICloudAvailability.unsupported;
+    }
+    try {
+      final status = await _channel.invokeMethod<String>(
+        'getICloudAvailability',
+      );
+      return availabilityFromStatus(status);
+    } catch (e, stackTrace) {
+      _log.warning(
+        'Failed to get iCloud availability: $e',
+        stackTrace: stackTrace,
+      );
+      return ICloudAvailability.unknown;
     }
   }
 
