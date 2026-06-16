@@ -25,5 +25,13 @@
 	<!-- Photo library access for attaching dive photos -->
 	<key>com.apple.security.personal-information.photos-library</key>
 	<true/>
+
+	<!-- Keychain access for flutter_secure_storage (S3 sync credentials). -->
+	<!-- This ad-hoc signature has no team prefix, so the data-protection -->
+	<!-- keychain is unavailable here and S3CredentialsStore falls back to -->
+	<!-- the legacy file-based keychain at runtime. Declared for parity and -->
+	<!-- in case this build is ever re-signed with a Developer ID identity. -->
+	<key>keychain-access-groups</key>
+	<array/>
 </dict>
 </plist>
