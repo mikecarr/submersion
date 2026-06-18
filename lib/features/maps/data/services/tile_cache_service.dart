@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 import 'package:latlong2/latlong.dart';
@@ -164,36 +165,45 @@ class TileCacheService {
     return FMTCTileProvider(
       stores: {_defaultStoreName: BrowseStoreStrategy.readUpdateCreate},
       loadingStrategy: loadingStrategy,
-      errorHandler: (error) {
-        // Tile failures are non-fatal: the map shows a blank tile (return
-        // null) rather than throwing. Most are simply offline cache misses,
-        // but provider- or transport-level errors (TLS, HTTP rejections, DNS)
-        // are otherwise invisible -- so capture the full error for the in-app
-        // Debug Log Viewer instead of silently swallowing it.
-        final response = error.response;
-        final original = error.originalError;
-        final details = StringBuffer()
-          ..write('Tile load failed [${error.type.name}]')
-          ..write(' url=${error.networkUrl}');
-        if (response != null) {
-          details
-            ..write(' httpStatus=${response.statusCode}')
-            ..write(' reason=${response.reasonPhrase}')
-            ..write(' contentType=${response.headers['content-type']}')
-            ..write(' bodyBytes=${response.bodyBytes.length}');
-        }
-        if (original != null) {
-          details.write(' cause=${original.runtimeType}: $original');
-        }
-        // An offline miss is expected; anything else is a real problem.
-        if (error.type == FMTCBrowsingErrorType.noConnectionDuringFetch) {
-          _log.info(details.toString());
-        } else {
-          _log.warning(details.toString());
-        }
-        return null; // Show a blank tile instead of throwing.
-      },
+      errorHandler: handleTileError,
     );
+  }
+
+  /// Handles a tile fetch failure: logs it (offline misses at info, real
+  /// transport/HTTP errors at warning) and returns null so the map shows a
+  /// blank tile rather than throwing.
+  ///
+  /// Tile failures are non-fatal and most are simply offline cache misses,
+  /// but provider- or transport-level errors (TLS, HTTP rejections, DNS) are
+  /// otherwise invisible -- so the full error is captured for the in-app
+  /// Debug Log Viewer instead of being silently swallowed. Static and
+  /// [visibleForTesting] so the formatting and log-level policy can be
+  /// exercised directly, without initialising the cache backend; used as the
+  /// [FMTCTileProvider.errorHandler] in [getTileProvider].
+  @visibleForTesting
+  static Uint8List? handleTileError(FMTCBrowsingError error) {
+    final response = error.response;
+    final original = error.originalError;
+    final details = StringBuffer()
+      ..write('Tile load failed [${error.type.name}]')
+      ..write(' url=${error.networkUrl}');
+    if (response != null) {
+      details
+        ..write(' httpStatus=${response.statusCode}')
+        ..write(' reason=${response.reasonPhrase}')
+        ..write(' contentType=${response.headers['content-type']}')
+        ..write(' bodyBytes=${response.bodyBytes.length}');
+    }
+    if (original != null) {
+      details.write(' cause=${original.runtimeType}: $original');
+    }
+    // An offline miss is expected; anything else is a real problem.
+    if (error.type == FMTCBrowsingErrorType.noConnectionDuringFetch) {
+      _log.info(details.toString());
+    } else {
+      _log.warning(details.toString());
+    }
+    return null;
   }
 
   /// Get a tile provider configured for offline-only usage.
