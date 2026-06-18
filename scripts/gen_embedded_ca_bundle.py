@@ -1,27 +1,40 @@
 #!/usr/bin/env python3
 """Regenerate lib/core/network/embedded_ca_bundle.dart.
 
-The embedded bundle is the *fallback* trust anchor set used on Windows when
-the native certificate-store read fails or returns too few roots (see
-app_security_context.dart). It is a plain concatenation of public root CA
-certificates in PEM form, emitted as a Dart raw-string constant so the
-SecurityContext can be built synchronously with no asset loading.
+The embedded bundle is the public root CA *baseline* for TLS verification on
+Windows builds (see app_security_context.dart). Dart bundles BoringSSL and
+builds that context with `withTrustedRoots: false`; the live Windows store is
+read and unioned on top for enterprise/private roots. But the public roots
+must always be present and complete -- Windows materializes roots lazily, so
+a store read can succeed yet still be missing a common root that an endpoint
+chains to. Baking the full public set in here closes that gap.
 
-Source defaults to the host's system bundle. On macOS that is
-/etc/ssl/cert.pem (the Mozilla-derived root set). Override with argv[1] to
-pin a specific cacert.pem (e.g. a vendored https://curl.se/ca/cacert.pem).
+It must therefore be the *complete, current* public root set. The
+authoritative source is the Mozilla CA set as published by the curl project
+(https://curl.se/ca/cacert.pem), which is fetched by default.
+
+Do NOT generate it from the host's /etc/ssl/cert.pem: on macOS that is
+Apple's divergent root set, which omits roots (e.g. GlobalSign Root CA - R3,
+which tile.openstreetmap.org chains to) that public endpoints depend on.
+
+The certificates are emitted as a Dart raw-string constant so the
+SecurityContext can be built synchronously with no asset loading.
 
 Usage:
     python3 scripts/gen_embedded_ca_bundle.py [path-to-cacert.pem]
+
+With no argument, fetches the canonical bundle from curl.se. Pass a local
+path to pin a vendored copy for offline or reproducible builds.
 """
 
-import sys
 import re
+import sys
+import urllib.request
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 OUT = REPO_ROOT / "lib" / "core" / "network" / "embedded_ca_bundle.dart"
-DEFAULT_SOURCES = ["/etc/ssl/cert.pem", "/etc/ssl/certs/ca-certificates.crt"]
+CANONICAL_URL = "https://curl.se/ca/cacert.pem"
 
 CERT_RE = re.compile(
     r"-----BEGIN CERTIFICATE-----.*?-----END CERTIFICATE-----",
@@ -29,20 +42,24 @@ CERT_RE = re.compile(
 )
 
 
+def load_source(arg):
+    """Return (pem_text, source_label) from a local path or the canonical URL."""
+    if arg is not None:
+        path = Path(arg)
+        if not path.exists():
+            raise FileNotFoundError(f"no such CA bundle file: {arg}")
+        return path.read_text(encoding="utf-8"), str(path)
+    with urllib.request.urlopen(CANONICAL_URL) as resp:
+        return resp.read().decode("utf-8"), CANONICAL_URL
+
+
 def main() -> int:
-    source = None
-    if len(sys.argv) > 1:
-        source = Path(sys.argv[1])
-    else:
-        for candidate in DEFAULT_SOURCES:
-            if Path(candidate).exists():
-                source = Path(candidate)
-                break
-    if source is None or not source.exists():
-        print(f"error: no CA bundle source found (tried {DEFAULT_SOURCES})")
+    try:
+        text, source = load_source(sys.argv[1] if len(sys.argv) > 1 else None)
+    except Exception as exc:  # noqa: BLE001 - surface any fetch/read failure
+        print(f"error: could not load CA source: {exc}")
         return 1
 
-    text = source.read_text()
     certs = CERT_RE.findall(text)
     if not certs:
         print(f"error: no certificates found in {source}")
@@ -61,8 +78,8 @@ def main() -> int:
         "// Regenerate with: python3 scripts/gen_embedded_ca_bundle.py\n"
         f"// Source: {source} ({len(certs)} root certificates).\n"
         "//\n"
-        "// Fallback trust anchors used on Windows when the native certificate\n"
-        "// store read yields too few roots. See app_security_context.dart.\n"
+        "// Public root CA baseline for Windows TLS verification. Always merged\n"
+        "// with the live OS certificate store. See app_security_context.dart.\n"
         "library;\n"
         "\n"
         "/// Concatenated public root CA certificates in PEM form.\n"

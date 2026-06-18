@@ -76,6 +76,78 @@ void main() {
       expect(context, isNotNull);
     });
   });
+
+  group('windowsTrustAnchorsPem', () {
+    test('always includes the public-CA bundle first, even with many native '
+        'roots', () {
+      // Regression: the embedded bundle used to be added only when fewer
+      // than five native roots were read. A Windows store that returned
+      // many roots but happened to omit one (e.g. GlobalSign Root CA - R3,
+      // which tile.openstreetmap.org chains to) then left that endpoint
+      // unverifiable while other providers worked.
+      final manyNativeRoots = List.generate(
+        20,
+        (i) => Uint8List.fromList([i, i, i, i]),
+      );
+
+      final anchors = windowsTrustAnchorsPem(
+        nativeRoots: manyNativeRoots,
+        fallbackBundlePem: embeddedCaBundlePem,
+      );
+
+      expect(
+        anchors.first,
+        embeddedCaBundlePem,
+        reason: 'the bundle must be installed first, into a fresh context',
+      );
+      expect(
+        anchors.length,
+        manyNativeRoots.length + 1,
+        reason: 'the bundle is merged in addition to every native root',
+      );
+    });
+
+    test('omits the bundle entry only when it is empty', () {
+      expect(
+        windowsTrustAnchorsPem(nativeRoots: const [], fallbackBundlePem: ''),
+        isEmpty,
+      );
+    });
+
+    test('armors each native DER root to PEM, after the bundle', () {
+      final anchors = windowsTrustAnchorsPem(
+        nativeRoots: [_firstEmbeddedCertDer()],
+        fallbackBundlePem: embeddedCaBundlePem,
+      );
+
+      expect(anchors, hasLength(2));
+      expect(anchors[0], embeddedCaBundlePem);
+      expect(anchors[1], startsWith('-----BEGIN CERTIFICATE-----'));
+    });
+  });
+
+  group('embeddedCaBundlePem', () {
+    test('is a substantial, loadable public-CA set', () {
+      // Guards against a regeneration from an incomplete or wrong source
+      // (e.g. macOS /etc/ssl/cert.pem) that ships a near-empty bundle.
+      final certCount = '-----BEGIN CERTIFICATE-----'
+          .allMatches(embeddedCaBundlePem)
+          .length;
+      expect(
+        certCount,
+        greaterThanOrEqualTo(100),
+        reason: 'a small bundle implies the wrong/incomplete CA source',
+      );
+
+      expect(
+        () => SecurityContext(
+          withTrustedRoots: false,
+        ).setTrustedCertificatesBytes(utf8.encode(embeddedCaBundlePem)),
+        returnsNormally,
+        reason: 'the bundle must parse and load as PEM trust anchors',
+      );
+    });
+  });
 }
 
 /// Decodes the first certificate of the embedded bundle back to DER bytes,
