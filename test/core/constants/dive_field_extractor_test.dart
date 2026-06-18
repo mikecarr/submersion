@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:submersion/core/constants/dive_field.dart';
 import 'package:submersion/core/constants/enums.dart';
+import 'package:submersion/core/constants/units.dart';
 import 'package:submersion/features/dive_centers/domain/entities/dive_center.dart';
 import 'package:submersion/features/dive_log/domain/entities/dive.dart';
 import 'package:submersion/features/dive_log/domain/entities/dive_summary.dart';
@@ -464,6 +465,54 @@ void main() {
       // Tank 2: 7.0  * (200 - 150) = 350L
       // Total: 1550L / 52 / 2.82 ≈ 10.57
       expect(result as double, closeTo(10.57, 0.1));
+    });
+
+    test('sacRate volume mode returns L/min from dive.sac', () {
+      final result = DiveField.sacRate.extractFromDive(
+        testDive,
+        sacUnit: SacUnit.litersPerMin,
+      );
+      // 1800L / 52 / 2.82 ≈ 12.28
+      expect(result as double, closeTo(12.28, 0.1));
+    });
+
+    test('sacRate pressure mode returns bar/min from dive.sacPressure', () {
+      final result = DiveField.sacRate.extractFromDive(
+        testDive,
+        sacUnit: SacUnit.pressurePerMin,
+      );
+      // 150 bar / 52 / 2.82 ≈ 1.02 bar/min
+      expect(result as double, closeTo(1.02, 0.05));
+    });
+
+    test('sacRate pressure mode works without tank volume', () {
+      // A tank with pressures but no volume: volume-based SAC is impossible,
+      // but pressure-based SAC only needs the pressure drop.
+      const noVolumeTank = DiveTank(
+        id: 'tank-nv',
+        startPressure: 200.0,
+        endPressure: 50.0,
+        role: TankRole.backGas,
+      );
+      final dive = Dive(
+        id: 'dive-nv-prs',
+        dateTime: now,
+        runtime: const Duration(minutes: 45),
+        avgDepth: 18.0,
+        tanks: [noVolumeTank],
+      );
+
+      expect(
+        DiveField.sacRate.extractFromDive(dive, sacUnit: SacUnit.litersPerMin),
+        isNull,
+      );
+      expect(
+        DiveField.sacRate.extractFromDive(
+          dive,
+          sacUnit: SacUnit.pressurePerMin,
+        ),
+        isA<double>(),
+      );
     });
 
     test('gasConsumed sums all tanks on multi-tank dive', () {
