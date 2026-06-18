@@ -195,7 +195,9 @@ class TileCacheService {
         ..write(' bodyBytes=${response.bodyBytes.length}');
     }
     if (original != null) {
-      details.write(' cause=${original.runtimeType}: $original');
+      details.write(
+        ' cause=${original.runtimeType}: ${_describeError(original)}',
+      );
     }
     // An offline miss is expected; anything else is a real problem.
     if (error.type == FMTCBrowsingErrorType.noConnectionDuringFetch) {
@@ -204,6 +206,19 @@ class TileCacheService {
       _log.warning(details.toString());
     }
     return null;
+  }
+
+  /// The error's own `toString` (which carries the actionable detail, e.g.
+  /// `CERTIFICATE_VERIFY_FAILED`), falling back to [Error.safeToString] if
+  /// that throws. Guards the [handleTileError] log line so a pathological
+  /// `toString` can never throw back out of the error handler and surface as
+  /// a map-render exception. Mirrors `CloudStorageException`'s cause handling.
+  static String _describeError(Object error) {
+    try {
+      return error.toString();
+    } catch (_) {
+      return Error.safeToString(error);
+    }
   }
 
   /// Get a tile provider configured for offline-only usage.

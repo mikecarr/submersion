@@ -49,7 +49,7 @@ def load_source(arg):
         if not path.exists():
             raise FileNotFoundError(f"no such CA bundle file: {arg}")
         return path.read_text(encoding="utf-8"), str(path)
-    with urllib.request.urlopen(CANONICAL_URL) as resp:
+    with urllib.request.urlopen(CANONICAL_URL, timeout=30) as resp:
         return resp.read().decode("utf-8"), CANONICAL_URL
 
 

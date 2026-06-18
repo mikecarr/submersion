@@ -104,5 +104,31 @@ void main() {
         );
       },
     );
+
+    test('never rethrows when the cause toString throws', () async {
+      Object? result;
+      final entry = await logFrom(() {
+        result = TileCacheService.handleTileError(
+          FMTCBrowsingError(
+            type: FMTCBrowsingErrorType.unknownFetchException,
+            networkUrl: 'https://tile.example/1/1/1.png',
+            storageSuitableUID: 'uid',
+            originalError: _ThrowingToString(),
+          ),
+        );
+      });
+
+      expect(result, isNull); // handler degraded instead of propagating
+      expect(entry.level, LogLevel.warning);
+      expect(entry.message, contains('cause=_ThrowingToString'));
+    });
   });
+}
+
+/// A cause whose `toString` throws, used to verify
+/// [TileCacheService.handleTileError] degrades safely rather than letting the
+/// error escape the handler.
+class _ThrowingToString {
+  @override
+  String toString() => throw StateError('toString boom');
 }
