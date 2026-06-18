@@ -975,6 +975,23 @@ void main() {
       });
     });
 
+    group('resolveBackupsDirectory', () {
+      test('creates and returns the custom location; else default', () async {
+        final base = await Directory.systemTemp.createTemp('rbd_');
+        addTearDown(() => base.delete(recursive: true));
+        final sub = '${base.path}/backups_sub'; // does not exist yet
+
+        await preferences.setBackupLocation(sub);
+        expect(await BackupService.resolveBackupsDirectory(preferences), sub);
+        expect(await Directory(sub).exists(), isTrue); // created
+
+        await preferences.setBackupLocation(null);
+        final def = await BackupService.resolveBackupsDirectory(preferences);
+        expect(def, contains('Submersion'));
+        expect(def, contains('Backups'));
+      });
+    });
+
     group('resolveDefaultBackupsDirectory', () {
       test('returns the sandbox Submersion/Backups path even when a custom '
           'location is configured', () async {

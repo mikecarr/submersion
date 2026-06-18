@@ -114,4 +114,36 @@ void main() {
     expect(await BackupBookmarkService.resolveBookmark(Uint8List(1)), isNull);
     expect(await BackupBookmarkService.verifyWriteAccess('/x'), isFalse);
   });
+
+  group('error and unsupported handling', () {
+    test('create/resolve/verify swallow a PlatformException', () async {
+      mock((_) async => throw PlatformException(code: 'BOOM'));
+      expect(await BackupBookmarkService.createBookmark('/x'), isNull);
+      expect(await BackupBookmarkService.resolveBookmark(Uint8List(1)), isNull);
+      expect(await BackupBookmarkService.verifyWriteAccess('/x'), isFalse);
+    });
+
+    test('release and releaseAll swallow a PlatformException', () async {
+      mock((_) async => throw PlatformException(code: 'BOOM'));
+      await BackupBookmarkService.release('r'); // must not throw
+      await BackupBookmarkService.releaseAll(); // must not throw
+    });
+
+    test('pickFolder rethrows a PlatformException', () async {
+      mock((_) async => throw PlatformException(code: 'BOOM'));
+      await expectLater(
+        BackupBookmarkService.pickFolder(),
+        throwsA(isA<PlatformException>()),
+      );
+    });
+
+    test('release/releaseAll/pickFolder are no-ops when unsupported', () async {
+      BackupBookmarkService.debugSupportedOverride = false;
+      mock((_) async => null);
+      await BackupBookmarkService.release('r');
+      await BackupBookmarkService.releaseAll();
+      expect(await BackupBookmarkService.pickFolder(), isNull);
+      expect(calls, isEmpty);
+    });
+  });
 }
