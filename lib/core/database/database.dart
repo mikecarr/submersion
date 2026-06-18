@@ -1619,7 +1619,7 @@ class AppDatabase extends _$AppDatabase {
 
   /// The current schema version as a static constant so that pre-open checks
   /// (e.g. version-mismatch guard) can reference it without an instance.
-  static const int currentSchemaVersion = 87;
+  static const int currentSchemaVersion = 88;
 
   /// Every schema version that has a migration block in onUpgrade.
   /// Used to calculate progress step counts. When adding a new migration,
@@ -1710,6 +1710,7 @@ class AppDatabase extends _$AppDatabase {
     85,
     86,
     87,
+    88,
   ];
 
   /// Tables that carry a per-row Hybrid Logical Clock for cross-device conflict
@@ -1779,6 +1780,7 @@ class AppDatabase extends _$AppDatabase {
           ('shore', 'Shore', 11),
           ('boat', 'Boat', 12),
           ('liveaboard', 'Liveaboard', 13),
+          ('cavern', 'Cavern', 14),
         ];
 
         for (final type in builtInTypes) {
@@ -4126,6 +4128,27 @@ class AppDatabase extends _$AppDatabase {
           }
         }
         if (from < 87) await reportProgress();
+        if (from < 88) {
+          // Add 'Cavern' as a built-in dive type. Cavern diving (light-zone
+          // only, cavern cert) is a distinct discipline from Cave (beyond
+          // light zone, full cave cert). Guarded by a sqlite_master check so
+          // minimal-schema test databases without dive_types are not affected;
+          // INSERT OR IGNORE preserves any user-created 'cavern' row.
+          //
+          // Renumbered from v84 to v88 because upstream claimed v84-v87 for
+          // sync-infrastructure migrations (see blocks above).
+          final tables = await customSelect(
+            "SELECT name FROM sqlite_master WHERE type='table' AND name='dive_types'",
+          ).get();
+          if (tables.isNotEmpty) {
+            final now = DateTime.now().millisecondsSinceEpoch;
+            await customStatement('''
+              INSERT OR IGNORE INTO dive_types (id, name, is_built_in, sort_order, created_at, updated_at)
+              VALUES ('cavern', 'Cavern', 1, 14, $now, $now)
+            ''');
+          }
+        }
+        if (from < 88) await reportProgress();
       },
       beforeOpen: (details) async {
         // Enable foreign keys
