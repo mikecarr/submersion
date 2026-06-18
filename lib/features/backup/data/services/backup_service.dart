@@ -70,6 +70,7 @@ class BackupDirLease {
 abstract class BackupBookmarkPort {
   Future<BackupBookmarkLease?> resolve(Uint8List data);
   Future<void> release(String ref);
+  Future<Uint8List?> createBookmark(String path);
 }
 
 class _DefaultBackupBookmarkPort implements BackupBookmarkPort {
@@ -81,6 +82,10 @@ class _DefaultBackupBookmarkPort implements BackupBookmarkPort {
 
   @override
   Future<void> release(String ref) => BackupBookmarkService.release(ref);
+
+  @override
+  Future<Uint8List?> createBookmark(String path) =>
+      BackupBookmarkService.createBookmark(path);
 }
 
 /// Core backup service handling backup creation, restore, pruning, and cloud upload.
@@ -712,6 +717,17 @@ class BackupService {
     if (bytes != null) {
       final lease = await port.resolve(bytes);
       if (lease != null) {
+        if (lease.isStale) {
+          // Resolved but stale (the folder moved, or an OS upgrade aged the
+          // bookmark). Re-mint it from the now-armed path so it stops resolving
+          // stale -- best-effort: if re-minting fails we keep the resolved
+          // location rather than discard a working choice. A genuinely broken
+          // bookmark resolves to null below and is reset to the default.
+          final fresh = await port.createBookmark(lease.path);
+          if (fresh != null) {
+            await preferences.setBackupLocationBookmark(fresh);
+          }
+        }
         return BackupDirLease(
           await _ensureDir(lease.path),
           () => port.release(lease.ref),
