@@ -228,6 +228,27 @@ class _SiteEditPageState extends ConsumerState<SiteEditPage> {
       isMeaningful: (value) => value.trim().isNotEmpty,
     );
     _initializeMergeTextField(
+      key: 'city',
+      controller: _cityController,
+      sites: data.sites,
+      getValue: (site) => site.city ?? '',
+      isMeaningful: (value) => value.trim().isNotEmpty,
+    );
+    _initializeMergeTextField(
+      key: 'island',
+      controller: _islandController,
+      sites: data.sites,
+      getValue: (site) => site.island ?? '',
+      isMeaningful: (value) => value.trim().isNotEmpty,
+    );
+    _initializeMergeTextField(
+      key: 'bodyOfWater',
+      controller: _bodyOfWaterController,
+      sites: data.sites,
+      getValue: (site) => site.bodyOfWater ?? '',
+      isMeaningful: (value) => value.trim().isNotEmpty,
+    );
+    _initializeMergeTextField(
       key: 'minDepth',
       controller: _minDepthController,
       sites: data.sites,
@@ -1099,6 +1120,9 @@ class _SiteEditPageState extends ConsumerState<SiteEditPage> {
       'description' => _descriptionController,
       'country' => _countryController,
       'region' => _regionController,
+      'city' => _cityController,
+      'island' => _islandController,
+      'bodyOfWater' => _bodyOfWaterController,
       'minDepth' => _minDepthController,
       'maxDepth' => _maxDepthController,
       'notes' => _notesController,

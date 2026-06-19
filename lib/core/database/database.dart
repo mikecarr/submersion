@@ -350,6 +350,7 @@ class DiveSites extends Table {
   // MacDive site metadata
   TextColumn get waterType => text().nullable()();
   TextColumn get bodyOfWater => text().nullable()();
+  // Location hierarchy
   TextColumn get city => text().nullable()();
   TextColumn get island => text().nullable()();
   TextColumn get country => text().nullable()();

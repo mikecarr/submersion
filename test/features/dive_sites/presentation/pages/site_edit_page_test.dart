@@ -754,6 +754,49 @@ void main() {
             '_initializeFromMerge was not setting _isShared before the fix.',
       );
     });
+
+    testWidgets('initializes city/island/bodyOfWater from a merge candidate', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(900, 3200);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+
+      // Primary has no locality; secondary carries the values that must not be
+      // silently dropped during a merge.
+      final repo = SiteRepository();
+      final primarySite = await repo.createSite(
+        const DiveSite(id: 'merge-primary', name: 'Primary'),
+      );
+      await repo.createSite(
+        const DiveSite(
+          id: 'merge-secondary',
+          name: 'Secondary',
+          city: 'Cebu City',
+          island: 'Malapascua',
+          bodyOfWater: 'Visayan Sea',
+        ),
+      );
+
+      await tester.pumpWidget(
+        _buildMergeHarness(
+          prefs: prefs,
+          divers: const [],
+          mergeSiteIds: [primarySite.id, 'merge-secondary'],
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // The merge picks the first meaningful value, so the locality fields are
+      // populated from the secondary site rather than left empty.
+      expect(
+        find.widgetWithText(TextFormField, 'Cebu City'),
+        findsOneWidget,
+        reason: 'city must be initialized from the merge candidate',
+      );
+      expect(find.widgetWithText(TextFormField, 'Malapascua'), findsOneWidget);
+      expect(find.widgetWithText(TextFormField, 'Visayan Sea'), findsOneWidget);
+    });
   });
 
   group('location fields', () {
