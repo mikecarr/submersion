@@ -737,6 +737,13 @@ class DiveProfilePoint extends Equatable {
   // CCR/SCR rebreather data (v1.5)
   final double? setpoint; // Current setpoint at this sample (bar)
   final double? ppO2; // Measured/calculated ppO2 (bar)
+  // Individual O2 cell readings (bar), stored raw; null when absent
+  final double? o2Sensor1;
+  final double? o2Sensor2;
+  final double? o2Sensor3;
+  final double? o2Sensor4;
+  final double? o2Sensor5;
+  final double? o2Sensor6;
   // Wearable integration (v2.0)
   final String? heartRateSource; // 'diveComputer', 'appleWatch', 'garmin'
   // Decompression data
@@ -755,6 +762,12 @@ class DiveProfilePoint extends Equatable {
     this.heartRate,
     this.setpoint,
     this.ppO2,
+    this.o2Sensor1,
+    this.o2Sensor2,
+    this.o2Sensor3,
+    this.o2Sensor4,
+    this.o2Sensor5,
+    this.o2Sensor6,
     this.heartRateSource,
     this.cns,
     this.ndl,
@@ -772,6 +785,12 @@ class DiveProfilePoint extends Equatable {
     int? heartRate,
     double? setpoint,
     double? ppO2,
+    double? o2Sensor1,
+    double? o2Sensor2,
+    double? o2Sensor3,
+    double? o2Sensor4,
+    double? o2Sensor5,
+    double? o2Sensor6,
     String? heartRateSource,
     double? cns,
     int? ndl,
@@ -788,6 +807,12 @@ class DiveProfilePoint extends Equatable {
       heartRate: heartRate ?? this.heartRate,
       setpoint: setpoint ?? this.setpoint,
       ppO2: ppO2 ?? this.ppO2,
+      o2Sensor1: o2Sensor1 ?? this.o2Sensor1,
+      o2Sensor2: o2Sensor2 ?? this.o2Sensor2,
+      o2Sensor3: o2Sensor3 ?? this.o2Sensor3,
+      o2Sensor4: o2Sensor4 ?? this.o2Sensor4,
+      o2Sensor5: o2Sensor5 ?? this.o2Sensor5,
+      o2Sensor6: o2Sensor6 ?? this.o2Sensor6,
       heartRateSource: heartRateSource ?? this.heartRateSource,
       cns: cns ?? this.cns,
       ndl: ndl ?? this.ndl,
@@ -807,6 +832,12 @@ class DiveProfilePoint extends Equatable {
     heartRate,
     setpoint,
     ppO2,
+    o2Sensor1,
+    o2Sensor2,
+    o2Sensor3,
+    o2Sensor4,
+    o2Sensor5,
+    o2Sensor6,
     heartRateSource,
     cns,
     ndl,

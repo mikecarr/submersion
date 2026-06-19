@@ -5162,6 +5162,9 @@ class AppLocalizationsHu extends AppLocalizations {
   String get diveLog_tissue_title => 'Szovettelitodes';
 
   @override
+  String get diveLog_tooltip_avgCalculated => '(átl., számított)';
+
+  @override
   String get diveLog_tooltip_ceiling => 'Plafon';
 
   @override
@@ -5211,6 +5214,9 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get diveLog_tooltip_sac => 'SAC';
+
+  @override
+  String get diveLog_tooltip_sensor => 'Érzékelő';
 
   @override
   String get diveLog_tooltip_srfGf => 'SrfGF';

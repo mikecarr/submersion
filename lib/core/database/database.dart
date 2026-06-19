@@ -309,6 +309,16 @@ class DiveProfiles extends Table {
       real().nullable()(); // Current setpoint at sample (bar)
   RealColumn get ppO2 => real().nullable()(); // Measured/calculated ppO2 (bar)
 
+  // Individual CCR O2 cell readings (bar). Subsurface exports up to 6
+  // (sensor1..sensor6); rebreathers run 3 (e.g. JJ-CCR) to 5 (e.g. rEvo).
+  // Stored raw exactly as the source reports them; null when absent.
+  RealColumn get o2Sensor1 => real().nullable()();
+  RealColumn get o2Sensor2 => real().nullable()();
+  RealColumn get o2Sensor3 => real().nullable()();
+  RealColumn get o2Sensor4 => real().nullable()();
+  RealColumn get o2Sensor5 => real().nullable()();
+  RealColumn get o2Sensor6 => real().nullable()();
+
   // Per-sample decompression data (v1.5)
   RealColumn get cns => real().nullable()(); // CNS percentage 0-100
   IntColumn get tts => integer().nullable()(); // Time to surface in seconds
@@ -1619,7 +1629,7 @@ class AppDatabase extends _$AppDatabase {
 
   /// The current schema version as a static constant so that pre-open checks
   /// (e.g. version-mismatch guard) can reference it without an instance.
-  static const int currentSchemaVersion = 88;
+  static const int currentSchemaVersion = 89;
 
   /// Every schema version that has a migration block in onUpgrade.
   /// Used to calculate progress step counts. When adding a new migration,
@@ -1711,6 +1721,7 @@ class AppDatabase extends _$AppDatabase {
     86,
     87,
     88,
+    89,
   ];
 
   /// Tables that carry a per-row Hybrid Logical Clock for cross-device conflict
@@ -4149,6 +4160,28 @@ class AppDatabase extends _$AppDatabase {
           }
         }
         if (from < 88) await reportProgress();
+        if (from < 89) {
+          // Individual CCR O2 cell readings (sensor1..sensor6 from Subsurface
+          // CCR imports): six nullable columns on `dive_profiles`. PRAGMA-guarded
+          // so a healthy database no-ops; existing rows read as NULL.
+          //
+          // Renumbered from v88 to v89 because upstream claimed v88 for the
+          // Cavern dive-type migration (see block above).
+          final cols = await customSelect(
+            "PRAGMA table_info('dive_profiles')",
+          ).get();
+          if (cols.isNotEmpty) {
+            final existing = cols.map((c) => c.read<String>('name')).toSet();
+            for (var n = 1; n <= 6; n++) {
+              if (!existing.contains('o2_sensor$n')) {
+                await customStatement(
+                  'ALTER TABLE dive_profiles ADD COLUMN o2_sensor$n REAL',
+                );
+              }
+            }
+          }
+        }
+        if (from < 89) await reportProgress();
       },
       beforeOpen: (details) async {
         // Enable foreign keys

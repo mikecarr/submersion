@@ -8794,6 +8794,12 @@ abstract class AppLocalizations {
   /// **'Tissue Loading'**
   String get diveLog_tissue_title;
 
+  /// No description provided for @diveLog_tooltip_avgCalculated.
+  ///
+  /// In en, this message translates to:
+  /// **'(avg, calculated)'**
+  String get diveLog_tooltip_avgCalculated;
+
   /// No description provided for @diveLog_tooltip_ceiling.
   ///
   /// In en, this message translates to:
@@ -8895,6 +8901,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'SAC'**
   String get diveLog_tooltip_sac;
+
+  /// No description provided for @diveLog_tooltip_sensor.
+  ///
+  /// In en, this message translates to:
+  /// **'Sensor'**
+  String get diveLog_tooltip_sensor;
 
   /// No description provided for @diveLog_tooltip_srfGf.
   ///

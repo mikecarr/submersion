@@ -4938,6 +4938,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get diveLog_tissue_title => '组织饱和度';
 
   @override
+  String get diveLog_tooltip_avgCalculated => '（平均值，计算）';
+
+  @override
   String get diveLog_tooltip_ceiling => '上升限制';
 
   @override
@@ -4987,6 +4990,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get diveLog_tooltip_sac => 'SAC';
+
+  @override
+  String get diveLog_tooltip_sensor => '传感器';
 
   @override
   String get diveLog_tooltip_srfGf => '水面GF';

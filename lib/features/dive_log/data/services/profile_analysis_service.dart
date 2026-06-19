@@ -217,6 +217,15 @@ class ProfileAnalysis {
   /// ppO2 at each profile point (bar)
   final List<double> ppO2Curve;
 
+  /// Individual CCR O2 cell readings at each profile point (bar). Outer list is
+  /// indexed by cell (0-based: cell 1, cell 2, ...), inner list is per sample
+  /// with null where that cell had no reading. Null when the dive has no cells.
+  final List<List<double?>>? o2SensorCurves;
+
+  /// True when [ppO2Curve] values are derived from averaging O2 cells (no
+  /// computer-supplied ppO2 was available). Used to label the chart tooltip.
+  final bool ppO2FromSensorAverage;
+
   /// SAC rate at each point (bar/min at surface) - null if no pressure data
   final List<double>? sacCurve;
 
@@ -278,6 +287,8 @@ class ProfileAnalysis {
     required this.decoStatuses,
     required this.o2Exposure,
     required this.ppO2Curve,
+    this.o2SensorCurves,
+    this.ppO2FromSensorAverage = false,
     this.sacCurve,
     this.smoothedSacCurve,
     this.sacSegments,
@@ -365,6 +376,8 @@ class ProfileAnalysis {
     List<DecoStatus>? decoStatuses,
     O2Exposure? o2Exposure,
     List<double>? ppO2Curve,
+    List<List<double?>>? o2SensorCurves,
+    bool? ppO2FromSensorAverage,
     List<double>? sacCurve,
     List<double>? smoothedSacCurve,
     List<SacSegment>? sacSegments,
@@ -393,6 +406,9 @@ class ProfileAnalysis {
       decoStatuses: decoStatuses ?? this.decoStatuses,
       o2Exposure: o2Exposure ?? this.o2Exposure,
       ppO2Curve: ppO2Curve ?? this.ppO2Curve,
+      o2SensorCurves: o2SensorCurves ?? this.o2SensorCurves,
+      ppO2FromSensorAverage:
+          ppO2FromSensorAverage ?? this.ppO2FromSensorAverage,
       sacCurve: sacCurve ?? this.sacCurve,
       smoothedSacCurve: smoothedSacCurve ?? this.smoothedSacCurve,
       sacSegments: sacSegments ?? this.sacSegments,

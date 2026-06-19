@@ -92,6 +92,8 @@ Widget _buildChart({
   double? tankVolume,
   double sacNormalizationFactor = 1.0,
   List<double>? ppO2Curve,
+  List<List<double?>>? o2SensorCurves,
+  bool ppO2FromSensorAverage = false,
   List<double>? ppN2Curve,
   List<double>? ppHeCurve,
   List<double>? densityCurve,
@@ -141,6 +143,8 @@ Widget _buildChart({
             tankVolume: tankVolume,
             sacNormalizationFactor: sacNormalizationFactor,
             ppO2Curve: ppO2Curve,
+            o2SensorCurves: o2SensorCurves,
+            ppO2FromSensorAverage: ppO2FromSensorAverage,
             ppN2Curve: ppN2Curve,
             ppHeCurve: ppHeCurve,
             densityCurve: densityCurve,
@@ -182,6 +186,8 @@ Widget _buildChartAllMetrics({
   double? tankVolume,
   double sacNormalizationFactor = 1.0,
   List<double>? ppO2Curve,
+  List<List<double?>>? o2SensorCurves,
+  bool ppO2FromSensorAverage = false,
   List<double>? ppN2Curve,
   List<double>? ppHeCurve,
   List<double>? densityCurve,
@@ -221,6 +227,8 @@ Widget _buildChartAllMetrics({
             tankVolume: tankVolume,
             sacNormalizationFactor: sacNormalizationFactor,
             ppO2Curve: ppO2Curve,
+            o2SensorCurves: o2SensorCurves,
+            ppO2FromSensorAverage: ppO2FromSensorAverage,
             ppN2Curve: ppN2Curve,
             ppHeCurve: ppHeCurve,
             densityCurve: densityCurve,
@@ -668,6 +676,50 @@ void main() {
       await tester.pumpWidget(_buildChart(profile: profile, ppO2Curve: ppO2));
       await tester.pumpAndSettle();
       expect(find.byType(DiveProfileChart), findsOneWidget);
+    });
+
+    testWidgets('renders with O2 sensor curves alongside ppO2', (tester) async {
+      final profile = makeRichProfile();
+      final ppO2 = List.generate(10, (i) => 0.7 + i * 0.05);
+      // Three cells (e.g. JJ-CCR), each per-sample, with a null gap on cell 3.
+      final sensors = <List<double?>>[
+        List.generate(10, (i) => 0.68 + i * 0.05),
+        List.generate(10, (i) => 0.72 + i * 0.05),
+        List.generate(10, (i) => i == 4 ? null : 0.70 + i * 0.05),
+      ];
+
+      await tester.pumpWidget(
+        _buildChart(profile: profile, ppO2Curve: ppO2, o2SensorCurves: sensors),
+      );
+      await tester.pumpAndSettle();
+
+      final chart = tester.widget<DiveProfileChart>(
+        find.byType(DiveProfileChart),
+      );
+      expect(chart.o2SensorCurves, sensors);
+      expect(chart.ppO2FromSensorAverage, isFalse);
+    });
+
+    testWidgets('forwards ppO2FromSensorAverage flag to the chart', (
+      tester,
+    ) async {
+      final profile = makeRichProfile();
+      final ppO2 = List.generate(10, (i) => 0.7 + i * 0.05);
+
+      await tester.pumpWidget(
+        _buildChart(
+          profile: profile,
+          ppO2Curve: ppO2,
+          o2SensorCurves: <List<double?>>[List.generate(10, (i) => 0.7)],
+          ppO2FromSensorAverage: true,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final chart = tester.widget<DiveProfileChart>(
+        find.byType(DiveProfileChart),
+      );
+      expect(chart.ppO2FromSensorAverage, isTrue);
     });
 
     testWidgets('renders with ppN2 curve data', (tester) async {
@@ -1524,6 +1576,118 @@ void main() {
 
         expect(receivedRows, isNull);
         expect(selectedIndex, isNull);
+      },
+    );
+
+    testWidgets(
+      'tooltip exposes per-cell sensor rows and the calculated-average ppO2 '
+      'label',
+      (tester) async {
+        List<TooltipRow>? receivedRows;
+
+        final profile = makeTouchProfile();
+        final sensors = <List<double?>>[
+          List.generate(20, (i) => 0.95),
+          List.generate(20, (i) => 0.97),
+          // Cell 3 drops out near the touch point to cover the null skip path.
+          List.generate(20, (i) => i == 10 ? null : 0.96),
+        ];
+
+        await tester.pumpWidget(
+          // _buildChartAllMetrics enables the ppO2 legend toggle
+          // (defaultShowPpO2: true); the tooltip ppO2/sensor rows only render
+          // when that toggle is on.
+          _buildChartAllMetrics(
+            profile: profile,
+            tooltipBelow: true,
+            onTooltipData: (rows) => receivedRows = rows,
+            ppO2Curve: List.generate(20, (i) => 0.96),
+            o2SensorCurves: sensors,
+            ppO2FromSensorAverage: true,
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        final chartFinder = find.byType(LineChart);
+        final chartCenter = tester.getCenter(chartFinder);
+
+        final gesture = await tester.startGesture(chartCenter);
+        await tester.pump(const Duration(milliseconds: 600));
+        await gesture.moveBy(const Offset(5, 0));
+        await tester.pump();
+        await gesture.moveBy(const Offset(5, 0));
+        await tester.pump();
+
+        // The emission depends on fl_chart resolving a nearby spot; assert the
+        // new rows only when a tooltip was produced (matching the file's
+        // gesture-based tooltip tests).
+        if (receivedRows != null) {
+          final labels = receivedRows!.map((r) => r.label).toList();
+          // ppO2 row is labelled as a calculated average when no computer ppO2.
+          expect(labels.any((l) => l.contains('avg, calculated')), isTrue);
+          // Each present cell contributes a row; cell 3 may be absent at the
+          // null sample, so assert on the always-present cells.
+          expect(labels, contains('Sensor 1'));
+          expect(labels, contains('Sensor 2'));
+        }
+
+        await gesture.up();
+        await tester.pump();
+      },
+    );
+
+    testWidgets(
+      'in-chart tooltip (tooltipBelow=false) builds the calculated-average '
+      'ppO2 label and per-cell sensor rows without crashing',
+      (tester) async {
+        final profile = makeTouchProfile();
+        final sensors = <List<double?>>[
+          List.generate(20, (i) => 0.95),
+          List.generate(20, (i) => 0.97),
+          // Cell 3 drops out at one sample to cover the null-skip branch.
+          List.generate(20, (i) => i == 10 ? null : 0.96),
+        ];
+
+        // tooltipBelow=false routes tooltip building through fl_chart's
+        // getTooltipItems (the in-chart bubble) instead of the external
+        // callback. That is the second ppO2/sensor code path, distinct from
+        // _emitExternalTooltip exercised by the tooltipBelow=true test above.
+        // _buildChartAllMetrics enables the ppO2 legend toggle so the rows
+        // render.
+        await tester.pumpWidget(
+          _buildChartAllMetrics(
+            profile: profile,
+            tooltipBelow: false,
+            ppO2Curve: List.generate(20, (i) => 0.96),
+            o2SensorCurves: sensors,
+            ppO2FromSensorAverage: true,
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        final chartFinder = find.byType(LineChart);
+        final chartBox = tester.renderObject(chartFinder) as RenderBox;
+        final chartSize = chartBox.size;
+
+        // Sweep across the chart so fl_chart resolves a nearby data point and
+        // renders the in-chart tooltip, exercising getTooltipItems.
+        for (var xFrac = 0.1; xFrac <= 0.9; xFrac += 0.1) {
+          final testPoint = chartBox.localToGlobal(
+            Offset(chartSize.width * xFrac, chartSize.height * 0.5),
+          );
+          final gesture = await tester.startGesture(testPoint);
+          await tester.pump(const Duration(milliseconds: 600));
+          await gesture.moveBy(const Offset(2, 0));
+          await tester.pump();
+          await gesture.up();
+          await tester.pump();
+        }
+
+        // The in-chart tooltip has no external callback to inspect; the
+        // coverage win is that getTooltipItems ran the ppO2-average and
+        // per-cell sensor branch (including the null-skip) without throwing.
+        expect(tester.takeException(), isNull);
+        expect(find.byType(LineChart), findsOneWidget);
       },
     );
 

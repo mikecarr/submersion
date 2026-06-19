@@ -5203,6 +5203,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get diveLog_tissue_title => 'Charge tissulaire';
 
   @override
+  String get diveLog_tooltip_avgCalculated => '(moy., calculé)';
+
+  @override
   String get diveLog_tooltip_ceiling => 'Plafond';
 
   @override
@@ -5252,6 +5255,9 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get diveLog_tooltip_sac => 'CAS';
+
+  @override
+  String get diveLog_tooltip_sensor => 'Capteur';
 
   @override
   String get diveLog_tooltip_srfGf => 'SrfGF';

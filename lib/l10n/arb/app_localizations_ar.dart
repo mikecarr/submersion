@@ -5058,6 +5058,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get diveLog_tissue_title => 'تحميل الأنسجة';
 
   @override
+  String get diveLog_tooltip_avgCalculated => '(متوسط، محسوب)';
+
+  @override
   String get diveLog_tooltip_ceiling => 'السقف';
 
   @override
@@ -5107,6 +5110,9 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get diveLog_tooltip_sac => 'SAC';
+
+  @override
+  String get diveLog_tooltip_sensor => 'المستشعر';
 
   @override
   String get diveLog_tooltip_srfGf => 'SrfGF';

@@ -590,6 +590,68 @@ void main() {
       expect(sourceInfo.cnsActual, MetricDataSource.calculated);
     });
 
+    test('CCR: computer ppO2 wins, labeled as not-average', () {
+      final profile = baseProfile
+          .map((p) => p.copyWith(ppO2: 1.3, o2Sensor1: 1.1, setpoint: 0.7))
+          .toList();
+
+      final (result, _) = overlayComputerDecoData(baseAnalysis, profile);
+
+      expect(result.ppO2Curve.first, 1.3);
+      expect(result.ppO2FromSensorAverage, isFalse);
+      // Cells still exposed for the tooltip.
+      expect(result.o2SensorCurves, isNotNull);
+      expect(result.o2SensorCurves!.first.first, 1.1);
+    });
+
+    test('CCR: no computer ppO2 -> cell average, labeled as average', () {
+      final profile = baseProfile
+          .map(
+            (p) => p.copyWith(o2Sensor1: 1.2, o2Sensor2: 1.3, o2Sensor3: 1.4),
+          )
+          .toList();
+
+      final (result, _) = overlayComputerDecoData(baseAnalysis, profile);
+
+      // (1.2 + 1.3 + 1.4) / 3 = 1.3
+      expect(result.ppO2Curve.first, closeTo(1.3, 1e-9));
+      expect(result.ppO2FromSensorAverage, isTrue);
+      expect(result.o2SensorCurves!.length, 3);
+    });
+
+    test('CCR: sensor gaps hold last cell value, never drop to setpoint', () {
+      // Cells on every other sample, setpoint 0.7 on all. The cell-less samples
+      // must carry the cell value forward, not jump back to the setpoint.
+      final profile = <DiveProfilePoint>[];
+      for (var i = 0; i < baseProfile.length; i++) {
+        final p = baseProfile[i].copyWith(setpoint: 0.7);
+        profile.add(i.isEven ? p.copyWith(o2Sensor1: 1.3) : p);
+      }
+
+      final (result, _) = overlayComputerDecoData(baseAnalysis, profile);
+
+      expect(result.ppO2Curve.every((v) => v == 1.3), isTrue);
+      expect(result.ppO2Curve.any((v) => v == 0.7), isFalse);
+      expect(result.ppO2FromSensorAverage, isTrue);
+    });
+
+    test('CCR: only setpoint -> ppO2 from setpoint, never OC', () {
+      final profile = baseProfile
+          .map((p) => p.copyWith(setpoint: 1.3))
+          .toList();
+
+      final (result, _) = overlayComputerDecoData(baseAnalysis, profile);
+
+      expect(result.ppO2Curve.every((v) => v == 1.3), isTrue);
+      expect(result.ppO2FromSensorAverage, isFalse);
+      expect(result.o2SensorCurves, isNull);
+    });
+
+    test('OC (no setpoint/cells/ppO2) leaves ppO2 curve untouched', () {
+      final (result, _) = overlayComputerDecoData(baseAnalysis, baseProfile);
+      expect(result.ppO2Curve, equals(baseAnalysis.ppO2Curve));
+    });
+
     test('overlays computer NDL when available', () {
       // Add computer NDL to some profile points
       final profileWithNdl = <DiveProfilePoint>[];

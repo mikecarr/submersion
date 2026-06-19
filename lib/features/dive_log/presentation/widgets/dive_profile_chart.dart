@@ -142,6 +142,15 @@ class DiveProfileChart extends ConsumerStatefulWidget {
   /// ppO2 curve in bar
   final List<double>? ppO2Curve;
 
+  /// Individual CCR O2 cell readings (bar). Outer list indexed by cell
+  /// (Sensor 1, Sensor 2, ...), inner list per sample (null where no reading).
+  /// Shown in the tooltip alongside the resolved ppO2.
+  final List<List<double?>>? o2SensorCurves;
+
+  /// True when [ppO2Curve] is a cell average (no computer-supplied ppO2),
+  /// used to label the tooltip "ppO2 (avg)".
+  final bool ppO2FromSensorAverage;
+
   /// ppN2 curve in bar
   final List<double>? ppN2Curve;
 
@@ -272,6 +281,8 @@ class DiveProfileChart extends ConsumerStatefulWidget {
     this.playbackTimestamp,
     this.highlightedTimestamp,
     this.ppO2Curve,
+    this.o2SensorCurves,
+    this.ppO2FromSensorAverage = false,
     this.ppN2Curve,
     this.ppHeCurve,
     this.modCurve,
@@ -653,17 +664,35 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
       );
     }
 
-    // ppO2
+    // ppO2 (computer-supplied value or O2 cell average) plus each sensor cell.
     if (_showPpO2 &&
         widget.ppO2Curve != null &&
         spot.spotIndex < widget.ppO2Curve!.length) {
       rows.add(
         TooltipRow(
-          label: 'ppO2',
+          label: widget.ppO2FromSensorAverage
+              ? '${context.l10n.diveLog_tooltip_ppO2} ${context.l10n.diveLog_tooltip_avgCalculated}'
+              : context.l10n.diveLog_tooltip_ppO2,
           value: '${widget.ppO2Curve![spot.spotIndex].toStringAsFixed(2)} bar',
           bulletColor: const Color(0xFF00ACC1),
         ),
       );
+      final sensorCurves = widget.o2SensorCurves;
+      if (sensorCurves != null) {
+        for (var cell = 0; cell < sensorCurves.length; cell++) {
+          final readings = sensorCurves[cell];
+          if (spot.spotIndex >= readings.length) continue;
+          final reading = readings[spot.spotIndex];
+          if (reading == null) continue;
+          rows.add(
+            TooltipRow(
+              label: '${context.l10n.diveLog_tooltip_sensor} ${cell + 1}',
+              value: '${reading.toStringAsFixed(2)} bar',
+              bulletColor: const Color(0xFF80DEEA),
+            ),
+          );
+        }
+      }
     }
 
     // ppN2
@@ -1821,7 +1850,7 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
                       );
                     }
 
-                    // ppO2 (if enabled)
+                    // ppO2 (computer value or O2 cell average) plus each sensor
                     if (_showPpO2) {
                       String ppO2Value = '—';
                       if (widget.ppO2Curve != null &&
@@ -1830,10 +1859,26 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
                         ppO2Value = '${ppO2.toStringAsFixed(2)} bar';
                       }
                       addRow(
-                        context.l10n.diveLog_tooltip_ppO2,
+                        widget.ppO2FromSensorAverage
+                            ? '${context.l10n.diveLog_tooltip_ppO2} ${context.l10n.diveLog_tooltip_avgCalculated}'
+                            : context.l10n.diveLog_tooltip_ppO2,
                         ppO2Value,
                         const Color(0xFF00ACC1),
                       );
+                      final sensorCurves = widget.o2SensorCurves;
+                      if (sensorCurves != null) {
+                        for (var cell = 0; cell < sensorCurves.length; cell++) {
+                          final readings = sensorCurves[cell];
+                          if (spot.spotIndex >= readings.length) continue;
+                          final reading = readings[spot.spotIndex];
+                          if (reading == null) continue;
+                          addRow(
+                            '${context.l10n.diveLog_tooltip_sensor} ${cell + 1}',
+                            '${reading.toStringAsFixed(2)} bar',
+                            const Color(0xFF80DEEA),
+                          );
+                        }
+                      }
                     }
 
                     // ppN2 (if enabled)

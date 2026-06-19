@@ -1013,6 +1013,12 @@ class UddfEntityImporter {
                   decoType: p['decoType'] as int?,
                   setpoint: asDoubleOrNull(p['setpoint']),
                   ppO2: asDoubleOrNull(p['ppO2']),
+                  o2Sensor1: asDoubleOrNull(p['o2Sensor1']),
+                  o2Sensor2: asDoubleOrNull(p['o2Sensor2']),
+                  o2Sensor3: asDoubleOrNull(p['o2Sensor3']),
+                  o2Sensor4: asDoubleOrNull(p['o2Sensor4']),
+                  o2Sensor5: asDoubleOrNull(p['o2Sensor5']),
+                  o2Sensor6: asDoubleOrNull(p['o2Sensor6']),
                 ),
               )
               .toList() ??

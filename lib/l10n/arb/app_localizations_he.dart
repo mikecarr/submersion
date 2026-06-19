@@ -5037,6 +5037,9 @@ class AppLocalizationsHe extends AppLocalizations {
   String get diveLog_tissue_title => 'עומס רקמות';
 
   @override
+  String get diveLog_tooltip_avgCalculated => '(ממוצע, מחושב)';
+
+  @override
   String get diveLog_tooltip_ceiling => 'תקרה';
 
   @override
@@ -5086,6 +5089,9 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get diveLog_tooltip_sac => 'SAC';
+
+  @override
+  String get diveLog_tooltip_sensor => 'חיישן';
 
   @override
   String get diveLog_tooltip_srfGf => 'SrfGF';

@@ -254,6 +254,81 @@ ProfileAnalysisService _resolveAnalysisService(
   final useTts = ttsSource == MetricDataSource.computer && hasComputerTts;
   final useCns = cnsSource == MetricDataSource.computer && hasComputerCns;
 
+  // ---- ppO2 / O2 cell overlay (CCR/SCR) ----
+  // For rebreather dives the displayed ppO2 must come from sensor data or the
+  // setpoint, never the OC depth x FO2 fallback. Resolve per sample with the
+  // priority: computer ppO2 (dc_supplied) -> cell average -> setpoint. Cells
+  // are exposed individually for the tooltip. Averaging here is display-time
+  // only (the no-calculation rule applies to import, not display).
+  const cellAccessors = <double? Function(DiveProfilePoint)>[
+    _o2Sensor1,
+    _o2Sensor2,
+    _o2Sensor3,
+    _o2Sensor4,
+    _o2Sensor5,
+    _o2Sensor6,
+  ];
+  double? cellAverage(DiveProfilePoint p) {
+    var sum = 0.0;
+    var count = 0;
+    for (final accessor in cellAccessors) {
+      final value = accessor(p);
+      if (value != null) {
+        sum += value;
+        count++;
+      }
+    }
+    return count == 0 ? null : sum / count;
+  }
+
+  final hasComputerPpO2 = profile.any((p) => p.ppO2 != null);
+  final hasCells = profile.any((p) => cellAverage(p) != null);
+  final hasSetpoint = profile.any((p) => p.setpoint != null);
+  final hasSensorData = hasComputerPpO2 || hasCells;
+  final hasRebreatherPpO2 = hasSensorData || hasSetpoint;
+
+  List<double>? resolvedPpO2;
+  List<List<double?>>? o2SensorCurves;
+  var ppO2FromSensorAverage = false;
+  if (hasRebreatherPpO2) {
+    // Pick ONE source for the whole dive — sensor data when present, otherwise
+    // the setpoint — and never mix them. Mixing makes the curve jump between
+    // the measured value and the setpoint on samples where the cells are
+    // momentarily absent. Within the chosen source, hold the last known value
+    // across gaps (and back-fill leading gaps with the first reading) so the
+    // curve stays continuous instead of dropping out.
+    final raw = List<double?>.generate(profile.length, (i) {
+      final p = profile[i];
+      return hasSensorData ? (p.ppO2 ?? cellAverage(p)) : p.setpoint;
+    });
+    final firstKnown = raw.firstWhere((v) => v != null, orElse: () => null);
+    double? carry = firstKnown;
+    resolvedPpO2 = List<double>.generate(profile.length, (i) {
+      final value = raw[i];
+      if (value != null) carry = value;
+      return carry ?? 0.0;
+    });
+    // Tooltip labels the value as an average only when cells are the source
+    // (no computer-supplied ppO2 was available).
+    ppO2FromSensorAverage = hasSensorData && !hasComputerPpO2;
+    // Expose each cell as its own per-sample curve, indexed by physical cell
+    // position so the tooltip labels them correctly (curve index i == Sensor
+    // i+1). Build curves up to the highest-numbered cell that has any reading;
+    // any lower cell with no readings stays an all-null curve, which the chart
+    // skips per-sample. This keeps labels right even when cells are absent or
+    // non-contiguous (e.g. a failed/unreported cell).
+    var highestCell = -1;
+    for (var i = 0; i < cellAccessors.length; i++) {
+      if (profile.any((p) => cellAccessors[i](p) != null)) highestCell = i;
+    }
+    if (highestCell >= 0) {
+      o2SensorCurves = [
+        for (var i = 0; i <= highestCell; i++)
+          profile.map(cellAccessors[i]).toList(),
+      ];
+    }
+  }
+
   // Report actual source used (fallback to calculated if no data)
   final sourceInfo = (
     ndlActual: useNdl ? MetricDataSource.computer : MetricDataSource.calculated,
@@ -264,7 +339,7 @@ ProfileAnalysisService _resolveAnalysisService(
     cnsActual: useCns ? MetricDataSource.computer : MetricDataSource.calculated,
   );
 
-  if (!useNdl && !useCeiling && !useTts && !useCns) {
+  if (!useNdl && !useCeiling && !useTts && !useCns && resolvedPpO2 == null) {
     return (analysis, sourceInfo);
   }
 
@@ -307,10 +382,22 @@ ProfileAnalysisService _resolveAnalysisService(
                     : 0.0),
           )
         : null,
+    // ppO2 from sensor/setpoint (null keeps the calculated curve).
+    ppO2Curve: resolvedPpO2,
+    o2SensorCurves: o2SensorCurves,
+    ppO2FromSensorAverage: resolvedPpO2 != null ? ppO2FromSensorAverage : null,
   );
 
   return (overlaid, sourceInfo);
 }
+
+// Top-level cell accessors so they can form a `const` list of tear-offs.
+double? _o2Sensor1(DiveProfilePoint p) => p.o2Sensor1;
+double? _o2Sensor2(DiveProfilePoint p) => p.o2Sensor2;
+double? _o2Sensor3(DiveProfilePoint p) => p.o2Sensor3;
+double? _o2Sensor4(DiveProfilePoint p) => p.o2Sensor4;
+double? _o2Sensor5(DiveProfilePoint p) => p.o2Sensor5;
+double? _o2Sensor6(DiveProfilePoint p) => p.o2Sensor6;
 
 /// Provider for the ProfileAnalysisService configured with user settings
 final profileAnalysisServiceProvider = Provider<ProfileAnalysisService>((ref) {
