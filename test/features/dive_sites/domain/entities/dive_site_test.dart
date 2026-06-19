@@ -269,5 +269,38 @@ void main() {
       const site = DiveSite(id: 's', name: 'S');
       expect(site.locationString, '');
     });
+
+    test('whitespace-only locality is ignored, not rendered', () {
+      const site = DiveSite(
+        id: 's',
+        name: 'S',
+        country: 'Philippines',
+        region: 'Cebu',
+        city: '   ',
+      );
+      // Whitespace-only city must not produce "   · Cebu, Philippines".
+      expect(site.locationString, 'Cebu, Philippines');
+    });
+
+    test('whitespace-only city falls back to island', () {
+      const site = DiveSite(
+        id: 's',
+        name: 'S',
+        city: '  ',
+        island: 'Malapascua',
+      );
+      expect(site.locationString, 'Malapascua');
+    });
+
+    test('surrounding whitespace is trimmed in rendered output', () {
+      const site = DiveSite(
+        id: 's',
+        name: 'S',
+        country: ' Philippines ',
+        region: ' Cebu ',
+        city: ' Cebu City ',
+      );
+      expect(site.locationString, 'Cebu City · Cebu, Philippines');
+    });
   });
 }

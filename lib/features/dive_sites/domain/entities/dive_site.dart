@@ -86,14 +86,19 @@ class DiveSite extends Equatable {
   /// Locality prefers [city], falling back to [island]. [bodyOfWater] is
   /// intentionally excluded to keep list tiles and map popups tight.
   String get locationString {
+    // Trim before testing meaningfulness and before rendering so whitespace-
+    // only values (e.g. from imported/synced data) are ignored and the output
+    // is normalized — consistent with the save/merge paths' trim().isNotEmpty.
+    final regionTrimmed = region?.trim() ?? '';
+    final countryTrimmed = country?.trim() ?? '';
     final base = <String>[];
-    if (region != null && region!.isNotEmpty) base.add(region!);
-    if (country != null && country!.isNotEmpty) base.add(country!);
+    if (regionTrimmed.isNotEmpty) base.add(regionTrimmed);
+    if (countryTrimmed.isNotEmpty) base.add(countryTrimmed);
     final baseStr = base.join(', ');
 
-    final locality = (city != null && city!.isNotEmpty)
-        ? city!
-        : (island != null && island!.isNotEmpty ? island! : '');
+    final cityTrimmed = city?.trim() ?? '';
+    final islandTrimmed = island?.trim() ?? '';
+    final locality = cityTrimmed.isNotEmpty ? cityTrimmed : islandTrimmed;
 
     if (locality.isNotEmpty && baseStr.isNotEmpty) {
       return '$locality · $baseStr';
