@@ -755,4 +755,23 @@ void main() {
       );
     });
   });
+
+  group('location fields', () {
+    testWidgets('renders City, Island, and Body of Water fields', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(900, 3200);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+
+      await tester.pumpWidget(
+        _buildHarness(prefs: prefs, divers: const [], shareByDefault: false),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('City'), findsWidgets);
+      expect(find.text('Island'), findsWidgets);
+      expect(find.text('Body of Water'), findsWidgets);
+    });
+  });
 }
