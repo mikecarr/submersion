@@ -41,27 +41,32 @@ let halcyonTx = "00000201-8C3B-4F2C-A59E-8C08224F3253"
 let pelagicWrite = "6606AB42-89D5-4A00-A8CE-4EB5E1414EE0"
 let preferredService = "CB3C4555-D670-4670-BC20-B61DBC851E9A"
 
-// 1. Halcyon Symbios (issue #288): Rx (00000101: read+write+indicate, app
-// receives replies) and Tx (00000201: write, app sends commands). Both
-// advertise plain write and tie on raw score, with Rx at the lower handle, so
-// the generic scorer would pick Rx for writing and the device never answers.
-// Commands must go to Tx; replies must be read from Rx.
+// 1. Halcyon Symbios (issue #288). On a real device BOTH characteristics
+// advertise read+write+indicate (confirmed by the GATT discovery log on the
+// issue), so the raw write/notify scores tie and a preferred UUID must decide
+// the pair. The Tx/Rx names are device-centric -- Subsurface's qt-ble.cpp
+// labels 00000101 "Rx" and 00000201 "Tx" and writes commands to the device's
+// Rx while reading replies from the device's Tx. So the app must WRITE to
+// 00000101 (halcyonRx) and SUBSCRIBE on 00000201 (halcyonTx). PR #356 mapped
+// these backwards (wrote to Tx, listened on Rx); the device received the write
+// at the ATT layer but never answered (result=-7). This asserts the corrected
+// mapping that matches the known-working Subsurface implementation.
 do {
     let services = [
         BleCharacteristicSelector.Service(
             uuid: CBUUID(string: halcyonService),
             characteristics: [
                 char(halcyonRx, [.read, .write, .indicate]),
-                char(halcyonTx, [.write]),
+                char(halcyonTx, [.read, .write, .indicate]),
             ]
         )
     ]
     let result = resolve(services, BleCharacteristicSelector.select(services: services))
-    expect(result?.write == CBUUID(string: halcyonTx),
-           "halcyon: command write characteristic is Tx (00000201), "
+    expect(result?.write == CBUUID(string: halcyonRx),
+           "halcyon: app writes commands to the device Rx (00000101), "
                + "got \(result?.write.uuidString ?? "nil")")
-    expect(result?.notify == CBUUID(string: halcyonRx),
-           "halcyon: notify characteristic is Rx (00000101), "
+    expect(result?.notify == CBUUID(string: halcyonTx),
+           "halcyon: app reads replies from the device Tx (00000201), "
                + "got \(result?.notify.uuidString ?? "nil")")
 }
 
