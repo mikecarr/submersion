@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:submersion/core/data/repositories/sync_repository.dart';
 import 'package:submersion/core/services/database_service.dart';
@@ -8,6 +10,14 @@ import 'package:submersion/features/dive_log/data/repositories/dive_repository_i
 import '../../../helpers/test_database.dart';
 import '../../../helpers/mock_providers.dart';
 import '../../../support/fake_cloud_storage_provider.dart';
+
+/// Base-adoption temp files are named `ssv1_<peer>_<seq>.<uuid>.base` and must
+/// be deleted by the reader after each apply. No `*.base` file should survive a
+/// completed sync.
+Iterable<File> _leakedBaseTempFiles() => Directory.systemTemp
+    .listSync()
+    .whereType<File>()
+    .where((f) => f.path.endsWith('.base'));
 
 /// End-to-end proof that the changeset-log transport converges two devices
 /// through the real merge. One in-memory database stands in for each device in
@@ -47,6 +57,65 @@ void main() {
       row,
       isNotNull,
       reason: "device B must receive device A's dive via changeset sync",
+    );
+    expect(
+      _leakedBaseTempFiles(),
+      isEmpty,
+      reason: 'the reader must delete the streamed base temp file after apply',
+    );
+    await tearDownTestDatabase();
+  });
+
+  test('cold-start adopts a multi-entity base via the streaming path', () async {
+    final cloud = FakeCloudStorageProvider();
+
+    // --- Device A: a small library across several tables, then publish ---
+    await setUpTestDatabase();
+    var svc = SyncService(
+      syncRepository: SyncRepository(),
+      serializer: SyncDataSerializer(),
+      cloudProvider: cloud,
+    );
+    final serializerA = SyncDataSerializer();
+    for (var i = 1; i <= 3; i++) {
+      await DiveRepository().createDive(
+        createTestDiveWithBottomTime(id: 'm$i', diveNumber: i),
+      );
+    }
+    await serializerA.upsertRecord('diveSites', {
+      'id': 'site-m',
+      'name': 'Manta Point',
+      'description': '',
+      'notes': '',
+      'isShared': false,
+      'createdAt': 1000,
+      'updatedAt': 1000,
+    });
+    expect((await svc.performSync()).status, SyncResultStatus.success);
+    await tearDownTestDatabase();
+
+    // --- Device B: fresh DB, adopts A's base through _applyRemoteBaseFile ---
+    await setUpTestDatabase();
+    svc = SyncService(
+      syncRepository: SyncRepository(),
+      serializer: SyncDataSerializer(),
+      cloudProvider: cloud,
+    );
+    expect((await svc.performSync()).status, SyncResultStatus.success);
+
+    final db = DatabaseService.instance.database;
+    final diveCount = await db
+        .customSelect("SELECT COUNT(*) AS c FROM dives")
+        .getSingle();
+    expect(diveCount.data['c'], 3, reason: 'all three dives must converge');
+    final site = await db
+        .customSelect("SELECT name FROM dive_sites WHERE id = 'site-m'")
+        .getSingleOrNull();
+    expect(site, isNotNull, reason: 'the dive site must converge');
+    expect(
+      _leakedBaseTempFiles(),
+      isEmpty,
+      reason: 'no base temp file should survive the sync',
     );
     await tearDownTestDatabase();
   });
