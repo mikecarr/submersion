@@ -50,17 +50,23 @@ enum BleCharacteristicSelector {
     static let preferredWriteUUIDs: Set<CBUUID> = [
         // Pelagic gen1 (Aqualung i330R / Apeks DSX) command characteristic.
         CBUUID(string: "6606AB42-89D5-4A00-A8CE-4EB5E1414EE0"),
-        // Halcyon Symbios Tx: the app sends commands here. Its Rx counterpart
-        // (00000101) also advertises write and ties on raw score, so without
-        // this bias the scorer writes to Rx and the device never answers
-        // (issue #288).
-        CBUUID(string: "00000201-8C3B-4F2C-A59E-8C08224F3253"),
+        // Halcyon Symbios: the app writes commands to the device's Rx endpoint
+        // (00000101). Both Symbios characteristics advertise read+write+indicate
+        // and tie on raw score, so a preferred UUID is required to tell them
+        // apart. The Tx/Rx names are device-centric: Subsurface's qt-ble.cpp
+        // writes commands to 00000101 ("Rx") and reads replies from 00000201
+        // ("Tx"). PR #356 mapped these backwards -- it wrote to 00000201, which
+        // the device accepts at the ATT layer but never answers -- so downloads
+        // timed out with result=-7 (issue #288).
+        CBUUID(string: "00000101-8C3B-4F2C-A59E-8C08224F3253"),
     ]
 
     static let preferredNotifyUUIDs: Set<CBUUID> = [
         CBUUID(string: "A60B8E5C-B267-44D7-9764-837CAF96489E"),
-        // Halcyon Symbios Rx: the device sends replies here via indications.
-        CBUUID(string: "00000101-8C3B-4F2C-A59E-8C08224F3253"),
+        // Halcyon Symbios: the device transmits replies on its Tx endpoint
+        // (00000201) via indications; the app writes commands on 00000101 (see
+        // preferredWriteUUIDs and issue #288).
+        CBUUID(string: "00000201-8C3B-4F2C-A59E-8C08224F3253"),
     ]
 
     /// Score a write candidate, or nil if the characteristic cannot be written.

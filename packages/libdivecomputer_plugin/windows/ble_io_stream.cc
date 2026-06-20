@@ -20,9 +20,12 @@ const winrt::guid BleIoStream::kPreferredWriteUuid{
 const winrt::guid BleIoStream::kPreferredNotifyUuid{
     0xA60B8E5C, 0xB267, 0x44D7,
     {0x97, 0x64, 0x83, 0x7C, 0xAF, 0x96, 0x48, 0x9E}};
-// Halcyon Symbios Tx (commands) and Rx (replies via indications). Rx also
-// advertises write and ties with Tx on raw score, so without this bias the
-// scorer may write to Rx and the device never answers (issue #288).
+// Halcyon Symbios device-centric Tx/Rx endpoints. The app WRITES commands to
+// the device's Rx (00000101) and READS replies (indications) from its Tx
+// (00000201) -- matching Subsurface's qt-ble.cpp. Both chars advertise
+// read+write+indicate and tie on raw score, so these biases pick the pair.
+// PR #356 biased them backwards (wrote to Tx) and the device never answered
+// (issue #288).
 const winrt::guid BleIoStream::kHalcyonSymbiosTxUuid{
     0x00000201, 0x8C3B, 0x4F2C,
     {0xA5, 0x9E, 0x8C, 0x08, 0x22, 0x4F, 0x32, 0x53}};
@@ -101,7 +104,7 @@ bool BleIoStream::DiscoverCharacteristics() {
                     ws += 2;
                 }
                 if (ch.Uuid() == kPreferredWriteUuid ||
-                    ch.Uuid() == kHalcyonSymbiosTxUuid) {
+                    ch.Uuid() == kHalcyonSymbiosRxUuid) {
                     ws += 1000;
                 }
                 if (ws > best_write_score) {
@@ -125,7 +128,7 @@ bool BleIoStream::DiscoverCharacteristics() {
                     ns += 2;
                 }
                 if (ch.Uuid() == kPreferredNotifyUuid ||
-                    ch.Uuid() == kHalcyonSymbiosRxUuid) {
+                    ch.Uuid() == kHalcyonSymbiosTxUuid) {
                     ns += 1000;
                 }
                 if (ns > best_notify_score) {
