@@ -20,8 +20,12 @@ env:
   DART_DEFINES: '--dart-define=flutter.flutter_map.unblockOSM=Our tile servers are not.'
 
 jobs:
-  analyze:
-    name: Analyze & Format
+  # Producer job: runs build_runner ONCE and publishes the generated sources as
+  # an artifact. Everything else (analyze, test, builds) gates on this ~3 min
+  # job instead of the full analyze job, so flutter analyze + format run in
+  # PARALLEL with the test shards and builds rather than as a serial prefix.
+  codegen:
+    name: Code Generation
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -81,6 +85,52 @@ jobs:
           if-no-files-found: error
           retention-days: 1
 
+  analyze:
+    name: Analyze & Format
+    needs: codegen
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: true
+
+      - name: Read Flutter version
+        id: flutter-ver
+        run: echo "version=$(cat ${{ env.FLUTTER_VERSION_FILE }})" >> "$GITHUB_OUTPUT"
+
+      - uses: subosito/flutter-action@v2
+        id: setup-flutter
+        with:
+          flutter-version: ${{ steps.flutter-ver.outputs.version }}
+          channel: 'stable'
+
+      - name: Cache Flutter SDK
+        uses: actions/cache@v5
+        with:
+          path: ${{ steps.setup-flutter.outputs.CACHE-PATH }}
+          key: ${{ steps.setup-flutter.outputs.CACHE-KEY }}
+
+      - name: Cache pub dependencies
+        uses: actions/cache@v5
+        with:
+          path: |
+            ~/.pub-cache
+            ${{ github.workspace }}/.dart_tool
+          key: pub-${{ runner.os }}-${{ hashFiles('**/pubspec.lock') }}
+          restore-keys: |
+            pub-${{ runner.os }}-
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Download generated code
+        uses: actions/download-artifact@v7
+        with:
+          name: generated-code
+
+      - name: Unpack generated code
+        run: tar -xzf generated-code.tar.gz
+
       - name: Analyze code
         run: flutter analyze --fatal-infos
 
@@ -89,7 +139,7 @@ jobs:
 
   test:
     name: Test (shard ${{ matrix.shard }})
-    needs: analyze
+    needs: codegen
     runs-on: ubuntu-latest
     strategy:
       # Don't cancel the other shards when one fails - we want the full picture.
@@ -177,7 +227,7 @@ jobs:
 
   integration-test:
     name: Integration Test (macOS)
-    needs: analyze
+    needs: codegen
     runs-on: macos-14
     if: github.event_name == 'pull_request'
     steps:
@@ -241,7 +291,7 @@ jobs:
 
   build-ios:
     name: Build iOS
-    needs: analyze
+    needs: codegen
     runs-on: macos-14
     steps:
       - uses: actions/checkout@v6
@@ -321,7 +371,7 @@ jobs:
 
   build-macos:
     name: Build macOS
-    needs: analyze
+    needs: codegen
     runs-on: macos-14
     steps:
       - uses: actions/checkout@v6
@@ -426,7 +476,7 @@ jobs:
 
   build-android:
     name: Build Android
-    needs: analyze
+    needs: codegen
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -499,7 +549,7 @@ jobs:
 
   build-linux:
     name: Build Linux
-    needs: analyze
+    needs: codegen
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -569,7 +619,7 @@ jobs:
 
   build-windows:
     name: Build Windows
-    needs: analyze
+    needs: codegen
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v6
@@ -639,14 +689,18 @@ jobs:
           retention-days: 7
 
   # Single aggregation gate. Because the build jobs now run in parallel with the
-  # test shards (needs: analyze, not needs: test), a green build no longer
+  # test shards (needs: codegen, not needs: test), a green build no longer
   # implies tests passed. This job is the one to mark "required" in branch
   # protection - it fails if ANY needed job failed or was cancelled. Skipped
   # jobs (e.g. integration-test on push) are treated as acceptable.
+  # NOTE: codegen MUST be listed here - if it fails, every downstream job is
+  # SKIPPED, and skipped is treated as acceptable below, so without codegen in
+  # the needs list a codegen failure would report a false green.
   ci-success:
     name: CI Success
     if: always()
     needs:
+      - codegen
       - analyze
       - test
       - integration-test
