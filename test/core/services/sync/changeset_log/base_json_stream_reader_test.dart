@@ -132,4 +132,24 @@ void main() {
       ['data', 't', '{"id":"a"}'],
     ]);
   });
+
+  test('throws FormatException on a truncated document', () async {
+    // Stream ends mid-row, before the top-level object closes.
+    await expectLater(
+      run(_one('{"data":{"t":[{"id":"a"')),
+      throwsFormatException,
+    );
+  });
+
+  test('throws FormatException on empty input', () async {
+    await expectLater(run(_one('')), throwsFormatException);
+  });
+
+  test('throws FormatException when the top object is never closed', () async {
+    // Well-formed rows but the final closing brace is missing.
+    await expectLater(
+      run(_one('{"data":{"t":[{"id":"a"}]},"deletions":{}')),
+      throwsFormatException,
+    );
+  });
 }

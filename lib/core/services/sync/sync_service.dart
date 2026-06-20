@@ -1201,9 +1201,16 @@ class SyncService {
   /// Per-entity "has an updatedAt column" flag, mirroring the `mergeOrder`
   /// records in [_applyRemotePayloadInner]. The streaming base apply
   /// ([_applyRemoteBaseFile]) uses it for (a) conflict-detection behavior in
-  /// [_mergeEntity] and (b) the set of entity tables it applies (the keys are
-  /// the known entities). Kept consistent with `mergeOrder` by the
-  /// streaming-vs-in-memory parity test, which exercises every entity here.
+  /// [_mergeEntity] and (b) the set of entity tables it applies (a table absent
+  /// from these keys is silently skipped on base import).
+  ///
+  /// MUST list every [SyncData] entity: a structural test
+  /// (`entityHasUpdatedAt covers exactly the SyncData entities`) asserts the
+  /// keys match [SyncData], so adding an entity without a flag here fails that
+  /// test. Each flag VALUE must match the `hasUpdatedAt` of the corresponding
+  /// `mergeOrder` record above; the parity test verifies apply behavior for a
+  /// representative subset (parent, clockless-child, junction, BLOB, and
+  /// updatedAt tables plus a tombstone), not for every entity.
   @visibleForTesting
   static const Map<String, bool> entityHasUpdatedAt = {
     'divers': true,

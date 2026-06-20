@@ -93,6 +93,21 @@ class BaseJsonStreamReader {
         }
       }
     }
+
+    // Completeness guard: a well-formed base ends with the top-level object
+    // closed (state == done). Any other end state means the stream was empty
+    // or truncated. Throw so the caller fails the base closed (the reader's
+    // per-peer catch leaves the cursor unadvanced; a mid-apply throw rolls back
+    // the transaction) rather than silently applying a partial base. This is
+    // defense-in-depth behind BasePartFileSink's checksums, which already
+    // reject corruption when the manifest carries checksums but are absent on
+    // legacy manifests.
+    if (_state != _S.done) {
+      throw const FormatException(
+        'Base JSON ended before the top-level object closed '
+        '(empty or truncated document)',
+      );
+    }
   }
 
   _Step _consume(int c) {

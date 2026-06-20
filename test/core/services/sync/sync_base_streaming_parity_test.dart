@@ -15,9 +15,11 @@ import '../../../helpers/test_database.dart';
 /// Proves the streaming base apply (_applyRemoteBaseFile) produces a
 /// byte-for-byte identical database to the in-memory apply (_applyRemotePayload)
 /// for the same payload. This is the safety net for issue #358: it guarantees
-/// that bounding memory did not change merge behavior, including the
-/// entityHasUpdatedAt flags (every entity below is exercised), BLOB columns,
-/// junctions, and the deletions pass.
+/// that bounding memory did not change merge behavior across a representative
+/// subset of tables -- a parent, clockless children, a junction, a BLOB column,
+/// updatedAt tables, and the deletions pass. (A separate structural test in
+/// this file asserts entityHasUpdatedAt lists every SyncData entity; this parity
+/// test does not seed all of them.)
 
 /// Order-independent snapshot of a SyncData JSON map: each table's rows are
 /// sorted by their JSON so a difference in cross-table insertion order between
@@ -141,6 +143,16 @@ void main() {
     SharedPreferences.setMockInitialValues({});
   });
   tearDown(() => tearDownTestDatabase());
+
+  test('entityHasUpdatedAt covers exactly the SyncData entities', () {
+    // The streaming apply only applies tables present in entityHasUpdatedAt, so
+    // a SyncData entity missing from the map would be silently dropped on base
+    // import. This locks the map to the entity set.
+    expect(
+      SyncService.entityHasUpdatedAt.keys.toSet(),
+      const SyncData().toJson().keys.toSet(),
+    );
+  });
 
   test('streaming base apply matches in-memory apply byte-for-byte', () async {
     await _seedRichLibrary();

@@ -158,9 +158,15 @@ class ChangesetReader {
     Map<String, CloudFileInfo> byName,
   ) {
     final baseSeq = manifest.baseSeq!;
+    final partCount = manifest.basePartCount ?? 0;
+    // A manifest that names a base (baseSeq set) but no parts is malformed --
+    // a real base always has at least one part. Treat it as a transient gap
+    // (publish in flight / truncated manifest) so we don't assemble an empty
+    // file and advance the cursor past a base we never applied.
+    if (partCount <= 0) return Future<String?>.value(null);
     return _baseSink.assemble(
       name: 'ssv1_${peerId}_$baseSeq',
-      partCount: manifest.basePartCount ?? 0,
+      partCount: partCount,
       wholeChecksum: manifest.baseChecksum,
       partChecksums: manifest.basePartChecksums,
       downloadPart: (i) async {
