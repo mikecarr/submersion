@@ -326,6 +326,7 @@ class BaseJsonStreamReader {
           return const _Step(true);
         }
         _beginCapture(_Cap.scalar);
+        _state = _S.capture;
         return const _Step(false); // reprocess this char inside capture
 
       case _S.sectionKeyOrClose:
