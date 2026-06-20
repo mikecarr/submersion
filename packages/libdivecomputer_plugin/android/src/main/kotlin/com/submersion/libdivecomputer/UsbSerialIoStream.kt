@@ -62,25 +62,32 @@ class UsbSerialIoStream(
         }
         connection = conn
 
-        val serialPort = driver.ports.firstOrNull()
-        if (serialPort == null) {
+        val ports = driver.ports
+        if (ports.isEmpty()) {
             NativeLogger.e(TAG, "SER", "driver exposes no serial ports")
             conn.close()
             connection = null
             return false
         }
 
-        return try {
-            serialPort.open(conn)
-            port = serialPort
-            NativeLogger.i(TAG, "SER", "Opened USB serial port for ${device.deviceName}")
-            true
-        } catch (e: IOException) {
-            NativeLogger.e(TAG, "SER", "port.open failed: ${e.message}")
-            conn.close()
-            connection = null
-            false
+        // Most adapters expose a single port, but multi-interface chips expose
+        // several; try each until one opens so a non-functional first interface
+        // doesn't block the download.
+        for ((index, candidate) in ports.withIndex()) {
+            try {
+                candidate.open(conn)
+                port = candidate
+                NativeLogger.i(TAG, "SER", "Opened USB serial port[$index] for ${device.deviceName}")
+                return true
+            } catch (e: IOException) {
+                NativeLogger.w(TAG, "SER", "port[$index] open failed: ${e.message}")
+            }
         }
+
+        NativeLogger.e(TAG, "SER", "no openable serial port on ${device.deviceName}")
+        conn.close()
+        connection = null
+        return false
     }
 
     private fun requestPermission(usbManager: UsbManager, device: UsbDevice): Boolean {

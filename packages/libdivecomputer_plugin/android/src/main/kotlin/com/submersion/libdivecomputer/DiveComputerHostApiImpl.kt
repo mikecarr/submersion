@@ -369,6 +369,7 @@ class DiveComputerHostApiImpl(
             NativeLogger.d(TAG, "SER", "nativeDownloadRun (serial): ${driver.device.deviceName}")
 
             val errorBuf = ByteArray(256)
+            var thrownMsg: String? = null
             val result = try {
                 LibdcWrapper.nativeDownloadRun(
                     sessionPtr,
@@ -380,12 +381,18 @@ class DiveComputerHostApiImpl(
                 )
             } catch (e: Throwable) {
                 NativeLogger.e(TAG, "LDC", "nativeDownloadRun threw: ${e.message}")
+                thrownMsg = e.message
                 -999
             }
             stream.close()
             activeSerialStream = null
             lastResult = result
-            lastErrorMsg = String(errorBuf).trim('\u0000')
+            // Prefer libdivecomputer's error text; fall back to the thrown
+            // exception message (errorBuf is empty when the JNI call throws) or a
+            // generic code, so download_error is never blank.
+            lastErrorMsg = String(errorBuf).takeWhile { it.code != 0 }.ifEmpty {
+                thrownMsg ?: "Download failed (rc=$result)"
+            }
 
             if (result == 0 || result == LIBDC_STATUS_CANCELLED) break
             probeLog.append("  ${driver.device.deviceName}: download failed (rc=$result)\n")
