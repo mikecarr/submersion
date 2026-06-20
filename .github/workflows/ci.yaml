@@ -150,9 +150,19 @@ jobs:
         # subset, which divides the per-file cost. Codecov merges the partial
         # coverage reports via the per-shard flag below.
         run: |
+          total=$(find test -name '*_test.dart' | wc -l)
           mapfile -t files < <(find test -name '*_test.dart' | sort \
             | awk "NR % ${TOTAL_SHARDS} == ${{ matrix.shard }}")
-          echo "Shard ${{ matrix.shard }}/${TOTAL_SHARDS}: ${#files[@]} of $(find test -name '*_test.dart' | wc -l) test files"
+          echo "Shard ${{ matrix.shard }}/${TOTAL_SHARDS}: ${#files[@]} of ${total} test files"
+          # Guard: with no paths, `flutter test` runs the ENTIRE suite. An empty
+          # shard (more shards than files) would silently re-run everything and
+          # defeat sharding, so skip it and emit an empty lcov so the Codecov
+          # step still has a file to upload.
+          if [ "${#files[@]}" -eq 0 ]; then
+            echo "No test files assigned to this shard; skipping."
+            mkdir -p coverage && : > coverage/lcov.info
+            exit 0
+          fi
           flutter test --coverage --exclude-tags performance "${files[@]}"
 
       - name: Upload coverage
