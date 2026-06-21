@@ -5,6 +5,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:submersion/core/providers/provider.dart';
 
 import 'package:submersion/core/domain/entities/storage_config.dart';
+import 'package:submersion/core/services/database_location_service.dart';
 import 'package:submersion/core/services/database_migration_service.dart';
 import 'package:submersion/core/services/database_service.dart';
 import 'package:submersion/features/settings/presentation/pages/reset_complete_page.dart';
@@ -487,10 +488,45 @@ class _StorageSettingsPageState extends ConsumerState<StorageSettingsPage> {
     await _selectAndMigrateToCustomFolder();
   }
 
+  /// Android-only: lets the user pick which app-specific external volume
+  /// (internal storage or SD card) holds the database. The chooser is only
+  /// invoked from the Android pick branch; other platforms never call it.
+  Future<ExternalVolumeOption?> _chooseStorageVolume(
+    List<ExternalVolumeOption> options,
+  ) async {
+    if (!mounted) return null;
+    return showDialog<ExternalVolumeOption>(
+      context: context,
+      builder: (context) => SimpleDialog(
+        title: Text(context.l10n.db_location_choose_volume),
+        children: [
+          for (final option in options)
+            SimpleDialogOption(
+              onPressed: () => Navigator.pop(context, option),
+              child: Text(
+                option.isInternal
+                    ? context.l10n.db_location_internal
+                    : context.l10n.db_location_sd_card,
+              ),
+            ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(24, 8, 24, 8),
+            child: Text(
+              context.l10n.db_location_external_note,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _selectAndMigrateToCustomFolder() async {
     // Pick a folder
     final notifier = ref.read(storageConfigNotifierProvider.notifier);
-    final pickResult = await notifier.pickCustomFolder();
+    final pickResult = await notifier.pickCustomFolder(
+      chooser: _chooseStorageVolume,
+    );
 
     if (pickResult == null || !mounted) return;
 

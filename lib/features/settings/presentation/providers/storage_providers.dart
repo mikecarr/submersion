@@ -139,7 +139,10 @@ class StorageConfigNotifier extends StateNotifier<StorageConfigState> {
   ///
   /// Returns a [FolderPickResultWithBookmark] containing the path and optional
   /// bookmark data (for iOS), or null if cancelled.
-  Future<FolderPickResultWithBookmark?> pickCustomFolder() async {
+  Future<FolderPickResultWithBookmark?> pickCustomFolder({
+    Future<ExternalVolumeOption?> Function(List<ExternalVolumeOption>)? chooser,
+  }) async {
+    _locationService.externalVolumeChooser = chooser;
     return _locationService.pickCustomFolder();
   }
 
