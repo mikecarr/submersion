@@ -290,6 +290,21 @@ static int jni_io_read(void *userdata, void *data, size_t size, size_t *actual) 
         env->CallObjectMethod(ctx->ioHandler, method,
             static_cast<jint>(size), static_cast<jint>(ctx->timeout_ms)));
 
+    // A pending Java exception (e.g. an IOException from a serial read on an
+    // unplugged device or after a revoked USB permission) is a real I/O
+    // failure: report LIBDC_STATUS_IO so the driver fails fast instead of
+    // retrying a dead port. Clearing it is also mandatory -- a left-pending
+    // exception would corrupt the next JNI call. (BLE reads don't throw in
+    // normal operation, so this path is serial-specific in practice while the
+    // partial-read SUCCESS semantics below stay intact for BLE.)
+    if (env->ExceptionCheck()) {
+        env->ExceptionDescribe();
+        env->ExceptionClear();
+        *actual = 0;
+        if (attached) ctx->jvm->DetachCurrentThread();
+        return LIBDC_STATUS_IO;
+    }
+
     if (!result) {
         *actual = 0;
         if (attached) ctx->jvm->DetachCurrentThread();

@@ -178,10 +178,14 @@ class UsbSerialIoStream(
             val n = try {
                 p.read(tmp, sliceTimeout)
             } catch (e: IOException) {
+                // A real I/O error (device unplugged, USB permission revoked) --
+                // not a timeout, which returns 0 rather than throwing. Propagate
+                // so the JNI bridge reports LIBDC_STATUS_IO and the driver fails
+                // fast instead of retrying a dead port.
                 NativeLogger.e(TAG, "SER", "read failed: ${e.message}")
-                break
+                throw e
             }
-            if (n <= 0) break // timeout, EOF, or nothing available this slice
+            if (n <= 0) break // timeout / nothing available this slice
             System.arraycopy(tmp, 0, result, received, n)
             received += n
         }
