@@ -33,8 +33,7 @@ class _RecordingSafPort implements BackupSafPort {
     required String treeUri,
     required String fileName,
     required String sourcePath,
-  }) async =>
-      'content://doc';
+  }) async => 'content://doc';
 
   @override
   Future<void> readBackup({
@@ -49,22 +48,23 @@ class _RecordingSafPort implements BackupSafPort {
   }
 
   @override
-  Future<bool> exists(String documentUri) async => existing.contains(documentUri);
+  Future<bool> exists(String documentUri) async =>
+      existing.contains(documentUri);
 
   @override
   Future<String?> resolveTree(String treeUri) async => 'Backups';
 }
 
 BackupRecord _saf(String id, String uri) => BackupRecord(
-      id: id,
-      filename: 'f.db',
-      timestamp: DateTime(2026),
-      sizeBytes: 1,
-      location: BackupLocation.local,
-      diveCount: 0,
-      siteCount: 0,
-      localPath: uri,
-    );
+  id: id,
+  filename: 'f.db',
+  timestamp: DateTime(2026),
+  sizeBytes: 1,
+  location: BackupLocation.local,
+  diveCount: 0,
+  siteCount: 0,
+  localPath: uri,
+);
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -74,9 +74,9 @@ void main() {
   setUpAll(() {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(
-      const MethodChannel('plugins.flutter.io/path_provider'),
-      (call) async => Directory.systemTemp.path,
-    );
+          const MethodChannel('plugins.flutter.io/path_provider'),
+          (call) async => Directory.systemTemp.path,
+        );
   });
   setUp(() async {
     SharedPreferences.setMockInitialValues({});
@@ -85,10 +85,10 @@ void main() {
   });
 
   BackupService service() => BackupService(
-        dbAdapter: _NoopAdapter(),
-        preferences: prefs,
-        safPort: port,
-      );
+    dbAdapter: _NoopAdapter(),
+    preferences: prefs,
+    safPort: port,
+  );
 
   test('deleteBackup routes a SAF ref to the port', () async {
     final r = _saf('1', 'content://doc/1');
@@ -97,12 +97,14 @@ void main() {
     expect(port.deleted, ['content://doc/1']);
   });
 
-  test('getValidatedBackupHistory keeps a SAF record whose doc still exists',
-      () async {
-    port.existing.add('content://doc/keep');
-    await prefs.addRecord(_saf('keep', 'content://doc/keep'));
-    await prefs.addRecord(_saf('gone', 'content://doc/gone'));
-    final valid = await service().getValidatedBackupHistory();
-    expect(valid.map((r) => r.id), ['keep']);
-  });
+  test(
+    'getValidatedBackupHistory keeps a SAF record whose doc still exists',
+    () async {
+      port.existing.add('content://doc/keep');
+      await prefs.addRecord(_saf('keep', 'content://doc/keep'));
+      await prefs.addRecord(_saf('gone', 'content://doc/gone'));
+      final valid = await service().getValidatedBackupHistory();
+      expect(valid.map((r) => r.id), ['keep']);
+    },
+  );
 }

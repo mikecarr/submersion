@@ -356,7 +356,9 @@ class BackupService {
     final localRef = record.localPath;
     if (localRef != null && isSafRef(localRef)) {
       if (!await _safPort.exists(localRef)) {
-        throw const BackupException('Backup file not found locally or in cloud');
+        throw const BackupException(
+          'Backup file not found locally or in cloud',
+        );
       }
       final tempDir = await getTemporaryDirectory();
       sourcePath = p.join(tempDir.path, record.filename);

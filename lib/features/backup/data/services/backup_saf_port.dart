@@ -27,19 +27,17 @@ class MethodChannelBackupSafPort implements BackupSafPort {
     required String treeUri,
     required String fileName,
     required String sourcePath,
-  }) =>
-      SubmersionSaf.writeBackup(
-        treeUri: treeUri,
-        fileName: fileName,
-        sourcePath: sourcePath,
-      );
+  }) => SubmersionSaf.writeBackup(
+    treeUri: treeUri,
+    fileName: fileName,
+    sourcePath: sourcePath,
+  );
 
   @override
   Future<void> readBackup({
     required String documentUri,
     required String destPath,
-  }) =>
-      SubmersionSaf.readBackup(documentUri: documentUri, destPath: destPath);
+  }) => SubmersionSaf.readBackup(documentUri: documentUri, destPath: destPath);
 
   @override
   Future<bool> delete(String documentUri) => SubmersionSaf.delete(documentUri);

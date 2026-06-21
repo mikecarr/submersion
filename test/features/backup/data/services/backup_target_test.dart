@@ -66,31 +66,39 @@ void main() {
     expect(isSafRef('/storage/emulated/0/x.db'), isFalse);
   });
 
-  test('FilesystemBackupTarget delegates to adapter.backup and returns the path',
-      () async {
-    final tmp = await Directory.systemTemp.createTemp('fbt_');
-    addTearDown(() => tmp.delete(recursive: true));
-    final src = File(p.join(tmp.path, 'src.db'));
-    await src.writeAsString('db');
-    final adapter = _FakeAdapter(src.path);
+  test(
+    'FilesystemBackupTarget delegates to adapter.backup and returns the path',
+    () async {
+      final tmp = await Directory.systemTemp.createTemp('fbt_');
+      addTearDown(() => tmp.delete(recursive: true));
+      final src = File(p.join(tmp.path, 'src.db'));
+      await src.writeAsString('db');
+      final adapter = _FakeAdapter(src.path);
 
-    final ref = await FilesystemBackupTarget(tmp.path).write(adapter, 'out.db');
+      final ref = await FilesystemBackupTarget(
+        tmp.path,
+      ).write(adapter, 'out.db');
 
-    expect(ref, p.join(tmp.path, 'out.db'));
-    expect(adapter.copiedTo, ref);
-    expect(File(ref).existsSync(), isTrue);
-  });
+      expect(ref, p.join(tmp.path, 'out.db'));
+      expect(adapter.copiedTo, ref);
+      expect(File(ref).existsSync(), isTrue);
+    },
+  );
 
-  test('SafBackupTarget writes the source DB via the port, returns the doc URI',
-      () async {
-    final port = _FakeSafPort();
-    final adapter = _FakeAdapter('/data/live.db');
+  test(
+    'SafBackupTarget writes the source DB via the port, returns the doc URI',
+    () async {
+      final port = _FakeSafPort();
+      final adapter = _FakeAdapter('/data/live.db');
 
-    final ref =
-        await SafBackupTarget('content://tree/1', port).write(adapter, 'out.db');
+      final ref = await SafBackupTarget(
+        'content://tree/1',
+        port,
+      ).write(adapter, 'out.db');
 
-    expect(ref, 'content://tree/1/doc/out.db');
-    expect(port.wroteSource, '/data/live.db');
-    expect(port.wroteName, 'out.db');
-  });
+      expect(ref, 'content://tree/1/doc/out.db');
+      expect(port.wroteSource, '/data/live.db');
+      expect(port.wroteName, 'out.db');
+    },
+  );
 }

@@ -19,8 +19,7 @@ class _FakeSafPort implements BackupSafPort {
     required String treeUri,
     required String fileName,
     required String sourcePath,
-  }) async =>
-      'content://doc';
+  }) async => 'content://doc';
 
   @override
   Future<void> readBackup({
@@ -45,9 +44,9 @@ void main() {
   setUpAll(() {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(
-      const MethodChannel('plugins.flutter.io/path_provider'),
-      (call) async => Directory.systemTemp.path,
-    );
+          const MethodChannel('plugins.flutter.io/path_provider'),
+          (call) async => Directory.systemTemp.path,
+        );
   });
   setUp(() async {
     SharedPreferences.setMockInitialValues({});
@@ -65,25 +64,28 @@ void main() {
     await lease.release();
   });
 
-  test('content:// location + dead grant -> self-heal to filesystem default',
-      () async {
-    await preferences.setBackupLocation('content://tree/gone');
-    final lease = await BackupService.resolveBackupTargetLeased(
-      preferences,
-      saf: _FakeSafPort(tree: null),
-    );
-    expect(lease.target, isA<FilesystemBackupTarget>());
-    expect(preferences.getSettings().backupLocation, isNull);
-  });
+  test(
+    'content:// location + dead grant -> self-heal to filesystem default',
+    () async {
+      await preferences.setBackupLocation('content://tree/gone');
+      final lease = await BackupService.resolveBackupTargetLeased(
+        preferences,
+        saf: _FakeSafPort(tree: null),
+      );
+      expect(lease.target, isA<FilesystemBackupTarget>());
+      expect(preferences.getSettings().backupLocation, isNull);
+    },
+  );
 
   test(
-      'filesystem location -> FilesystemBackupTarget (delegates to existing resolver)',
-      () async {
-    final tmp = await Directory.systemTemp.createTemp('btl_');
-    addTearDown(() => tmp.delete(recursive: true));
-    await preferences.setBackupLocation(tmp.path);
-    BackupBookmarkService.debugSupportedOverride = false;
-    final lease = await BackupService.resolveBackupTargetLeased(preferences);
-    expect(lease.target, isA<FilesystemBackupTarget>());
-  });
+    'filesystem location -> FilesystemBackupTarget (delegates to existing resolver)',
+    () async {
+      final tmp = await Directory.systemTemp.createTemp('btl_');
+      addTearDown(() => tmp.delete(recursive: true));
+      await preferences.setBackupLocation(tmp.path);
+      BackupBookmarkService.debugSupportedOverride = false;
+      final lease = await BackupService.resolveBackupTargetLeased(preferences);
+      expect(lease.target, isA<FilesystemBackupTarget>());
+    },
+  );
 }

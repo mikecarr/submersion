@@ -48,22 +48,23 @@ class SubmersionSaf {
   static Future<void> readBackup({
     required String documentUri,
     required String destPath,
-  }) =>
-      _channel.invokeMethod<void>('readBackup', {
-        'documentUri': documentUri,
-        'destPath': destPath,
-      });
+  }) => _channel.invokeMethod<void>('readBackup', {
+    'documentUri': documentUri,
+    'destPath': destPath,
+  });
 
   /// Deletes the document at [documentUri]. Returns whether it was deleted.
   static Future<bool> delete(String documentUri) async =>
-      await _channel
-          .invokeMethod<bool>('delete', {'documentUri': documentUri}) ??
+      await _channel.invokeMethod<bool>('delete', {
+        'documentUri': documentUri,
+      }) ??
       false;
 
   /// Whether the document at [documentUri] still exists.
   static Future<bool> exists(String documentUri) async =>
-      await _channel
-          .invokeMethod<bool>('exists', {'documentUri': documentUri}) ??
+      await _channel.invokeMethod<bool>('exists', {
+        'documentUri': documentUri,
+      }) ??
       false;
 
   /// Returns the writable tree's display name, or null if the persisted grant
