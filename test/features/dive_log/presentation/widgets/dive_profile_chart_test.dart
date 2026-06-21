@@ -1,4 +1,5 @@
 import 'package:fl_chart/fl_chart.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:submersion/core/constants/enums.dart';
@@ -1905,6 +1906,59 @@ void main() {
       expect(find.byType(DiveProfileChart), findsOneWidget);
 
       FlutterError.onError = origOnError;
+    });
+  });
+
+  // Reads the primary fl_chart LineChartData (the depth/time plot is first).
+  LineChartData primaryChartData(WidgetTester tester) =>
+      tester.widget<LineChart>(find.byType(LineChart).first).data;
+
+  group('zoom anchoring', () {
+    testWidgets('mouse wheel up zooms in WITHOUT pinning the left edge to 0', (
+      tester,
+    ) async {
+      await tester.pumpWidget(_buildChart(profile: _makeProfile(points: 20)));
+      await tester.pumpAndSettle();
+
+      final chart = find.byType(LineChart).first;
+      final before = primaryChartData(tester);
+      expect(before.minX, 0.0); // at zoom 1 the window starts at t=0
+
+      final topLeft = tester.getTopLeft(chart);
+      final size = tester.getSize(chart);
+      // Cursor in the right third of the plot.
+      final cursor = topLeft + Offset(size.width * 0.75, size.height * 0.5);
+
+      await tester.sendEventToBinding(
+        PointerScrollEvent(
+          position: cursor,
+          scrollDelta: const Offset(0, -100),
+        ),
+      );
+      await tester.pump();
+
+      final after = primaryChartData(tester);
+      // Zoomed in: visible time range shrank.
+      expect(after.maxX - after.minX, lessThan(before.maxX - before.minX));
+      // Anchored toward the cursor, not the corner: left edge moved off 0.
+      expect(after.minX, greaterThan(0.0));
+    });
+
+    testWidgets('mouse wheel down at max-out keeps the full window', (
+      tester,
+    ) async {
+      await tester.pumpWidget(_buildChart(profile: _makeProfile(points: 20)));
+      await tester.pumpAndSettle();
+      final chart = find.byType(LineChart).first;
+      final center = tester.getCenter(chart);
+
+      await tester.sendEventToBinding(
+        PointerScrollEvent(position: center, scrollDelta: const Offset(0, 100)),
+      );
+      await tester.pump();
+
+      final after = primaryChartData(tester);
+      expect(after.minX, 0.0); // cannot zoom out past 1.0
     });
   });
 }

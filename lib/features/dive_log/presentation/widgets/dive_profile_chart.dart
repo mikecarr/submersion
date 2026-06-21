@@ -23,6 +23,7 @@ import 'package:submersion/features/dive_log/presentation/widgets/dive_profile_l
 import 'package:submersion/features/dive_log/presentation/widgets/gas_colors.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/gas_timeline_strip.dart';
 import 'package:submersion/l10n/l10n_extension.dart';
+import 'package:submersion/features/dive_log/presentation/widgets/profile_chart_viewport.dart';
 
 /// Structured row emitted via [DiveProfileChart.onTooltipData] so callers
 /// can render the tooltip externally (e.g., below the chart).
@@ -454,19 +455,16 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
     }
   }
 
-  // Zoom/pan state
-  double _zoomLevel = 1.0;
-  double _panOffsetX = 0.0; // Normalized offset (0-1 range based on total data)
-  double _panOffsetY = 0.0;
+  // Zoom/pan state — see profile_chart_viewport.dart.
+  ProfileChartViewport _viewport = ProfileChartViewport.reset;
 
-  // For gesture handling
-  double _previousZoom = 1.0;
-  Offset _previousPan = Offset.zero;
+  // Snapshot of the viewport at the start of a continuous gesture; continuous
+  // gestures report cumulative scale/pan, so we apply them against this.
+  ProfileChartViewport _gestureStartViewport = ProfileChartViewport.reset;
   Offset _startFocalPoint = Offset.zero;
 
-  // Zoom limits
-  static const double _minZoom = 1.0;
-  static const double _maxZoom = 10.0;
+  // Local position of the most recent (double-)tap, for tap-anchored zoom.
+  Offset _lastTapDownLocal = Offset.zero;
 
   // Tooltip memoization
   int? _lastTooltipSpotIndex;
@@ -505,11 +503,7 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
   }
 
   void _resetZoom() {
-    setState(() {
-      _zoomLevel = 1.0;
-      _panOffsetX = 0.0;
-      _panOffsetY = 0.0;
-    });
+    setState(() => _viewport = ProfileChartViewport.reset);
   }
 
   /// Build and emit [TooltipRow] data for external rendering when
@@ -890,25 +884,49 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
     widget.onTooltipData!(rows);
   }
 
+  /// The plot-rect insets (reserved axis gutters) for the current build, so a
+  /// gesture's local position can be mapped to a plot-area fraction. Mirrors
+  /// the axis reservations used for the gas-strip overlay (left/right at
+  /// :2265-2270, bottom at :1379-1382). Top has no titles, so its inset is 0.
+  ({double left, double top, double right, double bottom}) _plotInsets(
+    double availableWidth,
+    UnitFormatter units,
+  ) {
+    final legendNotifier = ref.read(profileLegendProvider.notifier);
+    final preferredMetric = legendNotifier.getEffectiveRightAxisMetric();
+    final effectiveRightAxisMetric = preferredMetric != null
+        ? _getEffectiveRightAxisMetric(preferredMetric)
+        : null;
+    final rightAxisRange = effectiveRightAxisMetric != null
+        ? _getMetricRange(effectiveRightAxisMetric, units)
+        : null;
+    final hasRightAxisName =
+        effectiveRightAxisMetric != null && rightAxisRange != null;
+
+    return (
+      left:
+          DiveProfileChart._leftRightAxisNameSize +
+          DiveProfileChart.leftAxisSize(availableWidth),
+      top: 0,
+      right:
+          (hasRightAxisName ? DiveProfileChart._leftRightAxisNameSize : 0) +
+          DiveProfileChart.rightAxisSize(availableWidth),
+      bottom:
+          DiveProfileChart._bottomAxisNameSize +
+          (_hasGasStrip
+              ? DiveProfileChart._bottomTickReservedSize +
+                    DiveProfileChart.gasTimelineHeight
+              : DiveProfileChart._bottomTickReservedSize),
+    );
+  }
+
+  // Buttons have no cursor, so they zoom about the visible center.
   void _zoomIn() {
-    setState(() {
-      _zoomLevel = (_zoomLevel * 1.5).clamp(_minZoom, _maxZoom);
-      _clampPanOffsets();
-    });
+    setState(() => _viewport = _viewport.zoomedAt(0.5, 0.5, 1.5));
   }
 
   void _zoomOut() {
-    setState(() {
-      _zoomLevel = (_zoomLevel / 1.5).clamp(_minZoom, _maxZoom);
-      _clampPanOffsets();
-    });
-  }
-
-  void _clampPanOffsets() {
-    // Calculate maximum allowed pan based on zoom level
-    final maxPan = 1.0 - (1.0 / _zoomLevel);
-    _panOffsetX = _panOffsetX.clamp(0.0, maxPan);
-    _panOffsetY = _panOffsetY.clamp(0.0, maxPan);
+    setState(() => _viewport = _viewport.zoomedAt(0.5, 0.5, 1 / 1.5));
   }
 
   @override
@@ -1024,9 +1042,9 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
             // Chart header with legend and zoom controls (decluttered)
             DiveProfileLegend(
               config: legendConfig,
-              zoomLevel: _zoomLevel,
-              minZoom: _minZoom,
-              maxZoom: _maxZoom,
+              zoomLevel: _viewport.zoom,
+              minZoom: ProfileChartViewport.minZoom,
+              maxZoom: ProfileChartViewport.maxZoom,
               onZoomIn: _zoomIn,
               onZoomOut: _zoomOut,
               onResetZoom: _resetZoom,
@@ -1049,12 +1067,12 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
               ),
             ),
             // Zoom hint
-            if (_zoomLevel > 1.0)
+            if (_viewport.isZoomed)
               Padding(
                 padding: const EdgeInsets.only(top: 4),
                 child: Text(
                   context.l10n.diveLog_profile_zoomHint(
-                    _zoomLevel.toStringAsFixed(1),
+                    _viewport.zoom.toStringAsFixed(1),
                   ),
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: colorScheme.onSurfaceVariant,
@@ -1080,74 +1098,85 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
           label: context.l10n.diveLog_profile_semantics_chart,
           child: GestureDetector(
             onScaleStart: (details) {
-              _previousZoom = _zoomLevel;
-              _previousPan = Offset(_panOffsetX, _panOffsetY);
+              _gestureStartViewport = _viewport;
               _startFocalPoint = details.localFocalPoint;
             },
             onScaleUpdate: (details) {
-              // Only apply zoom/pan for multi-touch (pinch) gestures.
-              // Single-finger drag is handled by fl_chart's touchCallback
-              // without gesture arena disambiguation delay.
+              // Single-pointer drags (mouse pan / touch scrub) are wired in a
+              // later task; for now only multi-touch pinch+pan acts here.
               if (details.pointerCount < 2) return;
 
               setState(() {
-                // Handle zoom
-                final newZoom = (_previousZoom * details.scale).clamp(
-                  _minZoom,
-                  _maxZoom,
+                final box = constraints.biggest;
+                final insets = _plotInsets(constraints.maxWidth, units);
+                final plotW = (box.width - insets.left - insets.right).clamp(
+                  1.0,
+                  double.infinity,
                 );
-
-                // Handle pan
-                final panDelta = details.localFocalPoint - _startFocalPoint;
-
-                // Convert pixel delta to normalized offset based on chart size
-                final chartWidth = constraints.maxWidth;
-                final chartHeight = constraints.maxHeight;
-
-                // Only apply pan if zoomed in
-                if (newZoom > 1.0) {
-                  final normalizedDeltaX = -panDelta.dx / chartWidth / newZoom;
-                  final normalizedDeltaY = -panDelta.dy / chartHeight / newZoom;
-
-                  _panOffsetX = (_previousPan.dx + normalizedDeltaX).clamp(
-                    0.0,
-                    1.0 - (1.0 / newZoom),
-                  );
-                  _panOffsetY = (_previousPan.dy + normalizedDeltaY).clamp(
-                    0.0,
-                    1.0 - (1.0 / newZoom),
-                  );
-                } else {
-                  _panOffsetX = 0.0;
-                  _panOffsetY = 0.0;
-                }
-
-                _zoomLevel = newZoom;
+                final plotH = (box.height - insets.top - insets.bottom).clamp(
+                  1.0,
+                  double.infinity,
+                );
+                final focal = chartFocalFraction(
+                  _startFocalPoint,
+                  box,
+                  left: insets.left,
+                  right: insets.right,
+                  top: insets.top,
+                  bottom: insets.bottom,
+                );
+                // scale is cumulative from gesture start -> apply to snapshot.
+                var vp = _gestureStartViewport.zoomedAt(
+                  focal.fx,
+                  focal.fy,
+                  details.scale,
+                );
+                final panPx = details.localFocalPoint - _startFocalPoint;
+                vp = vp.pannedBy(
+                  -panPx.dx / plotW / vp.zoom,
+                  -panPx.dy / plotH / vp.zoom,
+                );
+                _viewport = vp;
               });
             },
+            onDoubleTapDown: (details) {
+              _lastTapDownLocal = details.localPosition;
+            },
             onDoubleTap: () {
-              if (_zoomLevel > 1.0) {
-                _resetZoom();
-              } else {
-                setState(() {
-                  _zoomLevel = 2.0;
-                });
-              }
+              setState(() {
+                if (_viewport.isZoomed) {
+                  _viewport = ProfileChartViewport.reset;
+                } else {
+                  final box = constraints.biggest;
+                  final insets = _plotInsets(constraints.maxWidth, units);
+                  final focal = chartFocalFraction(
+                    _lastTapDownLocal,
+                    box,
+                    left: insets.left,
+                    right: insets.right,
+                    top: insets.top,
+                    bottom: insets.bottom,
+                  );
+                  _viewport = _viewport.zoomedAt(focal.fx, focal.fy, 2.0);
+                }
+              });
             },
             child: Listener(
               onPointerSignal: (event) {
-                // Handle mouse scroll wheel for zoom
                 if (event is PointerScrollEvent) {
                   setState(() {
-                    final scrollDelta = event.scrollDelta.dy;
-                    if (scrollDelta < 0) {
-                      // Scroll up = zoom in
-                      _zoomLevel = (_zoomLevel * 1.1).clamp(_minZoom, _maxZoom);
-                    } else {
-                      // Scroll down = zoom out
-                      _zoomLevel = (_zoomLevel / 1.1).clamp(_minZoom, _maxZoom);
-                    }
-                    _clampPanOffsets();
+                    final box = constraints.biggest;
+                    final insets = _plotInsets(constraints.maxWidth, units);
+                    final focal = chartFocalFraction(
+                      event.localPosition,
+                      box,
+                      left: insets.left,
+                      right: insets.right,
+                      top: insets.top,
+                      bottom: insets.bottom,
+                    );
+                    final factor = event.scrollDelta.dy < 0 ? 1.1 : 1 / 1.1;
+                    _viewport = _viewport.zoomedAt(focal.fx, focal.fy, factor);
                   });
                 }
               },
@@ -1235,14 +1264,14 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
     );
     final totalMaxDepth = maxDepthValueDisplay * 1.1; // Add 10% padding
 
-    // Apply zoom and pan to calculate visible bounds
-    final visibleRangeX = totalMaxTime / _zoomLevel;
-    final visibleRangeY = totalMaxDepth / _zoomLevel;
+    // Apply zoom and pan to calculate visible bounds (see ProfileChartViewport).
+    final visibleRangeX = totalMaxTime * _viewport.visibleWidth;
+    final visibleRangeY = totalMaxDepth * _viewport.visibleHeight;
 
-    final visibleMinX = _panOffsetX * totalMaxTime;
+    final visibleMinX = _viewport.offsetX * totalMaxTime;
     final visibleMaxX = visibleMinX + visibleRangeX;
 
-    final visibleMinDepth = _panOffsetY * totalMaxDepth;
+    final visibleMinDepth = _viewport.offsetY * totalMaxDepth;
     final visibleMaxDepth = visibleMinDepth + visibleRangeY;
 
     // Temperature bounds (if showing) - convert to user's preferred unit
