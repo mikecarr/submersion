@@ -490,6 +490,11 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
   // in the Listener.onPointerMove mouse-pan path (bypasses gesture arena).
   Offset? _lastPointerLocal;
 
+  // Number of pointers currently down. onPointerMove only pans for a genuine
+  // single-pointer drag, so a multi-finger touch never leaks into the pan path
+  // (this is what keeps Task 7's double-tap-hold pan single-finger-only).
+  int _activePointerCount = 0;
+
   // Tooltip memoization
   int? _lastTooltipSpotIndex;
   List<LineTooltipItem?> _lastTooltipItems = [];
@@ -1161,39 +1166,14 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
               _startFocalPoint = details.localFocalPoint;
             },
             onScaleUpdate: (details) {
-              if (details.pointerCount < 2) {
-                // single-pointer: mouse drag pans, touch one-finger scrubs (falls through)
-                final intent = chartDragIntent(
-                  kind: _activePointerKind,
-                  pointerCount: details.pointerCount,
-                  doubleTapHold: _doubleTapHold,
-                );
-                if (intent != ChartDragIntent.pan) return; // touch scrub
-                setState(() {
-                  final box = constraints.biggest;
-                  final insets = _plotInsets(constraints.maxWidth, units);
-                  final plotW = (box.width - insets.left - insets.right).clamp(
-                    1.0,
-                    double.infinity,
-                  );
-                  final plotH = (box.height - insets.top - insets.bottom).clamp(
-                    1.0,
-                    double.infinity,
-                  );
-                  final d = details.focalPointDelta;
-                  _viewport = _viewport.pannedBy(
-                    -d.dx / plotW / _viewport.zoom,
-                    -d.dy / plotH / _viewport.zoom,
-                  );
-                });
-                return;
-              }
+              // Single-pointer drags are handled by Listener.onPointerMove
+              // (mouse pan) and fl_chart's own recognizer (touch scrub); they
+              // never reach onScaleUpdate, which only ever fires for a pinch.
+              if (details.pointerCount < 2) return;
 
-              // pointerCount >= 2: pinch. Keep the Task 5 touch-only guard.
               // Trackpad pinch is handled by the Listener's onPointerPanZoomUpdate
-              // (reliable cursor anchor); the ScaleGestureRecognizer's synthesized
-              // focal point is unreliable on desktop. Touch focal points are correct,
-              // so touch pinch is handled here.
+              // (reliable cursor anchor); touch focal points are correct, so touch
+              // pinch is handled here.
               if (_activePointerKind != PointerDeviceKind.touch) return;
 
               setState(() {
@@ -1253,6 +1233,7 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
             },
             child: Listener(
               onPointerDown: (event) {
+                _activePointerCount++;
                 _activePointerKind = event.kind;
                 _lastPointerLocal = event.localPosition;
               },
@@ -1262,7 +1243,7 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
                 if (prev == null) return;
                 final intent = chartDragIntent(
                   kind: _activePointerKind,
-                  pointerCount: 1,
+                  pointerCount: _activePointerCount,
                   doubleTapHold: _doubleTapHold,
                 );
                 if (intent != ChartDragIntent.pan) return;
@@ -1284,8 +1265,14 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
                   );
                 });
               },
-              onPointerUp: (event) => _lastPointerLocal = null,
-              onPointerCancel: (event) => _lastPointerLocal = null,
+              onPointerUp: (event) {
+                if (_activePointerCount > 0) _activePointerCount--;
+                _lastPointerLocal = null;
+              },
+              onPointerCancel: (event) {
+                if (_activePointerCount > 0) _activePointerCount--;
+                _lastPointerLocal = null;
+              },
               onPointerPanZoomStart: (event) {
                 _activePointerKind = PointerDeviceKind.trackpad;
                 _gestureStartViewport = _viewport;
