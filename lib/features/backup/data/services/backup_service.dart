@@ -9,51 +9,25 @@ import 'package:sqlite3/sqlite3.dart' as sqlite3;
 import 'package:uuid/uuid.dart';
 
 import 'package:submersion/core/data/repositories/sync_repository.dart';
-import 'package:submersion/core/database/database.dart';
 import 'package:submersion/core/services/backup_bookmark_service.dart';
 import 'package:submersion/core/services/cloud_storage/cloud_storage_provider.dart';
-import 'package:submersion/core/services/database_service.dart';
 import 'package:submersion/core/services/logger_service.dart';
 import 'package:submersion/core/services/sync/library_epoch.dart';
 import 'package:submersion/core/services/sync/library_epoch_store.dart';
 import 'package:submersion/core/services/sync/post_restore_sync_store.dart';
 import 'package:submersion/features/backup/data/repositories/backup_preferences.dart';
+import 'package:submersion/features/backup/data/services/backup_database_adapter.dart';
 import 'package:submersion/features/backup/data/services/backup_saf_port.dart';
 import 'package:submersion/features/backup/data/services/backup_target.dart';
 import 'package:submersion/features/backup/domain/entities/backup_record.dart';
 import 'package:submersion/features/backup/domain/entities/backup_type.dart';
 import 'package:submersion/features/backup/domain/entities/restore_mode.dart';
 
-/// Thin interface for the database operations BackupService needs.
-///
-/// Allows injecting a fake in tests without depending on the
-/// [DatabaseService] singleton directly.
-abstract class BackupDatabaseAdapter {
-  Future<void> backup(String destinationPath);
-  Future<void> restore(String backupPath);
-  Future<String> get databasePath;
-  AppDatabase get database;
-}
-
-/// Default adapter that delegates to [DatabaseService.instance].
-class DefaultBackupDatabaseAdapter implements BackupDatabaseAdapter {
-  final DatabaseService _dbAdapter;
-
-  const DefaultBackupDatabaseAdapter(this._dbAdapter);
-
-  @override
-  Future<void> backup(String destinationPath) =>
-      _dbAdapter.backup(destinationPath);
-
-  @override
-  Future<void> restore(String backupPath) => _dbAdapter.restore(backupPath);
-
-  @override
-  Future<String> get databasePath => _dbAdapter.databasePath;
-
-  @override
-  AppDatabase get database => _dbAdapter.database;
-}
+// BackupDatabaseAdapter + DefaultBackupDatabaseAdapter live in
+// backup_database_adapter.dart; re-exported so existing importers
+// (background_service, providers, tests) keep resolving these types from
+// backup_service.dart after the extraction that broke the backup_target cycle.
+export 'package:submersion/features/backup/data/services/backup_database_adapter.dart';
 
 /// A backups directory ready to write into, plus [release] to call when the
 /// caller is done -- which stops any security-scoped access that was armed to
