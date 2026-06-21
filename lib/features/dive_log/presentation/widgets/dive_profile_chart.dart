@@ -469,7 +469,6 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
 
   // Active pointer kind, corrected on the first real pointer event. Chooses
   // pan-vs-scrub for single-pointer drags and is set by trackpad gestures.
-  // ignore: unused_field — read by Task 6 (single-pointer drag routing).
   PointerDeviceKind _activePointerKind =
       (defaultTargetPlatform == TargetPlatform.iOS ||
           defaultTargetPlatform == TargetPlatform.android)
@@ -478,6 +477,18 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
 
   // Cursor position at the start of a trackpad pan/zoom gesture.
   Offset _trackpadAnchor = Offset.zero;
+
+  // True between a double-tap-down and the gesture's end; lets a held-finger
+  // drag pan instead of scrub. Toggled in a later task; false here.
+  // ignore: prefer_final_fields — mutated in Task 7 (double-tap-hold pan).
+  bool _doubleTapHold = false;
+
+  // Index of the last sample reported via hover, to de-dupe onPointSelected.
+  int? _lastHoverIndex;
+
+  // Last raw pointer position during a drag; used to compute per-move deltas
+  // in the Listener.onPointerMove mouse-pan path (bypasses gesture arena).
+  Offset? _lastPointerLocal;
 
   // Tooltip memoization
   int? _lastTooltipSpotIndex;
@@ -933,6 +944,41 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
     );
   }
 
+  /// Nearest profile sample index under a hover at [localPos], or null if the
+  /// profile is empty. Maps the cursor X through the current viewport to a
+  /// timestamp, then finds the closest sample.
+  int? _hoverIndex(
+    Offset localPos,
+    Size box,
+    ({double left, double top, double right, double bottom}) insets,
+  ) {
+    if (widget.profile.isEmpty) return null;
+    final focal = chartFocalFraction(
+      localPos,
+      box,
+      left: insets.left,
+      right: insets.right,
+      top: insets.top,
+      bottom: insets.bottom,
+    );
+    final totalMaxTime = widget.profile
+        .map((p) => p.timestamp)
+        .reduce(math.max)
+        .toDouble();
+    final t =
+        (_viewport.offsetX + focal.fx * _viewport.visibleWidth) * totalMaxTime;
+    var best = 0;
+    var bestDist = double.infinity;
+    for (var i = 0; i < widget.profile.length; i++) {
+      final d = (widget.profile[i].timestamp - t).abs();
+      if (d < bestDist) {
+        bestDist = d;
+        best = i;
+      }
+    }
+    return best;
+  }
+
   // Buttons have no cursor, so they zoom about the visible center.
   void _zoomIn() {
     setState(() => _viewport = _viewport.zoomedAt(0.5, 0.5, 1.5));
@@ -1115,10 +1161,35 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
               _startFocalPoint = details.localFocalPoint;
             },
             onScaleUpdate: (details) {
-              // Single-pointer drags (mouse pan / touch scrub) are wired in a
-              // later task; for now only multi-touch pinch+pan acts here.
-              if (details.pointerCount < 2) return;
+              if (details.pointerCount < 2) {
+                // single-pointer: mouse drag pans, touch one-finger scrubs (falls through)
+                final intent = chartDragIntent(
+                  kind: _activePointerKind,
+                  pointerCount: details.pointerCount,
+                  doubleTapHold: _doubleTapHold,
+                );
+                if (intent != ChartDragIntent.pan) return; // touch scrub
+                setState(() {
+                  final box = constraints.biggest;
+                  final insets = _plotInsets(constraints.maxWidth, units);
+                  final plotW = (box.width - insets.left - insets.right).clamp(
+                    1.0,
+                    double.infinity,
+                  );
+                  final plotH = (box.height - insets.top - insets.bottom).clamp(
+                    1.0,
+                    double.infinity,
+                  );
+                  final d = details.focalPointDelta;
+                  _viewport = _viewport.pannedBy(
+                    -d.dx / plotW / _viewport.zoom,
+                    -d.dy / plotH / _viewport.zoom,
+                  );
+                });
+                return;
+              }
 
+              // pointerCount >= 2: pinch. Keep the Task 5 touch-only guard.
               // Trackpad pinch is handled by the Listener's onPointerPanZoomUpdate
               // (reliable cursor anchor); the ScaleGestureRecognizer's synthesized
               // focal point is unreliable on desktop. Touch focal points are correct,
@@ -1181,7 +1252,40 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
               });
             },
             child: Listener(
-              onPointerDown: (event) => _activePointerKind = event.kind,
+              onPointerDown: (event) {
+                _activePointerKind = event.kind;
+                _lastPointerLocal = event.localPosition;
+              },
+              onPointerMove: (event) {
+                final prev = _lastPointerLocal;
+                _lastPointerLocal = event.localPosition;
+                if (prev == null) return;
+                final intent = chartDragIntent(
+                  kind: _activePointerKind,
+                  pointerCount: 1,
+                  doubleTapHold: _doubleTapHold,
+                );
+                if (intent != ChartDragIntent.pan) return;
+                setState(() {
+                  final box = constraints.biggest;
+                  final insets = _plotInsets(constraints.maxWidth, units);
+                  final plotW = (box.width - insets.left - insets.right).clamp(
+                    1.0,
+                    double.infinity,
+                  );
+                  final plotH = (box.height - insets.top - insets.bottom).clamp(
+                    1.0,
+                    double.infinity,
+                  );
+                  final d = event.localPosition - prev;
+                  _viewport = _viewport.pannedBy(
+                    -d.dx / plotW / _viewport.zoom,
+                    -d.dy / plotH / _viewport.zoom,
+                  );
+                });
+              },
+              onPointerUp: (event) => _lastPointerLocal = null,
+              onPointerCancel: (event) => _lastPointerLocal = null,
               onPointerPanZoomStart: (event) {
                 _activePointerKind = PointerDeviceKind.trackpad;
                 _gestureStartViewport = _viewport;
@@ -1238,13 +1342,33 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
                   });
                 }
               },
-              child: _buildChart(
-                context,
-                units,
-                availableWidth: constraints.maxWidth,
-                hasTemperatureData: hasTemperatureData,
-                hasPressureData: hasPressureData,
-                hasHeartRateData: hasHeartRateData,
+              onPointerHover: (event) {
+                _activePointerKind = PointerDeviceKind.mouse;
+                final idx = _hoverIndex(
+                  event.localPosition,
+                  constraints.biggest,
+                  _plotInsets(constraints.maxWidth, units),
+                );
+                if (idx != _lastHoverIndex) {
+                  _lastHoverIndex = idx;
+                  widget.onPointSelected?.call(idx);
+                }
+              },
+              child: MouseRegion(
+                onExit: (_) {
+                  if (_lastHoverIndex != null) {
+                    _lastHoverIndex = null;
+                    widget.onPointSelected?.call(null);
+                  }
+                },
+                child: _buildChart(
+                  context,
+                  units,
+                  availableWidth: constraints.maxWidth,
+                  hasTemperatureData: hasTemperatureData,
+                  hasPressureData: hasPressureData,
+                  hasHeartRateData: hasHeartRateData,
+                ),
               ),
             ),
           ),

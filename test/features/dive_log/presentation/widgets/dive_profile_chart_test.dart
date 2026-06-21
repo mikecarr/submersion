@@ -2037,4 +2037,93 @@ void main() {
       },
     );
   });
+
+  group('desktop pan and hover', () {
+    testWidgets('mouse click-drag pans a zoomed-in chart', (tester) async {
+      await tester.pumpWidget(_buildChart(profile: _makeProfile(points: 20)));
+      await tester.pumpAndSettle();
+      final chart = find.byType(LineChart).first;
+      final center = tester.getCenter(chart);
+
+      // Zoom in first (about center) via two wheel steps.
+      await tester.sendEventToBinding(
+        PointerScrollEvent(
+          position: center,
+          scrollDelta: const Offset(0, -100),
+        ),
+      );
+      await tester.sendEventToBinding(
+        PointerScrollEvent(
+          position: center,
+          scrollDelta: const Offset(0, -100),
+        ),
+      );
+      await tester.pump();
+      final zoomed = tester.widget<LineChart>(chart).data;
+
+      // Drag left with the mouse -> window should move right (minX increases).
+      final gesture = await tester.startGesture(
+        center,
+        kind: PointerDeviceKind.mouse,
+      );
+      await gesture.moveBy(const Offset(-60, 0));
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      final panned = tester.widget<LineChart>(chart).data;
+      expect(panned.minX, greaterThan(zoomed.minX));
+    });
+
+    testWidgets('touch one-finger drag does NOT pan (still scrubs)', (
+      tester,
+    ) async {
+      await tester.pumpWidget(_buildChart(profile: _makeProfile(points: 20)));
+      await tester.pumpAndSettle();
+      final chart = find.byType(LineChart).first;
+      final center = tester.getCenter(chart);
+
+      await tester.sendEventToBinding(
+        PointerScrollEvent(
+          position: center,
+          scrollDelta: const Offset(0, -100),
+        ),
+      );
+      await tester.pump();
+      final zoomed = tester.widget<LineChart>(chart).data;
+
+      final gesture = await tester.startGesture(
+        center,
+        kind: PointerDeviceKind.touch,
+      );
+      await gesture.moveBy(const Offset(-60, 0));
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      final after = tester.widget<LineChart>(chart).data;
+      expect(after.minX, zoomed.minX); // unchanged: one finger scrubs, no pan
+    });
+
+    testWidgets('mouse hover selects the nearest sample', (tester) async {
+      int? selected;
+      await tester.pumpWidget(
+        _buildChart(
+          profile: _makeProfile(points: 20),
+          onPointSelected: (i) => selected = i,
+        ),
+      );
+      await tester.pumpAndSettle();
+      final chart = find.byType(LineChart).first;
+      final topLeft = tester.getTopLeft(chart);
+      final size = tester.getSize(chart);
+
+      final pointer = TestPointer(1, PointerDeviceKind.mouse);
+      await tester.sendEventToBinding(
+        pointer.hover(topLeft + Offset(size.width * 0.5, size.height * 0.5)),
+      );
+      await tester.pump();
+
+      expect(selected, isNotNull);
+      expect(selected, inInclusiveRange(0, 19));
+    });
+  });
 }
