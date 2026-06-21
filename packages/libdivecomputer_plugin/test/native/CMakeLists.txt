@@ -33,7 +33,27 @@ target_include_directories(test_descriptor_matcher PRIVATE
     ${CONFIG_DIR}
 )
 
+# Integration test: links the real libdivecomputer descriptor table so it
+# exercises libdc_descriptor_match end-to-end (BLE name -> descriptor). The
+# minimal source set below is everything the matcher transitively needs from
+# libdivecomputer.
+add_executable(test_descriptor_match_integration
+    test_descriptor_match_integration.c
+    ${WRAPPER_DIR}/libdc_wrapper.c
+    ${LIBDC_DIR}/src/descriptor.c
+    ${LIBDC_DIR}/src/iterator.c
+    ${LIBDC_DIR}/src/array.c
+    ${LIBDC_DIR}/src/platform.c
+    ${LIBDC_DIR}/src/version.c
+)
+target_include_directories(test_descriptor_match_integration PRIVATE
+    ${WRAPPER_DIR}
+    ${LIBDC_DIR}/include
+    ${CONFIG_DIR}
+)
+
 enable_testing()
 add_test(NAME test_dive_converter COMMAND test_dive_converter)
 add_test(NAME test_serial_callbacks COMMAND test_serial_callbacks)
 add_test(NAME test_descriptor_matcher COMMAND test_descriptor_matcher)
+add_test(NAME test_descriptor_match_integration COMMAND test_descriptor_match_integration)
