@@ -77,7 +77,16 @@ func serialReadFully(
             return SerialReadOutcome(status: .io, bytesRead: received)
         }
         if ready == 0 {
-            break  // Timed out waiting for more data.
+            break  // Genuine timeout: no data arrived within the deadline.
+        }
+
+        // poll() also wakes on error/hangup, not just readable data. POLLERR or
+        // POLLNVAL (invalid fd) is a hard failure: surface it as .io so the
+        // caller fails fast instead of mis-reading it as a timeout. POLLHUP can
+        // accompany still-buffered data, so fall through and let read() drain
+        // it; an empty read (0) below is then the real end of stream.
+        if (pfd.revents & (Int16(POLLERR) | Int16(POLLNVAL))) != 0 {
+            return SerialReadOutcome(status: .io, bytesRead: received)
         }
 
         let n = read(fd, buffer.advanced(by: received), size - received)
@@ -86,7 +95,10 @@ func serialReadFully(
             return SerialReadOutcome(status: .io, bytesRead: received)
         }
         if n == 0 {
-            break  // EOF: the port closed mid-packet.
+            // EOF: the port closed mid-packet (e.g. the device was unplugged).
+            // That is an I/O failure, not a timeout -- don't burn driver
+            // retries on a dead fd.
+            return SerialReadOutcome(status: .io, bytesRead: received)
         }
         received += n
     }
