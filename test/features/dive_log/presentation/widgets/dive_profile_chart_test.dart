@@ -1271,6 +1271,34 @@ void main() {
       },
     );
 
+    testWidgets(
+      'gesture on a gas-strip dive does not watch a provider outside build',
+      (tester) async {
+        // _plotInsets (called from gesture handlers, outside build) reads the
+        // gas-strip flag. On a gas-strip dive that flag must NOT use ref.watch
+        // (illegal outside build) — a wheel zoom here must not throw.
+        await tester.pumpWidget(
+          _buildChart(
+            profile: _makeProfile(points: 20),
+            gasSegments: makeSegments(),
+            diveDurationSeconds: 300,
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        final chart = find.byType(LineChart).first;
+        await tester.sendEventToBinding(
+          PointerScrollEvent(
+            position: tester.getCenter(chart),
+            scrollDelta: const Offset(0, -100),
+          ),
+        );
+        await tester.pump();
+
+        expect(tester.takeException(), isNull);
+      },
+    );
+
     testWidgets('does not render GasTimelineStrip when segments is empty', (
       tester,
     ) async {

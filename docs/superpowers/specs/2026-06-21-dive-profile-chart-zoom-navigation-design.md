@@ -2,7 +2,7 @@
 
 - **Source:** Direct user report (no tracked GitHub issue yet): "Zooming in on the dive profile chart always keeps the focus anchored in the upper-left corner. Navigating a zoomed-in chart is also tedious and unintuitive."
 - **Date:** 2026-06-21
-- **Status:** Approved design, pending implementation plan
+- **Status:** Implemented in PR #372 — see the implementation plan at `docs/superpowers/plans/2026-06-21-dive-profile-chart-zoom-navigation.md`; macOS device-verified.
 - **Chart widget:** `lib/features/dive_log/presentation/widgets/dive_profile_chart.dart` (~3,730 lines)
 - **Chart library:** `fl_chart ^1.1.1` (zoom/pan is hand-rolled on top of it, not fl_chart's transform)
 - **Sibling spec:** `2026-06-21-map-touchpad-interaction-design.md` — shares the "key off `PointerDeviceKind`, anchor zoom at the cursor" philosophy. Read both together.

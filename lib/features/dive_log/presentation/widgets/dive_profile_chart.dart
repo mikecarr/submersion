@@ -930,6 +930,11 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
         : null;
     final hasRightAxisName =
         effectiveRightAxisMetric != null && rightAxisRange != null;
+    // ref.read (NOT _hasGasStrip's ref.watch): _plotInsets runs from gesture
+    // callbacks, outside build, where ref.watch must not be used.
+    final hasGasStrip = _gasStripVisible(
+      ref.read(profileLegendProvider).showGas,
+    );
 
     return (
       left:
@@ -941,7 +946,7 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
           DiveProfileChart.rightAxisSize(availableWidth),
       bottom:
           DiveProfileChart._bottomAxisNameSize +
-          (_hasGasStrip
+          (hasGasStrip
               ? DiveProfileChart._bottomTickReservedSize +
                     DiveProfileChart.gasTimelineHeight
               : DiveProfileChart._bottomTickReservedSize),
@@ -1412,10 +1417,16 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
   /// supplied AND the user has not hidden the strip via the chart options
   /// menu — keeps the chart self-contained and lets us cheaply branch in
   /// the layout code without nullable bookkeeping at every call site.
-  bool get _hasGasStrip =>
+  bool _gasStripVisible(bool showGas) =>
       (widget.gasSegments?.isNotEmpty ?? false) &&
       (widget.diveDurationSeconds != null && widget.diveDurationSeconds! > 0) &&
-      ref.watch(profileLegendProvider.select((s) => s.showGas));
+      showGas;
+
+  // ref.watch is correct here: _hasGasStrip is only read from build().
+  // Gesture paths must use _gasStripVisible with ref.read (see _plotInsets).
+  bool get _hasGasStrip => _gasStripVisible(
+    ref.watch(profileLegendProvider.select((s) => s.showGas)),
+  );
 
   Widget _buildChart(
     BuildContext context,
