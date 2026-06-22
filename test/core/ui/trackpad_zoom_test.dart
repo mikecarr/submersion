@@ -7,12 +7,12 @@ void main() {
       expect(trackpadScrollZoomDelta(0), 0);
     });
 
-    test('scroll up (negative dy) zooms in (positive delta)', () {
-      expect(trackpadScrollZoomDelta(-100), greaterThan(0));
+    test('scroll up (negative dy) zooms out (negative delta)', () {
+      expect(trackpadScrollZoomDelta(-100), lessThan(0));
     });
 
-    test('scroll down (positive dy) zooms out (negative delta)', () {
-      expect(trackpadScrollZoomDelta(100), lessThan(0));
+    test('scroll down (positive dy) zooms in (positive delta)', () {
+      expect(trackpadScrollZoomDelta(100), greaterThan(0));
     });
 
     test('is symmetric for equal-and-opposite scrolls', () {
@@ -27,7 +27,7 @@ void main() {
     });
 
     test('default sensitivity maps a ~100px flick to ~1 zoom level', () {
-      expect(trackpadScrollZoomDelta(-100), closeTo(1.0, 0.0001));
+      expect(trackpadScrollZoomDelta(100), closeTo(1.0, 0.0001));
     });
   });
 }

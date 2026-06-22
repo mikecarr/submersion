@@ -21,10 +21,10 @@ delta — you cannot have both).
 - **Panning after the change:** click-drag only. Pinch still zooms. Two-finger
   vertical scroll zooms; horizontal scroll component is ignored.
 - **Zoom anchor:** under the cursor.
-- **Direction:** matches the existing mouse-wheel convention so wheel and trackpad
-  agree on the same machine — negative `dy` (scroll up/away) → zoom in. The OS
-  natural-scroll setting affects the reported sign identically for wheel and
-  trackpad, so they stay consistent.
+- **Direction:** two-finger scroll **up zooms out**, **down zooms in** (per user
+  preference, set after device testing). This is the opposite of the mouse-wheel
+  path (up = zoom in), which is left unchanged; the trackpad-only flip lives in
+  `trackpadScrollZoomDelta`.
 - **Pointer-kind aware:** only `PointerDeviceKind.trackpad` gestures are
   re-interpreted. Touchscreen pinch / two-finger pan keep flowing through
   flutter_map and the chart's existing handlers untouched (iPad users unaffected).

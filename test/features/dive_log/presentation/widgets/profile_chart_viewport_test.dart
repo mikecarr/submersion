@@ -215,15 +215,15 @@ void main() {
 
   group('trackpad scroll maps to a cursor-anchored zoom factor', () {
     // The chart applies pow(2, trackpadScrollZoomDelta(dy)) as the zoom factor.
-    test('scroll up produces a >1 factor (zoom in)', () {
-      final factor = math.pow(2, trackpadScrollZoomDelta(-100)).toDouble();
+    test('scroll down produces a >1 factor (zoom in)', () {
+      final factor = math.pow(2, trackpadScrollZoomDelta(100)).toDouble();
       expect(factor, greaterThan(1.0));
       final vp = const ProfileChartViewport().zoomedAt(0.5, 0.5, factor);
       expect(vp.zoom, greaterThan(1.0));
     });
 
-    test('scroll down produces a <1 factor and is a no-op at the min rail', () {
-      final factor = math.pow(2, trackpadScrollZoomDelta(100)).toDouble();
+    test('scroll up produces a <1 factor and is a no-op at the min rail', () {
+      final factor = math.pow(2, trackpadScrollZoomDelta(-100)).toDouble();
       expect(factor, lessThan(1.0));
       final vp = const ProfileChartViewport().zoomedAt(0.5, 0.5, factor);
       expect(vp.zoom, ProfileChartViewport.minZoom);

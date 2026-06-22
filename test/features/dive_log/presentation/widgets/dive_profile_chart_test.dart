@@ -2017,7 +2017,7 @@ void main() {
     });
 
     testWidgets(
-      'trackpad two-finger scroll up zooms in, anchored toward the cursor',
+      'trackpad two-finger scroll down zooms in, anchored toward the cursor',
       (tester) async {
         await tester.pumpWidget(_buildChart(profile: _makeProfile(points: 20)));
         await tester.pumpAndSettle();
@@ -2030,9 +2030,9 @@ void main() {
         final before = primaryChartData(tester);
         final pointer = TestPointer(1, PointerDeviceKind.trackpad);
         await tester.sendEventToBinding(pointer.panZoomStart(anchor));
-        // Scroll up (negative dy) zooms in. Horizontal component is ignored.
+        // Scroll down (positive dy) zooms in. Horizontal component is ignored.
         await tester.sendEventToBinding(
-          pointer.panZoomUpdate(anchor, pan: const Offset(0, -120)),
+          pointer.panZoomUpdate(anchor, pan: const Offset(0, 120)),
         );
         await tester.sendEventToBinding(pointer.panZoomEnd());
         await tester.pump();
@@ -2041,7 +2041,7 @@ void main() {
         expect(
           after.maxX - after.minX,
           lessThan(before.maxX - before.minX),
-          reason: 'two-finger scroll up zooms in (visible window shrinks)',
+          reason: 'two-finger scroll down zooms in (visible window shrinks)',
         );
         expect(
           after.minX,

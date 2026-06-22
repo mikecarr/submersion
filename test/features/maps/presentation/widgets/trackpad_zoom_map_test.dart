@@ -31,7 +31,7 @@ void main() {
     return controller;
   }
 
-  testWidgets('trackpad two-finger scroll up zooms in progressively', (
+  testWidgets('trackpad two-finger scroll down zooms in progressively', (
     tester,
   ) async {
     final controller = await pumpMap(tester);
@@ -43,12 +43,12 @@ void main() {
     );
     await gesture.panZoomStart(center);
     await tester.pump();
-    await gesture.panZoomUpdate(center, pan: const Offset(0, -50));
+    await gesture.panZoomUpdate(center, pan: const Offset(0, 50));
     await tester.pump();
-    await gesture.panZoomUpdate(center, pan: const Offset(0, -100));
+    await gesture.panZoomUpdate(center, pan: const Offset(0, 100));
     await tester.pump();
     final mid = controller.camera.zoom;
-    await gesture.panZoomUpdate(center, pan: const Offset(0, -150));
+    await gesture.panZoomUpdate(center, pan: const Offset(0, 150));
     await tester.pump();
     await gesture.panZoomEnd();
     await tester.pump();
@@ -61,7 +61,7 @@ void main() {
     );
   });
 
-  testWidgets('trackpad two-finger scroll down zooms out', (tester) async {
+  testWidgets('trackpad two-finger scroll up zooms out', (tester) async {
     final controller = await pumpMap(tester);
     final start = controller.camera.zoom;
     final center = tester.getCenter(find.byType(FlutterMap));
@@ -71,7 +71,7 @@ void main() {
     );
     await gesture.panZoomStart(center);
     await tester.pump();
-    await gesture.panZoomUpdate(center, pan: const Offset(0, 100));
+    await gesture.panZoomUpdate(center, pan: const Offset(0, -100));
     await tester.pump();
     await gesture.panZoomEnd();
     await tester.pump();
