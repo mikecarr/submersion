@@ -52,6 +52,8 @@ void main() {
 
   test('routes uncaught platform errors to the logger and lets the platform '
       'keep handling them', () async {
+    // With no prior handler, the new handler falls back to returning false.
+    PlatformDispatcher.instance.onError = null;
     installGlobalErrorHandlers();
 
     final captured = <LogEntry>[];
@@ -74,6 +76,28 @@ void main() {
       ),
       isNotEmpty,
       reason: 'an uncaught platform error should be logged at error level',
+    );
+  });
+
+  test('platform error handler delegates to a previously-installed handler '
+      'instead of silently replacing it', () async {
+    var delegated = false;
+    PlatformDispatcher.instance.onError = (error, stack) {
+      delegated = true;
+      return true; // pretend a crash reporter fully handled it
+    };
+    installGlobalErrorHandlers();
+
+    final handled = PlatformDispatcher.instance.onError!(
+      StateError('boom-chain'),
+      StackTrace.current,
+    );
+
+    expect(delegated, isTrue, reason: 'the previous handler should still run');
+    expect(
+      handled,
+      isTrue,
+      reason: "the previous handler's result should be propagated",
     );
   });
 

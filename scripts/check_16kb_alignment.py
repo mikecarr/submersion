@@ -96,9 +96,11 @@ def check_archive(path):
         for name in entries:
             try:
                 is_64bit, aligns = load_segment_alignments(zf.read(name))
-            except ElfError as exc:
-                # Fail closed: a native lib we cannot parse is a native lib we
-                # cannot prove is 16 KB-aligned, so do not let the build pass.
+            except (ElfError, struct.error) as exc:
+                # Fail closed: a native lib we cannot parse (malformed, or a
+                # truncated header that trips struct.unpack_from) is a lib we
+                # cannot prove is 16 KB-aligned, so do not let the build pass --
+                # and keep checking the remaining libs instead of crashing.
                 ok = False
                 lines.append(
                     f"  FAIL  {name}: not a parseable ELF ({exc}); "

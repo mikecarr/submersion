@@ -31,6 +31,7 @@ void installGlobalErrorHandlers() {
     (previousFlutterOnError ?? FlutterError.presentError)(details);
   };
 
+  final previousPlatformOnError = PlatformDispatcher.instance.onError;
   PlatformDispatcher.instance.onError = (Object error, StackTrace stack) {
     _logger.error(
       'Uncaught platform error',
@@ -38,9 +39,10 @@ void installGlobalErrorHandlers() {
       error: error,
       stackTrace: stack,
     );
-    // Returning false marks the error as not fully handled, so the platform
+    // Delegate to any previously-installed handler (e.g. a crash reporter)
+    // instead of silently replacing it; fall back to false so the platform
     // still applies its default behavior (printing to the console / logcat).
-    return false;
+    return previousPlatformOnError?.call(error, stack) ?? false;
   };
 }
 
