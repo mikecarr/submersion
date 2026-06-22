@@ -97,7 +97,13 @@ def check_archive(path):
             try:
                 is_64bit, aligns = load_segment_alignments(zf.read(name))
             except ElfError as exc:
-                lines.append(f"  SKIP  {name}: {exc}")
+                # Fail closed: a native lib we cannot parse is a native lib we
+                # cannot prove is 16 KB-aligned, so do not let the build pass.
+                ok = False
+                lines.append(
+                    f"  FAIL  {name}: not a parseable ELF ({exc}); "
+                    "cannot verify alignment"
+                )
                 continue
             min_align = min(aligns) if aligns else 0
             bits = "64-bit" if is_64bit else "32-bit"
