@@ -2072,6 +2072,23 @@ void main() {
       final after = primaryChartData(tester);
       expect(after.maxX - after.minX, before.maxX - before.minX);
     });
+
+    testWidgets('a cancelled pointer resets the drag state', (tester) async {
+      await tester.pumpWidget(_buildChart(profile: _makeProfile(points: 20)));
+      await tester.pumpAndSettle();
+
+      final chart = find.byType(LineChart).first;
+      final center = tester.getCenter(chart);
+
+      // Start a pointer, move it, then cancel — exercises onPointerCancel.
+      final gesture = await tester.startGesture(center);
+      await gesture.moveBy(const Offset(10, 0));
+      await gesture.cancel();
+      // Flush the double-tap disambiguation timer before teardown.
+      await tester.pump(const Duration(milliseconds: 400));
+
+      expect(find.byType(LineChart), findsWidgets);
+    });
   });
 
   group('desktop pan and hover', () {

@@ -13,6 +13,8 @@ void main() {
         home: Scaffold(
           body: TrackpadZoomMap(
             controller: controller,
+            minZoom: 1,
+            maxZoom: 18,
             child: FlutterMap(
               mapController: controller,
               options: const MapOptions(
@@ -95,5 +97,25 @@ void main() {
     await tester.pump();
 
     expect(controller.camera.zoom, greaterThan(start));
+  });
+
+  testWidgets('trackpad click-drag is not claimed by the zoom recognizer', (
+    tester,
+  ) async {
+    await pumpMap(tester);
+    final center = tester.getCenter(find.byType(FlutterMap));
+
+    // An ordinary trackpad pointer (click-drag), not a pan-zoom gesture. The
+    // recognizer's addAllowedPointer is a no-op, so it must not claim this and
+    // the map keeps working (no crash).
+    final gesture = await tester.startGesture(
+      center,
+      kind: PointerDeviceKind.trackpad,
+    );
+    await gesture.moveBy(const Offset(0, -40));
+    await gesture.up();
+    await tester.pump();
+
+    expect(find.byType(FlutterMap), findsOneWidget);
   });
 }

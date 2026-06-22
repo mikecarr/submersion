@@ -58,8 +58,13 @@ class DiveLocationsMap extends ConsumerStatefulWidget {
 }
 
 class _DiveLocationsMapState extends ConsumerState<DiveLocationsMap> {
-  late final MapController _effectiveController =
-      widget.controller ?? MapController();
+  // Stable fallback used only when the caller does not supply a controller.
+  // Derive the effective controller each build so a parent that rebuilds with a
+  // different `controller` is always honored.
+  final MapController _fallbackController = MapController();
+
+  MapController get _effectiveController =>
+      widget.controller ?? _fallbackController;
 
   @override
   Widget build(BuildContext context) {
