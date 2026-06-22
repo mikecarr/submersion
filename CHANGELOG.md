@@ -3,6 +3,13 @@
 All notable changes to Submersion are documented in this file.
 
 
+## 1.5.5 (2026-06-22)
+
+### Chores
+
+- bump version to 1.5.5+107
+
+
 ## 1.5.4 (2026-06-21)
 
 ### Features
