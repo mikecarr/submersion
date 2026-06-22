@@ -3,6 +3,67 @@
 All notable changes to Submersion are documented in this file.
 
 
+## 1.5.4 (2026-06-21)
+
+### Features
+
+- double-tap-hold to pan on profile chart (touch)
+- desktop hover select and click-drag pan on profile chart
+- trackpad pinch zoom-to-cursor and two-finger pan on profile chart
+- anchor dive profile zoom to cursor/pinch via ProfileChartViewport
+- add chartDragIntent pointer-kind drag routing
+- add chartFocalFraction plot-rect focal mapping
+- add ProfileChartViewport for cursor-anchored profile zoom
+- localized internal/SD-card chooser dialog (#300)
+- Android internal/SD-card chooser via external dirs (#300)
+- Android SAF folder picker + label display (#300)
+- ref-aware restore/delete/history for SAF backups (#300)
+- route performBackup through BackupTarget with SAF self-heal (#300)
+- add BackupTarget abstraction (filesystem + SAF) (#300)
+- add BackupSafPort seam over the SAF facade (#300)
+- scaffold submersion_saf plugin for SAF backups (#300)
+
+### Bug Fixes
+
+- surface Android serial I/O errors as IO, not timeout (#334)
+- fail fast on serial EOF/error, harden read tests (#334)
+- identify Halcyon Symbios Handset instead of HUD (#357)
+- accumulate USB-serial reads to the full packet (#334)
+- read gas-strip flag via ref.read in gesture paths (PR review)
+- trackpad pinch/pan jumped to the lower-right corner on macOS
+- gate profile-chart drag-pan to a live single-pointer count
+- route trackpad pinch solely through the cursor-anchored handler
+- OSTC nano (hw_ostc3) downloads over BLE (#280)
+- import all o2 sensors, not only the first one
+- drop OC depth x FO2 fallback for CCR/SCR CNS
+- compute CCR/SCR CNS from measured loop ppO2
+- identify Scubapro G2 HUD instead of Aladin Sport Matrix (#285)
+
+### Refactoring
+
+- extract testable chooser dialog + resolveAndroidDbDir; coverage:ignore native glue (#300)
+- extract BackupDatabaseAdapter to break the backup_target import cycle (#300)
+
+### Documentation
+
+- add dive profile chart zoom & navigation spec and plan
+
+### Tests
+
+- cover SAF port/target/restore + db-location chooser; patch coverage 32% -> 97% (#300)
+- cover trackpad two-finger-scroll pan on profile chart
+
+### Chores
+
+- bump version to 1.5.4+106
+- add Copilot code-review instructions for Dart 3 semantics
+
+### Other
+
+- cancel DB-location pick on dismiss, clear chooser, cancel SAF pick on detach (#300)
+- dart format SAF backup sources (#300)
+
+
 ## 1.5.4 (2026-06-20)
 
 ### Features
