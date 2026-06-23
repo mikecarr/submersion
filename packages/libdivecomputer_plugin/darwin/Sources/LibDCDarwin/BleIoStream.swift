@@ -603,11 +603,17 @@ class BleIoStream: NSObject, CBPeripheralDelegate {
         guard let value = characteristic.value else { return }
         hasSeenNotify = true
         consecutiveReadTimeouts = 0
+        // Hand the payload to the consumer before logging. Under the OSTC
+        // download fire-hose (hundreds of notifications/second) any work left on
+        // this CoreBluetooth delegate queue delays draining the next
+        // notification; if the queue falls behind, iOS drops notifications and
+        // the download loses bytes (issue #394). append() is O(1) and the log
+        // is dispatched off this queue by NativeLogger.
+        packetBuffer.append(value)
         NativeLogger.d("BleIoStream", category: "BLE",
             "notify \(characteristic.uuid.uuidString)"
                 + " bytes=\(value.count)"
                 + " data=\(Self.hexString(value, maxBytes: Self.maxLogBytes))")
-        packetBuffer.append(value)
     }
 
     func peripheral(_ peripheral: CBPeripheral,

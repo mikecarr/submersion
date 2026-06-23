@@ -141,10 +141,209 @@ static void check_fill(size_t total) {
   free(out);
 }
 
+// ---------------------------------------------------------------------------
+// Issue #394: per-transfer retry (hw_ostc3_transfer_retry).
+//
+// On iOS/macOS the OSTC nano's BLE link intermittently drops a few bytes during
+// the large logbook/profile transfers, so a read stalls short and the transfer
+// times out. The device stays idle and responsive afterwards, so re-issuing the
+// command recovers. These tests drive the real hw_ostc3_transfer through a mock
+// that speaks the OSTC command/echo/data/ready protocol and can fail the first
+// N attempts, verifying the wrapper recovers, resets progress, honors the
+// attempt cap, and does NOT retry a non-transient (UNSUPPORTED) result.
+// ---------------------------------------------------------------------------
+
+enum { PH_ECHO = 0, PH_DATA = 1, PH_READY = 2, PH_DONE = 3 };
+
+typedef struct {
+  const unsigned char *payload;
+  size_t size;
+  int phase;        // PH_* state within the current attempt
+  size_t offset;    // bytes of payload served this attempt
+  unsigned char cmd;
+  int attempt;      // command writes seen (== transfer attempts)
+  int fail_attempts;     // the first N attempts stall (lose bytes)
+  size_t fail_after;     // bytes served before the stall, on a failing attempt
+  unsigned char echo_byte;  // byte returned for the echo (cmd, or a wrong byte)
+  int purge_calls;
+} proto_mock_t;
+
+// Every write in the COMPACT flow is the 1-byte command (COMPACT has no input
+// payload), so each write begins a fresh attempt.
+static dc_status_t proto_write(void *userdata, const void *data, size_t size,
+                               size_t *actual) {
+  proto_mock_t *m = (proto_mock_t *)userdata;
+  m->cmd = ((const unsigned char *)data)[0];
+  m->phase = PH_ECHO;
+  m->offset = 0;
+  m->attempt++;
+  if (actual) *actual = size;
+  return DC_STATUS_SUCCESS;
+}
+
+static dc_status_t proto_read(void *userdata, void *data, size_t size,
+                              size_t *actual) {
+  proto_mock_t *m = (proto_mock_t *)userdata;
+  unsigned char *out = (unsigned char *)data;
+  switch (m->phase) {
+    case PH_ECHO:
+      out[0] = m->echo_byte ? m->echo_byte : m->cmd;
+      if (actual) *actual = 1;
+      m->phase = PH_DATA;
+      return DC_STATUS_SUCCESS;
+    case PH_DATA: {
+      // Simulate lost bytes: a failing attempt stalls once it has served
+      // fail_after bytes, exactly as a read does when the tail never arrives.
+      if (m->attempt <= m->fail_attempts && m->offset >= m->fail_after) {
+        if (actual) *actual = 0;
+        return DC_STATUS_TIMEOUT;
+      }
+      size_t remaining = m->size - m->offset;
+      size_t n = size < MOCK_CHUNK ? size : MOCK_CHUNK;
+      if (n > remaining) n = remaining;
+      memcpy(out, m->payload + m->offset, n);
+      m->offset += n;
+      if (actual) *actual = n;
+      if (m->offset == m->size) m->phase = PH_READY;
+      return DC_STATUS_SUCCESS;
+    }
+    case PH_READY:
+      out[0] = READY;  // 0x4D, the ready byte for state == DOWNLOAD
+      if (actual) *actual = 1;
+      m->phase = PH_DONE;
+      return DC_STATUS_SUCCESS;
+    default:
+      if (actual) *actual = 0;
+      return DC_STATUS_TIMEOUT;
+  }
+}
+
+static dc_status_t proto_purge(void *userdata, dc_direction_t direction) {
+  proto_mock_t *m = (proto_mock_t *)userdata;
+  (void)direction;
+  m->purge_calls++;
+  return DC_STATUS_SUCCESS;
+}
+
+static dc_status_t proto_sleep(void *userdata, unsigned int ms) {
+  (void)userdata;
+  (void)ms;  // no-op: keep the test fast
+  return DC_STATUS_SUCCESS;
+}
+
+// Runs one COMPACT transfer through hw_ostc3_transfer_retry against a mock that
+// fails `fail_attempts` times. Returns the transfer status and reports details
+// via the out-params so each test can assert what it cares about.
+static dc_status_t run_retry(size_t total, int fail_attempts,
+                             unsigned char echo_byte,
+                             unsigned int progress_start, int *attempts,
+                             int *purges, unsigned int *progress_end,
+                             int *data_ok) {
+  unsigned char *payload = (unsigned char *)malloc(total);
+  for (size_t i = 0; i < total; i++) payload[i] = (unsigned char)((i * 7) & 0xFF);
+
+  dc_context_t *ctx = NULL;
+  assert(dc_context_new(&ctx) == DC_STATUS_SUCCESS);
+
+  proto_mock_t mock;
+  memset(&mock, 0, sizeof(mock));
+  mock.payload = payload;
+  mock.size = total;
+  mock.fail_attempts = fail_attempts;
+  mock.fail_after = total / 2;  // stall halfway: clearly short
+  mock.echo_byte = echo_byte;
+
+  dc_custom_cbs_t cbs;
+  memset(&cbs, 0, sizeof(cbs));
+  cbs.read = proto_read;
+  cbs.write = proto_write;
+  cbs.purge = proto_purge;
+  cbs.sleep = proto_sleep;
+  cbs.close = mock_close;
+
+  dc_iostream_t *iostream = NULL;
+  assert(dc_custom_open(&iostream, ctx, DC_TRANSPORT_BLE, &cbs, &mock) ==
+         DC_STATUS_SUCCESS);
+
+  hw_ostc3_device_t dev;
+  memset(&dev, 0, sizeof(dev));
+  dev.base.context = ctx;
+  dev.iostream = iostream;
+  dev.state = DOWNLOAD;  // ready byte is READY (0x4D)
+
+  dc_event_progress_t progress;
+  memset(&progress, 0, sizeof(progress));
+  progress.current = progress_start;
+  progress.maximum = progress_start + (unsigned int)total;
+
+  unsigned char *out = (unsigned char *)malloc(total);
+  memset(out, 0xEE, total);
+
+  dc_status_t rc = hw_ostc3_transfer_retry(&dev, &progress, COMPACT, NULL, 0,
+                                           out, (unsigned int)total, NULL,
+                                           NODELAY);
+
+  if (attempts) *attempts = mock.attempt;
+  if (purges) *purges = mock.purge_calls;
+  if (progress_end) *progress_end = progress.current;
+  if (data_ok) *data_ok = (rc == DC_STATUS_SUCCESS) &&
+                          (memcmp(out, payload, total) == 0);
+
+  dc_iostream_close(iostream);
+  dc_context_free(ctx);
+  free(payload);
+  free(out);
+  return rc;
+}
+
+static void expect(int cond, const char *label) {
+  if (cond) {
+    printf("PASS: %s\n", label);
+  } else {
+    printf("FAIL: %s\n", label);
+    failures++;
+  }
+}
+
+static void check_retry(void) {
+  const size_t total = 4096;  // the COMPACT logbook size from the issue
+  int attempts, purges, data_ok;
+  unsigned int progress_end;
+  dc_status_t rc;
+
+  // Recovery: one failing attempt, then success on the retry.
+  rc = run_retry(total, 1, 0, 1000, &attempts, &purges, &progress_end, &data_ok);
+  expect(rc == DC_STATUS_SUCCESS, "retry recovers a transient transfer timeout");
+  expect(data_ok, "recovered transfer fills the whole buffer correctly");
+  expect(attempts == 2, "recovery takes exactly two attempts");
+  expect(purges >= 1, "the link is purged before the retry");
+  // Progress must count only the successful attempt, not the failed partial.
+  expect(progress_end == 1000 + (unsigned int)total,
+         "progress is reset between attempts (no double counting)");
+
+  // Happy path: no failures, no retry, no purge.
+  rc = run_retry(total, 0, 0, 0, &attempts, &purges, NULL, &data_ok);
+  expect(rc == DC_STATUS_SUCCESS && data_ok && attempts == 1 && purges == 0,
+         "a clean transfer succeeds on the first attempt with no purge");
+
+  // Attempt cap: a persistently lossy link fails after the bounded attempts.
+  rc = run_retry(total, 999, 0, 0, &attempts, &purges, NULL, NULL);
+  expect(rc == DC_STATUS_TIMEOUT, "a persistent failure returns the error");
+  expect(attempts == HW_OSTC3_DOWNLOAD_ATTEMPTS,
+         "retries are capped at HW_OSTC3_DOWNLOAD_ATTEMPTS");
+
+  // Non-transient result (UNSUPPORTED via a ready-byte echo) is not retried:
+  // this preserves the COMPACT -> HEADER fallback for older firmware.
+  rc = run_retry(total, 0, READY, 0, &attempts, &purges, NULL, NULL);
+  expect(rc == DC_STATUS_UNSUPPORTED, "an unsupported command is reported");
+  expect(attempts == 1, "an unsupported command is not retried");
+}
+
 int main(void) {
   check_fill(64);    // exact multiple of the 16-byte notification size
   check_fill(40);    // non-multiple: the final read is a partial (8 bytes)
   check_fill(4096);  // the real COMPACT logbook size from issue #280
+  check_retry();     // issue #394: per-transfer retry recovers from byte loss
 
   if (failures == 0) {
     printf("All hw_ostc3_read tests passed.\n");
