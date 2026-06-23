@@ -82,7 +82,9 @@ void main() {
 
   group('bulkReplaceTags', () {
     setUp(() async {
-      await db.customStatement('PRAGMA foreign_keys = OFF'); // test-only isolation
+      await db.customStatement(
+        'PRAGMA foreign_keys = OFF',
+      ); // test-only isolation
     });
 
     test('replaces existing tag membership with the given set', () async {
@@ -140,7 +142,11 @@ void main() {
         await seed('hasTank');
         await repository.bulkAddTank(['hasTank'], al80);
 
-        await repository.bulkAddTank(['empty', 'hasTank'], al80, onlyIfEmpty: true);
+        await repository.bulkAddTank(
+          ['empty', 'hasTank'],
+          al80,
+          onlyIfEmpty: true,
+        );
 
         final emptyTanks = await (db.select(
           db.diveTanks,
@@ -158,14 +164,17 @@ void main() {
     test('bulkReplaceTanks overwrites the whole list', () async {
       await seed('d1');
       await repository.bulkAddTank(['d1'], al80);
-      await repository.bulkReplaceTanks(['d1'], const [
-        domain.DiveTank(
-          id: '',
-          name: 'D12',
-          volume: 24,
-          gasMix: domain.GasMix(o2: 32),
-        ),
-      ]);
+      await repository.bulkReplaceTanks(
+        ['d1'],
+        const [
+          domain.DiveTank(
+            id: '',
+            name: 'D12',
+            volume: 24,
+            gasMix: domain.GasMix(o2: 32),
+          ),
+        ],
+      );
       final rows = await (db.select(
         db.diveTanks,
       )..where((t) => t.diveId.equals('d1'))).get();
@@ -192,14 +201,17 @@ void main() {
       expect(rows.length, 1);
       expect(rows.single.amountKg, 4);
 
-      await repository.bulkReplaceWeights(['d1'], const [
-        domain.DiveWeight(
-          id: '',
-          diveId: '',
-          weightType: WeightType.integrated,
-          amountKg: 6,
-        ),
-      ]);
+      await repository.bulkReplaceWeights(
+        ['d1'],
+        const [
+          domain.DiveWeight(
+            id: '',
+            diveId: '',
+            weightType: WeightType.integrated,
+            amountKg: 6,
+          ),
+        ],
+      );
       rows = await (db.select(
         db.diveWeights,
       )..where((t) => t.diveId.equals('d1'))).get();

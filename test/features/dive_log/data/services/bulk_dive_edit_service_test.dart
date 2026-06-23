@@ -113,7 +113,9 @@ void main() {
           diveIds: ['d1', 'd2'],
           scalars: DivesCompanion(rating: Value(4)),
           notesAppend: ' trip',
-          ops: [TagsOp(mode: BulkCollectionMode.replace, tagIds: ['t1'])],
+          ops: [
+            TagsOp(mode: BulkCollectionMode.replace, tagIds: ['t1']),
+          ],
         ),
       );
 
@@ -139,7 +141,9 @@ void main() {
       const BulkEditRequest(
         diveIds: ['d1'],
         scalars: DivesCompanion(rating: Value(9)),
-        ops: [TagsOp(mode: BulkCollectionMode.replace, tagIds: ['new'])],
+        ops: [
+          TagsOp(mode: BulkCollectionMode.replace, tagIds: ['new']),
+        ],
       ),
     );
 

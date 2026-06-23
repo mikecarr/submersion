@@ -167,28 +167,25 @@ class BulkDiveEditService {
       final tanks = snapshot.priorTanks;
       if (tanks != null) {
         for (final id in ids) {
-          await _diveRepo.bulkReplaceTanks(
-            [id],
-            _tanksFromRows(tanks[id] ?? const []),
-          );
+          await _diveRepo.bulkReplaceTanks([
+            id,
+          ], _tanksFromRows(tanks[id] ?? const []));
         }
       }
       final weights = snapshot.priorWeights;
       if (weights != null) {
         for (final id in ids) {
-          await _diveRepo.bulkReplaceWeights(
-            [id],
-            _weightsFromRows(weights[id] ?? const []),
-          );
+          await _diveRepo.bulkReplaceWeights([
+            id,
+          ], _weightsFromRows(weights[id] ?? const []));
         }
       }
       final sightings = snapshot.priorSightings;
       if (sightings != null) {
         for (final id in ids) {
-          await _speciesRepo.bulkReplaceSightings(
-            [id],
-            _sightingsFromRows(sightings[id] ?? const []),
-          );
+          await _speciesRepo.bulkReplaceSightings([
+            id,
+          ], _sightingsFromRows(sightings[id] ?? const []));
         }
       }
     });

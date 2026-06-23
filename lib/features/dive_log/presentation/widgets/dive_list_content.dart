@@ -1281,11 +1281,11 @@ class _DiveListContentState extends ConsumerState<DiveListContent> {
               tooltip: context.l10n.diveLog_selection_tooltip_selectAll,
               onPressed: () => _selectAll(dives),
             ),
-            IconButton(
-              icon: const Icon(Icons.date_range, size: 20),
-              tooltip: context.l10n.diveLog_selection_tooltip_selectDateRange,
-              onPressed: () => _selectByDateRange(dives),
-            ),
+          IconButton(
+            icon: const Icon(Icons.date_range, size: 20),
+            tooltip: context.l10n.diveLog_selection_tooltip_selectDateRange,
+            onPressed: () => _selectByDateRange(dives),
+          ),
           if (_selectedIds.isNotEmpty)
             IconButton(
               icon: const Icon(Icons.upload, size: 20),

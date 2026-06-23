@@ -3,11 +3,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:submersion/features/dive_log/domain/entities/dive_summary.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/dive_list_content.dart';
 
-DiveSummary summary(String id, [DateTime? dt]) => DiveSummary(
-  id: id,
-  dateTime: dt ?? DateTime(2026, 1, 1),
-  sortTimestamp: 0,
-);
+DiveSummary summary(String id, [DateTime? dt]) =>
+    DiveSummary(id: id, dateTime: dt ?? DateTime(2026, 1, 1), sortTimestamp: 0);
 
 void main() {
   test('rangeIds returns inclusive span regardless of direction', () {

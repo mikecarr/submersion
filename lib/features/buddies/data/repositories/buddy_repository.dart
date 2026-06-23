@@ -477,7 +477,8 @@ class BuddyRepository {
       for (final bwr in buddies) {
         final existing =
             await (_db.select(_db.diveBuddies)..where(
-                  (t) => t.diveId.equals(diveId) & t.buddyId.equals(bwr.buddy.id),
+                  (t) =>
+                      t.diveId.equals(diveId) & t.buddyId.equals(bwr.buddy.id),
                 ))
                 .getSingleOrNull();
         if (existing != null) {
@@ -492,15 +493,17 @@ class BuddyRepository {
           );
         } else {
           final id = _uuid.v4();
-          await _db.into(_db.diveBuddies).insert(
-            DiveBuddiesCompanion(
-              id: Value(id),
-              diveId: Value(diveId),
-              buddyId: Value(bwr.buddy.id),
-              role: Value(bwr.role.name),
-              createdAt: Value(now),
-            ),
-          );
+          await _db
+              .into(_db.diveBuddies)
+              .insert(
+                DiveBuddiesCompanion(
+                  id: Value(id),
+                  diveId: Value(diveId),
+                  buddyId: Value(bwr.buddy.id),
+                  role: Value(bwr.role.name),
+                  createdAt: Value(now),
+                ),
+              );
           await _syncRepository.markRecordPending(
             entityType: 'diveBuddies',
             recordId: id,
@@ -519,14 +522,12 @@ class BuddyRepository {
   ) async {
     if (diveIds.isEmpty || buddyIds.isEmpty) return;
     final now = DateTime.now().millisecondsSinceEpoch;
-    final existing = await (_db.select(_db.diveBuddies)..where(
-          (t) => t.diveId.isIn(diveIds) & t.buddyId.isIn(buddyIds),
-        ))
-        .get();
-    await (_db.delete(_db.diveBuddies)..where(
-          (t) => t.diveId.isIn(diveIds) & t.buddyId.isIn(buddyIds),
-        ))
-        .go();
+    final existing = await (_db.select(
+      _db.diveBuddies,
+    )..where((t) => t.diveId.isIn(diveIds) & t.buddyId.isIn(buddyIds))).get();
+    await (_db.delete(
+      _db.diveBuddies,
+    )..where((t) => t.diveId.isIn(diveIds) & t.buddyId.isIn(buddyIds))).go();
     for (final row in existing) {
       await _syncRepository.logDeletion(
         entityType: 'diveBuddies',
@@ -560,15 +561,17 @@ class BuddyRepository {
       }
       for (final bwr in buddies) {
         final id = _uuid.v4();
-        await _db.into(_db.diveBuddies).insert(
-          DiveBuddiesCompanion(
-            id: Value(id),
-            diveId: Value(diveId),
-            buddyId: Value(bwr.buddy.id),
-            role: Value(bwr.role.name),
-            createdAt: Value(now),
-          ),
-        );
+        await _db
+            .into(_db.diveBuddies)
+            .insert(
+              DiveBuddiesCompanion(
+                id: Value(id),
+                diveId: Value(diveId),
+                buddyId: Value(bwr.buddy.id),
+                role: Value(bwr.role.name),
+                createdAt: Value(now),
+              ),
+            );
         await _syncRepository.markRecordPending(
           entityType: 'diveBuddies',
           recordId: id,

@@ -301,15 +301,17 @@ class SpeciesRepository {
     for (final diveId in diveIds) {
       for (final sighting in sightings) {
         final id = _uuid.v4();
-        await _db.into(_db.sightings).insert(
-          SightingsCompanion(
-            id: Value(id),
-            diveId: Value(diveId),
-            speciesId: Value(sighting.speciesId),
-            count: Value(sighting.count),
-            notes: Value(sighting.notes),
-          ),
-        );
+        await _db
+            .into(_db.sightings)
+            .insert(
+              SightingsCompanion(
+                id: Value(id),
+                diveId: Value(diveId),
+                speciesId: Value(sighting.speciesId),
+                count: Value(sighting.count),
+                notes: Value(sighting.notes),
+              ),
+            );
         await _syncRepository.markRecordPending(
           entityType: 'sightings',
           recordId: id,
@@ -342,15 +344,17 @@ class SpeciesRepository {
       }
       for (final sighting in sightings) {
         final id = _uuid.v4();
-        await _db.into(_db.sightings).insert(
-          SightingsCompanion(
-            id: Value(id),
-            diveId: Value(diveId),
-            speciesId: Value(sighting.speciesId),
-            count: Value(sighting.count),
-            notes: Value(sighting.notes),
-          ),
-        );
+        await _db
+            .into(_db.sightings)
+            .insert(
+              SightingsCompanion(
+                id: Value(id),
+                diveId: Value(diveId),
+                speciesId: Value(sighting.speciesId),
+                count: Value(sighting.count),
+                notes: Value(sighting.notes),
+              ),
+            );
         await _syncRepository.markRecordPending(
           entityType: 'sightings',
           recordId: id,

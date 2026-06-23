@@ -3673,7 +3673,10 @@ class DiveRepository {
   }
 
   /// Replace each dive's tag membership with exactly [tagIds]. No notify/txn.
-  Future<void> bulkReplaceTags(List<String> diveIds, List<String> tagIds) async {
+  Future<void> bulkReplaceTags(
+    List<String> diveIds,
+    List<String> tagIds,
+  ) async {
     if (diveIds.isEmpty) return;
     final now = DateTime.now().millisecondsSinceEpoch;
     final existing = await (_db.select(
@@ -3689,14 +3692,16 @@ class DiveRepository {
     for (final diveId in diveIds) {
       for (final tagId in tagIds) {
         final id = _uuid.v4();
-        await _db.into(_db.diveTags).insert(
-          DiveTagsCompanion(
-            id: Value(id),
-            diveId: Value(diveId),
-            tagId: Value(tagId),
-            createdAt: Value(now),
-          ),
-        );
+        await _db
+            .into(_db.diveTags)
+            .insert(
+              DiveTagsCompanion(
+                id: Value(id),
+                diveId: Value(diveId),
+                tagId: Value(tagId),
+                createdAt: Value(now),
+              ),
+            );
         await _syncRepository.markRecordPending(
           entityType: 'diveTags',
           recordId: id,
@@ -3739,12 +3744,14 @@ class DiveRepository {
     final now = DateTime.now().millisecondsSinceEpoch;
     for (final diveId in diveIds) {
       for (final equipmentId in equipmentIds) {
-        await _db.into(_db.diveEquipment).insertOnConflictUpdate(
-          DiveEquipmentCompanion(
-            diveId: Value(diveId),
-            equipmentId: Value(equipmentId),
-          ),
-        );
+        await _db
+            .into(_db.diveEquipment)
+            .insertOnConflictUpdate(
+              DiveEquipmentCompanion(
+                diveId: Value(diveId),
+                equipmentId: Value(equipmentId),
+              ),
+            );
         await _syncRepository.markRecordPending(
           entityType: 'diveEquipment',
           recordId: '$diveId|$equipmentId',
@@ -3762,10 +3769,11 @@ class DiveRepository {
   ) async {
     if (diveIds.isEmpty || equipmentIds.isEmpty) return;
     final now = DateTime.now().millisecondsSinceEpoch;
-    final existing = await (_db.select(_db.diveEquipment)..where(
-          (t) => t.diveId.isIn(diveIds) & t.equipmentId.isIn(equipmentIds),
-        ))
-        .get();
+    final existing =
+        await (_db.select(_db.diveEquipment)..where(
+              (t) => t.diveId.isIn(diveIds) & t.equipmentId.isIn(equipmentIds),
+            ))
+            .get();
     await (_db.delete(_db.diveEquipment)..where(
           (t) => t.diveId.isIn(diveIds) & t.equipmentId.isIn(equipmentIds),
         ))
@@ -3800,12 +3808,14 @@ class DiveRepository {
     }
     for (final diveId in diveIds) {
       for (final equipmentId in equipmentIds) {
-        await _db.into(_db.diveEquipment).insertOnConflictUpdate(
-          DiveEquipmentCompanion(
-            diveId: Value(diveId),
-            equipmentId: Value(equipmentId),
-          ),
-        );
+        await _db
+            .into(_db.diveEquipment)
+            .insertOnConflictUpdate(
+              DiveEquipmentCompanion(
+                diveId: Value(diveId),
+                equipmentId: Value(equipmentId),
+              ),
+            );
         await _syncRepository.markRecordPending(
           entityType: 'diveEquipment',
           recordId: '$diveId|$equipmentId',
