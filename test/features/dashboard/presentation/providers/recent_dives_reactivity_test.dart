@@ -14,10 +14,12 @@ import '../../../../helpers/mock_providers.dart';
 /// showing the pre-import slice (e.g. dive 144 in place of the new 145) until an
 /// app restart.
 ///
-/// `recentDivesProvider` reads [divesProvider], which self-invalidates on any
-/// `dives`-table write (see [DiveRepository.watchDivesChanges]). This guards
-/// that the home tab recent-dives list reflects a direct DB write -- the same
-/// path an import or a sync takes -- without any manual invalidation.
+/// `recentDivesProvider` self-invalidates on any `dives`-table write -- both
+/// directly (its own [DiveRepository.watchDivesChanges] subscription) and
+/// transitively through [divesProvider], which self-invalidates on the same
+/// tick. This guards that the home tab recent-dives list reflects a direct DB
+/// write -- the same path an import or a sync takes -- without any manual
+/// invalidation.
 void main() {
   setUp(() async {
     SharedPreferences.setMockInitialValues({});
