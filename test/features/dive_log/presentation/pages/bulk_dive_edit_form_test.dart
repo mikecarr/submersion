@@ -122,5 +122,55 @@ void main() {
       expect((await repository.getDiveById(d1.id))!.isFavorite, isTrue);
       expect((await repository.getDiveById(d2.id))!.isFavorite, isTrue);
     });
+
+    testWidgets('saving with nothing enabled shows a hint, no dialog', (
+      tester,
+    ) async {
+      await pumpBulk(tester);
+
+      await tester.ensureVisible(find.text('Save'));
+      await tester.tap(find.text('Save'));
+      await tester.pumpAndSettle();
+
+      // No confirm dialog (its Apply button is absent); a hint SnackBar shows.
+      expect(find.text('Apply'), findsNothing);
+      expect(find.byType(SnackBar), findsOneWidget);
+    });
+
+    testWidgets('selecting a collection mode is included in the save', (
+      tester,
+    ) async {
+      final d1 = await repository.createDive(
+        createTestDiveWithBottomTime().copyWith(id: 'coll-1'),
+      );
+      final overrides = await getBaseOverrides();
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: buildOverrides(overrides).cast(),
+          child: MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: Scaffold(
+              body: DiveEditPage(bulkDiveIds: [d1.id], embedded: true),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Turn on the first collection's "Add" mode (Tags).
+      await tester.ensureVisible(find.text('Add').first);
+      await tester.tap(find.text('Add').first);
+      await tester.pumpAndSettle();
+
+      await tester.ensureVisible(find.text('Save'));
+      await tester.tap(find.text('Save'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Apply'));
+      await tester.pumpAndSettle();
+
+      // The apply path (collection op) ran and reported success.
+      expect(find.byType(SnackBar), findsOneWidget);
+    });
   });
 }
