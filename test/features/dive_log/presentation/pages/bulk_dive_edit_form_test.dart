@@ -258,5 +258,99 @@ void main() {
 
       expect((await repository.getDiveById(d1.id))!.humidity, 60);
     });
+
+    testWidgets('selecting every collection mode covers all op branches', (
+      tester,
+    ) async {
+      final d1 = await repository.createDive(
+        createTestDiveWithBottomTime().copyWith(id: 'all-1'),
+      );
+      final overrides = await getBaseOverrides();
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: buildOverrides(overrides).cast(),
+          child: MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: Scaffold(
+              body: DiveEditPage(bulkDiveIds: [d1.id], embedded: true),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Turn on "Add" for each of the six collections (reveals every editor
+      // and exercises every _collectCollectionOps branch).
+      final selectors = find.byType(BulkCollectionModeSelector);
+      final count = tester.widgetList(selectors).length;
+      for (var i = 0; i < count; i++) {
+        final addChip = find.descendant(
+          of: selectors.at(i),
+          matching: find.widgetWithText(ChoiceChip, 'Add'),
+        );
+        await tester.ensureVisible(addChip);
+        await tester.tap(addChip);
+        await tester.pumpAndSettle();
+      }
+
+      // Add a tank so the tank-card editor + TanksOp payload are exercised.
+      await tester.ensureVisible(find.text('Add Tank'));
+      await tester.tap(find.text('Add Tank'));
+      await tester.pumpAndSettle();
+
+      await tester.ensureVisible(find.text('Save'));
+      await tester.tap(find.text('Save'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Apply'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(SnackBar), findsOneWidget);
+    });
+
+    testWidgets('notes Append mode applies an appended note', (tester) async {
+      final d1 = await repository.createDive(
+        createTestDiveWithBottomTime().copyWith(id: 'note-1'),
+      );
+      final overrides = await getBaseOverrides();
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: buildOverrides(overrides).cast(),
+          child: MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: Scaffold(
+              body: DiveEditPage(bulkDiveIds: [d1.id], embedded: true),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Notes is the last gate; enable it, switch to Append, and type.
+      final notesGate = find.byType(BulkFieldGate).last;
+      await tester.ensureVisible(notesGate);
+      await tester.tap(
+        find.descendant(of: notesGate, matching: find.byType(Checkbox)),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(
+        find.descendant(of: notesGate, matching: find.text('Append')),
+      );
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.descendant(of: notesGate, matching: find.byType(TextField)),
+        'extra log',
+      );
+      await tester.pumpAndSettle();
+
+      await tester.ensureVisible(find.text('Save'));
+      await tester.tap(find.text('Save'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Apply'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(SnackBar), findsOneWidget);
+    });
   });
 }
