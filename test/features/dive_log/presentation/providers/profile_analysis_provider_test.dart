@@ -405,6 +405,49 @@ void main() {
 
       expect(result, isNull);
     });
+
+    test('still produces SAC when pressure tank_id no longer matches a tank', () {
+      // Regression for #276: dive-scoped pressure is fetched by dive id, but a
+      // re-import / reparse can re-key the dive's tanks with fresh UUIDs. The
+      // pressure rows then reference a tank id the dive no longer has, and the
+      // SAC join silently drops them ("un-keyed"). Since the pressure is already
+      // scoped to this dive, it must still produce a curve.
+      const currentTank = DiveTank(id: 'tank-new', gasMix: GasMix());
+      final tankPressures = {
+        'tank-old': const [
+          TankPressurePoint(
+            id: 'p0',
+            tankId: 'tank-old',
+            timestamp: 0,
+            pressure: 200,
+          ),
+          TankPressurePoint(
+            id: 'p1',
+            tankId: 'tank-old',
+            timestamp: 60,
+            pressure: 190,
+          ),
+          TankPressurePoint(
+            id: 'p2',
+            tankId: 'tank-old',
+            timestamp: 120,
+            pressure: 180,
+          ),
+        ],
+      };
+
+      final result = combineMultiTankPressures(
+        timestamps: const [0, 60, 120],
+        tankPressures: tankPressures,
+        tanks: const [currentTank],
+      );
+
+      expect(result, isNotNull);
+      expect(result, hasLength(3));
+      expect(result![0], closeTo(200, 0.001));
+      expect(result[1], closeTo(190, 0.001));
+      expect(result[2], closeTo(180, 0.001));
+    });
   });
 
   group('ProfileAnalysisService - Gradient Factor override', () {
