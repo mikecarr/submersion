@@ -1022,7 +1022,7 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
         ),
         _collectionEntry(
           type: BulkCollectionType.sightings,
-          label: 'Marine life', // localized in Phase 6
+          label: context.l10n.diveLog_edit_section_marineLife,
           allowed: ownedModes,
           editor: _sightingsChild(),
         ),
@@ -1091,14 +1091,14 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
 
   Widget _buildBulkConditionsSection(UnitFormatter units) {
     return FormSection(
-      label: 'Conditions', // localized in Phase 6
+      label: context.l10n.diveLog_edit_section_conditions,
       expanded: true,
       onToggle: null,
       children: [
         _gatedRow(
           BulkField.waterType,
           FormRow.custom(
-            label: 'Water type',
+            label: context.l10n.diveLog_edit_label_waterType,
             child: _enumDropdown<WaterType>(
               value: _waterType,
               options: WaterType.values,
@@ -1110,7 +1110,7 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
         _gatedRow(
           BulkField.visibility,
           FormRow.custom(
-            label: 'Visibility',
+            label: context.l10n.diveLog_edit_label_visibility,
             child: _enumDropdown<Visibility>(
               value: _selectedVisibility,
               options: Visibility.values,
@@ -1123,7 +1123,7 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
         _gatedRow(
           BulkField.currentDirection,
           FormRow.custom(
-            label: 'Current direction',
+            label: context.l10n.diveLog_edit_label_currentDirection,
             child: _enumDropdown<CurrentDirection>(
               value: _currentDirection,
               options: CurrentDirection.values,
@@ -1135,7 +1135,7 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
         _gatedRow(
           BulkField.currentStrength,
           FormRow.custom(
-            label: 'Current strength',
+            label: context.l10n.diveLog_edit_label_currentStrength,
             child: _enumDropdown<CurrentStrength>(
               value: _currentStrength,
               options: CurrentStrength.values,
@@ -1147,7 +1147,7 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
         _gatedRow(
           BulkField.swellHeight,
           FormRow.text(
-            label: 'Swell height',
+            label: context.l10n.diveLog_edit_label_swellHeight,
             controller: _swellHeightController,
             keyboardType: TextInputType.number,
             alwaysEditing: true,
@@ -1156,7 +1156,7 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
         _gatedRow(
           BulkField.entryMethod,
           FormRow.custom(
-            label: 'Entry method',
+            label: context.l10n.diveLog_edit_label_entryMethod,
             child: _enumDropdown<EntryMethod>(
               value: _entryMethod,
               options: EntryMethod.values,
@@ -1168,7 +1168,7 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
         _gatedRow(
           BulkField.exitMethod,
           FormRow.custom(
-            label: 'Exit method',
+            label: context.l10n.diveLog_edit_label_exitMethod,
             child: _enumDropdown<EntryMethod>(
               value: _exitMethod,
               options: EntryMethod.values,
@@ -1180,7 +1180,7 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
         _gatedRow(
           BulkField.altitude,
           FormRow.text(
-            label: 'Altitude',
+            label: context.l10n.diveLog_edit_label_altitude,
             controller: _altitudeController,
             keyboardType: TextInputType.number,
             alwaysEditing: true,
@@ -1189,7 +1189,7 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
         _gatedRow(
           BulkField.surfacePressure,
           FormRow.text(
-            label: 'Surface pressure',
+            label: context.l10n.diveLog_edit_label_surfacePressure,
             controller: _surfacePressureController,
             keyboardType: TextInputType.number,
             alwaysEditing: true,
@@ -1208,7 +1208,7 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
         _gatedRow(
           BulkField.windSpeed,
           FormRow.text(
-            label: 'Wind speed',
+            label: context.l10n.diveLog_edit_label_windSpeed,
             controller: _windSpeedController,
             keyboardType: TextInputType.number,
             alwaysEditing: true,
@@ -1217,7 +1217,7 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
         _gatedRow(
           BulkField.windDirection,
           FormRow.custom(
-            label: 'Wind direction',
+            label: context.l10n.diveLog_edit_label_windDirection,
             child: _enumDropdown<CurrentDirection>(
               value: _windDirection,
               options: CurrentDirection.values,
@@ -1229,7 +1229,7 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
         _gatedRow(
           BulkField.cloudCover,
           FormRow.custom(
-            label: 'Cloud cover',
+            label: context.l10n.diveLog_edit_label_cloudCover,
             child: _enumDropdown<CloudCover>(
               value: _cloudCover,
               options: CloudCover.values,
@@ -1241,7 +1241,7 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
         _gatedRow(
           BulkField.precipitation,
           FormRow.custom(
-            label: 'Precipitation',
+            label: context.l10n.diveLog_edit_label_precipitation,
             child: _enumDropdown<Precipitation>(
               value: _precipitation,
               options: Precipitation.values,
@@ -1253,7 +1253,7 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
         _gatedRow(
           BulkField.humidity,
           FormRow.text(
-            label: 'Humidity',
+            label: context.l10n.diveLog_edit_label_humidity,
             controller: _humidityController,
             keyboardType: TextInputType.number,
             alwaysEditing: true,
@@ -1262,7 +1262,7 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
         _gatedRow(
           BulkField.weatherDescription,
           FormRow.text(
-            label: 'Weather',
+            label: context.l10n.diveLog_edit_label_weatherDescription,
             controller: _weatherDescriptionController,
             alwaysEditing: true,
           ),
