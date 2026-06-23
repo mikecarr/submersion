@@ -232,9 +232,7 @@ class BulkDiveEditService {
           case BulkCollectionMode.replace:
             await _diveRepo.bulkReplaceTanks(ids, tanks);
           case BulkCollectionMode.add:
-            for (final tank in tanks) {
-              await _diveRepo.bulkAddTank(ids, tank, onlyIfEmpty: onlyIfEmpty);
-            }
+            await _diveRepo.bulkAddTanks(ids, tanks, onlyIfEmpty: onlyIfEmpty);
           case BulkCollectionMode.remove:
             throw UnsupportedError(
               'Tanks support only add/replace, not remove',

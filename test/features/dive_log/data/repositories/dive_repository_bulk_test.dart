@@ -60,6 +60,18 @@ void main() {
         const DivesCompanion(rating: Value(3)),
       );
     });
+
+    test('with an empty companion is a no-op (no updatedAt touch)', () async {
+      await seed('x');
+      await (db.update(db.dives)..where((t) => t.id.equals('x'))).write(
+        const DivesCompanion(updatedAt: Value(123)),
+      );
+      await repository.bulkUpdateFields(['x'], const DivesCompanion());
+      final row = await (db.select(
+        db.dives,
+      )..where((t) => t.id.equals('x'))).getSingle();
+      expect(row.updatedAt, 123); // unchanged — no sync-visible touch
+    });
   });
 
   group('bulkAppendNotes', () {
@@ -182,6 +194,22 @@ void main() {
       expect(rows.single.tankName, 'D12');
       expect(rows.single.o2Percent, 32);
     });
+
+    test(
+      'bulkAddTanks with onlyIfEmpty adds ALL tanks to an empty dive',
+      () async {
+        await seed('e');
+        await repository.bulkAddTanks(
+          ['e'],
+          const [al80, al80],
+          onlyIfEmpty: true,
+        );
+        final rows = await (db.select(
+          db.diveTanks,
+        )..where((t) => t.diveId.equals('e'))).get();
+        expect(rows.length, 2); // both tanks added, not just the first
+      },
+    );
   });
 
   group('bulk weights', () {

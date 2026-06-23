@@ -3630,7 +3630,9 @@ class DiveRepository {
     List<String> diveIds,
     DivesCompanion partial,
   ) async {
-    if (diveIds.isEmpty) return;
+    // No-op when there's nothing to write; an all-absent companion must not
+    // produce a sync-visible "touch" (updatedAt bump + pending mark).
+    if (diveIds.isEmpty || partial.toColumns(false).isEmpty) return;
     final now = DateTime.now().millisecondsSinceEpoch;
     await (_db.update(_db.dives)..where((t) => t.id.isIn(diveIds))).write(
       partial.copyWith(updatedAt: Value(now)),
@@ -3847,34 +3849,48 @@ class DiveRepository {
     presetName: Value(t.presetName),
   );
 
-  /// Append one tank to each dive (fresh id, order = current tank count).
-  /// When [onlyIfEmpty], skips dives that already have any tank. No notify/txn.
-  Future<void> bulkAddTank(
+  /// Append [tanks] to each dive (fresh ids, appended after existing tanks).
+  /// When [onlyIfEmpty], a dive that already has any tank is skipped entirely.
+  /// No notify/txn.
+  Future<void> bulkAddTanks(
     List<String> diveIds,
-    domain.DiveTank tank, {
+    List<domain.DiveTank> tanks, {
     bool onlyIfEmpty = false,
   }) async {
-    if (diveIds.isEmpty) return;
+    if (diveIds.isEmpty || tanks.isEmpty) return;
     final now = DateTime.now().millisecondsSinceEpoch;
     final changed = <String>[];
     for (final diveId in diveIds) {
       final existing = await (_db.select(
         _db.diveTanks,
       )..where((t) => t.diveId.equals(diveId))).get();
+      // Evaluate emptiness once per dive (before any insert), so a multi-tank
+      // add with onlyIfEmpty adds the whole list rather than just the first.
       if (onlyIfEmpty && existing.isNotEmpty) continue;
-      final tankId = _uuid.v4();
-      await _db
-          .into(_db.diveTanks)
-          .insert(_tankCompanion(tankId, diveId, tank, existing.length));
-      await _syncRepository.markRecordPending(
-        entityType: 'diveTanks',
-        recordId: tankId,
-        localUpdatedAt: now,
-      );
+      var order = existing.length;
+      for (final tank in tanks) {
+        final tankId = _uuid.v4();
+        await _db
+            .into(_db.diveTanks)
+            .insert(_tankCompanion(tankId, diveId, tank, order));
+        order++;
+        await _syncRepository.markRecordPending(
+          entityType: 'diveTanks',
+          recordId: tankId,
+          localUpdatedAt: now,
+        );
+      }
       changed.add(diveId);
     }
     if (changed.isNotEmpty) await _bumpDives(changed, now);
   }
+
+  /// Append a single tank to each dive. Convenience wrapper over [bulkAddTanks].
+  Future<void> bulkAddTank(
+    List<String> diveIds,
+    domain.DiveTank tank, {
+    bool onlyIfEmpty = false,
+  }) => bulkAddTanks(diveIds, [tank], onlyIfEmpty: onlyIfEmpty);
 
   /// Replace each dive's tank list with [tanks] (fresh ids, sequential order).
   /// No notify/txn. Cascades to delete tank_pressure_profiles/gas_switches.
