@@ -122,6 +122,80 @@ Uint8List buildTestRunningFitFile({
   return builder.build().toBytes();
 }
 
+/// Builds a feature-rich dive FIT file (deco records, gas mix, dive settings,
+/// dive summary, GPS) for exercising the enriched orchestrator.
+Uint8List buildRichDiveFitFile() {
+  final builder = FitFileBuilder(autoDefine: true, minStringSize: 50);
+  final start = DateTime.utc(2025, 10, 13, 11, 24, 0);
+
+  builder.add(
+    FileIdMessage()
+      ..type = FileType.activity
+      ..manufacturer = 1
+      ..product =
+          4223 // Descent Mk3i
+      ..serialNumber = 3502016516
+      ..timeCreated = start.millisecondsSinceEpoch,
+  );
+
+  final depths = [1.6, 15.0, 29.5, 20.0, 6.0, 0.5];
+  for (var i = 0; i < depths.length; i++) {
+    builder.add(
+      RecordMessage()
+        ..timestamp = start
+            .add(Duration(seconds: i * 60))
+            .millisecondsSinceEpoch
+        ..depth = depths[i]
+        ..temperature = 24
+        ..nextStopDepth = i == 2 ? 6.0 : 0.0
+        ..ndlTime = i == 2 ? 0 : 99
+        ..timeToSurface = i == 2 ? 480 : 0
+        ..cnsLoad = i + 1,
+    );
+  }
+
+  builder.add(
+    DiveGasMessage()
+      ..messageIndex = 0
+      ..oxygenContent = 28
+      ..heliumContent = 0
+      ..status = DiveGasStatus.enabled,
+  );
+
+  builder.add(
+    DiveSettingsMessage()
+      ..waterType = WaterType.salt
+      ..gfLow = 50
+      ..gfHigh = 85
+      ..model = TissueModelType.zhl16c,
+  );
+
+  builder.add(
+    DiveSummaryMessage()
+      ..diveNumber = 73
+      ..bottomTime = 3263.0
+      ..surfaceInterval = 4612
+      ..startCns = 0
+      ..endCns = 12
+      ..o2Toxicity = 25,
+  );
+
+  builder.add(
+    SessionMessage()
+      ..sport = Sport.diving
+      ..timestamp = start
+          .add(const Duration(seconds: 360))
+          .millisecondsSinceEpoch
+      ..startTime = start.millisecondsSinceEpoch
+      ..totalElapsedTime = 360.0
+      ..totalTimerTime = 360.0
+      ..startPositionLat = 35.815
+      ..startPositionLong = 14.451,
+  );
+
+  return builder.build().toBytes();
+}
+
 void main() {
   late FitParserService service;
 
@@ -186,7 +260,8 @@ void main() {
     });
 
     test('extracts correct start and end times from session', () async {
-      final startTime = DateTime(2024, 3, 20, 14, 0, 0);
+      // Built as UTC so the wall-clock-as-UTC assertion is timezone-independent.
+      final startTime = DateTime.utc(2024, 3, 20, 14, 0, 0);
       const durationSeconds = 2400; // 40 minutes
       final bytes = buildTestDiveFitFile(
         startTime: startTime,
@@ -381,6 +456,34 @@ void main() {
       expect(result!.latitude, isNull);
       expect(result.longitude, isNull);
     });
+
+    test(
+      'enriched parse surfaces gas, deco, dive number, GPS, water type',
+      () async {
+        final dive = await service.parseFitFile(buildRichDiveFitFile());
+
+        expect(dive, isNotNull);
+        expect(dive!.diveNumber, 73);
+        expect(dive.waterType, 'salt');
+        expect(dive.gfLow, 50);
+        expect(dive.gfHigh, 85);
+        expect(dive.decoModel, 'zhl_16c');
+        expect(dive.cnsEnd, 12);
+        expect(dive.otu, 25);
+        expect(dive.bottomTimeSeconds, 3263);
+        expect(dive.surfaceIntervalSeconds, 4612);
+        expect(dive.latitude, closeTo(35.815, 1e-3));
+        expect(dive.computerModel, 'Descent Mk3i');
+        expect(dive.sourceUuid, dive.sourceId);
+        // No transmitter -> synthesize a tank from the gas mix (EAN28).
+        expect(dive.tanks, hasLength(1));
+        expect(dive.tanks.single.o2Percent, 28);
+        expect(dive.tanks.single.startPressureBar, isNull);
+        // Recorded deco values present on the deep sample.
+        expect(dive.profile.any((s) => s.ceiling == 6.0), isTrue);
+        expect(dive.profile.any((s) => s.ttsSeconds == 480), isTrue);
+      },
+    );
   });
 
   group('parseFitFiles', () {
