@@ -4,6 +4,7 @@ import 'package:submersion/core/providers/provider.dart';
 import 'package:submersion/features/dive_log/data/repositories/dive_repository_impl.dart';
 import 'package:submersion/features/dive_log/presentation/pages/dive_edit_page.dart';
 import 'package:submersion/features/dive_log/presentation/providers/dive_providers.dart';
+import 'package:submersion/features/dive_log/presentation/widgets/bulk_collection_mode_selector.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/bulk_field_gate.dart';
 import 'package:submersion/features/tank_presets/presentation/providers/tank_preset_providers.dart';
 import 'package:submersion/l10n/arb/app_localizations.dart';
@@ -59,6 +60,9 @@ void main() {
       // + 1 Notes gate.
       expect(find.byType(BulkFieldGate), findsNWidgets(6));
       expect(find.text('Favorite'), findsOneWidget);
+      // 6 collections (tags, equipment, buddies, weights, tanks, sightings)
+      // each render a mode selector.
+      expect(find.byType(BulkCollectionModeSelector), findsNWidgets(6));
     });
 
     testWidgets('toggling a gate enables its checkbox', (tester) async {

@@ -72,6 +72,7 @@ import 'package:submersion/shared/widgets/forms/responsive_form_columns.dart';
 import 'package:submersion/features/dive_log/domain/entities/bulk_edit_request.dart';
 import 'package:submersion/features/dive_log/presentation/pages/bulk_edit_field_set.dart';
 import 'package:submersion/features/dive_log/presentation/providers/bulk_dive_edit_provider.dart';
+import 'package:submersion/features/dive_log/presentation/widgets/bulk_collection_mode_selector.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/bulk_field_gate.dart';
 import 'package:submersion/core/constants/tank_presets.dart';
 import 'package:submersion/features/tank_presets/domain/entities/tank_preset_entity.dart';
@@ -716,6 +717,8 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
   final Set<BulkField> _bulkEnabled = {};
   bool _bulkFavorite = false;
   bool _bulkNotesAppend = false; // false = Set (overwrite), true = Append
+  final Map<BulkCollectionType, BulkCollectionMode> _collectionModes = {};
+  bool _bulkTankOnlyIfEmpty = false;
 
   Widget _gatedRow(BulkField field, Widget child) {
     return BulkFieldGate(
@@ -814,6 +817,7 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
               ),
             ],
           ),
+          _buildBulkCollectionsSection(units),
           FormSection(
             label: l10n.diveLog_edit_section_notes,
             expanded: true,
@@ -858,6 +862,181 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
     );
   }
 
+  Widget _collectionEntry({
+    required BulkCollectionType type,
+    required String label,
+    required List<BulkCollectionMode> allowed,
+    required Widget editor,
+  }) {
+    final mode = _collectionModes[type];
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(14, 8, 14, 0),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  label,
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
+              ),
+              BulkCollectionModeSelector(
+                mode: mode,
+                allowed: allowed,
+                onChanged: (m) => setState(() {
+                  if (m == null) {
+                    _collectionModes.remove(type);
+                  } else {
+                    _collectionModes[type] = m;
+                  }
+                }),
+              ),
+            ],
+          ),
+        ),
+        if (mode != null) editor,
+      ],
+    );
+  }
+
+  Widget _bulkTanksEditor(UnitFormatter units) {
+    return Column(
+      children: [
+        for (var i = 0; i < _tanks.length; i++)
+          TankCard(
+            key: ValueKey(_tanks[i].id),
+            tank: _tanks[i],
+            tankNumber: i + 1,
+            units: units,
+            onChanged: (t) => setState(() {
+              _markDirty();
+              _tanks[i] = t;
+            }),
+            onRemove: () => _removeTank(i),
+          ),
+        TextButton.icon(
+          onPressed: _addTank,
+          icon: const Icon(Icons.add),
+          label: Text(context.l10n.diveLog_edit_addTank),
+        ),
+        if (_collectionModes[BulkCollectionType.tanks] ==
+            BulkCollectionMode.add)
+          CheckboxListTile(
+            value: _bulkTankOnlyIfEmpty,
+            onChanged: (v) => setState(() => _bulkTankOnlyIfEmpty = v ?? false),
+            title: const Text(
+              "Only dives that don't already have a tank",
+            ), // localized in Phase 6
+            controlAffinity: ListTileControlAffinity.leading,
+            dense: true,
+          ),
+      ],
+    );
+  }
+
+  Widget _buildBulkCollectionsSection(UnitFormatter units) {
+    final l10n = context.l10n;
+    const refModes = [
+      BulkCollectionMode.add,
+      BulkCollectionMode.remove,
+      BulkCollectionMode.replace,
+    ];
+    const ownedModes = [BulkCollectionMode.add, BulkCollectionMode.replace];
+    return FormSection(
+      label: 'Tags, Gear & Life', // localized in Phase 6
+      expanded: true,
+      onToggle: null,
+      children: [
+        _collectionEntry(
+          type: BulkCollectionType.tags,
+          label: l10n.diveLog_edit_section_tags,
+          allowed: refModes,
+          editor: TagInputWidget(
+            selectedTags: _selectedTags,
+            onTagsChanged: (tags) => setState(() => _selectedTags = tags),
+          ),
+        ),
+        _collectionEntry(
+          type: BulkCollectionType.equipment,
+          label: l10n.diveLog_edit_section_equipment,
+          allowed: refModes,
+          editor: _equipmentChild(),
+        ),
+        _collectionEntry(
+          type: BulkCollectionType.buddies,
+          label: l10n.diveLog_edit_group_buddies,
+          allowed: refModes,
+          editor: BuddyPicker(
+            selectedBuddies: _selectedBuddies,
+            onChanged: (b) => setState(() => _selectedBuddies = b),
+          ),
+        ),
+        _collectionEntry(
+          type: BulkCollectionType.weights,
+          label: 'Weights', // localized in Phase 6
+          allowed: ownedModes,
+          editor: _weightChild(units),
+        ),
+        _collectionEntry(
+          type: BulkCollectionType.tanks,
+          label: 'Tanks', // localized in Phase 6
+          allowed: ownedModes,
+          editor: _bulkTanksEditor(units),
+        ),
+        _collectionEntry(
+          type: BulkCollectionType.sightings,
+          label: 'Marine life', // localized in Phase 6
+          allowed: ownedModes,
+          editor: _sightingsChild(),
+        ),
+      ],
+    );
+  }
+
+  List<BulkCollectionOp> _collectCollectionOps() {
+    final ops = <BulkCollectionOp>[];
+    final tagsMode = _collectionModes[BulkCollectionType.tags];
+    if (tagsMode != null) {
+      ops.add(
+        TagsOp(mode: tagsMode, tagIds: _selectedTags.map((t) => t.id).toList()),
+      );
+    }
+    final equipMode = _collectionModes[BulkCollectionType.equipment];
+    if (equipMode != null) {
+      ops.add(
+        EquipmentOp(
+          mode: equipMode,
+          equipmentIds: _selectedEquipment.map((e) => e.id).toList(),
+        ),
+      );
+    }
+    final buddiesMode = _collectionModes[BulkCollectionType.buddies];
+    if (buddiesMode != null) {
+      ops.add(BuddiesOp(mode: buddiesMode, buddies: _selectedBuddies));
+    }
+    final tanksMode = _collectionModes[BulkCollectionType.tanks];
+    if (tanksMode != null) {
+      ops.add(
+        TanksOp(
+          mode: tanksMode,
+          tanks: _tanks,
+          onlyIfEmpty: _bulkTankOnlyIfEmpty,
+        ),
+      );
+    }
+    final weightsMode = _collectionModes[BulkCollectionType.weights];
+    if (weightsMode != null) {
+      ops.add(WeightsOp(mode: weightsMode, weights: _weights));
+    }
+    final sightingsMode = _collectionModes[BulkCollectionType.sightings];
+    if (sightingsMode != null) {
+      ops.add(SightingsOp(mode: sightingsMode, sightings: _sightings));
+    }
+    return ops;
+  }
+
   Future<void> _saveBulk(UnitFormatter units) async {
     final l10n = context.l10n;
     final ids = widget.bulkDiveIds!;
@@ -872,8 +1051,11 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
       scalarFields,
       _collectScalarInputs(units),
     );
+    final ops = _collectCollectionOps();
     final hasScalar = scalars.toColumns(false).isNotEmpty;
-    if (!hasScalar && (notesAppend == null || notesAppend.isEmpty)) {
+    if (!hasScalar &&
+        (notesAppend == null || notesAppend.isEmpty) &&
+        ops.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Turn on at least one field to apply changes.'),
@@ -909,6 +1091,7 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
           diveIds: ids,
           scalars: scalars,
           notesAppend: notesAppend,
+          ops: ops,
         ),
       );
       if (!mounted) return;
