@@ -56,9 +56,8 @@ void main() {
     testWidgets('renders gated Logistics + Notes fields', (tester) async {
       await pumpBulk(tester);
 
-      // 5 Logistics gates (dive center, trip, dive type, rating, favorite)
-      // + 9 Conditions gates + 1 Notes gate.
-      expect(find.byType(BulkFieldGate), findsNWidgets(15));
+      // 5 Logistics + 9 Conditions + 6 Weather + 1 Notes gates.
+      expect(find.byType(BulkFieldGate), findsNWidgets(21));
       expect(find.text('Favorite'), findsOneWidget);
       // 6 collections (tags, equipment, buddies, weights, tanks, sightings)
       // each render a mode selector.

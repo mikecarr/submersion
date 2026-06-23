@@ -818,6 +818,7 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
             ],
           ),
           _buildBulkConditionsSection(units),
+          _buildBulkWeatherSection(units),
           _buildBulkCollectionsSection(units),
           FormSection(
             label: l10n.diveLog_edit_section_notes,
@@ -879,6 +880,18 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
           : null,
       surfacePressure: _surfacePressureController.text.isNotEmpty
           ? (double.tryParse(_surfacePressureController.text) ?? 0) / 1000
+          : null,
+      windSpeed: _windSpeedController.text.isNotEmpty
+          ? units.windSpeedToMs(double.tryParse(_windSpeedController.text) ?? 0)
+          : null,
+      windDirection: _windDirection?.name,
+      cloudCover: _cloudCover?.name,
+      precipitation: _precipitation?.name,
+      humidity: _humidityController.text.isNotEmpty
+          ? (double.tryParse(_humidityController.text) ?? 0)
+          : null,
+      weatherDescription: _weatherDescriptionController.text.isNotEmpty
+          ? _weatherDescriptionController.text
           : null,
       notes: _notesController.text,
     );
@@ -1179,6 +1192,78 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
             label: 'Surface pressure',
             controller: _surfacePressureController,
             keyboardType: TextInputType.number,
+            alwaysEditing: true,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildBulkWeatherSection(UnitFormatter units) {
+    return FormSection(
+      label: 'Weather', // localized in Phase 6
+      expanded: true,
+      onToggle: null,
+      children: [
+        _gatedRow(
+          BulkField.windSpeed,
+          FormRow.text(
+            label: 'Wind speed',
+            controller: _windSpeedController,
+            keyboardType: TextInputType.number,
+            alwaysEditing: true,
+          ),
+        ),
+        _gatedRow(
+          BulkField.windDirection,
+          FormRow.custom(
+            label: 'Wind direction',
+            child: _enumDropdown<CurrentDirection>(
+              value: _windDirection,
+              options: CurrentDirection.values,
+              label: (v) => v.displayName,
+              onChanged: (v) => setState(() => _windDirection = v),
+            ),
+          ),
+        ),
+        _gatedRow(
+          BulkField.cloudCover,
+          FormRow.custom(
+            label: 'Cloud cover',
+            child: _enumDropdown<CloudCover>(
+              value: _cloudCover,
+              options: CloudCover.values,
+              label: (v) => v.displayName,
+              onChanged: (v) => setState(() => _cloudCover = v),
+            ),
+          ),
+        ),
+        _gatedRow(
+          BulkField.precipitation,
+          FormRow.custom(
+            label: 'Precipitation',
+            child: _enumDropdown<Precipitation>(
+              value: _precipitation,
+              options: Precipitation.values,
+              label: (v) => v.displayName,
+              onChanged: (v) => setState(() => _precipitation = v),
+            ),
+          ),
+        ),
+        _gatedRow(
+          BulkField.humidity,
+          FormRow.text(
+            label: 'Humidity',
+            controller: _humidityController,
+            keyboardType: TextInputType.number,
+            alwaysEditing: true,
+          ),
+        ),
+        _gatedRow(
+          BulkField.weatherDescription,
+          FormRow.text(
+            label: 'Weather',
+            controller: _weatherDescriptionController,
             alwaysEditing: true,
           ),
         ),
