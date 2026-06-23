@@ -3622,6 +3622,28 @@ class DiveRepository {
   // Bulk Operations
   // ============================================================================
 
+  /// Bulk-set the columns present in [partial] on every dive in [diveIds].
+  /// Absent columns are left untouched (Drift writes only present columns).
+  /// Forces `updatedAt = now` and marks each dive pending. Does NOT open a
+  /// transaction or notify sync — BulkDiveEditService owns those.
+  Future<void> bulkUpdateFields(
+    List<String> diveIds,
+    DivesCompanion partial,
+  ) async {
+    if (diveIds.isEmpty) return;
+    final now = DateTime.now().millisecondsSinceEpoch;
+    await (_db.update(_db.dives)..where((t) => t.id.isIn(diveIds))).write(
+      partial.copyWith(updatedAt: Value(now)),
+    );
+    for (final diveId in diveIds) {
+      await _syncRepository.markRecordPending(
+        entityType: 'dives',
+        recordId: diveId,
+        localUpdatedAt: now,
+      );
+    }
+  }
+
   /// Bulk update trip for multiple dives
   Future<void> bulkUpdateTrip(List<String> diveIds, String? tripId) async {
     if (diveIds.isEmpty) return;
