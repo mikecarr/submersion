@@ -80,6 +80,10 @@ const _createNewTripSentinel = '__create_new_trip__';
 class DiveEditPage extends ConsumerStatefulWidget {
   final String? diveId;
 
+  /// When set, the page renders in bulk-edit mode for these dive ids (mutually
+  /// exclusive with [diveId]). Mirrors `SiteEditPage.mergeSiteIds`.
+  final List<String>? bulkDiveIds;
+
   /// When true, renders without Scaffold wrapper for use in master-detail layout.
   final bool embedded;
 
@@ -92,12 +96,17 @@ class DiveEditPage extends ConsumerStatefulWidget {
   const DiveEditPage({
     super.key,
     this.diveId,
+    this.bulkDiveIds,
     this.embedded = false,
     this.onSaved,
     this.onCancel,
-  });
+  }) : assert(
+         diveId == null || bulkDiveIds == null,
+         'diveId and bulkDiveIds are mutually exclusive',
+       );
 
   bool get isEditing => diveId != null;
+  bool get isBulk => bulkDiveIds != null && bulkDiveIds!.isNotEmpty;
 
   @override
   ConsumerState<DiveEditPage> createState() => _DiveEditPageState();
@@ -274,7 +283,12 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
       ),
     ];
 
-    if (widget.isEditing) {
+    if (widget.isBulk) {
+      // Bulk mode: start from empty form state; no draft load, no GPS/number,
+      // and no starting tank (bulk tanks are Add/Replace, not a default list).
+      _tanks = [];
+      _suppressDirty = false;
+    } else if (widget.isEditing) {
       _loadExistingDive();
     } else {
       // For new dives, capture GPS in the background to suggest nearby sites
@@ -625,6 +639,10 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
       );
     }
 
+    if (widget.isBulk) {
+      return _buildBulkScaffold(units);
+    }
+
     final formBody = Form(
       key: _formKey,
       onChanged: _markDirty,
@@ -672,6 +690,26 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
       child: formBody,
     );
   }
+
+  // === Bulk edit mode ===
+  // Filled in across Phases 2-5. Shell + stubs here so bulk mode compiles.
+
+  Widget _buildBulkScaffold(UnitFormatter units) {
+    return EditFormScaffold(
+      title: 'Edit ${widget.bulkDiveIds!.length} dives', // localized in Phase 6
+      embedded: widget.embedded,
+      isSaving: _isSaving,
+      hasUnsavedChanges: _hasUnsavedChanges,
+      onSave: () => _saveBulk(units),
+      onCancel: widget.onCancel,
+      headerIcon: Icons.edit_note,
+      child: _buildBulkForm(units),
+    );
+  }
+
+  Widget _buildBulkForm(UnitFormatter units) => const SizedBox.shrink();
+
+  Future<void> _saveBulk(UnitFormatter units) async {}
 
   Widget _customFieldsChild() {
     final currentDiverId = ref.watch(currentDiverIdProvider);
