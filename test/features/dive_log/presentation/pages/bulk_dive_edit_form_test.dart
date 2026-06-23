@@ -41,10 +41,10 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: buildOverrides(overrides).cast(),
-          child: MaterialApp(
+          child: const MaterialApp(
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
-            home: const Scaffold(
+            home: Scaffold(
               body: DiveEditPage(bulkDiveIds: ['d1', 'd2'], embedded: true),
             ),
           ),
