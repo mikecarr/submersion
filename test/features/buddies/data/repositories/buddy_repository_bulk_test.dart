@@ -1,4 +1,3 @@
-import 'package:drift/drift.dart' hide isNull, isNotNull;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:submersion/core/constants/enums.dart';
 import 'package:submersion/core/database/database.dart';
@@ -58,4 +57,25 @@ void main() {
     )..where((t) => t.diveId.equals('d1'))).get();
     expect(rows, isEmpty);
   });
+
+  test(
+    'bulkAddBuddies updates the role when the link already exists',
+    () async {
+      await repository.bulkAddBuddies(['d1'], [bwr('x')]); // role buddy
+      await repository.bulkAddBuddies(
+        ['d1'],
+        [
+          domain.BuddyWithRole(
+            buddy: bwr('x').buddy,
+            role: BuddyRole.instructor,
+          ),
+        ],
+      );
+      final rows = await (db.select(
+        db.diveBuddies,
+      )..where((t) => t.diveId.equals('d1'))).get();
+      expect(rows.length, 1); // not duplicated
+      expect(rows.single.role, 'instructor'); // role updated in place
+    },
+  );
 }
