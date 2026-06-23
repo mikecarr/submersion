@@ -191,10 +191,21 @@ final batchProfileCacheProvider =
 /// to re-fetch, while keepAlive prevents disposal between navigations.
 final statisticsVersionProvider = StateProvider<int>((ref) => 0);
 
-/// Statistics provider (filtered by current diver)
+/// Statistics provider (filtered by current diver).
+///
+/// Self-invalidates whenever the `dives` table is written -- e.g. a dive
+/// computer import or an iCloud sync applying remote changes directly to the DB
+/// -- so the dashboard HeroHeader stats refresh without an app restart. This is
+/// the same dives-table tick the dive list and [divesProvider] already use; the
+/// dashboard stat that feeds the "recent dives" area was reactive via
+/// [divesProvider] but the headline totals were not (issue #217).
 final diveStatisticsProvider = FutureProvider<DiveStatistics>((ref) async {
   final repository = ref.watch(diveRepositoryProvider);
   final currentDiverId = ref.watch(currentDiverIdProvider);
+  final sub = repository.watchDivesChanges().listen(
+    (_) => ref.invalidateSelf(),
+  );
+  ref.onDispose(sub.cancel);
   return repository.getStatistics(diverId: currentDiverId);
 });
 
