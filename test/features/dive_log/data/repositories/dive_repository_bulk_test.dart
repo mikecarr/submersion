@@ -94,4 +94,31 @@ void main() {
       expect(rows.map((r) => r.tagId).toSet(), {'t1', 't2'});
     });
   });
+
+  group('bulk equipment', () {
+    setUp(() async {
+      await db.customStatement('PRAGMA foreign_keys = OFF');
+    });
+
+    test('add then remove adjusts membership; replace overwrites', () async {
+      await seed('d1');
+      await repository.bulkAddEquipment(['d1'], ['e1', 'e2']);
+      var rows = await (db.select(
+        db.diveEquipment,
+      )..where((t) => t.diveId.equals('d1'))).get();
+      expect(rows.map((r) => r.equipmentId).toSet(), {'e1', 'e2'});
+
+      await repository.bulkRemoveEquipment(['d1'], ['e1']);
+      rows = await (db.select(
+        db.diveEquipment,
+      )..where((t) => t.diveId.equals('d1'))).get();
+      expect(rows.map((r) => r.equipmentId).toSet(), {'e2'});
+
+      await repository.bulkReplaceEquipment(['d1'], ['e9']);
+      rows = await (db.select(
+        db.diveEquipment,
+      )..where((t) => t.diveId.equals('d1'))).get();
+      expect(rows.map((r) => r.equipmentId).toSet(), {'e9'});
+    });
+  });
 }

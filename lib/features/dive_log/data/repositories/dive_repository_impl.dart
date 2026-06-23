@@ -3716,6 +3716,106 @@ class DiveRepository {
     }
   }
 
+  /// Bump updatedAt + mark pending for a set of dives (shared by bulk ops).
+  Future<void> _bumpDives(List<String> diveIds, int now) async {
+    await (_db.update(_db.dives)..where((t) => t.id.isIn(diveIds))).write(
+      DivesCompanion(updatedAt: Value(now)),
+    );
+    for (final diveId in diveIds) {
+      await _syncRepository.markRecordPending(
+        entityType: 'dives',
+        recordId: diveId,
+        localUpdatedAt: now,
+      );
+    }
+  }
+
+  /// Add each equipment id to each dive (junction upsert). No notify/txn.
+  Future<void> bulkAddEquipment(
+    List<String> diveIds,
+    List<String> equipmentIds,
+  ) async {
+    if (diveIds.isEmpty || equipmentIds.isEmpty) return;
+    final now = DateTime.now().millisecondsSinceEpoch;
+    for (final diveId in diveIds) {
+      for (final equipmentId in equipmentIds) {
+        await _db.into(_db.diveEquipment).insertOnConflictUpdate(
+          DiveEquipmentCompanion(
+            diveId: Value(diveId),
+            equipmentId: Value(equipmentId),
+          ),
+        );
+        await _syncRepository.markRecordPending(
+          entityType: 'diveEquipment',
+          recordId: '$diveId|$equipmentId',
+          localUpdatedAt: now,
+        );
+      }
+    }
+    await _bumpDives(diveIds, now);
+  }
+
+  /// Remove each equipment id from each dive. No notify/txn.
+  Future<void> bulkRemoveEquipment(
+    List<String> diveIds,
+    List<String> equipmentIds,
+  ) async {
+    if (diveIds.isEmpty || equipmentIds.isEmpty) return;
+    final now = DateTime.now().millisecondsSinceEpoch;
+    final existing = await (_db.select(_db.diveEquipment)..where(
+          (t) => t.diveId.isIn(diveIds) & t.equipmentId.isIn(equipmentIds),
+        ))
+        .get();
+    await (_db.delete(_db.diveEquipment)..where(
+          (t) => t.diveId.isIn(diveIds) & t.equipmentId.isIn(equipmentIds),
+        ))
+        .go();
+    for (final row in existing) {
+      await _syncRepository.logDeletion(
+        entityType: 'diveEquipment',
+        recordId: '${row.diveId}|${row.equipmentId}',
+      );
+    }
+    await _bumpDives(diveIds, now);
+  }
+
+  /// Replace each dive's equipment with exactly [equipmentIds]. No notify/txn.
+  Future<void> bulkReplaceEquipment(
+    List<String> diveIds,
+    List<String> equipmentIds,
+  ) async {
+    if (diveIds.isEmpty) return;
+    final now = DateTime.now().millisecondsSinceEpoch;
+    final existing = await (_db.select(
+      _db.diveEquipment,
+    )..where((t) => t.diveId.isIn(diveIds))).get();
+    await (_db.delete(
+      _db.diveEquipment,
+    )..where((t) => t.diveId.isIn(diveIds))).go();
+    for (final row in existing) {
+      await _syncRepository.logDeletion(
+        entityType: 'diveEquipment',
+        recordId: '${row.diveId}|${row.equipmentId}',
+      );
+    }
+    for (final diveId in diveIds) {
+      for (final equipmentId in equipmentIds) {
+        await _db.into(_db.diveEquipment).insertOnConflictUpdate(
+          DiveEquipmentCompanion(
+            diveId: Value(diveId),
+            equipmentId: Value(equipmentId),
+          ),
+        );
+        await _syncRepository.markRecordPending(
+          entityType: 'diveEquipment',
+          recordId: '$diveId|$equipmentId',
+          localUpdatedAt: now,
+        );
+      }
+    }
+    await _bumpDives(diveIds, now);
+  }
+
   /// Bulk update trip for multiple dives
   Future<void> bulkUpdateTrip(List<String> diveIds, String? tripId) async {
     if (diveIds.isEmpty) return;
