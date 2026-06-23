@@ -3644,6 +3644,34 @@ class DiveRepository {
     }
   }
 
+  /// Append [textToAppend] to the notes of every dive in [diveIds].
+  /// Empty existing notes receive just the text. No transaction/notify.
+  Future<void> bulkAppendNotes(
+    List<String> diveIds,
+    String textToAppend,
+  ) async {
+    if (diveIds.isEmpty || textToAppend.isEmpty) return;
+    final now = DateTime.now().millisecondsSinceEpoch;
+    final placeholders = List.filled(diveIds.length, '?').join(', ');
+    await _db.customUpdate(
+      "UPDATE dives SET notes = COALESCE(notes, '') || ?, updated_at = ? "
+      'WHERE id IN ($placeholders)',
+      variables: [
+        Variable.withString(textToAppend),
+        Variable.withInt(now),
+        ...diveIds.map(Variable.withString),
+      ],
+      updates: {_db.dives},
+    );
+    for (final diveId in diveIds) {
+      await _syncRepository.markRecordPending(
+        entityType: 'dives',
+        recordId: diveId,
+        localUpdatedAt: now,
+      );
+    }
+  }
+
   /// Bulk update trip for multiple dives
   Future<void> bulkUpdateTrip(List<String> diveIds, String? tripId) async {
     if (diveIds.isEmpty) return;

@@ -58,4 +58,22 @@ void main() {
       );
     });
   });
+
+  group('bulkAppendNotes', () {
+    test('appends to existing notes and to empty notes', () async {
+      await seed('a', notes: 'Cozumel');
+      await seed('b', notes: '');
+
+      await repository.bulkAppendNotes(['a', 'b'], '\nGreat viz');
+
+      final ra = await (db.select(
+        db.dives,
+      )..where((t) => t.id.equals('a'))).getSingle();
+      final rb = await (db.select(
+        db.dives,
+      )..where((t) => t.id.equals('b'))).getSingle();
+      expect(ra.notes, 'Cozumel\nGreat viz');
+      expect(rb.notes, '\nGreat viz');
+    });
+  });
 }
