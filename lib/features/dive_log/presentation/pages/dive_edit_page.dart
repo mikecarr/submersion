@@ -731,6 +731,7 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
         } else {
           _bulkEnabled.remove(field);
         }
+        _markDirty();
       }),
       child: child,
     );
@@ -740,7 +741,8 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
     final diveTypesAsync = ref.watch(diveTypeListNotifierProvider);
     return diveTypesAsync.when(
       loading: () => const LinearProgressIndicator(),
-      error: (e, st) => const SizedBox.shrink(),
+      error: (e, st) =>
+          Text(context.l10n.diveLog_edit_errorLoadingDiveTypes(e.toString())),
       data: (diveTypes) {
         if (diveTypes.isEmpty) return const SizedBox.shrink();
         final exists = diveTypes.any((t) => t.id == _selectedDiveTypeId);
@@ -763,6 +765,7 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
     final l10n = context.l10n;
     return Form(
       key: _formKey,
+      onChanged: _markDirty,
       child: ResponsiveFormColumns(
         children: [
           FormSection(
@@ -1094,7 +1097,10 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
     return DropdownButtonFormField<T?>(
       initialValue: value,
       items: <DropdownMenuItem<T?>>[
-        const DropdownMenuItem(value: null, child: Text('—')),
+        DropdownMenuItem<T?>(
+          value: null,
+          child: Text(context.l10n.diveLog_edit_notSpecified),
+        ),
         for (final o in options)
           DropdownMenuItem<T?>(value: o, child: Text(label(o))),
       ],

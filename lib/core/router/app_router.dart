@@ -276,6 +276,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: 'bulk-edit',
                 name: 'bulkEditDives',
+                redirect: (context, state) {
+                  final ids = (state.extra as List<dynamic>?)?.cast<String>();
+                  // No ids (deep link / manual nav) means there is nothing to
+                  // bulk edit; send the user back to the dive list rather than
+                  // landing on what looks like the new-dive form.
+                  return (ids == null || ids.isEmpty) ? '/dives' : null;
+                },
                 builder: (context, state) {
                   final ids =
                       (state.extra as List<dynamic>?)?.cast<String>() ??
