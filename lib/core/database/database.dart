@@ -4271,7 +4271,18 @@ class AppDatabase extends _$AppDatabase {
         if (from < 91) await reportProgress();
         if (from < 92) {
           await m.createTable(diveDiveTypes);
-          await customStatement(kSeedDiveDiveTypesSql);
+          // Seed only when the dives table (with its dive_type column) is
+          // present. Minimal-schema migration tests build a partial database
+          // without it, and the seed must not fail there.
+          final diveCols = await customSelect(
+            "PRAGMA table_info('dives')",
+          ).get();
+          final hasDiveType = diveCols.any(
+            (c) => c.read<String>('name') == 'dive_type',
+          );
+          if (hasDiveType) {
+            await customStatement(kSeedDiveDiveTypesSql);
+          }
         }
         if (from < 92) await reportProgress();
       },

@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sqlite3/sqlite3.dart';
 import 'package:submersion/core/database/database.dart'
-    show kSeedDiveDiveTypesSql;
+    show kSeedDiveDiveTypesSql, AppDatabase;
 
 void main() {
   test(
@@ -34,4 +34,11 @@ void main() {
       db.dispose();
     },
   );
+
+  test('schema version is 92 and the migration list includes it', () {
+    // Latest-version tripwire: bumping the schema must come with a matching
+    // migration block and an update here.
+    expect(AppDatabase.currentSchemaVersion, 92);
+    expect(AppDatabase.migrationVersions, contains(92));
+  });
 }
