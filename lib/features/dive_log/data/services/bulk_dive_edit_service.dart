@@ -45,6 +45,7 @@ class BulkDiveEditService {
     )..where((t) => t.id.isIn(ids))).get();
 
     Map<String, List<String>>? priorTagIds;
+    Map<String, List<String>>? priorDiveTypeIds;
     Map<String, List<String>>? priorEquipmentIds;
     Map<String, List<BuddyWithRole>>? priorBuddies;
     Map<String, List<DiveTank>>? priorTanks;
@@ -60,6 +61,14 @@ class BulkDiveEditService {
           priorTagIds = {for (final id in ids) id: <String>[]};
           for (final r in rows) {
             priorTagIds[r.diveId]!.add(r.tagId);
+          }
+        case DiveTypesOp():
+          final rows = await (_db.select(
+            _db.diveDiveTypes,
+          )..where((t) => t.diveId.isIn(ids))).get();
+          priorDiveTypeIds = {for (final id in ids) id: <String>[]};
+          for (final r in rows) {
+            priorDiveTypeIds[r.diveId]!.add(r.diveTypeId);
           }
         case EquipmentOp():
           final rows = await (_db.select(
@@ -117,6 +126,7 @@ class BulkDiveEditService {
     return BulkEditSnapshot(
       priorDiveRows: priorDiveRows,
       priorTagIds: priorTagIds,
+      priorDiveTypeIds: priorDiveTypeIds,
       priorEquipmentIds: priorEquipmentIds,
       priorBuddies: priorBuddies,
       priorTanks: priorTanks,
@@ -150,6 +160,12 @@ class BulkDiveEditService {
       if (tags != null) {
         for (final id in ids) {
           await _diveRepo.bulkReplaceTags([id], tags[id] ?? const []);
+        }
+      }
+      final diveTypes = snapshot.priorDiveTypeIds;
+      if (diveTypes != null) {
+        for (final id in ids) {
+          await _diveRepo.bulkReplaceDiveTypes([id], diveTypes[id] ?? const []);
         }
       }
       final equip = snapshot.priorEquipmentIds;
@@ -203,6 +219,15 @@ class BulkDiveEditService {
             await _diveRepo.bulkRemoveTags(ids, tagIds);
           case BulkCollectionMode.replace:
             await _diveRepo.bulkReplaceTags(ids, tagIds);
+        }
+      case DiveTypesOp(:final mode, :final diveTypeIds):
+        switch (mode) {
+          case BulkCollectionMode.add:
+            await _diveRepo.bulkAddDiveTypes(ids, diveTypeIds);
+          case BulkCollectionMode.remove:
+            await _diveRepo.bulkRemoveDiveTypes(ids, diveTypeIds);
+          case BulkCollectionMode.replace:
+            await _diveRepo.bulkReplaceDiveTypes(ids, diveTypeIds);
         }
       case EquipmentOp(:final mode, :final equipmentIds):
         switch (mode) {

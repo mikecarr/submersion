@@ -44,7 +44,15 @@ enum BulkField {
 }
 
 /// The collections the bulk-edit form can mutate (Add/Remove/Replace).
-enum BulkCollectionType { tags, equipment, buddies, tanks, weights, sightings }
+enum BulkCollectionType {
+  tags,
+  diveTypes,
+  equipment,
+  buddies,
+  tanks,
+  weights,
+  sightings,
+}
 
 /// Already-converted scalar values (metric, enum `.name`/`.code` strings, FK
 /// ids) collected from the form controllers, ready to drop into a companion.
