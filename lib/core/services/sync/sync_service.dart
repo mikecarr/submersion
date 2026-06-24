@@ -1976,6 +1976,111 @@ class SyncService {
     );
   }
 
+  /// Streaming replace-adopt apply (production path). Runs inside the caller's
+  /// deferred-FK transaction. Upserts every restored row in exportedAt order
+  /// (each base temp file streamed in 500-row batches, plus in-memory
+  /// changesets), collecting cloud ids as it goes, then deletes local rows
+  /// absent from that set, then repairs FKs. Bounded memory: one batch + the
+  /// cloud id sets (ids only, never full rows), independent of library size.
+  ///
+  /// Equivalent to [_applyAdoptInMemory]: `upsertRecord` is an unconditional
+  /// overwrite, so applying in ascending exportedAt order is latest-export-wins
+  /// (the in-memory `restored` map); and delete-not-in-cloud is order
+  /// independent, so upsert-then-delete here matches delete-then-upsert there
+  /// (final state is the cloud union either way). A null record id is skipped
+  /// entirely, exactly as the in-memory path does. Enforced by
+  /// sync_adopt_streaming_parity_test.dart.
+  Future<void> _adoptApplyStreaming({
+    required List<String> baseFilePaths,
+    required List<int> baseExportedAt,
+    required List<SyncPayload> changesets,
+  }) async {
+    final cloudIds = <String, Set<String>>{};
+
+    Future<void> upsertRow(String table, Map<String, dynamic> record) async {
+      final id = _recordIdForEntity(table, record);
+      if (id == null) return; // matches in-memory: null-id rows are skipped
+      (cloudIds[table] ??= <String>{}).add(id);
+      await _serializer.upsertRecord(table, record);
+    }
+
+    // Apply units: each base file and each changeset, ascending by exportedAt
+    // (latest export wins under the unconditional upsert).
+    final units = <({int at, String? file, SyncPayload? changeset})>[
+      for (var i = 0; i < baseFilePaths.length; i++)
+        (at: baseExportedAt[i], file: baseFilePaths[i], changeset: null),
+      for (final c in changesets) (at: c.exportedAt, file: null, changeset: c),
+    ]..sort((a, b) => a.at.compareTo(b.at));
+
+    for (final unit in units) {
+      final changeset = unit.changeset;
+      if (changeset != null) {
+        for (final entry in changeset.data.toJson().entries) {
+          if (!entityHasUpdatedAt.containsKey(entry.key)) continue;
+          for (final record
+              in (entry.value as List).cast<Map<String, dynamic>>()) {
+            await upsertRow(entry.key, record);
+          }
+        }
+        continue;
+      }
+
+      // Base file: stream `data` rows, batching 500 per table.
+      const batchSize = 500;
+      String? currentTable;
+      var batch = <Map<String, dynamic>>[];
+      Future<void> flush() async {
+        final table = currentTable;
+        if (table == null || batch.isEmpty) return;
+        for (final record in batch) {
+          await upsertRow(table, record);
+        }
+        batch = <Map<String, dynamic>>[];
+      }
+
+      await BaseJsonStreamReader().parse(
+        File(unit.file!).openRead(),
+        wantRows: (section, table) =>
+            section == 'data' && entityHasUpdatedAt.containsKey(table),
+        onRow: (section, table, rowBytes) async {
+          if (table != currentTable) {
+            await flush();
+            currentTable = table;
+          }
+          batch.add(jsonDecode(utf8.decode(rowBytes)) as Map<String, dynamic>);
+          if (batch.length >= batchSize) await flush();
+        },
+      );
+      await flush();
+    }
+
+    // Delete local rows the restored library does not contain.
+    for (final entity in entityHasUpdatedAt.keys) {
+      final cloud = cloudIds[entity] ?? const <String>{};
+      for (final localId in await _serializer.recordIdsFor(entity)) {
+        if (!cloud.contains(localId)) {
+          await _serializer.deleteRecord(entity, localId);
+        }
+      }
+    }
+
+    await _serializer.repairDanglingForeignKeys();
+  }
+
+  /// Test seam: streaming adopt of base temp files + in-memory changesets.
+  @visibleForTesting
+  Future<void> debugAdoptStreaming(
+    List<String> baseFilePaths,
+    List<int> baseExportedAt,
+    List<SyncPayload> changesets,
+  ) => _serializer.applyInDeferredFkTransaction(
+    () => _adoptApplyStreaming(
+      baseFilePaths: baseFilePaths,
+      baseExportedAt: baseExportedAt,
+      changesets: changesets,
+    ),
+  );
+
   /// Collect every payload (base + changesets) from all changeset logs stamped
   /// with [epochId]. Used by adoption to rebuild the authoritative library
   /// after a Replace restore. Skips a log whose base parts are not all present
