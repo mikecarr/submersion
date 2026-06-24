@@ -2501,7 +2501,7 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
             _buildDetailRow(
               context,
               context.l10n.diveLog_detail_label_diveType,
-              dive.diveTypeName,
+              dive.diveTypeNames.join(', '),
             ),
             if (dive.trip != null) _buildTripRow(context, dive),
             if (dive.diveCenter != null) _buildDiveCenterRow(context, dive),
