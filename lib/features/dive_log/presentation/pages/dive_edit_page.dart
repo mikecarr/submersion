@@ -29,7 +29,6 @@ import 'package:submersion/features/trips/domain/entities/trip.dart';
 import 'package:submersion/features/trips/presentation/providers/trip_providers.dart';
 import 'package:submersion/features/settings/presentation/providers/settings_providers.dart';
 import 'package:submersion/features/trips/presentation/widgets/trip_picker.dart';
-import 'package:submersion/features/dive_types/presentation/providers/dive_type_providers.dart';
 import 'package:submersion/features/dive_log/domain/entities/dive.dart';
 import 'package:submersion/features/dive_log/domain/entities/dive_custom_field.dart';
 import 'package:submersion/features/dive_log/domain/entities/dive_weight.dart';
@@ -738,35 +737,6 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
     );
   }
 
-  Widget _bulkDiveTypeDropdown() {
-    final diveTypesAsync = ref.watch(diveTypeListNotifierProvider);
-    return diveTypesAsync.when(
-      loading: () => const LinearProgressIndicator(),
-      error: (e, st) =>
-          Text(context.l10n.diveLog_edit_errorLoadingDiveTypes(e.toString())),
-      data: (diveTypes) {
-        if (diveTypes.isEmpty) return const SizedBox.shrink();
-        // Stopgap single-select bulk control; Task 11 replaces this whole
-        // method with a collection-lane (Add/Remove/Replace) editor.
-        final current = _selectedDiveTypeIds.isEmpty
-            ? 'recreational'
-            : _selectedDiveTypeIds.first;
-        final exists = diveTypes.any((t) => t.id == current);
-        final value = exists ? current : 'recreational';
-        return DropdownButtonFormField<String>(
-          key: ValueKey('bulk_dive_type_${diveTypes.length}_$value'),
-          initialValue: value,
-          items: diveTypes
-              .map((t) => DropdownMenuItem(value: t.id, child: Text(t.name)))
-              .toList(),
-          onChanged: (v) {
-            if (v != null) setState(() => _selectedDiveTypeIds = [v]);
-          },
-        );
-      },
-    );
-  }
-
   Widget _buildBulkForm(UnitFormatter units) {
     final l10n = context.l10n;
     return Form(
@@ -801,13 +771,6 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
                   onClear: _selectedTrip == null
                       ? null
                       : () => setState(() => _selectedTrip = null),
-                ),
-              ),
-              _gatedRow(
-                BulkField.diveType,
-                FormRow.custom(
-                  label: l10n.diveLog_edit_label_diveType,
-                  child: _bulkDiveTypeDropdown(),
                 ),
               ),
               _gatedRow(
@@ -875,7 +838,6 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
       diveCenterId: _selectedDiveCenter?.id,
       tripId: _selectedTrip?.id,
       courseId: _selectedCourse?.id,
-      diveTypeId: _selectedDiveTypeIds.first,
       rating: _rating > 0 ? _rating : null,
       isFavorite: _bulkFavorite,
       waterType: _waterType?.name,
@@ -1016,6 +978,15 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
           ),
         ),
         _collectionEntry(
+          type: BulkCollectionType.diveTypes,
+          label: l10n.diveLog_edit_label_diveTypes,
+          allowed: refModes,
+          editor: DiveTypeMultiSelectField(
+            selectedTypeIds: _selectedDiveTypeIds,
+            onChanged: (ids) => setState(() => _selectedDiveTypeIds = ids),
+          ),
+        ),
+        _collectionEntry(
           type: BulkCollectionType.equipment,
           label: l10n.diveLog_edit_section_equipment,
           allowed: refModes,
@@ -1058,6 +1029,12 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
     if (tagsMode != null) {
       ops.add(
         TagsOp(mode: tagsMode, tagIds: _selectedTags.map((t) => t.id).toList()),
+      );
+    }
+    final diveTypesMode = _collectionModes[BulkCollectionType.diveTypes];
+    if (diveTypesMode != null) {
+      ops.add(
+        DiveTypesOp(mode: diveTypesMode, diveTypeIds: _selectedDiveTypeIds),
       );
     }
     final equipMode = _collectionModes[BulkCollectionType.equipment];
