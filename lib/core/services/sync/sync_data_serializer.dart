@@ -2171,6 +2171,10 @@ class SyncDataSerializer {
       // Dive profile markers
       'showMaxDepthMarker': true,
       'showPressureThresholdMarkers': false,
+      // Dive profile default-visible metrics. Non-nullable bool added in v91;
+      // seed it so payloads predating the column hydrate instead of throwing in
+      // DiverSetting.fromJson.
+      'defaultShowAscentRateLine': false,
       // Override with actual data (existing values take precedence)
       ...data,
     };

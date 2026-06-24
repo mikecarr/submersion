@@ -897,8 +897,14 @@ class DiverSettings extends Table {
       boolean().withDefault(const Constant(true))();
   BoolColumn get defaultShowGasTimeline =>
       boolean().withDefault(const Constant(false))();
+  // Drift column declarations are codegen inputs shadowed by the generated
+  // table at runtime, so this line is never executed (every sibling column
+  // getter is likewise uncovered). The default is verified via the migration
+  // and settings tests, not by exercising this declaration.
+  // coverage:ignore-start
   BoolColumn get defaultShowAscentRateLine =>
       boolean().withDefault(const Constant(false))();
+  // coverage:ignore-end
   // Notification settings (v26)
   BoolColumn get notificationsEnabled =>
       boolean().withDefault(const Constant(true))();
