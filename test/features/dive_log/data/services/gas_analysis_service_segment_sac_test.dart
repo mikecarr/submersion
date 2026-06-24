@@ -284,5 +284,73 @@ void main() {
       // sacVolume should be null (no tank volume)
       expect(results.first.sacVolume, isNull);
     });
+
+    test(
+        'calculateCylinderSac non-time-series branch uses Z-corrected SAC when volume available',
+        () {
+      const tank = DiveTank(
+        id: 't1',
+        volume: 12.0,
+        startPressure: 200,
+        endPressure: 60,
+        gasMix: GasMix(o2: 21, he: 0),
+      );
+      // Minimal profile for avgDepth, but no tankPressures → non-time-series
+      final profile = flatProfile(50 * 60, 20.0);
+
+      final dive = Dive(
+        id: 'dive-no-ts',
+        dateTime: DateTime(2026),
+        runtime: const Duration(minutes: 50),
+        avgDepth: 20.0,
+        tanks: const [tank],
+        profile: profile,
+      );
+
+      final results = service.calculateCylinderSac(
+        dive: dive,
+        profile: profile,
+        // No tankPressures → skips time-series branch
+      );
+
+      expect(results, hasLength(1));
+      expect(results.first.sacRate, isNotNull);
+      // Z-corrected: should be close to but not identical to simple pressure math
+      expect(results.first.sacRate!, closeTo(0.933, 0.05));
+      expect(results.first.sacVolume, isNotNull);
+    });
+
+    test(
+        'calculateCylinderSac non-time-series branch falls back to pressure-based when no volume',
+        () {
+      const tank = DiveTank(
+        id: 't1',
+        // No volume
+        startPressure: 200,
+        endPressure: 60,
+        gasMix: GasMix(o2: 21, he: 0),
+      );
+      final profile = flatProfile(50 * 60, 20.0);
+
+      final dive = Dive(
+        id: 'dive-no-ts-no-vol',
+        dateTime: DateTime(2026),
+        runtime: const Duration(minutes: 50),
+        avgDepth: 20.0,
+        tanks: const [tank],
+        profile: profile,
+      );
+
+      final results = service.calculateCylinderSac(
+        dive: dive,
+        profile: profile,
+      );
+
+      expect(results, hasLength(1));
+      expect(results.first.sacRate, isNotNull);
+      // Simple pressure-based: (200-60) / 50 / 3.0 ≈ 0.933 bar/min
+      expect(results.first.sacRate!, closeTo(0.933, 0.01));
+      expect(results.first.sacVolume, isNull);
+    });
   });
 }

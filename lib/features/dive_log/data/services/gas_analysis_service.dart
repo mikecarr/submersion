@@ -288,19 +288,24 @@ class GasAnalysisService {
           avgDepthDuringUse != null) {
         // Basic calculation from start/end pressures with Z-factor correction
         final pressureUsed = tank.startPressure! - tank.endPressure!;
-        if (pressureUsed > 0 && tank.volume != null) {
+        if (pressureUsed > 0) {
           final durationMin = (usageRange.end - usageRange.start) / 60.0;
           if (durationMin > 0) {
             final ambientPressureAtm = (avgDepthDuringUse / 10.0) + 1.0;
-            sacRate = _zCorrectedSacRate(
-              tankVolume: tank.volume!,
-              startPressureBar: tank.startPressure!,
-              endPressureBar: tank.endPressure!,
-              o2Percent: tank.gasMix.o2,
-              hePercent: tank.gasMix.he,
-              durationMin: durationMin,
-              ambientPressureAtm: ambientPressureAtm,
-            );
+            if (tank.volume != null) {
+              sacRate = _zCorrectedSacRate(
+                tankVolume: tank.volume!,
+                startPressureBar: tank.startPressure!,
+                endPressureBar: tank.endPressure!,
+                o2Percent: tank.gasMix.o2,
+                hePercent: tank.gasMix.he,
+                durationMin: durationMin,
+                ambientPressureAtm: ambientPressureAtm,
+              );
+            } else {
+              // Fallback: pressure-based SAC (bar/min) when no tank volume
+              sacRate = pressureUsed / durationMin / ambientPressureAtm;
+            }
           }
         }
       }
@@ -335,6 +340,8 @@ class GasAnalysisService {
   /// Compute SAC rate using Z-factor corrected gas volumes.
   ///
   /// Returns the SAC rate in bar/min at surface, or null if gas used ≤ 0.
+  /// The gasVolume() function returns liters at 1 atm, so dividing by
+  /// tankVolume yields atm; we multiply by standardAtmBar to convert to bar.
   static double? _zCorrectedSacRate({
     required double tankVolume,
     required double startPressureBar,
@@ -358,7 +365,12 @@ class GasAnalysisService {
     );
     final gasUsedLiters = startVol - endVol;
     if (gasUsedLiters <= 0) return null;
-    return gasUsedLiters / tankVolume / durationMin / ambientPressureAtm;
+    // gasUsedLiters / tankVolume is in atm; multiply by standardAtmBar for bar
+    return gasUsedLiters /
+        tankVolume *
+        standardAtmBar /
+        durationMin /
+        ambientPressureAtm;
   }
 
   /// Classify a profile point into a dive phase
