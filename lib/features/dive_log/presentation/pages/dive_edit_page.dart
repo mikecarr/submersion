@@ -1442,6 +1442,12 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
         SnackBar(
           content: Text(l10n.diveLog_bulkEdit_applied(ids.length)),
           duration: const Duration(seconds: 5),
+          // A SnackBar with an action defaults to persist: true, which makes the
+          // auto-dismiss timer a no-op so the banner never hides on its own.
+          // Force the 5s auto-dismiss and add a close icon so the banner can be
+          // dismissed without tapping Undo (which would revert the edit). #406.
+          persist: false,
+          showCloseIcon: true,
           action: SnackBarAction(
             label: l10n.diveLog_bulkDelete_undo,
             onPressed: () => service.undo(snapshot),
