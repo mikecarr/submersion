@@ -9,6 +9,82 @@ class AppLocalizationsZh extends AppLocalizations {
   AppLocalizationsZh([String locale = 'zh']) : super(locale);
 
   @override
+  String get diveLog_bulkEdit_groupRebreather => '潜水模式与循环呼吸器';
+
+  @override
+  String get diveLog_bulkEdit_fieldSetpointLow => '低设定点';
+
+  @override
+  String get diveLog_bulkEdit_fieldSetpointHigh => '高设定点';
+
+  @override
+  String get diveLog_bulkEdit_fieldSetpointDeco => '减压设定点';
+
+  @override
+  String get diveLog_bulkEdit_fieldScrubberType => '吸收剂类型';
+
+  @override
+  String get diveLog_bulkEdit_fieldScrubberDuration => '吸收剂时长';
+
+  @override
+  String get diveLog_bulkEdit_contradiction => '开路模式不能包含循环呼吸器设置。请关闭这些字段或更改模式。';
+
+  @override
+  String diveLog_bulkEdit_appBarTitle(int count) {
+    return '编辑 $count 次潜水';
+  }
+
+  @override
+  String get diveLog_bulkEdit_groupLogistics => '后勤';
+
+  @override
+  String get diveLog_bulkEdit_groupWeather => '天气';
+
+  @override
+  String get diveLog_bulkEdit_groupCollections => '标签、装备和生物';
+
+  @override
+  String get diveLog_bulkEdit_fieldFavorite => '收藏';
+
+  @override
+  String get diveLog_bulkEdit_collectionWeights => '配重';
+
+  @override
+  String get diveLog_bulkEdit_collectionTanks => '气瓶';
+
+  @override
+  String get diveLog_bulkEdit_notesSet => '设置';
+
+  @override
+  String get diveLog_bulkEdit_notesAppend => '追加';
+
+  @override
+  String get diveLog_bulkEdit_modeAdd => '添加';
+
+  @override
+  String get diveLog_bulkEdit_modeRemove => '移除';
+
+  @override
+  String get diveLog_bulkEdit_modeReplace => '替换';
+
+  @override
+  String get diveLog_bulkEdit_tankOnlyIfEmpty => '仅没有气瓶的潜水';
+
+  @override
+  String get diveLog_bulkEdit_confirmTitle => '应用更改？';
+
+  @override
+  String get diveLog_bulkEdit_confirmApply => '应用';
+
+  @override
+  String get diveLog_bulkEdit_nothingSelected => '至少启用一个字段以应用更改。';
+
+  @override
+  String diveLog_bulkEdit_applied(int count) {
+    return '已更新 $count 次潜水';
+  }
+
+  @override
   String get settings_cloudSync_error_icloudSignedOut =>
       'iCloud 不可用。请在设备设置中登录 iCloud。';
 
@@ -3935,6 +4011,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get diveLog_legend_label_ascentRate => '上升速率';
 
   @override
+  String get diveLog_legend_label_ascentRateLine => '上升速率曲线';
+
+  @override
   String get diveLog_legend_label_ceiling => '上升限制';
 
   @override
@@ -4136,11 +4215,6 @@ class AppLocalizationsZh extends AppLocalizations {
       one: '1 个问题',
     );
     return '$_temp0';
-  }
-
-  @override
-  String forms_statCell_useProfileValue(String value) {
-    return '使用潜水轮廓中的 $value';
   }
 
   @override
@@ -4722,6 +4796,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get diveLog_selection_tooltip_selectAll => '全选';
+
+  @override
+  String get diveLog_selection_tooltip_selectDateRange => '按日期范围选择';
 
   @override
   String get diveLog_sighting_add => '添加';

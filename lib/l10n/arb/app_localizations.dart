@@ -116,6 +116,150 @@ abstract class AppLocalizations {
     Locale('zh'),
   ];
 
+  /// No description provided for @diveLog_bulkEdit_groupRebreather.
+  ///
+  /// In en, this message translates to:
+  /// **'Dive Mode & Rebreather'**
+  String get diveLog_bulkEdit_groupRebreather;
+
+  /// No description provided for @diveLog_bulkEdit_fieldSetpointLow.
+  ///
+  /// In en, this message translates to:
+  /// **'Setpoint low'**
+  String get diveLog_bulkEdit_fieldSetpointLow;
+
+  /// No description provided for @diveLog_bulkEdit_fieldSetpointHigh.
+  ///
+  /// In en, this message translates to:
+  /// **'Setpoint high'**
+  String get diveLog_bulkEdit_fieldSetpointHigh;
+
+  /// No description provided for @diveLog_bulkEdit_fieldSetpointDeco.
+  ///
+  /// In en, this message translates to:
+  /// **'Setpoint deco'**
+  String get diveLog_bulkEdit_fieldSetpointDeco;
+
+  /// No description provided for @diveLog_bulkEdit_fieldScrubberType.
+  ///
+  /// In en, this message translates to:
+  /// **'Scrubber type'**
+  String get diveLog_bulkEdit_fieldScrubberType;
+
+  /// No description provided for @diveLog_bulkEdit_fieldScrubberDuration.
+  ///
+  /// In en, this message translates to:
+  /// **'Scrubber duration'**
+  String get diveLog_bulkEdit_fieldScrubberDuration;
+
+  /// No description provided for @diveLog_bulkEdit_contradiction.
+  ///
+  /// In en, this message translates to:
+  /// **'OC mode can\'t carry rebreather settings. Turn off those fields or change the mode.'**
+  String get diveLog_bulkEdit_contradiction;
+
+  /// No description provided for @diveLog_bulkEdit_appBarTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit {count} dives'**
+  String diveLog_bulkEdit_appBarTitle(int count);
+
+  /// No description provided for @diveLog_bulkEdit_groupLogistics.
+  ///
+  /// In en, this message translates to:
+  /// **'Logistics'**
+  String get diveLog_bulkEdit_groupLogistics;
+
+  /// No description provided for @diveLog_bulkEdit_groupWeather.
+  ///
+  /// In en, this message translates to:
+  /// **'Weather'**
+  String get diveLog_bulkEdit_groupWeather;
+
+  /// No description provided for @diveLog_bulkEdit_groupCollections.
+  ///
+  /// In en, this message translates to:
+  /// **'Tags, Gear & Life'**
+  String get diveLog_bulkEdit_groupCollections;
+
+  /// No description provided for @diveLog_bulkEdit_fieldFavorite.
+  ///
+  /// In en, this message translates to:
+  /// **'Favorite'**
+  String get diveLog_bulkEdit_fieldFavorite;
+
+  /// No description provided for @diveLog_bulkEdit_collectionWeights.
+  ///
+  /// In en, this message translates to:
+  /// **'Weights'**
+  String get diveLog_bulkEdit_collectionWeights;
+
+  /// No description provided for @diveLog_bulkEdit_collectionTanks.
+  ///
+  /// In en, this message translates to:
+  /// **'Tanks'**
+  String get diveLog_bulkEdit_collectionTanks;
+
+  /// No description provided for @diveLog_bulkEdit_notesSet.
+  ///
+  /// In en, this message translates to:
+  /// **'Set'**
+  String get diveLog_bulkEdit_notesSet;
+
+  /// No description provided for @diveLog_bulkEdit_notesAppend.
+  ///
+  /// In en, this message translates to:
+  /// **'Append'**
+  String get diveLog_bulkEdit_notesAppend;
+
+  /// No description provided for @diveLog_bulkEdit_modeAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get diveLog_bulkEdit_modeAdd;
+
+  /// No description provided for @diveLog_bulkEdit_modeRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get diveLog_bulkEdit_modeRemove;
+
+  /// No description provided for @diveLog_bulkEdit_modeReplace.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace'**
+  String get diveLog_bulkEdit_modeReplace;
+
+  /// No description provided for @diveLog_bulkEdit_tankOnlyIfEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Only dives that don\'t already have a tank'**
+  String get diveLog_bulkEdit_tankOnlyIfEmpty;
+
+  /// No description provided for @diveLog_bulkEdit_confirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply changes?'**
+  String get diveLog_bulkEdit_confirmTitle;
+
+  /// No description provided for @diveLog_bulkEdit_confirmApply.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply'**
+  String get diveLog_bulkEdit_confirmApply;
+
+  /// No description provided for @diveLog_bulkEdit_nothingSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn on at least one field to apply changes.'**
+  String get diveLog_bulkEdit_nothingSelected;
+
+  /// No description provided for @diveLog_bulkEdit_applied.
+  ///
+  /// In en, this message translates to:
+  /// **'Updated {count} dives'**
+  String diveLog_bulkEdit_applied(int count);
+
   /// No description provided for @settings_cloudSync_error_icloudSignedOut.
   ///
   /// In en, this message translates to:
@@ -6970,6 +7114,12 @@ abstract class AppLocalizations {
   /// **'Ascent Rate'**
   String get diveLog_legend_label_ascentRate;
 
+  /// No description provided for @diveLog_legend_label_ascentRateLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Ascent Rate Line'**
+  String get diveLog_legend_label_ascentRateLine;
+
   /// No description provided for @diveLog_legend_label_ceiling.
   ///
   /// In en, this message translates to:
@@ -7353,12 +7503,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count, plural, one{1 issue} other{{count} issues}}'**
   String forms_section_issues(int count);
-
-  /// Menu action offering to replace a stat with the value computed from the dive profile
-  ///
-  /// In en, this message translates to:
-  /// **'Use {value} from profile'**
-  String forms_statCell_useProfileValue(String value);
 
   /// No description provided for @siteMatchReview_title.
   ///
@@ -8409,6 +8553,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Select All'**
   String get diveLog_selection_tooltip_selectAll;
+
+  /// No description provided for @diveLog_selection_tooltip_selectDateRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Select by date range'**
+  String get diveLog_selection_tooltip_selectDateRange;
 
   /// No description provided for @diveLog_sighting_add.
   ///

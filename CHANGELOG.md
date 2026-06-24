@@ -3,6 +3,136 @@
 All notable changes to Submersion are documented in this file.
 
 
+## 1.5.6 (2026-06-24)
+
+### Features
+
+- default ascent-rate toggles off, unify naming
+- adopt replaced library via bounded streaming (fixes #358)
+- streaming replace-adopt apply with parity test (#358)
+- bounded recordIdsFor id enumeration for streaming adopt (#358)
+- bulk dive-mode + rebreather cascade (mode/setpoints/scrubber) with OC contradiction guard
+- bulk form Weather group (wind/cloud/precipitation/humidity/description)
+- bulk form Conditions group (water/visibility/current/swell/entry-exit/altitude/pressure)
+- bulk form collections (tags/equipment/buddies/weights/tanks/sightings) with Add/Remove/Replace
+- add BulkCollectionModeSelector
+- bulk form Logistics + Notes groups with save/confirm/undo flow
+- add BulkField set + scalar DivesCompanion builder
+- add BulkFieldGate field wrapper
+- open bulk-edit route from multi-select toolbar; remove superseded bulk sheet
+- add BulkDiveEditPage + /dives/bulk-edit route
+- add DiveEditPage bulk mode (constructor, isBulk, build branch skeleton)
+- add Select-by-date-range to multi-select toolbars
+- shift-click range selection with a selection anchor
+- add bulkDiveEditServiceProvider
+- add BulkDiveEditService.undo (per-dive restore)
+- add BulkDiveEditService.apply with snapshot capture
+- add BulkEditSnapshot data holder
+- add BulkEditRequest and collection-op model
+- add bulk sightings add and replace
+- add bulk buddy add/remove/replace for dives
+- add bulk weights add and replace
+- add bulk tank add (onlyIfEmpty) and replace
+- add bulk equipment add/remove/replace
+- add DiveRepository.bulkReplaceTags
+- add DiveRepository.bulkAppendNotes
+- add DiveRepository.bulkUpdateFields generic bulk scalar update
+- flatten The Dive group to rows + restore calculate buttons (#388)
+- one-tap calculate affordance on FormRow.text (#388)
+- graph ascent rate (#242)
+- emit UDDF-shaped payload with tanks/deco/gps/sourceUuid
+- orchestrate extractors into enriched ImportedDive
+- extend ImportedDive with tanks/deco/summary fields
+- extract dive summary/session/settings fields
+- extract profile samples with recorded deco fields
+- extract tanks and pressure series from msgs 319/323
+- extract gas mixes from dive_gas messages
+- map Garmin product codes to model names
+- resolve local wall-clock from FIT local_timestamp
+- add FIT constants and GenericMessage field access
+- enable trackpad scroll/pinch zoom on all 17 map sites
+- two-finger trackpad scroll/pinch zooms the dive profile chart
+- add kind-aware TrackpadZoomMap two-finger-scroll zoom wrapper
+- add trackpadScrollZoomDelta helper
+
+### Bug Fixes
+
+- address PR review on recordIdsFor (#358)
+- defer log construction off the delegate queue; cover retry paths
+- retry OSTC nano BLE downloads, unblock the notification queue (#394)
+- add Deselect All to master-detail selection bar; pair with Select All on phone
+- address PR review (bulk dive-type error msg, localized null option, empty-ids route guard, dirty tracking)
+- address review - bulkAddTanks evaluates onlyIfEmpty once per dive; bulkUpdateFields no-ops on empty companion
+- address review - fix shift-click anchor walk; fail-fast on unsupported owned-collection modes
+- restore numeric input filters on metric rows + harden calc-icon tests (Copilot review #392)
+- address Copilot review on ascent-rate graphing
+- refresh home tab dive providers on direct DB writes (#217)
+- correct real-file timezone base and multi-gas/AI tank handling
+- map recorded ceiling and entry/exit GPS onto imported dives
+- persist entry/exit GPS in createDive
+- keep SAC curve when tank pressure is keyed to a stale tank (#276)
+- address review - catch struct.error in guard, chain platform onError (#318)
+- stop save from overriding cleared Country/Region
+- address review - fail-closed guard + guard BLE discovery (#318)
+- prevent and diagnose 16 KB-page native load crash (#318)
+- flip trackpad scroll zoom direction (up = out, down = in)
+- 16 KB page-align liblibdc_jni.so for Android 15+
+
+### Refactoring
+
+- extract in-memory adopt as debug reference seam (#358)
+- drop unused StatCell profile glyph (#388)
+- move timestamp normalization into FitTimeResolver
+- TrackpadZoomMap via arena-winning recognizer
+
+### Documentation
+
+- implementation plan for streaming replace-adopt (#358)
+- bulk dive editing form implementation plan (#150)
+- bulk dive editing spec + engine plan (#150)
+- plans
+- clarify home-tab reactivity comments (Copilot review, #217)
+- add Garmin FIT import design spec and implementation plan
+- trackpad scroll-to-zoom spec and implementation plan
+- release notes
+
+### Tests
+
+- cover ascent-rate changes; harden sync fallback
+- cover all collection ops, tank cards, notes-append (bulk methods 90%)
+- cover numeric scalar conversion paths in bulk save
+- cover nothing-selected guard + collection-mode save path
+- cover all buildScalarCompanion branches (100%)
+- cover bulk save flow end-to-end (gate, toggle, confirm, DB apply)
+- const MaterialApp in bulk form test (analyzer)
+- comprehensive bulk-edit coverage (service ops, provider, selection widget tests)
+- raise patch coverage + fix test formatting
+- cover air-integration path + address Copilot review
+- cover provider seam + use-my-location; settle after save
+- raise patch coverage for the #318 error-handler changes
+- cover trackpad zoom rollout + address PR review
+
+### CI/CD
+
+- bump actions/download-artifact from 7 to 8
+- bump actions/checkout from 6 to 7
+
+### Chores
+
+- bump version to 1.5.6+108
+- bump submodule to OSTC3 BLE retry (4ac9867)
+- remove orphaned forms_statCell_useProfileValue (#388)
+
+### Other
+
+- i18n(dive-log): localize all bulk-edit form strings (17 keys across 11 locales)
+- i18n(dive-log): localize bulk-form Conditions/Weather field labels via existing keys
+- apply canonical dart format to bulk-edit files
+- i18n(dive-log): add select-by-date-range tooltip in all 11 locales
+- reword unit-volume fallback comment; clearer non-null local in test
+- docs+test: address second Copilot review
+
+
 ## 1.5.5 (2026-06-22)
 
 ### Chores

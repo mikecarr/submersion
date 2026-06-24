@@ -25,6 +25,7 @@ import 'package:submersion/features/dive_log/presentation/widgets/gas_colors.dar
 import 'package:submersion/features/dive_log/presentation/widgets/gas_timeline_strip.dart';
 import 'package:submersion/l10n/l10n_extension.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/profile_chart_viewport.dart';
+import 'package:submersion/core/ui/trackpad_zoom_recognizer.dart';
 
 /// Structured row emitted via [DiveProfileChart.onTooltipData] so callers
 /// can render the tooltip externally (e.g., below the chart).
@@ -252,6 +253,27 @@ class DiveProfileChart extends ConsumerStatefulWidget {
     return (labelText + valueText).trimRight();
   }
 
+  /// Symmetric m/min range for the ascent-rate line and the right axis so both
+  /// share one scale. Returns null when there is no ascent-rate data. The floor
+  /// keeps the scale meaningful for gentle dives.
+  @visibleForTesting
+  static ({double min, double max})? ascentRateAxisRange(
+    List<AscentRatePoint>? rates,
+  ) {
+    if (rates == null || rates.isEmpty) return null;
+    var maxAbs = 0.0;
+    for (final r in rates) {
+      final a = r.rateMetersPerMin.abs();
+      if (a > maxAbs) maxAbs = a;
+    }
+    // Floor the scale a little above the danger threshold so the warning/danger
+    // bands are always on-axis; derived from the calculator's threshold so the
+    // two cannot drift apart.
+    const floorSpan = AscentRateCalculator.defaultCriticalThreshold * 1.25;
+    final span = math.max(maxAbs, floorSpan);
+    return (min: -span, max: span);
+  }
+
   const DiveProfileChart({
     super.key,
     required this.profile,
@@ -268,7 +290,7 @@ class DiveProfileChart extends ConsumerStatefulWidget {
     this.tankVolume,
     this.sacNormalizationFactor = 1.0,
     this.showCeiling = true,
-    this.showAscentRateColors = true,
+    this.showAscentRateColors = false,
     this.showEvents = true,
     this.showSac = false,
     this.markers,
@@ -319,7 +341,8 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
 
   // Decompression visualization toggles
   bool _showCeiling = true;
-  bool _showAscentRateColors = true;
+  bool _showAscentRateColors = false;
+  bool _showAscentRateLine = false;
   bool _showEvents = true;
 
   // Profile marker toggles
@@ -476,7 +499,6 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
       : PointerDeviceKind.mouse;
 
   // Cursor position at the start of a trackpad pan/zoom gesture.
-  Offset _trackpadAnchor = Offset.zero;
 
   // True between a double-tap-down and the finger lifting; lets a held-finger
   // drag pan instead of scrub.
@@ -601,7 +623,7 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
     }
 
     // Ascent rate
-    if (_showAscentRateColors &&
+    if ((_showAscentRateColors || _showAscentRateLine) &&
         widget.ascentRates != null &&
         spot.spotIndex < widget.ascentRates!.length) {
       final ascentRate = widget.ascentRates![spot.spotIndex];
@@ -1020,6 +1042,7 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
     _showSac = legendState.showSac;
     _showCeiling = legendState.showCeiling;
     _showAscentRateColors = legendState.showAscentRateColors;
+    _showAscentRateLine = legendState.showAscentRateLine;
     _showEvents = legendState.showEvents;
     _showMaxDepthMarkerLocal = legendState.showMaxDepthMarker;
     _showPressureMarkersLocal = legendState.showPressureMarkers;
@@ -1162,131 +1185,60 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
   }) {
     return LayoutBuilder(
       builder: (context, constraints) {
+        // Trackpad two-finger scroll/pinch zoom, cursor-anchored. Driven by an
+        // arena-winning recognizer so it does not also scroll an enclosing page
+        // (the chart lives inside a SingleChildScrollView) and is not fought by
+        // fl_chart's own recognizers.
+        void zoomAt(Offset localPosition, double zoomDelta) {
+          if (zoomDelta == 0) return;
+          setState(() {
+            _activePointerKind = PointerDeviceKind.trackpad;
+            final box = constraints.biggest;
+            final insets = _plotInsets(constraints.maxWidth, units);
+            final focal = chartFocalFraction(
+              localPosition,
+              box,
+              left: insets.left,
+              right: insets.right,
+              top: insets.top,
+              bottom: insets.bottom,
+            );
+            _viewport = _viewport.zoomedAt(
+              focal.fx,
+              focal.fy,
+              math.pow(2, zoomDelta).toDouble(),
+            );
+          });
+        }
+
         return Semantics(
           label: context.l10n.diveLog_profile_semantics_chart,
-          child: GestureDetector(
-            onScaleStart: (details) {
-              _gestureStartViewport = _viewport;
-              _startFocalPoint = details.localFocalPoint;
+          child: RawGestureDetector(
+            gestures: {
+              TrackpadZoomGestureRecognizer:
+                  GestureRecognizerFactoryWithHandlers<
+                    TrackpadZoomGestureRecognizer
+                  >(
+                    () => TrackpadZoomGestureRecognizer(debugOwner: this),
+                    (recognizer) => recognizer.onZoom = zoomAt,
+                  ),
             },
-            onScaleUpdate: (details) {
-              // Single-pointer drags are handled by Listener.onPointerMove
-              // (mouse pan) and fl_chart's own recognizer (touch scrub); they
-              // never reach onScaleUpdate, which only ever fires for a pinch.
-              if (details.pointerCount < 2) return;
-
-              // Trackpad pinch is handled by the Listener's onPointerPanZoomUpdate
-              // (reliable cursor anchor); touch focal points are correct, so touch
-              // pinch is handled here.
-              if (_activePointerKind != PointerDeviceKind.touch) return;
-
-              setState(() {
-                final box = constraints.biggest;
-                final insets = _plotInsets(constraints.maxWidth, units);
-                final plotW = (box.width - insets.left - insets.right).clamp(
-                  1.0,
-                  double.infinity,
-                );
-                final plotH = (box.height - insets.top - insets.bottom).clamp(
-                  1.0,
-                  double.infinity,
-                );
-                final focal = chartFocalFraction(
-                  _startFocalPoint,
-                  box,
-                  left: insets.left,
-                  right: insets.right,
-                  top: insets.top,
-                  bottom: insets.bottom,
-                );
-                // scale is cumulative from gesture start -> apply to snapshot.
-                var vp = _gestureStartViewport.zoomedAt(
-                  focal.fx,
-                  focal.fy,
-                  details.scale,
-                );
-                final panPx = details.localFocalPoint - _startFocalPoint;
-                vp = vp.pannedBy(
-                  -panPx.dx / plotW / vp.zoom,
-                  -panPx.dy / plotH / vp.zoom,
-                );
-                _viewport = vp;
-              });
-            },
-            onDoubleTapDown: (details) {
-              _lastTapDownLocal = details.localPosition;
-              _doubleTapHold = true;
-            },
-            onDoubleTap: () {
-              _doubleTapHold = false;
-              setState(() {
-                if (_viewport.isZoomed) {
-                  _viewport = ProfileChartViewport.reset;
-                } else {
-                  final box = constraints.biggest;
-                  final insets = _plotInsets(constraints.maxWidth, units);
-                  final focal = chartFocalFraction(
-                    _lastTapDownLocal,
-                    box,
-                    left: insets.left,
-                    right: insets.right,
-                    top: insets.top,
-                    bottom: insets.bottom,
-                  );
-                  _viewport = _viewport.zoomedAt(focal.fx, focal.fy, 2.0);
-                }
-              });
-            },
-            child: Listener(
-              onPointerDown: (event) {
-                _activePointerCount++;
-                _activePointerKind = event.kind;
-                _lastPointerLocal = event.localPosition;
-              },
-              onPointerMove: (event) {
-                final prev = _lastPointerLocal;
-                _lastPointerLocal = event.localPosition;
-                if (prev == null) return;
-                final intent = chartDragIntent(
-                  kind: _activePointerKind,
-                  pointerCount: _activePointerCount,
-                  doubleTapHold: _doubleTapHold,
-                );
-                if (intent != ChartDragIntent.pan) return;
-                setState(() {
-                  final box = constraints.biggest;
-                  final insets = _plotInsets(constraints.maxWidth, units);
-                  final plotW = (box.width - insets.left - insets.right).clamp(
-                    1.0,
-                    double.infinity,
-                  );
-                  final plotH = (box.height - insets.top - insets.bottom).clamp(
-                    1.0,
-                    double.infinity,
-                  );
-                  final d = event.localPosition - prev;
-                  _viewport = _viewport.pannedBy(
-                    -d.dx / plotW / _viewport.zoom,
-                    -d.dy / plotH / _viewport.zoom,
-                  );
-                });
-              },
-              onPointerUp: (event) {
-                if (_activePointerCount > 0) _activePointerCount--;
-                _lastPointerLocal = null;
-                _doubleTapHold = false;
-              },
-              onPointerCancel: (event) {
-                if (_activePointerCount > 0) _activePointerCount--;
-                _lastPointerLocal = null;
-                _doubleTapHold = false;
-              },
-              onPointerPanZoomStart: (event) {
-                _activePointerKind = PointerDeviceKind.trackpad;
+            child: GestureDetector(
+              onScaleStart: (details) {
                 _gestureStartViewport = _viewport;
-                _trackpadAnchor = event.localPosition;
+                _startFocalPoint = details.localFocalPoint;
               },
-              onPointerPanZoomUpdate: (event) {
+              onScaleUpdate: (details) {
+                // Single-pointer drags are handled by Listener.onPointerMove
+                // (mouse pan) and fl_chart's own recognizer (touch scrub); they
+                // never reach onScaleUpdate, which only ever fires for a pinch.
+                if (details.pointerCount < 2) return;
+
+                // Trackpad pinch/scroll is handled by the
+                // TrackpadZoomGestureRecognizer (reliable cursor anchor); touch
+                // focal points are correct, so touch pinch is handled here.
+                if (_activePointerKind != PointerDeviceKind.touch) return;
+
                 setState(() {
                   final box = constraints.biggest;
                   final insets = _plotInsets(constraints.maxWidth, units);
@@ -1299,77 +1251,143 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
                     double.infinity,
                   );
                   final focal = chartFocalFraction(
-                    _trackpadAnchor,
+                    _startFocalPoint,
                     box,
                     left: insets.left,
                     right: insets.right,
                     top: insets.top,
                     bottom: insets.bottom,
                   );
-                  // scale and pan are cumulative from the gesture start.
+                  // scale is cumulative from gesture start -> apply to snapshot.
                   var vp = _gestureStartViewport.zoomedAt(
                     focal.fx,
                     focal.fy,
-                    event.scale,
+                    details.scale,
                   );
-                  // Use the GLOBAL pan delta (event.pan), NOT event.localPan:
-                  // on macOS the trackpad PointerPanZoom localPan is contaminated
-                  // by the widget's global->local translation (the translation is
-                  // wrongly applied to the pan vector), making it a huge constant
-                  // (~ -(widget global origin)) that pins the view to a corner.
-                  // The chart has no rotation/scale, so the global pan delta IS
-                  // the correct local delta.
+                  final panPx = details.localFocalPoint - _startFocalPoint;
                   vp = vp.pannedBy(
-                    -event.pan.dx / plotW / vp.zoom,
-                    -event.pan.dy / plotH / vp.zoom,
+                    -panPx.dx / plotW / vp.zoom,
+                    -panPx.dy / plotH / vp.zoom,
                   );
                   _viewport = vp;
                 });
               },
-              onPointerSignal: (event) {
-                if (event is PointerScrollEvent) {
-                  setState(() {
+              onDoubleTapDown: (details) {
+                _lastTapDownLocal = details.localPosition;
+                _doubleTapHold = true;
+              },
+              onDoubleTap: () {
+                _doubleTapHold = false;
+                setState(() {
+                  if (_viewport.isZoomed) {
+                    _viewport = ProfileChartViewport.reset;
+                  } else {
                     final box = constraints.biggest;
                     final insets = _plotInsets(constraints.maxWidth, units);
                     final focal = chartFocalFraction(
-                      event.localPosition,
+                      _lastTapDownLocal,
                       box,
                       left: insets.left,
                       right: insets.right,
                       top: insets.top,
                       bottom: insets.bottom,
                     );
-                    final factor = event.scrollDelta.dy < 0 ? 1.1 : 1 / 1.1;
-                    _viewport = _viewport.zoomedAt(focal.fx, focal.fy, factor);
+                    _viewport = _viewport.zoomedAt(focal.fx, focal.fy, 2.0);
+                  }
+                });
+              },
+              child: Listener(
+                onPointerDown: (event) {
+                  _activePointerCount++;
+                  _activePointerKind = event.kind;
+                  _lastPointerLocal = event.localPosition;
+                },
+                onPointerMove: (event) {
+                  final prev = _lastPointerLocal;
+                  _lastPointerLocal = event.localPosition;
+                  if (prev == null) return;
+                  final intent = chartDragIntent(
+                    kind: _activePointerKind,
+                    pointerCount: _activePointerCount,
+                    doubleTapHold: _doubleTapHold,
+                  );
+                  if (intent != ChartDragIntent.pan) return;
+                  setState(() {
+                    final box = constraints.biggest;
+                    final insets = _plotInsets(constraints.maxWidth, units);
+                    final plotW = (box.width - insets.left - insets.right)
+                        .clamp(1.0, double.infinity);
+                    final plotH = (box.height - insets.top - insets.bottom)
+                        .clamp(1.0, double.infinity);
+                    final d = event.localPosition - prev;
+                    _viewport = _viewport.pannedBy(
+                      -d.dx / plotW / _viewport.zoom,
+                      -d.dy / plotH / _viewport.zoom,
+                    );
                   });
-                }
-              },
-              onPointerHover: (event) {
-                _activePointerKind = PointerDeviceKind.mouse;
-                final idx = _hoverIndex(
-                  event.localPosition,
-                  constraints.biggest,
-                  _plotInsets(constraints.maxWidth, units),
-                );
-                if (idx != _lastHoverIndex) {
-                  _lastHoverIndex = idx;
-                  widget.onPointSelected?.call(idx);
-                }
-              },
-              child: MouseRegion(
-                onExit: (_) {
-                  if (_lastHoverIndex != null) {
-                    _lastHoverIndex = null;
-                    widget.onPointSelected?.call(null);
+                },
+                onPointerUp: (event) {
+                  if (_activePointerCount > 0) _activePointerCount--;
+                  _lastPointerLocal = null;
+                  _doubleTapHold = false;
+                },
+                onPointerCancel: (event) {
+                  if (_activePointerCount > 0) _activePointerCount--;
+                  _lastPointerLocal = null;
+                  _doubleTapHold = false;
+                },
+                // Trackpad two-finger scroll/pinch is handled by the
+                // TrackpadZoomGestureRecognizer above (it wins the gesture arena so
+                // it cannot also scroll the enclosing page).
+                onPointerSignal: (event) {
+                  if (event is PointerScrollEvent) {
+                    setState(() {
+                      final box = constraints.biggest;
+                      final insets = _plotInsets(constraints.maxWidth, units);
+                      final focal = chartFocalFraction(
+                        event.localPosition,
+                        box,
+                        left: insets.left,
+                        right: insets.right,
+                        top: insets.top,
+                        bottom: insets.bottom,
+                      );
+                      final factor = event.scrollDelta.dy < 0 ? 1.1 : 1 / 1.1;
+                      _viewport = _viewport.zoomedAt(
+                        focal.fx,
+                        focal.fy,
+                        factor,
+                      );
+                    });
                   }
                 },
-                child: _buildChart(
-                  context,
-                  units,
-                  availableWidth: constraints.maxWidth,
-                  hasTemperatureData: hasTemperatureData,
-                  hasPressureData: hasPressureData,
-                  hasHeartRateData: hasHeartRateData,
+                onPointerHover: (event) {
+                  _activePointerKind = PointerDeviceKind.mouse;
+                  final idx = _hoverIndex(
+                    event.localPosition,
+                    constraints.biggest,
+                    _plotInsets(constraints.maxWidth, units),
+                  );
+                  if (idx != _lastHoverIndex) {
+                    _lastHoverIndex = idx;
+                    widget.onPointSelected?.call(idx);
+                  }
+                },
+                child: MouseRegion(
+                  onExit: (_) {
+                    if (_lastHoverIndex != null) {
+                      _lastHoverIndex = null;
+                      widget.onPointSelected?.call(null);
+                    }
+                  },
+                  child: _buildChart(
+                    context,
+                    units,
+                    availableWidth: constraints.maxWidth,
+                    hasTemperatureData: hasTemperatureData,
+                    hasPressureData: hasPressureData,
+                    hasHeartRateData: hasHeartRateData,
+                  ),
                 ),
               ),
             ),
@@ -1731,6 +1749,10 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
               if (_showSac && hasSacData && minSac != null && maxSac != null)
                 _buildSacLine(totalMaxDepth, minSac, maxSac),
 
+              // Ascent-rate magnitude line (separate overlay; signed m/min)
+              if (_showAscentRateLine && widget.ascentRates != null)
+                _buildAscentRateLine(totalMaxDepth),
+
               // Ceiling line (if showing and data available)
               if (_showCeiling && widget.ceilingCurve != null)
                 _buildCeilingLine(units),
@@ -2011,7 +2033,7 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
                     // - Descent: cyan (distinct from air blue)
                     // - Safe ascent: lime green (distinct from nitrox green)
                     // - Warning/danger: orange/red (already distinct)
-                    if (_showAscentRateColors) {
+                    if (_showAscentRateColors || _showAscentRateLine) {
                       Color rateColor = Colors.grey;
                       String arrow = '—';
                       double convertedRate = 0.0;
@@ -2653,6 +2675,15 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
     if (cpProfiles != null && cpProfiles.length >= 2) {
       return _buildMultiComputerDepthLines(cpProfiles, units);
     }
+    // When the ascent-rate overlay is on, colour the depth line by velocity
+    // band; otherwise draw a single solid depth-coloured segment.
+    final ascentRates = widget.ascentRates;
+    if (_showAscentRateColors &&
+        ascentRates != null &&
+        ascentRates.length == widget.profile.length &&
+        widget.profile.length >= 2) {
+      return _buildVelocityColoredDepthLines(units, ascentRates);
+    }
     const depthColor = AppColors.chartDepth;
     return [
       _buildSingleDepthSegment(
@@ -2663,6 +2694,46 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
         showFill: true,
       ),
     ];
+  }
+
+  /// Build depth-line segments coloured by ascent-rate band ("velocity
+  /// coloring", green/orange/red).
+  ///
+  /// Each line segment between samples i-1 and i is coloured by the velocity
+  /// recorded at point i ([AscentRateCalculator] stores the rate for the
+  /// segment that *ends* at i; index 0 is a zero placeholder). Consecutive
+  /// same-band segments are merged into one polyline, so every bar spans at
+  /// least two points (the final sample never collapses to a 1-point dot) and
+  /// every run keeps the gradient fill so the plot reads as a continuous depth
+  /// area.
+  List<LineChartBarData> _buildVelocityColoredDepthLines(
+    UnitFormatter units,
+    List<AscentRatePoint> ascentRates,
+  ) {
+    final n = widget.profile.length;
+    final lines = <LineChartBarData>[];
+    var segStart = 1; // first drawable segment connects points 0 and 1
+    while (segStart < n) {
+      var segEnd = segStart;
+      while (segEnd + 1 < n &&
+          ascentRates[segEnd + 1].category == ascentRates[segStart].category) {
+        segEnd++;
+      }
+      // Segments [segStart..segEnd] cover points [segStart-1 .. segEnd]; the
+      // sublist end is exclusive, so segEnd + 1 includes point segEnd. Adjacent
+      // runs share their boundary sample, so the coloured pieces join cleanly.
+      lines.add(
+        _buildSingleDepthSegment(
+          _getAscentRateColor(ascentRates[segStart].category),
+          units,
+          segStart - 1,
+          segEnd + 1,
+          showFill: true,
+        ),
+      );
+      segStart = segEnd + 1;
+    }
+    return lines;
   }
 
   /// Build one depth line per computer for multi-computer rendering.
@@ -3002,6 +3073,41 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
       isStrokeCapRound: true,
       dotData: const FlDotData(show: false),
       dashArray: [6, 3], // Distinctive dash pattern for SAC
+    );
+  }
+
+  /// Build the separate ascent-rate magnitude line: signed rate (m/min) mapped
+  /// into the depth plot area so ascents rise above and descents dip below the
+  /// vertical mid-plot. Self-scaled via [DiveProfileChart.ascentRateAxisRange]
+  /// so the line and the optional right-axis labels share one scale.
+  LineChartBarData _buildAscentRateLine(double chartMaxDepth) {
+    final ascentRates = widget.ascentRates!;
+    final range = DiveProfileChart.ascentRateAxisRange(ascentRates)!;
+    final spots = <FlSpot>[];
+    for (var i = 0; i < widget.profile.length && i < ascentRates.length; i++) {
+      // Normalisation is unit-invariant, so map the stored m/min value
+      // directly; the right axis converts to the user's unit at label time.
+      spots.add(
+        FlSpot(
+          widget.profile[i].timestamp.toDouble(),
+          -_mapValueToDepth(
+            ascentRates[i].rateMetersPerMin,
+            chartMaxDepth,
+            range.min,
+            range.max,
+          ),
+        ),
+      );
+    }
+    return LineChartBarData(
+      spots: spots,
+      isCurved: true,
+      curveSmoothness: 0.2,
+      color: Colors.lime,
+      barWidth: 2,
+      isStrokeCapRound: true,
+      dotData: const FlDotData(show: false),
+      dashArray: const [5, 3],
     );
   }
 
@@ -3683,6 +3789,8 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
         return widget.profile.any((p) => p.heartRate != null);
       case ProfileRightAxisMetric.sac:
         return widget.sacCurve != null && widget.sacCurve!.any((s) => s > 0);
+      case ProfileRightAxisMetric.ascentRate:
+        return widget.ascentRates != null && widget.ascentRates!.isNotEmpty;
       case ProfileRightAxisMetric.ndl:
         return widget.ndlCurve != null && widget.ndlCurve!.isNotEmpty;
       case ProfileRightAxisMetric.ppO2:
@@ -3772,6 +3880,9 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
         if (sacs.isEmpty) return null;
         return (min: 0.0, max: sacs.reduce(math.max) * 1.2);
 
+      case ProfileRightAxisMetric.ascentRate:
+        return DiveProfileChart.ascentRateAxisRange(widget.ascentRates);
+
       case ProfileRightAxisMetric.ndl:
         return (min: 0.0, max: 3600.0); // 0-60 minutes
 
@@ -3832,6 +3943,9 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
       // SAC stored in bar/min -> convert pressure component to user unit
       case ProfileRightAxisMetric.sac:
         return units.convertPressure(value).toStringAsFixed(1);
+      // Ascent rate stored in m/min -> convert depth component to user unit
+      case ProfileRightAxisMetric.ascentRate:
+        return units.convertDepth(value).toStringAsFixed(0);
       // Mean depth stored in meters -> convert to user unit
       case ProfileRightAxisMetric.meanDepth:
         return units.convertDepth(value).toStringAsFixed(0);
@@ -3866,6 +3980,8 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
         return '$name (${units.depthSymbol})';
       case ProfileRightAxisMetric.sac:
         return '$name (${units.pressureSymbol}/min)';
+      case ProfileRightAxisMetric.ascentRate:
+        return '$name (${units.depthSymbol}/min)';
       default:
         final suffix = metric.unitSuffix;
         if (suffix != null) return '$name ($suffix)';

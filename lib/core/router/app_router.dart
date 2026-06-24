@@ -33,6 +33,7 @@ import 'package:submersion/features/dive_centers/presentation/pages/dive_center_
 import 'package:submersion/features/dive_centers/presentation/pages/dive_center_map_page.dart';
 import 'package:submersion/features/dive_log/presentation/pages/dive_list_page.dart';
 import 'package:submersion/features/dive_log/presentation/pages/dive_detail_page.dart';
+import 'package:submersion/features/dive_log/presentation/pages/bulk_dive_edit_page.dart';
 import 'package:submersion/features/dive_log/presentation/pages/dive_edit_page.dart';
 import 'package:submersion/features/dive_log/presentation/pages/dive_search_page.dart';
 import 'package:submersion/features/dive_log/presentation/pages/profile_editor_page.dart';
@@ -270,6 +271,23 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                 builder: (context, state) {
                   final ids = (state.extra as List<dynamic>?)?.cast<String>();
                   return SiteMatchReviewPage(diveIds: ids);
+                },
+              ),
+              GoRoute(
+                path: 'bulk-edit',
+                name: 'bulkEditDives',
+                redirect: (context, state) {
+                  final ids = (state.extra as List<dynamic>?)?.cast<String>();
+                  // No ids (deep link / manual nav) means there is nothing to
+                  // bulk edit; send the user back to the dive list rather than
+                  // landing on what looks like the new-dive form.
+                  return (ids == null || ids.isEmpty) ? '/dives' : null;
+                },
+                builder: (context, state) {
+                  final ids =
+                      (state.extra as List<dynamic>?)?.cast<String>() ??
+                      const <String>[];
+                  return BulkDiveEditPage(diveIds: ids);
                 },
               ),
               GoRoute(

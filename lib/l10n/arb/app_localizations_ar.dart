@@ -9,6 +9,86 @@ class AppLocalizationsAr extends AppLocalizations {
   AppLocalizationsAr([String locale = 'ar']) : super(locale);
 
   @override
+  String get diveLog_bulkEdit_groupRebreather => 'وضع الغوص وجهاز التنفس';
+
+  @override
+  String get diveLog_bulkEdit_fieldSetpointLow => 'النقطة المحددة المنخفضة';
+
+  @override
+  String get diveLog_bulkEdit_fieldSetpointHigh => 'النقطة المحددة العالية';
+
+  @override
+  String get diveLog_bulkEdit_fieldSetpointDeco =>
+      'النقطة المحددة لإزالة الضغط';
+
+  @override
+  String get diveLog_bulkEdit_fieldScrubberType => 'نوع الفلتر';
+
+  @override
+  String get diveLog_bulkEdit_fieldScrubberDuration => 'مدة الفلتر';
+
+  @override
+  String get diveLog_bulkEdit_contradiction =>
+      'وضع الدائرة المفتوحة لا يدعم إعدادات جهاز التنفس. عطّل تلك الحقول أو غيّر الوضع.';
+
+  @override
+  String diveLog_bulkEdit_appBarTitle(int count) {
+    return 'تعديل $count غطسات';
+  }
+
+  @override
+  String get diveLog_bulkEdit_groupLogistics => 'اللوجستيات';
+
+  @override
+  String get diveLog_bulkEdit_groupWeather => 'الطقس';
+
+  @override
+  String get diveLog_bulkEdit_groupCollections => 'الوسوم والمعدات والحياة';
+
+  @override
+  String get diveLog_bulkEdit_fieldFavorite => 'مفضّل';
+
+  @override
+  String get diveLog_bulkEdit_collectionWeights => 'الأوزان';
+
+  @override
+  String get diveLog_bulkEdit_collectionTanks => 'الأسطوانات';
+
+  @override
+  String get diveLog_bulkEdit_notesSet => 'تعيين';
+
+  @override
+  String get diveLog_bulkEdit_notesAppend => 'إلحاق';
+
+  @override
+  String get diveLog_bulkEdit_modeAdd => 'إضافة';
+
+  @override
+  String get diveLog_bulkEdit_modeRemove => 'إزالة';
+
+  @override
+  String get diveLog_bulkEdit_modeReplace => 'استبدال';
+
+  @override
+  String get diveLog_bulkEdit_tankOnlyIfEmpty =>
+      'الغطسات التي لا تحتوي على أسطوانة فقط';
+
+  @override
+  String get diveLog_bulkEdit_confirmTitle => 'تطبيق التغييرات؟';
+
+  @override
+  String get diveLog_bulkEdit_confirmApply => 'تطبيق';
+
+  @override
+  String get diveLog_bulkEdit_nothingSelected =>
+      'فعّل حقلاً واحداً على الأقل لتطبيق التغييرات.';
+
+  @override
+  String diveLog_bulkEdit_applied(int count) {
+    return 'تم تحديث $count غطسة';
+  }
+
+  @override
   String get settings_cloudSync_error_icloudSignedOut =>
       'iCloud غير متوفر. يُرجى تسجيل الدخول إلى iCloud من إعدادات جهازك.';
 
@@ -4040,6 +4120,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get diveLog_legend_label_ascentRate => 'معدل الصعود';
 
   @override
+  String get diveLog_legend_label_ascentRateLine => 'خط معدل الصعود';
+
+  @override
   String get diveLog_legend_label_ceiling => 'السقف';
 
   @override
@@ -4246,11 +4329,6 @@ class AppLocalizationsAr extends AppLocalizations {
       one: 'مشكلة واحدة',
     );
     return '$_temp0';
-  }
-
-  @override
-  String forms_statCell_useProfileValue(String value) {
-    return 'استخدام $value من ملف الغوصة';
   }
 
   @override
@@ -4842,6 +4920,10 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get diveLog_selection_tooltip_selectAll => 'تحديد الكل';
+
+  @override
+  String get diveLog_selection_tooltip_selectDateRange =>
+      'التحديد حسب نطاق التاريخ';
 
   @override
   String get diveLog_sighting_add => 'إضافة';

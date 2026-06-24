@@ -3,11 +3,11 @@ import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:submersion/core/providers/provider.dart';
+import 'package:submersion/core/providers/location_service_provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 
-import 'package:submersion/core/services/location_service.dart';
 import 'package:submersion/core/deco/altitude_calculator.dart';
 import 'package:submersion/core/utils/unit_formatter.dart';
 import 'package:submersion/features/divers/presentation/providers/diver_providers.dart';
@@ -1420,7 +1420,7 @@ class _SiteEditPageState extends ConsumerState<SiteEditPage> {
     setState(() => _isGettingLocation = true);
 
     try {
-      final locationService = LocationService.instance;
+      final locationService = ref.read(locationServiceProvider);
       final result = await locationService.getCurrentLocation(
         includeGeocoding: true,
       );
@@ -2032,10 +2032,16 @@ class _SiteEditPageState extends ConsumerState<SiteEditPage> {
           ? units.altitudeToMeters(altitudeInput)
           : null;
 
-      String? country = _countryController.text.trim().isEmpty
+      // Location fields persist exactly as shown. We deliberately do NOT
+      // reverse-geocode empty country/region on save: an empty field is
+      // indistinguishable from one the user intentionally cleared, so silently
+      // refilling it makes a cleared field un-clearable and overrides the
+      // user's edits. Auto-fill happens only on explicit request, via the
+      // "Use my location" / "Pick from map" actions (which fill empty fields).
+      final String? country = _countryController.text.trim().isEmpty
           ? null
           : _countryController.text.trim();
-      String? region = _regionController.text.trim().isEmpty
+      final String? region = _regionController.text.trim().isEmpty
           ? null
           : _regionController.text.trim();
       final String? city = _cityController.text.trim().isEmpty
@@ -2047,23 +2053,6 @@ class _SiteEditPageState extends ConsumerState<SiteEditPage> {
       final String? bodyOfWater = _bodyOfWaterController.text.trim().isEmpty
           ? null
           : _bodyOfWaterController.text.trim();
-
-      if (location != null && (country == null || region == null)) {
-        try {
-          final geocodeResult = await LocationService.instance.reverseGeocode(
-            location.latitude,
-            location.longitude,
-          );
-          if (country == null && geocodeResult.country != null) {
-            country = geocodeResult.country;
-          }
-          if (region == null && geocodeResult.region != null) {
-            region = geocodeResult.region;
-          }
-        } catch (e) {
-          // Geocoding is best-effort
-        }
-      }
 
       final diverId =
           _originalSite?.diverId ??

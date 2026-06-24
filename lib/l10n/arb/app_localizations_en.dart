@@ -9,6 +9,85 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
+  String get diveLog_bulkEdit_groupRebreather => 'Dive Mode & Rebreather';
+
+  @override
+  String get diveLog_bulkEdit_fieldSetpointLow => 'Setpoint low';
+
+  @override
+  String get diveLog_bulkEdit_fieldSetpointHigh => 'Setpoint high';
+
+  @override
+  String get diveLog_bulkEdit_fieldSetpointDeco => 'Setpoint deco';
+
+  @override
+  String get diveLog_bulkEdit_fieldScrubberType => 'Scrubber type';
+
+  @override
+  String get diveLog_bulkEdit_fieldScrubberDuration => 'Scrubber duration';
+
+  @override
+  String get diveLog_bulkEdit_contradiction =>
+      'OC mode can\'t carry rebreather settings. Turn off those fields or change the mode.';
+
+  @override
+  String diveLog_bulkEdit_appBarTitle(int count) {
+    return 'Edit $count dives';
+  }
+
+  @override
+  String get diveLog_bulkEdit_groupLogistics => 'Logistics';
+
+  @override
+  String get diveLog_bulkEdit_groupWeather => 'Weather';
+
+  @override
+  String get diveLog_bulkEdit_groupCollections => 'Tags, Gear & Life';
+
+  @override
+  String get diveLog_bulkEdit_fieldFavorite => 'Favorite';
+
+  @override
+  String get diveLog_bulkEdit_collectionWeights => 'Weights';
+
+  @override
+  String get diveLog_bulkEdit_collectionTanks => 'Tanks';
+
+  @override
+  String get diveLog_bulkEdit_notesSet => 'Set';
+
+  @override
+  String get diveLog_bulkEdit_notesAppend => 'Append';
+
+  @override
+  String get diveLog_bulkEdit_modeAdd => 'Add';
+
+  @override
+  String get diveLog_bulkEdit_modeRemove => 'Remove';
+
+  @override
+  String get diveLog_bulkEdit_modeReplace => 'Replace';
+
+  @override
+  String get diveLog_bulkEdit_tankOnlyIfEmpty =>
+      'Only dives that don\'t already have a tank';
+
+  @override
+  String get diveLog_bulkEdit_confirmTitle => 'Apply changes?';
+
+  @override
+  String get diveLog_bulkEdit_confirmApply => 'Apply';
+
+  @override
+  String get diveLog_bulkEdit_nothingSelected =>
+      'Turn on at least one field to apply changes.';
+
+  @override
+  String diveLog_bulkEdit_applied(int count) {
+    return 'Updated $count dives';
+  }
+
+  @override
   String get settings_cloudSync_error_icloudSignedOut =>
       'iCloud is not available. Please sign in to iCloud in your device settings.';
 
@@ -4065,6 +4144,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get diveLog_legend_label_ascentRate => 'Ascent Rate';
 
   @override
+  String get diveLog_legend_label_ascentRateLine => 'Ascent Rate Line';
+
+  @override
   String get diveLog_legend_label_ceiling => 'Ceiling';
 
   @override
@@ -4271,11 +4353,6 @@ class AppLocalizationsEn extends AppLocalizations {
       one: '1 issue',
     );
     return '$_temp0';
-  }
-
-  @override
-  String forms_statCell_useProfileValue(String value) {
-    return 'Use $value from profile';
   }
 
   @override
@@ -4867,6 +4944,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get diveLog_selection_tooltip_selectAll => 'Select All';
+
+  @override
+  String get diveLog_selection_tooltip_selectDateRange =>
+      'Select by date range';
 
   @override
   String get diveLog_sighting_add => 'Add';
