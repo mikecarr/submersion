@@ -279,6 +279,9 @@ class FitParserService {
           volumeUsedLiters: i < realTanks.length
               ? realTanks[i].volumeUsedLiters
               : null,
+          volumeLiters: i < realTanks.length
+              ? realTanks[i].cylinderVolumeLiters
+              : null,
           o2Percent: i < gases.length ? gases[i].o2Percent : null,
           hePercent: i < gases.length ? gases[i].hePercent : null,
         ),
