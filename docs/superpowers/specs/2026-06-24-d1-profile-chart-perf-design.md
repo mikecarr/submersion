@@ -77,3 +77,15 @@ Then a **parity test**: O(N) `combineMultiTankPressures` output matches the curr
 
 - Viewport-aware re-decimation on zoom (future enhancement; current zoom does not slice spots).
 - The other Phase 2 avenues (S3 offload sync CPU, S2 batch writes, S1 debounce, D2 lazy sections) — separate fixes/PRs.
+
+## Measurement result (Plan A / D1a)
+
+Captured in profile mode (Apple M5 Pro) via `scratchpad/vmcap.dart`, opening Dive #41 (3,644 samples):
+
+- **`combineMultiTankPressures` O(N): CONFIRMED** — gone from the UI-isolate CPU hot list (was 56 ms in Phase 1).
+- **Memoization: PROVEN by widget test** — a playback-only rebuild returns the identical `lineBarsData` instance; a profile change rebuilds it. The interaction jank (Phase 1's 87 over-budget warm frames) is eliminated deterministically.
+- **Cold chart build: still ~36 ms** worst-frame build (vs 35.6 ms Phase 1) — unchanged, as expected (memoization caches after the first build; decimation deliberately unwired). Decimation (Plan B) is the lever for this one-time cost.
+- **The on-launch sync base-apply still dominates the cold start** — `pread` 448 ms, `sqlite3VdbeExec` 245 ms, SHA-256 217 ms, `BaseJsonStreamReader` ~280 ms, all on the UI isolate (sync did not settle within the 20 s wait).
+
+### Plan B decision
+Decimation remains justified (cold build ~36 ms, ~4x over the 60 fps budget) but is **lower priority than S3 (offload sync CPU)**: the measured first-open cost is dominated by the sync base-apply, not the chart. Recommended order: ship D1a → **S3** → Plan B decimation as a later chart-polish pass.
