@@ -116,8 +116,8 @@ void main() {
         o2Percent: 0,
         hePercent: 100,
       );
-      // He has Z > 1, so volume = tank * P/Z is less than ideal
-      // Air has Z < 1, so volume = tank * P/Z is more than ideal
+      // He has Z > 1 (larger), so volume = tank * P/Z is less
+      // Air also has Z > 1 but smaller than He, so air volume > He volume
       expect(volAir, greaterThan(volHe));
     });
 

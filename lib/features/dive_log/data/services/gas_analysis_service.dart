@@ -292,27 +292,15 @@ class GasAnalysisService {
           final durationMin = (usageRange.end - usageRange.start) / 60.0;
           if (durationMin > 0) {
             final ambientPressureAtm = (avgDepthDuringUse / 10.0) + 1.0;
-            final startVol = gasVolume(
-              tankSizeLiters: tank.volume!,
-              pressureBar: tank.startPressure!,
+            sacRate = _zCorrectedSacRate(
+              tankVolume: tank.volume!,
+              startPressureBar: tank.startPressure!,
+              endPressureBar: tank.endPressure!,
               o2Percent: tank.gasMix.o2,
               hePercent: tank.gasMix.he,
+              durationMin: durationMin,
+              ambientPressureAtm: ambientPressureAtm,
             );
-            final endVol = gasVolume(
-              tankSizeLiters: tank.volume!,
-              pressureBar: tank.endPressure!,
-              o2Percent: tank.gasMix.o2,
-              hePercent: tank.gasMix.he,
-            );
-            final gasUsedLiters = startVol - endVol;
-            if (gasUsedLiters > 0) {
-              // SAC in bar/min at surface (pressure-based)
-              sacRate =
-                  gasUsedLiters /
-                  tank.volume! /
-                  durationMin /
-                  ambientPressureAtm;
-            }
           }
         }
       }
@@ -343,6 +331,35 @@ class GasAnalysisService {
   // ─────────────────────────────────────────────────────────────────────────
   // Private Helper Methods
   // ─────────────────────────────────────────────────────────────────────────
+
+  /// Compute SAC rate using Z-factor corrected gas volumes.
+  ///
+  /// Returns the SAC rate in bar/min at surface, or null if gas used ≤ 0.
+  static double? _zCorrectedSacRate({
+    required double tankVolume,
+    required double startPressureBar,
+    required double endPressureBar,
+    required double o2Percent,
+    required double hePercent,
+    required double durationMin,
+    required double ambientPressureAtm,
+  }) {
+    final startVol = gasVolume(
+      tankSizeLiters: tankVolume,
+      pressureBar: startPressureBar,
+      o2Percent: o2Percent,
+      hePercent: hePercent,
+    );
+    final endVol = gasVolume(
+      tankSizeLiters: tankVolume,
+      pressureBar: endPressureBar,
+      o2Percent: o2Percent,
+      hePercent: hePercent,
+    );
+    final gasUsedLiters = startVol - endVol;
+    if (gasUsedLiters <= 0) return null;
+    return gasUsedLiters / tankVolume / durationMin / ambientPressureAtm;
+  }
 
   /// Classify a profile point into a dive phase
   DivePhase _classifyPhase(
@@ -593,22 +610,16 @@ class GasAnalysisService {
 
     // Use Z-factor corrected volume when tank data available
     if (tank.volume != null && startPressure != null && endPressure != null) {
-      final startVol = gasVolume(
-        tankSizeLiters: tank.volume!,
-        pressureBar: startPressure,
+      final result = _zCorrectedSacRate(
+        tankVolume: tank.volume!,
+        startPressureBar: startPressure,
+        endPressureBar: endPressure,
         o2Percent: tank.gasMix.o2,
         hePercent: tank.gasMix.he,
+        durationMin: durationMin,
+        ambientPressureAtm: ambientPressureAtm,
       );
-      final endVol = gasVolume(
-        tankSizeLiters: tank.volume!,
-        pressureBar: endPressure,
-        o2Percent: tank.gasMix.o2,
-        hePercent: tank.gasMix.he,
-      );
-      final gasUsedLiters = startVol - endVol;
-      if (gasUsedLiters > 0) {
-        return gasUsedLiters / tank.volume! / durationMin / ambientPressureAtm;
-      }
+      if (result != null) return result;
     }
 
     return pressureUsed / durationMin / ambientPressureAtm;
@@ -640,21 +651,16 @@ class GasAnalysisService {
 
     // Use Z-factor corrected volume if tank size is known
     if (tankVolume != null && tankVolume > 0) {
-      final startVol = gasVolume(
-        tankSizeLiters: tankVolume,
-        pressureBar: startPressure,
+      final result = _zCorrectedSacRate(
+        tankVolume: tankVolume,
+        startPressureBar: startPressure,
+        endPressureBar: endPressure,
         o2Percent: gasMix.o2,
         hePercent: gasMix.he,
+        durationMin: durationMin,
+        ambientPressureAtm: ambientPressureAtm,
       );
-      final endVol = gasVolume(
-        tankSizeLiters: tankVolume,
-        pressureBar: endPressure,
-        o2Percent: gasMix.o2,
-        hePercent: gasMix.he,
-      );
-      final gasUsedLiters = startVol - endVol;
-      if (gasUsedLiters <= 0) return null;
-      return gasUsedLiters / tankVolume / durationMin / ambientPressureAtm;
+      if (result != null) return result;
     }
 
     // Fallback: simple pressure-based (no Z correction possible)
