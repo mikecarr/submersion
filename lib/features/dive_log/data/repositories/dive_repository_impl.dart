@@ -1498,7 +1498,10 @@ class DiveRepository {
       args.add(Variable(endOfDay.millisecondsSinceEpoch));
     }
     if (filter.diveTypeId != null) {
-      clauses.add('d.dive_type = ?');
+      clauses.add(
+        'EXISTS (SELECT 1 FROM dive_dive_types ddt '
+        'WHERE ddt.dive_id = d.id AND ddt.dive_type_id = ?)',
+      );
       args.add(Variable(filter.diveTypeId!));
     }
     if (filter.siteId != null) {
