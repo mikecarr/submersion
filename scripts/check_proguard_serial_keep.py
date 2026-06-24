@@ -169,5 +169,5 @@ def main(argv):
     return 0 if all_ok else 1
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     sys.exit(main(sys.argv))

@@ -229,6 +229,36 @@ jobs:
           flags: shard-${{ matrix.shard }}
           fail_ci_if_error: false  # Enable after configuring repo on codecov.io
 
+  # Unit-tests the dependency-free Python guard scripts (e.g. the issue #318
+  # ProGuard keep-rule checker). No Flutter/codegen needed, so it runs in
+  # parallel and gives the guard logic its own coverage, scoped to the script.
+  script-tests:
+    name: Script Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install coverage.py
+        run: python3 -m pip install coverage
+
+      - name: Run Python guard tests with coverage
+        run: |
+          mkdir -p coverage
+          python3 -m coverage run --include='scripts/check_proguard_serial_keep.py' \
+            scripts/check_proguard_serial_keep_test.py
+          python3 -m coverage report -m --include='scripts/check_proguard_serial_keep.py'
+          python3 -m coverage xml --include='scripts/check_proguard_serial_keep.py' \
+            -o coverage/scripts.xml
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v7
+        if: always()
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: coverage/scripts.xml
+          flags: scripts
+          fail_ci_if_error: false
+
   integration-test:
     name: Integration Test (macOS)
     needs: codegen
