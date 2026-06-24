@@ -970,8 +970,11 @@ final residualOtuProvider = FutureProvider.family<double, String>((
 
 /// Weekly OTU rolling total for a given dive (7-day window ending on dive date).
 ///
-/// Queries all dives in the 7 days leading up to (and including) the dive's
-/// date, sums their OTU. Used by O2ToxicityCard for REPEX compliance display.
+/// Queries dives in the 7 days leading up to the dive's date and sums the OTU
+/// of the current dive plus any dive that occurred at or before it. Dives
+/// logged LATER than the current dive (e.g. later the same day) are excluded
+/// so the displayed "Prior" never borrows OTU from the future (issue #407).
+/// Used by O2ToxicityCard for REPEX compliance display.
 final weeklyOtuProvider = FutureProvider.family<double, String>((
   ref,
   diveId,
@@ -994,6 +997,16 @@ final weeklyOtuProvider = FutureProvider.family<double, String>((
 
     double totalOtu = 0.0;
     for (final dive in weekDives) {
+      // Count the current dive and any dive that occurred at or before it, but
+      // skip dives logged LATER than the current dive. The query window spans
+      // the current dive's whole calendar day, so without this guard a later
+      // same-day dive would inflate the rolling total -- and the card derives
+      // "Prior" as (weekly - thisDive), wrongly attributing the future dive's
+      // OTU to this dive's prior exposure (issue #407). Mirrors the same-day
+      // ordering discipline in [_computeResidualOtu].
+      final diveTime = dive.entryTime ?? dive.dateTime;
+      if (dive.id != diveId && diveTime.isAfter(diveDate)) continue;
+
       // Read (not watch) to avoid cascading Riverpod invalidations.
       // Each profileAnalysisProvider independently watches settings,
       // so ref.read is sufficient for aggregation.
