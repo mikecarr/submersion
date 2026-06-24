@@ -573,6 +573,9 @@ void main() {
         expect(tank.startPressureBar, closeTo(221.25, 1e-6));
         expect(tank.endPressureBar, closeTo(88.11, 1e-6));
         expect(tank.volumeUsedLiters, closeTo(1993.5, 1e-6));
+        // Cylinder volume derived from volume_used / pressure_drop:
+        // 1993.5 / (221.25 - 88.11) = 14.97 -> rounded to 15.0 L.
+        expect(tank.volumeLiters, closeTo(15.0, 1e-9));
 
         // The pressure series is merged onto the contemporaneous depth samples.
         final withPressure = dive.profile

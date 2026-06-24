@@ -26,6 +26,7 @@ class ImportedTank extends Equatable {
     this.startPressureBar,
     this.endPressureBar,
     this.volumeUsedLiters,
+    this.volumeLiters,
     this.o2Percent,
     this.hePercent,
   });
@@ -34,6 +35,10 @@ class ImportedTank extends Equatable {
   final double? startPressureBar;
   final double? endPressureBar;
   final double? volumeUsedLiters;
+
+  /// Configured cylinder volume in liters (water volume). Derived for Garmin
+  /// air-integration tanks; null when unknown.
+  final double? volumeLiters;
   final double? o2Percent;
   final double? hePercent;
 
@@ -43,6 +48,7 @@ class ImportedTank extends Equatable {
     startPressureBar,
     endPressureBar,
     volumeUsedLiters,
+    volumeLiters,
     o2Percent,
     hePercent,
   ];
