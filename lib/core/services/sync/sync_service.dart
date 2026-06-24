@@ -10,6 +10,7 @@ import 'package:submersion/core/services/cloud_storage/cloud_storage_provider.da
 import 'package:submersion/core/services/database_service.dart';
 import 'package:submersion/core/services/logger_service.dart';
 import 'package:submersion/core/services/sync/changeset_log/base_json_stream_reader.dart';
+import 'package:submersion/core/services/sync/changeset_log/base_part_file_sink.dart';
 import 'package:submersion/core/services/sync/changeset_log/changeset_codec.dart';
 import 'package:submersion/core/services/sync/changeset_log/changeset_log_layout.dart';
 import 'package:submersion/core/services/sync/changeset_log/changeset_reader.dart';
@@ -177,6 +178,10 @@ class SyncService {
 
   // Changeset-log transport (Phases 1-6), lazily bound to the active database.
   late final ChangesetCodec _changesetCodec = ChangesetCodec(_serializer);
+
+  /// Assembles a peer's base parts into a temp file (per-part + whole-file
+  /// checksum verified) for the bounded-memory replace-adopt (#358).
+  final BasePartFileSink _baseSink = BasePartFileSink();
   late final ChangesetWriter _changesetWriter = ChangesetWriter(
     _serializer,
     _changesetCodec,
@@ -1847,12 +1852,15 @@ class SyncService {
       }
 
       final folderId = await provider.getOrCreateSyncFolder();
-      final payloads = await _collectEpochPayloads(
+      // Stream each epoch device's base to a temp file (bounded memory); the
+      // streaming apply (#358) replaces the old in-memory collect + union,
+      // which OOM-crashed iOS adopting a large library.
+      final sources = await _collectEpochBaseSources(
         provider,
         folderId,
         marker.epochId,
       );
-      if (payloads.isEmpty) {
+      if (sources.baseFilePaths.isEmpty) {
         // No current-format library for this epoch. If the marker is stale
         // (old-format backend or an orphaned replace), re-establish from the
         // local library rather than bricking; the notifier's follow-up sync
@@ -1872,19 +1880,20 @@ class SyncService {
               'The replaced library is still uploading. Try again shortly.',
         );
       }
-      payloads.sort((a, b) => a.exportedAt.compareTo(b.exportedAt));
 
-      final deviceId = await _syncRepository.getDeviceId();
-      final localSnapshot = await _serializer.exportData(
-        deviceId: deviceId,
-        lastSyncTimestamp: null,
-        deletions: const [],
-        uploadNonce: null,
-      );
-
-      await _serializer.applyInDeferredFkTransaction(
-        () => _applyAdoptInMemory(payloads, localSnapshot),
-      );
+      try {
+        await _serializer.applyInDeferredFkTransaction(
+          () => _adoptApplyStreaming(
+            baseFilePaths: sources.baseFilePaths,
+            baseExportedAt: sources.baseExportedAt,
+            changesets: sources.changesets,
+          ),
+        );
+      } finally {
+        for (final path in sources.baseFilePaths) {
+          await _baseSink.deleteQuietly(path);
+        }
+      }
 
       // Re-baseline under the adopted epoch. Our tombstones are obsolete --
       // the restored library is authoritative.
@@ -2081,11 +2090,23 @@ class SyncService {
     ),
   );
 
-  /// Collect every payload (base + changesets) from all changeset logs stamped
-  /// with [epochId]. Used by adoption to rebuild the authoritative library
-  /// after a Replace restore. Skips a log whose base parts are not all present
-  /// (a publish still in flight).
-  Future<List<SyncPayload>> _collectEpochPayloads(
+  /// Stream every epoch-stamped changeset log into adopt sources: each device's
+  /// base assembled to a temp file (bounded memory, via [BasePartFileSink],
+  /// which verifies per-part and whole-file checksums as bytes land), its base
+  /// export time, and its post-base changesets decoded in memory (small
+  /// deltas). Skips a device whose base parts are not all present or whose base
+  /// fails its checksum (a publish still in flight -> retry next adopt).
+  /// Replaces the old in-memory collect that decoded every device's whole base
+  /// into RAM and OOM-crashed iOS adopting a large library (#358). The caller
+  /// owns the returned temp files and must delete them.
+  Future<
+    ({
+      List<String> baseFilePaths,
+      List<int> baseExportedAt,
+      List<SyncPayload> changesets,
+    })
+  >
+  _collectEpochBaseSources(
     CloudStorageProvider provider,
     String folderId,
     String epochId,
@@ -2100,7 +2121,9 @@ class SyncService {
         if (ChangesetLogLayout.deviceIdOf(f.name) != null)
           ChangesetLogLayout.deviceIdOf(f.name)!,
     };
-    final payloads = <SyncPayload>[];
+    final baseFilePaths = <String>[];
+    final baseExportedAt = <int>[];
+    final changesets = <SyncPayload>[];
     for (final deviceId in deviceIds) {
       final manifestFile = byName[ChangesetLogLayout.manifestName(deviceId)];
       if (manifestFile == null) continue;
@@ -2115,28 +2138,50 @@ class SyncService {
       if (manifest.epochId != epochId) continue;
       final baseSeq = manifest.baseSeq;
       if (baseSeq == null) continue;
-      final parts = <Uint8List>[];
-      var complete = true;
-      for (var i = 0; i < (manifest.basePartCount ?? 0); i++) {
-        final pf =
-            byName[ChangesetLogLayout.basePartName(deviceId, baseSeq, i)];
-        if (pf == null) {
-          complete = false;
-          break;
-        }
-        parts.add(await provider.downloadFile(pf.id));
-      }
-      if (!complete || parts.isEmpty) continue;
-      payloads.add(_changesetCodec.decodeBaseParts(parts));
+      final partCount = manifest.basePartCount ?? 0;
+      if (partCount <= 0) continue;
+      final path = await _baseSink.assemble(
+        name: 'ssv1_adopt_${deviceId}_$baseSeq',
+        partCount: partCount,
+        wholeChecksum: manifest.baseChecksum,
+        partChecksums: manifest.basePartChecksums,
+        downloadPart: (i) async {
+          final pf =
+              byName[ChangesetLogLayout.basePartName(deviceId, baseSeq, i)];
+          if (pf == null) return null;
+          return provider.downloadFile(pf.id);
+        },
+      );
+      if (path == null) continue; // base incomplete/corrupt -> skip this device
+      baseFilePaths.add(path);
+      baseExportedAt.add(await _readBaseExportedAt(path));
       for (var seq = baseSeq + 1; seq <= manifest.headSeq; seq++) {
         final cf = byName[ChangesetLogLayout.changesetName(deviceId, seq)];
         if (cf == null) break;
-        payloads.add(
+        changesets.add(
           _changesetCodec.decodeChangeset(await provider.downloadFile(cf.id)),
         );
       }
     }
-    return payloads;
+    return (
+      baseFilePaths: baseFilePaths,
+      baseExportedAt: baseExportedAt,
+      changesets: changesets,
+    );
+  }
+
+  /// Read a base file's `exportedAt` (the cross-device latest-wins order key)
+  /// from a bounded prefix rather than parsing the whole base: it is the second
+  /// top-level member of the payload JSON, always within the first bytes. 0 if
+  /// absent (an unstamped/legacy base sorts first, which is the safe default).
+  Future<int> _readBaseExportedAt(String path) async {
+    final bytes = <int>[];
+    await for (final chunk in File(path).openRead(0, 65536)) {
+      bytes.addAll(chunk);
+    }
+    final head = utf8.decode(bytes, allowMalformed: true);
+    final match = RegExp(r'"exportedAt"\s*:\s*(\d+)').firstMatch(head);
+    return match == null ? 0 : (int.tryParse(match.group(1)!) ?? 0);
   }
 
   /// Download and parse the cloud epoch marker. Returns null when absent.
