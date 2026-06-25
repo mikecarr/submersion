@@ -580,7 +580,7 @@ class ReparseService {
                 o2Percent: Value(tank.o2Percent),
                 hePercent: Value(tank.hePercent),
                 tankOrder: Value(tank.index),
-                tankRole: const Value('backGas'),
+                tankRole: Value(tank.role ?? 'backGas'),
               ),
             );
       }

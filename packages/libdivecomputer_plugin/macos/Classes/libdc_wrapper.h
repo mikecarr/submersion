@@ -165,6 +165,7 @@ typedef struct {
     double workpressure;       // bar
     double beginpressure;      // bar
     double endpressure;        // bar
+    unsigned int usage;        // dc_usage_t (0=none, 1=oxygen, 2=diluent, 3=sidemount)
 } libdc_tank_t;
 
 #define LIBDC_MAX_EVENTS 256

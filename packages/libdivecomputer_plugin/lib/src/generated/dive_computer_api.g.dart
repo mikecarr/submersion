@@ -261,6 +261,7 @@ class TankInfo {
     this.volumeLiters,
     this.startPressureBar,
     this.endPressureBar,
+    this.usage,
   });
 
   int index;
@@ -273,6 +274,10 @@ class TankInfo {
 
   double? endPressureBar;
 
+  /// Tank usage from libdivecomputer's `dc_usage_t` (1=oxygen, 2=diluent,
+  /// 3=sidemount); null when the computer reported no usage (DC_USAGE_NONE).
+  int? usage;
+
   Object encode() {
     return <Object?>[
       index,
@@ -280,6 +285,7 @@ class TankInfo {
       volumeLiters,
       startPressureBar,
       endPressureBar,
+      usage,
     ];
   }
 
@@ -291,6 +297,7 @@ class TankInfo {
       volumeLiters: result[2] as double?,
       startPressureBar: result[3] as double?,
       endPressureBar: result[4] as double?,
+      usage: result[5] as int?,
     );
   }
 }

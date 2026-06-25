@@ -185,13 +185,17 @@ ParsedDive ConvertParsedDive(const libdc_parsed_dive_t& dive) {
             (begin_p == 0.0) ? std::nullopt : std::optional<double>(begin_p);
         std::optional<double> opt_end =
             (end_p == 0.0) ? std::nullopt : std::optional<double>(end_p);
+        std::optional<int64_t> opt_usage =
+            (tk.usage == 0) ? std::nullopt
+                            : std::optional<int64_t>(static_cast<int64_t>(tk.usage));
 
         tanks.push_back(flutter::CustomEncodableValue(TankInfo(
             static_cast<int64_t>(i),
             static_cast<int64_t>(tk.gasmix),
             opt_vol ? &*opt_vol : nullptr,
             opt_begin ? &*opt_begin : nullptr,
-            opt_end ? &*opt_end : nullptr)));
+            opt_end ? &*opt_end : nullptr,
+            opt_usage ? &*opt_usage : nullptr)));
     }
 
     // Convert events.

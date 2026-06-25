@@ -634,7 +634,8 @@ class DiveComputerHostApiImpl: DiveComputerHostApi {
                     gasMixIndex: Int64(tk.gasmix),
                     volumeLiters: tk.volume > 0 ? tk.volume : nil,
                     startPressureBar: tk.beginpressure > 0 ? tk.beginpressure : nil,
-                    endPressureBar: tk.endpressure > 0 ? tk.endpressure : nil
+                    endPressureBar: tk.endpressure > 0 ? tk.endpressure : nil,
+                    usage: tk.usage == 0 ? nil : Int64(tk.usage)
                 ))
             }
         }

@@ -287,6 +287,10 @@ class DownloadedTank {
   /// Tank volume in liters
   final double? volumeLiters;
 
+  /// Inferred cylinder role (a [TankRole] name, e.g. 'deco'), or null to use
+  /// the default. Derived from the computer's tank usage / the gas mix.
+  final String? role;
+
   const DownloadedTank({
     required this.index,
     required this.o2Percent,
@@ -294,6 +298,7 @@ class DownloadedTank {
     this.startPressure,
     this.endPressure,
     this.volumeLiters,
+    this.role,
   });
 
   /// Whether this is air (21% O2)

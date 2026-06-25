@@ -1064,7 +1064,7 @@ class DiveComputerRepository {
                 o2Percent: Value(tank.o2Percent),
                 hePercent: Value(tank.hePercent),
                 tankOrder: Value(tank.index),
-                tankRole: const Value('backGas'),
+                tankRole: Value(tank.role ?? 'backGas'),
               ),
             );
             _log.info(
@@ -1711,6 +1711,9 @@ class TankData {
   final double? endPressure;
   final double? volumeLiters;
 
+  /// Inferred cylinder role (a [TankRole] name), or null for the default.
+  final String? role;
+
   const TankData({
     required this.index,
     required this.o2Percent,
@@ -1718,6 +1721,7 @@ class TankData {
     this.startPressure,
     this.endPressure,
     this.volumeLiters,
+    this.role,
   });
 }
 

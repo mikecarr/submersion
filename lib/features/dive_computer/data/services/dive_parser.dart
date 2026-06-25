@@ -69,6 +69,7 @@ class DiveParser {
           startPressure: tank.startPressure,
           endPressure: tank.endPressure,
           volumeLiters: tank.volumeLiters,
+          role: tank.role,
         ),
       );
     }

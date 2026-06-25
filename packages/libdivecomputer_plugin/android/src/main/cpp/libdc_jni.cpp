@@ -975,16 +975,17 @@ Java_com_submersion_libdivecomputer_LibdcWrapper_nativeGetDiveTank(
     if (index < 0 || static_cast<unsigned int>(index) >= dive->tank_count) return nullptr;
 
     const libdc_tank_t *tk = &dive->tanks[index];
-    // Return [gasmix, volume, workpressure, beginpressure, endpressure]
-    jdouble values[5] = {
+    // Return [gasmix, volume, workpressure, beginpressure, endpressure, usage]
+    jdouble values[6] = {
         static_cast<jdouble>(tk->gasmix),
         tk->volume,
         tk->workpressure,
         tk->beginpressure,
-        tk->endpressure
+        tk->endpressure,
+        static_cast<jdouble>(tk->usage)
     };
-    jdoubleArray result = env->NewDoubleArray(5);
-    env->SetDoubleArrayRegion(result, 0, 5, values);
+    jdoubleArray result = env->NewDoubleArray(6);
+    env->SetDoubleArrayRegion(result, 0, 6, values);
     return result;
 }
 

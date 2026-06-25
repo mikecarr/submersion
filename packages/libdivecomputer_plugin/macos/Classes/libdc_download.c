@@ -338,6 +338,7 @@ static int extract_dive_fields(dc_parser_t *parser, libdc_parsed_dive_t *dive) {
                 dive->tanks[i].workpressure = tk.workpressure;
                 dive->tanks[i].beginpressure = tk.beginpressure;
                 dive->tanks[i].endpressure = tk.endpressure;
+                dive->tanks[i].usage = tk.usage;
             }
         }
         dive->tank_count = tank_count;

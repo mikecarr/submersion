@@ -170,9 +170,12 @@ LibdivecomputerPluginParsedDive* convert_parsed_dive(
         double ep_val = tk->endpressure;
         double* end_p = (ep_val == 0.0) ? NULL : &ep_val;
 
+        int64_t usage_val = (int64_t)tk->usage;
+        int64_t* usage = (tk->usage == 0) ? NULL : &usage_val;
+
         LibdivecomputerPluginTankInfo* tank =
             libdivecomputer_plugin_tank_info_new(
-                (int64_t)i, (int64_t)tk->gasmix, volume, begin_p, end_p);
+                (int64_t)i, (int64_t)tk->gasmix, volume, begin_p, end_p, usage);
         fl_value_append_take(
             tanks,
             fl_value_new_custom_object(134, G_OBJECT(tank)));

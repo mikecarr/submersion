@@ -1,4 +1,5 @@
 import 'package:libdivecomputer_plugin/libdivecomputer_plugin.dart' as pigeon;
+import 'package:submersion/core/constants/enums.dart';
 import 'package:submersion/features/dive_computer/domain/entities/downloaded_dive.dart';
 
 /// Resolve a parsed dive's gas mixes to concrete cylinders, shared by the
@@ -95,6 +96,7 @@ _ResolvedCylinders _resolveCylinders(pigeon.ParsedDive parsed) {
           index: g.index,
           o2Percent: g.o2Percent,
           hePercent: g.hePercent,
+          role: _inferRole(null, g.o2Percent, g.hePercent),
         ),
       );
     }
@@ -112,15 +114,18 @@ _ResolvedCylinders _resolveCylinders(pigeon.ParsedDive parsed) {
       consumed.add(gasIndex);
       gasIndexToTankIndex[gasIndex] = tank.index;
     }
+    final o2 = gas?.o2Percent ?? 21.0;
+    final he = gas?.hePercent ?? 0.0;
     result.add(
       DownloadedTank(
         index: tank.index,
         // No gas mixes (e.g. gauge mode): default to air rather than mislabel.
-        o2Percent: gas?.o2Percent ?? 21.0,
-        hePercent: gas?.hePercent ?? 0.0,
+        o2Percent: o2,
+        hePercent: he,
         startPressure: tank.startPressureBar,
         endPressure: tank.endPressureBar,
         volumeLiters: tank.volumeLiters,
+        role: _inferRole(tank.usage, o2, he),
       ),
     );
   }
@@ -138,11 +143,29 @@ _ResolvedCylinders _resolveCylinders(pigeon.ParsedDive parsed) {
         index: nextIndex++,
         o2Percent: gasMixes[i].o2Percent,
         hePercent: gasMixes[i].hePercent,
+        role: _inferRole(null, gasMixes[i].o2Percent, gasMixes[i].hePercent),
       ),
     );
   }
 
   return _ResolvedCylinders(result, gasIndexToTankIndex);
+}
+
+/// Infer a cylinder [TankRole] (returned as its `.name`). The computer's tank
+/// [usage] (libdivecomputer `dc_usage_t`: 1=oxygen, 2=diluent) is authoritative
+/// when present; otherwise fall back to an open-circuit gas heuristic where a
+/// nitrox mix of 41% O2 or more is a deco gas. Everything else is back gas.
+String _inferRole(int? usage, double o2Percent, double hePercent) {
+  switch (usage) {
+    case 1: // DC_USAGE_OXYGEN
+      return TankRole.oxygenSupply.name;
+    case 2: // DC_USAGE_DILUENT
+      return TankRole.diluent.name;
+  }
+  if (hePercent == 0.0 && o2Percent >= 41.0) {
+    return TankRole.deco.name;
+  }
+  return TankRole.backGas.name;
 }
 
 /// The gas-mix index (position in [gasMixes]) for [tank], preferring the gas

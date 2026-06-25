@@ -239,7 +239,12 @@ data class TankInfo (
   val gasMixIndex: Long,
   val volumeLiters: Double? = null,
   val startPressureBar: Double? = null,
-  val endPressureBar: Double? = null
+  val endPressureBar: Double? = null,
+  /**
+   * Tank usage from libdivecomputer's `dc_usage_t` (1=oxygen, 2=diluent,
+   * 3=sidemount); null when the computer reported no usage (DC_USAGE_NONE).
+   */
+  val usage: Long? = null
 )
  {
   companion object {
@@ -249,7 +254,8 @@ data class TankInfo (
       val volumeLiters = pigeonVar_list[2] as Double?
       val startPressureBar = pigeonVar_list[3] as Double?
       val endPressureBar = pigeonVar_list[4] as Double?
-      return TankInfo(index, gasMixIndex, volumeLiters, startPressureBar, endPressureBar)
+      val usage = pigeonVar_list[5] as Long?
+      return TankInfo(index, gasMixIndex, volumeLiters, startPressureBar, endPressureBar, usage)
     }
   }
   fun toList(): List<Any?> {
@@ -259,6 +265,7 @@ data class TankInfo (
       volumeLiters,
       startPressureBar,
       endPressureBar,
+      usage,
     )
   }
 }

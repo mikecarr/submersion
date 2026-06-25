@@ -355,7 +355,8 @@ class TankInfo {
     int64_t gas_mix_index,
     const double* volume_liters,
     const double* start_pressure_bar,
-    const double* end_pressure_bar);
+    const double* end_pressure_bar,
+    const int64_t* usage);
 
   int64_t index() const;
   void set_index(int64_t value_arg);
@@ -375,6 +376,12 @@ class TankInfo {
   void set_end_pressure_bar(const double* value_arg);
   void set_end_pressure_bar(double value_arg);
 
+  // Tank usage from libdivecomputer's `dc_usage_t` (1=oxygen, 2=diluent,
+  // 3=sidemount); null when the computer reported no usage (DC_USAGE_NONE).
+  const int64_t* usage() const;
+  void set_usage(const int64_t* value_arg);
+  void set_usage(int64_t value_arg);
+
 
  private:
   static TankInfo FromEncodableList(const flutter::EncodableList& list);
@@ -387,6 +394,7 @@ class TankInfo {
   std::optional<double> volume_liters_;
   std::optional<double> start_pressure_bar_;
   std::optional<double> end_pressure_bar_;
+  std::optional<int64_t> usage_;
 
 };
 

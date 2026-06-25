@@ -478,12 +478,13 @@ G_DECLARE_FINAL_TYPE(LibdivecomputerPluginTankInfo, libdivecomputer_plugin_tank_
  * volume_liters: field in this object.
  * start_pressure_bar: field in this object.
  * end_pressure_bar: field in this object.
+ * usage: field in this object.
  *
  * Creates a new #TankInfo object.
  *
  * Returns: a new #LibdivecomputerPluginTankInfo
  */
-LibdivecomputerPluginTankInfo* libdivecomputer_plugin_tank_info_new(int64_t index, int64_t gas_mix_index, double* volume_liters, double* start_pressure_bar, double* end_pressure_bar);
+LibdivecomputerPluginTankInfo* libdivecomputer_plugin_tank_info_new(int64_t index, int64_t gas_mix_index, double* volume_liters, double* start_pressure_bar, double* end_pressure_bar, int64_t* usage);
 
 /**
  * libdivecomputer_plugin_tank_info_get_index
@@ -534,6 +535,17 @@ double* libdivecomputer_plugin_tank_info_get_start_pressure_bar(LibdivecomputerP
  * Returns: the field value.
  */
 double* libdivecomputer_plugin_tank_info_get_end_pressure_bar(LibdivecomputerPluginTankInfo* object);
+
+/**
+ * libdivecomputer_plugin_tank_info_get_usage
+ * @object: a #LibdivecomputerPluginTankInfo.
+ *
+ * Tank usage from libdivecomputer's `dc_usage_t` (1=oxygen, 2=diluent,
+ * 3=sidemount); null when the computer reported no usage (DC_USAGE_NONE).
+ *
+ * Returns: the field value.
+ */
+int64_t* libdivecomputer_plugin_tank_info_get_usage(LibdivecomputerPluginTankInfo* object);
 
 /**
  * LibdivecomputerPluginDiveEvent:

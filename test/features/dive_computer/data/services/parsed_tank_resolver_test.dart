@@ -263,6 +263,86 @@ void main() {
       expect(tanks[0].o2Percent, 21.0);
       expect(tanks[0].isAir, isTrue);
     });
+
+    group('role inference', () {
+      String? roleOf(pigeon.ParsedDive parsed, double o2) =>
+          resolveParsedTanks(parsed).firstWhere((t) => t.o2Percent == o2).role;
+
+      test('open circuit: O2 >= 41% is deco, below is back gas', () {
+        final parsed = makeParsedDive(
+          gasMixes: [
+            pigeon.GasMix(index: 0, o2Percent: 32.0, hePercent: 0.0),
+            pigeon.GasMix(index: 1, o2Percent: 41.0, hePercent: 0.0),
+            pigeon.GasMix(index: 2, o2Percent: 100.0, hePercent: 0.0),
+          ],
+        );
+        expect(roleOf(parsed, 32.0), 'backGas');
+        expect(roleOf(parsed, 41.0), 'deco');
+        expect(roleOf(parsed, 100.0), 'deco');
+      });
+
+      test('open circuit: trimix bottom gas (He>0, O2<41) is back gas', () {
+        final parsed = makeParsedDive(
+          gasMixes: [pigeon.GasMix(index: 0, o2Percent: 18.0, hePercent: 45.0)],
+        );
+        expect(roleOf(parsed, 18.0), 'backGas');
+      });
+
+      test('native usage maps oxygen -> oxygenSupply, diluent -> diluent', () {
+        final parsed = makeParsedDive(
+          gasMixes: [
+            pigeon.GasMix(index: 0, o2Percent: 100.0, hePercent: 0.0),
+            pigeon.GasMix(index: 1, o2Percent: 21.0, hePercent: 0.0),
+          ],
+          tanks: [
+            pigeon.TankInfo(
+              index: 0,
+              gasMixIndex: 0,
+              startPressureBar: 200.0,
+              usage: 1, // DC_USAGE_OXYGEN
+            ),
+            pigeon.TankInfo(
+              index: 1,
+              gasMixIndex: 1,
+              startPressureBar: 200.0,
+              usage: 2, // DC_USAGE_DILUENT
+            ),
+          ],
+        );
+        final tanks = resolveParsedTanks(parsed);
+        expect(tanks.firstWhere((t) => t.index == 0).role, 'oxygenSupply');
+        expect(tanks.firstWhere((t) => t.index == 1).role, 'diluent');
+      });
+
+      test('native usage wins over the O2 heuristic', () {
+        // usage = oxygen on a 32% gas still resolves to oxygenSupply.
+        final parsed = makeParsedDive(
+          gasMixes: [pigeon.GasMix(index: 0, o2Percent: 32.0, hePercent: 0.0)],
+          tanks: [pigeon.TankInfo(index: 0, gasMixIndex: 0, usage: 1)],
+        );
+        expect(resolveParsedTanks(parsed).single.role, 'oxygenSupply');
+      });
+
+      test('synthesized deco cylinder (no transmitter) gets the deco role', () {
+        final parsed = makeParsedDive(
+          gasMixes: [
+            pigeon.GasMix(index: 0, o2Percent: 99.0, hePercent: 0.0),
+            pigeon.GasMix(index: 1, o2Percent: 32.0, hePercent: 0.0),
+          ],
+          tanks: [
+            pigeon.TankInfo(
+              index: 0,
+              gasMixIndex: unknownGasMixIndex,
+              startPressureBar: 240.0,
+            ),
+          ],
+          samples: [sample(2, 0, 1), sample(100, 0, 1), sample(5958, 0, 0)],
+        );
+        final tanks = resolveParsedTanks(parsed);
+        expect(tanks.firstWhere((t) => t.o2Percent == 32.0).role, 'backGas');
+        expect(tanks.firstWhere((t) => t.o2Percent == 99.0).role, 'deco');
+      });
+    });
   });
 
   group('resolveGasSwitches', () {

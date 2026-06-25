@@ -122,12 +122,17 @@ class TankInfo {
     this.volumeLiters,
     this.startPressureBar,
     this.endPressureBar,
+    this.usage,
   });
   final int index;
   final int gasMixIndex;
   final double? volumeLiters;
   final double? startPressureBar;
   final double? endPressureBar;
+
+  /// Tank usage from libdivecomputer's `dc_usage_t` (1=oxygen, 2=diluent,
+  /// 3=sidemount); null when the computer reported no usage (DC_USAGE_NONE).
+  final int? usage;
 }
 
 class DiveEvent {
