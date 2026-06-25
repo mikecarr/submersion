@@ -765,6 +765,33 @@ static void check_dive_profile_terminated(void) {
     expect(rc == DC_STATUS_TIMEOUT,
            "a profile truncated before the end marker still fails (and retries)");
   }
+
+  // Documents a KNOWN LIMITATION (issue #394 review): a notification dropped
+  // mid-profile while the final FD FD marker still arrives leaves a buffer that
+  // ends in the marker but is missing interior bytes. read_profile cannot tell
+  // this from a legitimate over-declare, so it accepts the short profile and the
+  // dive is stored corrupt -- hw_ostc3_device_foreach does not catch it (its
+  // checks compare the two declared length fields to each other, not to the
+  // received count) and the hwOS profile has no CRC. Asserted here so the
+  // behavior is explicit and the suite does not imply this case is rejected; the
+  // retry narrows the window, only a less lossy link closes it.
+  {
+    unsigned char buf[256 + 100 + 4];
+    size_t full = build_dive(buf, 100, 1, 1);  // header + 100 samples + FD FD + ready
+    // Drop one whole mock notification (MOCK_CHUNK bytes), aligned to a
+    // notification boundary inside the sample stream, while keeping the FD FD +
+    // ready tail intact -- the device's BLE bridge losing a single notification.
+    const size_t cut = 256 + 2 * MOCK_CHUNK;  // a notification boundary in the samples
+    memmove(buf + cut, buf + cut + MOCK_CHUNK, full - (cut + MOCK_CHUNK));
+    size_t lossy = full - MOCK_CHUNK;
+    unsigned char out[512];
+    unsigned int len = 0;
+    dc_status_t rc = run_dive(buf, lossy, 380, &len, out, sizeof(out));
+    expect(rc == DC_STATUS_SUCCESS,
+           "lost-middle-with-FD-FD-tail is accepted as complete (known limitation)");
+    expect(len == 256 + 100 + 2 - MOCK_CHUNK,
+           "the corrupt short profile is accepted at its received length");
+  }
 }
 
 int main(void) {
