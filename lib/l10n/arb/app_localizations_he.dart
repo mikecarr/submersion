@@ -3470,6 +3470,9 @@ class AppLocalizationsHe extends AppLocalizations {
   String get diveLog_edit_label_diveType => 'סוג צלילה';
 
   @override
+  String get diveLog_edit_label_diveTypes => 'Dive Types';
+
+  @override
   String get diveLog_edit_label_diveNumber => 'מס\' צלילה';
 
   @override

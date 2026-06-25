@@ -216,6 +216,7 @@ class DiveRepository {
 
         // Load all tags for these dives in one query
         final tagsByDive = await _tagRepository.getTagsForDives(diveIds);
+        final diveTypesByDive = await _diveTypesForDives(diveIds);
 
         // Load all custom fields for these dives in one query
         final customFieldsByDive = await _customFieldRepository
@@ -233,6 +234,7 @@ class DiveRepository {
                     : null,
                 trip: row.tripId != null ? tripsById[row.tripId] : null,
                 tags: tagsByDive[row.id] ?? [],
+                diveTypeIds: diveTypesByDive[row.id],
                 customFields: customFieldsByDive[row.id] ?? [],
               ),
             )
@@ -771,6 +773,7 @@ class DiveRepository {
         recordId: id,
         localUpdatedAt: now,
       );
+      await _replaceDiveTypeRows(id, dive.diveTypeIds, now);
 
       // Batch insert all child records for performance
       // Profile points, tanks, weights, and equipment are inserted in a single
@@ -1003,6 +1006,7 @@ class DiveRepository {
         recordId: dive.id,
         localUpdatedAt: now,
       );
+      await _replaceDiveTypeRows(dive.id, dive.diveTypeIds, now);
 
       // Update tanks:
       // Try to match existing tanks by ID to do updates instead of delete+insert when possible,
@@ -1360,6 +1364,7 @@ class DiveRepository {
         // Batch load tags for all returned dive IDs
         final diveIds = rows.map((r) => r.read<String>('id')).toList();
         final tagsByDive = await _tagRepository.getTagsForDives(diveIds);
+        final diveTypesByDive = await _diveTypesForDives(diveIds);
 
         return rows.map((row) {
           final id = row.read<String>('id');
@@ -1385,7 +1390,7 @@ class DiveRepository {
             waterTemp: row.readNullable<double>('water_temp'),
             rating: row.readNullable<int>('rating'),
             isFavorite: row.read<int>('is_favorite') == 1,
-            diveTypeId: row.read<String>('dive_type'),
+            diveTypeIds: diveTypesByDive[id] ?? [row.read<String>('dive_type')],
             tags: tagsByDive[id] ?? [],
             siteName: row.readNullable<String>('site_name'),
             siteCountry: row.readNullable<String>('site_country'),
@@ -1493,7 +1498,10 @@ class DiveRepository {
       args.add(Variable(endOfDay.millisecondsSinceEpoch));
     }
     if (filter.diveTypeId != null) {
-      clauses.add('d.dive_type = ?');
+      clauses.add(
+        'EXISTS (SELECT 1 FROM dive_dive_types ddt '
+        'WHERE ddt.dive_id = d.id AND ddt.dive_type_id = ?)',
+      );
       args.add(Variable(filter.diveTypeId!));
     }
     if (filter.siteId != null) {
@@ -2117,6 +2125,7 @@ class DiveRepository {
     DiveCenter? center,
     Trip? trip,
     List<domain.Tag> tags = const [],
+    List<String>? diveTypeIds,
     List<domain.DiveCustomField> customFields = const [],
   }) {
     // Map site if exists
@@ -2218,7 +2227,7 @@ class DiveRepository {
               orElse: () => Visibility.unknown,
             )
           : null,
-      diveTypeId: row.diveType,
+      diveTypeIds: diveTypeIds ?? [row.diveType],
       buddy: row.buddy,
       diveMaster: row.diveMaster,
       notes: row.notes,
@@ -2527,6 +2536,8 @@ class DiveRepository {
 
     // Get tags for this dive
     final tags = await _tagRepository.getTagsForDive(row.id);
+    final diveTypesByDive = await _diveTypesForDives([row.id]);
+    final diveTypeIds = diveTypesByDive[row.id] ?? [row.diveType];
 
     // Derive waterTemp from profile if not set in the dives table.
     // Some imports populate per-point temperature but miss the dive-level field.
@@ -2566,7 +2577,7 @@ class DiveRepository {
               orElse: () => Visibility.unknown,
             )
           : null,
-      diveTypeId: row.diveType,
+      diveTypeIds: diveTypeIds,
       buddy: row.buddy,
       diveMaster: row.diveMaster,
       notes: row.notes,
@@ -3680,6 +3691,84 @@ class DiveRepository {
     }
   }
 
+  /// Load each dive's ordered dive-type slugs from the junction, keyed by dive
+  /// id. Used by the mappers and the summary query to hydrate `diveTypeIds`.
+  Future<Map<String, List<String>>> _diveTypesForDives(
+    List<String> diveIds,
+  ) async {
+    if (diveIds.isEmpty) return {};
+    final rows =
+        await (_db.select(_db.diveDiveTypes)
+              ..where((t) => t.diveId.isIn(diveIds))
+              ..orderBy([(t) => OrderingTerm(expression: t.createdAt)]))
+            .get();
+    final map = <String, List<String>>{};
+    for (final r in rows) {
+      (map[r.diveId] ??= <String>[]).add(r.diveTypeId);
+    }
+    return map;
+  }
+
+  /// Load each dive's representative `dives.dive_type` slug, keyed by id. Used
+  /// to seed the base set for bulk add/remove on legacy dives that have no
+  /// junction rows yet (sync transition window).
+  Future<Map<String, String>> _representativeDiveTypeColumn(
+    List<String> diveIds,
+  ) async {
+    if (diveIds.isEmpty) return {};
+    final rows = await (_db.select(
+      _db.dives,
+    )..where((t) => t.id.isIn(diveIds))).get();
+    return {for (final r in rows) r.id: r.diveType};
+  }
+
+  /// Replace [diveId]'s dive-type rows with exactly [typeIds] (>= 1 enforced),
+  /// and write the representative `dives.dive_type` column. Fresh UUIDs per row
+  /// so a reinsert never collides with a replaced row's tombstone (#347).
+  Future<void> _replaceDiveTypeRows(
+    String diveId,
+    List<String> typeIds,
+    int now,
+  ) async {
+    final types = typeIds.isEmpty ? const ['recreational'] : typeIds;
+    final existing = await (_db.select(
+      _db.diveDiveTypes,
+    )..where((t) => t.diveId.equals(diveId))).get();
+    await (_db.delete(
+      _db.diveDiveTypes,
+    )..where((t) => t.diveId.equals(diveId))).go();
+    for (final row in existing) {
+      await _syncRepository.logDeletion(
+        entityType: 'diveDiveTypes',
+        recordId: row.id,
+      );
+    }
+    for (var i = 0; i < types.length; i++) {
+      final id = _uuid.v4();
+      await _db
+          .into(_db.diveDiveTypes)
+          .insert(
+            DiveDiveTypesCompanion(
+              id: Value(id),
+              diveId: Value(diveId),
+              diveTypeId: Value(types[i]),
+              // +i keeps read-back order deterministic (representative = first)
+              // even when several rows are written in the same millisecond.
+              createdAt: Value(now + i),
+            ),
+          );
+      await _syncRepository.markRecordPending(
+        entityType: 'diveDiveTypes',
+        recordId: id,
+        localUpdatedAt: now,
+      );
+    }
+    // Keep the denormalized representative column in lockstep with the set.
+    await (_db.update(_db.dives)..where((t) => t.id.equals(diveId))).write(
+      DivesCompanion(diveType: Value(types.first)),
+    );
+  }
+
   /// Replace each dive's tag membership with exactly [tagIds]. No notify/txn.
   Future<void> bulkReplaceTags(
     List<String> diveIds,
@@ -3741,6 +3830,67 @@ class DiveRepository {
         localUpdatedAt: now,
       );
     }
+  }
+
+  /// Replace each dive's dive-type membership with exactly [typeIds] (coerced
+  /// to a single recreational type if empty). No notify/txn.
+  Future<void> bulkReplaceDiveTypes(
+    List<String> diveIds,
+    List<String> typeIds,
+  ) async {
+    if (diveIds.isEmpty) return;
+    final now = DateTime.now().millisecondsSinceEpoch;
+    for (final diveId in diveIds) {
+      await _replaceDiveTypeRows(diveId, typeIds, now);
+    }
+    await _bumpDives(diveIds, now);
+  }
+
+  /// Add [typeIds] to each dive's set (union, deduped). No notify/txn.
+  Future<void> bulkAddDiveTypes(
+    List<String> diveIds,
+    List<String> typeIds,
+  ) async {
+    if (diveIds.isEmpty || typeIds.isEmpty) return;
+    final now = DateTime.now().millisecondsSinceEpoch;
+    final current = await _diveTypesForDives(diveIds);
+    final reps = await _representativeDiveTypeColumn(diveIds);
+    for (final diveId in diveIds) {
+      // Seed from the representative column for legacy dives with no junction
+      // rows, so adding a type does not drop the existing representative.
+      final merged = [
+        ...(current[diveId] ?? [reps[diveId] ?? 'recreational']),
+      ];
+      for (final t in typeIds) {
+        if (!merged.contains(t)) merged.add(t);
+      }
+      await _replaceDiveTypeRows(diveId, merged, now);
+    }
+    await _bumpDives(diveIds, now);
+  }
+
+  /// Remove [typeIds] from each dive's set. Never empties a dive: a removal
+  /// that would clear the last type falls back to a single recreational type.
+  Future<void> bulkRemoveDiveTypes(
+    List<String> diveIds,
+    List<String> typeIds,
+  ) async {
+    if (diveIds.isEmpty || typeIds.isEmpty) return;
+    final now = DateTime.now().millisecondsSinceEpoch;
+    final current = await _diveTypesForDives(diveIds);
+    final reps = await _representativeDiveTypeColumn(diveIds);
+    for (final diveId in diveIds) {
+      // Seed from the representative column for legacy dives with no junction
+      // rows, so a remove does not silently reset the type to recreational.
+      final existing = current[diveId] ?? [reps[diveId] ?? 'recreational'];
+      final remaining = existing.where((t) => !typeIds.contains(t)).toList();
+      await _replaceDiveTypeRows(
+        diveId,
+        remaining.isEmpty ? const ['recreational'] : remaining,
+        now,
+      );
+    }
+    await _bumpDives(diveIds, now);
   }
 
   /// Add each equipment id to each dive (junction upsert). No notify/txn.
