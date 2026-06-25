@@ -640,6 +640,81 @@ void main() {
       },
     );
 
+    test('resolveConflict with replaceSource forwards the dive gas switches to '
+        'importProfile', () async {
+      final dive = DownloadedDive(
+        fingerprint: 'fp-replace-gas',
+        startTime: DateTime(2026, 4, 6, 9, 0),
+        durationSeconds: 3000,
+        maxDepth: 25.0,
+        profile: const [],
+        tanks: const [],
+        events: const [],
+        gasSwitches: const [
+          GasSwitchEvent(timeSeconds: 600, depth: 12.0, toTankIndex: 1),
+        ],
+        rawData: Uint8List.fromList([0xDE, 0xAD]),
+      );
+
+      final conflict = ImportConflict(
+        downloaded: dive,
+        existingDiveId: 'existing-dive-77',
+        duplicateResult: const DuplicateResult(
+          matchingDiveId: 'existing-dive-77',
+          confidence: DuplicateConfidence.exact,
+          score: 0.95,
+        ),
+      );
+
+      when(
+        mockComputerRepo.clearSourceAndProfiles(
+          diveId: anyNamed('diveId'),
+          computerId: anyNamed('computerId'),
+        ),
+      ).thenAnswer((_) async {});
+
+      await service.resolveConflict(
+        conflict,
+        ConflictResolution.replaceSource,
+        computer.id,
+      );
+
+      final captured =
+          verify(
+                mockComputerRepo.importProfile(
+                  computerId: anyNamed('computerId'),
+                  profileStartTime: anyNamed('profileStartTime'),
+                  points: anyNamed('points'),
+                  durationSeconds: anyNamed('durationSeconds'),
+                  maxDepth: anyNamed('maxDepth'),
+                  avgDepth: anyNamed('avgDepth'),
+                  isPrimary: anyNamed('isPrimary'),
+                  diverId: anyNamed('diverId'),
+                  tanks: anyNamed('tanks'),
+                  decoAlgorithm: anyNamed('decoAlgorithm'),
+                  gfLow: anyNamed('gfLow'),
+                  gfHigh: anyNamed('gfHigh'),
+                  decoConservatism: anyNamed('decoConservatism'),
+                  events: anyNamed('events'),
+                  gasSwitches: captureAnyNamed('gasSwitches'),
+                  diveNumber: anyNamed('diveNumber'),
+                  forceNew: anyNamed('forceNew'),
+                  rawData: anyNamed('rawData'),
+                  rawFingerprint: anyNamed('rawFingerprint'),
+                  descriptorVendor: anyNamed('descriptorVendor'),
+                  descriptorProduct: anyNamed('descriptorProduct'),
+                  descriptorModel: anyNamed('descriptorModel'),
+                  libdivecomputerVersion: anyNamed('libdivecomputerVersion'),
+                ),
+              ).captured.single
+              as List<GasSwitchData>;
+
+      expect(captured, hasLength(1));
+      expect(captured.single.timestamp, 600);
+      expect(captured.single.depth, 12.0);
+      expect(captured.single.toTankIndex, 1);
+    });
+
     test('resolveConflict with consolidate returns null', () async {
       final dive = DownloadedDive(
         fingerprint: 'fp-consolidate',

@@ -541,6 +541,7 @@ class DiveImportService {
 
     final profilePoints = _parser.parseProfile(dive);
     final events = _convertEvents(dive.events);
+    final gasSwitches = _parser.parseGasSwitches(dive);
 
     // Re-import using the existing dive's start time so that importProfile
     // matches it back to the same dive row.
@@ -557,6 +558,7 @@ class DiveImportService {
       gfHigh: dive.gfHigh,
       decoConservatism: dive.decoConservatism,
       events: events,
+      gasSwitches: gasSwitches,
       rawData: dive.rawData,
       rawFingerprint: dive.rawFingerprint,
       descriptorVendor: descriptorVendor,
