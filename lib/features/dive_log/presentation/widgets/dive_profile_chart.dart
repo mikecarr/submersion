@@ -531,11 +531,14 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
   /// Identity of everything the assembled bars depend on. Excludes playback,
   /// viewport, highlight, and tooltip state -- those drive separate overlays and
   /// never change the bars. [legendState] is taken as [Object] since only its
-  /// identity (changed on any visibility toggle) matters here.
+  /// identity (changed on any visibility toggle) matters here. [colorScheme] is
+  /// hashed by value (not just its [Brightness]) so switching between two
+  /// presets of the same brightness -- which recolours series such as the
+  /// tertiary temperature line -- still invalidates the cached bars.
   String _barsSignature(
     UnitFormatter units,
     Object legendState,
-    Brightness brightness,
+    ColorScheme colorScheme,
   ) => [
     identityHashCode(widget.profile),
     identityHashCode(widget.ascentRates),
@@ -563,7 +566,7 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
     units.temperatureSymbol,
     units.pressureSymbol,
     units.sacSymbol,
-    brightness,
+    colorScheme.hashCode,
   ].join('|');
 
   @override
@@ -1113,9 +1116,7 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
 
     // Drop the memoized bars only when their inputs change; playback / hover /
     // zoom rebuilds keep the same signature and reuse the assembled series.
-    _barsCache.invalidate(
-      _barsSignature(units, legendState, colorScheme.brightness),
-    );
+    _barsCache.invalidate(_barsSignature(units, legendState, colorScheme));
 
     // Check data availability for advanced curves
     final hasNdlData = widget.ndlCurve != null && widget.ndlCurve!.isNotEmpty;

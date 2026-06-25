@@ -1,7 +1,9 @@
 /// Memoizes a chart's series lists by key. The whole cache is dropped whenever
 /// the data signature changes (data, units, visibility, or theme); within one
-/// signature, repeated builds (playback ticks, hover, zoom, legend toggles) are
-/// pure cache hits and never reconstruct the series.
+/// signature, rebuilds driven purely by interaction state (playback ticks,
+/// hover, zoom) are pure cache hits and never reconstruct the series. A
+/// visibility (legend) or theme change is part of the signature and so does
+/// rebuild.
 class ChartSeriesCache<T> {
   final Map<String, List<T>> _cache = {};
   String? _signature;

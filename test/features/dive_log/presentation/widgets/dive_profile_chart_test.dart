@@ -2472,5 +2472,72 @@ void main() {
         expect(identical(barsOf(), bars1), isFalse);
       },
     );
+
+    testWidgets(
+      'rebuilds bars with fresh colors when the theme changes at the same '
+      'brightness (e.g. switching between two light presets)',
+      (tester) async {
+        // Two light schemes that differ only in tertiary -- the colour the
+        // temperature line is drawn in. A same-brightness preset switch must
+        // still invalidate the cache; keying on Brightness alone would serve
+        // bars with stale colours.
+        const tertiaryA = Color(0xFF101010);
+        const tertiaryB = Color(0xFFF0F0F0);
+
+        final profile = List.generate(
+          10,
+          (i) => DiveProfilePoint(
+            timestamp: i * 30,
+            depth: (i < 5 ? i * 3.0 : (9 - i) * 3.0),
+            temperature: 22.0 - i * 0.5,
+          ),
+        );
+
+        // themeAnimationDuration: zero so the AnimatedTheme cross-fade does not
+        // lerp the scheme over frames (Color.lerp(a, b, 0) == a would otherwise
+        // read the stale colour right after a one-frame pump).
+        Widget app(Color tertiary) => ProviderScope(
+          overrides: [
+            settingsProvider.overrideWith((ref) => _TestSettingsNotifier()),
+          ],
+          child: MaterialApp(
+            themeAnimationDuration: Duration.zero,
+            theme: ThemeData(
+              colorScheme: const ColorScheme.light().copyWith(
+                tertiary: tertiary,
+              ),
+            ),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: Scaffold(
+              body: SizedBox(
+                width: 400,
+                height: 300,
+                child: DiveProfileChart(profile: profile),
+              ),
+            ),
+          ),
+        );
+
+        Iterable<Color?> barColors() => tester
+            .widget<LineChart>(find.byType(LineChart).first)
+            .data
+            .lineBarsData
+            .map((b) => b.color);
+
+        await tester.pumpWidget(app(tertiaryA));
+        await tester.pumpAndSettle();
+        // The temperature line is drawn in the active scheme's tertiary.
+        expect(barColors(), contains(tertiaryA));
+
+        // Same brightness, different scheme: the State (and its bars cache) is
+        // retained across this pump, so the bars must be rebuilt with the new
+        // tertiary rather than reused with the stale colour.
+        await tester.pumpWidget(app(tertiaryB));
+        await tester.pumpAndSettle();
+        expect(barColors(), contains(tertiaryB));
+        expect(barColors(), isNot(contains(tertiaryA)));
+      },
+    );
   });
 }
