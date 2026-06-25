@@ -765,6 +765,31 @@ static void check_dive_profile_terminated(void) {
     expect(rc == DC_STATUS_TIMEOUT,
            "a profile truncated before the end marker still fails (and retries)");
   }
+
+  // Documents a KNOWN LIMITATION (issue #394 review): a notification dropped
+  // mid-profile while the final FD FD marker still arrives leaves a buffer that
+  // ends in the marker but is missing interior bytes. read_profile cannot tell
+  // this from a legitimate over-declare, so it accepts the short profile and the
+  // dive is stored corrupt -- hw_ostc3_device_foreach does not catch it (its
+  // checks compare the two declared length fields to each other, not to the
+  // received count) and the hwOS profile has no CRC. Asserted here so the
+  // behavior is explicit and the suite does not imply this case is rejected; the
+  // retry narrows the window, only a less lossy link closes it.
+  {
+    unsigned char buf[256 + 100 + 4];
+    size_t full = build_dive(buf, 100, 1, 1);  // header + 100 samples + FD FD + ready
+    // Drop 16 interior sample bytes, keeping the FD FD + ready tail intact.
+    const size_t drop = 16;
+    memmove(buf + 256 + 40, buf + 256 + 40 + drop, full - (256 + 40 + drop));
+    size_t lossy = full - drop;
+    unsigned char out[512];
+    unsigned int len = 0;
+    dc_status_t rc = run_dive(buf, lossy, 380, &len, out, sizeof(out));
+    expect(rc == DC_STATUS_SUCCESS,
+           "lost-middle-with-FD-FD-tail is accepted as complete (known limitation)");
+    expect(len == 256 + 100 + 2 - drop,
+           "the corrupt short profile is accepted at its received length");
+  }
 }
 
 int main(void) {
