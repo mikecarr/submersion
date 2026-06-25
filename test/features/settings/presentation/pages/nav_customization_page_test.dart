@@ -39,12 +39,13 @@ void main() {
     });
 
     test('drop below divider stays below divider', () {
-      // Move 'a' (flat index 0) to position 5 (between 'd' and 'e' below divider)
+      // onReorderItem reports the post-removal flat index, so moving 'a' (flat 0)
+      // to between 'd' and 'e' below the divider is newIndex 4 (not 5).
       final result = applyReorderPreservingDivider(
         movable: const ['a', 'b', 'c', 'd', 'e', 'f'],
         dividerIndex: 3,
         oldIndex: 0,
-        newIndex: 5,
+        newIndex: 4,
       );
       expect(result, ['b', 'c', 'd', 'a', 'e', 'f']);
     });
@@ -59,17 +60,17 @@ void main() {
       expect(result, ['a', 'b', 'c', 'd', 'e', 'f']);
     });
 
-    test('Flutter-style newIndex > oldIndex accounts for the shift', () {
-      // Flutter convention: when moving down, newIndex is post-removal.
-      // Move 'a' (0) to just above 'e': newIndex=5 in the flat list means
-      // position 4 in the movable list after removal.
+    test('newIndex is treated as the post-removal index (no internal shift)', () {
+      // onReorderItem already adjusts for the removed item, so dragging 'a' (0)
+      // to the bottom reports newIndex 6 (end of the 6-item post-removal flat
+      // list); the helper must not subtract again.
       final result = applyReorderPreservingDivider(
         movable: const ['a', 'b', 'c', 'd', 'e', 'f'],
         dividerIndex: 3,
         oldIndex: 0,
-        newIndex: 5,
+        newIndex: 6,
       );
-      expect(result, ['b', 'c', 'd', 'a', 'e', 'f']);
+      expect(result, ['b', 'c', 'd', 'e', 'f', 'a']);
     });
 
     test(
