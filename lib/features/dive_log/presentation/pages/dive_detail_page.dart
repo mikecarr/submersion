@@ -163,6 +163,17 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
   ProfileAnalysis? _lastDecoPanelAnalysis;
   String? _lastDecoPanelAnalysisDiveId;
 
+  /// Last usable profile analysis rendered in the "SAC Rate by Segment" card,
+  /// kept (paired with its dive id) so a transient null from
+  /// [profileAnalysisProvider] -- the same mid-sync empty-profile read that
+  /// blinks the deco/O2 panel -- keeps the segment card visible instead of
+  /// collapsing it to [SizedBox.shrink]. A dive that has genuinely never
+  /// produced segments never populates this, so it still shows nothing.
+  /// Sibling defense-in-depth to [_lastDecoPanelAnalysis] alongside the
+  /// `watchDiveDetailChanges` change-tick debounce.
+  ProfileAnalysis? _lastSacSegmentsAnalysis;
+  String? _lastSacSegmentsAnalysisDiveId;
+
   String get diveId => widget.diveId;
 
   @override
@@ -1578,7 +1589,27 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
     Dive dive,
     int? selectedPointIndex,
   ) {
-    final analysis = ref.watch(profileAnalysisProvider(dive.id)).valueOrNull;
+    final current = ref.watch(profileAnalysisProvider(dive.id)).valueOrNull;
+    final isUsable =
+        current != null &&
+        current.sacSegments != null &&
+        current.sacSegments!.isNotEmpty;
+
+    // Retain the last usable analysis for THIS dive and fall back to it when the
+    // provider momentarily yields null/empty (e.g. a mid-sync empty-profile
+    // read), so a single transient null doesn't blink the card out. A dive that
+    // has genuinely never produced segments falls through to the
+    // SizedBox.shrink below and correctly shows nothing.
+    if (isUsable) {
+      _lastSacSegmentsAnalysis = current;
+      _lastSacSegmentsAnalysisDiveId = dive.id;
+    }
+    final analysis = isUsable
+        ? current
+        : (_lastSacSegmentsAnalysisDiveId == dive.id
+              ? _lastSacSegmentsAnalysis
+              : null);
+
     final settings = ref.watch(settingsProvider);
     final units = UnitFormatter(settings);
     final sacUnit = ref.watch(sacUnitProvider);
@@ -1598,7 +1629,8 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
     // Get cylinder SAC data for multi-tank dives
     final cylinderSacAsync = ref.watch(cylinderSacProvider(dive.id));
 
-    // Don't show if no segments available at all
+    // Don't show if no segments are, or ever were, available for this dive
+    // (the last-good fallback above keeps a transient null from collapsing it).
     if (analysis == null ||
         (analysis.sacSegments == null || analysis.sacSegments!.isEmpty)) {
       // Still show cylinder SAC if available
