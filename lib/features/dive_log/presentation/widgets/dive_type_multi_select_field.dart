@@ -2,13 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:submersion/features/dive_log/domain/entities/dive.dart';
+import 'package:submersion/features/dive_types/domain/entities/dive_type_entity.dart';
 import 'package:submersion/features/dive_types/presentation/providers/dive_type_providers.dart';
 import 'package:submersion/l10n/l10n_extension.dart';
 
-/// Multi-select dive-type field: collapses to a row of chips for the selected
-/// types and expands (as an anchored dropdown of checkboxes) to add or remove
-/// types. Enforces the at-least-one invariant — the last selected type cannot
-/// be unchecked. Custom types are managed on the dedicated dive-types page.
+/// Multi-select dive-type field: shows the selected types as a row of chips and
+/// opens a bottom-sheet checklist (tap the field) to add or remove types.
+/// Enforces the at-least-one invariant -- the last selected type cannot be
+/// unchecked -- unless [allowEmpty] is set (bulk-edit mode). Custom types are
+/// managed on the dedicated dive-types page.
+///
+/// Uses a modal bottom sheet (mirroring [BuddyPicker]) rather than an anchored
+/// menu: Flutter 3.44's MenuAnchor regressed and would not open on macOS, so a
+/// tap on the field appeared dead. The sheet path is the one already proven in
+/// this form.
 class DiveTypeMultiSelectField extends ConsumerWidget {
   const DiveTypeMultiSelectField({
     super.key,
@@ -45,53 +52,134 @@ class DiveTypeMultiSelectField extends ConsumerWidget {
         String nameOf(String id) =>
             nameById[id] ?? Dive.diveTypeDisplayName(id);
 
-        void toggle(String id, bool selected) {
-          final next = [...selectedTypeIds];
-          if (selected) {
-            if (!next.contains(id)) next.add(id);
-          } else {
-            next.remove(id);
-            // Single-dive editor enforces >= 1; bulk mode allows clearing.
-            if (next.isEmpty && !allowEmpty) return;
-          }
-          onChanged(next);
-        }
-
-        return MenuAnchor(
-          menuChildren: [
-            for (final t in types)
-              CheckboxMenuButton(
-                value: selectedTypeIds.contains(t.id),
-                onChanged: (v) => toggle(t.id, v ?? false),
-                child: Text(t.name),
-              ),
-          ],
-          builder: (context, controller, child) {
-            return InkWell(
-              onTap: () =>
-                  controller.isOpen ? controller.close() : controller.open(),
-              child: InputDecorator(
-                decoration: InputDecoration(
-                  labelText: label,
-                  suffixIcon: const Icon(Icons.arrow_drop_down),
-                ),
-                child: Wrap(
-                  spacing: 6,
-                  runSpacing: 4,
-                  children: [
-                    for (final id in selectedTypeIds)
-                      Chip(
-                        label: Text(nameOf(id)),
-                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        visualDensity: VisualDensity.compact,
-                      ),
-                  ],
-                ),
-              ),
-            );
-          },
+        return InkWell(
+          onTap: () => _openPicker(context, types, label),
+          child: InputDecorator(
+            decoration: InputDecoration(
+              labelText: label,
+              suffixIcon: const Icon(Icons.arrow_drop_down),
+            ),
+            child: Wrap(
+              spacing: 6,
+              runSpacing: 4,
+              children: [
+                for (final id in selectedTypeIds)
+                  Chip(
+                    label: Text(nameOf(id)),
+                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    visualDensity: VisualDensity.compact,
+                  ),
+              ],
+            ),
+          ),
         );
       },
+    );
+  }
+
+  Future<void> _openPicker(
+    BuildContext context,
+    List<DiveTypeEntity> types,
+    String title,
+  ) {
+    return showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (context) => _DiveTypePickerSheet(
+        title: title,
+        types: types,
+        selectedTypeIds: selectedTypeIds,
+        allowEmpty: allowEmpty,
+        onChanged: onChanged,
+      ),
+    );
+  }
+}
+
+/// The bottom-sheet checklist. Holds its own working selection while open and
+/// reports each change live via [onChanged] (matching the original field's
+/// per-toggle semantics), so the sheet stays open for multiple selections.
+class _DiveTypePickerSheet extends StatefulWidget {
+  const _DiveTypePickerSheet({
+    required this.title,
+    required this.types,
+    required this.selectedTypeIds,
+    required this.allowEmpty,
+    required this.onChanged,
+  });
+
+  final String title;
+  final List<DiveTypeEntity> types;
+  final List<String> selectedTypeIds;
+  final bool allowEmpty;
+  final ValueChanged<List<String>> onChanged;
+
+  @override
+  State<_DiveTypePickerSheet> createState() => _DiveTypePickerSheetState();
+}
+
+class _DiveTypePickerSheetState extends State<_DiveTypePickerSheet> {
+  late List<String> _working = [...widget.selectedTypeIds];
+
+  void _toggle(String id, bool selected) {
+    final next = [..._working];
+    if (selected) {
+      if (!next.contains(id)) next.add(id);
+    } else {
+      next.remove(id);
+      // Single-dive editor enforces >= 1; bulk mode allows clearing.
+      if (next.isEmpty && !widget.allowEmpty) return;
+    }
+    setState(() => _working = next);
+    widget.onChanged(next);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return SafeArea(
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.sizeOf(context).height * 0.6,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 0, 12, 4),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      widget.title,
+                      style: theme.textTheme.titleMedium,
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: Text(context.l10n.common_action_close),
+                  ),
+                ],
+              ),
+            ),
+            Flexible(
+              child: ListView(
+                shrinkWrap: true,
+                children: [
+                  for (final t in widget.types)
+                    CheckboxListTile(
+                      value: _working.contains(t.id),
+                      onChanged: (v) => _toggle(t.id, v ?? false),
+                      title: Text(t.name),
+                    ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
