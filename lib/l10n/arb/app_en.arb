@@ -3332,6 +3332,8 @@
   "diveSites_locationPicker_semantics_map": "Interactive map for picking a dive site location. Tap on the map to select a location.",
   "diveSites_mapContent_error_loadingDiveSites": "Error loading dive sites: {error}",
   "diveSites_map_appBar_title": "Dive Sites",
+  "diveSites_map_builtInSites_add": "Add to my sites",
+  "diveSites_map_builtInSites_added": "Added to your sites",
   "diveSites_map_builtInSites_hide": "Hide built-in sites",
   "diveSites_map_builtInSites_off": "Built-in sites hidden",
   "diveSites_map_builtInSites_on": "Built-in sites shown",

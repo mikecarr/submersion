@@ -11178,6 +11178,18 @@ abstract class AppLocalizations {
   /// **'Dive Sites'**
   String get diveSites_map_appBar_title;
 
+  /// No description provided for @diveSites_map_builtInSites_add.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to my sites'**
+  String get diveSites_map_builtInSites_add;
+
+  /// No description provided for @diveSites_map_builtInSites_added.
+  ///
+  /// In en, this message translates to:
+  /// **'Added to your sites'**
+  String get diveSites_map_builtInSites_added;
+
   /// No description provided for @diveSites_map_builtInSites_hide.
   ///
   /// In en, this message translates to:
