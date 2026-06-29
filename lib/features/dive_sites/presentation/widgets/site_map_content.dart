@@ -571,9 +571,20 @@ class _SiteMapContentState extends ConsumerState<SiteMapContent>
   }
 
   Future<void> _addBuiltInSite(ExternalDiveSite site) async {
-    await ref
-        .read(siteListNotifierProvider.notifier)
-        .addSite(site.toDiveSite());
+    try {
+      await ref
+          .read(siteListNotifierProvider.notifier)
+          .addSite(site.toDiveSite());
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(context.l10n.diveSites_map_builtInSites_addError),
+          backgroundColor: Theme.of(context).colorScheme.error,
+        ),
+      );
+      return;
+    }
     // addSite reloads the notifier but not the map's FutureProvider; invalidate
     // so the new site appears and the built-in duplicate is deduped out.
     ref.invalidate(sitesWithCountsProvider);

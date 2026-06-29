@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:submersion/l10n/arb/app_localizations.dart';
 import 'package:submersion/features/dive_sites/data/repositories/site_repository_impl.dart';
 import 'package:submersion/features/dive_sites/data/services/dive_site_api_service.dart';
+import 'package:submersion/features/dive_sites/domain/entities/dive_site.dart';
 import 'package:submersion/features/dive_sites/presentation/providers/built_in_sites_providers.dart';
 import 'package:submersion/features/dive_sites/presentation/providers/site_providers.dart';
 import 'package:submersion/features/dive_sites/presentation/widgets/site_map_content.dart';
@@ -22,6 +23,16 @@ const _builtInA = ExternalDiveSite(
   longitude: -157,
   source: 't',
 );
+
+/// A repository whose createSite always fails, to exercise the add-error path.
+class _ThrowingSiteRepository extends SiteRepository {
+  @override
+  Future<List<DiveSite>> getAllSites({String? diverId}) async => [];
+
+  @override
+  Future<DiveSite> createSite(DiveSite site) async =>
+      throw Exception('write failed');
+}
 
 Future<void> _semanticsTap(WidgetTester tester, String label) async {
   tester.semantics.tap(find.semantics.byLabel(label));
@@ -119,6 +130,36 @@ void main() {
       await tester.pump(const Duration(seconds: 1));
       expect(find.text('Added to your sites'), findsOneWidget);
       expect(find.text('Add to my sites'), findsNothing);
+
+      handle.dispose();
+    });
+
+    testWidgets('shows an error snackbar when adding a built-in site fails', (
+      tester,
+    ) async {
+      final handle = tester.ensureSemantics();
+
+      await _pumpContent(
+        tester,
+        extraOverrides: [
+          heatMapSettingsProvider.overrideWith(
+            (ref) => const HeatMapSettings(isVisible: false),
+          ),
+          showBuiltInSitesProvider.overrideWith((ref) => true),
+          siteRepositoryProvider.overrideWithValue(_ThrowingSiteRepository()),
+          visibleBuiltInSitesProvider.overrideWith(
+            (ref) async => const [_builtInA],
+          ),
+        ],
+      );
+
+      await _semanticsTap(tester, 'Built-in dive site: A');
+      await tester.tap(find.text('Add to my sites'));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+
+      expect(find.text("Couldn't add site. Please try again."), findsOneWidget);
+      expect(find.text('Add to my sites'), findsOneWidget);
 
       handle.dispose();
     });

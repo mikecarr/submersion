@@ -6460,6 +6460,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get diveSites_map_builtInSites_add => 'Add to my sites';
 
   @override
+  String get diveSites_map_builtInSites_addError =>
+      'Couldn\'t add site. Please try again.';
+
+  @override
   String get diveSites_map_builtInSites_added => 'Added to your sites';
 
   @override

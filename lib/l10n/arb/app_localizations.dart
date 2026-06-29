@@ -11184,6 +11184,12 @@ abstract class AppLocalizations {
   /// **'Add to my sites'**
   String get diveSites_map_builtInSites_add;
 
+  /// No description provided for @diveSites_map_builtInSites_addError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t add site. Please try again.'**
+  String get diveSites_map_builtInSites_addError;
+
   /// No description provided for @diveSites_map_builtInSites_added.
   ///
   /// In en, this message translates to:
