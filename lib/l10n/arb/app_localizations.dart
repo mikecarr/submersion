@@ -11244,6 +11244,12 @@ abstract class AppLocalizations {
   /// **'{count, plural, =1{1 dive} other{{count} dives}}'**
   String diveSites_map_infoCard_diveCount(int count);
 
+  /// No description provided for @diveSites_map_semantics_builtInSiteMarker.
+  ///
+  /// In en, this message translates to:
+  /// **'Built-in dive site: {name}'**
+  String diveSites_map_semantics_builtInSiteMarker(Object name);
+
   /// No description provided for @diveSites_map_semantics_diveSiteMarker.
   ///
   /// In en, this message translates to:

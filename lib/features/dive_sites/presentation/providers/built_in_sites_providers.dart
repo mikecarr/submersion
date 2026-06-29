@@ -21,7 +21,11 @@ final showBuiltInSitesProvider = StateProvider<bool>((ref) => false);
 final visibleBuiltInSitesProvider = FutureProvider<List<ExternalDiveSite>>((
   ref,
 ) async {
-  final builtIn = await ref.watch(builtInSitesProvider.future);
-  final userSites = await ref.watch(sitesWithCountsProvider.future);
+  // Start both queries before awaiting so they run in parallel, reducing
+  // toggle-on latency when either touches disk/DB.
+  final builtInFuture = ref.watch(builtInSitesProvider.future);
+  final userSitesFuture = ref.watch(sitesWithCountsProvider.future);
+  final builtIn = await builtInFuture;
+  final userSites = await userSitesFuture;
   return visibleBuiltInSites(builtIn, userSites.map((s) => s.site).toList());
 });

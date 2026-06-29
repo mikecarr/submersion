@@ -51,6 +51,15 @@ class _SiteMapPageState extends ConsumerState<SiteMapPage>
     final sitesAsync = ref.watch(sitesWithCountsProvider);
     final selectionState = ref.watch(mapListSelectionProvider('sites'));
 
+    // Clear a built-in selection when built-in sites are hidden, so the info
+    // card cannot outlive its markers. Uses listen (not watch) to avoid
+    // rebuilding the map on toggle, which would recreate the FlutterMap.
+    ref.listen<bool>(showBuiltInSitesProvider, (prev, next) {
+      if (!next && _selectedBuiltInId != null) {
+        setState(() => _selectedBuiltInId = null);
+      }
+    });
+
     // Find selected site from sitesAsync using selectionState.selectedId
     final selectedSite = sitesAsync.whenOrNull(
       data: (sitesWithCounts) {

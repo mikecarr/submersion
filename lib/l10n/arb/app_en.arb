@@ -3343,6 +3343,7 @@
   "diveSites_map_error_loadingSites": "Error loading sites: {error}",
   "diveSites_map_error_retry": "Retry",
   "diveSites_map_infoCard_diveCount": "{count, plural, =1{1 dive} other{{count} dives}}",
+  "diveSites_map_semantics_builtInSiteMarker": "Built-in dive site: {name}",
   "diveSites_map_semantics_diveSiteMarker": "Dive site: {name}",
   "diveSites_map_tooltip_fitAllSites": "Fit All Sites",
   "diveSites_map_tooltip_listView": "List View",

@@ -3,6 +3,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_marker_cluster/flutter_map_marker_cluster.dart';
 import 'package:latlong2/latlong.dart';
 
+import 'package:submersion/l10n/l10n_extension.dart';
 import 'package:submersion/features/dive_sites/data/services/dive_site_api_service.dart';
 
 /// A recessive marker-cluster layer for built-in (bundled) dive sites.
@@ -37,13 +38,21 @@ class BuiltInSiteMarkerLayer extends StatelessWidget {
             point: LatLng(site.latitude!, site.longitude!),
             width: selected ? 34 : 28,
             height: selected ? 40 : 34,
-            child: GestureDetector(
-              key: Key('builtInPin_${site.externalId}'),
-              onTap: () => onTap(site),
-              child: Icon(
-                Icons.location_on_outlined,
-                size: selected ? 36 : 30,
-                color: selected ? Theme.of(context).colorScheme.primary : _grey,
+            child: Semantics(
+              button: true,
+              label: context.l10n.diveSites_map_semantics_builtInSiteMarker(
+                site.name,
+              ),
+              child: GestureDetector(
+                key: Key('builtInPin_${site.externalId}'),
+                onTap: () => onTap(site),
+                child: Icon(
+                  Icons.location_on_outlined,
+                  size: selected ? 36 : 30,
+                  color: selected
+                      ? Theme.of(context).colorScheme.primary
+                      : _grey,
+                ),
               ),
             ),
           );

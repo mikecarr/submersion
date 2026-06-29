@@ -135,6 +135,15 @@ class _SiteMapContentState extends ConsumerState<SiteMapContent>
     final heatMapAsync = ref.watch(siteCoverageHeatMapProvider);
     final heatMapSettings = ref.watch(heatMapSettingsProvider);
 
+    // Clear a built-in selection when built-in sites are hidden, so the info
+    // card cannot outlive its markers. Uses listen (not watch) to avoid
+    // rebuilding the map on toggle, which would recreate the FlutterMap.
+    ref.listen<bool>(showBuiltInSitesProvider, (prev, next) {
+      if (!next && _selectedBuiltInId != null) {
+        setState(() => _selectedBuiltInId = null);
+      }
+    });
+
     return sitesAsync.when(
       data: (sitesWithCounts) => _buildMapWithInfoCard(
         context,

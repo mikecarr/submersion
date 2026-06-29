@@ -6484,6 +6484,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get diveSites_map_appBar_title => 'Dive Sites';
 
   @override
+  String get diveSites_map_builtInSites_add => 'Add to my sites';
+
+  @override
+  String get diveSites_map_builtInSites_added => 'Added to your sites';
+
+  @override
+  String get diveSites_map_builtInSites_hide => 'Hide built-in sites';
+
+  @override
+  String get diveSites_map_builtInSites_off => 'Built-in sites hidden';
+
+  @override
+  String get diveSites_map_builtInSites_on => 'Built-in sites shown';
+
+  @override
+  String get diveSites_map_builtInSites_show => 'Show built-in sites';
+
+  @override
   String get diveSites_map_empty_description =>
       'Add coordinates to your dive sites to see them on the map';
 
@@ -6507,6 +6525,11 @@ class AppLocalizationsEn extends AppLocalizations {
       one: '1 dive',
     );
     return '$_temp0';
+  }
+
+  @override
+  String diveSites_map_semantics_builtInSiteMarker(Object name) {
+    return 'Built-in dive site: $name';
   }
 
   @override
