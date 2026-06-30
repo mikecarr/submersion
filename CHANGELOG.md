@@ -3,6 +3,55 @@
 All notable changes to Submersion are documented in this file.
 
 
+## 1.5.8 (2026-06-29)
+
+### Features
+
+- show built-in sites on the embedded Sites map pane
+- show built-in sites on the full-page Sites map
+- add built-in site info card with add action
+- add recessive built-in site marker layer
+- add built-in sites toggle button
+- add deduped visible built-in sites provider
+- add grid-bucketed built-in site dedup
+- expose built-in sites accessor and providers
+
+### Bug Fixes
+
+- release JNI local refs in libdc callbacks (#318)
+- wrap long dive-type and weather rows on the dive detail page (#434)
+- keep dive-type chips visible during background reloads (#429)
+- handle add-site failures with an error snackbar (PR review)
+- address PR review — clear built-in selection on hide, add marker semantics, parallel provider loads
+- address code review on gas-switch persistence
+- persist gas switches on replace-source re-download
+- persist gas switches on multi-gas dive-computer dives
+- keep all gases on multi-gas dive-computer downloads
+
+### Documentation
+
+- spec for gas-aware ascent in deco calculations
+
+### Tests
+
+- cover built-in selection, import, cluster and provider paths (patch coverage 96%)
+- cover the dominant-gas update and gas-switch drop branches
+
+### CI/CD
+
+- bump actions/cache from 5 to 6
+
+### Chores
+
+- bump version to 1.5.8+112
+- regenerate Podfile.lock (sqlite3_flutter_libs + permission_handler_apple)
+- sync Podfile.lock with sqlite3_flutter_libs
+
+### Other
+
+- format generated Pigeon binding with the pinned Dart (3.44.4)
+
+
 ## 1.5.8 (2026-06-27)
 
 ### Bug Fixes
