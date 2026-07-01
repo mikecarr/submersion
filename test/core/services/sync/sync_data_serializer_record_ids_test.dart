@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:submersion/core/services/database_service.dart';
 import 'package:submersion/core/services/sync/sync_data_serializer.dart';
 import 'package:submersion/core/services/sync/sync_service.dart';
 import 'package:submersion/features/dive_log/data/repositories/dive_repository_impl.dart';
@@ -107,6 +108,31 @@ void main() {
     for (final entity in SyncService.entityHasUpdatedAt.keys) {
       await s.deleteAllRecords(entity); // must not throw on an empty table
     }
+  });
+
+  test('deleteAllRecords(settings) preserves device-local keys', () async {
+    // Replace-adopt clears each synced table before re-inserting the cloud
+    // union. A device-local key (active_diver_id) is excluded from every base
+    // (_exportSettings) AND from the re-insert (upsertRecords filter), so
+    // clearing it would permanently lose it. It must survive the clear (#447).
+    final db = DatabaseService.instance.database;
+    // Device-local key: upsertRecord filters it, so insert it directly.
+    await db.customStatement(
+      "INSERT INTO settings (key, value, updated_at) "
+      "VALUES ('active_diver_id', 'diver-1', 1)",
+    );
+    await SyncDataSerializer().upsertRecord('settings', {
+      'key': 'theme',
+      'value': 'dark',
+      'updatedAt': 1,
+    });
+
+    await SyncDataSerializer().deleteAllRecords('settings');
+
+    final keys = {for (final r in await db.select(db.settings).get()) r.key};
+    expect(keys, {
+      'active_diver_id',
+    }, reason: 'device-local key survives; the synced key is cleared');
   });
 }
 

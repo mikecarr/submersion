@@ -2051,8 +2051,20 @@ class SyncDataSerializer {
   /// Replace-adopt (#358): clearing each table then re-inserting the cloud
   /// union is equivalent to upsert-then-delete-not-in-cloud but needs no in-RAM
   /// id set to diff against, so adopt memory stays bounded regardless of size.
-  Future<void> deleteAllRecords(String entityType) =>
-      _db.delete(_syncTableFor(entityType)).go();
+  ///
+  /// Device-local settings keys ([_deviceLocalSettingsKeys], e.g.
+  /// `active_diver_id`) are preserved: they are never part of a synced or
+  /// replaced library, so an adopt must not wipe them (they are also excluded
+  /// from the base by [_exportSettings], so re-insert would not restore them).
+  Future<void> deleteAllRecords(String entityType) async {
+    if (entityType == 'settings') {
+      await (_db.delete(
+        _db.settings,
+      )..where((t) => t.key.isNotIn(_deviceLocalSettingsKeys.toList()))).go();
+      return;
+    }
+    await _db.delete(_syncTableFor(entityType)).go();
+  }
 
   /// The Drift table backing a synced [entityType] (mirrors recordIdsFor).
   TableInfo<Table, dynamic> _syncTableFor(String entityType) {
