@@ -98,6 +98,16 @@ void main() {
       );
     }
   });
+
+  test('every synced entity has a deleteAllRecords case', () async {
+    // deleteAllRecords -> _syncTableFor throws on an entity with no case, so
+    // iterating every synced entity fails loudly if one is ever added without a
+    // case -- streaming Replace-adopt clears each synced table by entity (#358).
+    final s = SyncDataSerializer();
+    for (final entity in SyncService.entityHasUpdatedAt.keys) {
+      await s.deleteAllRecords(entity); // must not throw on an empty table
+    }
+  });
 }
 
 Map<String, dynamic> _site(String id) => {

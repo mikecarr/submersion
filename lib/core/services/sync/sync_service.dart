@@ -2020,10 +2020,19 @@ class SyncService {
       await _serializer.deleteAllRecords(entity);
     }
 
-    Future<void> upsertRow(String table, Map<String, dynamic> record) async {
-      final id = _recordIdForEntity(table, record);
-      if (id == null) return; // matches in-memory: null-id rows are skipped
-      await _serializer.upsertRecord(table, record);
+    // Batched upsert of a table's rows (skipping null-id rows, matching the
+    // in-memory path). Batching is the throughput lever: a large adopt is
+    // millions of rows, and row-by-row upserts froze the UI (#358 adopt).
+    Future<void> applyBatch(
+      String table,
+      List<Map<String, dynamic>> records,
+    ) async {
+      final valid = [
+        for (final r in records)
+          if (_recordIdForEntity(table, r) != null) r,
+      ];
+      if (valid.isEmpty) return;
+      await _serializer.upsertRecords(table, valid);
     }
 
     // Apply units: each base file and each changeset, ascending by exportedAt
@@ -2039,10 +2048,10 @@ class SyncService {
       if (changeset != null) {
         for (final entry in changeset.data.toJson().entries) {
           if (!entityHasUpdatedAt.containsKey(entry.key)) continue;
-          for (final record
-              in (entry.value as List).cast<Map<String, dynamic>>()) {
-            await upsertRow(entry.key, record);
-          }
+          await applyBatch(
+            entry.key,
+            (entry.value as List).cast<Map<String, dynamic>>(),
+          );
         }
         continue;
       }
@@ -2054,9 +2063,7 @@ class SyncService {
       Future<void> flush() async {
         final table = currentTable;
         if (table == null || batch.isEmpty) return;
-        for (final record in batch) {
-          await upsertRow(table, record);
-        }
+        await applyBatch(table, batch);
         batch = <Map<String, dynamic>>[];
       }
 
