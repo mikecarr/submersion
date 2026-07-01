@@ -1993,30 +1993,36 @@ class SyncService {
   }
 
   /// Streaming replace-adopt apply (production path). Runs inside the caller's
-  /// deferred-FK transaction. Upserts every restored row in exportedAt order
-  /// (each base temp file streamed in 500-row batches, plus in-memory
-  /// changesets), collecting cloud ids as it goes, then deletes local rows
-  /// absent from that set, then repairs FKs. Bounded memory: one batch + the
-  /// cloud id sets (ids only, never full rows), independent of library size.
+  /// deferred-FK transaction. Clears every synced table, then upserts every
+  /// restored row in exportedAt order (each base temp file streamed in 500-row
+  /// batches, plus in-memory changesets), then repairs FKs. Bounded memory: one
+  /// batch of rows at a time, independent of library size -- unlike the old
+  /// path it holds NO id set (#358 adopt OOM: a full-library cloud-id set plus
+  /// per-entity local-id sets pushed a large library past the iOS jetsam
+  /// limit).
   ///
-  /// Equivalent to [_applyAdoptInMemory]: `upsertRecord` is an unconditional
-  /// overwrite, so applying in ascending exportedAt order is latest-export-wins
-  /// (the in-memory `restored` map); and delete-not-in-cloud is order
-  /// independent, so upsert-then-delete here matches delete-then-upsert there
-  /// (final state is the cloud union either way). A null record id is skipped
-  /// entirely, exactly as the in-memory path does. Enforced by
+  /// Equivalent to [_applyAdoptInMemory]: clearing then re-inserting the cloud
+  /// union yields the same final rows as upsert-then-delete-not-in-cloud (both
+  /// converge the DB to the cloud union), `upsertRecord` is an unconditional
+  /// overwrite so ascending exportedAt order is latest-export-wins, and a null
+  /// record id is skipped exactly as the in-memory path does. Enforced by
   /// sync_adopt_streaming_parity_test.dart.
   Future<void> _adoptApplyStreaming({
     required List<String> baseFilePaths,
     required List<int> baseExportedAt,
     required List<SyncPayload> changesets,
   }) async {
-    final cloudIds = <String, Set<String>>{};
+    // Replace semantics: clear every synced table, then insert the cloud union
+    // (latest export wins). Equivalent to the old upsert-then-delete-not-in-
+    // cloud, but needs no in-RAM id set to diff against, so adopt memory stays
+    // bounded regardless of library size (#358 adopt OOM).
+    for (final entity in entityHasUpdatedAt.keys) {
+      await _serializer.deleteAllRecords(entity);
+    }
 
     Future<void> upsertRow(String table, Map<String, dynamic> record) async {
       final id = _recordIdForEntity(table, record);
       if (id == null) return; // matches in-memory: null-id rows are skipped
-      (cloudIds[table] ??= <String>{}).add(id);
       await _serializer.upsertRecord(table, record);
     }
 
@@ -2068,16 +2074,6 @@ class SyncService {
         },
       );
       await flush();
-    }
-
-    // Delete local rows the restored library does not contain.
-    for (final entity in entityHasUpdatedAt.keys) {
-      final cloud = cloudIds[entity] ?? const <String>{};
-      for (final localId in await _serializer.recordIdsFor(entity)) {
-        if (!cloud.contains(localId)) {
-          await _serializer.deleteRecord(entity, localId);
-        }
-      }
     }
 
     await _serializer.repairDanglingForeignKeys();

@@ -1670,6 +1670,105 @@ class SyncDataSerializer {
     }
   }
 
+  /// Delete every row of the table backing [entityType]. Used by streaming
+  /// Replace-adopt (#358): clearing each table then re-inserting the cloud
+  /// union is equivalent to upsert-then-delete-not-in-cloud but needs no in-RAM
+  /// id set to diff against, so adopt memory stays bounded regardless of size.
+  Future<void> deleteAllRecords(String entityType) =>
+      _db.delete(_syncTableFor(entityType)).go();
+
+  /// The Drift table backing a synced [entityType] (mirrors recordIdsFor).
+  TableInfo<Table, dynamic> _syncTableFor(String entityType) {
+    switch (entityType) {
+      case 'settings':
+        return _db.settings;
+      case 'diveEquipment':
+        return _db.diveEquipment;
+      case 'equipmentSetItems':
+        return _db.equipmentSetItems;
+      case 'divers':
+        return _db.divers;
+      case 'diverSettings':
+        return _db.diverSettings;
+      case 'buddies':
+        return _db.buddies;
+      case 'diveCenters':
+        return _db.diveCenters;
+      case 'trips':
+        return _db.trips;
+      case 'liveaboardDetails':
+        return _db.liveaboardDetailRecords;
+      case 'itineraryDays':
+        return _db.tripItineraryDays;
+      case 'equipment':
+        return _db.equipment;
+      case 'equipmentSets':
+        return _db.equipmentSets;
+      case 'diveTypes':
+        return _db.diveTypes;
+      case 'tankPresets':
+        return _db.tankPresets;
+      case 'diveComputers':
+        return _db.diveComputers;
+      case 'species':
+        return _db.species;
+      case 'tags':
+        return _db.tags;
+      case 'courses':
+        return _db.courses;
+      case 'dives':
+        return _db.dives;
+      case 'diveSites':
+        return _db.diveSites;
+      case 'diveTanks':
+        return _db.diveTanks;
+      case 'diveWeights':
+        return _db.diveWeights;
+      case 'diveTags':
+        return _db.diveTags;
+      case 'diveDiveTypes':
+        return _db.diveDiveTypes;
+      case 'diveBuddies':
+        return _db.diveBuddies;
+      case 'diveProfiles':
+        return _db.diveProfiles;
+      case 'diveProfileEvents':
+        return _db.diveProfileEvents;
+      case 'gasSwitches':
+        return _db.gasSwitches;
+      case 'diveCustomFields':
+        return _db.diveCustomFields;
+      case 'diveDataSources':
+        return _db.diveDataSources;
+      case 'siteSpecies':
+        return _db.siteSpecies;
+      case 'csvPresets':
+        return _db.csvPresets;
+      case 'viewConfigs':
+        return _db.viewConfigs;
+      case 'fieldPresets':
+        return _db.fieldPresets;
+      case 'tankPressureProfiles':
+        return _db.tankPressureProfiles;
+      case 'tideRecords':
+        return _db.tideRecords;
+      case 'sightings':
+        return _db.sightings;
+      case 'certifications':
+        return _db.certifications;
+      case 'serviceRecords':
+        return _db.serviceRecords;
+      case 'media':
+        return _db.media;
+      default:
+        throw ArgumentError.value(
+          entityType,
+          'entityType',
+          '_syncTableFor has no case for this synced entity',
+        );
+    }
+  }
+
   Future<void> deleteRecord(String entityType, String recordId) async {
     switch (entityType) {
       case 'divers':
