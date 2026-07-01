@@ -56,4 +56,25 @@ void main() {
     expect(res.wholeChecksum, BaseChunker.checksum(data));
     await dir.delete(recursive: true);
   });
+
+  test(
+    'empty file yields one empty part (mirrors BaseChunker.slice)',
+    () async {
+      final dir = await Directory.systemTemp.createTemp('src_empty');
+      final path = '${dir.path}/base.json';
+      await File(path).writeAsBytes(Uint8List(0));
+
+      final uploaded = <int, Uint8List>{};
+      final res = await BasePartFileSource(path).uploadAll((i, bytes) async {
+        uploaded[i] = Uint8List.fromList(bytes);
+      });
+
+      expect(res.partCount, 1);
+      expect(res.byteLength, 0);
+      expect(uploaded[0], isEmpty);
+      expect(res.wholeChecksum, BaseChunker.checksum(Uint8List(0)));
+      expect(res.partChecksums.single, BaseChunker.checksum(Uint8List(0)));
+      await dir.delete(recursive: true);
+    },
+  );
 }
