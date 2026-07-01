@@ -1,9 +1,12 @@
+import 'dart:io';
+
 import 'package:drift/drift.dart' show Value;
 
 import 'package:submersion/core/database/database.dart';
 import 'package:submersion/core/services/cloud_storage/cloud_storage_provider.dart';
 import 'package:submersion/core/services/sync/sync_data_serializer.dart';
 import 'package:submersion/core/services/sync/changeset_log/base_chunker.dart';
+import 'package:submersion/core/services/sync/changeset_log/base_part_file_source.dart';
 import 'package:submersion/core/services/sync/changeset_log/changeset_codec.dart';
 import 'package:submersion/core/services/sync/changeset_log/changeset_log_layout.dart';
 import 'package:submersion/core/services/sync/changeset_log/publish_state_store.dart';
@@ -61,68 +64,80 @@ class ChangesetWriter {
     final hasBase = ownManifest?.baseSeq != null;
     final watermark = ownManifest?.publishedHlcHigh ?? state?.publishedHlcHigh;
 
-    final payload = await _serializer.exportChangeset(
-      deviceId: deviceId,
-      hlcWatermark: hasBase ? watermark : null,
-      deletions: deletions,
-      seq: knownHeadSeq + 1,
-      epochId: epochId,
-      uploadNonce: uploadNonce,
-    );
-
-    if (_isEmpty(payload)) {
-      return const ChangesetWriteResult(ChangesetWriteKind.noop);
-    }
-
     final newSeq = knownHeadSeq + 1;
     final now = DateTime.now().millisecondsSinceEpoch;
 
     if (!hasBase) {
-      final fullBytes = _codec.encodeChangeset(payload);
-      // Slice the SAME bytes we checksum (serialize once): the base parts and
-      // baseChecksum are then guaranteed consistent, so a reader's whole-base
-      // checksum can only fail on real transport corruption, never on a
-      // re-serialization divergence.
-      final parts = BaseChunker.slice(fullBytes);
-      for (var i = 0; i < parts.length; i++) {
-        await provider.uploadFile(
-          parts[i],
-          ChangesetLogLayout.basePartName(deviceId, newSeq, i),
-          folderId: folderId,
-        );
-      }
-      final manifest = SyncManifest(
+      // Stream the base to a temp file and slice-upload it, so a large library
+      // is never materialized in RAM (#358 write side). Do NOT call
+      // exportChangeset(null) here -- that is the OOM path.
+      final base = await _serializer.exportBaseToTempFile(
         deviceId: deviceId,
-        provider: providerId,
-        baseSeq: newSeq,
-        basePartCount: parts.length,
-        baseBytes: fullBytes.length,
-        baseChecksum: BaseChunker.checksum(fullBytes),
-        basePartChecksums: parts.map(BaseChunker.checksum).toList(),
-        headSeq: newSeq,
-        publishedHlcHigh: payload.toHlc,
+        deletions: deletions,
         epochId: epochId,
         uploadNonce: uploadNonce,
-        updatedAt: now,
+        seq: newSeq,
       );
-      await _writeManifest(provider, folderId, deviceId, manifest);
-      await _publishState.upsert(
-        LocalPublishStatesCompanion(
-          provider: Value(providerId),
-          baseSeq: Value(newSeq),
-          basePartCount: Value(parts.length),
-          baseBytes: Value(fullBytes.length),
-          headSeq: Value(newSeq),
-          publishedHlcHigh: Value(payload.toHlc),
-          changesetBytesSinceBase: const Value(0),
-          updatedAt: Value(now),
-        ),
-      );
-      return ChangesetWriteResult(ChangesetWriteKind.base, newSeq);
+      try {
+        if (base.rowCount == 0 && deletions.isEmpty) {
+          return const ChangesetWriteResult(ChangesetWriteKind.noop);
+        }
+        final upload = await BasePartFileSource(base.path).uploadAll(
+          (i, bytes) => provider.uploadFile(
+            bytes,
+            ChangesetLogLayout.basePartName(deviceId, newSeq, i),
+            folderId: folderId,
+          ),
+        );
+        final manifest = SyncManifest(
+          deviceId: deviceId,
+          provider: providerId,
+          baseSeq: newSeq,
+          basePartCount: upload.partCount,
+          baseBytes: base.byteLength,
+          baseChecksum: upload.wholeChecksum,
+          basePartChecksums: upload.partChecksums,
+          headSeq: newSeq,
+          publishedHlcHigh: base.toHlc,
+          epochId: epochId,
+          uploadNonce: uploadNonce,
+          updatedAt: now,
+        );
+        await _writeManifest(provider, folderId, deviceId, manifest);
+        await _publishState.upsert(
+          LocalPublishStatesCompanion(
+            provider: Value(providerId),
+            baseSeq: Value(newSeq),
+            basePartCount: Value(upload.partCount),
+            baseBytes: Value(base.byteLength),
+            headSeq: Value(newSeq),
+            publishedHlcHigh: Value(base.toHlc),
+            changesetBytesSinceBase: const Value(0),
+            updatedAt: Value(now),
+          ),
+        );
+        return ChangesetWriteResult(ChangesetWriteKind.base, newSeq);
+      } finally {
+        try {
+          await File(base.path).delete();
+        } catch (_) {}
+      }
     }
 
     // Changeset: reuse the base fields from the (authoritative) own manifest;
-    // only headSeq / publishedHlcHigh advance.
+    // only headSeq / publishedHlcHigh advance. The incremental delta stays in
+    // memory (small); only the base path above is streamed (#358).
+    final payload = await _serializer.exportChangeset(
+      deviceId: deviceId,
+      hlcWatermark: watermark,
+      deletions: deletions,
+      seq: newSeq,
+      epochId: epochId,
+      uploadNonce: uploadNonce,
+    );
+    if (_isEmpty(payload)) {
+      return const ChangesetWriteResult(ChangesetWriteKind.noop);
+    }
     final bytes = _codec.encodeChangeset(payload);
     await provider.uploadFile(
       bytes,

@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:crypto/crypto.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:submersion/core/data/repositories/sync_repository.dart';
 import 'package:submersion/core/services/database_service.dart';
@@ -238,6 +241,51 @@ void main() {
         before,
         reason: 'a no-op writes no new file',
       );
+    },
+  );
+
+  test(
+    'first base publish streams parts that reassemble to the library',
+    () async {
+      await DiveRepository().createDive(
+        createTestDiveWithBottomTime(id: 'd1', diveNumber: 1),
+      );
+      await DiveRepository().createDive(
+        createTestDiveWithBottomTime(id: 'd2', diveNumber: 2),
+      );
+      final result = await publish();
+      expect(result.kind, ChangesetWriteKind.base);
+
+      final deviceId = await SyncRepository().getDeviceId();
+      final manifest = SyncManifest.fromBytes(
+        await provider.downloadFile(
+          '$folder/${ChangesetLogLayout.manifestName(deviceId)}',
+        ),
+      );
+
+      // Reassemble the streamed parts and verify checksum + parsed content.
+      final parts = <int, List<int>>{};
+      for (final f in await provider.listFiles(
+        folderId: folder,
+        namePattern: ChangesetLogLayout.prefix,
+      )) {
+        final bp = ChangesetLogLayout.basePartOf(f.name);
+        if (bp != null && bp.baseSeq == manifest.baseSeq) {
+          parts[bp.part] = await provider.downloadFile(f.id);
+        }
+      }
+      final ordered = [
+        for (final i in parts.keys.toList()..sort()) ...parts[i]!,
+      ];
+      expect(parts.length, manifest.basePartCount);
+      expect(ordered.length, manifest.baseBytes);
+      expect('sha256:${sha256.convert(ordered)}', manifest.baseChecksum);
+
+      final payload = jsonDecode(utf8.decode(ordered)) as Map<String, dynamic>;
+      final diveIds = ((payload['data'] as Map)['dives'] as List)
+          .map((d) => (d as Map)['id'])
+          .toSet();
+      expect(diveIds, {'d1', 'd2'});
     },
   );
 }
