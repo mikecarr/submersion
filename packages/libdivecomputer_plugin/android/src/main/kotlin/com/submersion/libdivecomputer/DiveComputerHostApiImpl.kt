@@ -50,6 +50,12 @@ class DiveComputerHostApiImpl(
     private var isBufferingDives = false
     private val bufferedDives = mutableListOf<ParsedDive>()
 
+    init {
+        // Points the crash-survivable serial tracer at submersion.log so its
+        // synchronous breadcrumbs survive a native download crash (issue #318).
+        NativeTrace.init(context)
+    }
+
     // MARK: - Device Descriptors
 
     override fun getDeviceDescriptors(callback: (Result<List<DeviceDescriptor>>) -> Unit) {
@@ -395,7 +401,17 @@ class DiveComputerHostApiImpl(
             synchronized(diveBufferLock) { bufferedDives.clear() }
 
             val stream = UsbSerialIoStream(context, driver)
+            val probeDev = driver.device
+            // Records the driver class + USB VID/PID so the debug log identifies
+            // the cable's chipset (FTDI 0x0403 vs CP210x 0x10c4 etc.) (issue #318).
+            NativeTrace.d(
+                "probe ${driver.javaClass.simpleName} " +
+                    "vid=0x${Integer.toHexString(probeDev.vendorId)} " +
+                    "pid=0x${Integer.toHexString(probeDev.productId)} " +
+                    "name=${probeDev.deviceName}"
+            )
             if (!stream.open()) {
+                NativeTrace.w("stream.open() failed for ${probeDev.deviceName}")
                 probeLog.append("  ${driver.device.deviceName}: failed to open\n")
                 continue
             }
@@ -405,6 +421,10 @@ class DiveComputerHostApiImpl(
 
             val errorBuf = ByteArray(256)
             var thrownMsg: String? = null
+            NativeTrace.d(
+                "nativeDownloadRun begin vendor=${device.vendor} " +
+                    "product=${device.product} model=${device.model}"
+            )
             val result = try {
                 LibdcWrapper.nativeDownloadRun(
                     sessionPtr,
@@ -415,10 +435,14 @@ class DiveComputerHostApiImpl(
                     downloadCallback, errorBuf
                 )
             } catch (e: Throwable) {
+                NativeTrace.e("nativeDownloadRun threw: ${e.message}")
                 NativeLogger.e(TAG, "LDC", "nativeDownloadRun threw: ${e.message}")
                 thrownMsg = e.message
                 -999
             }
+            // If the native download crashes the process, this line never lands;
+            // the last UsbSerialIoStream breadcrumb then identifies the operation.
+            NativeTrace.d("nativeDownloadRun returned rc=$result")
             stream.close()
             activeSerialStream = null
             lastResult = result
