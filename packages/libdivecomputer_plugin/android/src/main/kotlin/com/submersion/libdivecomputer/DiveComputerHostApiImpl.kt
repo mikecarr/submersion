@@ -42,6 +42,11 @@ class DiveComputerHostApiImpl(
     private var activeBleStream: BleIoStream? = null
     private var activeSerialStream: UsbSerialIoStream? = null
 
+    // Serial/USB downloads run in the :dc process via this client so a native
+    // libdivecomputer crash can't kill the app (issue #318). BLE stays in-process.
+    private val serialDownloadClient = SerialDownloadClient(context, flutterApi)
+    @Volatile private var serialDownloadActive = false
+
     // Dive buffering for the multi-port USB-serial probe (see macOS parity).
     // While buffering, onDive accumulates instead of dispatching so dives from a
     // wrong port are not leaked to Flutter; flushed on success, discarded on
@@ -166,6 +171,24 @@ class DiveComputerHostApiImpl(
     ) {
         callback(Result.success(Unit))
 
+        if (device.transport == TransportType.SERIAL || device.transport == TransportType.USB) {
+            // Serial-over-USB runs in the :dc process so a native libdivecomputer
+            // crash takes down only that process, not the app (issue #318). No
+            // in-process fallback.
+            serialDownloadActive = true
+            serialDownloadClient.start(
+                SerialDownloadRequest(
+                    vendor = device.vendor,
+                    product = device.product,
+                    model = device.model,
+                    name = device.name,
+                    fingerprint = decodeFingerprint(fingerprint),
+                )
+            )
+            return
+        }
+
+        serialDownloadActive = false
         executor.execute {
             // Backstop: convert any native-level failure into a reported error
             // instead of an uncaught Throwable that kills the executor thread
@@ -186,6 +209,10 @@ class DiveComputerHostApiImpl(
     }
 
     override fun cancelDownload() {
+        if (serialDownloadActive) {
+            serialDownloadClient.cancel()
+            return
+        }
         if (downloadSessionPtr != 0L) {
             LibdcWrapper.nativeDownloadCancel(downloadSessionPtr)
         }
@@ -214,11 +241,15 @@ class DiveComputerHostApiImpl(
         when (device.transport) {
             TransportType.BLE ->
                 performBleDownload(device, sessionPtr, fingerprint, isRetry)
-            TransportType.SERIAL, TransportType.USB ->
-                // Serial-over-USB (e.g. Mares Puck Pro). The Dart layer folds
-                // libdivecomputer's serial transport into `.usb`, so both route
-                // here and download over LIBDC_TRANSPORT_SERIAL.
-                performUsbSerialDownload(device, sessionPtr, fingerprint)
+            TransportType.SERIAL, TransportType.USB -> {
+                // Unreachable: serial/USB downloads are intercepted in
+                // startDownload and run in the :dc process (issue #318). Guard
+                // defensively so they can never silently run in-process again.
+                reportError("download_error",
+                    "Serial downloads must run in the download process.")
+                LibdcWrapper.nativeDownloadSessionFree(sessionPtr)
+                downloadSessionPtr = 0
+            }
             TransportType.INFRARED -> {
                 reportError("unsupported_transport", "Infrared transport is not supported on Android")
                 LibdcWrapper.nativeDownloadSessionFree(sessionPtr)
