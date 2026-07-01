@@ -5,7 +5,6 @@ import 'package:drift/drift.dart' show Value;
 import 'package:submersion/core/database/database.dart';
 import 'package:submersion/core/services/cloud_storage/cloud_storage_provider.dart';
 import 'package:submersion/core/services/sync/sync_data_serializer.dart';
-import 'package:submersion/core/services/sync/changeset_log/base_chunker.dart';
 import 'package:submersion/core/services/sync/changeset_log/base_part_file_source.dart';
 import 'package:submersion/core/services/sync/changeset_log/changeset_codec.dart';
 import 'package:submersion/core/services/sync/changeset_log/changeset_log_layout.dart';
@@ -261,35 +260,42 @@ class ChangesetWriter {
     // a since-deleted record and cold-starts from this base (its prior
     // changesets pruned) would otherwise never see the tombstone and resurrect
     // the row. Mirrors the first base, which also exports with deletions.
-    final full = await _serializer.exportChangeset(
+    // Stream the fresh base to a temp file and slice-upload it (bounded memory,
+    // #358), mirroring publish()'s base path. The base still carries the full
+    // deletion log (see above).
+    final compSeq = afterSeq + 1;
+    final base = await _serializer.exportBaseToTempFile(
       deviceId: deviceId,
-      hlcWatermark: null,
       deletions: deletions,
       epochId: epochId,
       uploadNonce: uploadNonce,
+      seq: compSeq,
     );
-    final fullBytes = _codec.encodeChangeset(full);
-    // Slice the same bytes we checksum (serialize once) -- see publish().
-    final parts = BaseChunker.slice(fullBytes);
-    final compSeq = afterSeq + 1;
-    for (var i = 0; i < parts.length; i++) {
-      await provider.uploadFile(
-        parts[i],
-        ChangesetLogLayout.basePartName(deviceId, compSeq, i),
-        folderId: folderId,
+    final BasePartUploadResult upload;
+    try {
+      upload = await BasePartFileSource(base.path).uploadAll(
+        (i, bytes) => provider.uploadFile(
+          bytes,
+          ChangesetLogLayout.basePartName(deviceId, compSeq, i),
+          folderId: folderId,
+        ),
       );
+    } finally {
+      try {
+        await File(base.path).delete();
+      } catch (_) {}
     }
     final now = DateTime.now().millisecondsSinceEpoch;
     final manifest = SyncManifest(
       deviceId: deviceId,
       provider: providerId,
       baseSeq: compSeq,
-      basePartCount: parts.length,
-      baseBytes: fullBytes.length,
-      baseChecksum: BaseChunker.checksum(fullBytes),
-      basePartChecksums: parts.map(BaseChunker.checksum).toList(),
+      basePartCount: upload.partCount,
+      baseBytes: base.byteLength,
+      baseChecksum: upload.wholeChecksum,
+      basePartChecksums: upload.partChecksums,
       headSeq: compSeq,
-      publishedHlcHigh: full.toHlc,
+      publishedHlcHigh: base.toHlc,
       epochId: epochId,
       uploadNonce: uploadNonce,
       updatedAt: now,
@@ -299,10 +305,10 @@ class ChangesetWriter {
       LocalPublishStatesCompanion(
         provider: Value(providerId),
         baseSeq: Value(compSeq),
-        basePartCount: Value(parts.length),
-        baseBytes: Value(fullBytes.length),
+        basePartCount: Value(upload.partCount),
+        baseBytes: Value(base.byteLength),
         headSeq: Value(compSeq),
-        publishedHlcHigh: Value(full.toHlc),
+        publishedHlcHigh: Value(base.toHlc),
         changesetBytesSinceBase: const Value(0),
         updatedAt: Value(now),
       ),
