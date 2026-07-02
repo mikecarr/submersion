@@ -14,8 +14,18 @@ class DecoStatus extends Equatable {
   /// Decompression ceiling in meters (0 if no deco obligation)
   final double ceilingMeters;
 
-  /// Time To Surface in seconds (including deco stops)
+  /// Time To Surface in seconds: the mandatory ascent time plus any
+  /// decompression stops. The recommended safety stop is NOT included here --
+  /// it is reported separately in [safetyStopSeconds] so entering deco can only
+  /// ever increase TTS, never drop it.
   final int ttsSeconds;
+
+  /// Recommended safety-stop time remaining in seconds: a 3-minute stop on
+  /// no-deco dives, minus time already accumulated in the 3-6 m safety-stop
+  /// zone during the ascent. Zero once completed or when a mandatory
+  /// decompression obligation exists (the deco stops supersede the safety
+  /// stop). Not part of [ttsSeconds].
+  final int safetyStopSeconds;
 
   /// Gradient Factor Low (0.0 - 1.0)
   final double gfLow;
@@ -37,6 +47,7 @@ class DecoStatus extends Equatable {
     required this.ndlSeconds,
     required this.ceilingMeters,
     required this.ttsSeconds,
+    this.safetyStopSeconds = 0,
     required this.gfLow,
     required this.gfHigh,
     required this.decoStops,
@@ -167,6 +178,7 @@ class DecoStatus extends Equatable {
     int? ndlSeconds,
     double? ceilingMeters,
     int? ttsSeconds,
+    int? safetyStopSeconds,
     double? gfLow,
     double? gfHigh,
     List<DecoStop>? decoStops,
@@ -178,6 +190,7 @@ class DecoStatus extends Equatable {
       ndlSeconds: ndlSeconds ?? this.ndlSeconds,
       ceilingMeters: ceilingMeters ?? this.ceilingMeters,
       ttsSeconds: ttsSeconds ?? this.ttsSeconds,
+      safetyStopSeconds: safetyStopSeconds ?? this.safetyStopSeconds,
       gfLow: gfLow ?? this.gfLow,
       gfHigh: gfHigh ?? this.gfHigh,
       decoStops: decoStops ?? this.decoStops,
@@ -192,6 +205,7 @@ class DecoStatus extends Equatable {
     ndlSeconds,
     ceilingMeters,
     ttsSeconds,
+    safetyStopSeconds,
     gfLow,
     gfHigh,
     decoStops,

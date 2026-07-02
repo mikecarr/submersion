@@ -463,35 +463,31 @@ class BuhlmannAlgorithm {
         ? calculateDecoSchedule(currentDepth: currentDepth, fN2: fN2, fHe: fHe)
         : <DecoStop>[];
 
-    // Calculate TTS - even for no-deco dives, include safety stop time
-    // so divers know realistic ascent time.
+    // TTS is the MANDATORY time to surface only: the ascent plus any required
+    // decompression stops. The recommended safety stop is NOT folded in here --
+    // it is reported separately in safetyStopSeconds. Baking the safety stop
+    // into TTS made TTS drop when a dive entered deco (the safety stop vanished
+    // as deco stops appeared), which reads backwards on the profile. Keeping TTS
+    // mandatory-only means it can only ever rise as an obligation grows.
     final int tts;
+    final int safetyStop;
     if (ndl < 0) {
-      // In deco: calculate full TTS including deco stops
+      // In deco: full obligation (ascent + deco stops). The mandatory deco
+      // stops supersede any recommended safety stop, so it is not reported.
       tts = calculateTts(currentDepth: currentDepth, fN2: fN2, fHe: fHe);
+      safetyStop = 0;
     } else {
-      // Not in deco: calculate ascent time including recommended safety stop
-      // Safety stop: 3 minutes at 5m (15ft), minus time already spent there
-      const safetyStopDepth = 5.0; // meters
+      // No deco obligation: TTS is just the direct ascent to the surface.
+      tts = (currentDepth / ascentRate * 60).round();
+
+      // Report the recommended safety stop separately: a 3-minute stop, minus
+      // time already accumulated in the 3-6 m safety-stop zone during the ascent
+      // (see processProfileWithGasSegments; can't go negative).
       const safetyStopDuration = 180; // 3 minutes in seconds
-
-      // Calculate remaining safety stop time (can't be negative)
-      final remainingSafetyStop =
-          (safetyStopDuration - safetyStopTimeAccumulated).clamp(
-            0,
-            safetyStopDuration,
-          );
-
-      if (currentDepth > safetyStopDepth) {
-        // Below safety stop depth: include time to reach stop + remaining stop time + ascent
-        final ascentToStop =
-            ((currentDepth - safetyStopDepth) / ascentRate * 60).round();
-        final ascentToSurface = (safetyStopDepth / ascentRate * 60).round();
-        tts = ascentToStop + remainingSafetyStop + ascentToSurface;
-      } else {
-        // In or above safety stop zone: remaining stop time + direct ascent
-        tts = remainingSafetyStop + (currentDepth / ascentRate * 60).round();
-      }
+      safetyStop = (safetyStopDuration - safetyStopTimeAccumulated).clamp(
+        0,
+        safetyStopDuration,
+      );
     }
 
     return DecoStatus(
@@ -499,6 +495,7 @@ class BuhlmannAlgorithm {
       ndlSeconds: ndl,
       ceilingMeters: ceiling,
       ttsSeconds: tts,
+      safetyStopSeconds: safetyStop,
       gfLow: gfLow,
       gfHigh: gfHigh,
       decoStops: stops,
@@ -557,10 +554,17 @@ class BuhlmannAlgorithm {
 
     final results = <DecoStatus>[];
 
-    // Track time spent in safety stop zone (3-6m / 10-20ft)
-    // This allows TTS to count down as diver completes their safety stop
+    // Track time spent in the safety-stop zone (3-6m / 10-20ft) so the
+    // recommended safety stop reported on DecoStatus counts down as the diver
+    // completes it. Only count time during the ascent phase -- after the dive's
+    // deepest sample -- so descent through the zone and mid-dive shallow
+    // excursions don't pre-drain the recommendation. This mirrors
+    // profile_analysis_service's safety-stop detection (which anchors on the
+    // last occurrence of max depth).
     const safetyStopZoneMin = 3.0; // meters
     const safetyStopZoneMax = 6.0; // meters
+    final maxDepth = depths.reduce(math.max);
+    final maxDepthIndex = depths.lastIndexOf(maxDepth);
     int safetyStopTimeAccumulated = 0;
 
     for (int i = 0; i < depths.length; i++) {
@@ -611,8 +615,12 @@ class BuhlmannAlgorithm {
             fHe: gas.fHe,
           );
 
-          // Accumulate time if average depth was in safety stop zone
-          if (avgDepth >= safetyStopZoneMin && avgDepth <= safetyStopZoneMax) {
+          // Accumulate time if average depth was in the safety-stop zone,
+          // but only on the ascent (after the deepest sample) so descent and
+          // mid-dive shallow excursions don't count.
+          if (i > maxDepthIndex &&
+              avgDepth >= safetyStopZoneMin &&
+              avgDepth <= safetyStopZoneMax) {
             safetyStopTimeAccumulated += duration;
           }
         }
