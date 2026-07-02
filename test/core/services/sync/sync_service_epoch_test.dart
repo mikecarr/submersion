@@ -402,6 +402,54 @@ void main() {
       );
     });
 
+    test(
+      'after adoption with no local changes, performSync defers the self-base '
+      'publish',
+      () async {
+        await DiveRepository().createDive(
+          createTestDiveWithBottomTime(id: 'cloud-dive'),
+        );
+        await seedPeerLog(cloud, 'replacer', epochId: 'e1');
+        final service = buildService();
+        await service.writeLibraryEpochMarker(cloud, marker);
+        await service.adoptReplacedLibrary();
+
+        final result = await service.performSync();
+
+        // The sync itself succeeds (guards against a vacuous pass from an early
+        // error): our library == the adopted epoch (already published by
+        // 'replacer') and we have no local changes, so re-uploading our own
+        // full base would be pure redundancy -- the publish is deferred (no own
+        // manifest is written).
+        expect(result.isSuccess, isTrue);
+        final deviceId = await SyncRepository().getDeviceId();
+        expect(await hasPublishedLog(cloud, deviceId), isFalse);
+      },
+    );
+
+    test(
+      'after adoption, a local change re-enables the self-base publish',
+      () async {
+        await DiveRepository().createDive(
+          createTestDiveWithBottomTime(id: 'cloud-dive'),
+        );
+        await seedPeerLog(cloud, 'replacer', epochId: 'e1');
+        final service = buildService();
+        await service.writeLibraryEpochMarker(cloud, marker);
+        await service.adoptReplacedLibrary();
+
+        // A local edit means we now have something of our own to contribute, so
+        // the deferral clears and we publish a base.
+        await DiveRepository().createDive(
+          createTestDiveWithBottomTime(id: 'my-dive', maxDepth: 42),
+        );
+        await service.performSync();
+
+        final deviceId = await SyncRepository().getDeviceId();
+        expect(await hasPublishedLog(cloud, deviceId), isTrue);
+      },
+    );
+
     test('adoption preserves device identity', () async {
       await DiveRepository().createDive(
         createTestDiveWithBottomTime(id: 'cloud-dive'),

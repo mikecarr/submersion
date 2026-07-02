@@ -183,10 +183,13 @@ class SyncService {
   /// Assembles a peer's base parts into a temp file (per-part + whole-file
   /// checksum verified) for the bounded-memory replace-adopt (#358).
   final BasePartFileSink _baseSink = BasePartFileSink();
+  late final PublishStateStore _publishStateStore = PublishStateStore(
+    DatabaseService.instance.database,
+  );
   late final ChangesetWriter _changesetWriter = ChangesetWriter(
     _serializer,
     _changesetCodec,
-    PublishStateStore(DatabaseService.instance.database),
+    _publishStateStore,
   );
   late final ChangesetReader _changesetReader = ChangesetReader(
     _changesetCodec,
@@ -433,35 +436,47 @@ class SyncService {
       // ---- Upload: publish our delta ----
       _reportProgress(SyncPhase.uploading, 0.8, 'Publishing changes...');
       final deletions = await _syncRepository.getAllDeletions();
-      final uploadNonce = _uuid.v4();
-      // Record the nonce BEFORE publishing: a lost response (timeout, app
-      // death) still leaves our manifest carrying this nonce, and an
-      // unrecorded copy would read as a foreign twin on the next sync.
-      await _syncInitializer?.recordUploadNonce(
-        uploadNonce,
-        provider.providerId,
-      );
-      try {
-        await _changesetWriter.publish(
-          provider: provider,
-          deviceId: deviceId,
-          folderId: folderId,
-          deletions: deletions,
-          epochId: currentEpochId,
-          uploadNonce: uploadNonce,
+      if (await _shouldDeferSelfBaseAfterAdopt(provider.providerId)) {
+        // Just adopted a restored library and have nothing of our own yet: our
+        // library == the adopted epoch the peers already published. Publishing
+        // our own full base here would redundantly re-upload the whole library
+        // (#358, the slow first sync after adopt). Defer until we have a local
+        // change of our own to contribute (checked before the nonce so a
+        // deferred sync does not consume a nonce ring slot).
+        _log.info(
+          'Deferring redundant self-base publish after adopt (no local changes)',
         );
-      } catch (e) {
-        // Keep the speculative nonce on a timeout (the publish may have
-        // landed); remove it only on definite failures, so repeated hard
-        // failures cannot evict the last good nonce from the ring.
-        final cause = e is SyncStepException ? e.error : e;
-        if (cause is! TimeoutException) {
-          await _syncInitializer?.removeUploadNonce(
-            uploadNonce,
-            provider.providerId,
+      } else {
+        final uploadNonce = _uuid.v4();
+        // Record the nonce BEFORE publishing: a lost response (timeout, app
+        // death) still leaves our manifest carrying this nonce, and an
+        // unrecorded copy would read as a foreign twin on the next sync.
+        await _syncInitializer?.recordUploadNonce(
+          uploadNonce,
+          provider.providerId,
+        );
+        try {
+          await _changesetWriter.publish(
+            provider: provider,
+            deviceId: deviceId,
+            folderId: folderId,
+            deletions: deletions,
+            epochId: currentEpochId,
+            uploadNonce: uploadNonce,
           );
+        } catch (e) {
+          // Keep the speculative nonce on a timeout (the publish may have
+          // landed); remove it only on definite failures, so repeated hard
+          // failures cannot evict the last good nonce from the ring.
+          final cause = e is SyncStepException ? e.error : e;
+          if (cause is! TimeoutException) {
+            await _syncInitializer?.removeUploadNonce(
+              uploadNonce,
+              provider.providerId,
+            );
+          }
+          rethrow;
         }
-        rethrow;
       }
 
       // Advance state only on a clean apply (idempotent re-pull otherwise).
@@ -2116,6 +2131,14 @@ class SyncService {
           lastSeqApplied: c.appliedThrough,
         );
       }
+      // Record the deferred self-base marker: our library is now exactly the
+      // adopted epoch, which the peers already published. The next sync must
+      // NOT re-upload our own full base (a redundant copy) until we actually
+      // make a local change of our own (#358, the slow first sync after adopt).
+      await _publishStateStore.markAdoptedPendingBase(
+        provider.providerId,
+        await _syncRepository.maxRowHlc(),
+      );
       await _syncRepository.setLastAcceptedEpochId(marker.epochId);
       await store.setLastAccepted(marker);
       SyncClock.instance.reset();
@@ -2310,6 +2333,26 @@ class SyncService {
       changesets: changesets,
     ),
   );
+
+  /// True when we just adopted a restored library and have nothing of our own
+  /// to publish yet -- so the next sync must NOT re-upload our own full base, a
+  /// redundant copy of the epoch the peers already published (#358, the slow
+  /// first sync after adopt).
+  ///
+  /// The deferred marker is a publish-state row with a null `baseSeq`: adopt
+  /// records it, and the writer always sets `baseSeq` when it publishes, so a
+  /// null there uniquely means "adopted, no self-base yet". A device that has
+  /// published (baseSeq set -- including a cloud-manifest-lost cold-start that
+  /// legitimately re-bases) or never adopted (no row at all) falls straight
+  /// through and publishes normally. The deferral clears the moment we have any
+  /// local change: [SyncRepository.hasUnsyncedChanges] counts pending / conflict
+  /// / deletion rows, which are written in the same transaction as the edit, so
+  /// it is reliable even in the window before the HLC clock is reconfigured.
+  Future<bool> _shouldDeferSelfBaseAfterAdopt(String providerId) async {
+    final state = await _publishStateStore.get(providerId);
+    if (state == null || state.baseSeq != null) return false;
+    return !(await _syncRepository.hasUnsyncedChanges());
+  }
 
   /// Stream every epoch-stamped changeset log into adopt sources: each device's
   /// base assembled to a temp file (bounded memory, via [BasePartFileSink],
