@@ -3,15 +3,30 @@ import 'dart:async';
 import 'package:submersion/core/providers/provider.dart';
 
 import 'package:submersion/core/constants/units.dart';
+import 'package:submersion/features/dive_log/data/repositories/dive_repository_impl.dart';
 import 'package:submersion/features/dive_log/presentation/providers/dive_providers.dart';
 import 'package:submersion/features/divers/presentation/providers/diver_providers.dart';
 import 'package:submersion/features/settings/presentation/providers/settings_providers.dart';
 import 'package:submersion/features/statistics/data/repositories/statistics_repository.dart';
 import 'package:submersion/features/statistics/domain/entities/species_statistics.dart';
+import 'package:submersion/features/statistics/presentation/providers/statistics_filter_provider.dart';
 
 /// Repository provider
 final statisticsRepositoryProvider = Provider<StatisticsRepository>((ref) {
   return StatisticsRepository();
+});
+
+/// Overview totals scoped by the Statistics filter. Kept separate from
+/// diveStatisticsProvider so the home dashboard and dive-log summary (which
+/// read diveStatisticsProvider) stay unfiltered.
+final filteredDiveStatisticsProvider = FutureProvider<DiveStatistics>((
+  ref,
+) async {
+  final repository = ref.watch(diveRepositoryProvider);
+  final currentDiverId = ref.watch(currentDiverIdProvider);
+  final filter = ref.watch(statisticsFilterProvider);
+  ref.invalidateSelfWhen(repository.watchDivesChanges());
+  return repository.getStatistics(diverId: currentDiverId, filter: filter);
 });
 
 /// Adds keepAlive with a 5-minute expiry and watches the statistics version
