@@ -248,6 +248,7 @@ class DiveMergeBuilder {
       loopO2Avg: _firstNonNull(sorted, (d) => d.loopO2Avg),
       loopVolume: _firstNonNull(sorted, (d) => d.loopVolume),
       scrubber: _firstNonNull(sorted, (d) => d.scrubber),
+      courseId: _firstNonNull(sorted, (d) => d.courseId),
       importSource: _firstNonNull(sorted, (d) => d.importSource),
       importId: _firstNonNull(sorted, (d) => d.importId),
       windSpeed: _firstNonNull(sorted, (d) => d.windSpeed),

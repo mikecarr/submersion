@@ -215,6 +215,7 @@ void main() {
         waterTemp: 19.5,
         diveComputerModel: 'Perdix 2',
         diveNumber: 102,
+        courseId: 'course-1',
       );
       final merged = builder.build([b, a]).mergedDive; // unsorted input
       expect(merged.rating, 4); // a is chronologically first
@@ -222,6 +223,7 @@ void main() {
       expect(merged.diveComputerModel, 'Perdix 2');
       expect(merged.diveNumber, 101); // always the first dive's
       expect(merged.surfaceInterval, const Duration(hours: 2));
+      expect(merged.courseId, 'course-1'); // a has none -> filled from b
     });
 
     test('notes concatenate non-empty in order; favorite is OR', () {
