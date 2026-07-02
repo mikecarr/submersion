@@ -63,6 +63,9 @@ class DiveMergeBuilder {
     for (var i = 0; i < sorted.length - 1; i++) {
       final prev = sorted[i];
       final next = sorted[i + 1];
+      // A dive with no derivable duration is treated as zero-length: it has
+      // no profile samples, so nothing can overlap it. Deliberate (#449
+      // review).
       final prevEnd = prev.effectiveEntryTime.add(
         prev.effectiveRuntime ?? Duration.zero,
       );

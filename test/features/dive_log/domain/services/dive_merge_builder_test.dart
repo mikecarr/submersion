@@ -68,6 +68,22 @@ void main() {
       expect(seq.gaps.single.duration, const Duration(minutes: 30));
     });
 
+    test('a dive with no derivable duration is treated as zero-length', () {
+      // No runtime, no exitTime, no profile, no bottomTime: effectiveRuntime
+      // is null, so the dive is zero-length and cannot overlap anything.
+      final durationless = Dive(
+        id: 'a',
+        diverId: 'diver1',
+        dateTime: DateTime.utc(2026, 7, 1, 9),
+        entryTime: DateTime.utc(2026, 7, 1, 9),
+      );
+      final result = builder.classify([
+        durationless,
+        dive('b', entry: DateTime.utc(2026, 7, 1, 10)),
+      ]);
+      expect(result, isA<MergeSequential>());
+    });
+
     test('touching dives (gap == 0) are sequential with a zero gap', () {
       final result = builder.classify([
         dive('a', entry: DateTime.utc(2026, 7, 1, 9), runtimeMin: 60),
