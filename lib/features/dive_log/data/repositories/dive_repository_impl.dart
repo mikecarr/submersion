@@ -1782,7 +1782,7 @@ class DiveRepository {
     return getNextDiveNumber(diverId: diverId);
   }
 
-  /// Search dives by notes or buddy name
+  /// Search dives by name, notes, or buddy name
   Future<List<domain.Dive>> searchDives(String query, {String? diverId}) async {
     try {
       // Search across dive fields and all related tables in a single query.
