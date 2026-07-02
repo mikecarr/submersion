@@ -2868,6 +2868,60 @@ class AppLocalizationsHe extends AppLocalizations {
   }
 
   @override
+  String get diveLog_combine_confirm => 'Combine into one dive';
+
+  @override
+  String get diveLog_combine_dataNote =>
+      'Details come from the earliest dive, with blanks filled from later dives. Notes are combined. Tanks, gear, buddies, tags, and sightings are all kept.';
+
+  @override
+  String diveLog_combine_gapLabel(String duration) {
+    return 'Surface interval: $duration';
+  }
+
+  @override
+  String get diveLog_combine_mixedDivers =>
+      'The selected dives belong to different divers and can\'t be combined.';
+
+  @override
+  String get diveLog_combine_overlapBody =>
+      'Overlapping dives look like the same dive recorded by multiple dive computers. Combining those into a single entry that shows every computer\'s data is coming in a future release.';
+
+  @override
+  String get diveLog_combine_overlapHintTwoDives =>
+      'To merge two records of the same dive now, open one of them and use \"Merge with another dive\".';
+
+  @override
+  String get diveLog_combine_overlapTitle => 'These dives overlap in time';
+
+  @override
+  String diveLog_combine_previewIntro(int count) {
+    return 'These $count dives will be combined into one continuous dive. Gaps between them become surface time.';
+  }
+
+  @override
+  String diveLog_combine_resultSummary(String runtime, String maxDepth) {
+    return 'Result: $runtime total, max depth $maxDepth';
+  }
+
+  @override
+  String diveLog_combine_snackbar(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'dives',
+      one: 'dive',
+    );
+    return 'Combined $count $_temp0';
+  }
+
+  @override
+  String get diveLog_combine_title => 'Combine dives';
+
+  @override
+  String get diveLog_combine_undone => 'Combine undone';
+
+  @override
   String get diveLog_computerSheet_description =>
       'בחר מאיזה פרופיל מחשב לערוך.';
 
@@ -4882,6 +4936,9 @@ class AppLocalizationsHe extends AppLocalizations {
   String diveLog_selection_countSelected(Object count) {
     return '$count נבחרו';
   }
+
+  @override
+  String get diveLog_selection_tooltip_combine => 'Combine';
 
   @override
   String get diveLog_selection_tooltip_delete => 'מחק נבחרים';

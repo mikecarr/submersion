@@ -5009,6 +5009,78 @@ abstract class AppLocalizations {
   /// **'Expand {title} section'**
   String diveLog_collapsible_semantics_expand(Object title);
 
+  /// No description provided for @diveLog_combine_confirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Combine into one dive'**
+  String get diveLog_combine_confirm;
+
+  /// No description provided for @diveLog_combine_dataNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Details come from the earliest dive, with blanks filled from later dives. Notes are combined. Tanks, gear, buddies, tags, and sightings are all kept.'**
+  String get diveLog_combine_dataNote;
+
+  /// No description provided for @diveLog_combine_gapLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Surface interval: {duration}'**
+  String diveLog_combine_gapLabel(String duration);
+
+  /// No description provided for @diveLog_combine_mixedDivers.
+  ///
+  /// In en, this message translates to:
+  /// **'The selected dives belong to different divers and can\'t be combined.'**
+  String get diveLog_combine_mixedDivers;
+
+  /// No description provided for @diveLog_combine_overlapBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Overlapping dives look like the same dive recorded by multiple dive computers. Combining those into a single entry that shows every computer\'s data is coming in a future release.'**
+  String get diveLog_combine_overlapBody;
+
+  /// No description provided for @diveLog_combine_overlapHintTwoDives.
+  ///
+  /// In en, this message translates to:
+  /// **'To merge two records of the same dive now, open one of them and use \"Merge with another dive\".'**
+  String get diveLog_combine_overlapHintTwoDives;
+
+  /// No description provided for @diveLog_combine_overlapTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'These dives overlap in time'**
+  String get diveLog_combine_overlapTitle;
+
+  /// No description provided for @diveLog_combine_previewIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'These {count} dives will be combined into one continuous dive. Gaps between them become surface time.'**
+  String diveLog_combine_previewIntro(int count);
+
+  /// No description provided for @diveLog_combine_resultSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Result: {runtime} total, max depth {maxDepth}'**
+  String diveLog_combine_resultSummary(String runtime, String maxDepth);
+
+  /// No description provided for @diveLog_combine_snackbar.
+  ///
+  /// In en, this message translates to:
+  /// **'Combined {count} {count, plural, =1{dive} other{dives}}'**
+  String diveLog_combine_snackbar(int count);
+
+  /// No description provided for @diveLog_combine_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Combine dives'**
+  String get diveLog_combine_title;
+
+  /// No description provided for @diveLog_combine_undone.
+  ///
+  /// In en, this message translates to:
+  /// **'Combine undone'**
+  String get diveLog_combine_undone;
+
   /// Description of the computer profile selection sheet
   ///
   /// In en, this message translates to:
@@ -8523,6 +8595,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count} selected'**
   String diveLog_selection_countSelected(Object count);
+
+  /// No description provided for @diveLog_selection_tooltip_combine.
+  ///
+  /// In en, this message translates to:
+  /// **'Combine'**
+  String get diveLog_selection_tooltip_combine;
 
   /// No description provided for @diveLog_selection_tooltip_delete.
   ///
