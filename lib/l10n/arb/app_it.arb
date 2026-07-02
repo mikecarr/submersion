@@ -1207,6 +1207,8 @@
   "diveLog_edit_label_diveTypes": "Dive Types",
   "diveLog_edit_label_diveNumber": "N. immersione",
   "diveLog_edit_hint_diveNumber": "Assegnato automaticamente se lasciato vuoto",
+  "diveLog_edit_label_diveName": "Nome",
+  "diveLog_edit_diveNamePlaceholder": "Nome facoltativo per questa immersione",
   "diveLog_edit_label_entryMethod": "Metodo di ingresso",
   "diveLog_edit_label_exitMethod": "Metodo di uscita",
   "diveLog_edit_label_maxDepth": "Profondita massima",

@@ -3621,6 +3621,13 @@ class AppLocalizationsNl extends AppLocalizations {
   String get diveLog_edit_label_diveNumber => 'Duik nr.';
 
   @override
+  String get diveLog_edit_label_diveName => 'Naam';
+
+  @override
+  String get diveLog_edit_diveNamePlaceholder =>
+      'Optionele naam voor deze duik';
+
+  @override
   String get diveLog_edit_hint_diveNumber =>
       'Automatisch toegewezen als leeg gelaten';
 

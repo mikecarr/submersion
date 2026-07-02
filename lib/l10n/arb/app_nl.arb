@@ -1241,6 +1241,8 @@
   "diveLog_edit_label_diveTypes": "Dive Types",
   "diveLog_edit_label_diveNumber": "Duik nr.",
   "diveLog_edit_hint_diveNumber": "Automatisch toegewezen als leeg gelaten",
+  "diveLog_edit_label_diveName": "Naam",
+  "diveLog_edit_diveNamePlaceholder": "Optionele naam voor deze duik",
   "diveLog_edit_label_entryMethod": "Instapmethode",
   "diveLog_edit_label_exitMethod": "Uitstapmethode",
   "diveLog_edit_label_maxDepth": "Max diepte",

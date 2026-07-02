@@ -1241,6 +1241,8 @@
   "diveLog_edit_label_diveTypes": "Dive Types",
   "diveLog_edit_label_diveNumber": "No. do Mergulho",
   "diveLog_edit_hint_diveNumber": "Atribuido automaticamente se deixado em branco",
+  "diveLog_edit_label_diveName": "Nome",
+  "diveLog_edit_diveNamePlaceholder": "Nome opcional para este mergulho",
   "diveLog_edit_label_entryMethod": "Metodo de Entrada",
   "diveLog_edit_label_exitMethod": "Metodo de Saida",
   "diveLog_edit_label_maxDepth": "Prof. Maxima",

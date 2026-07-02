@@ -831,4 +831,83 @@ void main() {
       }
     });
   });
+
+  group('DiveField.diveName', () {
+    test('extractFromSummary returns the name when set', () {
+      final summary = DiveSummary(
+        id: 'd1',
+        dateTime: now,
+        name: 'Wreck penetration dive',
+        siteName: 'Blue Hole',
+        sortTimestamp: 0,
+      );
+      expect(
+        DiveField.diveName.extractFromSummary(summary),
+        'Wreck penetration dive',
+      );
+    });
+
+    test('extractFromSummary falls back to the site name when unnamed', () {
+      final summary = DiveSummary(
+        id: 'd1',
+        dateTime: now,
+        siteName: 'Blue Hole',
+        sortTimestamp: 0,
+      );
+      expect(DiveField.diveName.extractFromSummary(summary), 'Blue Hole');
+    });
+
+    test('extractFromSummary returns null when name and site are absent', () {
+      final summary = DiveSummary(id: 'd1', dateTime: now, sortTimestamp: 0);
+      expect(DiveField.diveName.extractFromSummary(summary), isNull);
+    });
+
+    test('extractFromDive falls back to site name', () {
+      final named = Dive(id: 'd1', dateTime: now, name: 'Training 1');
+      final unnamed = Dive(id: 'd2', dateTime: now, site: testSite);
+      expect(DiveField.diveName.extractFromDive(named), 'Training 1');
+      expect(DiveField.diveName.extractFromDive(unnamed), 'Blue Hole');
+    });
+
+    test('extractFromDive returns null when name and site are absent', () {
+      final bare = Dive(id: 'd1', dateTime: now);
+      expect(DiveField.diveName.extractFromDive(bare), isNull);
+    });
+
+    test('whitespace-only name behaves as unset (falls back to site)', () {
+      // In-app writes trim to null, but synced rows from other writers can
+      // carry empty/whitespace names; the display fallback must not show a
+      // blank title.
+      final wsDive = Dive(id: 'd1', dateTime: now, name: '   ', site: testSite);
+      expect(DiveField.diveName.extractFromDive(wsDive), 'Blue Hole');
+
+      final wsSummary = DiveSummary(
+        id: 'd1',
+        dateTime: now,
+        name: '   ',
+        siteName: 'Blue Hole',
+        sortTimestamp: 0,
+      );
+      expect(DiveField.diveName.extractFromSummary(wsSummary), 'Blue Hole');
+
+      final emptySummary = DiveSummary(
+        id: 'd2',
+        dateTime: now,
+        name: '',
+        sortTimestamp: 0,
+      );
+      expect(DiveField.diveName.extractFromSummary(emptySummary), isNull);
+    });
+
+    test('name with surrounding whitespace is trimmed for display', () {
+      final padded = Dive(id: 'd1', dateTime: now, name: '  Night dive  ');
+      expect(DiveField.diveName.extractFromDive(padded), 'Night dive');
+    });
+
+    test('diveName is a summary field in the core category', () {
+      expect(DiveField.summaryFields, contains(DiveField.diveName));
+      expect(DiveField.diveName.category, DiveFieldCategory.core);
+      expect(DiveField.diveName.displayName, 'Dive Name');
+    });
+  });
 }

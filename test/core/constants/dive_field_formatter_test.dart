@@ -415,6 +415,7 @@ void main() {
         DiveField.diveNumber: 1,
         DiveField.dateTime: DateTime(2024, 1, 1),
         DiveField.siteName: 'Site',
+        DiveField.diveName: 'Dive',
         DiveField.maxDepth: 10.0,
         DiveField.avgDepth: 5.0,
         DiveField.bottomTime: const Duration(minutes: 30),

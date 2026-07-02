@@ -1207,6 +1207,8 @@
   "diveLog_edit_label_diveTypes": "Dive Types",
   "diveLog_edit_label_diveNumber": "מס' צלילה",
   "diveLog_edit_hint_diveNumber": "מוקצה אוטומטית אם נותר ריק",
+  "diveLog_edit_label_diveName": "שם",
+  "diveLog_edit_diveNamePlaceholder": "שם אופציונלי לצלילה זו",
   "diveLog_edit_label_entryMethod": "שיטת כניסה",
   "diveLog_edit_label_exitMethod": "שיטת יציאה",
   "diveLog_edit_label_maxDepth": "עומק מרבי",
