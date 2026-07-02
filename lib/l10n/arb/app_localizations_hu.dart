@@ -929,6 +929,37 @@ class AppLocalizationsHu extends AppLocalizations {
       'Nincs elég búvártárs az összevonáshoz.';
 
   @override
+  String get buddies_section_professionalRoles => 'Szakmai szerepek';
+
+  @override
+  String get buddies_roles_addRole => 'Szerep hozzáadása';
+
+  @override
+  String get buddies_roles_role => 'Szerep';
+
+  @override
+  String get buddies_roles_agency => 'Szervezet';
+
+  @override
+  String get buddies_roles_credentialNumber => 'Igazolványszám';
+
+  @override
+  String get buddies_roles_removeTooltip => 'Szerep eltávolítása';
+
+  @override
+  String get buddies_roles_emptyHint =>
+      'Adja hozzá az oktatói vagy divemaster képesítéseket, hogy újra felhasználhassa őket képesítések és tanfolyamok rögzítésekor.';
+
+  @override
+  String get buddies_instructorPicker_label => 'Oktató a búvártársak közül';
+
+  @override
+  String get buddies_instructorPicker_none => 'Nincs (kézi bevitel)';
+
+  @override
+  String get buddies_detail_section_professionalRoles => 'Szakmai szerepek';
+
+  @override
   String get certifications_appBar_addCertification => 'Kepesites hozzaadasa';
 
   @override

@@ -890,6 +890,36 @@ class AppLocalizationsZh extends AppLocalizations {
   String get buddies_edit_merge_notEnoughBody => '潜伴数量不足，无法合并。';
 
   @override
+  String get buddies_section_professionalRoles => '专业角色';
+
+  @override
+  String get buddies_roles_addRole => '添加角色';
+
+  @override
+  String get buddies_roles_role => '角色';
+
+  @override
+  String get buddies_roles_agency => '机构';
+
+  @override
+  String get buddies_roles_credentialNumber => '资质编号';
+
+  @override
+  String get buddies_roles_removeTooltip => '移除角色';
+
+  @override
+  String get buddies_roles_emptyHint => '添加教练或潜水长资质，以便在记录认证和课程时重复使用。';
+
+  @override
+  String get buddies_instructorPicker_label => '来自潜伴的教练';
+
+  @override
+  String get buddies_instructorPicker_none => '无（手动输入）';
+
+  @override
+  String get buddies_detail_section_professionalRoles => '专业角色';
+
+  @override
   String get certifications_appBar_addCertification => '添加证书';
 
   @override

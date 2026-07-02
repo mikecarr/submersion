@@ -915,6 +915,37 @@ class AppLocalizationsEn extends AppLocalizations {
   String get buddies_edit_merge_notEnoughBody => 'Not enough buddies to merge.';
 
   @override
+  String get buddies_section_professionalRoles => 'Professional Roles';
+
+  @override
+  String get buddies_roles_addRole => 'Add role';
+
+  @override
+  String get buddies_roles_role => 'Role';
+
+  @override
+  String get buddies_roles_agency => 'Agency';
+
+  @override
+  String get buddies_roles_credentialNumber => 'Credential number';
+
+  @override
+  String get buddies_roles_removeTooltip => 'Remove role';
+
+  @override
+  String get buddies_roles_emptyHint =>
+      'Add instructor or divemaster credentials to reuse them when logging certifications and courses.';
+
+  @override
+  String get buddies_instructorPicker_label => 'Instructor from buddies';
+
+  @override
+  String get buddies_instructorPicker_none => 'None (manual entry)';
+
+  @override
+  String get buddies_detail_section_professionalRoles => 'Professional Roles';
+
+  @override
   String get certifications_appBar_addCertification => 'Add Certification';
 
   @override

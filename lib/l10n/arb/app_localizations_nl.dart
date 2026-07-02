@@ -922,6 +922,37 @@ class AppLocalizationsNl extends AppLocalizations {
       'Niet genoeg buddies om samen te voegen.';
 
   @override
+  String get buddies_section_professionalRoles => 'Professionele rollen';
+
+  @override
+  String get buddies_roles_addRole => 'Rol toevoegen';
+
+  @override
+  String get buddies_roles_role => 'Rol';
+
+  @override
+  String get buddies_roles_agency => 'Organisatie';
+
+  @override
+  String get buddies_roles_credentialNumber => 'Registratienummer';
+
+  @override
+  String get buddies_roles_removeTooltip => 'Rol verwijderen';
+
+  @override
+  String get buddies_roles_emptyHint =>
+      'Voeg instructeur- of divemasterkwalificaties toe, zodat je ze kunt hergebruiken bij het registreren van certificeringen en cursussen.';
+
+  @override
+  String get buddies_instructorPicker_label => 'Instructeur uit buddy\'s';
+
+  @override
+  String get buddies_instructorPicker_none => 'Geen (handmatige invoer)';
+
+  @override
+  String get buddies_detail_section_professionalRoles => 'Professionele rollen';
+
+  @override
   String get certifications_appBar_addCertification =>
       'Certificering toevoegen';
 
