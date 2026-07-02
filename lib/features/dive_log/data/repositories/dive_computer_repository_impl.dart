@@ -1051,6 +1051,7 @@ class DiveComputerRepository {
               DiveTanksCompanion(
                 id: Value(tankId),
                 diveId: Value(diveId),
+                computerId: Value(computerId),
                 volume: Value(tank.volumeLiters),
                 startPressure: Value(tank.startPressure),
                 endPressure: Value(tank.endPressure),
@@ -1111,6 +1112,7 @@ class DiveComputerRepository {
                   id: _uuid.v4(),
                   diveId: diveId,
                   tankId: tankId,
+                  computerId: Value(computerId),
                   timestamp: point.timestamp,
                   pressure: point.pressure,
                 ),
@@ -1212,6 +1214,7 @@ class DiveComputerRepository {
               DiveProfileEventsCompanion(
                 id: Value(_uuid.v4()),
                 diveId: Value(diveId),
+                computerId: Value(computerId),
                 timestamp: Value(event.timestamp),
                 eventType: Value(eventType),
                 severity: Value(_eventSeverity(eventType)),
