@@ -1,0 +1,167 @@
+import 'package:flutter_test/flutter_test.dart';
+import 'package:submersion/core/services/database_service.dart';
+import 'package:submersion/core/services/sync/sync_data_serializer.dart';
+
+import '../../../helpers/test_database.dart';
+
+/// Sync replication for `buddy_roles` (professional credentials attached to a
+/// buddy -- instructor, divemaster, dive guide; issue #395).
+///
+/// Like `dive_dive_types` (#414), this is a surrogate-UUID-keyed table, but it
+/// carries its own `hlc` column (mirroring `buddies`) rather than being a
+/// clockless append-only child, so its export uses the simple hlc-filter
+/// pattern instead of gathering by an HLC parent.
+void main() {
+  group('buddy_roles sync (#395)', () {
+    setUp(() async {
+      await setUpTestDatabase();
+    });
+
+    tearDown(() async {
+      await tearDownTestDatabase();
+    });
+
+    // Hlc string with a given physical-time component (counter 0), matching
+    // the canonical zero-padded form the row-level `isBiggerThanValue` filter
+    // compares against.
+    String hlcAt(int physical, String node) =>
+        '${physical.toString().padLeft(15, '0')}:000000:$node';
+
+    Map<String, dynamic> buddyRow(String id) => {
+      'id': id,
+      'diverId': null,
+      'name': 'Buddy $id',
+      'email': null,
+      'phone': null,
+      'certificationLevel': null,
+      'certificationAgency': null,
+      'photoPath': null,
+      'notes': '',
+      'createdAt': 1000,
+      'updatedAt': 1000,
+      'hlc': null,
+    };
+
+    Map<String, dynamic> buddyRoleRow(
+      String id,
+      String buddyId, {
+      required String hlc,
+      String role = 'instructor',
+      String? credentialNumber,
+      String? agency,
+    }) => {
+      'id': id,
+      'buddyId': buddyId,
+      'role': role,
+      'credentialNumber': credentialNumber,
+      'agency': agency,
+      'notes': '',
+      'createdAt': 1000,
+      'updatedAt': 1000,
+      'hlc': hlc,
+    };
+
+    test('export includes a buddy_roles row', () async {
+      final serializer = SyncDataSerializer();
+      await serializer.upsertRecord('buddies', buddyRow('buddy-1'));
+      await serializer.upsertRecord(
+        'buddyRoles',
+        buddyRoleRow(
+          'role-1',
+          'buddy-1',
+          hlc: hlcAt(1000, 'dev-a'),
+          credentialNumber: 'ABC123',
+          agency: 'padi',
+        ),
+      );
+
+      final payload = await serializer.exportData(
+        deviceId: 'dev-a',
+        deletions: const [],
+      );
+
+      final ids = payload.data.buddyRoles.map((r) => r['id']).toSet();
+      expect(
+        ids,
+        contains('role-1'),
+        reason: 'a buddy_roles row must appear in the exported payload',
+      );
+    });
+
+    test(
+      'round trip: wipe and re-import restores role, credentialNumber, agency',
+      () async {
+        final serializer = SyncDataSerializer();
+        await serializer.upsertRecord('buddies', buddyRow('buddy-1'));
+        await serializer.upsertRecord(
+          'buddyRoles',
+          buddyRoleRow(
+            'role-1',
+            'buddy-1',
+            hlc: hlcAt(1000, 'dev-a'),
+            role: 'divemaster',
+            credentialNumber: 'DM-42',
+            agency: 'ssi',
+          ),
+        );
+
+        final payload = await serializer.exportData(
+          deviceId: 'dev-a',
+          deletions: const [],
+        );
+        final exportedRow = payload.data.buddyRoles.singleWhere(
+          (r) => r['id'] == 'role-1',
+        );
+
+        final db = DatabaseService.instance.database;
+        await serializer.deleteAllRecords('buddyRoles');
+        expect(
+          await (db.select(
+            db.buddyRoles,
+          )..where((t) => t.id.equals('role-1'))).getSingleOrNull(),
+          isNull,
+          reason: 'sanity: the wipe actually removed the row',
+        );
+
+        await serializer.upsertRecord('buddyRoles', exportedRow);
+
+        final restored = await (db.select(
+          db.buddyRoles,
+        )..where((t) => t.id.equals('role-1'))).getSingle();
+        expect(restored.role, 'divemaster');
+        expect(restored.credentialNumber, 'DM-42');
+        expect(restored.agency, 'ssi');
+      },
+    );
+
+    test(
+      'incremental export: only rows with hlc > watermark are included',
+      () async {
+        final serializer = SyncDataSerializer();
+        await serializer.upsertRecord('buddies', buddyRow('buddy-1'));
+        await serializer.upsertRecord(
+          'buddyRoles',
+          buddyRoleRow('role-old', 'buddy-1', hlc: hlcAt(1000, 'dev-a')),
+        );
+        await serializer.upsertRecord(
+          'buddyRoles',
+          buddyRoleRow('role-new', 'buddy-1', hlc: hlcAt(9000, 'dev-a')),
+        );
+
+        final changeset = await serializer.exportChangeset(
+          deviceId: 'dev-a',
+          hlcWatermark: hlcAt(5000, 'dev-a'),
+          deletions: const [],
+        );
+
+        final ids = changeset.data.buddyRoles.map((r) => r['id']).toSet();
+        expect(ids, contains('role-new'));
+        expect(
+          ids,
+          isNot(contains('role-old')),
+          reason: 'a buddy_role at/below the watermark must not be re-sent',
+        );
+      },
+    );
+  });
+}
