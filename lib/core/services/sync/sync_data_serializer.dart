@@ -1372,6 +1372,11 @@ class SyncDataSerializer {
           _db.buddies,
         )..where((t) => t.id.isIn(idList))).get();
         return {for (final r in rows) r.id: r.toJson()};
+      case 'buddyRoles':
+        final rows = await (_db.select(
+          _db.buddyRoles,
+        )..where((t) => t.id.isIn(idList))).get();
+        return {for (final r in rows) r.id: r.toJson()};
       case 'diveCenters':
         final rows = await (_db.select(
           _db.diveCenters,

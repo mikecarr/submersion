@@ -1,7 +1,14 @@
+import 'dart:convert';
+
+import 'package:crypto/crypto.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:submersion/core/data/repositories/sync_repository.dart';
 import 'package:submersion/core/services/database_service.dart';
 import 'package:submersion/core/services/sync/sync_data_serializer.dart';
+import 'package:submersion/core/services/sync/sync_service.dart';
 
+import '../../../helpers/changeset_test_helpers.dart';
+import '../../../helpers/fake_cloud_storage_provider.dart';
 import '../../../helpers/test_database.dart';
 
 /// Sync replication for `buddy_roles` (professional credentials attached to a
@@ -161,6 +168,61 @@ void main() {
           isNot(contains('role-old')),
           reason: 'a buddy_role at/below the watermark must not be re-sent',
         );
+      },
+    );
+
+    test(
+      'end to end: a peer-published credential replicates via performSync',
+      () async {
+        // Device A (the peer) published a buddy plus an instructor credential;
+        // this device pulls both down through the real sync pipeline
+        // (mergeOrder, entityHasUpdatedAt, fetchRecords, parentRefs).
+        final cloud = FakeCloudStorageProvider();
+        final data = SyncData(
+          buddies: [buddyRow('buddy-1')],
+          buddyRoles: [
+            buddyRoleRow(
+              'role-1',
+              'buddy-1',
+              hlc: hlcAt(1000, 'peer-dev'),
+              role: 'instructor',
+              credentialNumber: 'INST-99',
+              agency: 'padi',
+            ),
+          ],
+        );
+        final payload = SyncPayload(
+          version: syncFormatVersion,
+          exportedAt: 9000,
+          deviceId: 'peer-dev',
+          checksum: sha256
+              .convert(utf8.encode(jsonEncode(data.toJson())))
+              .toString(),
+          data: data,
+          deletions: const {},
+        );
+        await seedPeerBaseFromPayload(cloud, 'peer-dev', payload);
+
+        final result = await SyncService(
+          syncRepository: SyncRepository(),
+          serializer: SyncDataSerializer(),
+          cloudProvider: cloud,
+        ).performSync();
+        expect(result.status, isNot(SyncResultStatus.error));
+
+        final db = DatabaseService.instance.database;
+        final restored = await (db.select(
+          db.buddyRoles,
+        )..where((t) => t.id.equals('role-1'))).getSingleOrNull();
+        expect(
+          restored,
+          isNotNull,
+          reason: 'a peer-published credential must replicate to this device',
+        );
+        expect(restored!.buddyId, 'buddy-1');
+        expect(restored.role, 'instructor');
+        expect(restored.credentialNumber, 'INST-99');
+        expect(restored.agency, 'padi');
       },
     );
   });
