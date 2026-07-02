@@ -1705,9 +1705,10 @@
   "diveLog_combine_overlapHintTwoDives": "To merge two records of the same dive now, open one of them and use \"Merge with another dive\".",
   "diveLog_combine_overlapTitle": "These dives overlap in time",
   "diveLog_combine_previewIntro": "These {count} dives will be combined into one continuous dive. Gaps between them become surface time.",
-  "diveLog_combine_resultSummary": "Result: {runtime} total, max depth {maxDepth}",
+  "diveLog_combine_resultSummary": "Result: {runtime} total, max depth {maxDepth}, {bottomTime} bottom time",
   "diveLog_combine_snackbar": "Combined {count} {count, plural, =1{dive} other{dives}}",
   "diveLog_combine_title": "Combine dives",
+  "diveLog_combine_undoError": "Couldn't undo the combine.",
   "diveLog_combine_undone": "Combine undone",
   "diveLog_computerSheet_description": "Select which computer's profile to edit from.",
   "@diveLog_computerSheet_description": {"description": "Description of the computer profile selection sheet"},
@@ -2595,6 +2596,9 @@
         "type": "String"
       },
       "maxDepth": {
+        "type": "String"
+      },
+      "bottomTime": {
         "type": "String"
       }
     }

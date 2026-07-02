@@ -2992,8 +2992,12 @@ class AppLocalizationsIt extends AppLocalizations {
   }
 
   @override
-  String diveLog_combine_resultSummary(String runtime, String maxDepth) {
-    return 'Risultato: $runtime totali, profondità massima $maxDepth';
+  String diveLog_combine_resultSummary(
+    String runtime,
+    String maxDepth,
+    String bottomTime,
+  ) {
+    return 'Risultato: $runtime totali, profondità massima $maxDepth, tempo di fondo $bottomTime';
   }
 
   @override
@@ -3009,6 +3013,9 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get diveLog_combine_title => 'Unisci immersioni';
+
+  @override
+  String get diveLog_combine_undoError => 'Impossibile annullare l\'unione.';
 
   @override
   String get diveLog_combine_undone => 'Unione annullata';

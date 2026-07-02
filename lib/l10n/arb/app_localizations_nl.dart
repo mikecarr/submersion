@@ -2966,8 +2966,12 @@ class AppLocalizationsNl extends AppLocalizations {
   }
 
   @override
-  String diveLog_combine_resultSummary(String runtime, String maxDepth) {
-    return 'Resultaat: $runtime totaal, maximale diepte $maxDepth';
+  String diveLog_combine_resultSummary(
+    String runtime,
+    String maxDepth,
+    String bottomTime,
+  ) {
+    return 'Resultaat: $runtime totaal, maximale diepte $maxDepth, bodemtijd $bottomTime';
   }
 
   @override
@@ -2983,6 +2987,10 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get diveLog_combine_title => 'Duiken samenvoegen';
+
+  @override
+  String get diveLog_combine_undoError =>
+      'Kon het samenvoegen niet ongedaan maken.';
 
   @override
   String get diveLog_combine_undone => 'Samenvoeging ongedaan gemaakt';

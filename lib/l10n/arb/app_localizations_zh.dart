@@ -2839,8 +2839,12 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String diveLog_combine_resultSummary(String runtime, String maxDepth) {
-    return '结果：总计 $runtime，最大深度 $maxDepth';
+  String diveLog_combine_resultSummary(
+    String runtime,
+    String maxDepth,
+    String bottomTime,
+  ) {
+    return '结果：总计 $runtime，最大深度 $maxDepth，底部时间 $bottomTime';
   }
 
   @override
@@ -2856,6 +2860,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get diveLog_combine_title => '合并潜水';
+
+  @override
+  String get diveLog_combine_undoError => '无法撤消合并。';
 
   @override
   String get diveLog_combine_undone => '已撤消合并';

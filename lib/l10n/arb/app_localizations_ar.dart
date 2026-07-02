@@ -2920,8 +2920,12 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String diveLog_combine_resultSummary(String runtime, String maxDepth) {
-    return 'النتيجة: $runtime إجمالاً، أقصى عمق $maxDepth';
+  String diveLog_combine_resultSummary(
+    String runtime,
+    String maxDepth,
+    String bottomTime,
+  ) {
+    return 'النتيجة: $runtime إجمالاً، أقصى عمق $maxDepth، ووقت القاع $bottomTime';
   }
 
   @override
@@ -2937,6 +2941,9 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get diveLog_combine_title => 'دمج الغوصات';
+
+  @override
+  String get diveLog_combine_undoError => 'تعذّر التراجع عن الدمج.';
 
   @override
   String get diveLog_combine_undone => 'تم التراجع عن الدمج';

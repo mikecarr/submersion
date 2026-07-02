@@ -148,6 +148,9 @@ class _CombineDivesDialogState extends ConsumerState<CombineDivesDialog> {
             context.l10n.diveLog_combine_resultSummary(
               _formatDuration(result.mergedDive.runtime ?? Duration.zero),
               units.formatDepth(result.mergedDive.maxDepth),
+              result.mergedDive.bottomTime != null
+                  ? _formatDuration(result.mergedDive.bottomTime!)
+                  : '--',
             ),
             style: textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
           ),

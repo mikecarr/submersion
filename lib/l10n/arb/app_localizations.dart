@@ -5066,8 +5066,12 @@ abstract class AppLocalizations {
   /// No description provided for @diveLog_combine_resultSummary.
   ///
   /// In en, this message translates to:
-  /// **'Result: {runtime} total, max depth {maxDepth}'**
-  String diveLog_combine_resultSummary(String runtime, String maxDepth);
+  /// **'Result: {runtime} total, max depth {maxDepth}, {bottomTime} bottom time'**
+  String diveLog_combine_resultSummary(
+    String runtime,
+    String maxDepth,
+    String bottomTime,
+  );
 
   /// No description provided for @diveLog_combine_snackbar.
   ///
@@ -5080,6 +5084,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Combine dives'**
   String get diveLog_combine_title;
+
+  /// No description provided for @diveLog_combine_undoError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t undo the combine.'**
+  String get diveLog_combine_undoError;
 
   /// No description provided for @diveLog_combine_undone.
   ///

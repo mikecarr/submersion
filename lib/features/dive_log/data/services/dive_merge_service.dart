@@ -96,6 +96,29 @@ class DiveMergeService {
     );
   }
 
+  /// Returns the first non-null [pick] value in chronological order, or
+  /// null if none of [orderedRows] has one.
+  T? _firstNonNullDiveColumn<T>(
+    List<Dive> orderedRows,
+    T? Function(Dive) pick,
+  ) {
+    for (final row in orderedRows) {
+      final value = pick(row);
+      if (value != null) return value;
+    }
+    return null;
+  }
+
+  /// The first profile row belonging to source dive [diveId] that carries a
+  /// computerId, used to attribute synthesized gap samples to the correct
+  /// source (#449 review F1).
+  DiveProfile? _adjacentProfileRow(List<DiveProfile> rows, String diveId) {
+    for (final row in rows) {
+      if (row.diveId == diveId && row.computerId != null) return row;
+    }
+    return null;
+  }
+
   /// Merges [diveIds] into one new dive inside a single transaction.
   ///
   /// Throws [ArgumentError] (via [DiveMergeBuilder.build]) if the selection
@@ -142,6 +165,40 @@ class DiveMergeService {
       //    fields, profile=[], equipment, tags, dive types).
       await _diveRepo.createDive(result.mergedDive);
 
+      // 1b. Columns the domain Dive entity has no field for (computerId,
+      //     importVersion, cnsStart/cnsEnd/otu) never travel through
+      //     createDive's round-trip through the domain layer, so backfill
+      //     them directly from the source rows here, chronologically
+      //     (sortedSources order), first-non-null wins per column. Same
+      //     transaction/record as createDive's write above, so no separate
+      //     markRecordPending is needed.
+      final chronologicalDiveRows = [
+        for (final source in result.sortedSources)
+          snapshot.diveRows.firstWhere((r) => r.id == source.id),
+      ];
+      await (_db.update(_db.dives)..where((t) => t.id.equals(mergedId))).write(
+        DivesCompanion(
+          computerId: Value(
+            _firstNonNullDiveColumn(chronologicalDiveRows, (r) => r.computerId),
+          ),
+          importVersion: Value(
+            _firstNonNullDiveColumn(
+              chronologicalDiveRows,
+              (r) => r.importVersion,
+            ),
+          ),
+          // cnsStart is NOT NULL (default 0), so the earliest source's value
+          // is always the "first non-null" one.
+          cnsStart: Value(chronologicalDiveRows.first.cnsStart),
+          cnsEnd: Value(
+            _firstNonNullDiveColumn(chronologicalDiveRows, (r) => r.cnsEnd),
+          ),
+          otu: Value(
+            _firstNonNullDiveColumn(chronologicalDiveRows, (r) => r.otu),
+          ),
+        ),
+      );
+
       // 2. Profile rows copied directly (preserves computerId/isPrimary/
       //    temperature/sensor columns), re-based onto the merged timeline.
       await _db.batch((batch) {
@@ -159,8 +216,14 @@ class DiveMergeService {
           );
         }
         // 3. Synthesized 0-depth samples at gap boundaries (skip tiny gaps).
+        //    Stamped with the adjacent segment's computerId/isPrimary so
+        //    getProfilesBySource (dive_repository_impl.dart) doesn't see a
+        //    bogus extra 'original' source next to the real computer's rows.
         for (final gap in result.gaps) {
           if (gap.endSeconds - gap.startSeconds < 2) continue;
+          final adjacent =
+              _adjacentProfileRow(snapshot.profileRows, gap.afterDiveId) ??
+              _adjacentProfileRow(snapshot.profileRows, gap.beforeDiveId);
           for (final ts in [gap.startSeconds + 1, gap.endSeconds - 1]) {
             batch.insert(
               _db.diveProfiles,
@@ -169,14 +232,18 @@ class DiveMergeService {
                 diveId: mergedId,
                 timestamp: ts,
                 depth: 0,
+                computerId: Value(adjacent?.computerId),
+                isPrimary: Value(adjacent?.isPrimary ?? true),
               ),
             );
           }
         }
       });
 
-      // 4. Surface events at each gap boundary.
+      // 4. Surface events at each gap boundary (skip tiny gaps -- same
+      //    threshold as step 3's synthesized samples).
       for (final gap in result.gaps) {
+        if (gap.endSeconds - gap.startSeconds < 2) continue;
         for (final ts in [gap.startSeconds, gap.endSeconds]) {
           final eventId = _uuid.v4();
           await _db

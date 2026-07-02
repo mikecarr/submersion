@@ -2978,8 +2978,12 @@ class AppLocalizationsHu extends AppLocalizations {
   }
 
   @override
-  String diveLog_combine_resultSummary(String runtime, String maxDepth) {
-    return 'Eredmény: összesen $runtime, legnagyobb mélység $maxDepth';
+  String diveLog_combine_resultSummary(
+    String runtime,
+    String maxDepth,
+    String bottomTime,
+  ) {
+    return 'Eredmény: összesen $runtime, legnagyobb mélység $maxDepth, fenékidő $bottomTime';
   }
 
   @override
@@ -2995,6 +2999,10 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get diveLog_combine_title => 'Merülések összevonása';
+
+  @override
+  String get diveLog_combine_undoError =>
+      'Nem sikerült visszavonni az összevonást.';
 
   @override
   String get diveLog_combine_undone => 'Összevonás visszavonva';

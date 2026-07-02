@@ -2904,8 +2904,12 @@ class AppLocalizationsHe extends AppLocalizations {
   }
 
   @override
-  String diveLog_combine_resultSummary(String runtime, String maxDepth) {
-    return 'תוצאה: $runtime בסך הכול, עומק מרבי $maxDepth';
+  String diveLog_combine_resultSummary(
+    String runtime,
+    String maxDepth,
+    String bottomTime,
+  ) {
+    return 'תוצאה: $runtime בסך הכול, עומק מרבי $maxDepth, זמן תחתית $bottomTime';
   }
 
   @override
@@ -2921,6 +2925,9 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get diveLog_combine_title => 'מיזוג צלילות';
+
+  @override
+  String get diveLog_combine_undoError => 'לא ניתן היה לבטל את המיזוג.';
 
   @override
   String get diveLog_combine_undone => 'המיזוג בוטל';

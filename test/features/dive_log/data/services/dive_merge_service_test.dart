@@ -27,11 +27,18 @@ void main() {
   /// Seeds a dive with one tank, a 3-sample profile, and link rows in the
   /// tables createDive does not cover (buddy, sighting, event, gas switch,
   /// tank pressure, data source, media).
+  ///
+  /// [computerId] mirrors how a real dive-computer download stamps profile
+  /// rows: the domain DiveProfilePoint has no computerId field (createDive
+  /// can't set it), so it's stamped with a direct update afterward, same as
+  /// production's saveComputerReading/reparse_service path. FK enforcement
+  /// is off by default in this suite, so no dive_computers row is seeded.
   Future<void> seedDive(
     String id, {
     required DateTime entry,
     int runtimeMin = 30,
     double depth = 10,
+    String? computerId,
   }) async {
     await diveRepo.createDive(
       domain.Dive(
@@ -49,6 +56,10 @@ void main() {
         ],
       ),
     );
+    if (computerId != null) {
+      await (db.update(db.diveProfiles)..where((t) => t.diveId.equals(id)))
+          .write(DiveProfilesCompanion(computerId: Value(computerId)));
+    }
     await db
         .into(db.diveBuddies)
         .insert(
@@ -260,6 +271,61 @@ void main() {
         expect(await db.select(db.deletionLog).get(), isEmpty);
       },
     );
+
+    test(
+      'stamps synthesized gap samples with the source computerId so '
+      'getProfilesBySource does not see a phantom extra source (#449 F1)',
+      () async {
+        await seedDive(
+          'a',
+          entry: DateTime.utc(2026, 7, 1, 9),
+          computerId: 'comp-1',
+        );
+        await seedDive(
+          'b',
+          entry: DateTime.utc(2026, 7, 1, 10),
+          computerId: 'comp-1',
+        );
+
+        final outcome = await service.apply(['a', 'b']);
+        final mergedId = outcome.mergedDive.id;
+
+        final profile = await (db.select(
+          db.diveProfiles,
+        )..where((t) => t.diveId.equals(mergedId))).get();
+        // 3 samples per source + 2 synthesized gap samples.
+        expect(profile, hasLength(8));
+        expect(profile.every((p) => p.computerId == 'comp-1'), isTrue);
+
+        final bySource = await diveRepo.getProfilesBySource(mergedId);
+        expect(bySource.keys, {'comp-1'});
+      },
+    );
+
+    test('zero-length gaps between touching dives get no surface events or '
+        'gap samples (#449 F3/F8)', () async {
+      // 'a' ends exactly when 'b' starts -- gap is 0 seconds.
+      await seedDive('a', entry: DateTime.utc(2026, 7, 1, 9), runtimeMin: 30);
+      await seedDive(
+        'b',
+        entry: DateTime.utc(2026, 7, 1, 9, 30),
+        runtimeMin: 30,
+      );
+
+      final outcome = await service.apply(['a', 'b']);
+      final mergedId = outcome.mergedDive.id;
+
+      final profile = await (db.select(
+        db.diveProfiles,
+      )..where((t) => t.diveId.equals(mergedId))).get();
+      // 3 samples per source, no synthesized gap samples.
+      expect(profile, hasLength(6));
+
+      final events = await (db.select(
+        db.diveProfileEvents,
+      )..where((t) => t.diveId.equals(mergedId))).get();
+      expect(events.where((e) => e.eventType == 'surface'), isEmpty);
+    });
   });
 
   group('undo', () {

@@ -2997,8 +2997,12 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
-  String diveLog_combine_resultSummary(String runtime, String maxDepth) {
-    return 'Ergebnis: $runtime insgesamt, maximale Tiefe $maxDepth';
+  String diveLog_combine_resultSummary(
+    String runtime,
+    String maxDepth,
+    String bottomTime,
+  ) {
+    return 'Ergebnis: $runtime insgesamt, maximale Tiefe $maxDepth, Grundzeit $bottomTime';
   }
 
   @override
@@ -3014,6 +3018,10 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get diveLog_combine_title => 'Tauchgänge kombinieren';
+
+  @override
+  String get diveLog_combine_undoError =>
+      'Die Kombination konnte nicht rückgängig gemacht werden.';
 
   @override
   String get diveLog_combine_undone => 'Kombination rückgängig gemacht';

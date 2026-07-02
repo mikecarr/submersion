@@ -386,28 +386,45 @@ class _DiveListContentState extends ConsumerState<DiveListContent> {
     _lastMergeOutcome = outcome;
     _refreshAfterMerge();
 
+    // Captured now (synchronously, while context is still valid) so the
+    // Undo action's async onPressed never has to read context.l10n after an
+    // await.
+    final l10n = context.l10n;
+
     scaffoldMessenger.clearSnackBars();
     scaffoldMessenger.showSnackBar(
       SnackBar(
-        content: Text(context.l10n.diveLog_combine_snackbar(ids.length)),
+        content: Text(l10n.diveLog_combine_snackbar(ids.length)),
         duration: const Duration(seconds: 5),
         // #406: an action defaults to persist: true; force auto-dismiss and
         // allow closing without triggering Undo.
         persist: false,
         showCloseIcon: true,
         action: SnackBarAction(
-          label: context.l10n.diveLog_bulkDelete_undo,
+          label: l10n.diveLog_bulkDelete_undo,
           onPressed: () async {
             final toUndo = _lastMergeOutcome;
             if (toUndo == null) return;
             _lastMergeOutcome = null;
-            await ref.read(diveMergeServiceProvider).undo(toUndo.snapshot);
-            _refreshAfterMerge();
-            if (mounted) {
+            // Single attempt: on failure the snapshot may be partially
+            // applied, so it is not restored to _lastMergeOutcome for retry
+            // (#449 review F4).
+            try {
+              await ref.read(diveMergeServiceProvider).undo(toUndo.snapshot);
+              _refreshAfterMerge();
+              if (mounted) {
+                scaffoldMessenger.showSnackBar(
+                  SnackBar(
+                    content: Text(l10n.diveLog_combine_undone),
+                    duration: const Duration(seconds: 2),
+                  ),
+                );
+              }
+            } catch (_) {
               scaffoldMessenger.showSnackBar(
                 SnackBar(
-                  content: Text(context.l10n.diveLog_combine_undone),
-                  duration: const Duration(seconds: 2),
+                  content: Text(l10n.diveLog_combine_undoError),
+                  duration: const Duration(seconds: 4),
                 ),
               );
             }
