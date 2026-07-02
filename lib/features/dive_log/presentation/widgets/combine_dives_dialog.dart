@@ -150,13 +150,23 @@ class _CombineDivesDialogState extends ConsumerState<CombineDivesDialog> {
             // Depth-line-only preview of the merged timeline (surface gaps
             // included) so the user can visually confirm the seam before
             // committing. Higher maxPoints than the list thumbnails keeps a
-            // mid-dive surface interval crisp.
+            // mid-dive surface interval crisp; the inserted surface gaps are
+            // highlighted so they read apart from the real dive data.
             DiveSparkline(
               profile: result.previewProfile,
               width: double.infinity,
               height: 120,
               color: colorScheme.primary,
               maxPoints: 200,
+              highlightColor: colorScheme.tertiary,
+              highlightBands: [
+                for (final gap in result.gaps)
+                  if (gap.endSeconds > gap.startSeconds)
+                    (
+                      startX: gap.startSeconds.toDouble(),
+                      endX: gap.endSeconds.toDouble(),
+                    ),
+              ],
             ),
             const SizedBox(height: 16),
           ],

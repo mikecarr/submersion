@@ -117,6 +117,41 @@ void main() {
       final chart = tester.widget<LineChart>(find.byType(LineChart));
       expect(chart.data.lineBarsData.first.spots.length, 200);
     });
+
+    testWidgets('draws no overlay bar when highlightBands is empty', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(body: DiveSparkline(profile: _makeProfile(30))),
+        ),
+      );
+      final chart = tester.widget<LineChart>(find.byType(LineChart));
+      expect(chart.data.lineBarsData.length, 1);
+    });
+
+    testWidgets('overlays a distinct-coloured bar for each highlight band', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: DiveSparkline(
+              profile: _makeProfile(30), // timestamps 0..290
+              highlightBands: const [(startX: 100.0, endX: 200.0)],
+              highlightColor: Colors.orange,
+            ),
+          ),
+        ),
+      );
+      final chart = tester.widget<LineChart>(find.byType(LineChart));
+      final bars = chart.data.lineBarsData;
+      expect(bars.length, 2); // main line + one surface overlay
+      final overlay = bars.last;
+      expect(overlay.color, Colors.orange);
+      expect(overlay.spots.length, greaterThan(1));
+      expect(overlay.spots.every((s) => s.x >= 100 && s.x <= 200), isTrue);
+    });
   });
 
   group('DiveSparkline.downsample', () {

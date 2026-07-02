@@ -161,6 +161,15 @@ void main() {
     );
     expect(find.text('Combined profile'), findsOneWidget);
     expect(find.byType(DiveSparkline), findsOneWidget);
+
+    // The surface interval is passed as a highlight band so it renders in a
+    // distinct colour, apart from the real dive data.
+    final sparkline = tester.widget<DiveSparkline>(find.byType(DiveSparkline));
+    expect(sparkline.highlightBands, hasLength(1));
+    expect(
+      sparkline.highlightBands.single.endX,
+      greaterThan(sparkline.highlightBands.single.startX),
+    );
   });
 
   testWidgets('sequential preview omits the chart when sources have no '
