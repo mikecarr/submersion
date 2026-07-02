@@ -544,6 +544,39 @@ void main() {
       expect(newId, isNotEmpty);
       expect(newId, isNot(equals(diveId)));
     });
+
+    test('marks the new dive and the original dive pending for sync', () async {
+      final diveId = await insertTestDive(id: 'dive-sync-check');
+
+      await repository.saveComputerReading(
+        buildReading(id: 'r-primary', diveId: diveId, isPrimary: true),
+      );
+      await repository.saveComputerReading(
+        buildReading(id: 'r-secondary', diveId: diveId, isPrimary: false),
+      );
+
+      final newDiveId = await repository.unlinkComputer(
+        diveId: diveId,
+        computerReadingId: 'r-secondary',
+      );
+
+      final newDiveSyncRecord =
+          await (db.select(db.syncRecords)..where(
+                (t) =>
+                    t.entityType.equals('dives') & t.recordId.equals(newDiveId),
+              ))
+              .getSingleOrNull();
+      expect(newDiveSyncRecord, isNotNull);
+      expect(newDiveSyncRecord!.syncStatus, equals('pending'));
+
+      final originalDiveSyncRecord =
+          await (db.select(db.syncRecords)..where(
+                (t) => t.entityType.equals('dives') & t.recordId.equals(diveId),
+              ))
+              .getSingleOrNull();
+      expect(originalDiveSyncRecord, isNotNull);
+      expect(originalDiveSyncRecord!.syncStatus, equals('pending'));
+    });
   });
 
   // ---------------------------------------------------------------------------
@@ -684,6 +717,54 @@ void main() {
       );
     }
 
+    /// Asserts referential dive-locality: no tank_pressure_profiles,
+    /// dive_profile_events, or gas_switches row on [diveId] references a
+    /// dive_tanks row that lives on a different dive.
+    Future<void> assertNoCrossDiveTankRefs(String diveId) async {
+      final tankIds = (await (db.select(
+        db.diveTanks,
+      )..where((t) => t.diveId.equals(diveId))).get()).map((t) => t.id).toSet();
+
+      final pressures = await (db.select(
+        db.tankPressureProfiles,
+      )..where((t) => t.diveId.equals(diveId))).get();
+      for (final p in pressures) {
+        expect(
+          tankIds,
+          contains(p.tankId),
+          reason:
+              'tank_pressure_profiles row ${p.id} on dive $diveId '
+              'references tank ${p.tankId}, which is not on this dive',
+        );
+      }
+
+      final events = await (db.select(
+        db.diveProfileEvents,
+      )..where((t) => t.diveId.equals(diveId) & t.tankId.isNotNull())).get();
+      for (final e in events) {
+        expect(
+          tankIds,
+          contains(e.tankId),
+          reason:
+              'dive_profile_events row ${e.id} on dive $diveId references '
+              'tank ${e.tankId}, which is not on this dive',
+        );
+      }
+
+      final switches = await (db.select(
+        db.gasSwitches,
+      )..where((t) => t.diveId.equals(diveId))).get();
+      for (final s in switches) {
+        expect(
+          tankIds,
+          contains(s.tankId),
+          reason:
+              'gas_switches row ${s.id} on dive $diveId references tank '
+              '${s.tankId}, which is not on this dive',
+        );
+      }
+    }
+
     test('moves the secondary computer\'s tanks, pressures, and events to the '
         'new dive, cloning the shared tank for its pressure curve', () async {
       await seedConsolidatedDive(targetId: 'dive-t', secondaryId: 'dive-s');
@@ -776,6 +857,122 @@ void main() {
         db.diveProfileEvents,
       )..where((t) => t.diveId.equals('dive-t'))).get();
       expect(originalEvents.any((e) => e.computerId == 'comp-s'), isFalse);
+    });
+
+    test("unlinking the shared tank's owner leaves the tank (and the other "
+        "computer's rows) on the original dive and clones it for the "
+        'departing computer', () async {
+      await seedConsolidatedDive(targetId: 'dive-t', secondaryId: 'dive-s');
+
+      // Gas switches carry no computerId and always stay with the
+      // original dive; add one on the shared tank so all three
+      // "remaining reference" checks (pressure, event, gas switch) are
+      // exercised.
+      await db
+          .into(db.gasSwitches)
+          .insert(
+            GasSwitchesCompanion.insert(
+              id: 'switch-t1',
+              diveId: 'dive-t',
+              tankId: 'tank-t1',
+              timestamp: 45,
+              createdAt: 0,
+            ),
+          );
+
+      final readings = await repository.getDataSources('dive-t');
+      final targetReading = readings.firstWhere(
+        (r) => r.computerId == 'comp-t',
+      );
+
+      final newDiveId = await repository.unlinkComputer(
+        diveId: 'dive-t',
+        computerReadingId: targetReading.id,
+      );
+
+      // -- Tanks -------------------------------------------------------
+      // tank-t1 is shared: comp-s's pressure row and event still
+      // reference it, and the gas switch always stays. It must remain
+      // on the original dive, freed from comp-t's attribution.
+      final originalTanks = await (db.select(
+        db.diveTanks,
+      )..where((t) => t.diveId.equals('dive-t'))).get();
+      final sharedTank = originalTanks.firstWhere((t) => t.id == 'tank-t1');
+      expect(sharedTank.computerId, isNull);
+      expect(sharedTank.o2Percent, equals(21.0));
+      expect(sharedTank.hePercent, equals(0.0));
+      expect(sharedTank.startPressure, equals(200.0));
+      expect(sharedTank.endPressure, equals(100.0));
+
+      // tank-t2 has no remaining references from other computers, so it
+      // still moves outright, same as before this fix.
+      expect(originalTanks.map((t) => t.id), isNot(contains('tank-t2')));
+
+      final newDiveTanks = await (db.select(
+        db.diveTanks,
+      )..where((t) => t.diveId.equals(newDiveId))).get();
+      final movedTankT2 = newDiveTanks.firstWhere((t) => t.id == 'tank-t2');
+      expect(movedTankT2.computerId, equals('comp-t'));
+
+      // comp-t gets a fresh clone of the shared tank on the new dive.
+      final clone = newDiveTanks.firstWhere((t) => t.id != 'tank-t2');
+      expect(clone.id, isNot(equals('tank-t1')));
+      expect(clone.computerId, equals('comp-t'));
+      expect(clone.o2Percent, equals(21.0));
+      expect(clone.startPressure, equals(200.0));
+      expect(clone.endPressure, equals(100.0));
+
+      // -- Tank pressure profiles ---------------------------------------
+      // comp-s's pressure rows stay on the original dive; the one that
+      // lived on the shared tank still points at tank-t1, which is
+      // still on that dive.
+      final originalPressures = await (db.select(
+        db.tankPressureProfiles,
+      )..where((t) => t.diveId.equals('dive-t'))).get();
+      expect(originalPressures, hasLength(2));
+      expect(originalPressures.every((p) => p.computerId == 'comp-s'), isTrue);
+      final stayedOnShared = originalPressures.firstWhere(
+        (p) => p.tankId == 'tank-t1',
+      );
+      expect(stayedOnShared.computerId, equals('comp-s'));
+
+      // comp-t's own pressure row moves to the new dive, re-pointed at
+      // the clone rather than the shared tank it used to live on.
+      final newDivePressures = await (db.select(
+        db.tankPressureProfiles,
+      )..where((t) => t.diveId.equals(newDiveId))).get();
+      expect(newDivePressures, hasLength(1));
+      expect(newDivePressures.single.computerId, equals('comp-t'));
+      expect(newDivePressures.single.tankId, equals(clone.id));
+
+      // -- Profile events -------------------------------------------------
+      // comp-s's event stays on the original dive, still pointing at
+      // tank-t1.
+      final originalEvents = await (db.select(
+        db.diveProfileEvents,
+      )..where((t) => t.diveId.equals('dive-t'))).get();
+      expect(originalEvents, hasLength(1));
+      expect(originalEvents.single.tankId, equals('tank-t1'));
+      expect(originalEvents.single.computerId, equals('comp-s'));
+
+      final newDiveEvents = await (db.select(
+        db.diveProfileEvents,
+      )..where((t) => t.diveId.equals(newDiveId))).get();
+      expect(newDiveEvents, isEmpty);
+
+      // -- Gas switches -----------------------------------------------
+      // Gas switches never move; the one on the shared tank stays put.
+      final originalSwitches = await (db.select(
+        db.gasSwitches,
+      )..where((t) => t.diveId.equals('dive-t'))).get();
+      expect(originalSwitches, hasLength(1));
+      expect(originalSwitches.single.tankId, equals('tank-t1'));
+
+      // -- Referential dive-locality ------------------------------------
+      // Neither dive's pressure/event/gas-switch rows dangle across to a
+      // tank that lives on the other dive.
+      await assertNoCrossDiveTankRefs('dive-t');
+      await assertNoCrossDiveTankRefs(newDiveId);
     });
 
     test(

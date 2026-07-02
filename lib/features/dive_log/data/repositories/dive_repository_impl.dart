@@ -4688,12 +4688,19 @@ class DiveRepository {
   /// [setPrimaryDataSource].
   ///
   /// When the reading carries a `computerId`, its attributed tanks,
-  /// profile events, and tank pressure curves move with it. A pressure
-  /// curve recorded on a tank that was deduped into a shared tank (which
-  /// stays on the original dive) gets a fresh clone of that shared tank on
-  /// the new dive so the curve still has a home. Readings with a null
-  /// `computerId` cannot be attributed, so no tanks/events/pressures move
-  /// for them.
+  /// profile events, and tank pressure curves move with it. A tank only
+  /// moves when nothing that will REMAIN on the original dive still
+  /// references it: another computer's tank pressure profile or profile
+  /// event, or any gas switch (gas switches carry no `computerId` and
+  /// always stay with the original dive). When a tank has such remaining
+  /// references — e.g. one deduped during consolidation that now also
+  /// carries another computer's pressure curve — it stays on the original
+  /// dive with its `computerId` cleared, and a fresh clone attributed to
+  /// the departing computer is created on the new dive to carry that
+  /// computer's own pressure rows instead. A pressure curve recorded on a
+  /// shared tank the departing computer never owned gets the same
+  /// clone-on-demand treatment. Readings with a null `computerId` cannot be
+  /// attributed, so no tanks/events/pressures move for them.
   ///
   /// Returns the ID of the newly created dive.
   Future<String> unlinkComputer({
@@ -4750,6 +4757,11 @@ class DiveRepository {
                 updatedAt: Value(now.millisecondsSinceEpoch),
               ),
             );
+        await _syncRepository.markRecordPending(
+          entityType: 'dives',
+          recordId: newDiveId,
+          localUpdatedAt: now.millisecondsSinceEpoch,
+        );
 
         // Re-parent this computer's profiles to the new dive.
         // Match by computerId when available; fall back to non-primary, null
@@ -4786,19 +4798,109 @@ class DiveRepository {
         // Move this computer's attributed children to the new dive.
         if (reading.computerId != null) {
           final cid = reading.computerId!;
-          await (_db.update(_db.diveTanks)..where(
-                (t) => t.diveId.equals(diveId) & t.computerId.equals(cid),
-              ))
-              .write(DiveTanksCompanion(diveId: Value(newDiveId)));
+
+          // Tanks attributed to the departing computer only move when
+          // nothing that will REMAIN on the original dive still references
+          // them: another computer's tank pressure profile or profile
+          // event, or any gas switch (gas switches carry no computerId and
+          // always stay with the original dive). A tank with such
+          // remaining references — e.g. one deduped during consolidation
+          // that now also carries another computer's pressure curve — must
+          // stay behind; moving it would leave those rows dangling,
+          // pointing at a tank that lives on a different dive.
+          final candidateTanks =
+              await (_db.select(_db.diveTanks)..where(
+                    (t) => t.diveId.equals(diveId) & t.computerId.equals(cid),
+                  ))
+                  .get();
+
+          final tankIdsToMove = <String>[];
+          for (final candidate in candidateTanks) {
+            final otherPressureRefs =
+                await (_db.select(_db.tankPressureProfiles)..where(
+                      (t) =>
+                          t.diveId.equals(diveId) &
+                          t.tankId.equals(candidate.id) &
+                          (t.computerId.equals(cid).not() |
+                              t.computerId.isNull()),
+                    ))
+                    .get();
+            final otherEventRefs =
+                await (_db.select(_db.diveProfileEvents)..where(
+                      (t) =>
+                          t.diveId.equals(diveId) &
+                          t.tankId.equals(candidate.id) &
+                          (t.computerId.equals(cid).not() |
+                              t.computerId.isNull()),
+                    ))
+                    .get();
+            final gasSwitchRefs =
+                await (_db.select(_db.gasSwitches)..where(
+                      (t) =>
+                          t.diveId.equals(diveId) &
+                          t.tankId.equals(candidate.id),
+                    ))
+                    .get();
+
+            if (otherPressureRefs.isEmpty &&
+                otherEventRefs.isEmpty &&
+                gasSwitchRefs.isEmpty) {
+              tankIdsToMove.add(candidate.id);
+              continue;
+            }
+
+            // Shared tank: stays on the original dive (freed from this
+            // computer's attribution) and gets a fresh clone on the new
+            // dive so this computer's own pressure rows still have a home.
+            final cloneId = _uuid.v4();
+            await _db
+                .into(_db.diveTanks)
+                .insert(
+                  candidate
+                      .toCompanion(false)
+                      .copyWith(
+                        id: Value(cloneId),
+                        diveId: Value(newDiveId),
+                        computerId: Value(cid),
+                      ),
+                );
+            await (_db.update(_db.tankPressureProfiles)..where(
+                  (t) =>
+                      t.diveId.equals(diveId) &
+                      t.tankId.equals(candidate.id) &
+                      t.computerId.equals(cid),
+                ))
+                .write(
+                  TankPressureProfilesCompanion(
+                    diveId: Value(newDiveId),
+                    tankId: Value(cloneId),
+                  ),
+                );
+            await (_db.update(_db.diveTanks)
+                  ..where((t) => t.id.equals(candidate.id)))
+                .write(const DiveTanksCompanion(computerId: Value(null)));
+          }
+
+          if (tankIdsToMove.isNotEmpty) {
+            await (_db.update(_db.diveTanks)..where(
+                  (t) => t.diveId.equals(diveId) & t.id.isIn(tankIdsToMove),
+                ))
+                .write(DiveTanksCompanion(diveId: Value(newDiveId)));
+          }
+
           await (_db.update(_db.diveProfileEvents)..where(
                 (t) => t.diveId.equals(diveId) & t.computerId.equals(cid),
               ))
               .write(DiveProfileEventsCompanion(diveId: Value(newDiveId)));
 
-          // Pressure curves recorded by this computer on a SHARED (deduped)
-          // tank need a home tank on the new dive: clone the shared tank
-          // once, then re-parent this computer's pressure rows onto the
-          // clone.
+          // Pressure curves recorded by this computer on a SHARED tank it
+          // never owned (i.e. not one of the candidateTanks above) need a
+          // home tank on the new dive too: clone the shared tank once,
+          // then re-parent this computer's pressure rows onto the clone.
+          // Rows already re-pointed above (shared tanks this computer DID
+          // own) no longer match this query, since their diveId already
+          // moved off of the original dive — so they are not
+          // double-handled here.
           final pressureRows =
               await (_db.select(_db.tankPressureProfiles)..where(
                     (t) => t.diveId.equals(diveId) & t.computerId.equals(cid),
@@ -4876,6 +4978,18 @@ class DiveRepository {
             _db.diveDataSources,
           )..where((t) => t.diveId.equals(diveId))).go();
         }
+
+        // Touch the original dive so incremental sync carries its changed
+        // children (moved/cloned tanks, re-pointed pressure rows and
+        // events, removed reading).
+        await (_db.update(_db.dives)..where((t) => t.id.equals(diveId))).write(
+          DivesCompanion(updatedAt: Value(now.millisecondsSinceEpoch)),
+        );
+        await _syncRepository.markRecordPending(
+          entityType: 'dives',
+          recordId: diveId,
+          localUpdatedAt: now.millisecondsSinceEpoch,
+        );
       });
 
       SyncEventBus.notifyLocalChange();
