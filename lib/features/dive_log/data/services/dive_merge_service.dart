@@ -1,7 +1,24 @@
+import 'package:drift/drift.dart';
+import 'package:uuid/uuid.dart';
+
+import 'package:submersion/core/data/repositories/sync_repository.dart';
 import 'package:submersion/core/database/database.dart';
 import 'package:submersion/core/services/database_service.dart';
+import 'package:submersion/core/services/sync/sync_event_bus.dart';
 import 'package:submersion/features/dive_log/data/repositories/dive_repository_impl.dart';
 import 'package:submersion/features/dive_log/data/services/dive_merge_snapshot.dart';
+import 'package:submersion/features/dive_log/domain/entities/dive.dart'
+    as domain;
+import 'package:submersion/features/dive_log/domain/services/dive_merge_builder.dart';
+import 'package:submersion/features/tags/data/repositories/tag_repository.dart';
+
+/// Result of a successful merge: the new dive plus the pre-merge snapshot
+/// needed to undo it.
+class DiveMergeOutcome {
+  const DiveMergeOutcome({required this.mergedDive, required this.snapshot});
+  final domain.Dive mergedDive;
+  final DiveMergeSnapshot snapshot;
+}
 
 /// Applies and undoes sequential dive combines (#449).
 /// Mirrors the BulkDiveEditService shape: snapshot -> one transaction ->
@@ -9,10 +26,12 @@ import 'package:submersion/features/dive_log/data/services/dive_merge_snapshot.d
 class DiveMergeService {
   DiveMergeService(this._diveRepo);
 
-  // Unused by captureSnapshot; wired in for the apply/undo methods added in
-  // Tasks 7-8.
-  // ignore: unused_field
   final DiveRepository _diveRepo;
+
+  final _uuid = const Uuid();
+  final _builder = const DiveMergeBuilder();
+  final _sync = SyncRepository();
+  final _tagRepository = TagRepository();
 
   AppDatabase get _db => DatabaseService.instance.database;
 
@@ -75,5 +94,290 @@ class DiveMergeService {
       )..where((t) => t.diveId.isIn(diveIds))).get(),
       mediaDiveIds: {for (final m in mediaRows) m.id: m.diveId!},
     );
+  }
+
+  /// Merges [diveIds] into one new dive inside a single transaction.
+  ///
+  /// Throws [ArgumentError] (via [DiveMergeBuilder.build]) if the selection
+  /// is not a valid sequential combine (too few dives, mixed divers, or
+  /// overlapping timelines) -- nothing is read from the DB via a snapshot
+  /// and nothing is written in that case.
+  Future<DiveMergeOutcome> apply(List<String> diveIds) async {
+    final sources = await _diveRepo.getDivesByIds(diveIds);
+    final tagsByDive = await _tagRepository.getTagsForDives(diveIds);
+
+    // Sightings from rows (speciesName not needed for persistence).
+    final sightingRows = await (_db.select(
+      _db.sightings,
+    )..where((t) => t.diveId.isIn(diveIds))).get();
+    final sightingsByDive = <String, List<domain.MarineSighting>>{};
+    for (final row in sightingRows) {
+      sightingsByDive
+          .putIfAbsent(row.diveId, () => [])
+          .add(
+            domain.MarineSighting(
+              id: row.id,
+              speciesId: row.speciesId,
+              speciesName: '',
+              count: row.count,
+              notes: row.notes,
+            ),
+          );
+    }
+
+    // Throws ArgumentError for non-sequential selections; nothing has been
+    // written yet, so the DB is untouched on failure.
+    final result = _builder.build(
+      sources,
+      tagsByDive: tagsByDive,
+      sightingsByDive: sightingsByDive,
+      idGenerator: _uuid.v4,
+    );
+    final mergedId = result.mergedDive.id;
+    final snapshot = await captureSnapshot(diveIds, mergedId);
+    final now = DateTime.now().millisecondsSinceEpoch;
+
+    await _db.transaction(() async {
+      // 1. Merged dive + entity-carried children (tanks, weights, custom
+      //    fields, profile=[], equipment, tags, dive types).
+      await _diveRepo.createDive(result.mergedDive);
+
+      // 2. Profile rows copied directly (preserves computerId/isPrimary/
+      //    temperature/sensor columns), re-based onto the merged timeline.
+      await _db.batch((batch) {
+        for (final row in snapshot.profileRows) {
+          final offset = result.segmentOffsetsSeconds[row.diveId] ?? 0;
+          batch.insert(
+            _db.diveProfiles,
+            row
+                .toCompanion(false)
+                .copyWith(
+                  id: Value(_uuid.v4()),
+                  diveId: Value(mergedId),
+                  timestamp: Value(row.timestamp + offset),
+                ),
+          );
+        }
+        // 3. Synthesized 0-depth samples at gap boundaries (skip tiny gaps).
+        for (final gap in result.gaps) {
+          if (gap.endSeconds - gap.startSeconds < 2) continue;
+          for (final ts in [gap.startSeconds + 1, gap.endSeconds - 1]) {
+            batch.insert(
+              _db.diveProfiles,
+              DiveProfilesCompanion.insert(
+                id: _uuid.v4(),
+                diveId: mergedId,
+                timestamp: ts,
+                depth: 0,
+              ),
+            );
+          }
+        }
+      });
+
+      // 4. Surface events at each gap boundary.
+      for (final gap in result.gaps) {
+        for (final ts in [gap.startSeconds, gap.endSeconds]) {
+          final eventId = _uuid.v4();
+          await _db
+              .into(_db.diveProfileEvents)
+              .insert(
+                DiveProfileEventsCompanion.insert(
+                  id: eventId,
+                  diveId: mergedId,
+                  timestamp: ts,
+                  eventType: 'surface',
+                  severity: const Value('info'),
+                  depth: const Value(0),
+                  source: const Value('app'),
+                  createdAt: now,
+                ),
+              );
+          await _sync.markRecordPending(
+            entityType: 'diveProfileEvents',
+            recordId: eventId,
+            localUpdatedAt: now,
+          );
+        }
+      }
+
+      // 5. Existing profile events, re-based, tank text-refs remapped.
+      for (final row in snapshot.eventRows) {
+        final offset = result.segmentOffsetsSeconds[row.diveId] ?? 0;
+        final eventId = _uuid.v4();
+        await _db
+            .into(_db.diveProfileEvents)
+            .insert(
+              row
+                  .toCompanion(false)
+                  .copyWith(
+                    id: Value(eventId),
+                    diveId: Value(mergedId),
+                    timestamp: Value(row.timestamp + offset),
+                    tankId: Value(
+                      row.tankId == null
+                          ? null
+                          : result.tankIdMap[row.tankId] ?? row.tankId,
+                    ),
+                  ),
+            );
+        await _sync.markRecordPending(
+          entityType: 'diveProfileEvents',
+          recordId: eventId,
+          localUpdatedAt: now,
+        );
+      }
+
+      // 6. Gas switches, re-based + tank FK remapped (drop unmappable).
+      for (final row in snapshot.gasSwitchRows) {
+        final newTankId = result.tankIdMap[row.tankId];
+        if (newTankId == null) continue;
+        final offset = result.segmentOffsetsSeconds[row.diveId] ?? 0;
+        final switchId = _uuid.v4();
+        await _db
+            .into(_db.gasSwitches)
+            .insert(
+              row
+                  .toCompanion(false)
+                  .copyWith(
+                    id: Value(switchId),
+                    diveId: Value(mergedId),
+                    tankId: Value(newTankId),
+                    timestamp: Value(row.timestamp + offset),
+                  ),
+            );
+        await _sync.markRecordPending(
+          entityType: 'gasSwitches',
+          recordId: switchId,
+          localUpdatedAt: now,
+        );
+      }
+
+      // 7. Tank pressure series, re-based + remapped (parent-dive sync
+      //    pattern: no per-row pending, same as createDive's profile rows).
+      await _db.batch((batch) {
+        for (final row in snapshot.tankPressureRows) {
+          final newTankId = result.tankIdMap[row.tankId];
+          if (newTankId == null) continue;
+          final offset = result.segmentOffsetsSeconds[row.diveId] ?? 0;
+          batch.insert(
+            _db.tankPressureProfiles,
+            row
+                .toCompanion(false)
+                .copyWith(
+                  id: Value(_uuid.v4()),
+                  diveId: Value(mergedId),
+                  tankId: Value(newTankId),
+                  timestamp: Value(row.timestamp + offset),
+                ),
+          );
+        }
+      });
+
+      // 8. Buddies: union by buddyId, chronological (sortedSources order).
+      final seenBuddies = <String>{};
+      for (final source in result.sortedSources) {
+        for (final row in snapshot.buddyRows.where(
+          (r) => r.diveId == source.id,
+        )) {
+          if (!seenBuddies.add(row.buddyId)) continue;
+          final buddyRowId = _uuid.v4();
+          await _db
+              .into(_db.diveBuddies)
+              .insert(
+                row
+                    .toCompanion(false)
+                    .copyWith(
+                      id: Value(buddyRowId),
+                      diveId: Value(mergedId),
+                      createdAt: Value(now),
+                    ),
+              );
+          await _sync.markRecordPending(
+            entityType: 'diveBuddies',
+            recordId: buddyRowId,
+            localUpdatedAt: now,
+          );
+        }
+      }
+
+      // 9. Merged sightings (already unioned by the builder).
+      for (final s in result.mergedSightings) {
+        await _db
+            .into(_db.sightings)
+            .insert(
+              SightingsCompanion.insert(
+                id: s.id,
+                diveId: mergedId,
+                speciesId: s.speciesId,
+                count: Value(s.count),
+                notes: Value(s.notes),
+              ),
+            );
+        await _sync.markRecordPending(
+          entityType: 'sightings',
+          recordId: s.id,
+          localUpdatedAt: now,
+        );
+      }
+
+      // 10. Data sources carried as provenance; NEVER primary (a merged
+      //     profile is user-authored -- reparse must not rewrite it).
+      // saveComputerReading (dive_repository_impl.dart:4437) does not call
+      // markRecordPending for diveDataSources rows either -- it relies on
+      // the parent dive's pending record (step 1) to carry the change, so
+      // no per-row markRecordPending here mirrors that.
+      for (final row in snapshot.dataSourceRows) {
+        await _db
+            .into(_db.diveDataSources)
+            .insert(
+              row
+                  .toCompanion(false)
+                  .copyWith(
+                    id: Value(_uuid.v4()),
+                    diveId: Value(mergedId),
+                    isPrimary: const Value(false),
+                  ),
+            );
+      }
+
+      // 11. Tide record: first dive's only.
+      final firstTide = snapshot.tideRows
+          .where((r) => r.diveId == result.sortedSources.first.id)
+          .toList();
+      if (firstTide.isNotEmpty) {
+        final tideId = _uuid.v4();
+        await _db
+            .into(_db.tideRecords)
+            .insert(
+              firstTide.first
+                  .toCompanion(false)
+                  .copyWith(id: Value(tideId), diveId: Value(mergedId)),
+            );
+        await _sync.markRecordPending(
+          entityType: 'tideRecords',
+          recordId: tideId,
+          localUpdatedAt: now,
+        );
+      }
+
+      // 12. Re-point media BEFORE deleting sources (FK is setNull).
+      for (final mediaId in snapshot.mediaDiveIds.keys) {
+        await (_db.update(_db.media)..where((t) => t.id.equals(mediaId))).write(
+          MediaCompanion(diveId: Value(mergedId), updatedAt: Value(now)),
+        );
+        await _sync.markRecordPending(
+          entityType: 'media',
+          recordId: mediaId,
+          localUpdatedAt: now,
+        );
+      }
+
+      // 13. Delete sources through the tombstone-logging path.
+      await _diveRepo.bulkDeleteDives(diveIds);
+    });
+
+    SyncEventBus.notifyLocalChange();
+    return DiveMergeOutcome(mergedDive: result.mergedDive, snapshot: snapshot);
   }
 }

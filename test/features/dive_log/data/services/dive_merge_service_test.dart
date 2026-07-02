@@ -143,4 +143,122 @@ void main() {
       expect(snap.mediaDiveIds, {'media-a': 'a', 'media-b': 'b'});
     });
   });
+
+  group('apply', () {
+    test('creates merged dive, copies children, deletes sources', () async {
+      await seedDive('a', entry: DateTime.utc(2026, 7, 1, 9), depth: 10);
+      await seedDive(
+        'b',
+        entry: DateTime.utc(2026, 7, 1, 10),
+        depth: 20,
+        runtimeMin: 20,
+      );
+
+      final outcome = await service.apply(['a', 'b']);
+      final mergedId = outcome.mergedDive.id;
+
+      // Sources gone, tombstones logged.
+      final remaining = await db.select(db.dives).get();
+      expect(remaining.map((r) => r.id), [mergedId]);
+      final tombstones = await (db.select(
+        db.deletionLog,
+      )..where((t) => t.entityType.equals('dives'))).get();
+      expect(tombstones.map((t) => t.recordId).toSet(), {'a', 'b'});
+
+      // Profile: 3 samples per source, re-based, plus 2 gap samples.
+      final profile =
+          await (db.select(db.diveProfiles)
+                ..where((t) => t.diveId.equals(mergedId))
+                ..orderBy([(t) => OrderingTerm.asc(t.timestamp)]))
+              .get();
+      expect(profile, hasLength(8));
+      // Dive a ends at 1800s; dive b starts at 3600s; gap samples inside.
+      final gapSamples = profile.where(
+        (p) => p.timestamp > 1800 && p.timestamp < 3600,
+      );
+      expect(gapSamples, hasLength(2));
+      expect(gapSamples.every((p) => p.depth == 0), isTrue);
+      // b's first sample re-based to 3600.
+      expect(profile.where((p) => p.timestamp == 3600), isNotEmpty);
+
+      // Surface events at the gap boundaries.
+      final events = await (db.select(
+        db.diveProfileEvents,
+      )..where((t) => t.diveId.equals(mergedId))).get();
+      expect(
+        events.where((e) => e.eventType == 'surface').map((e) => e.timestamp),
+        containsAll([1800, 3600]),
+      );
+
+      // Gas switch re-pointed to a NEW tank id belonging to the merged dive.
+      final mergedTanks = await (db.select(
+        db.diveTanks,
+      )..where((t) => t.diveId.equals(mergedId))).get();
+      expect(mergedTanks, hasLength(2));
+      final switches = await (db.select(
+        db.gasSwitches,
+      )..where((t) => t.diveId.equals(mergedId))).get();
+      expect(switches, hasLength(2));
+      expect(
+        mergedTanks
+            .map((t) => t.id)
+            .toSet()
+            .containsAll(switches.map((s) => s.tankId)),
+        isTrue,
+      );
+
+      // Tank pressures re-based and re-pointed.
+      final pressures = await (db.select(
+        db.tankPressureProfiles,
+      )..where((t) => t.diveId.equals(mergedId))).get();
+      expect(pressures.map((p) => p.timestamp).toSet(), {60, 3660});
+
+      // Buddies and sightings carried; same-species sightings merged.
+      final buddies = await (db.select(
+        db.diveBuddies,
+      )..where((t) => t.diveId.equals(mergedId))).get();
+      expect(buddies.map((b) => b.buddyId).toSet(), {'buddy-cat-1'});
+      final sightings = await (db.select(
+        db.sightings,
+      )..where((t) => t.diveId.equals(mergedId))).get();
+      expect(sightings, hasLength(1));
+      expect(sightings.single.count, 2);
+
+      // Data sources carried, all non-primary.
+      final sources = await (db.select(
+        db.diveDataSources,
+      )..where((t) => t.diveId.equals(mergedId))).get();
+      expect(sources, hasLength(2));
+      expect(sources.every((s) => !s.isPrimary), isTrue);
+
+      // Media re-pointed, not orphaned.
+      final media = await db.select(db.media).get();
+      expect(media.every((m) => m.diveId == mergedId), isTrue);
+
+      // Merged stats.
+      final mergedRow = await (db.select(
+        db.dives,
+      )..where((t) => t.id.equals(mergedId))).getSingle();
+      expect(mergedRow.maxDepth, 20);
+      expect(mergedRow.runtime, 80 * 60); // createDive persists seconds.
+    });
+
+    test('rejects overlapping selections', () async {
+      await seedDive('a', entry: DateTime.utc(2026, 7, 1, 9), runtimeMin: 90);
+      await seedDive('b', entry: DateTime.utc(2026, 7, 1, 10));
+      expect(() => service.apply(['a', 'b']), throwsArgumentError);
+      expect(await db.select(db.dives).get(), hasLength(2)); // untouched
+    });
+
+    test(
+      'rejects when a selected dive no longer exists; DB untouched',
+      () async {
+        await seedDive('a', entry: DateTime.utc(2026, 7, 1, 9));
+        // 'ghost' was never created -> only 1 dive loads -> tooFewDives.
+        expect(() => service.apply(['a', 'ghost']), throwsArgumentError);
+        expect(await db.select(db.dives).get(), hasLength(1));
+        expect(await db.select(db.deletionLog).get(), isEmpty);
+      },
+    );
+  });
 }
