@@ -158,7 +158,7 @@ class _CombineDivesDialogState extends ConsumerState<CombineDivesDialog> {
               height: 120,
               color: colorScheme.primary,
               maxPoints: 200,
-              highlightColor: colorScheme.tertiary,
+              highlightColor: Colors.green,
               highlightBands: [
                 for (final gap in result.gaps)
                   if (gap.endSeconds > gap.startSeconds)

@@ -77,8 +77,8 @@ full and classifies their time relationship using `effectiveEntryTime` and
   preview chart of the combined timeline (surface gaps included) is shown
   for visual confirmation of the seam before committing; it renders from the
   same builder output that persistence uses, so the preview cannot diverge
-  from the result. The inserted surface intervals are re-drawn in a distinct
-  colour (`colorScheme.tertiary`) so they read apart from the real dive data.
+  from the result. The inserted surface intervals are re-drawn in green so
+  they read apart from the real dive data.
   A note explains data handling: details are taken from the
   earliest dive, blanks filled from later dives; notes are combined; tanks,
   gear, buddies, tags, and sightings are all kept. Confirm button:

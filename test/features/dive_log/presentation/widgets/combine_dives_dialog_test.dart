@@ -170,6 +170,8 @@ void main() {
       sparkline.highlightBands.single.endX,
       greaterThan(sparkline.highlightBands.single.startX),
     );
+    // Surface time is shaded green.
+    expect(sparkline.highlightColor, Colors.green);
   });
 
   testWidgets('sequential preview omits the chart when sources have no '
