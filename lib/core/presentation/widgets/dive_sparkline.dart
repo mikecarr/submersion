@@ -23,12 +23,18 @@ class DiveSparkline extends StatelessWidget {
   /// Line and fill color. Defaults to [ColorScheme.primary].
   final Color? color;
 
+  /// Maximum points to render; the profile is downsampled to this many.
+  /// The default (40) suits tiny list thumbnails; larger previews can raise
+  /// it to keep detail such as a mid-dive surface interval crisp.
+  final int maxPoints;
+
   const DiveSparkline({
     super.key,
     required this.profile,
     this.width = 80,
     this.height = 32,
     this.color,
+    this.maxPoints = 40,
   });
 
   @override
@@ -36,7 +42,7 @@ class DiveSparkline extends StatelessWidget {
     if (profile.isEmpty) return const SizedBox.shrink();
 
     final effectiveColor = color ?? Theme.of(context).colorScheme.primary;
-    final samples = downsample(profile);
+    final samples = downsample(profile, maxPoints: maxPoints);
 
     // Negate depth so the curve goes downward (divers' convention).
     final spots = samples

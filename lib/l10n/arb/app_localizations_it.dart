@@ -2975,6 +2975,9 @@ class AppLocalizationsIt extends AppLocalizations {
       'Le immersioni selezionate appartengono a subacquei diversi e non possono essere unite.';
 
   @override
+  String get diveLog_combine_profilePreview => 'Profilo combinato';
+
+  @override
   String get diveLog_combine_overlapBody =>
       'Le immersioni sovrapposte sembrano la stessa immersione registrata da più computer subacquei. La possibilità di unirle in un\'unica voce che mostri i dati di ogni computer arriverà in una versione futura.';
 

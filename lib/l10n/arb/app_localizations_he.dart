@@ -2888,6 +2888,9 @@ class AppLocalizationsHe extends AppLocalizations {
       'הצלילות שנבחרו שייכות לצוללנים שונים ולא ניתן למזג אותן.';
 
   @override
+  String get diveLog_combine_profilePreview => 'פרופיל ממוזג';
+
+  @override
   String get diveLog_combine_overlapBody =>
       'צלילות חופפות נראות כמו אותה צלילה שנרשמה על ידי כמה מחשבי צלילה. מיזוג שלהן לרשומה אחת שמציגה את הנתונים של כל מחשב יגיע בגרסה עתידית.';
 

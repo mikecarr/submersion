@@ -1023,6 +1023,7 @@
   "diveLog_combine_error": "לא ניתן היה למזג את הצלילות. שום דבר לא השתנה.",
   "diveLog_combine_gapLabel": "מרווח פני שטח: {duration}",
   "diveLog_combine_mixedDivers": "הצלילות שנבחרו שייכות לצוללנים שונים ולא ניתן למזג אותן.",
+  "diveLog_combine_profilePreview": "פרופיל ממוזג",
   "diveLog_combine_overlapBody": "צלילות חופפות נראות כמו אותה צלילה שנרשמה על ידי כמה מחשבי צלילה. מיזוג שלהן לרשומה אחת שמציגה את הנתונים של כל מחשב יגיע בגרסה עתידית.",
   "diveLog_combine_overlapHintTwoDives": "כדי למזג עכשיו שתי רשומות של אותה צלילה, פתח אחת מהן והשתמש ב«מיזוג עם צלילה אחרת».",
   "diveLog_combine_overlapTitle": "הצלילות האלה חופפות בזמן",

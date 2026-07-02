@@ -2920,6 +2920,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'The selected dives belong to different divers and can\'t be combined.';
 
   @override
+  String get diveLog_combine_profilePreview => 'Combined profile';
+
+  @override
   String get diveLog_combine_overlapBody =>
       'Overlapping dives look like the same dive recorded by multiple dive computers. Combining those into a single entry that shows every computer\'s data is coming in a future release.';
 

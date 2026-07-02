@@ -2950,6 +2950,9 @@ class AppLocalizationsNl extends AppLocalizations {
       'De geselecteerde duiken behoren tot verschillende duikers en kunnen niet worden samengevoegd.';
 
   @override
+  String get diveLog_combine_profilePreview => 'Samengevoegd profiel';
+
+  @override
   String get diveLog_combine_overlapBody =>
       'Overlappende duiken lijken op dezelfde duik die door meerdere duikcomputers is vastgelegd. Het samenvoegen daarvan tot één item dat de gegevens van elke computer toont, komt in een toekomstige release.';
 

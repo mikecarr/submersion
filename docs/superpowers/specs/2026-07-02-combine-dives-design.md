@@ -73,7 +73,11 @@ full and classifies their time relationship using `effectiveEntryTime` and
   shows a preview listing the dives in chronological order (dive number,
   entry time, duration), the computed surface gap between each consecutive
   pair, and the resulting merged dive (total runtime, max depth, combined
-  bottom time). A note explains data handling: details are taken from the
+  bottom time). When the sources carry profile data, a depth-line-only
+  preview chart of the combined timeline (surface gaps included) is shown
+  for visual confirmation of the seam before committing; it renders from the
+  same builder output that persistence uses, so the preview cannot diverge
+  from the result. A note explains data handling: details are taken from the
   earliest dive, blanks filled from later dives; notes are combined; tanks,
   gear, buddies, tags, and sightings are all kept. Confirm button:
   **Combine into one dive**.

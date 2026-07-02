@@ -91,6 +91,32 @@ void main() {
       expect(sizedBox.width, 80);
       expect(sizedBox.height, 32);
     });
+
+    testWidgets('renders at most the default 40 spots for a dense profile', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(body: DiveSparkline(profile: _makeProfile(500))),
+        ),
+      );
+      final chart = tester.widget<LineChart>(find.byType(LineChart));
+      expect(chart.data.lineBarsData.first.spots.length, 40);
+    });
+
+    testWidgets('honors a custom maxPoints for higher-fidelity previews', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: DiveSparkline(profile: _makeProfile(500), maxPoints: 200),
+          ),
+        ),
+      );
+      final chart = tester.widget<LineChart>(find.byType(LineChart));
+      expect(chart.data.lineBarsData.first.spots.length, 200);
+    });
   });
 
   group('DiveSparkline.downsample', () {

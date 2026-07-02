@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import 'package:submersion/core/presentation/widgets/dive_sparkline.dart';
 import 'package:submersion/core/utils/unit_formatter.dart';
 import 'package:submersion/features/dive_log/data/services/dive_merge_service.dart';
 import 'package:submersion/features/dive_log/domain/entities/dive.dart'
@@ -138,6 +139,27 @@ class _CombineDivesDialogState extends ConsumerState<CombineDivesDialog> {
             ),
           ),
           const SizedBox(height: 16),
+          if (result.previewProfile.isNotEmpty) ...[
+            Text(
+              context.l10n.diveLog_combine_profilePreview,
+              style: textTheme.labelMedium?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 8),
+            // Depth-line-only preview of the merged timeline (surface gaps
+            // included) so the user can visually confirm the seam before
+            // committing. Higher maxPoints than the list thumbnails keeps a
+            // mid-dive surface interval crisp.
+            DiveSparkline(
+              profile: result.previewProfile,
+              width: double.infinity,
+              height: 120,
+              color: colorScheme.primary,
+              maxPoints: 200,
+            ),
+            const SizedBox(height: 16),
+          ],
           Flexible(
             child: SingleChildScrollView(
               child: Column(

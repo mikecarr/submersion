@@ -399,4 +399,57 @@ void main() {
       expect(turtle.id, isNot('s1'));
     });
   });
+
+  group('build - preview profile', () {
+    test('re-bases each segment and bridges gaps with 0-depth points', () {
+      final a = dive(
+        'a',
+        entry: DateTime.utc(2026, 7, 1, 9),
+        runtimeMin: 5,
+        profile: const [
+          DiveProfilePoint(timestamp: 0, depth: 0),
+          DiveProfilePoint(timestamp: 150, depth: 12),
+          DiveProfilePoint(timestamp: 300, depth: 0),
+        ],
+      );
+      final b = dive(
+        'b',
+        entry: DateTime.utc(2026, 7, 1, 9, 10), // 600s after a's entry
+        runtimeMin: 5,
+        profile: const [
+          DiveProfilePoint(timestamp: 0, depth: 0),
+          DiveProfilePoint(timestamp: 150, depth: 8),
+          DiveProfilePoint(timestamp: 300, depth: 0),
+        ],
+      );
+
+      final preview = builder.build([a, b]).previewProfile;
+
+      // a unchanged (offset 0), then the 300..600 gap as two 0-depth
+      // points, then b re-based by +600.
+      expect(preview.map((p) => p.timestamp).toList(), [
+        0,
+        150,
+        300,
+        300,
+        600,
+        600,
+        750,
+        900,
+      ]);
+      expect(preview.map((p) => p.depth).toList(), [0, 12, 0, 0, 0, 0, 8, 0]);
+      for (var i = 1; i < preview.length; i++) {
+        expect(
+          preview[i].timestamp,
+          greaterThanOrEqualTo(preview[i - 1].timestamp),
+        );
+      }
+    });
+
+    test('is empty when no source carries profile data', () {
+      final a = dive('a', entry: DateTime.utc(2026, 7, 1, 9), runtimeMin: 30);
+      final b = dive('b', entry: DateTime.utc(2026, 7, 1, 10), runtimeMin: 30);
+      expect(builder.build([a, b]).previewProfile, isEmpty);
+    });
+  });
 }

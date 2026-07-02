@@ -5039,6 +5039,12 @@ abstract class AppLocalizations {
   /// **'The selected dives belong to different divers and can\'t be combined.'**
   String get diveLog_combine_mixedDivers;
 
+  /// No description provided for @diveLog_combine_profilePreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Combined profile'**
+  String get diveLog_combine_profilePreview;
+
   /// No description provided for @diveLog_combine_overlapBody.
   ///
   /// In en, this message translates to:

@@ -2980,6 +2980,9 @@ class AppLocalizationsDe extends AppLocalizations {
       'Die ausgewählten Tauchgänge gehören zu unterschiedlichen Tauchern und können nicht kombiniert werden.';
 
   @override
+  String get diveLog_combine_profilePreview => 'Kombiniertes Profil';
+
+  @override
   String get diveLog_combine_overlapBody =>
       'Sich überschneidende Tauchgänge sehen aus wie derselbe Tauchgang, der von mehreren Tauchcomputern aufgezeichnet wurde. Das Zusammenführen dieser Tauchgänge zu einem einzigen Eintrag, der die Daten jedes Computers zeigt, kommt in einer zukünftigen Version.';
 

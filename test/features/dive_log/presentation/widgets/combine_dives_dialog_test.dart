@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:submersion/core/constants/map_style.dart';
+import 'package:submersion/core/presentation/widgets/dive_sparkline.dart';
 import 'package:submersion/core/providers/provider.dart';
 import 'package:submersion/features/dive_log/data/repositories/dive_repository_impl.dart';
 import 'package:submersion/features/dive_log/data/services/dive_merge_service.dart';
@@ -19,13 +20,25 @@ domain.Dive diveAt(
   DateTime entry, {
   int runtimeMin = 30,
   String? diverId = 'diver1',
+  List<domain.DiveProfilePoint> profile = const [],
 }) => domain.Dive(
   id: id,
   diverId: diverId,
   dateTime: entry,
   entryTime: entry,
   runtime: Duration(minutes: runtimeMin),
+  profile: profile,
 );
+
+/// A short descend-bottom-ascend profile for the given [runtimeMin].
+List<domain.DiveProfilePoint> _profile(int runtimeMin) {
+  final end = runtimeMin * 60;
+  return [
+    const domain.DiveProfilePoint(timestamp: 0, depth: 0),
+    domain.DiveProfilePoint(timestamp: end ~/ 2, depth: 15),
+    domain.DiveProfilePoint(timestamp: end, depth: 0),
+  ];
+}
 
 /// Fake [DiveRepository] whose `getDivesByIds` returns canned dives.
 class _FakeDiveRepository implements DiveRepository {
@@ -125,6 +138,45 @@ void main() {
     expect(find.text('Combine dives'), findsOneWidget);
     expect(find.textContaining('Surface interval'), findsOneWidget);
     expect(find.text('Combine into one dive'), findsOneWidget);
+  });
+
+  testWidgets('sequential preview shows a depth-line profile chart when the '
+      'sources carry profile data', (tester) async {
+    await pumpCombineDialog(
+      tester,
+      dives: [
+        diveAt(
+          'a',
+          DateTime.utc(2026, 7, 1, 9),
+          runtimeMin: 5,
+          profile: _profile(5),
+        ),
+        diveAt(
+          'b',
+          DateTime.utc(2026, 7, 1, 10),
+          runtimeMin: 5,
+          profile: _profile(5),
+        ),
+      ],
+    );
+    expect(find.text('Combined profile'), findsOneWidget);
+    expect(find.byType(DiveSparkline), findsOneWidget);
+  });
+
+  testWidgets('sequential preview omits the chart when sources have no '
+      'profile data', (tester) async {
+    await pumpCombineDialog(
+      tester,
+      dives: [
+        diveAt('a', DateTime.utc(2026, 7, 1, 9)),
+        diveAt('b', DateTime.utc(2026, 7, 1, 10)),
+      ],
+    );
+    // Still a valid sequential preview...
+    expect(find.text('Combine into one dive'), findsOneWidget);
+    // ...but no chart to show.
+    expect(find.byType(DiveSparkline), findsNothing);
+    expect(find.text('Combined profile'), findsNothing);
   });
 
   testWidgets('overlapping selection shows the explanation panel', (

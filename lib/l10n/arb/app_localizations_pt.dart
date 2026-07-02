@@ -2973,6 +2973,9 @@ class AppLocalizationsPt extends AppLocalizations {
       'Os mergulhos selecionados pertencem a mergulhadores diferentes e não podem ser combinados.';
 
   @override
+  String get diveLog_combine_profilePreview => 'Perfil combinado';
+
+  @override
   String get diveLog_combine_overlapBody =>
       'Mergulhos sobrepostos parecem ser o mesmo mergulho registrado por vários computadores de mergulho. A opção de combiná-los em um único registro que mostra os dados de cada computador chegará em uma versão futura.';
 

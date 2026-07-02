@@ -1023,6 +1023,7 @@
   "diveLog_combine_error": "Impossibile unire le immersioni. Non è stato modificato nulla.",
   "diveLog_combine_gapLabel": "Intervallo di superficie: {duration}",
   "diveLog_combine_mixedDivers": "Le immersioni selezionate appartengono a subacquei diversi e non possono essere unite.",
+  "diveLog_combine_profilePreview": "Profilo combinato",
   "diveLog_combine_overlapBody": "Le immersioni sovrapposte sembrano la stessa immersione registrata da più computer subacquei. La possibilità di unirle in un'unica voce che mostri i dati di ogni computer arriverà in una versione futura.",
   "diveLog_combine_overlapHintTwoDives": "Per unire ora due registrazioni della stessa immersione, apri una di esse e usa «Unisci con un'altra immersione».",
   "diveLog_combine_overlapTitle": "Queste immersioni si sovrappongono nel tempo",

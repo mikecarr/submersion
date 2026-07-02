@@ -2823,6 +2823,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get diveLog_combine_mixedDivers => '所选潜水属于不同的潜水员，无法合并。';
 
   @override
+  String get diveLog_combine_profilePreview => '合并后的剖面';
+
+  @override
   String get diveLog_combine_overlapBody =>
       '重叠的潜水看起来像是由多台潜水电脑记录的同一次潜水。将它们合并为显示每台电脑数据的单条记录的功能即将在未来版本中推出。';
 

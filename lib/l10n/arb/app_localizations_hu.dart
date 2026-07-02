@@ -2961,6 +2961,9 @@ class AppLocalizationsHu extends AppLocalizations {
       'A kiválasztott merülések különböző búvárokhoz tartoznak, ezért nem vonhatók össze.';
 
   @override
+  String get diveLog_combine_profilePreview => 'Összevont profil';
+
+  @override
   String get diveLog_combine_overlapBody =>
       'Az egymást átfedő merülések úgy néznek ki, mintha ugyanaz a merülés lenne, amelyet több merülésszámítógép rögzített. Az ilyen merülések egyetlen, minden számítógép adatait megjelenítő bejegyzéssé történő összevonása egy jövőbeli verzióban lesz elérhető.';
 

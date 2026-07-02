@@ -2989,6 +2989,9 @@ class AppLocalizationsFr extends AppLocalizations {
       'Les plongées sélectionnées appartiennent à des plongeurs différents et ne peuvent pas être combinées.';
 
   @override
+  String get diveLog_combine_profilePreview => 'Profil combiné';
+
+  @override
   String get diveLog_combine_overlapBody =>
       'Des plongées qui se chevauchent ressemblent à la même plongée enregistrée par plusieurs ordinateurs de plongée. La possibilité de les combiner en une seule entrée affichant les données de chaque ordinateur arrivera dans une future version.';
 

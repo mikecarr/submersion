@@ -60,6 +60,7 @@ class DiveMergeResult {
     required this.segmentOffsetsSeconds,
     required this.tankIdMap,
     required this.mergedSightings,
+    required this.previewProfile,
   });
 
   final Dive mergedDive;
@@ -74,6 +75,14 @@ class DiveMergeResult {
 
   /// Union of source sightings (same species merged), with fresh ids.
   final List<MarineSighting> mergedSightings;
+
+  /// Depth-vs-time series for the confirmation preview: each source's
+  /// profile re-based onto the merged timeline, bridged by 0-depth points
+  /// across each gap. Preview-only -- the persisted profile is assembled
+  /// row-by-row in [DiveMergeService] to preserve per-sample computer
+  /// attribution and native-cadence surface samples. Empty when no source
+  /// carries submerged profile data.
+  final List<DiveProfilePoint> previewProfile;
 }
 
 class DiveMergeBuilder {
@@ -379,7 +388,38 @@ class DiveMergeBuilder {
       segmentOffsetsSeconds: offsets,
       tankIdMap: tankIdMap,
       mergedSightings: bySpecies.values.toList(),
+      previewProfile: _previewProfile(sorted, offsets, classification.gaps),
     );
+  }
+
+  /// Builds the preview depth series: each source's profile shifted by its
+  /// [offsets] onto the merged timeline, with two 0-depth points bridging
+  /// each positive gap so the surface interval renders as a flat line.
+  /// Returns an empty list when nothing submerged is present to preview.
+  List<DiveProfilePoint> _previewProfile(
+    List<Dive> sorted,
+    Map<String, int> offsets,
+    List<MergeGap> gaps,
+  ) {
+    final points = <DiveProfilePoint>[];
+    for (var i = 0; i < sorted.length; i++) {
+      final offset = offsets[sorted[i].id] ?? 0;
+      final ordered = [...sorted[i].profile]
+        ..sort((a, b) => a.timestamp.compareTo(b.timestamp));
+      for (final p in ordered) {
+        points.add(
+          DiveProfilePoint(timestamp: p.timestamp + offset, depth: p.depth),
+        );
+      }
+      if (i < gaps.length && gaps[i].endSeconds > gaps[i].startSeconds) {
+        points.add(DiveProfilePoint(timestamp: gaps[i].startSeconds, depth: 0));
+        points.add(DiveProfilePoint(timestamp: gaps[i].endSeconds, depth: 0));
+      }
+    }
+    // A series that never leaves the surface (no submerged samples) is not
+    // worth previewing.
+    if (points.every((p) => p.depth == 0)) return const [];
+    return points;
   }
 
   /// The segment's occupied span: the declared runtime or the last profile

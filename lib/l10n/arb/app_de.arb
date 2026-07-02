@@ -1057,6 +1057,7 @@
   "diveLog_combine_error": "Die Tauchgänge konnten nicht kombiniert werden. Es wurde nichts geändert.",
   "diveLog_combine_gapLabel": "Oberflächenintervall: {duration}",
   "diveLog_combine_mixedDivers": "Die ausgewählten Tauchgänge gehören zu unterschiedlichen Tauchern und können nicht kombiniert werden.",
+  "diveLog_combine_profilePreview": "Kombiniertes Profil",
   "diveLog_combine_overlapBody": "Sich überschneidende Tauchgänge sehen aus wie derselbe Tauchgang, der von mehreren Tauchcomputern aufgezeichnet wurde. Das Zusammenführen dieser Tauchgänge zu einem einzigen Eintrag, der die Daten jedes Computers zeigt, kommt in einer zukünftigen Version.",
   "diveLog_combine_overlapHintTwoDives": "Um jetzt zwei Aufzeichnungen desselben Tauchgangs zusammenzuführen, öffnen Sie einen davon und verwenden Sie „Mit einem anderen Tauchgang zusammenführen“.",
   "diveLog_combine_overlapTitle": "Diese Tauchgänge überschneiden sich zeitlich",

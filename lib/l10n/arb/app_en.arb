@@ -1701,6 +1701,7 @@
   "diveLog_combine_error": "Couldn't combine the dives. Nothing was changed.",
   "diveLog_combine_gapLabel": "Surface interval: {duration}",
   "diveLog_combine_mixedDivers": "The selected dives belong to different divers and can't be combined.",
+  "diveLog_combine_profilePreview": "Combined profile",
   "diveLog_combine_overlapBody": "Overlapping dives look like the same dive recorded by multiple dive computers. Combining those into a single entry that shows every computer's data is coming in a future release.",
   "diveLog_combine_overlapHintTwoDives": "To merge two records of the same dive now, open one of them and use \"Merge with another dive\".",
   "diveLog_combine_overlapTitle": "These dives overlap in time",

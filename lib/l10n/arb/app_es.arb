@@ -1057,6 +1057,7 @@
   "diveLog_combine_error": "No se pudieron combinar las inmersiones. No se realizó ningún cambio.",
   "diveLog_combine_gapLabel": "Intervalo de superficie: {duration}",
   "diveLog_combine_mixedDivers": "Las inmersiones seleccionadas pertenecen a buceadores diferentes y no se pueden combinar.",
+  "diveLog_combine_profilePreview": "Perfil combinado",
   "diveLog_combine_overlapBody": "Las inmersiones superpuestas parecen ser la misma inmersión registrada por varios ordenadores de buceo. Combinarlas en una sola entrada que muestre los datos de cada ordenador llegará en una futura versión.",
   "diveLog_combine_overlapHintTwoDives": "Para combinar ahora dos registros de la misma inmersión, abre uno de ellos y usa «Combinar con otra inmersión».",
   "diveLog_combine_overlapTitle": "Estas inmersiones se superponen en el tiempo",

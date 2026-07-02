@@ -1023,6 +1023,7 @@
   "diveLog_combine_error": "Impossible de combiner les plongées. Rien n'a été modifié.",
   "diveLog_combine_gapLabel": "Intervalle de surface : {duration}",
   "diveLog_combine_mixedDivers": "Les plongées sélectionnées appartiennent à des plongeurs différents et ne peuvent pas être combinées.",
+  "diveLog_combine_profilePreview": "Profil combiné",
   "diveLog_combine_overlapBody": "Des plongées qui se chevauchent ressemblent à la même plongée enregistrée par plusieurs ordinateurs de plongée. La possibilité de les combiner en une seule entrée affichant les données de chaque ordinateur arrivera dans une future version.",
   "diveLog_combine_overlapHintTwoDives": "Pour fusionner dès maintenant deux enregistrements de la même plongée, ouvre l'un d'eux et utilise « Fusionner avec une autre plongée ».",
   "diveLog_combine_overlapTitle": "Ces plongées se chevauchent dans le temps",

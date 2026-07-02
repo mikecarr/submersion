@@ -2904,6 +2904,9 @@ class AppLocalizationsAr extends AppLocalizations {
       'الغوصات المحددة تخص غواصين مختلفين ولا يمكن دمجها.';
 
   @override
+  String get diveLog_combine_profilePreview => 'الملف المدمج';
+
+  @override
   String get diveLog_combine_overlapBody =>
       'الغوصات المتداخلة تبدو وكأنها الغوصة نفسها مسجّلة بواسطة عدة أجهزة كمبيوتر غوص. ستتوفر قريبًا ميزة دمج هذه الغوصات في إدخال واحد يعرض بيانات كل جهاز.';
 
