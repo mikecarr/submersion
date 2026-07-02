@@ -2457,16 +2457,25 @@ void main() {
         final chart = find.byType(LineChart).first;
         final topLeft = tester.getTopLeft(chart);
         final size = tester.getSize(chart);
-        // Hover in the right third of the plot -- that x lands on the danger
-        // band (a non-first segment).
+        // Hover well into the right of the plot -- that x lands in the danger
+        // band (the last, non-first segment).
         final pointer = TestPointer(1, PointerDeviceKind.mouse);
         await tester.sendEventToBinding(
-          pointer.hover(topLeft + Offset(size.width * 0.8, size.height * 0.5)),
+          pointer.hover(topLeft + Offset(size.width * 0.85, size.height * 0.5)),
         );
         await tester.pump();
 
+        // Every band-local spotIndex in this fixture is <= 4 (each bar holds at
+        // most 5 points), and the danger band starts at global index 7. A hover
+        // here must resolve to a global index >= 7, which a band-local emission
+        // could never produce -- that is what proves the mapping, not merely
+        // "some in-range index".
         expect(selected, isNotNull);
-        expect(selected, inInclusiveRange(0, profile.length - 1));
+        expect(
+          selected,
+          allOf(greaterThanOrEqualTo(7), lessThan(profile.length)),
+          reason: 'must be the global danger-band index, not a band-local one',
+        );
       },
     );
 

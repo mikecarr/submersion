@@ -291,6 +291,15 @@ class DiveProfileChart extends ConsumerStatefulWidget {
   @visibleForTesting
   static List<({int start, int end, AscentRateCategory category})>
   velocityBandRuns(int profileLength, List<AscentRatePoint> ascentRates) {
+    // The loop indexes ascentRates up to profileLength - 1, so it needs at
+    // least one rate sample per profile point. All internal callers validate
+    // this; the assert turns a would-be RangeError into a clear message if the
+    // exposed helper is ever mis-called.
+    assert(
+      ascentRates.length >= profileLength,
+      'velocityBandRuns needs one ascent-rate sample per profile point '
+      '(got ${ascentRates.length} for $profileLength points)',
+    );
     final runs = <({int start, int end, AscentRateCategory category})>[];
     var segStart = 1; // first drawable segment connects points 0 and 1
     while (segStart < profileLength) {
