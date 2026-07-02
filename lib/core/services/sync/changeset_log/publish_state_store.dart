@@ -32,14 +32,24 @@ class PublishStateStore {
     String provider,
     String? adoptedHlcHigh,
   ) async {
+    // Write every base column EXPLICITLY rather than omitting baseSeq: with
+    // insertOnConflictUpdate, absent columns keep their prior values, so an
+    // unexpected pre-existing row would retain a non-null baseSeq (and stale
+    // base metadata) and silently defeat the null-baseSeq marker. Fully
+    // specifying the row makes the marker unambiguous whether it inserts or
+    // updates -- a fresh "adopted, no self-base yet" state.
     await _db
         .into(_db.localPublishStates)
         .insertOnConflictUpdate(
           LocalPublishStatesCompanion(
             provider: Value(provider),
+            baseSeq: const Value(null),
+            basePartCount: const Value(null),
+            baseBytes: const Value(null),
+            headSeq: const Value(0),
             publishedHlcHigh: Value(adoptedHlcHigh),
+            changesetBytesSinceBase: const Value(0),
             updatedAt: Value(DateTime.now().millisecondsSinceEpoch),
-            // baseSeq intentionally absent (null): the deferred marker.
           ),
         );
   }

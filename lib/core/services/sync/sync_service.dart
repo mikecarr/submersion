@@ -5,7 +5,8 @@ import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:submersion/core/data/repositories/sync_repository.dart';
-import 'package:submersion/core/database/database.dart' show SyncRecord;
+import 'package:submersion/core/database/database.dart'
+    show SyncRecord, DeletionLogData;
 import 'package:submersion/core/services/cloud_storage/cloud_storage_provider.dart';
 import 'package:submersion/core/services/database_service.dart';
 import 'package:submersion/core/services/logger_service.dart';
@@ -436,7 +437,10 @@ class SyncService {
       // ---- Upload: publish our delta ----
       _reportProgress(SyncPhase.uploading, 0.8, 'Publishing changes...');
       final deletions = await _syncRepository.getAllDeletions();
-      if (await _shouldDeferSelfBaseAfterAdopt(provider.providerId)) {
+      if (await _shouldDeferSelfBaseAfterAdopt(
+        provider.providerId,
+        deletions,
+      )) {
         // Just adopted a restored library and have nothing of our own yet: our
         // library == the adopted epoch the peers already published. Publishing
         // our own full base here would redundantly re-upload the whole library
@@ -2348,10 +2352,17 @@ class SyncService {
   /// local change: [SyncRepository.hasUnsyncedChanges] counts pending / conflict
   /// / deletion rows, which are written in the same transaction as the edit, so
   /// it is reliable even in the window before the HLC clock is reconfigured.
-  Future<bool> _shouldDeferSelfBaseAfterAdopt(String providerId) async {
+  Future<bool> _shouldDeferSelfBaseAfterAdopt(
+    String providerId,
+    List<DeletionLogData> deletions,
+  ) async {
     final state = await _publishStateStore.get(providerId);
     if (state == null || state.baseSeq != null) return false;
-    return !(await _syncRepository.hasUnsyncedChanges());
+    // Equivalent to !hasUnsyncedChanges(), but reuses the [deletions] the caller
+    // already fetched instead of re-reading the deletion log on this path.
+    if (deletions.isNotEmpty) return false;
+    return (await _syncRepository.getPendingCount()) == 0 &&
+        (await _syncRepository.getConflictCount()) == 0;
   }
 
   /// Stream every epoch-stamped changeset log into adopt sources: each device's
