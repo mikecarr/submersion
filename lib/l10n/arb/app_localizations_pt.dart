@@ -2953,6 +2953,80 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
+  String get diveLog_combine_confirm => 'Combinar em um mergulho';
+
+  @override
+  String get diveLog_combine_dataNote =>
+      'Os detalhes vêm do mergulho mais antigo, com os espaços em branco preenchidos pelos mergulhos posteriores. As notas são combinadas. Cilindros, equipamentos, parceiros, tags e avistamentos são todos mantidos.';
+
+  @override
+  String get diveLog_combine_error =>
+      'Não foi possível combinar os mergulhos. Nada foi alterado.';
+
+  @override
+  String diveLog_combine_gapLabel(String duration) {
+    return 'Intervalo de superfície: $duration';
+  }
+
+  @override
+  String get diveLog_combine_longSurfaceWarning =>
+      'Um ou mais intervalos de superfície são maiores que 30 minutos. Podem ser mergulhos separados em vez de um único mergulho contínuo.';
+
+  @override
+  String get diveLog_combine_mixedDivers =>
+      'Os mergulhos selecionados pertencem a mergulhadores diferentes e não podem ser combinados.';
+
+  @override
+  String get diveLog_combine_profilePreview => 'Perfil combinado';
+
+  @override
+  String get diveLog_combine_overlapBody =>
+      'Mergulhos sobrepostos parecem ser o mesmo mergulho registrado por vários computadores de mergulho. A opção de combiná-los em um único registro que mostra os dados de cada computador chegará em uma versão futura.';
+
+  @override
+  String get diveLog_combine_overlapHintTwoDives =>
+      'Para combinar agora dois registros do mesmo mergulho, abra um deles e use «Mesclar com outro mergulho».';
+
+  @override
+  String get diveLog_combine_overlapTitle =>
+      'Esses mergulhos se sobrepõem no tempo';
+
+  @override
+  String diveLog_combine_previewIntro(int count) {
+    return 'Estes $count mergulhos serão combinados em um único mergulho contínuo. Os intervalos entre eles se tornam tempo de superfície.';
+  }
+
+  @override
+  String diveLog_combine_resultSummary(
+    String runtime,
+    String maxDepth,
+    String bottomTime,
+  ) {
+    return 'Resultado: $runtime no total, profundidade máxima $maxDepth, tempo de fundo $bottomTime';
+  }
+
+  @override
+  String diveLog_combine_snackbar(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'mergulhos combinados',
+      one: 'mergulho combinado',
+    );
+    return '$count $_temp0';
+  }
+
+  @override
+  String get diveLog_combine_title => 'Combinar mergulhos';
+
+  @override
+  String get diveLog_combine_undoError =>
+      'Não foi possível desfazer a combinação.';
+
+  @override
+  String get diveLog_combine_undone => 'Combinação desfeita';
+
+  @override
   String get diveLog_computerSheet_description =>
       'Selecione de qual perfil de computador editar.';
 
@@ -5020,6 +5094,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String diveLog_selection_countSelected(Object count) {
     return '$count selecionado(s)';
   }
+
+  @override
+  String get diveLog_selection_tooltip_combine => 'Combinar';
 
   @override
   String get diveLog_selection_tooltip_delete => 'Excluir Selecionados';

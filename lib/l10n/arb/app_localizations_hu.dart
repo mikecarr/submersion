@@ -2941,6 +2941,80 @@ class AppLocalizationsHu extends AppLocalizations {
   }
 
   @override
+  String get diveLog_combine_confirm => 'Összevonás egy merüléssé';
+
+  @override
+  String get diveLog_combine_dataNote =>
+      'A részletek a legkorábbi merülésből származnak, az üres mezőket a későbbi merülések töltik ki. A jegyzetek összevonásra kerülnek. Az összes palack, felszerelés, búvártárs, cimke és megfigyelés megmarad.';
+
+  @override
+  String get diveLog_combine_error =>
+      'Nem sikerült összevonni a merüléseket. Semmi sem változott.';
+
+  @override
+  String diveLog_combine_gapLabel(String duration) {
+    return 'Felszíni szünet: $duration';
+  }
+
+  @override
+  String get diveLog_combine_longSurfaceWarning =>
+      'Egy vagy több felszíni szünet meghaladja a 30 percet. Ezek lehet, hogy külön merülések, nem pedig egyetlen folyamatos merülés.';
+
+  @override
+  String get diveLog_combine_mixedDivers =>
+      'A kiválasztott merülések különböző búvárokhoz tartoznak, ezért nem vonhatók össze.';
+
+  @override
+  String get diveLog_combine_profilePreview => 'Összevont profil';
+
+  @override
+  String get diveLog_combine_overlapBody =>
+      'Az egymást átfedő merülések úgy néznek ki, mintha ugyanaz a merülés lenne, amelyet több merülésszámítógép rögzített. Az ilyen merülések egyetlen, minden számítógép adatait megjelenítő bejegyzéssé történő összevonása egy jövőbeli verzióban lesz elérhető.';
+
+  @override
+  String get diveLog_combine_overlapHintTwoDives =>
+      'Ha most szeretnéd összevonni ugyanannak a merülésnek a két rögzített változatát, nyisd meg az egyiket, és használd az „Összevonás egy másik merüléssel” funkciót.';
+
+  @override
+  String get diveLog_combine_overlapTitle =>
+      'Ezek a merülések időben átfedik egymást';
+
+  @override
+  String diveLog_combine_previewIntro(int count) {
+    return 'Ez a $count merülés egyetlen folyamatos merüléssé lesz összevonva. A köztük lévő szünetek felszíni idővé válnak.';
+  }
+
+  @override
+  String diveLog_combine_resultSummary(
+    String runtime,
+    String maxDepth,
+    String bottomTime,
+  ) {
+    return 'Eredmény: összesen $runtime, legnagyobb mélység $maxDepth, fenékidő $bottomTime';
+  }
+
+  @override
+  String diveLog_combine_snackbar(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'merülés',
+      one: 'merülés',
+    );
+    return '$count $_temp0 összevonva';
+  }
+
+  @override
+  String get diveLog_combine_title => 'Merülések összevonása';
+
+  @override
+  String get diveLog_combine_undoError =>
+      'Nem sikerült visszavonni az összevonást.';
+
+  @override
+  String get diveLog_combine_undone => 'Összevonás visszavonva';
+
+  @override
   String get diveLog_computerSheet_description =>
       'Válaszd ki, melyik számítógép profiljából szerkesztesz.';
 
@@ -5005,6 +5079,9 @@ class AppLocalizationsHu extends AppLocalizations {
   String diveLog_selection_countSelected(Object count) {
     return '$count kivalasztva';
   }
+
+  @override
+  String get diveLog_selection_tooltip_combine => 'Összevonás';
 
   @override
   String get diveLog_selection_tooltip_delete => 'Kivalasztottak torlese';

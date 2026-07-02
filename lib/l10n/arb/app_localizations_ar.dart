@@ -2885,6 +2885,77 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
+  String get diveLog_combine_confirm => 'دمج في غوصة واحدة';
+
+  @override
+  String get diveLog_combine_dataNote =>
+      'تُؤخذ التفاصيل من أقدم غوصة، مع تعبئة الفراغات من الغوصات اللاحقة. يتم دمج الملاحظات. يتم الاحتفاظ بجميع الأسطوانات والمعدات ورفقاء الغوص والوسوم والمشاهدات.';
+
+  @override
+  String get diveLog_combine_error => 'تعذّر دمج الغوصات. لم يتغيّر شيء.';
+
+  @override
+  String diveLog_combine_gapLabel(String duration) {
+    return 'فترة السطح: $duration';
+  }
+
+  @override
+  String get diveLog_combine_longSurfaceWarning =>
+      'قد تتجاوز فترة سطح واحدة أو أكثر 30 دقيقة. قد تكون هذه غوصات منفصلة بدلاً من غوصة واحدة متواصلة.';
+
+  @override
+  String get diveLog_combine_mixedDivers =>
+      'الغوصات المحددة تخص غواصين مختلفين ولا يمكن دمجها.';
+
+  @override
+  String get diveLog_combine_profilePreview => 'الملف المدمج';
+
+  @override
+  String get diveLog_combine_overlapBody =>
+      'الغوصات المتداخلة تبدو وكأنها الغوصة نفسها مسجّلة بواسطة عدة أجهزة كمبيوتر غوص. ستتوفر قريبًا ميزة دمج هذه الغوصات في إدخال واحد يعرض بيانات كل جهاز.';
+
+  @override
+  String get diveLog_combine_overlapHintTwoDives =>
+      'لدمج سجلّين لنفس الغوصة الآن، افتح أحدهما واستخدم «دمج مع غوصة أخرى».';
+
+  @override
+  String get diveLog_combine_overlapTitle => 'هذه الغوصات متداخلة زمنياً';
+
+  @override
+  String diveLog_combine_previewIntro(int count) {
+    return 'ستُدمَج هذه الغوصات الـ $count في غوصة واحدة متواصلة. تتحول الفجوات بينها إلى وقت على السطح.';
+  }
+
+  @override
+  String diveLog_combine_resultSummary(
+    String runtime,
+    String maxDepth,
+    String bottomTime,
+  ) {
+    return 'النتيجة: $runtime إجمالاً، أقصى عمق $maxDepth، ووقت القاع $bottomTime';
+  }
+
+  @override
+  String diveLog_combine_snackbar(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'غوصات',
+      one: 'غوصة',
+    );
+    return 'تم دمج $count $_temp0';
+  }
+
+  @override
+  String get diveLog_combine_title => 'دمج الغوصات';
+
+  @override
+  String get diveLog_combine_undoError => 'تعذّر التراجع عن الدمج.';
+
+  @override
+  String get diveLog_combine_undone => 'تم التراجع عن الدمج';
+
+  @override
   String get diveLog_computerSheet_description =>
       'اختر ملف أي كمبيوتر تريد التحرير منه.';
 
@@ -4905,6 +4976,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String diveLog_selection_countSelected(Object count) {
     return '$count محدد';
   }
+
+  @override
+  String get diveLog_selection_tooltip_combine => 'دمج';
 
   @override
   String get diveLog_selection_tooltip_delete => 'حذف المحدد';

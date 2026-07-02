@@ -2930,6 +2930,79 @@ class AppLocalizationsNl extends AppLocalizations {
   }
 
   @override
+  String get diveLog_combine_confirm => 'Samenvoegen tot één duik';
+
+  @override
+  String get diveLog_combine_dataNote =>
+      'Details komen van de vroegste duik, met lege velden aangevuld vanuit latere duiken. Notities worden samengevoegd. Flessen, uitrusting, buddy\'s, tags en waarnemingen blijven allemaal behouden.';
+
+  @override
+  String get diveLog_combine_error =>
+      'Kon de duiken niet samenvoegen. Er is niets gewijzigd.';
+
+  @override
+  String diveLog_combine_gapLabel(String duration) {
+    return 'Oppervlakte-interval: $duration';
+  }
+
+  @override
+  String get diveLog_combine_longSurfaceWarning =>
+      'Een of meer oppervlakte-intervallen zijn langer dan 30 minuten. Dit kunnen aparte duiken zijn in plaats van één doorlopende duik.';
+
+  @override
+  String get diveLog_combine_mixedDivers =>
+      'De geselecteerde duiken behoren tot verschillende duikers en kunnen niet worden samengevoegd.';
+
+  @override
+  String get diveLog_combine_profilePreview => 'Samengevoegd profiel';
+
+  @override
+  String get diveLog_combine_overlapBody =>
+      'Overlappende duiken lijken op dezelfde duik die door meerdere duikcomputers is vastgelegd. Het samenvoegen daarvan tot één item dat de gegevens van elke computer toont, komt in een toekomstige release.';
+
+  @override
+  String get diveLog_combine_overlapHintTwoDives =>
+      'Om nu twee registraties van dezelfde duik samen te voegen, open je er een en gebruik je ‘Samenvoegen met een andere duik’.';
+
+  @override
+  String get diveLog_combine_overlapTitle => 'Deze duiken overlappen in tijd';
+
+  @override
+  String diveLog_combine_previewIntro(int count) {
+    return 'Deze $count duiken worden samengevoegd tot één doorlopende duik. Tussenliggende intervallen worden oppervlaktetijd.';
+  }
+
+  @override
+  String diveLog_combine_resultSummary(
+    String runtime,
+    String maxDepth,
+    String bottomTime,
+  ) {
+    return 'Resultaat: $runtime totaal, maximale diepte $maxDepth, bodemtijd $bottomTime';
+  }
+
+  @override
+  String diveLog_combine_snackbar(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'duiken',
+      one: 'duik',
+    );
+    return '$count $_temp0 samengevoegd';
+  }
+
+  @override
+  String get diveLog_combine_title => 'Duiken samenvoegen';
+
+  @override
+  String get diveLog_combine_undoError =>
+      'Kon het samenvoegen niet ongedaan maken.';
+
+  @override
+  String get diveLog_combine_undone => 'Samenvoeging ongedaan gemaakt';
+
+  @override
   String get diveLog_computerSheet_description =>
       'Kies vanaf welk computerprofiel je wilt bewerken.';
 
@@ -4980,6 +5053,9 @@ class AppLocalizationsNl extends AppLocalizations {
   String diveLog_selection_countSelected(Object count) {
     return '$count geselecteerd';
   }
+
+  @override
+  String get diveLog_selection_tooltip_combine => 'Samenvoegen';
 
   @override
   String get diveLog_selection_tooltip_delete => 'Geselecteerde verwijderen';

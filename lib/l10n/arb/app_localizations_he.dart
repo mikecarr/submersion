@@ -2868,6 +2868,78 @@ class AppLocalizationsHe extends AppLocalizations {
   }
 
   @override
+  String get diveLog_combine_confirm => 'מיזוג לצלילה אחת';
+
+  @override
+  String get diveLog_combine_dataNote =>
+      'הפרטים מגיעים מהצלילה המוקדמת ביותר, והשדות הריקים מתמלאים מצלילות מאוחרות יותר. ההערות מתמזגות. כל הבלונים, הציוד, השותפים, התגיות והתצפיות נשמרים.';
+
+  @override
+  String get diveLog_combine_error =>
+      'לא ניתן היה למזג את הצלילות. שום דבר לא השתנה.';
+
+  @override
+  String diveLog_combine_gapLabel(String duration) {
+    return 'מרווח פני שטח: $duration';
+  }
+
+  @override
+  String get diveLog_combine_longSurfaceWarning =>
+      'מרווח פני שטח אחד או יותר ארוך מ-30 דקות. ייתכן שאלה צלילות נפרדות ולא צלילה אחת רציפה.';
+
+  @override
+  String get diveLog_combine_mixedDivers =>
+      'הצלילות שנבחרו שייכות לצוללנים שונים ולא ניתן למזג אותן.';
+
+  @override
+  String get diveLog_combine_profilePreview => 'פרופיל ממוזג';
+
+  @override
+  String get diveLog_combine_overlapBody =>
+      'צלילות חופפות נראות כמו אותה צלילה שנרשמה על ידי כמה מחשבי צלילה. מיזוג שלהן לרשומה אחת שמציגה את הנתונים של כל מחשב יגיע בגרסה עתידית.';
+
+  @override
+  String get diveLog_combine_overlapHintTwoDives =>
+      'כדי למזג עכשיו שתי רשומות של אותה צלילה, פתח אחת מהן והשתמש ב«מיזוג עם צלילה אחרת».';
+
+  @override
+  String get diveLog_combine_overlapTitle => 'הצלילות האלה חופפות בזמן';
+
+  @override
+  String diveLog_combine_previewIntro(int count) {
+    return '$count הצלילות האלה ימוזגו לצלילה אחת רציפה. הפערים ביניהן יהפכו לזמן פני שטח.';
+  }
+
+  @override
+  String diveLog_combine_resultSummary(
+    String runtime,
+    String maxDepth,
+    String bottomTime,
+  ) {
+    return 'תוצאה: $runtime בסך הכול, עומק מרבי $maxDepth, זמן תחתית $bottomTime';
+  }
+
+  @override
+  String diveLog_combine_snackbar(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'צלילות',
+      one: 'צלילה',
+    );
+    return 'מוזגו $count $_temp0';
+  }
+
+  @override
+  String get diveLog_combine_title => 'מיזוג צלילות';
+
+  @override
+  String get diveLog_combine_undoError => 'לא ניתן היה לבטל את המיזוג.';
+
+  @override
+  String get diveLog_combine_undone => 'המיזוג בוטל';
+
+  @override
   String get diveLog_computerSheet_description =>
       'בחר מאיזה פרופיל מחשב לערוך.';
 
@@ -4882,6 +4954,9 @@ class AppLocalizationsHe extends AppLocalizations {
   String diveLog_selection_countSelected(Object count) {
     return '$count נבחרו';
   }
+
+  @override
+  String get diveLog_selection_tooltip_combine => 'מזג';
 
   @override
   String get diveLog_selection_tooltip_delete => 'מחק נבחרים';

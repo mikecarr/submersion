@@ -2955,6 +2955,79 @@ class AppLocalizationsIt extends AppLocalizations {
   }
 
   @override
+  String get diveLog_combine_confirm => 'Unisci in un\'immersione';
+
+  @override
+  String get diveLog_combine_dataNote =>
+      'I dettagli provengono dall\'immersione più vecchia, con gli spazi vuoti completati dalle immersioni successive. Le note vengono unite. Bombole, attrezzatura, compagni, tag e avvistamenti vengono tutti mantenuti.';
+
+  @override
+  String get diveLog_combine_error =>
+      'Impossibile unire le immersioni. Non è stato modificato nulla.';
+
+  @override
+  String diveLog_combine_gapLabel(String duration) {
+    return 'Intervallo di superficie: $duration';
+  }
+
+  @override
+  String get diveLog_combine_longSurfaceWarning =>
+      'Uno o più intervalli di superficie superano i 30 minuti. Potrebbero essere immersioni separate anziché un\'unica immersione continua.';
+
+  @override
+  String get diveLog_combine_mixedDivers =>
+      'Le immersioni selezionate appartengono a subacquei diversi e non possono essere unite.';
+
+  @override
+  String get diveLog_combine_profilePreview => 'Profilo combinato';
+
+  @override
+  String get diveLog_combine_overlapBody =>
+      'Le immersioni sovrapposte sembrano la stessa immersione registrata da più computer subacquei. La possibilità di unirle in un\'unica voce che mostri i dati di ogni computer arriverà in una versione futura.';
+
+  @override
+  String get diveLog_combine_overlapHintTwoDives =>
+      'Per unire ora due registrazioni della stessa immersione, apri una di esse e usa «Unisci con un\'altra immersione».';
+
+  @override
+  String get diveLog_combine_overlapTitle =>
+      'Queste immersioni si sovrappongono nel tempo';
+
+  @override
+  String diveLog_combine_previewIntro(int count) {
+    return 'Queste $count immersioni verranno unite in un\'unica immersione continua. Gli intervalli tra loro diventeranno tempo in superficie.';
+  }
+
+  @override
+  String diveLog_combine_resultSummary(
+    String runtime,
+    String maxDepth,
+    String bottomTime,
+  ) {
+    return 'Risultato: $runtime totali, profondità massima $maxDepth, tempo di fondo $bottomTime';
+  }
+
+  @override
+  String diveLog_combine_snackbar(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'immersioni unite',
+      one: 'immersione unita',
+    );
+    return '$count $_temp0';
+  }
+
+  @override
+  String get diveLog_combine_title => 'Unisci immersioni';
+
+  @override
+  String get diveLog_combine_undoError => 'Impossibile annullare l\'unione.';
+
+  @override
+  String get diveLog_combine_undone => 'Unione annullata';
+
+  @override
   String get diveLog_computerSheet_description =>
       'Seleziona da quale profilo del computer modificare.';
 
@@ -5024,6 +5097,9 @@ class AppLocalizationsIt extends AppLocalizations {
   String diveLog_selection_countSelected(Object count) {
     return '$count selezionati';
   }
+
+  @override
+  String get diveLog_selection_tooltip_combine => 'Unisci';
 
   @override
   String get diveLog_selection_tooltip_delete => 'Elimina selezionati';

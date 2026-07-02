@@ -23,11 +23,13 @@ import 'package:submersion/features/dive_types/presentation/providers/dive_type_
 import 'package:submersion/features/equipment/presentation/providers/equipment_providers.dart';
 import 'package:submersion/features/trips/presentation/providers/trip_providers.dart';
 import 'package:submersion/features/dive_centers/presentation/providers/dive_center_providers.dart';
+import 'package:submersion/features/dive_log/data/services/dive_merge_service.dart';
 import 'package:submersion/features/dive_log/domain/entities/dive.dart';
 import 'package:submersion/features/dive_log/domain/entities/dive_summary.dart';
 import 'package:submersion/features/dive_log/presentation/providers/dive_providers.dart';
 import 'package:submersion/features/dive_log/presentation/pages/dive_list_page.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/add_dive_bottom_sheet.dart';
+import 'package:submersion/features/dive_log/presentation/widgets/combine_dives_dialog.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/dive_numbering_dialog.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/dive_table_view.dart';
 import 'package:submersion/l10n/l10n_extension.dart';
@@ -102,6 +104,7 @@ class _DiveListContentState extends ConsumerState<DiveListContent> {
   bool _isSelectionMode = false;
   final Set<String> _selectedIds = {};
   List<Dive>? _deletedDives;
+  DiveMergeOutcome? _lastMergeOutcome;
   final ScrollController _scrollController = ScrollController();
   String? _lastScrolledToId;
   bool _selectionFromList =
@@ -161,15 +164,19 @@ class _DiveListContentState extends ConsumerState<DiveListContent> {
     }
   }
 
-  /// Scroll the list to show the selected item
-  void _scrollToSelectedItem() {
-    if (widget.selectedId == null) return;
+  /// Scroll the list to show [overrideId], or the current [widget.selectedId]
+  /// when omitted. An explicit id lets callers (e.g. the combine flow) scroll
+  /// to a freshly created row without depending on when the URL selection
+  /// propagates.
+  void _scrollToSelectedItem([String? overrideId]) {
+    final targetId = overrideId ?? widget.selectedId;
+    if (targetId == null) return;
 
     // Get the current dive list from the paginated provider
     final divesAsync = ref.read(paginatedDiveListProvider);
     divesAsync.whenData((paginatedState) {
       final dives = paginatedState.dives;
-      final index = dives.indexWhere((d) => d.id == widget.selectedId);
+      final index = dives.indexWhere((d) => d.id == targetId);
       if (index >= 0 && _scrollController.hasClients) {
         // Use post-frame callback to ensure layout is complete
         WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -193,7 +200,7 @@ class _DiveListContentState extends ConsumerState<DiveListContent> {
             duration: const Duration(milliseconds: 300),
             curve: Curves.easeInOut,
           );
-          _lastScrolledToId = widget.selectedId;
+          _lastScrolledToId = targetId;
         });
       }
     });
@@ -355,6 +362,121 @@ class _DiveListContentState extends ConsumerState<DiveListContent> {
         );
       }
     }
+  }
+
+  /// Show the combine-dives dialog for the current selection, then refresh
+  /// the list/detail/stats providers and surface an undoable snackbar.
+  ///
+  /// Mirrors [_confirmAndDelete]'s messenger-capture and stale-detail
+  /// clearing, but the snackbar action is #406-complete: `persist: false` is
+  /// required whenever a SnackBar has an action, otherwise it defaults to
+  /// persisting until explicitly dismissed.
+  Future<void> _combineSelected() async {
+    final ids = _selectedIds.toList();
+    if (ids.length < 2) return;
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+
+    final outcome = await showCombineDivesDialog(
+      context: context,
+      diveIds: ids,
+    );
+    if (outcome == null || !mounted) return;
+
+    // Select the merged dive the same way a list tap does: highlight its row
+    // (highlightedDiveIdProvider) AND open it in the detail pane
+    // (onItemSelected). Scrolling happens after the list reload settles
+    // below -- didUpdateWidget's scroll fires now, before the reloaded list
+    // contains the brand-new merged row, so it would find nothing.
+    _exitSelectionMode();
+    ref.read(highlightedDiveIdProvider.notifier).state = outcome.mergedDive.id;
+    widget.onItemSelected?.call(outcome.mergedDive.id);
+    _lastMergeOutcome = outcome;
+    _invalidateStatsAfterMerge();
+
+    // Captured now (synchronously, while context is still valid) so the
+    // Undo action's async onPressed never has to read context.l10n after an
+    // await.
+    final l10n = context.l10n;
+
+    scaffoldMessenger.clearSnackBars();
+    final snackBar = scaffoldMessenger.showSnackBar(
+      SnackBar(
+        content: Text(l10n.diveLog_combine_snackbar(ids.length)),
+        duration: const Duration(seconds: 5),
+        // #406: an action defaults to persist: true; force auto-dismiss and
+        // allow closing without triggering Undo.
+        persist: false,
+        showCloseIcon: true,
+        action: SnackBarAction(
+          label: l10n.diveLog_bulkDelete_undo,
+          onPressed: () async {
+            final toUndo = _lastMergeOutcome;
+            if (toUndo == null) return;
+            _lastMergeOutcome = null;
+            // Single attempt: on failure the snapshot may be partially
+            // applied, so it is not restored to _lastMergeOutcome for retry
+            // (#449 review F4).
+            try {
+              await ref.read(diveMergeServiceProvider).undo(toUndo.snapshot);
+              _refreshAfterMerge();
+              if (mounted) {
+                // The merged dive no longer exists; clear it from the detail
+                // pane and the row highlight if it is still selected.
+                if (widget.selectedId == toUndo.mergedDive.id) {
+                  widget.onItemSelected?.call(null);
+                }
+                if (ref.read(highlightedDiveIdProvider) ==
+                    toUndo.mergedDive.id) {
+                  ref.read(highlightedDiveIdProvider.notifier).state = null;
+                }
+                scaffoldMessenger.showSnackBar(
+                  SnackBar(
+                    content: Text(l10n.diveLog_combine_undone),
+                    duration: const Duration(seconds: 2),
+                  ),
+                );
+              }
+            } catch (_) {
+              scaffoldMessenger.showSnackBar(
+                SnackBar(
+                  content: Text(l10n.diveLog_combine_undoError),
+                  duration: const Duration(seconds: 4),
+                ),
+              );
+            }
+          },
+        ),
+      ),
+    );
+
+    // Drop the retained undo snapshot once the snackbar closes without Undo
+    // (timeout/dismiss), so the copied profile/child rows aren't held for the
+    // widget's lifetime. Guard on identity in case another merge replaced it.
+    snackBar.closed.then((reason) {
+      if (reason != SnackBarClosedReason.action &&
+          identical(_lastMergeOutcome, outcome)) {
+        _lastMergeOutcome = null;
+      }
+    });
+
+    // Reload the list and wait for it to settle -- now including the new
+    // merged dive -- then scroll that row into view. The reload must finish
+    // first or the row won't exist yet to scroll to.
+    await ref.read(paginatedDiveListProvider.notifier).refresh();
+    if (mounted) _scrollToSelectedItem(outcome.mergedDive.id);
+  }
+
+  /// Invalidate the merge-derived providers other than the paginated list
+  /// (which the combine path reloads explicitly so it can scroll afterwards).
+  void _invalidateStatsAfterMerge() {
+    ref.invalidate(diveListNotifierProvider);
+    ref.invalidate(diveStatisticsProvider);
+    ref.invalidate(diveNumberingInfoProvider);
+  }
+
+  void _refreshAfterMerge() {
+    ref.invalidate(paginatedDiveListProvider);
+    _invalidateStatsAfterMerge();
   }
 
   void _showExportDialog() {
@@ -884,6 +1006,12 @@ class _DiveListContentState extends ConsumerState<DiveListContent> {
           tooltip: context.l10n.diveLog_selection_tooltip_selectDateRange,
           onPressed: () => _selectByDateRange(dives),
         ),
+        if (_selectedIds.length >= 2)
+          IconButton(
+            icon: const Icon(Icons.call_merge),
+            tooltip: context.l10n.diveLog_selection_tooltip_combine,
+            onPressed: _combineSelected,
+          ),
         if (_selectedIds.isNotEmpty)
           IconButton(
             icon: const Icon(Icons.upload),
@@ -953,6 +1081,12 @@ class _DiveListContentState extends ConsumerState<DiveListContent> {
             tooltip: context.l10n.diveLog_selection_tooltip_selectDateRange,
             onPressed: () => _selectByDateRange(dives),
           ),
+          if (_selectedIds.length >= 2)
+            IconButton(
+              icon: const Icon(Icons.call_merge, size: 20),
+              tooltip: context.l10n.diveLog_selection_tooltip_combine,
+              onPressed: _combineSelected,
+            ),
           if (_selectedIds.isNotEmpty)
             IconButton(
               icon: const Icon(Icons.upload, size: 20),

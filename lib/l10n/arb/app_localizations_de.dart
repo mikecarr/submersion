@@ -2960,6 +2960,80 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
+  String get diveLog_combine_confirm => 'Zu einem Tauchgang kombinieren';
+
+  @override
+  String get diveLog_combine_dataNote =>
+      'Die Details stammen vom frühesten Tauchgang, wobei Lücken durch spätere Tauchgänge aufgefüllt werden. Notizen werden zusammengeführt. Flaschen, Ausrüstung, Tauchpartner, Tags und Sichtungen bleiben alle erhalten.';
+
+  @override
+  String get diveLog_combine_error =>
+      'Die Tauchgänge konnten nicht kombiniert werden. Es wurde nichts geändert.';
+
+  @override
+  String diveLog_combine_gapLabel(String duration) {
+    return 'Oberflächenintervall: $duration';
+  }
+
+  @override
+  String get diveLog_combine_longSurfaceWarning =>
+      'Ein oder mehrere Oberflächenintervalle sind länger als 30 Minuten. Dies könnten separate Tauchgänge sein statt eines durchgehenden Tauchgangs.';
+
+  @override
+  String get diveLog_combine_mixedDivers =>
+      'Die ausgewählten Tauchgänge gehören zu unterschiedlichen Tauchern und können nicht kombiniert werden.';
+
+  @override
+  String get diveLog_combine_profilePreview => 'Kombiniertes Profil';
+
+  @override
+  String get diveLog_combine_overlapBody =>
+      'Sich überschneidende Tauchgänge sehen aus wie derselbe Tauchgang, der von mehreren Tauchcomputern aufgezeichnet wurde. Das Zusammenführen dieser Tauchgänge zu einem einzigen Eintrag, der die Daten jedes Computers zeigt, kommt in einer zukünftigen Version.';
+
+  @override
+  String get diveLog_combine_overlapHintTwoDives =>
+      'Um jetzt zwei Aufzeichnungen desselben Tauchgangs zusammenzuführen, öffnen Sie einen davon und verwenden Sie „Mit einem anderen Tauchgang zusammenführen“.';
+
+  @override
+  String get diveLog_combine_overlapTitle =>
+      'Diese Tauchgänge überschneiden sich zeitlich';
+
+  @override
+  String diveLog_combine_previewIntro(int count) {
+    return 'Diese $count Tauchgänge werden zu einem durchgehenden Tauchgang kombiniert. Lücken dazwischen werden zu Oberflächenzeit.';
+  }
+
+  @override
+  String diveLog_combine_resultSummary(
+    String runtime,
+    String maxDepth,
+    String bottomTime,
+  ) {
+    return 'Ergebnis: $runtime insgesamt, maximale Tiefe $maxDepth, Grundzeit $bottomTime';
+  }
+
+  @override
+  String diveLog_combine_snackbar(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Tauchgänge',
+      one: 'Tauchgang',
+    );
+    return '$count $_temp0 kombiniert';
+  }
+
+  @override
+  String get diveLog_combine_title => 'Tauchgänge kombinieren';
+
+  @override
+  String get diveLog_combine_undoError =>
+      'Die Kombination konnte nicht rückgängig gemacht werden.';
+
+  @override
+  String get diveLog_combine_undone => 'Kombination rückgängig gemacht';
+
+  @override
   String get diveLog_computerSheet_description =>
       'Wähle, von welchem Computerprofil aus bearbeitet wird.';
 
@@ -5015,6 +5089,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String diveLog_selection_countSelected(Object count) {
     return '$count ausgewählt';
   }
+
+  @override
+  String get diveLog_selection_tooltip_combine => 'Kombinieren';
 
   @override
   String get diveLog_selection_tooltip_delete => 'Auswahl löschen';
