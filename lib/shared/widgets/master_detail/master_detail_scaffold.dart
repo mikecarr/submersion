@@ -272,6 +272,13 @@ class _MasterDetailScaffoldState extends ConsumerState<MasterDetailScaffold> {
     final selectedId = _selectedId;
     final mode = _mode;
 
+    // While editing or creating in the detail pane, keep keyboard Tab
+    // traversal confined to that pane. Without this, Tab crosses the divider
+    // into the master list on the left (issue #444). The list remains
+    // clickable and accessible; only Tab traversal is excluded.
+    final isEditingDetail =
+        mode == DetailPaneMode.edit || mode == DetailPaneMode.create;
+
     if (!isDesktop) {
       // Mobile: Just show the master pane with Scaffold
       return Scaffold(
@@ -289,11 +296,18 @@ class _MasterDetailScaffoldState extends ConsumerState<MasterDetailScaffold> {
           // Master pane (list) with fixed width
           SizedBox(
             width: widget.masterWidth,
-            child: _MasterPane(
-              floatingActionButton: widget.floatingActionButton != null
-                  ? _wrapFabForCreate(widget.floatingActionButton!)
-                  : null,
-              child: widget.masterBuilder(context, _onItemSelected, selectedId),
+            child: ExcludeFocusTraversal(
+              excluding: isEditingDetail,
+              child: _MasterPane(
+                floatingActionButton: widget.floatingActionButton != null
+                    ? _wrapFabForCreate(widget.floatingActionButton!)
+                    : null,
+                child: widget.masterBuilder(
+                  context,
+                  _onItemSelected,
+                  selectedId,
+                ),
+              ),
             ),
           ),
           // Vertical divider
