@@ -261,4 +261,58 @@ void main() {
       },
     );
   });
+
+  group('undo', () {
+    test(
+      'restores sources byte-for-byte and removes the merged dive',
+      () async {
+        await seedDive('a', entry: DateTime.utc(2026, 7, 1, 9));
+        await seedDive('b', entry: DateTime.utc(2026, 7, 1, 10));
+        final before = await (db.select(
+          db.dives,
+        )..orderBy([(t) => OrderingTerm.asc(t.id)])).get();
+
+        final outcome = await service.apply(['a', 'b']);
+        await service.undo(outcome.snapshot);
+
+        final after = await (db.select(
+          db.dives,
+        )..orderBy([(t) => OrderingTerm.asc(t.id)])).get();
+        expect(after.map((r) => r.id), ['a', 'b']);
+        // Every column identical except updatedAt and hlc: undo's
+        // markRecordPending deliberately stamps a fresh, newer HLC on the
+        // restored row (per DiveMergeService.undo's doc comment) so it wins
+        // LWW conflict resolution over the merge's tombstone.
+        // Drift ROW classes have value equality + copyWith; companions do not.
+        for (var i = 0; i < before.length; i++) {
+          expect(
+            after[i].copyWith(updatedAt: 0, hlc: const Value(null)),
+            before[i].copyWith(updatedAt: 0, hlc: const Value(null)),
+          );
+        }
+
+        // Children restored with original ids.
+        final tanks = await db.select(db.diveTanks).get();
+        expect(tanks.map((t) => t.id).toSet(), {'tank-a', 'tank-b'});
+        final buddies = await db.select(db.diveBuddies).get();
+        expect(buddies.map((b) => b.id).toSet(), {'buddy-a', 'buddy-b'});
+        final events = await db.select(db.diveProfileEvents).get();
+        expect(events.map((e) => e.id).toSet(), {'event-a', 'event-b'});
+        final sources = await db.select(db.diveDataSources).get();
+        expect(sources.every((s) => s.isPrimary), isTrue); // original flag back
+
+        // Media pointers restored.
+        final media = await (db.select(
+          db.media,
+        )..where((t) => t.id.equals('media-a'))).getSingle();
+        expect(media.diveId, 'a');
+
+        // Merged dive tombstoned.
+        final tombstones = await (db.select(
+          db.deletionLog,
+        )..where((t) => t.recordId.equals(outcome.mergedDive.id))).get();
+        expect(tombstones, isNotEmpty);
+      },
+    );
+  });
 }

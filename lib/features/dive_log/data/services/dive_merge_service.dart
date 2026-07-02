@@ -380,4 +380,217 @@ class DiveMergeService {
     SyncEventBus.notifyLocalChange();
     return DiveMergeOutcome(mergedDive: result.mergedDive, snapshot: snapshot);
   }
+
+  /// Restores the source dives exactly and removes the merged dive.
+  Future<void> undo(DiveMergeSnapshot snapshot) async {
+    final now = DateTime.now().millisecondsSinceEpoch;
+
+    await _db.transaction(() async {
+      // Remove the merged dive's own children explicitly, then the dive row
+      // itself (tombstone logged so the merge's remote copies are deleted
+      // too). Child tables declare ON DELETE CASCADE, but that only fires
+      // when the connection has `PRAGMA foreign_keys = ON`; deleting
+      // explicitly keeps undo correct even where it is off, and avoids
+      // leaving orphaned merge-output rows for the verbatim re-inserts below
+      // to collide with.
+      final mergedId = snapshot.mergedDiveId;
+      await _db.batch((batch) {
+        batch.deleteWhere(_db.diveProfiles, (t) => t.diveId.equals(mergedId));
+        batch.deleteWhere(_db.diveTanks, (t) => t.diveId.equals(mergedId));
+        batch.deleteWhere(_db.diveWeights, (t) => t.diveId.equals(mergedId));
+        batch.deleteWhere(
+          _db.diveCustomFields,
+          (t) => t.diveId.equals(mergedId),
+        );
+        batch.deleteWhere(_db.diveEquipment, (t) => t.diveId.equals(mergedId));
+        batch.deleteWhere(_db.diveDiveTypes, (t) => t.diveId.equals(mergedId));
+        batch.deleteWhere(_db.diveTags, (t) => t.diveId.equals(mergedId));
+        batch.deleteWhere(_db.diveBuddies, (t) => t.diveId.equals(mergedId));
+        batch.deleteWhere(_db.sightings, (t) => t.diveId.equals(mergedId));
+        batch.deleteWhere(
+          _db.diveProfileEvents,
+          (t) => t.diveId.equals(mergedId),
+        );
+        batch.deleteWhere(_db.gasSwitches, (t) => t.diveId.equals(mergedId));
+        batch.deleteWhere(
+          _db.tankPressureProfiles,
+          (t) => t.diveId.equals(mergedId),
+        );
+        batch.deleteWhere(
+          _db.diveDataSources,
+          (t) => t.diveId.equals(mergedId),
+        );
+        batch.deleteWhere(_db.tideRecords, (t) => t.diveId.equals(mergedId));
+      });
+      await _diveRepo.deleteDive(mergedId);
+
+      // Re-insert dives with ORIGINAL ids; newer HLC beats the tombstones.
+      //
+      // insertOrReplace (not a plain insert) throughout this method: child
+      // tables use ON DELETE CASCADE, which only fires when the DB
+      // connection has `PRAGMA foreign_keys = ON` (always true in the
+      // running app; some test harnesses disable it). Falling back to plain
+      // insert would then collide with rows deleteDive's cascade never
+      // actually removed.
+      for (final row in snapshot.diveRows) {
+        await _db
+            .into(_db.dives)
+            .insert(
+              row.toCompanion(false).copyWith(updatedAt: Value(now)),
+              mode: InsertMode.insertOrReplace,
+            );
+        await _sync.markRecordPending(
+          entityType: 'dives',
+          recordId: row.id,
+          localUpdatedAt: now,
+        );
+      }
+
+      // Child rows verbatim (original ids never collide with merge output:
+      // merged children all had fresh ids).
+      await _db.batch((batch) {
+        for (final r in snapshot.profileRows) {
+          batch.insert(
+            _db.diveProfiles,
+            r.toCompanion(false),
+            mode: InsertMode.insertOrReplace,
+          );
+        }
+        for (final r in snapshot.tankPressureRows) {
+          batch.insert(
+            _db.tankPressureProfiles,
+            r.toCompanion(false),
+            mode: InsertMode.insertOrReplace,
+          );
+        }
+        for (final r in snapshot.dataSourceRows) {
+          batch.insert(
+            _db.diveDataSources,
+            r.toCompanion(false),
+            mode: InsertMode.insertOrReplace,
+          );
+        }
+        for (final r in snapshot.tideRows) {
+          batch.insert(
+            _db.tideRecords,
+            r.toCompanion(false),
+            mode: InsertMode.insertOrReplace,
+          );
+        }
+        for (final r in snapshot.equipmentRows) {
+          batch.insert(
+            _db.diveEquipment,
+            r.toCompanion(false),
+            mode: InsertMode.insertOrReplace,
+          );
+        }
+      });
+      for (final r in snapshot.tankRows) {
+        await _db
+            .into(_db.diveTanks)
+            .insert(r.toCompanion(false), mode: InsertMode.insertOrReplace);
+        await _sync.markRecordPending(
+          entityType: 'diveTanks',
+          recordId: r.id,
+          localUpdatedAt: now,
+        );
+      }
+      for (final r in snapshot.weightRows) {
+        await _db
+            .into(_db.diveWeights)
+            .insert(r.toCompanion(false), mode: InsertMode.insertOrReplace);
+        await _sync.markRecordPending(
+          entityType: 'diveWeights',
+          recordId: r.id,
+          localUpdatedAt: now,
+        );
+      }
+      for (final r in snapshot.customFieldRows) {
+        await _db
+            .into(_db.diveCustomFields)
+            .insert(r.toCompanion(false), mode: InsertMode.insertOrReplace);
+        await _sync.markRecordPending(
+          entityType: 'diveCustomFields',
+          recordId: r.id,
+          localUpdatedAt: now,
+        );
+      }
+      for (final r in snapshot.diveTypeRows) {
+        await _db
+            .into(_db.diveDiveTypes)
+            .insert(r.toCompanion(false), mode: InsertMode.insertOrReplace);
+        await _sync.markRecordPending(
+          entityType: 'diveDiveTypes',
+          recordId: r.id,
+          localUpdatedAt: now,
+        );
+      }
+      for (final r in snapshot.tagRows) {
+        await _db
+            .into(_db.diveTags)
+            .insert(r.toCompanion(false), mode: InsertMode.insertOrReplace);
+        await _sync.markRecordPending(
+          entityType: 'diveTags',
+          recordId: r.id,
+          localUpdatedAt: now,
+        );
+      }
+      for (final r in snapshot.buddyRows) {
+        await _db
+            .into(_db.diveBuddies)
+            .insert(r.toCompanion(false), mode: InsertMode.insertOrReplace);
+        await _sync.markRecordPending(
+          entityType: 'diveBuddies',
+          recordId: r.id,
+          localUpdatedAt: now,
+        );
+      }
+      for (final r in snapshot.sightingRows) {
+        await _db
+            .into(_db.sightings)
+            .insert(r.toCompanion(false), mode: InsertMode.insertOrReplace);
+        await _sync.markRecordPending(
+          entityType: 'sightings',
+          recordId: r.id,
+          localUpdatedAt: now,
+        );
+      }
+      for (final r in snapshot.eventRows) {
+        await _db
+            .into(_db.diveProfileEvents)
+            .insert(r.toCompanion(false), mode: InsertMode.insertOrReplace);
+        await _sync.markRecordPending(
+          entityType: 'diveProfileEvents',
+          recordId: r.id,
+          localUpdatedAt: now,
+        );
+      }
+      for (final r in snapshot.gasSwitchRows) {
+        await _db
+            .into(_db.gasSwitches)
+            .insert(r.toCompanion(false), mode: InsertMode.insertOrReplace);
+        await _sync.markRecordPending(
+          entityType: 'gasSwitches',
+          recordId: r.id,
+          localUpdatedAt: now,
+        );
+      }
+
+      // Restore media pointers.
+      for (final entry in snapshot.mediaDiveIds.entries) {
+        await (_db.update(
+          _db.media,
+        )..where((t) => t.id.equals(entry.key))).write(
+          MediaCompanion(diveId: Value(entry.value), updatedAt: Value(now)),
+        );
+        await _sync.markRecordPending(
+          entityType: 'media',
+          recordId: entry.key,
+          localUpdatedAt: now,
+        );
+      }
+    });
+
+    SyncEventBus.notifyLocalChange();
+  }
 }
