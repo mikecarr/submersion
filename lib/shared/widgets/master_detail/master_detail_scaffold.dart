@@ -272,6 +272,20 @@ class _MasterDetailScaffoldState extends ConsumerState<MasterDetailScaffold> {
     final selectedId = _selectedId;
     final mode = _mode;
 
+    // While an edit/create form is actually shown in the detail pane, keep
+    // keyboard Tab traversal confined to that pane. Without this, Tab crosses
+    // the divider into the master list on the left (issue #444). The list
+    // remains clickable and accessible; only Tab traversal is excluded.
+    //
+    // These conditions mirror _DetailPane._buildContent so the master pane is
+    // only excluded when the edit/create builder is genuinely rendered (not,
+    // e.g., for `?mode=new` with a null createBuilder, which shows a summary).
+    final isEditingDetail =
+        (mode == DetailPaneMode.create && widget.createBuilder != null) ||
+        (mode == DetailPaneMode.edit &&
+            selectedId != null &&
+            widget.editBuilder != null);
+
     if (!isDesktop) {
       // Mobile: Just show the master pane with Scaffold
       return Scaffold(
@@ -289,11 +303,18 @@ class _MasterDetailScaffoldState extends ConsumerState<MasterDetailScaffold> {
           // Master pane (list) with fixed width
           SizedBox(
             width: widget.masterWidth,
-            child: _MasterPane(
-              floatingActionButton: widget.floatingActionButton != null
-                  ? _wrapFabForCreate(widget.floatingActionButton!)
-                  : null,
-              child: widget.masterBuilder(context, _onItemSelected, selectedId),
+            child: ExcludeFocusTraversal(
+              excluding: isEditingDetail,
+              child: _MasterPane(
+                floatingActionButton: widget.floatingActionButton != null
+                    ? _wrapFabForCreate(widget.floatingActionButton!)
+                    : null,
+                child: widget.masterBuilder(
+                  context,
+                  _onItemSelected,
+                  selectedId,
+                ),
+              ),
             ),
           ),
           // Vertical divider
