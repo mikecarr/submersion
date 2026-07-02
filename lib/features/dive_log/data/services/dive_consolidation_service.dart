@@ -1,0 +1,572 @@
+import 'package:drift/drift.dart';
+import 'package:uuid/uuid.dart';
+
+import 'package:submersion/core/data/repositories/sync_repository.dart';
+import 'package:submersion/core/database/database.dart';
+import 'package:submersion/core/services/database_service.dart';
+import 'package:submersion/core/services/sync/sync_event_bus.dart';
+import 'package:submersion/features/dive_log/data/repositories/dive_repository_impl.dart';
+import 'package:submersion/features/dive_log/data/services/dive_merge_snapshot.dart';
+import 'package:submersion/features/dive_log/domain/services/dive_consolidation_builder.dart';
+
+/// Result of a successful consolidation: the target dive id plus the
+/// pre-consolidation snapshot needed to undo it.
+class DiveConsolidationOutcome {
+  const DiveConsolidationOutcome({
+    required this.targetDiveId,
+    required this.snapshot,
+  });
+  final String targetDiveId;
+  final DiveMergeSnapshot snapshot;
+}
+
+/// Folds one or more secondary dive-computer downloads into an existing
+/// target dive as additional computer sources (multi-computer
+/// consolidation). Mirrors the DiveMergeService shape: snapshot -> one
+/// transaction -> one SyncEventBus notify.
+///
+/// Unlike DiveMergeService.apply, the target dive is MODIFIED in place (its
+/// row is never re-created), and the secondaries are folded into it and
+/// tombstoned. A consolidation can be applied repeatedly onto the same
+/// target -- each pass unions in another computer's data sources rather
+/// than nesting.
+class DiveConsolidationService {
+  DiveConsolidationService(this._diveRepo);
+
+  final DiveRepository _diveRepo;
+
+  final _uuid = const Uuid();
+  final _builder = const DiveConsolidationBuilder();
+  final _sync = SyncRepository();
+
+  AppDatabase get _db => DatabaseService.instance.database;
+
+  /// Folds [secondaryDiveIds] into [targetDiveId] as additional computer
+  /// sources. Throws [ArgumentError] (with the ConsolidationInvalidReason in
+  /// the message) when the selection cannot be consolidated. All-or-nothing:
+  /// nothing is written to the DB if validation fails.
+  Future<DiveConsolidationOutcome> apply({
+    required String targetDiveId,
+    required List<String> secondaryDiveIds,
+  }) async {
+    final allIds = [targetDiveId, ...secondaryDiveIds];
+    final dives = await _diveRepo.getDivesByIds(allIds);
+
+    // classify() silently falls back to the earliest dive if primaryDiveId
+    // matches nothing in the loaded selection, so the service must validate
+    // the target id itself before handing off to the builder.
+    if (!dives.any((d) => d.id == targetDiveId)) {
+      throw ArgumentError('targetDiveId not in selection');
+    }
+
+    final plan = _builder.build(dives, primaryDiveId: targetDiveId);
+    final snapshot = await DiveMergeSnapshot.capture(_db, allIds, targetDiveId);
+    final now = DateTime.now().millisecondsSinceEpoch;
+    final nowDt = DateTime.now();
+
+    // Raw rows for columns the domain entity does not carry.
+    final targetRow = snapshot.diveRows.firstWhere((r) => r.id == targetDiveId);
+    // Service-level same-computer guard on the FK itself (the builder can
+    // only see serials).
+    for (final id in secondaryDiveIds) {
+      final row = snapshot.diveRows.firstWhere((r) => r.id == id);
+      if (row.computerId != null && row.computerId == targetRow.computerId) {
+        throw ArgumentError('sameComputer: $id shares ${row.computerId}');
+      }
+    }
+
+    await _db.transaction(() async {
+      await _diveRepo.backfillPrimaryDataSource(targetDiveId);
+
+      // First consolidation: stamp the target's own children with the
+      // primary computer so null stays reserved for manual entries.
+      if (targetRow.computerId != null) {
+        await (_db.update(_db.diveTanks)..where(
+              (t) => t.diveId.equals(targetDiveId) & t.computerId.isNull(),
+            ))
+            .write(DiveTanksCompanion(computerId: Value(targetRow.computerId)));
+        await (_db.update(_db.tankPressureProfiles)..where(
+              (t) => t.diveId.equals(targetDiveId) & t.computerId.isNull(),
+            ))
+            .write(
+              TankPressureProfilesCompanion(
+                computerId: Value(targetRow.computerId),
+              ),
+            );
+        await (_db.update(_db.diveProfileEvents)..where(
+              (t) => t.diveId.equals(targetDiveId) & t.computerId.isNull(),
+            ))
+            .write(
+              DiveProfileEventsCompanion(
+                computerId: Value(targetRow.computerId),
+              ),
+            );
+      }
+
+      var nextTankOrder =
+          snapshot.tankRows
+              .where((r) => r.diveId == targetDiveId)
+              .fold<int>(-1, (m, r) => r.tankOrder > m ? r.tankOrder : m) +
+          1;
+      final tankIdMap = <String, String>{}; // old secondary id -> id on target
+
+      for (final secondary in plan.secondaries) {
+        final secRow = snapshot.diveRows.firstWhere(
+          (r) => r.id == secondary.id,
+        );
+        final offset = plan.offsetsSeconds[secondary.id] ?? 0;
+
+        // Data sources: re-point existing rows; synthesize when none.
+        final secSources = snapshot.dataSourceRows
+            .where((r) => r.diveId == secondary.id)
+            .toList();
+        if (secSources.isEmpty) {
+          // Synthesize from the dives row -- same companion mergeDives
+          // builds today (dive_repository_impl.dart:4616-4652), attributed
+          // to the secondary's own computer.
+          await _db
+              .into(_db.diveDataSources)
+              .insert(
+                DiveDataSourcesCompanion(
+                  id: Value(_uuid.v4()),
+                  diveId: Value(targetDiveId),
+                  computerId: Value(secRow.computerId),
+                  isPrimary: const Value(false),
+                  computerModel: Value(secRow.diveComputerModel),
+                  computerSerial: Value(secRow.diveComputerSerial),
+                  maxDepth: Value(secRow.maxDepth),
+                  avgDepth: Value(secRow.avgDepth),
+                  duration: Value(secRow.bottomTime),
+                  waterTemp: Value(secRow.waterTemp),
+                  entryTime: Value(
+                    secRow.entryTime != null
+                        ? DateTime.fromMillisecondsSinceEpoch(
+                            secRow.entryTime!,
+                            isUtc: true,
+                          )
+                        : null,
+                  ),
+                  exitTime: Value(
+                    secRow.exitTime != null
+                        ? DateTime.fromMillisecondsSinceEpoch(
+                            secRow.exitTime!,
+                            isUtc: true,
+                          )
+                        : null,
+                  ),
+                  surfaceInterval: Value(secRow.surfaceIntervalSeconds),
+                  cns: Value(secRow.cnsEnd),
+                  decoAlgorithm: Value(secRow.decoAlgorithm),
+                  gradientFactorLow: Value(secRow.gradientFactorLow),
+                  gradientFactorHigh: Value(secRow.gradientFactorHigh),
+                  importedAt: Value(nowDt),
+                  createdAt: Value(nowDt),
+                ),
+              );
+        } else {
+          for (final row in secSources) {
+            await _db
+                .into(_db.diveDataSources)
+                .insert(
+                  row
+                      .toCompanion(false)
+                      .copyWith(
+                        id: Value(_uuid.v4()),
+                        diveId: Value(targetDiveId),
+                        isPrimary: const Value(false),
+                      ),
+                );
+          }
+        }
+
+        // Tanks: merged ones map, kept ones copy with attribution.
+        final secTanks =
+            snapshot.tankRows.where((r) => r.diveId == secondary.id).toList()
+              ..sort((a, b) => a.tankOrder.compareTo(b.tankOrder));
+        for (final tank in secTanks) {
+          final mergeInto = plan.tankMerges[tank.id];
+          if (mergeInto != null) {
+            tankIdMap[tank.id] = mergeInto;
+          } else {
+            final freshId = _uuid.v4();
+            tankIdMap[tank.id] = freshId;
+            await _db
+                .into(_db.diveTanks)
+                .insert(
+                  tank
+                      .toCompanion(false)
+                      .copyWith(
+                        id: Value(freshId),
+                        diveId: Value(targetDiveId),
+                        computerId: Value(secRow.computerId),
+                        tankOrder: Value(nextTankOrder++),
+                      ),
+                );
+            await _sync.markRecordPending(
+              entityType: 'diveTanks',
+              recordId: freshId,
+              localUpdatedAt: now,
+            );
+          }
+        }
+
+        // Profiles: copy every column, re-based, attributed, never primary.
+        await _db.batch((batch) {
+          for (final row in snapshot.profileRows.where(
+            (r) => r.diveId == secondary.id,
+          )) {
+            batch.insert(
+              _db.diveProfiles,
+              row
+                  .toCompanion(false)
+                  .copyWith(
+                    id: Value(_uuid.v4()),
+                    diveId: Value(targetDiveId),
+                    timestamp: Value(row.timestamp + offset),
+                    computerId: Value(row.computerId ?? secRow.computerId),
+                    isPrimary: const Value(false),
+                  ),
+            );
+          }
+          // Tank pressures: re-based, remapped, attributed.
+          for (final row in snapshot.tankPressureRows.where(
+            (r) => r.diveId == secondary.id,
+          )) {
+            final mappedTank = tankIdMap[row.tankId];
+            if (mappedTank == null) continue;
+            batch.insert(
+              _db.tankPressureProfiles,
+              row
+                  .toCompanion(false)
+                  .copyWith(
+                    id: Value(_uuid.v4()),
+                    diveId: Value(targetDiveId),
+                    tankId: Value(mappedTank),
+                    timestamp: Value(row.timestamp + offset),
+                    computerId: Value(secRow.computerId),
+                  ),
+            );
+          }
+        });
+
+        // Existing profile events, re-based, tank text-refs remapped, PLUS
+        // computerId attribution (DiveMergeService.apply step 5 has no
+        // computerId column to carry).
+        for (final row in snapshot.eventRows.where(
+          (r) => r.diveId == secondary.id,
+        )) {
+          final eventId = _uuid.v4();
+          await _db
+              .into(_db.diveProfileEvents)
+              .insert(
+                row
+                    .toCompanion(false)
+                    .copyWith(
+                      id: Value(eventId),
+                      diveId: Value(targetDiveId),
+                      timestamp: Value(row.timestamp + offset),
+                      tankId: Value(
+                        row.tankId == null
+                            ? null
+                            : tankIdMap[row.tankId] ?? row.tankId,
+                      ),
+                      computerId: Value(secRow.computerId),
+                    ),
+              );
+          await _sync.markRecordPending(
+            entityType: 'diveProfileEvents',
+            recordId: eventId,
+            localUpdatedAt: now,
+          );
+        }
+
+        // Gas switches, re-based + tank FK remapped (drop unmappable).
+        for (final row in snapshot.gasSwitchRows.where(
+          (r) => r.diveId == secondary.id,
+        )) {
+          final newTankId = tankIdMap[row.tankId];
+          if (newTankId == null) continue;
+          final switchId = _uuid.v4();
+          await _db
+              .into(_db.gasSwitches)
+              .insert(
+                row
+                    .toCompanion(false)
+                    .copyWith(
+                      id: Value(switchId),
+                      diveId: Value(targetDiveId),
+                      tankId: Value(newTankId),
+                      timestamp: Value(row.timestamp + offset),
+                    ),
+              );
+          await _sync.markRecordPending(
+            entityType: 'gasSwitches',
+            recordId: switchId,
+            localUpdatedAt: now,
+          );
+        }
+
+        // Media re-pointed to the target BEFORE the secondary is deleted
+        // (FK is setNull).
+        for (final entry in snapshot.mediaDiveIds.entries.where(
+          (e) => e.value == secondary.id,
+        )) {
+          await (_db.update(
+            _db.media,
+          )..where((t) => t.id.equals(entry.key))).write(
+            MediaCompanion(diveId: Value(targetDiveId), updatedAt: Value(now)),
+          );
+          await _sync.markRecordPending(
+            entityType: 'media',
+            recordId: entry.key,
+            localUpdatedAt: now,
+          );
+        }
+      }
+
+      // Touch the target so sync carries the consolidation.
+      await (_db.update(_db.dives)..where((t) => t.id.equals(targetDiveId)))
+          .write(DivesCompanion(updatedAt: Value(now)));
+      await _sync.markRecordPending(
+        entityType: 'dives',
+        recordId: targetDiveId,
+        localUpdatedAt: now,
+      );
+
+      // Delete secondaries through the tombstone-logging path (this is the
+      // fix for mergeDives' raw delete, which never logged deletions and
+      // let sync resurrect the folded dive).
+      await _diveRepo.bulkDeleteDives(secondaryDiveIds.toList());
+    });
+
+    SyncEventBus.notifyLocalChange();
+    return DiveConsolidationOutcome(
+      targetDiveId: targetDiveId,
+      snapshot: snapshot,
+    );
+  }
+
+  /// Restores the pre-consolidation state byte-for-byte: the target dive's
+  /// original rows plus the secondaries, exactly as captured by [snapshot].
+  ///
+  /// Identical to DiveMergeService.undo except the target dive is never
+  /// deleted -- it was modified in place, not created, so its original row
+  /// is restored by the verbatim insertOrReplace re-inserts below rather
+  /// than by re-creating it.
+  Future<void> undo(DiveMergeSnapshot snapshot) async {
+    final now = DateTime.now().millisecondsSinceEpoch;
+
+    await _db.transaction(() async {
+      // Remove the target dive's current children explicitly (the mix of
+      // its own stamped-in-place rows and the freshly re-parented secondary
+      // rows), then re-insert the pre-consolidation snapshot verbatim below.
+      // Child tables declare ON DELETE CASCADE, but that only fires when the
+      // connection has `PRAGMA foreign_keys = ON`; deleting explicitly keeps
+      // undo correct even where it is off, and avoids leaving orphaned
+      // consolidation-output rows for the verbatim re-inserts below to
+      // collide with.
+      final mergedId = snapshot.mergedDiveId;
+      await _db.batch((batch) {
+        batch.deleteWhere(_db.diveProfiles, (t) => t.diveId.equals(mergedId));
+        batch.deleteWhere(_db.diveTanks, (t) => t.diveId.equals(mergedId));
+        batch.deleteWhere(_db.diveWeights, (t) => t.diveId.equals(mergedId));
+        batch.deleteWhere(
+          _db.diveCustomFields,
+          (t) => t.diveId.equals(mergedId),
+        );
+        batch.deleteWhere(_db.diveEquipment, (t) => t.diveId.equals(mergedId));
+        batch.deleteWhere(_db.diveDiveTypes, (t) => t.diveId.equals(mergedId));
+        batch.deleteWhere(_db.diveTags, (t) => t.diveId.equals(mergedId));
+        batch.deleteWhere(_db.diveBuddies, (t) => t.diveId.equals(mergedId));
+        batch.deleteWhere(_db.sightings, (t) => t.diveId.equals(mergedId));
+        batch.deleteWhere(
+          _db.diveProfileEvents,
+          (t) => t.diveId.equals(mergedId),
+        );
+        batch.deleteWhere(_db.gasSwitches, (t) => t.diveId.equals(mergedId));
+        batch.deleteWhere(
+          _db.tankPressureProfiles,
+          (t) => t.diveId.equals(mergedId),
+        );
+        batch.deleteWhere(
+          _db.diveDataSources,
+          (t) => t.diveId.equals(mergedId),
+        );
+        batch.deleteWhere(_db.tideRecords, (t) => t.diveId.equals(mergedId));
+      });
+
+      // Re-insert dives with ORIGINAL ids; newer HLC beats the tombstones.
+      //
+      // insertOrReplace (not a plain insert) throughout this method: child
+      // tables use ON DELETE CASCADE, which only fires when the DB
+      // connection has `PRAGMA foreign_keys = ON` (always true in the
+      // running app; some test harnesses disable it). Falling back to plain
+      // insert would then collide with rows the cascade never actually
+      // removed.
+      for (final row in snapshot.diveRows) {
+        await _db
+            .into(_db.dives)
+            .insert(
+              row.toCompanion(false).copyWith(updatedAt: Value(now)),
+              mode: InsertMode.insertOrReplace,
+            );
+        await _sync.markRecordPending(
+          entityType: 'dives',
+          recordId: row.id,
+          localUpdatedAt: now,
+        );
+      }
+
+      // Tanks BEFORE the batch below: tankPressureProfiles.tankId (and
+      // gasSwitches.tankId further down) are FKs into diveTanks, and FK
+      // enforcement is immediate under `PRAGMA foreign_keys = ON`, so the
+      // parent tank rows must exist before any row that references them.
+      for (final r in snapshot.tankRows) {
+        await _db
+            .into(_db.diveTanks)
+            .insert(r.toCompanion(false), mode: InsertMode.insertOrReplace);
+        await _sync.markRecordPending(
+          entityType: 'diveTanks',
+          recordId: r.id,
+          localUpdatedAt: now,
+        );
+      }
+
+      // Child rows verbatim (original ids never collide with consolidation
+      // output: consolidated children all had fresh ids).
+      await _db.batch((batch) {
+        for (final r in snapshot.profileRows) {
+          batch.insert(
+            _db.diveProfiles,
+            r.toCompanion(false),
+            mode: InsertMode.insertOrReplace,
+          );
+        }
+        for (final r in snapshot.tankPressureRows) {
+          batch.insert(
+            _db.tankPressureProfiles,
+            r.toCompanion(false),
+            mode: InsertMode.insertOrReplace,
+          );
+        }
+        for (final r in snapshot.dataSourceRows) {
+          batch.insert(
+            _db.diveDataSources,
+            r.toCompanion(false),
+            mode: InsertMode.insertOrReplace,
+          );
+        }
+        for (final r in snapshot.tideRows) {
+          batch.insert(
+            _db.tideRecords,
+            r.toCompanion(false),
+            mode: InsertMode.insertOrReplace,
+          );
+        }
+        for (final r in snapshot.equipmentRows) {
+          batch.insert(
+            _db.diveEquipment,
+            r.toCompanion(false),
+            mode: InsertMode.insertOrReplace,
+          );
+        }
+      });
+      for (final r in snapshot.weightRows) {
+        await _db
+            .into(_db.diveWeights)
+            .insert(r.toCompanion(false), mode: InsertMode.insertOrReplace);
+        await _sync.markRecordPending(
+          entityType: 'diveWeights',
+          recordId: r.id,
+          localUpdatedAt: now,
+        );
+      }
+      for (final r in snapshot.customFieldRows) {
+        await _db
+            .into(_db.diveCustomFields)
+            .insert(r.toCompanion(false), mode: InsertMode.insertOrReplace);
+        await _sync.markRecordPending(
+          entityType: 'diveCustomFields',
+          recordId: r.id,
+          localUpdatedAt: now,
+        );
+      }
+      for (final r in snapshot.diveTypeRows) {
+        await _db
+            .into(_db.diveDiveTypes)
+            .insert(r.toCompanion(false), mode: InsertMode.insertOrReplace);
+        await _sync.markRecordPending(
+          entityType: 'diveDiveTypes',
+          recordId: r.id,
+          localUpdatedAt: now,
+        );
+      }
+      for (final r in snapshot.tagRows) {
+        await _db
+            .into(_db.diveTags)
+            .insert(r.toCompanion(false), mode: InsertMode.insertOrReplace);
+        await _sync.markRecordPending(
+          entityType: 'diveTags',
+          recordId: r.id,
+          localUpdatedAt: now,
+        );
+      }
+      for (final r in snapshot.buddyRows) {
+        await _db
+            .into(_db.diveBuddies)
+            .insert(r.toCompanion(false), mode: InsertMode.insertOrReplace);
+        await _sync.markRecordPending(
+          entityType: 'diveBuddies',
+          recordId: r.id,
+          localUpdatedAt: now,
+        );
+      }
+      for (final r in snapshot.sightingRows) {
+        await _db
+            .into(_db.sightings)
+            .insert(r.toCompanion(false), mode: InsertMode.insertOrReplace);
+        await _sync.markRecordPending(
+          entityType: 'sightings',
+          recordId: r.id,
+          localUpdatedAt: now,
+        );
+      }
+      for (final r in snapshot.eventRows) {
+        await _db
+            .into(_db.diveProfileEvents)
+            .insert(r.toCompanion(false), mode: InsertMode.insertOrReplace);
+        await _sync.markRecordPending(
+          entityType: 'diveProfileEvents',
+          recordId: r.id,
+          localUpdatedAt: now,
+        );
+      }
+      for (final r in snapshot.gasSwitchRows) {
+        await _db
+            .into(_db.gasSwitches)
+            .insert(r.toCompanion(false), mode: InsertMode.insertOrReplace);
+        await _sync.markRecordPending(
+          entityType: 'gasSwitches',
+          recordId: r.id,
+          localUpdatedAt: now,
+        );
+      }
+
+      // Restore media pointers.
+      for (final entry in snapshot.mediaDiveIds.entries) {
+        await (_db.update(
+          _db.media,
+        )..where((t) => t.id.equals(entry.key))).write(
+          MediaCompanion(diveId: Value(entry.value), updatedAt: Value(now)),
+        );
+        await _sync.markRecordPending(
+          entityType: 'media',
+          recordId: entry.key,
+          localUpdatedAt: now,
+        );
+      }
+    });
+
+    SyncEventBus.notifyLocalChange();
+  }
+}
