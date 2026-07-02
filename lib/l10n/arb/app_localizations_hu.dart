@@ -6656,26 +6656,30 @@ class AppLocalizationsHu extends AppLocalizations {
   String get diveSites_map_appBar_title => 'Merulohelyek';
 
   @override
-  String get diveSites_map_builtInSites_add => 'Add to my sites';
+  String get diveSites_map_builtInSites_add => 'Hozzáadás a merülőhelyeimhez';
 
   @override
   String get diveSites_map_builtInSites_addError =>
-      'Couldn\'t add site. Please try again.';
+      'Nem sikerült hozzáadni a helyet. Kérjük, próbálja újra.';
 
   @override
-  String get diveSites_map_builtInSites_added => 'Added to your sites';
+  String get diveSites_map_builtInSites_added => 'Hozzáadva a merülőhelyeihez';
 
   @override
-  String get diveSites_map_builtInSites_hide => 'Hide built-in sites';
+  String get diveSites_map_builtInSites_hide =>
+      'Beépített merülőhelyek elrejtése';
 
   @override
-  String get diveSites_map_builtInSites_off => 'Built-in sites hidden';
+  String get diveSites_map_builtInSites_off =>
+      'Beépített merülőhelyek elrejtve';
 
   @override
-  String get diveSites_map_builtInSites_on => 'Built-in sites shown';
+  String get diveSites_map_builtInSites_on =>
+      'Beépített merülőhelyek megjelenítve';
 
   @override
-  String get diveSites_map_builtInSites_show => 'Show built-in sites';
+  String get diveSites_map_builtInSites_show =>
+      'Beépített merülőhelyek megjelenítése';
 
   @override
   String get diveSites_map_empty_description =>
@@ -6706,7 +6710,7 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String diveSites_map_semantics_builtInSiteMarker(Object name) {
-    return 'Built-in dive site: $name';
+    return 'Beépített merülőhely: $name';
   }
 
   @override

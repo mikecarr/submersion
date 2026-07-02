@@ -6362,26 +6362,25 @@ class AppLocalizationsZh extends AppLocalizations {
   String get diveSites_map_appBar_title => '潜水点';
 
   @override
-  String get diveSites_map_builtInSites_add => 'Add to my sites';
+  String get diveSites_map_builtInSites_add => '添加到我的潜水点';
 
   @override
-  String get diveSites_map_builtInSites_addError =>
-      'Couldn\'t add site. Please try again.';
+  String get diveSites_map_builtInSites_addError => '无法添加潜水点，请重试。';
 
   @override
-  String get diveSites_map_builtInSites_added => 'Added to your sites';
+  String get diveSites_map_builtInSites_added => '已添加到您的潜水点';
 
   @override
-  String get diveSites_map_builtInSites_hide => 'Hide built-in sites';
+  String get diveSites_map_builtInSites_hide => '隐藏内置潜水点';
 
   @override
-  String get diveSites_map_builtInSites_off => 'Built-in sites hidden';
+  String get diveSites_map_builtInSites_off => '已隐藏内置潜水点';
 
   @override
-  String get diveSites_map_builtInSites_on => 'Built-in sites shown';
+  String get diveSites_map_builtInSites_on => '已显示内置潜水点';
 
   @override
-  String get diveSites_map_builtInSites_show => 'Show built-in sites';
+  String get diveSites_map_builtInSites_show => '显示内置潜水点';
 
   @override
   String get diveSites_map_empty_description => '为您的潜水点添加坐标以在地图上显示';
@@ -6410,7 +6409,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String diveSites_map_semantics_builtInSiteMarker(Object name) {
-    return 'Built-in dive site: $name';
+    return '内置潜水点：$name';
   }
 
   @override

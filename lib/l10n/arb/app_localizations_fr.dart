@@ -6697,26 +6697,26 @@ class AppLocalizationsFr extends AppLocalizations {
   String get diveSites_map_appBar_title => 'Sites de plongee';
 
   @override
-  String get diveSites_map_builtInSites_add => 'Add to my sites';
+  String get diveSites_map_builtInSites_add => 'Ajouter à mes sites';
 
   @override
   String get diveSites_map_builtInSites_addError =>
-      'Couldn\'t add site. Please try again.';
+      'Impossible d\'ajouter le site. Veuillez réessayer.';
 
   @override
-  String get diveSites_map_builtInSites_added => 'Added to your sites';
+  String get diveSites_map_builtInSites_added => 'Ajouté à vos sites';
 
   @override
-  String get diveSites_map_builtInSites_hide => 'Hide built-in sites';
+  String get diveSites_map_builtInSites_hide => 'Masquer les sites intégrés';
 
   @override
-  String get diveSites_map_builtInSites_off => 'Built-in sites hidden';
+  String get diveSites_map_builtInSites_off => 'Sites intégrés masqués';
 
   @override
-  String get diveSites_map_builtInSites_on => 'Built-in sites shown';
+  String get diveSites_map_builtInSites_on => 'Sites intégrés affichés';
 
   @override
-  String get diveSites_map_builtInSites_show => 'Show built-in sites';
+  String get diveSites_map_builtInSites_show => 'Afficher les sites intégrés';
 
   @override
   String get diveSites_map_empty_description =>
@@ -6746,7 +6746,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String diveSites_map_semantics_builtInSiteMarker(Object name) {
-    return 'Built-in dive site: $name';
+    return 'Site de plongée intégré : $name';
   }
 
   @override

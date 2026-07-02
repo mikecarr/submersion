@@ -6663,26 +6663,32 @@ class AppLocalizationsDe extends AppLocalizations {
   String get diveSites_map_appBar_title => 'Tauchplätze';
 
   @override
-  String get diveSites_map_builtInSites_add => 'Add to my sites';
+  String get diveSites_map_builtInSites_add =>
+      'Zu meinen Tauchplätzen hinzufügen';
 
   @override
   String get diveSites_map_builtInSites_addError =>
-      'Couldn\'t add site. Please try again.';
+      'Tauchplatz konnte nicht hinzugefügt werden. Bitte erneut versuchen.';
 
   @override
-  String get diveSites_map_builtInSites_added => 'Added to your sites';
+  String get diveSites_map_builtInSites_added =>
+      'Zu Ihren Tauchplätzen hinzugefügt';
 
   @override
-  String get diveSites_map_builtInSites_hide => 'Hide built-in sites';
+  String get diveSites_map_builtInSites_hide =>
+      'Integrierte Tauchplätze ausblenden';
 
   @override
-  String get diveSites_map_builtInSites_off => 'Built-in sites hidden';
+  String get diveSites_map_builtInSites_off =>
+      'Integrierte Tauchplätze ausgeblendet';
 
   @override
-  String get diveSites_map_builtInSites_on => 'Built-in sites shown';
+  String get diveSites_map_builtInSites_on =>
+      'Integrierte Tauchplätze angezeigt';
 
   @override
-  String get diveSites_map_builtInSites_show => 'Show built-in sites';
+  String get diveSites_map_builtInSites_show =>
+      'Integrierte Tauchplätze anzeigen';
 
   @override
   String get diveSites_map_empty_description =>
@@ -6712,7 +6718,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String diveSites_map_semantics_builtInSiteMarker(Object name) {
-    return 'Built-in dive site: $name';
+    return 'Integrierter Tauchplatz: $name';
   }
 
   @override
