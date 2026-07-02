@@ -168,6 +168,7 @@ class DesktopOAuthAuthenticator implements GoogleDriveAuthenticator {
     // revoked; clear everything so the next attempt re-runs the browser
     // flow instead of looping on a dead refresh token.
     _teardownClient();
+    _email = null;
     await _tokenStore.clear();
   }
 

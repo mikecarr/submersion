@@ -197,14 +197,22 @@ void main() {
     expect(auth.authClient, isNull);
   });
 
-  test('handleAuthFailure clears the client and stored credentials', () async {
-    store.stored = creds(refreshToken: 'rt-1');
-    final auth = authenticator();
-    await auth.attemptSilentAuth();
+  test(
+    'handleAuthFailure clears the client, stored credentials, and email',
+    () async {
+      store.stored = creds(
+        refreshToken: 'rt-1',
+        idToken: idTokenWithEmail('diver@example.com'),
+      );
+      final auth = authenticator();
+      await auth.attemptSilentAuth();
+      expect(await auth.userEmail, isNotNull);
 
-    await auth.handleAuthFailure();
+      await auth.handleAuthFailure();
 
-    expect(auth.authClient, isNull);
-    expect(store.stored, isNull);
-  });
+      expect(auth.authClient, isNull);
+      expect(store.stored, isNull);
+      expect(await auth.userEmail, isNull);
+    },
+  );
 }
