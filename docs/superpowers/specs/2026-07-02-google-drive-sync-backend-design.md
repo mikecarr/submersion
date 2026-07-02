@@ -128,12 +128,13 @@ Click-by-click console instructions are in Appendix A.
 
 - Restore the Google Drive tile in `_buildProviderSection`, mirroring the
   iCloud tile's structure. When connected, the subtitle shows the
-  signed-in account email (`getUserEmail()`); a trailing overflow action
-  offers **Sign out**.
-- Sign-out routes through the existing backend-departure flow
-  (`recordBackendDeparture`) before deselecting, so the per-provider
-  cursor (v81) is stamped and the stale-cursor bug class PR #327 fixed
-  cannot recur.
+  signed-in account email (`getUserEmail()`).
+- Sign-out reuses the page's existing Advanced > Sign Out row, which
+  already confirms and disconnects the active provider; no per-tile
+  sign-out affordance is added. Provider switching continues to route
+  through the existing backend-departure flow (`recordBackendDeparture`),
+  so the per-provider cursor (v81) is stamped and the stale-cursor bug
+  class PR #327 fixed cannot recur.
 - Remove the `googledrive → null` coercion (lines 56–62); a persisted
   selection resumes normally.
 - Selecting the tile triggers `authenticate()`; on failure the tile stays
