@@ -84,7 +84,7 @@ void main() {
 
   group('batched upsertRecords', () {
     test(
-      'every single-PK entity round-trips fetchRecord -> upsertRecords',
+      'every single-PK entity round-trips fetchRecord -> upsertRecords -> fetchRecords',
       () async {
         // Minimal placeholder rows need not satisfy parent references.
         await db.customStatement('PRAGMA foreign_keys = OFF');
@@ -153,11 +153,16 @@ void main() {
           // Batched write: feed the row's own JSON back (a conflict-update).
           await serializer.upsertRecords(t.type, [json!]);
 
-          // The row still reads back after the batched upsert.
+          // Batched read: every entity arm, matching the per-id read and
+          // dropping absent ids.
+          final got = await serializer.fetchRecords(t.type, [id, 'absent-id']);
+          expect(got.keys.toSet(), {
+            id,
+          }, reason: 'fetchRecords(${t.type}) keys');
           expect(
+            got[id],
             await serializer.fetchRecord(t.type, id),
-            isNotNull,
-            reason: '${t.type} survives its own batched upsert',
+            reason: 'batched read == per-id read for ${t.type}',
           );
         }
       },
