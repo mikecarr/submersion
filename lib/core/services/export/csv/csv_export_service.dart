@@ -115,6 +115,7 @@ class CsvExportService {
 
     final headers = [
       'Dive Number',
+      'Name',
       'Date',
       'Time',
       'Site',
@@ -153,6 +154,7 @@ class CsvExportService {
       final tank = dive.tanks.isNotEmpty ? dive.tanks.first : null;
       rows.add([
         dive.diveNumber ?? '',
+        dive.name ?? '',
         _dateFormat.format(dive.dateTime),
         _timeFormat.format(dive.dateTime),
         dive.site?.name ?? '',
