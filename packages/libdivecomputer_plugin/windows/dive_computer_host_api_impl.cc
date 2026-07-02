@@ -3,11 +3,11 @@
 #include "dive_converter.h"
 #include "serial_scanner.h"
 
+#include <climits>
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <limits>
 #include <string>
 #include <vector>
 
@@ -165,7 +165,9 @@ void DiveComputerHostApiImpl::ParseRawDiveData(
     // expects an unsigned int descriptor id. Reject out-of-range values up front
     // so a corrupt/unexpected model yields a clear error instead of a silently
     // wrapped cast and a misleading "no descriptor" failure downstream.
-    constexpr int64_t kMaxModel = std::numeric_limits<unsigned int>::max();
+    // UINT_MAX (not std::numeric_limits::max()) avoids the windows.h max() macro,
+    // and the signed 64-bit bound keeps the comparison free of /W4 warnings.
+    constexpr int64_t kMaxModel = UINT_MAX;
     if (model < 0 || model > kMaxModel) {
         result(FlutterError(
             "PARSE_ERROR",
