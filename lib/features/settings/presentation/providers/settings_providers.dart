@@ -68,6 +68,11 @@ class SettingsKeys {
   static const String showNdlOnProfile = 'show_ndl_on_profile';
   static const String lastStopDepth = 'last_stop_depth';
   static const String decoStopIncrement = 'deco_stop_increment';
+
+  // Fullscreen profile view instrument tile preferences (device-local,
+  // stored directly in SharedPreferences rather than per-diver in the DB).
+  static const String fullscreenTileOrder = 'fullscreen_tile_order';
+  static const String fullscreenHiddenTiles = 'fullscreen_hidden_tiles';
 }
 
 /// App settings state
@@ -295,6 +300,13 @@ class AppSettings {
   /// Ordered list of dive detail section visibility preferences
   final List<DiveDetailSectionConfig> diveDetailSections;
 
+  /// Instrument tile order for the fullscreen profile view.
+  /// Empty means the built-in priority order.
+  final List<String> fullscreenTileOrder;
+
+  /// Instrument tiles the user has hidden in the fullscreen profile view.
+  final List<String> fullscreenHiddenTiles;
+
   const AppSettings({
     this.depthUnit = DepthUnit.meters,
     this.temperatureUnit = TemperatureUnit.celsius,
@@ -389,6 +401,8 @@ class AppSettings {
     this.showDetailsPaneCertifications = false,
     this.showDetailsPaneCourses = false,
     this.diveDetailSections = DiveDetailSectionConfig.defaultSections,
+    this.fullscreenTileOrder = const [],
+    this.fullscreenHiddenTiles = const [],
   });
 
   /// Compute the current unit preset based on actual unit values
@@ -517,6 +531,8 @@ class AppSettings {
     bool? showDetailsPaneCourses,
     List<DiveDetailSectionConfig>? diveDetailSections,
     bool clearDiveDetailSections = false,
+    List<String>? fullscreenTileOrder,
+    List<String>? fullscreenHiddenTiles,
   }) {
     return AppSettings(
       depthUnit: depthUnit ?? this.depthUnit,
@@ -635,6 +651,9 @@ class AppSettings {
       diveDetailSections: clearDiveDetailSections
           ? DiveDetailSectionConfig.defaultSections
           : (diveDetailSections ?? this.diveDetailSections),
+      fullscreenTileOrder: fullscreenTileOrder ?? this.fullscreenTileOrder,
+      fullscreenHiddenTiles:
+          fullscreenHiddenTiles ?? this.fullscreenHiddenTiles,
     );
   }
 }
@@ -722,16 +741,31 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
     _isLoading = true;
 
     try {
+      // Fullscreen profile tile preferences are device-local (not per-diver),
+      // so they're read straight from SharedPreferences rather than the
+      // per-diver settings repository.
+      final prefs = _ref.read(sharedPreferencesProvider);
+      final fullscreenTileOrder =
+          prefs.getStringList(SettingsKeys.fullscreenTileOrder) ?? const [];
+      final fullscreenHiddenTiles =
+          prefs.getStringList(SettingsKeys.fullscreenHiddenTiles) ?? const [];
+
       final diverId = _validatedDiverId;
       if (diverId == null) {
         // No diver selected, use defaults
-        state = const AppSettings();
+        state = AppSettings(
+          fullscreenTileOrder: fullscreenTileOrder,
+          fullscreenHiddenTiles: fullscreenHiddenTiles,
+        );
         return;
       }
 
       // Load settings from database
       final settings = await _repository.getOrCreateSettingsForDiver(diverId);
-      state = settings;
+      state = settings.copyWith(
+        fullscreenTileOrder: fullscreenTileOrder,
+        fullscreenHiddenTiles: fullscreenHiddenTiles,
+      );
 
       // Schedule notifications with the loaded settings
       _scheduleNotificationsIfNeeded();
@@ -762,6 +796,19 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
   }
 
   Future<void> _saveSettings() async {
+    // Fullscreen profile tile preferences are device-local (not per-diver),
+    // so they're always persisted to SharedPreferences, independent of
+    // whether a diver is currently selected.
+    final prefs = _ref.read(sharedPreferencesProvider);
+    await prefs.setStringList(
+      SettingsKeys.fullscreenTileOrder,
+      state.fullscreenTileOrder,
+    );
+    await prefs.setStringList(
+      SettingsKeys.fullscreenHiddenTiles,
+      state.fullscreenHiddenTiles,
+    );
+
     final diverId = _validatedDiverId;
     if (diverId == null) return;
     await _repository.updateSettingsForDiver(diverId, state);
@@ -1205,6 +1252,17 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
 
   Future<void> resetDiveDetailSections() async {
     state = state.copyWith(clearDiveDetailSections: true);
+    await _saveSettings();
+  }
+
+  Future<void> setFullscreenTilePreferences({
+    required List<String> order,
+    required List<String> hidden,
+  }) async {
+    state = state.copyWith(
+      fullscreenTileOrder: order,
+      fullscreenHiddenTiles: hidden,
+    );
     await _saveSettings();
   }
 

@@ -3120,18 +3120,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get diveLog_detail_errorLoading => '加载潜水出错';
 
   @override
-  String get diveLog_detail_fullscreen_sampleData => '采样数据';
-
-  @override
-  String get diveLog_detail_fullscreen_tapChartCompact => '点击图表切换紧凑视图';
-
-  @override
-  String get diveLog_detail_fullscreen_tapChartFull => '点击图表切换全屏视图';
-
-  @override
-  String get diveLog_detail_fullscreen_touchChart => '触摸图表查看该点的数据';
-
-  @override
   String get diveLog_detail_label_airTemp => '气温';
 
   @override
@@ -4138,6 +4126,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String diveLog_fullscreenProfile_title(Object number) {
     return '潜水 #$number 轮廓';
   }
+
+  @override
+  String get diveLog_instruments_customize => '自定义仪表';
+
+  @override
+  String get diveLog_instruments_customizeHint => '开启或关闭仪表。拖动以重新排序。';
 
   @override
   String get diveLog_legend_label_ascentRate => '上升速率';

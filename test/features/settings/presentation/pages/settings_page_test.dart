@@ -320,6 +320,14 @@ class _MockSettingsNotifier extends StateNotifier<AppSettings>
   @override
   Future<void> resetDiveDetailSections() async =>
       state = state.copyWith(clearDiveDetailSections: true);
+  @override
+  Future<void> setFullscreenTilePreferences({
+    required List<String> order,
+    required List<String> hidden,
+  }) async => state = state.copyWith(
+    fullscreenTileOrder: order,
+    fullscreenHiddenTiles: hidden,
+  );
 }
 
 /// Mock CurrentDiverIdNotifier that doesn't access the database

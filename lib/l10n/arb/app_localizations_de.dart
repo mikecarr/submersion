@@ -3291,21 +3291,6 @@ class AppLocalizationsDe extends AppLocalizations {
   String get diveLog_detail_errorLoading => 'Fehler beim Laden des Tauchgangs';
 
   @override
-  String get diveLog_detail_fullscreen_sampleData => 'Messdaten';
-
-  @override
-  String get diveLog_detail_fullscreen_tapChartCompact =>
-      'Tippen Sie auf das Diagramm für kompakte Ansicht';
-
-  @override
-  String get diveLog_detail_fullscreen_tapChartFull =>
-      'Tippen Sie auf das Diagramm für Vollbildansicht';
-
-  @override
-  String get diveLog_detail_fullscreen_touchChart =>
-      'Berühren Sie das Diagramm, um Daten an diesem Punkt zu sehen';
-
-  @override
   String get diveLog_detail_label_airTemp => 'Lufttemperatur';
 
   @override
@@ -4355,6 +4340,13 @@ class AppLocalizationsDe extends AppLocalizations {
   String diveLog_fullscreenProfile_title(Object number) {
     return 'Tauchgang #$number Profil';
   }
+
+  @override
+  String get diveLog_instruments_customize => 'Instrumente anpassen';
+
+  @override
+  String get diveLog_instruments_customizeHint =>
+      'Instrumente ein- oder ausschalten. Zum Sortieren ziehen.';
 
   @override
   String get diveLog_legend_label_ascentRate => 'Aufstiegsgeschwindigkeit';

@@ -3270,21 +3270,6 @@ class AppLocalizationsHu extends AppLocalizations {
   String get diveLog_detail_errorLoading => 'Hiba a merules betoltesekor';
 
   @override
-  String get diveLog_detail_fullscreen_sampleData => 'Minta adatok';
-
-  @override
-  String get diveLog_detail_fullscreen_tapChartCompact =>
-      'Koppints a grafikonra a kompakt nézetért';
-
-  @override
-  String get diveLog_detail_fullscreen_tapChartFull =>
-      'Koppints a grafikonra a teljes képernyős nézetért';
-
-  @override
-  String get diveLog_detail_fullscreen_touchChart =>
-      'Érintsd meg a grafikont az adott pont adatainak megtekintéséhez';
-
-  @override
   String get diveLog_detail_label_airTemp => 'Levego hom.';
 
   @override
@@ -4342,6 +4327,13 @@ class AppLocalizationsHu extends AppLocalizations {
   String diveLog_fullscreenProfile_title(Object number) {
     return 'Merules #$number profil';
   }
+
+  @override
+  String get diveLog_instruments_customize => 'Műszerek testreszabása';
+
+  @override
+  String get diveLog_instruments_customizeHint =>
+      'Kapcsolja be vagy ki a műszereket. Húzza az átrendezéshez.';
 
   @override
   String get diveLog_legend_label_ascentRate => 'Felszallasi sebesseg';

@@ -221,6 +221,10 @@ class DiveProfileChart extends ConsumerStatefulWidget {
   /// and [tooltipBelow] is true. Null clears the tooltip.
   final void Function(List<TooltipRow>? rows)? onTooltipData;
 
+  /// Optional widget rendered at the start of the legend row (e.g. a close
+  /// button and title in the fullscreen view).
+  final Widget? legendLeading;
+
   /// Returns responsive left axis reserved size based on available chart width.
   /// Tick labels are plain numbers (e.g. "30", "60") so don't need much space.
   static double leftAxisSize(double availableWidth) =>
@@ -380,6 +384,7 @@ class DiveProfileChart extends ConsumerStatefulWidget {
     this.computerNames,
     this.tooltipBelow = false,
     this.onTooltipData,
+    this.legendLeading,
   });
 
   @override
@@ -1338,36 +1343,50 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
             DiveProfileChart._leftRightAxisNameSize +
             DiveProfileChart.leftAxisSize(constraints.maxWidth);
 
+        // The chart with gesture handling
+        // Wrapped in RepaintBoundary for PNG export when exportKey is provided
+        final plot = RepaintBoundary(
+          key: widget.exportKey,
+          child: _buildInteractiveChart(
+            context,
+            units,
+            hasTemperatureData: hasTemperatureData,
+            hasPressureData: hasPressureData,
+            hasHeartRateData: hasHeartRateData,
+          ),
+        );
+
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Chart header with legend and zoom controls (decluttered)
-            DiveProfileLegend(
-              config: legendConfig,
-              zoomLevel: _viewport.zoom,
-              minZoom: ProfileChartViewport.minZoom,
-              maxZoom: ProfileChartViewport.maxZoom,
-              onZoomIn: _zoomIn,
-              onZoomOut: _zoomOut,
-              onResetZoom: _resetZoom,
-              leftPadding: legendLeftPadding,
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (widget.legendLeading != null) widget.legendLeading!,
+                Expanded(
+                  child: DiveProfileLegend(
+                    config: legendConfig,
+                    zoomLevel: _viewport.zoom,
+                    minZoom: ProfileChartViewport.minZoom,
+                    maxZoom: ProfileChartViewport.maxZoom,
+                    onZoomIn: _zoomIn,
+                    onZoomOut: _zoomOut,
+                    onResetZoom: _resetZoom,
+                    leftPadding: widget.legendLeading == null
+                        ? legendLeftPadding
+                        : 0,
+                  ),
+                ),
+              ],
             ),
 
-            // The chart with gesture handling
-            // Wrapped in RepaintBoundary for PNG export when exportKey is provided
-            RepaintBoundary(
-              key: widget.exportKey,
-              child: SizedBox(
-                height: 200,
-                child: _buildInteractiveChart(
-                  context,
-                  units,
-                  hasTemperatureData: hasTemperatureData,
-                  hasPressureData: hasPressureData,
-                  hasHeartRateData: hasHeartRateData,
-                ),
-              ),
-            ),
+            // Fill bounded parents (e.g. fullscreen); keep the 200px default
+            // in unbounded contexts such as inline scroll views.
+            if (constraints.hasBoundedHeight)
+              Expanded(child: plot)
+            else
+              SizedBox(height: 200, child: plot),
             // Zoom hint
             if (_viewport.isZoomed)
               Padding(

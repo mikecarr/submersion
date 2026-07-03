@@ -5498,30 +5498,6 @@ abstract class AppLocalizations {
   /// **'Error loading dive'**
   String get diveLog_detail_errorLoading;
 
-  /// No description provided for @diveLog_detail_fullscreen_sampleData.
-  ///
-  /// In en, this message translates to:
-  /// **'Sample Data'**
-  String get diveLog_detail_fullscreen_sampleData;
-
-  /// No description provided for @diveLog_detail_fullscreen_tapChartCompact.
-  ///
-  /// In en, this message translates to:
-  /// **'Tap chart for compact view'**
-  String get diveLog_detail_fullscreen_tapChartCompact;
-
-  /// No description provided for @diveLog_detail_fullscreen_tapChartFull.
-  ///
-  /// In en, this message translates to:
-  /// **'Tap chart for full-screen view'**
-  String get diveLog_detail_fullscreen_tapChartFull;
-
-  /// No description provided for @diveLog_detail_fullscreen_touchChart.
-  ///
-  /// In en, this message translates to:
-  /// **'Touch the chart to see data at that point'**
-  String get diveLog_detail_fullscreen_touchChart;
-
   /// No description provided for @diveLog_detail_label_airTemp.
   ///
   /// In en, this message translates to:
@@ -7321,6 +7297,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Dive #{number} Profile'**
   String diveLog_fullscreenProfile_title(Object number);
+
+  /// No description provided for @diveLog_instruments_customize.
+  ///
+  /// In en, this message translates to:
+  /// **'Customize instruments'**
+  String get diveLog_instruments_customize;
+
+  /// No description provided for @diveLog_instruments_customizeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Toggle instruments on or off. Drag to reorder.'**
+  String get diveLog_instruments_customizeHint;
 
   /// No description provided for @diveLog_legend_label_ascentRate.
   ///

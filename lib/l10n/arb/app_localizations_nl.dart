@@ -3259,21 +3259,6 @@ class AppLocalizationsNl extends AppLocalizations {
   String get diveLog_detail_errorLoading => 'Fout bij laden van duik';
 
   @override
-  String get diveLog_detail_fullscreen_sampleData => 'Meetgegevens';
-
-  @override
-  String get diveLog_detail_fullscreen_tapChartCompact =>
-      'Tik op grafiek voor compacte weergave';
-
-  @override
-  String get diveLog_detail_fullscreen_tapChartFull =>
-      'Tik op grafiek voor volledig scherm weergave';
-
-  @override
-  String get diveLog_detail_fullscreen_touchChart =>
-      'Raak de grafiek aan om gegevens op dat punt te zien';
-
-  @override
   String get diveLog_detail_label_airTemp => 'Luchttemp.';
 
   @override
@@ -4325,6 +4310,13 @@ class AppLocalizationsNl extends AppLocalizations {
   String diveLog_fullscreenProfile_title(Object number) {
     return 'Duik #$number profiel';
   }
+
+  @override
+  String get diveLog_instruments_customize => 'Instrumenten aanpassen';
+
+  @override
+  String get diveLog_instruments_customizeHint =>
+      'Schakel instrumenten in of uit. Sleep om te herschikken.';
 
   @override
   String get diveLog_legend_label_ascentRate => 'Opstijgsnelheid';

@@ -3284,21 +3284,6 @@ class AppLocalizationsPt extends AppLocalizations {
   String get diveLog_detail_errorLoading => 'Erro ao carregar mergulho';
 
   @override
-  String get diveLog_detail_fullscreen_sampleData => 'Dados de Amostra';
-
-  @override
-  String get diveLog_detail_fullscreen_tapChartCompact =>
-      'Toque no gráfico para visualização compacta';
-
-  @override
-  String get diveLog_detail_fullscreen_tapChartFull =>
-      'Toque no gráfico para visualização em tela cheia';
-
-  @override
-  String get diveLog_detail_fullscreen_touchChart =>
-      'Toque no gráfico para ver os dados naquele ponto';
-
-  @override
   String get diveLog_detail_label_airTemp => 'Temp do Ar';
 
   @override
@@ -4360,6 +4345,13 @@ class AppLocalizationsPt extends AppLocalizations {
   String diveLog_fullscreenProfile_title(Object number) {
     return 'Perfil do Mergulho #$number';
   }
+
+  @override
+  String get diveLog_instruments_customize => 'Personalizar instrumentos';
+
+  @override
+  String get diveLog_instruments_customizeHint =>
+      'Ative ou desative instrumentos. Arraste para reordenar.';
 
   @override
   String get diveLog_legend_label_ascentRate => 'Taxa de Subida';

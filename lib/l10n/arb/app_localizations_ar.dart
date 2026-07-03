@@ -3210,21 +3210,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get diveLog_detail_errorLoading => 'خطأ في تحميل الغوصة';
 
   @override
-  String get diveLog_detail_fullscreen_sampleData => 'بيانات العينة';
-
-  @override
-  String get diveLog_detail_fullscreen_tapChartCompact =>
-      'اضغط على المخطط للعرض المدمج';
-
-  @override
-  String get diveLog_detail_fullscreen_tapChartFull =>
-      'اضغط على المخطط للعرض بملء الشاشة';
-
-  @override
-  String get diveLog_detail_fullscreen_touchChart =>
-      'المس المخطط لرؤية البيانات عند تلك النقطة';
-
-  @override
   String get diveLog_detail_label_airTemp => 'درجة حرارة الهواء';
 
   @override
@@ -4253,6 +4238,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String diveLog_fullscreenProfile_title(Object number) {
     return 'ملف الغوصة #$number';
   }
+
+  @override
+  String get diveLog_instruments_customize => 'تخصيص الأدوات';
+
+  @override
+  String get diveLog_instruments_customizeHint =>
+      'قم بتشغيل الأدوات أو إيقافها. اسحب لإعادة الترتيب.';
 
   @override
   String get diveLog_legend_label_ascentRate => 'معدل الصعود';

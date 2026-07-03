@@ -3190,21 +3190,6 @@ class AppLocalizationsHe extends AppLocalizations {
   String get diveLog_detail_errorLoading => 'שגיאה בטעינת צלילה';
 
   @override
-  String get diveLog_detail_fullscreen_sampleData => 'נתוני דגימה';
-
-  @override
-  String get diveLog_detail_fullscreen_tapChartCompact =>
-      'לחץ על התרשים לתצוגה קומפקטית';
-
-  @override
-  String get diveLog_detail_fullscreen_tapChartFull =>
-      'לחץ על התרשים לתצוגה במסך מלא';
-
-  @override
-  String get diveLog_detail_fullscreen_touchChart =>
-      'גע בתרשים כדי לראות נתונים באותה נקודה';
-
-  @override
   String get diveLog_detail_label_airTemp => 'טמפ\' אוויר';
 
   @override
@@ -4232,6 +4217,13 @@ class AppLocalizationsHe extends AppLocalizations {
   String diveLog_fullscreenProfile_title(Object number) {
     return 'פרופיל צלילה #$number';
   }
+
+  @override
+  String get diveLog_instruments_customize => 'התאמה אישית של מכשירים';
+
+  @override
+  String get diveLog_instruments_customizeHint =>
+      'הפעל או כבה מכשירים. גרור כדי לסדר מחדש.';
 
   @override
   String get diveLog_legend_label_ascentRate => 'קצב עלייה';
