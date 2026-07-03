@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:submersion/core/services/database_service.dart';
 import 'package:submersion/features/checklists/data/repositories/checklist_template_repository.dart';
 import 'package:submersion/features/checklists/data/repositories/trip_checklist_repository.dart';
 import 'package:submersion/features/checklists/domain/entities/trip_checklist_item.dart';
@@ -136,5 +137,31 @@ void main() {
 
     expect(find.byType(AlertDialog), findsOneWidget);
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('a save failure keeps the dialog open and re-enables Save', (
+    tester,
+  ) async {
+    await openDialog(tester);
+    await tester.enterText(find.byType(TextFormField), 'Egypt prep');
+
+    // Force saveAsTemplate to throw by closing the underlying database.
+    await DatabaseService.instance.database.close();
+
+    await tester.tap(find.widgetWithText(FilledButton, 'Save'));
+    await tester.pumpAndSettle();
+
+    // Error surfaced, dialog still open, and the Save button is enabled again
+    // so the user can retry or cancel (not trapped by a stuck _saving flag).
+    expect(tester.takeException(), isNull);
+    expect(
+      find.text('Something went wrong. Please try again.'),
+      findsOneWidget,
+    );
+    expect(find.byType(AlertDialog), findsOneWidget);
+    final saveButton = tester.widget<FilledButton>(
+      find.widgetWithText(FilledButton, 'Save'),
+    );
+    expect(saveButton.onPressed, isNotNull);
   });
 }

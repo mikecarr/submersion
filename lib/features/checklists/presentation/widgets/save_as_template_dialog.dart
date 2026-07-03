@@ -45,25 +45,40 @@ class _SaveAsTemplateDialogState extends ConsumerState<_SaveAsTemplateDialog> {
     if (_saving || !_formKey.currentState!.validate()) return;
     setState(() => _saving = true);
     final repository = ref.read(tripChecklistRepositoryProvider);
-    await repository.saveAsTemplate(
-      tripId: widget.trip.id,
-      tripStartDate: widget.trip.startDate,
-      name: _controller.text.trim(),
-      diverId: widget.trip.diverId,
-    );
-    // Resolve navigator/messenger after the await and guard with mounted, so a
-    // teardown during the save can never pop a disposed route.
-    if (!mounted) return;
-    final messenger = ScaffoldMessenger.of(context);
-    final l10n = context.l10n;
-    Navigator.of(context).pop();
-    messenger.showSnackBar(
-      SnackBar(
-        content: Text(l10n.checklists_saveTemplate_success),
-        duration: const Duration(seconds: 4),
-        showCloseIcon: true,
-      ),
-    );
+    try {
+      await repository.saveAsTemplate(
+        tripId: widget.trip.id,
+        tripStartDate: widget.trip.startDate,
+        name: _controller.text.trim(),
+        diverId: widget.trip.diverId,
+      );
+      // Resolve navigator/messenger after the await and guard with mounted, so
+      // a teardown during the save can never pop a disposed route.
+      if (!mounted) return;
+      final messenger = ScaffoldMessenger.of(context);
+      final l10n = context.l10n;
+      Navigator.of(context).pop();
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(l10n.checklists_saveTemplate_success),
+          duration: const Duration(seconds: 4),
+          showCloseIcon: true,
+        ),
+      );
+    } catch (_) {
+      // Surface the failure but keep the dialog open so the user can retry or
+      // cancel; the finally re-enables the buttons.
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(context.l10n.common_error_tryAgain),
+          duration: const Duration(seconds: 4),
+          showCloseIcon: true,
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
   }
 
   @override
