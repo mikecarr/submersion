@@ -312,7 +312,11 @@ final uniqueSpeciesCountProvider = FutureProvider<int>((ref) async {
   _keepAliveWithExpiry(ref);
   final repository = ref.watch(statisticsRepositoryProvider);
   final currentDiverId = ref.watch(currentDiverIdProvider);
-  return repository.getUniqueSpeciesCount(diverId: currentDiverId);
+  final filter = ref.watch(statisticsFilterProvider);
+  return repository.getUniqueSpeciesCount(
+    diverId: currentDiverId,
+    filter: filter,
+  );
 });
 
 final mostCommonSightingsProvider = FutureProvider<List<RankingItem>>((
@@ -321,7 +325,11 @@ final mostCommonSightingsProvider = FutureProvider<List<RankingItem>>((
   _keepAliveWithExpiry(ref);
   final repository = ref.watch(statisticsRepositoryProvider);
   final currentDiverId = ref.watch(currentDiverIdProvider);
-  return repository.getMostCommonSightings(diverId: currentDiverId);
+  final filter = ref.watch(statisticsFilterProvider);
+  return repository.getMostCommonSightings(
+    diverId: currentDiverId,
+    filter: filter,
+  );
 });
 
 final bestSitesForMarineLifeProvider = FutureProvider<List<RankingItem>>((
@@ -330,7 +338,11 @@ final bestSitesForMarineLifeProvider = FutureProvider<List<RankingItem>>((
   _keepAliveWithExpiry(ref);
   final repository = ref.watch(statisticsRepositoryProvider);
   final currentDiverId = ref.watch(currentDiverIdProvider);
-  return repository.getBestSitesForMarineLife(diverId: currentDiverId);
+  final filter = ref.watch(statisticsFilterProvider);
+  return repository.getBestSitesForMarineLife(
+    diverId: currentDiverId,
+    filter: filter,
+  );
 });
 
 /// Per-species statistics (sightings, depth range, sites, first/last seen)
@@ -339,9 +351,11 @@ final speciesStatisticsProvider =
       _keepAliveWithExpiry(ref);
       final repository = ref.watch(statisticsRepositoryProvider);
       final currentDiverId = ref.watch(currentDiverIdProvider);
+      final filter = ref.watch(statisticsFilterProvider);
       return repository.getSpeciesStatistics(
         speciesId: speciesId,
         diverId: currentDiverId,
+        filter: filter,
       );
     });
 

@@ -60,6 +60,18 @@ void main() {
         );
   }
 
+  Future<void> species(String id) async {
+    await db
+        .into(db.species)
+        .insert(
+          SpeciesCompanion(
+            id: Value(id),
+            commonName: Value(id),
+            category: const Value('fish'),
+          ),
+        );
+  }
+
   test('visibility distribution respects a tag filter', () async {
     await dive('a', visibility: 'Good');
     await dive('b', visibility: 'Poor');
@@ -166,5 +178,29 @@ void main() {
       filter: const DiveFilterState(tagIds: ['dry']),
     );
     expect(filtered.first.count, 1); // buddy appears on 1 filtered dive
+  });
+
+  test('unique species count respects a tag filter', () async {
+    await dive('a');
+    await dive('b');
+    await species('turtle');
+    for (final id in ['a', 'b']) {
+      await db
+          .into(db.sightings)
+          .insert(
+            SightingsCompanion.insert(
+              id: 'sight-$id',
+              diveId: id,
+              speciesId: 'turtle',
+            ),
+          );
+    }
+    await tag('dry');
+    await link('a', 'dry');
+
+    final filtered = await repo.getUniqueSpeciesCount(
+      filter: const DiveFilterState(tagIds: ['dry']),
+    );
+    expect(filtered, 1);
   });
 }

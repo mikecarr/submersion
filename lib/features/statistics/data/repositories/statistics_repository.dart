@@ -1330,16 +1330,20 @@ class StatisticsRepository {
   // ============================================================================
 
   /// Get unique species count
-  Future<int> getUniqueSpeciesCount({String? diverId}) async {
+  Future<int> getUniqueSpeciesCount({
+    String? diverId,
+    DiveFilterState filter = const DiveFilterState(),
+  }) async {
     try {
       final diverFilter = diverId != null ? 'AND d.diver_id = ?' : '';
-      final params = diverId != null ? [diverId] : <dynamic>[];
+      final df = _diveFilter(filter, alias: 'd');
+      final params = diverId != null ? [diverId, ...df.params] : [...df.params];
 
       final results = await _db.customSelect('''
         SELECT COUNT(DISTINCT s.species_id) AS count
         FROM sightings s
         JOIN dives d ON d.id = s.dive_id
-        WHERE 1=1 $diverFilter
+        WHERE 1=1 $diverFilter ${df.clause}
         ''', variables: params.map((p) => Variable(p)).toList()).get();
 
       return results.first.read<int>('count');
@@ -1357,10 +1361,14 @@ class StatisticsRepository {
   Future<List<RankingItem>> getMostCommonSightings({
     String? diverId,
     int limit = 10,
+    DiveFilterState filter = const DiveFilterState(),
   }) async {
     try {
       final diverFilter = diverId != null ? 'AND d.diver_id = ?' : '';
-      final params = diverId != null ? [diverId, limit] : [limit];
+      final df = _diveFilter(filter, alias: 'd');
+      final params = diverId != null
+          ? [diverId, ...df.params, limit]
+          : [...df.params, limit];
 
       final results = await _db.customSelect('''
         SELECT
@@ -1371,7 +1379,7 @@ class StatisticsRepository {
         FROM sightings s
         JOIN species sp ON sp.id = s.species_id
         JOIN dives d ON d.id = s.dive_id
-        WHERE 1=1 $diverFilter
+        WHERE 1=1 $diverFilter ${df.clause}
         GROUP BY sp.id
         ORDER BY total_count DESC
         LIMIT ?
@@ -1399,10 +1407,14 @@ class StatisticsRepository {
   Future<List<RankingItem>> getBestSitesForMarineLife({
     String? diverId,
     int limit = 10,
+    DiveFilterState filter = const DiveFilterState(),
   }) async {
     try {
       final diverFilter = diverId != null ? 'AND d.diver_id = ?' : '';
-      final params = diverId != null ? [diverId, limit] : [limit];
+      final df = _diveFilter(filter, alias: 'd');
+      final params = diverId != null
+          ? [diverId, ...df.params, limit]
+          : [...df.params, limit];
 
       final results = await _db.customSelect('''
         SELECT
@@ -1412,7 +1424,7 @@ class StatisticsRepository {
         FROM dive_sites ds
         JOIN dives d ON d.site_id = ds.id
         JOIN sightings s ON s.dive_id = d.id
-        WHERE 1=1 $diverFilter
+        WHERE 1=1 $diverFilter ${df.clause}
         GROUP BY ds.id
         ORDER BY species_count DESC
         LIMIT ?
@@ -1439,12 +1451,14 @@ class StatisticsRepository {
   Future<SpeciesStatistics> getSpeciesStatistics({
     required String speciesId,
     String? diverId,
+    DiveFilterState filter = const DiveFilterState(),
   }) async {
     try {
       final diverFilter = diverId != null ? 'AND d.diver_id = ?' : '';
+      final df = _diveFilter(filter, alias: 'd');
       final baseParams = diverId != null
-          ? [speciesId, diverId]
-          : <dynamic>[speciesId];
+          ? [speciesId, diverId, ...df.params]
+          : [speciesId, ...df.params];
 
       // Aggregate stats: total sightings, dive count, depth range, date range
       final statsResult = await _db.customSelect('''
@@ -1458,7 +1472,7 @@ class StatisticsRepository {
           MAX(d.dive_date_time) AS last_seen
         FROM sightings s
         JOIN dives d ON d.id = s.dive_id
-        WHERE s.species_id = ? $diverFilter
+        WHERE s.species_id = ? $diverFilter ${df.clause}
       ''', variables: baseParams.map((p) => Variable(p)).toList()).getSingle();
 
       final totalSightings = statsResult.read<int>('total_sightings');
@@ -1476,7 +1490,7 @@ class StatisticsRepository {
         FROM sightings s
         JOIN dives d ON d.id = s.dive_id
         JOIN dive_sites ds ON ds.id = d.site_id
-        WHERE s.species_id = ? $diverFilter
+        WHERE s.species_id = ? $diverFilter ${df.clause}
           AND d.site_id IS NOT NULL
         GROUP BY ds.id
         ORDER BY sighting_count DESC
