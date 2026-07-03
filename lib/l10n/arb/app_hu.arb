@@ -1207,6 +1207,8 @@
   "diveLog_edit_label_diveTypes": "Dive Types",
   "diveLog_edit_label_diveNumber": "Merules sz.",
   "diveLog_edit_hint_diveNumber": "Automatikusan kiosztva, ha ures marad",
+  "diveLog_edit_label_diveName": "Név",
+  "diveLog_edit_diveNamePlaceholder": "Opcionális név ehhez a merüléshez",
   "diveLog_edit_label_entryMethod": "Beszallasi mod",
   "diveLog_edit_label_exitMethod": "Kiszallasi mod",
   "diveLog_edit_label_maxDepth": "Max melyseg",

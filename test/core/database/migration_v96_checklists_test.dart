@@ -3,10 +3,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:submersion/core/database/database.dart';
 
 void main() {
-  test('v95 creates the three checklist tables with hlc columns', () async {
+  test('v96 creates the three checklist tables with hlc columns', () async {
     final nativeDb = NativeDatabase.memory(
       setup: (rawDb) {
-        rawDb.execute('PRAGMA user_version = 94');
+        rawDb.execute('PRAGMA user_version = 95');
         // Minimal parents so FK references resolve.
         rawDb.execute('''
           CREATE TABLE divers (id TEXT NOT NULL PRIMARY KEY)
@@ -62,9 +62,9 @@ void main() {
     expect(indexNames, contains('idx_checklist_template_items_template_id'));
   });
 
-  test('schema version is 95 and the migration list includes it', () {
-    expect(AppDatabase.currentSchemaVersion, 95);
-    expect(AppDatabase.migrationVersions, contains(95));
+  test('schema version is 96 and the migration list includes it', () {
+    expect(AppDatabase.currentSchemaVersion, 96);
+    expect(AppDatabase.migrationVersions, contains(96));
   });
 
   test('fresh database exposes the checklist tables via Drift', () async {

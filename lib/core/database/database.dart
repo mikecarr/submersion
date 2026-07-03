@@ -194,6 +194,9 @@ class Dives extends Table {
   TextColumn get id => text()();
   TextColumn get diverId => text().nullable().references(Divers, #id)();
   IntColumn get diveNumber => integer().nullable()();
+  // User-defined dive name (#400). Null = never named; display falls back
+  // to the site name.
+  TextColumn get name => text().nullable()();
   IntColumn get diveDateTime =>
       integer()(); // Unix timestamp (legacy, kept for compatibility)
   IntColumn get entryTime =>
@@ -1777,7 +1780,7 @@ class AppDatabase extends _$AppDatabase {
 
   /// The current schema version as a static constant so that pre-open checks
   /// (e.g. version-mismatch guard) can reference it without an instance.
-  static const int currentSchemaVersion = 95;
+  static const int currentSchemaVersion = 96;
 
   /// Every schema version that has a migration block in onUpgrade.
   /// Used to calculate progress step counts. When adding a new migration,
@@ -1876,6 +1879,7 @@ class AppDatabase extends _$AppDatabase {
     93,
     94,
     95,
+    96,
   ];
 
   /// Tables that carry a per-row Hybrid Logical Clock for cross-device conflict
@@ -4402,6 +4406,21 @@ class AppDatabase extends _$AppDatabase {
         }
         if (from < 94) await reportProgress();
         if (from < 95) {
+          // Dive naming (#400): optional user-defined dive name. Guarded by a
+          // PRAGMA check so an interrupted upgrade that already added the
+          // column does not fail on a duplicate ALTER, and so minimal-schema
+          // migration tests without a dives table are unaffected (empty
+          // table_info means no dives table).
+          final diveCols = await customSelect(
+            "PRAGMA table_info('dives')",
+          ).get();
+          final hasName = diveCols.any((c) => c.read<String>('name') == 'name');
+          if (diveCols.isNotEmpty && !hasName) {
+            await customStatement('ALTER TABLE dives ADD COLUMN name TEXT');
+          }
+        }
+        if (from < 95) await reportProgress();
+        if (from < 96) {
           // Checklist tables for trip planning (issue #164). Raw idempotent
           // DDL (matches the v84 idiom) so interrupted migrations are safe.
           await customStatement('''
@@ -4454,7 +4473,7 @@ class AppDatabase extends _$AppDatabase {
             ON trip_checklist_items(trip_id)
           ''');
         }
-        if (from < 95) await reportProgress();
+        if (from < 96) await reportProgress();
       },
       beforeOpen: (details) async {
         // Enable foreign keys

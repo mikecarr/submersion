@@ -3649,6 +3649,13 @@ class AppLocalizationsDe extends AppLocalizations {
   String get diveLog_edit_label_diveNumber => 'Tauchgang-Nr.';
 
   @override
+  String get diveLog_edit_label_diveName => 'Name';
+
+  @override
+  String get diveLog_edit_diveNamePlaceholder =>
+      'Optionaler Name für diesen Tauchgang';
+
+  @override
   String get diveLog_edit_hint_diveNumber =>
       'Wird automatisch vergeben, wenn leer gelassen';
 

@@ -17,6 +17,8 @@ class Dive extends Equatable {
   final String id;
   final String? diverId;
   final int? diveNumber;
+  // User-defined dive name (#400). Null = never named.
+  final String? name;
   final DateTime dateTime; // Legacy field, kept for compatibility
   final DateTime? entryTime; // When diver entered water
   final DateTime? exitTime; // When diver exited water
@@ -133,6 +135,7 @@ class Dive extends Equatable {
     required this.id,
     this.diverId,
     this.diveNumber,
+    this.name,
     required this.dateTime,
     this.entryTime,
     this.exitTime,
@@ -219,6 +222,15 @@ class Dive extends Equatable {
 
   /// Effective start time of the dive (entryTime if set, otherwise dateTime)
   DateTime get effectiveEntryTime => entryTime ?? dateTime;
+
+  /// User-defined name, normalized for display: trimmed, with empty or
+  /// whitespace-only values treated as unset (null). In-app writes never
+  /// store such values, but synced rows from other writers can; display
+  /// fallbacks and exports should use this instead of [name].
+  String? get effectiveName {
+    final trimmed = name?.trim();
+    return (trimmed == null || trimmed.isEmpty) ? null : trimmed;
+  }
 
   /// Display name for the representative (first) dive type.
   String get diveTypeName => diveType?.name ?? diveTypeDisplayName(diveTypeId);
@@ -489,6 +501,7 @@ class Dive extends Equatable {
     String? id,
     String? diverId,
     int? diveNumber,
+    String? name,
     DateTime? dateTime,
     DateTime? entryTime,
     DateTime? exitTime,
@@ -576,6 +589,7 @@ class Dive extends Equatable {
       id: id ?? this.id,
       diverId: diverId ?? this.diverId,
       diveNumber: diveNumber ?? this.diveNumber,
+      name: name ?? this.name,
       dateTime: dateTime ?? this.dateTime,
       entryTime: entryTime ?? this.entryTime,
       exitTime: exitTime ?? this.exitTime,
@@ -666,6 +680,7 @@ class Dive extends Equatable {
     id,
     diverId,
     diveNumber,
+    name,
     dateTime,
     entryTime,
     exitTime,

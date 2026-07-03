@@ -1241,6 +1241,8 @@
   "diveLog_edit_label_diveTypes": "Dive Types",
   "diveLog_edit_label_diveNumber": "Tauchgang-Nr.",
   "diveLog_edit_hint_diveNumber": "Wird automatisch vergeben, wenn leer gelassen",
+  "diveLog_edit_label_diveName": "Name",
+  "diveLog_edit_diveNamePlaceholder": "Optionaler Name für diesen Tauchgang",
   "diveLog_edit_label_entryMethod": "Einstiegsmethode",
   "diveLog_edit_label_exitMethod": "Ausstiegsmethode",
   "diveLog_edit_label_maxDepth": "Max. Tiefe",
