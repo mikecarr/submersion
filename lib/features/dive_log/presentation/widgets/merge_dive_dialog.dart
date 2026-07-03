@@ -12,7 +12,7 @@ import 'package:submersion/features/settings/presentation/providers/settings_pro
 ///
 /// Step 1: Shows candidate dives from the same calendar day, sorted by
 ///         time proximity. User selects one.
-/// Step 2: Data-loss warning confirmation screen.
+/// Step 2: Confirmation screen explaining what the fold does.
 class MergeDiveDialog extends ConsumerStatefulWidget {
   final String currentDiveId;
   final DateTime currentDiveDate;
@@ -207,27 +207,26 @@ class _MergeDiveDialogState extends ConsumerState<MergeDiveDialog> {
           ),
           const SizedBox(height: 12),
           Card(
-            color: colorScheme.errorContainer.withValues(alpha: 0.4),
+            color: colorScheme.secondaryContainer.withValues(alpha: 0.4),
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Data loss warning',
+                    'What this does',
                     style: textTheme.titleSmall?.copyWith(
-                      color: colorScheme.error,
+                      color: colorScheme.onSecondaryContainer,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'The following data from the selected dive will be discarded: '
-                    'tanks, equipment links, notes, buddy, rating. '
-                    'Only the dive computer\'s profile data and metadata will be kept. '
+                    'This dive\'s profile, tanks, pressures, events, tags, buddies, and sightings '
+                    'will be folded into this dive as an additional computer source. '
                     'This action can be reversed with \'Unlink computer\'.',
                     style: textTheme.bodySmall?.copyWith(
-                      color: colorScheme.onErrorContainer,
+                      color: colorScheme.onSecondaryContainer,
                     ),
                   ),
                 ],

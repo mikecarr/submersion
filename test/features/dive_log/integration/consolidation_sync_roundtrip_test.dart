@@ -106,6 +106,37 @@ void main() {
             ),
           );
     }
+    // Catalog row for the tag seeded onto the secondary below (#449 review
+    // finding 1's junction-union path also needs cross-device sync
+    // coverage, not just tanks/events).
+    await db
+        .into(db.tags)
+        .insert(
+          TagsCompanion.insert(
+            id: 'tag1',
+            name: 'tag1',
+            createdAt: 0,
+            updatedAt: 0,
+          ),
+        );
+  }
+
+  Future<void> seedTag(
+    AppDatabase db,
+    String id, {
+    required String diveId,
+    required String tagId,
+  }) async {
+    await db
+        .into(db.diveTags)
+        .insert(
+          DiveTagsCompanion.insert(
+            id: id,
+            diveId: diveId,
+            tagId: tagId,
+            createdAt: 0,
+          ),
+        );
   }
 
   /// Seeds a dive via the repository (base row + tanks + profile) and stamps
@@ -259,6 +290,7 @@ void main() {
       timestamp: 30,
       tankId: 'tank-s1',
     );
+    await seedTag(db, 'dtag-s1', diveId: 's', tagId: 'tag1');
   }
 
   test('device A consolidates two computer downloads; device B (holding the '
@@ -391,6 +423,17 @@ void main() {
       reason: "the secondary's profile points must be re-parented",
     );
 
+    final tagsOnB = await (dbB.select(
+      dbB.diveTags,
+    )..where((t) => t.diveId.equals('t'))).get();
+    expect(
+      tagsOnB.map((t) => t.tagId),
+      contains('tag1'),
+      reason:
+          "B must see the secondary's tag unioned onto the target dive "
+          '(#449 review finding 1)',
+    );
+
     final secondaryOnB = await DiveRepository().getDiveById('s');
     expect(
       secondaryOnB,
@@ -467,5 +510,15 @@ void main() {
       {'event-s1'},
       reason: 'undo must not leave orphaned profile-event rows on B',
     );
+
+    final tagsAfterUndo = await dbB.select(dbB.diveTags).get();
+    expect(
+      tagsAfterUndo.map((t) => t.id).toSet(),
+      {'dtag-s1'},
+      reason:
+          'undo must not leave the union-created tag row behind on B; the '
+          'original tag returns to the secondary',
+    );
+    expect(tagsAfterUndo.single.diveId, 's');
   });
 }

@@ -1,6 +1,9 @@
+import 'package:submersion/core/services/logger_service.dart';
 import 'package:submersion/features/dive_log/data/repositories/dive_repository_impl.dart';
 import 'package:submersion/features/dive_log/data/services/dive_consolidation_service.dart';
 import 'package:submersion/features/universal_import/data/services/import_duplicate_checker.dart';
+
+const _log = LoggerService('ImportConsolidationService');
 
 /// Result of [performConsolidations]: how many indices were folded
 /// successfully vs. how many failed and were compensated.
@@ -61,8 +64,24 @@ Future<ConsolidationSummary> performConsolidations({
         secondaryDiveIds: [newDiveId],
       );
       consolidated++;
-    } catch (e) {
-      await diveRepository.bulkDeleteDives([newDiveId]);
+    } catch (e, st) {
+      _log.error(
+        'Consolidation fold failed for dive into ${matchResult.diveId}',
+        error: e,
+        stackTrace: st,
+      );
+      try {
+        await diveRepository.bulkDeleteDives([newDiveId]);
+      } catch (deleteError, deleteStack) {
+        // The compensating delete failed too -- log it and continue rather
+        // than rethrow, so the remaining indices are still processed
+        // instead of aborting the whole import.
+        _log.error(
+          'Compensating delete failed for orphaned dive $newDiveId',
+          error: deleteError,
+          stackTrace: deleteStack,
+        );
+      }
       failed++;
     }
   }

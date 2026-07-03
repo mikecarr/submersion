@@ -4,6 +4,7 @@ import 'package:uuid/uuid.dart';
 
 import 'package:submersion/core/domain/models/incoming_dive_data.dart';
 import 'package:submersion/core/providers/provider.dart';
+import 'package:submersion/core/services/logger_service.dart';
 import 'package:submersion/core/utils/unit_formatter.dart';
 import 'package:submersion/features/settings/presentation/providers/settings_providers.dart';
 import 'package:submersion/features/dive_computer/data/services/dive_import_service.dart';
@@ -79,6 +80,8 @@ enum _ConsolidateOutcome {
 /// **Quick download (known computer)** -- [knownComputer] is provided.
 /// One acquisition step: Download (auto-scans for the known device).
 class DiveComputerAdapter implements ImportSourceAdapter {
+  static final _log = LoggerService.forClass(DiveComputerAdapter);
+
   DiveComputerAdapter({
     required DiveImportService importService,
     required DiveComputerRepository computerRepository,
@@ -641,9 +644,26 @@ class DiveComputerAdapter implements ImportSourceAdapter {
         secondaryDiveIds: [newDiveId],
       );
       return _ConsolidateOutcome.consolidated;
-    } catch (e) {
+    } catch (e, st) {
+      _log.error(
+        'Consolidation fold failed for dive into $targetDiveId',
+        error: e,
+        stackTrace: st,
+      );
       if (newDiveId != null) {
-        await _diveRepository.bulkDeleteDives([newDiveId]);
+        try {
+          await _diveRepository.bulkDeleteDives([newDiveId]);
+        } catch (deleteError, deleteStack) {
+          // The compensating delete failed too -- log it and fall through
+          // rather than rethrow, so the import loop still processes the
+          // remaining dives instead of aborting on a stranded standalone
+          // dive.
+          _log.error(
+            'Compensating delete failed for orphaned dive $newDiveId',
+            error: deleteError,
+            stackTrace: deleteStack,
+          );
+        }
       }
       return _ConsolidateOutcome.failed;
     }

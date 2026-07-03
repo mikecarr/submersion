@@ -185,7 +185,7 @@
 | Per-computer overlay UI | ✅ Implemented | v1.6 | ComputerToggleBar drives depth/temperature/event/pressure overlays |
 | Profile comparison (buddies) | 📋 Planned | v2.0 | Side-by-side view |
 | Profile merging (consolidation) | ✅ Implemented | v1.6 | Full-fidelity multi-computer consolidation; see docs/superpowers/specs/2026-07-02-multi-computer-consolidation-completion-design.md |
-| Multi-transmitter support | ✅ Implemented | v1.6 | Tank pressure curves attributed per computer (two transmitters on one cylinder compare on the chart) |
+| Multi-transmitter support | 🚧 Partial | v1.6 | Pressure samples stored per computer (v94); chart still draws one series per tank -- per-(tank, computer) series split is a follow-up |
 
 **v1.5 Tasks:**
 

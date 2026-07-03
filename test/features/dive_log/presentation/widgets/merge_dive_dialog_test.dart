@@ -372,7 +372,7 @@ void main() {
       await _navigateToConfirmation(tester);
 
       expect(find.text('Confirm merge'), findsOneWidget);
-      expect(find.text('Data loss warning'), findsOneWidget);
+      expect(find.text('What this does'), findsOneWidget);
     });
 
     testWidgets('confirmation screen shows warning icon', (tester) async {
@@ -394,12 +394,17 @@ void main() {
       );
     });
 
-    testWidgets('confirmation screen shows data loss details', (tester) async {
+    testWidgets('confirmation screen explains the fold honestly', (
+      tester,
+    ) async {
       await _pumpAndOpenDialog(tester, allDives: _sameDayCandidates());
       await _navigateToConfirmation(tester);
 
       expect(
-        find.textContaining('tanks, equipment links, notes, buddy, rating'),
+        find.textContaining(
+          "profile, tanks, pressures, events, tags, buddies, and sightings "
+          "will be folded into this dive as an additional computer source",
+        ),
         findsOneWidget,
       );
       expect(

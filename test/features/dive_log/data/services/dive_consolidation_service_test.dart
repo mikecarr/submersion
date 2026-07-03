@@ -183,6 +183,123 @@ void main() {
         );
   }
 
+  Future<void> seedTag(
+    String id, {
+    required String diveId,
+    required String tagId,
+  }) async {
+    await db
+        .into(db.diveTags)
+        .insert(
+          DiveTagsCompanion.insert(
+            id: id,
+            diveId: diveId,
+            tagId: tagId,
+            createdAt: 0,
+          ),
+        );
+  }
+
+  Future<void> seedBuddy(
+    String id, {
+    required String diveId,
+    required String buddyId,
+  }) async {
+    await db
+        .into(db.diveBuddies)
+        .insert(
+          DiveBuddiesCompanion.insert(
+            id: id,
+            diveId: diveId,
+            buddyId: buddyId,
+            createdAt: 0,
+          ),
+        );
+  }
+
+  Future<void> seedEquipment({
+    required String diveId,
+    required String equipmentId,
+  }) async {
+    await db
+        .into(db.diveEquipment)
+        .insert(
+          DiveEquipmentCompanion.insert(
+            diveId: diveId,
+            equipmentId: equipmentId,
+          ),
+        );
+  }
+
+  Future<void> seedDiveTypeRow(
+    String id, {
+    required String diveId,
+    required String diveTypeId,
+  }) async {
+    await db
+        .into(db.diveDiveTypes)
+        .insert(
+          DiveDiveTypesCompanion.insert(
+            id: id,
+            diveId: diveId,
+            diveTypeId: diveTypeId,
+            createdAt: 0,
+          ),
+        );
+  }
+
+  Future<void> seedSighting(
+    String id, {
+    required String diveId,
+    required String speciesId,
+  }) async {
+    await db
+        .into(db.sightings)
+        .insert(
+          SightingsCompanion.insert(
+            id: id,
+            diveId: diveId,
+            speciesId: speciesId,
+          ),
+        );
+  }
+
+  Future<void> seedWeight(
+    String id, {
+    required String diveId,
+    double amountKg = 2.0,
+  }) async {
+    await db
+        .into(db.diveWeights)
+        .insert(
+          DiveWeightsCompanion.insert(
+            id: id,
+            diveId: diveId,
+            weightType: 'Integrated',
+            amountKg: amountKg,
+            createdAt: 0,
+          ),
+        );
+  }
+
+  Future<void> seedCustomField(
+    String id, {
+    required String diveId,
+    required String fieldKey,
+    required String fieldValue,
+  }) async {
+    await db
+        .into(db.diveCustomFields)
+        .insert(
+          DiveCustomFieldsCompanion.insert(
+            id: id,
+            diveId: diveId,
+            fieldKey: fieldKey,
+            createdAt: 0,
+          ).copyWith(fieldValue: Value(fieldValue)),
+        );
+  }
+
   /// Two overlapping dives (target 't', secondary 's', 60s apart) each with
   /// a computer, a data source, a profile carrying temp/tts/cns, two tanks
   /// (one dedupable pair: tank-t1 <-> tank-s1), tank pressures, two events,
@@ -533,6 +650,187 @@ void main() {
           'comp-s',
           'comp-u',
         });
+      },
+    );
+
+    test(
+      'scenario 10: unions tags/buddies/equipment/dive-types/sightings, '
+      'target wins on custom fields, weights copy only when target has none',
+      () async {
+        await seedConsolidatableFixture();
+
+        // Tags: target has 'tag-shared'; secondary has the same tag (must
+        // NOT duplicate) plus a secondary-only tag (must be added).
+        await seedTag('dtag-t1', diveId: 't', tagId: 'tag-shared');
+        await seedTag('dtag-s1', diveId: 's', tagId: 'tag-shared');
+        await seedTag('dtag-s2', diveId: 's', tagId: 'tag-only-s');
+
+        // Buddies: target has none; secondary's buddy must be added.
+        await seedBuddy('dbud-s1', diveId: 's', buddyId: 'buddy-s1');
+
+        // Equipment: target has 'eq-1'; secondary has the same item (must
+        // NOT duplicate) plus a secondary-only item (must be added).
+        await seedEquipment(diveId: 't', equipmentId: 'eq-1');
+        await seedEquipment(diveId: 's', equipmentId: 'eq-1');
+        await seedEquipment(diveId: 's', equipmentId: 'eq-2');
+
+        // Dive types: target has 'recreational'; secondary has the same
+        // (must NOT duplicate) plus 'wreck' (must be added).
+        await seedDiveTypeRow(
+          'dtype-t1',
+          diveId: 't',
+          diveTypeId: 'recreational',
+        );
+        await seedDiveTypeRow(
+          'dtype-s1',
+          diveId: 's',
+          diveTypeId: 'recreational',
+        );
+        await seedDiveTypeRow('dtype-s2', diveId: 's', diveTypeId: 'wreck');
+
+        // Sightings: target and secondary both saw 'fish' (one sighting,
+        // target's kept); secondary alone saw 'turtle' (added).
+        await seedSighting('sight-t1', diveId: 't', speciesId: 'fish');
+        await seedSighting('sight-s1', diveId: 's', speciesId: 'fish');
+        await seedSighting('sight-s2', diveId: 's', speciesId: 'turtle');
+
+        // Weights: both dives have weights -- target's must be kept,
+        // secondary's dropped entirely (avoid double-counting lead).
+        await seedWeight('weight-t1', diveId: 't', amountKg: 4.0);
+        await seedWeight('weight-s1', diveId: 's', amountKg: 3.0);
+
+        // Custom fields: both set 'visibility' -- target wins. Secondary
+        // alone sets 'notes2' -- added.
+        await seedCustomField(
+          'cf-t1',
+          diveId: 't',
+          fieldKey: 'visibility',
+          fieldValue: 'good',
+        );
+        await seedCustomField(
+          'cf-s1',
+          diveId: 's',
+          fieldKey: 'visibility',
+          fieldValue: 'bad',
+        );
+        await seedCustomField(
+          'cf-s2',
+          diveId: 's',
+          fieldKey: 'notes2',
+          fieldValue: 'xyz',
+        );
+
+        // Captured before apply so the post-undo assertions don't need to
+        // hardcode ids seedDive's own defaults create (e.g. every dive gets
+        // an auto 'recreational' diveDiveTypes row via
+        // dive_repository_impl.dart's _replaceDiveTypeRows).
+        Future<Set<String>> tagIds() async =>
+            (await db.select(db.diveTags).get()).map((r) => r.id).toSet();
+        Future<Set<String>> buddyIds() async =>
+            (await db.select(db.diveBuddies).get()).map((r) => r.id).toSet();
+        Future<Set<String>> equipmentPairs() async =>
+            (await db.select(db.diveEquipment).get())
+                .map((r) => '${r.diveId}|${r.equipmentId}')
+                .toSet();
+        Future<Set<String>> diveTypeIds() async =>
+            (await db.select(db.diveDiveTypes).get()).map((r) => r.id).toSet();
+        Future<Set<String>> sightingIds() async =>
+            (await db.select(db.sightings).get()).map((r) => r.id).toSet();
+        Future<Set<String>> weightIds() async =>
+            (await db.select(db.diveWeights).get()).map((r) => r.id).toSet();
+        Future<Set<String>> customFieldIds() async =>
+            (await db.select(db.diveCustomFields).get())
+                .map((r) => r.id)
+                .toSet();
+
+        final tagIdsBefore = await tagIds();
+        final buddyIdsBefore = await buddyIds();
+        final equipmentPairsBefore = await equipmentPairs();
+        final diveTypeIdsBefore = await diveTypeIds();
+        final sightingIdsBefore = await sightingIds();
+        final weightIdsBefore = await weightIds();
+        final customFieldIdsBefore = await customFieldIds();
+
+        final outcome = await service.apply(
+          targetDiveId: 't',
+          secondaryDiveIds: ['s'],
+        );
+
+        final tags = await (db.select(
+          db.diveTags,
+        )..where((t) => t.diveId.equals('t'))).get();
+        expect(tags.map((t) => t.tagId).toSet(), {'tag-shared', 'tag-only-s'});
+        expect(tags, hasLength(2)); // no duplicate for tag-shared
+
+        final buddies = await (db.select(
+          db.diveBuddies,
+        )..where((t) => t.diveId.equals('t'))).get();
+        expect(buddies.map((b) => b.buddyId).toSet(), {'buddy-s1'});
+
+        final equipment = await (db.select(
+          db.diveEquipment,
+        )..where((t) => t.diveId.equals('t'))).get();
+        expect(equipment.map((e) => e.equipmentId).toSet(), {'eq-1', 'eq-2'});
+
+        final diveTypes = await (db.select(
+          db.diveDiveTypes,
+        )..where((t) => t.diveId.equals('t'))).get();
+        expect(diveTypes.map((d) => d.diveTypeId).toSet(), {
+          'recreational',
+          'wreck',
+        });
+
+        final sightings = await (db.select(
+          db.sightings,
+        )..where((t) => t.diveId.equals('t'))).get();
+        expect(sightings.map((s) => s.speciesId).toSet(), {'fish', 'turtle'});
+        expect(sightings, hasLength(2)); // fish not duplicated
+        expect(sightings.map((s) => s.id), contains('sight-t1')); // kept
+
+        final weights = await (db.select(
+          db.diveWeights,
+        )..where((t) => t.diveId.equals('t'))).get();
+        expect(weights.map((w) => w.id).toSet(), {'weight-t1'});
+        expect(weights.single.amountKg, 4.0);
+
+        final customFields = await (db.select(
+          db.diveCustomFields,
+        )..where((t) => t.diveId.equals('t'))).get();
+        final byKey = {for (final cf in customFields) cf.fieldKey: cf};
+        expect(byKey.keys.toSet(), {'visibility', 'notes2'});
+        expect(byKey['visibility']!.fieldValue, 'good'); // target wins
+        expect(byKey['notes2']!.fieldValue, 'xyz');
+
+        // Undo restores every original row (both dives' own tags, buddies,
+        // equipment, dive types, sightings, weights, custom fields) and
+        // removes the fresh union-created rows on the target.
+        await service.undo(outcome.snapshot);
+
+        expect(await tagIds(), tagIdsBefore);
+        expect(await buddyIds(), buddyIdsBefore);
+        expect(await equipmentPairs(), equipmentPairsBefore);
+        expect(await diveTypeIds(), diveTypeIdsBefore);
+        expect(await sightingIds(), sightingIdsBefore);
+        expect(await weightIds(), weightIdsBefore);
+        expect(await customFieldIds(), customFieldIdsBefore);
+
+        // The fresh union-created rows the fold added to the target
+        // (tag-only-s, buddy-s1, eq-2, wreck, turtle, notes2) were tombstoned
+        // so peers that already pulled the consolidation drop them too.
+        final tombstoneTypes = (await db.select(db.deletionLog).get())
+            .map((t) => t.entityType)
+            .toSet();
+        expect(
+          tombstoneTypes,
+          containsAll({
+            'diveTags',
+            'diveBuddies',
+            'diveEquipment',
+            'diveDiveTypes',
+            'sightings',
+            'diveCustomFields',
+          }),
+        );
       },
     );
   });

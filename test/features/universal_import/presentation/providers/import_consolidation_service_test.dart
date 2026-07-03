@@ -293,5 +293,55 @@ void main() {
         ),
       ).called(1);
     });
+
+    test(
+      'when apply() throws AND the compensating delete also throws, the '
+      'loop still continues to remaining indices instead of aborting',
+      () async {
+        when(
+          mockConsolidationService.apply(
+            targetDiveId: 'existing-dive-a',
+            secondaryDiveIds: ['new-dive-0'],
+          ),
+        ).thenThrow(ArgumentError('targetDiveId not in selection'));
+        when(
+          mockDiveRepository.bulkDeleteDives(['new-dive-0']),
+        ).thenThrow(Exception('delete failed too'));
+
+        final summary = await performConsolidations(
+          indices: {0, 1},
+          diveIdByIndex: {0: 'new-dive-0', 1: 'new-dive-1'},
+          duplicateResult: const ImportDuplicateResult(
+            diveMatches: {
+              0: DiveMatchResult(
+                diveId: 'existing-dive-a',
+                score: 0.9,
+                timeDifferenceMs: 100,
+              ),
+              1: DiveMatchResult(
+                diveId: 'existing-dive-b',
+                score: 0.95,
+                timeDifferenceMs: 50,
+              ),
+            },
+          ),
+          consolidationService: mockConsolidationService,
+          diveRepository: mockDiveRepository,
+        );
+
+        // Index 0's double failure (apply throws, then the compensating
+        // delete also throws) must not propagate out of the loop -- index 1
+        // still gets processed and succeeds.
+        expect(summary.consolidated, 1);
+        expect(summary.failed, 1);
+        verify(mockDiveRepository.bulkDeleteDives(['new-dive-0'])).called(1);
+        verify(
+          mockConsolidationService.apply(
+            targetDiveId: 'existing-dive-b',
+            secondaryDiveIds: ['new-dive-1'],
+          ),
+        ).called(1);
+      },
+    );
   });
 }

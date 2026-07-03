@@ -110,6 +110,53 @@ class DiveConsolidationService {
           1;
       final tankIdMap = <String, String>{}; // old secondary id -> id on target
 
+      // Junction/child tables the snapshot also captures but a fold
+      // previously left behind for bulkDeleteDives' cascade to drop (#449
+      // review finding 1): tags, buddies, equipment, dive types, and
+      // sightings union by their referenced id -- target wins, secondary
+      // fills gaps. Weights copy over only when the target has none,
+      // mirroring #449's avoid-double-counting-lead rule. Custom fields
+      // union by key. Tracked here (outside the per-secondary loop) so a
+      // second secondary in the same call, or one that duplicates the
+      // first secondary's tag/buddy/etc, never double-inserts.
+      final targetTagIds = <String>{
+        for (final r in snapshot.tagRows.where((r) => r.diveId == targetDiveId))
+          r.tagId,
+      };
+      final targetBuddyIds = <String>{
+        for (final r in snapshot.buddyRows.where(
+          (r) => r.diveId == targetDiveId,
+        ))
+          r.buddyId,
+      };
+      final targetEquipmentIds = <String>{
+        for (final r in snapshot.equipmentRows.where(
+          (r) => r.diveId == targetDiveId,
+        ))
+          r.equipmentId,
+      };
+      final targetDiveTypeIds = <String>{
+        for (final r in snapshot.diveTypeRows.where(
+          (r) => r.diveId == targetDiveId,
+        ))
+          r.diveTypeId,
+      };
+      final targetSpeciesIds = <String>{
+        for (final r in snapshot.sightingRows.where(
+          (r) => r.diveId == targetDiveId,
+        ))
+          r.speciesId,
+      };
+      final targetCustomFieldKeys = <String>{
+        for (final r in snapshot.customFieldRows.where(
+          (r) => r.diveId == targetDiveId,
+        ))
+          r.fieldKey,
+      };
+      var targetHasWeights = snapshot.weightRows.any(
+        (r) => r.diveId == targetDiveId,
+      );
+
       for (final secondary in plan.secondaries) {
         final secRow = snapshot.diveRows.firstWhere(
           (r) => r.id == secondary.id,
@@ -322,6 +369,171 @@ class DiveConsolidationService {
             localUpdatedAt: now,
           );
         }
+
+        // Tags: union by tagId, target wins.
+        for (final row in snapshot.tagRows.where(
+          (r) => r.diveId == secondary.id,
+        )) {
+          if (!targetTagIds.add(row.tagId)) continue;
+          final rowId = _uuid.v4();
+          await _db
+              .into(_db.diveTags)
+              .insert(
+                row
+                    .toCompanion(false)
+                    .copyWith(
+                      id: Value(rowId),
+                      diveId: Value(targetDiveId),
+                      createdAt: Value(now),
+                    ),
+              );
+          await _sync.markRecordPending(
+            entityType: 'diveTags',
+            recordId: rowId,
+            localUpdatedAt: now,
+          );
+        }
+
+        // Buddies: union by buddyId, target wins.
+        for (final row in snapshot.buddyRows.where(
+          (r) => r.diveId == secondary.id,
+        )) {
+          if (!targetBuddyIds.add(row.buddyId)) continue;
+          final rowId = _uuid.v4();
+          await _db
+              .into(_db.diveBuddies)
+              .insert(
+                row
+                    .toCompanion(false)
+                    .copyWith(
+                      id: Value(rowId),
+                      diveId: Value(targetDiveId),
+                      createdAt: Value(now),
+                    ),
+              );
+          await _sync.markRecordPending(
+            entityType: 'diveBuddies',
+            recordId: rowId,
+            localUpdatedAt: now,
+          );
+        }
+
+        // Equipment: union by equipmentId. Composite-key junction (no
+        // surrogate id) -- diveId+equipmentId is the identity, and
+        // '$diveId|$equipmentId' is the recordId convention used elsewhere
+        // for this table (see dive_repository_impl.dart bulkAddEquipment).
+        for (final row in snapshot.equipmentRows.where(
+          (r) => r.diveId == secondary.id,
+        )) {
+          if (!targetEquipmentIds.add(row.equipmentId)) continue;
+          await _db
+              .into(_db.diveEquipment)
+              .insert(
+                DiveEquipmentCompanion(
+                  diveId: Value(targetDiveId),
+                  equipmentId: Value(row.equipmentId),
+                ),
+              );
+          await _sync.markRecordPending(
+            entityType: 'diveEquipment',
+            recordId: '$targetDiveId|${row.equipmentId}',
+            localUpdatedAt: now,
+          );
+        }
+
+        // Dive types: union by diveTypeId, target wins.
+        for (final row in snapshot.diveTypeRows.where(
+          (r) => r.diveId == secondary.id,
+        )) {
+          if (!targetDiveTypeIds.add(row.diveTypeId)) continue;
+          final rowId = _uuid.v4();
+          await _db
+              .into(_db.diveDiveTypes)
+              .insert(
+                row
+                    .toCompanion(false)
+                    .copyWith(
+                      id: Value(rowId),
+                      diveId: Value(targetDiveId),
+                      createdAt: Value(now),
+                    ),
+              );
+          await _sync.markRecordPending(
+            entityType: 'diveDiveTypes',
+            recordId: rowId,
+            localUpdatedAt: now,
+          );
+        }
+
+        // Sightings: union by speciesId -- the same species seen by both
+        // computers is one sighting; keep the target's row, add
+        // secondary-only species.
+        for (final row in snapshot.sightingRows.where(
+          (r) => r.diveId == secondary.id,
+        )) {
+          if (!targetSpeciesIds.add(row.speciesId)) continue;
+          final rowId = _uuid.v4();
+          await _db
+              .into(_db.sightings)
+              .insert(
+                row
+                    .toCompanion(false)
+                    .copyWith(id: Value(rowId), diveId: Value(targetDiveId)),
+              );
+          await _sync.markRecordPending(
+            entityType: 'sightings',
+            recordId: rowId,
+            localUpdatedAt: now,
+          );
+        }
+
+        // Weights: copy the secondary's ONLY if the target has none yet
+        // (#449's avoid-double-counting-lead rule -- otherwise two
+        // computers on the same diver would double the reported weight).
+        if (!targetHasWeights) {
+          for (final row in snapshot.weightRows.where(
+            (r) => r.diveId == secondary.id,
+          )) {
+            final rowId = _uuid.v4();
+            await _db
+                .into(_db.diveWeights)
+                .insert(
+                  row
+                      .toCompanion(false)
+                      .copyWith(
+                        id: Value(rowId),
+                        diveId: Value(targetDiveId),
+                        createdAt: Value(now),
+                      ),
+                );
+            await _sync.markRecordPending(
+              entityType: 'diveWeights',
+              recordId: rowId,
+              localUpdatedAt: now,
+            );
+            targetHasWeights = true;
+          }
+        }
+
+        // Custom fields: union by key, target wins.
+        for (final row in snapshot.customFieldRows.where(
+          (r) => r.diveId == secondary.id,
+        )) {
+          if (!targetCustomFieldKeys.add(row.fieldKey)) continue;
+          final rowId = _uuid.v4();
+          await _db
+              .into(_db.diveCustomFields)
+              .insert(
+                row
+                    .toCompanion(false)
+                    .copyWith(id: Value(rowId), diveId: Value(targetDiveId)),
+              );
+          await _sync.markRecordPending(
+            entityType: 'diveCustomFields',
+            recordId: rowId,
+            localUpdatedAt: now,
+          );
+        }
       }
 
       // Touch the target so sync carries the consolidation.
@@ -384,6 +596,16 @@ class DiveConsolidationService {
           for (final r in snapshot.tankPressureRows) r.id,
         },
         'diveDataSources': {for (final r in snapshot.dataSourceRows) r.id},
+        'diveTags': {for (final r in snapshot.tagRows) r.id},
+        'diveBuddies': {for (final r in snapshot.buddyRows) r.id},
+        'diveEquipment': {
+          for (final r in snapshot.equipmentRows)
+            '${r.diveId}|${r.equipmentId}',
+        },
+        'diveDiveTypes': {for (final r in snapshot.diveTypeRows) r.id},
+        'sightings': {for (final r in snapshot.sightingRows) r.id},
+        'diveWeights': {for (final r in snapshot.weightRows) r.id},
+        'diveCustomFields': {for (final r in snapshot.customFieldRows) r.id},
       };
       final currentChildIds = <String, List<String>>{
         'diveProfiles': [
@@ -419,6 +641,48 @@ class DiveConsolidationService {
         'diveDataSources': [
           for (final r in await (_db.select(
             _db.diveDataSources,
+          )..where((t) => t.diveId.equals(mergedId))).get())
+            r.id,
+        ],
+        'diveTags': [
+          for (final r in await (_db.select(
+            _db.diveTags,
+          )..where((t) => t.diveId.equals(mergedId))).get())
+            r.id,
+        ],
+        'diveBuddies': [
+          for (final r in await (_db.select(
+            _db.diveBuddies,
+          )..where((t) => t.diveId.equals(mergedId))).get())
+            r.id,
+        ],
+        'diveEquipment': [
+          for (final r in await (_db.select(
+            _db.diveEquipment,
+          )..where((t) => t.diveId.equals(mergedId))).get())
+            '${r.diveId}|${r.equipmentId}',
+        ],
+        'diveDiveTypes': [
+          for (final r in await (_db.select(
+            _db.diveDiveTypes,
+          )..where((t) => t.diveId.equals(mergedId))).get())
+            r.id,
+        ],
+        'sightings': [
+          for (final r in await (_db.select(
+            _db.sightings,
+          )..where((t) => t.diveId.equals(mergedId))).get())
+            r.id,
+        ],
+        'diveWeights': [
+          for (final r in await (_db.select(
+            _db.diveWeights,
+          )..where((t) => t.diveId.equals(mergedId))).get())
+            r.id,
+        ],
+        'diveCustomFields': [
+          for (final r in await (_db.select(
+            _db.diveCustomFields,
           )..where((t) => t.diveId.equals(mergedId))).get())
             r.id,
         ],
