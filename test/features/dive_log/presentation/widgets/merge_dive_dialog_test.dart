@@ -75,6 +75,8 @@ Future<void> _pumpAndOpenDialog(
         settingsProvider.overrideWith((ref) => _FakeSettingsNotifier()),
       ],
       child: MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
         home: Scaffold(
           body: Builder(
             builder: (context) {
@@ -303,6 +305,8 @@ void main() {
             settingsProvider.overrideWith((ref) => _FakeSettingsNotifier()),
           ],
           child: MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
             home: Scaffold(
               body: Builder(
                 builder: (context) {
@@ -341,6 +345,8 @@ void main() {
             settingsProvider.overrideWith((ref) => _FakeSettingsNotifier()),
           ],
           child: MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
             home: Scaffold(
               body: Builder(
                 builder: (context) {
