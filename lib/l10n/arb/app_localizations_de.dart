@@ -10853,7 +10853,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get settings_cloudSync_googleDrive_browserWait_message =>
-      'Schließe die Anmeldung bei Google in deinem Webbrowser ab und kehre dann zu Submersion zurück.';
+      'Schließen Sie die Google-Anmeldung in Ihrem Webbrowser ab und kehren Sie dann zu Submersion zurück.';
 
   @override
   String get settings_cloudSync_provider_icloud => 'iCloud';

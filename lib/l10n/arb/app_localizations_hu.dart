@@ -10830,11 +10830,11 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get settings_cloudSync_googleDrive_browserWait_title =>
-      'Folytasd a böngészőben';
+      'Folytassa a böngészőjében';
 
   @override
   String get settings_cloudSync_googleDrive_browserWait_message =>
-      'Fejezd be a Google-bejelentkezést a webböngésződben, majd térj vissza a Submersionbe.';
+      'Fejezze be a Google-bejelentkezést a webböngészőjében, majd térjen vissza a Submersionbe.';
 
   @override
   String get settings_cloudSync_provider_icloud => 'iCloud';

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -208,6 +209,19 @@ class _ThrowingCloudStorageProvider extends FakeCloudStorageProvider {
   @override
   Future<void> authenticate() async {
     throw const CloudStorageException('auth denied');
+  }
+}
+
+/// [FakeCloudStorageProvider] whose [authenticate] blocks on a completer, so
+/// tests can hold the desktop browser-wait dialog open and resolve (or fail)
+/// the sign-in at a chosen moment.
+class _PendingAuthCloudStorageProvider extends FakeCloudStorageProvider {
+  final authCompleter = Completer<void>();
+
+  @override
+  Future<void> authenticate() async {
+    await authCompleter.future;
+    await super.authenticate();
   }
 }
 
@@ -897,6 +911,68 @@ void main() {
         expect(find.textContaining('Fake connection failed:'), findsOneWidget);
       },
       skip: tapUnavailable,
+    );
+  });
+
+  group('CloudSyncPage - Google Drive desktop browser-wait dialog', () {
+    // _authenticateWithBrowserWait only shows the dialog on Windows/Linux
+    // (desktop loopback OAuth). These tests are the inverse of this file's
+    // Apple-only tile-tap tests: they run on the Linux CI runner and are
+    // skipped on macOS developer machines, where the branch is unreachable.
+    final dialogReachable = Platform.isWindows || Platform.isLinux;
+
+    testWidgets(
+      'shows the wait dialog and connects when auth completes',
+      (tester) async {
+        final fake = _PendingAuthCloudStorageProvider();
+        await pumpPage(tester, cloudProvider: fake);
+
+        await tester.tap(find.text('Google Drive'));
+        await tester.pump();
+
+        // The browser-wait dialog is up while authenticate() is pending.
+        expect(find.text('Continue in your browser'), findsOneWidget);
+
+        fake.authCompleter.complete();
+        await tester.pumpAndSettle();
+
+        // Dialog dismissed itself and the success snackbar is shown.
+        expect(find.text('Continue in your browser'), findsNothing);
+        expect(find.textContaining('Connected to'), findsOneWidget);
+      },
+      skip: !dialogReachable,
+    );
+
+    testWidgets(
+      'Cancel abandons the sign-in and clears the selection',
+      (tester) async {
+        final fake = _PendingAuthCloudStorageProvider();
+        await pumpPage(tester, cloudProvider: fake);
+
+        await tester.tap(find.text('Google Drive'));
+        await tester.pump();
+
+        final cancelLabel = MaterialLocalizations.of(
+          tester.element(find.byType(AlertDialog)),
+        ).cancelButtonLabel;
+        await tester.tap(find.text(cancelLabel));
+        await tester.pumpAndSettle();
+
+        // Dialog gone, selection cleared (no connected check icon), and the
+        // connection-failed snackbar shown.
+        expect(find.text('Continue in your browser'), findsNothing);
+        expect(find.byIcon(Icons.check_circle), findsNothing);
+        expect(find.textContaining('connection failed'), findsOneWidget);
+
+        // The abandoned flow's eventual error must be swallowed; nothing
+        // may surface after the user has already cancelled.
+        fake.authCompleter.completeError(
+          const CloudStorageException('loopback timeout'),
+        );
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull);
+      },
+      skip: !dialogReachable,
     );
   });
 
