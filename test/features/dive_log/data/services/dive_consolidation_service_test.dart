@@ -51,6 +51,7 @@ void main() {
     double depth = 18,
     String? computerId,
     String? serial,
+    Duration? bottomTime,
     List<domain.DiveTank> tanks = const [],
     List<domain.DiveProfilePoint>? profile,
   }) async {
@@ -61,6 +62,7 @@ void main() {
         dateTime: entry,
         entryTime: entry,
         runtime: Duration(minutes: runtimeMin),
+        bottomTime: bottomTime,
         maxDepth: depth,
         diveComputerSerial: serial,
         tanks: tanks,
@@ -525,6 +527,43 @@ void main() {
       expect(repointed.rawFingerprint, [9, 9]);
     });
 
+    test('scenario 3b: secondary with NO dive_data_sources row (manual/file '
+        'import) gets a synthesized non-primary source on the target, '
+        'carrying the secondary computer id, maxDepth, and duration', () async {
+      await seedDive(
+        't',
+        entry: DateTime.utc(2026, 7, 1, 9),
+        computerId: 'comp-t',
+        serial: 'SER-T',
+      );
+      await seedDataSource('src-t', diveId: 't', computerId: 'comp-t');
+
+      // Secondary reachable by consolidating a manual/file-entered dive:
+      // it has a computerId (assigned at consolidation time) but was
+      // never downloaded, so it has no dive_data_sources row at all.
+      await seedDive(
+        's',
+        entry: DateTime.utc(2026, 7, 1, 9, 1),
+        computerId: 'comp-s',
+        serial: 'SER-S',
+        depth: 27.5,
+        bottomTime: const Duration(minutes: 42),
+      );
+
+      await service.apply(targetDiveId: 't', secondaryDiveIds: ['s']);
+
+      final sources = await (db.select(
+        db.diveDataSources,
+      )..where((t) => t.diveId.equals('t'))).get();
+      expect(sources, hasLength(2));
+      expect(sources.where((s) => s.isPrimary), hasLength(1));
+
+      final synthesized = sources.firstWhere((s) => !s.isPrimary);
+      expect(synthesized.computerId, 'comp-s');
+      expect(synthesized.maxDepth, 27.5);
+      expect(synthesized.duration, const Duration(minutes: 42).inSeconds);
+    });
+
     test('scenario 4: stamps pre-existing target children with the primary '
         "computer on first consolidation", () async {
       await seedDive(
@@ -624,6 +663,61 @@ void main() {
         expect(await db.select(db.deletionLog).get(), isEmpty);
       },
     );
+
+    test('scenario 7b: same-computer rejection message starts with '
+        "'sameComputer'", () async {
+      await seedDive(
+        't2b',
+        entry: DateTime.utc(2026, 7, 1, 9),
+        computerId: 'comp-x',
+      );
+      await seedDive(
+        's2b',
+        entry: DateTime.utc(2026, 7, 1, 9, 1),
+        computerId: 'comp-x',
+      );
+
+      await expectLater(
+        () => service.apply(targetDiveId: 't2b', secondaryDiveIds: ['s2b']),
+        throwsA(
+          isA<ArgumentError>().having(
+            (e) => e.message.toString(),
+            'message',
+            startsWith('sameComputer'),
+          ),
+        ),
+      );
+    });
+
+    test('scenario 7c: rejects an unknown targetDiveId not present in the '
+        'loaded selection, writing nothing', () async {
+      await seedDive(
+        't3',
+        entry: DateTime.utc(2026, 7, 1, 9),
+        computerId: 'comp-a',
+      );
+      await seedDive(
+        's3',
+        entry: DateTime.utc(2026, 7, 1, 9, 1),
+        computerId: 'comp-b',
+      );
+
+      await expectLater(
+        () =>
+            service.apply(targetDiveId: 'not-there', secondaryDiveIds: ['s3']),
+        throwsA(
+          isA<ArgumentError>().having(
+            (e) => e.message.toString(),
+            'message',
+            contains('targetDiveId'),
+          ),
+        ),
+      );
+
+      final remaining = await db.select(db.dives).get();
+      expect(remaining.map((r) => r.id).toSet(), {'t3', 's3'});
+      expect(await db.select(db.deletionLog).get(), isEmpty);
+    });
 
     test(
       'scenario 9: a second consolidation unions sources without nesting',

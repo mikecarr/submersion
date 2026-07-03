@@ -652,6 +652,35 @@ void main() {
       expect(identical(service.undoneSnapshot, service.outcomeSnapshot), true);
     });
 
+    testWidgets(
+      'tapping Undo when service.undo throws shows the undo-error snackbar '
+      'text instead of crashing',
+      (tester) async {
+        final service = _FakeDiveConsolidationService(
+          undoError: StateError('Bad state: dive already deleted'),
+        );
+
+        await _pumpWithConsolidationHandler(tester, service: service);
+        await _navigateToConfirmation(tester);
+        await tester.tap(find.widgetWithText(FilledButton, 'Merge'));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text('Undo'));
+        await tester.pumpAndSettle();
+
+        // See app_en.arb's diveLog_consolidate_undoError for the English
+        // source string.
+        expect(find.text("Couldn't undo the merge."), findsOneWidget);
+        // The undo attempt was made (and failed) rather than silently
+        // skipped -- undoneSnapshot stays unset because the throw happens
+        // before it would be recorded.
+        expect(service.undoneSnapshot, isNull);
+        // The failure was caught inside the SnackBarAction's onPressed; no
+        // exception should escape to the test framework.
+        expect(tester.takeException(), isNull);
+      },
+    );
+
     testWidgets('an ArgumentError with a sameComputer reason surfaces the '
         'sameComputer error text instead of a success snackbar', (
       tester,
@@ -763,10 +792,14 @@ Future<void> _pumpWithConsolidationHandler(
 /// Records calls made to [DiveConsolidationService.apply] and [.undo] so
 /// tests can assert on the wiring contract without touching a real database.
 class _FakeDiveConsolidationService extends DiveConsolidationService {
-  _FakeDiveConsolidationService({this.applyError}) : super(DiveRepository());
+  _FakeDiveConsolidationService({this.applyError, this.undoError})
+    : super(DiveRepository());
 
   /// When set, [apply] throws this instead of returning a fake outcome.
   final Object? applyError;
+
+  /// When set, [undo] throws this instead of recording the snapshot.
+  final Object? undoError;
 
   String? capturedTargetDiveId;
   List<String>? capturedSecondaryDiveIds;
@@ -811,6 +844,8 @@ class _FakeDiveConsolidationService extends DiveConsolidationService {
 
   @override
   Future<void> undo(DiveMergeSnapshot snapshot) async {
+    final error = undoError;
+    if (error != null) throw error;
     undoneSnapshot = snapshot;
   }
 }
