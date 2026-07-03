@@ -3,10 +3,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:submersion/core/database/database.dart';
 
 void main() {
-  test('v96 creates the three checklist tables with hlc columns', () async {
+  test('v97 creates the three checklist tables with hlc columns', () async {
     final nativeDb = NativeDatabase.memory(
       setup: (rawDb) {
-        rawDb.execute('PRAGMA user_version = 95');
+        rawDb.execute('PRAGMA user_version = 96');
         // Minimal parents so FK references resolve.
         rawDb.execute('''
           CREATE TABLE divers (id TEXT NOT NULL PRIMARY KEY)
@@ -62,9 +62,60 @@ void main() {
     expect(indexNames, contains('idx_checklist_template_items_template_id'));
   });
 
-  test('schema version is 96 and the migration list includes it', () {
-    expect(AppDatabase.currentSchemaVersion, 96);
-    expect(AppDatabase.migrationVersions, contains(96));
+  test(
+    'recovers databases stranded at v96 by the photo-markers collision',
+    () async {
+      // Reproduces the user's exact live-DB state: a parallel in-flight
+      // feature (photo markers) also claimed schema v96 and already ran
+      // against this database, so user_version is 96 and
+      // diver_settings.default_show_photo_markers exists, but our checklist
+      // tables were never created because our old `if (from < 96)` guard
+      // saw from == 96 and skipped. The v97 migration must still create the
+      // checklist tables (idempotent DDL) and must not disturb the
+      // photo-markers column that already landed.
+      final nativeDb = NativeDatabase.memory(
+        setup: (rawDb) {
+          rawDb.execute('PRAGMA user_version = 96');
+          rawDb.execute('''
+            CREATE TABLE divers (id TEXT NOT NULL PRIMARY KEY)
+          ''');
+          rawDb.execute('''
+            CREATE TABLE trips (id TEXT NOT NULL PRIMARY KEY)
+          ''');
+          rawDb.execute('''
+            CREATE TABLE diver_settings (
+              id TEXT NOT NULL PRIMARY KEY,
+              diver_id TEXT NOT NULL,
+              default_show_photo_markers INTEGER NOT NULL DEFAULT 0
+            )
+          ''');
+        },
+      );
+      final db = AppDatabase(nativeDb);
+      addTearDown(() => db.close());
+
+      for (final table in [
+        'checklist_templates',
+        'checklist_template_items',
+        'trip_checklist_items',
+      ]) {
+        final cols = await db.customSelect("PRAGMA table_info('$table')").get();
+        expect(cols, isNotEmpty, reason: '$table was not created');
+      }
+
+      final diverSettingsCols = await db
+          .customSelect("PRAGMA table_info('diver_settings')")
+          .get();
+      final diverSettingsNames = diverSettingsCols
+          .map((c) => c.read<String>('name'))
+          .toSet();
+      expect(diverSettingsNames, contains('default_show_photo_markers'));
+    },
+  );
+
+  test('schema version is 97 and the migration list includes it', () {
+    expect(AppDatabase.currentSchemaVersion, 97);
+    expect(AppDatabase.migrationVersions, contains(97));
   });
 
   test('fresh database exposes the checklist tables via Drift', () async {

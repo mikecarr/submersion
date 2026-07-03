@@ -1780,7 +1780,7 @@ class AppDatabase extends _$AppDatabase {
 
   /// The current schema version as a static constant so that pre-open checks
   /// (e.g. version-mismatch guard) can reference it without an instance.
-  static const int currentSchemaVersion = 96;
+  static const int currentSchemaVersion = 97;
 
   /// Every schema version that has a migration block in onUpgrade.
   /// Used to calculate progress step counts. When adding a new migration,
@@ -1879,7 +1879,7 @@ class AppDatabase extends _$AppDatabase {
     93,
     94,
     95,
-    96,
+    97,
   ];
 
   /// Tables that carry a per-row Hybrid Logical Clock for cross-device conflict
@@ -4420,9 +4420,17 @@ class AppDatabase extends _$AppDatabase {
           }
         }
         if (from < 95) await reportProgress();
-        if (from < 96) {
+        if (from < 97) {
           // Checklist tables for trip planning (issue #164). Raw idempotent
           // DDL (matches the v84 idiom) so interrupted migrations are safe.
+          // This is v97, not v96, because a parallel feature branch (photo
+          // markers) also claimed v96 and reached user_version = 96 on some
+          // live databases before this migration merged, stranding those
+          // databases at v96 without these tables. Re-running the idempotent
+          // CREATE TABLE/INDEX IF NOT EXISTS statements here recovers them
+          // without disturbing whatever v96 already added (e.g.
+          // diver_settings.default_show_photo_markers) — the same recovery
+          // pattern as the v82/v83 schema-version-collision blocks above.
           await customStatement('''
             CREATE TABLE IF NOT EXISTS checklist_templates (
               id TEXT NOT NULL PRIMARY KEY,
@@ -4473,7 +4481,7 @@ class AppDatabase extends _$AppDatabase {
             ON trip_checklist_items(trip_id)
           ''');
         }
-        if (from < 96) await reportProgress();
+        if (from < 97) await reportProgress();
       },
       beforeOpen: (details) async {
         // Enable foreign keys
