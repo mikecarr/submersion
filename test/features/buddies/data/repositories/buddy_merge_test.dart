@@ -284,6 +284,9 @@ void main() {
       expect(survivorRoles.first.id, originalRow.id);
       expect(survivorRoles.first.role, 'instructor');
       expect(survivorRoles.first.credentialNumber, 'INS-100');
+      // The relink is a real mutation: updatedAt must move so the
+      // updatedAt fallback (rows without hlc) orders it correctly.
+      expect(survivorRoles.first.updatedAt, greaterThan(originalRow.updatedAt));
 
       final duplicateRoles = await (database.select(
         database.buddyRoles,
@@ -416,6 +419,10 @@ void main() {
           ),
         );
 
+        final preMergeRow = await (database.select(
+          database.certifications,
+        )..where((t) => t.id.equals(cert.id))).getSingle();
+
         await repository.mergeBuddies(
           mergedBuddy: buddyA.copyWith(name: 'Alice'),
           buddyIds: [buddyA.id, buddyB.id],
@@ -425,6 +432,8 @@ void main() {
           database.certifications,
         )..where((t) => t.id.equals(cert.id))).getSingle();
         expect(row.instructorId, buddyA.id);
+        // The re-point is a real mutation: updatedAt must move alongside it.
+        expect(row.updatedAt, greaterThan(preMergeRow.updatedAt));
       },
     );
   });

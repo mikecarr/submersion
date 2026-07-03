@@ -358,9 +358,14 @@ class BuddyMergeRepository {
                 recordId: row.id,
               );
             } else {
-              await (_db.update(_db.buddyRoles)
-                    ..where((t) => t.id.equals(row.id)))
-                  .write(BuddyRolesCompanion(buddyId: Value(survivorId)));
+              await (_db.update(
+                _db.buddyRoles,
+              )..where((t) => t.id.equals(row.id))).write(
+                BuddyRolesCompanion(
+                  buddyId: Value(survivorId),
+                  updatedAt: Value(now),
+                ),
+              );
               await _syncRepository.markRecordPending(
                 entityType: 'buddyRoles',
                 recordId: row.id,
@@ -382,9 +387,14 @@ class BuddyMergeRepository {
               instructorId: cert.instructorId!,
             ),
           );
-          await (_db.update(_db.certifications)
-                ..where((t) => t.id.equals(cert.id)))
-              .write(CertificationsCompanion(instructorId: Value(survivorId)));
+          await (_db.update(
+            _db.certifications,
+          )..where((t) => t.id.equals(cert.id))).write(
+            CertificationsCompanion(
+              instructorId: Value(survivorId),
+              updatedAt: Value(now),
+            ),
+          );
           await _syncRepository.markRecordPending(
             entityType: 'certifications',
             recordId: cert.id,
@@ -561,7 +571,10 @@ class BuddyMergeRepository {
           await (_db.update(
             _db.certifications,
           )..where((t) => t.id.equals(entry.certificationId))).write(
-            CertificationsCompanion(instructorId: Value(entry.instructorId)),
+            CertificationsCompanion(
+              instructorId: Value(entry.instructorId),
+              updatedAt: Value(now),
+            ),
           );
           await _syncRepository.markRecordPending(
             entityType: 'certifications',
