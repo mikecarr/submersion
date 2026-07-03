@@ -133,4 +133,38 @@ void main() {
     final total = filtered.fold<int>(0, (s, seg) => s + seg.count);
     expect(total, 1); // only dive 'a'
   });
+
+  test('top buddies respects a tag filter (LIMIT method)', () async {
+    await dive('a');
+    await dive('b');
+    await db
+        .into(db.buddies)
+        .insert(
+          BuddiesCompanion(
+            id: const Value('bud'),
+            name: const Value('Sam'),
+            createdAt: Value(now),
+            updatedAt: Value(now),
+          ),
+        );
+    for (final id in ['a', 'b']) {
+      await db
+          .into(db.diveBuddies)
+          .insert(
+            DiveBuddiesCompanion(
+              id: Value('db-$id'),
+              diveId: Value(id),
+              buddyId: const Value('bud'),
+              createdAt: Value(now),
+            ),
+          );
+    }
+    await tag('dry');
+    await link('a', 'dry');
+
+    final filtered = await repo.getTopBuddies(
+      filter: const DiveFilterState(tagIds: ['dry']),
+    );
+    expect(filtered.first.count, 1); // buddy appears on 1 filtered dive
+  });
 }

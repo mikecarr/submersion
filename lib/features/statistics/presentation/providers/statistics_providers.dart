@@ -248,7 +248,8 @@ final topBuddiesProvider = FutureProvider<List<RankingItem>>((ref) async {
   _keepAliveWithExpiry(ref);
   final repository = ref.watch(statisticsRepositoryProvider);
   final currentDiverId = ref.watch(currentDiverIdProvider);
-  return repository.getTopBuddies(diverId: currentDiverId);
+  final filter = ref.watch(statisticsFilterProvider);
+  return repository.getTopBuddies(diverId: currentDiverId, filter: filter);
 });
 
 final soloVsBuddyCountProvider = FutureProvider<({int solo, int buddy})>((
@@ -257,14 +258,19 @@ final soloVsBuddyCountProvider = FutureProvider<({int solo, int buddy})>((
   _keepAliveWithExpiry(ref);
   final repository = ref.watch(statisticsRepositoryProvider);
   final currentDiverId = ref.watch(currentDiverIdProvider);
-  return repository.getSoloVsBuddyCount(diverId: currentDiverId);
+  final filter = ref.watch(statisticsFilterProvider);
+  return repository.getSoloVsBuddyCount(
+    diverId: currentDiverId,
+    filter: filter,
+  );
 });
 
 final topDiveCentersProvider = FutureProvider<List<RankingItem>>((ref) async {
   _keepAliveWithExpiry(ref);
   final repository = ref.watch(statisticsRepositoryProvider);
   final currentDiverId = ref.watch(currentDiverIdProvider);
-  return repository.getTopDiveCenters(diverId: currentDiverId);
+  final filter = ref.watch(statisticsFilterProvider);
+  return repository.getTopDiveCenters(diverId: currentDiverId, filter: filter);
 });
 
 // ============================================================================
@@ -275,21 +281,27 @@ final countriesVisitedProvider = FutureProvider<List<RankingItem>>((ref) async {
   _keepAliveWithExpiry(ref);
   final repository = ref.watch(statisticsRepositoryProvider);
   final currentDiverId = ref.watch(currentDiverIdProvider);
-  return repository.getCountriesVisited(diverId: currentDiverId);
+  final filter = ref.watch(statisticsFilterProvider);
+  return repository.getCountriesVisited(
+    diverId: currentDiverId,
+    filter: filter,
+  );
 });
 
 final regionsExploredProvider = FutureProvider<List<RankingItem>>((ref) async {
   _keepAliveWithExpiry(ref);
   final repository = ref.watch(statisticsRepositoryProvider);
   final currentDiverId = ref.watch(currentDiverIdProvider);
-  return repository.getRegionsExplored(diverId: currentDiverId);
+  final filter = ref.watch(statisticsFilterProvider);
+  return repository.getRegionsExplored(diverId: currentDiverId, filter: filter);
 });
 
 final divesPerTripProvider = FutureProvider<List<RankingItem>>((ref) async {
   _keepAliveWithExpiry(ref);
   final repository = ref.watch(statisticsRepositoryProvider);
   final currentDiverId = ref.watch(currentDiverIdProvider);
-  return repository.getDivesPerTrip(diverId: currentDiverId);
+  final filter = ref.watch(statisticsFilterProvider);
+  return repository.getDivesPerTrip(diverId: currentDiverId, filter: filter);
 });
 
 // ============================================================================
