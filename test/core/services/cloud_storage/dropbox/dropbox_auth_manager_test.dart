@@ -126,6 +126,44 @@ void main() {
       );
       expect(await store.load(), isNull);
     });
+
+    test('wraps a 200 non-JSON token body as CloudStorageException', () async {
+      final mock = MockClient(
+        (_) async => http.Response('<html>gateway error</html>', 200),
+      );
+      final m = manager(mock);
+      m.beginAuthorization();
+      await expectLater(
+        m.completeAuthorization('the-code'),
+        throwsA(isA<CloudStorageException>()),
+      );
+      expect(await store.load(), isNull);
+    });
+
+    test(
+      'still connects when the account response has wrong-typed fields',
+      () async {
+        final mock = MockClient((request) async {
+          if (request.url.path == '/oauth2/token') return tokenResponse();
+          if (request.url.path == '/2/users/get_current_account') {
+            return http.Response(
+              jsonEncode({'email': 42, 'name': 'not-a-map'}),
+              200,
+              headers: {'content-type': 'application/json'},
+            );
+          }
+          return http.Response('unexpected', 500);
+        });
+        final m = manager(mock);
+        m.beginAuthorization();
+        final auth = await m.completeAuthorization('the-code');
+
+        expect(auth.refreshToken, 'rt-1');
+        expect(auth.email, isNull);
+        expect(auth.displayName, isNull);
+        expect((await store.load())!.refreshToken, 'rt-1');
+      },
+    );
   });
 
   group('getAccessToken', () {

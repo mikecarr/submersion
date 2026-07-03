@@ -108,8 +108,9 @@ class DropboxAuthManager {
       final account = await _fetchAccount(tokens['access_token'] as String);
       email = account.$1;
       displayName = account.$2;
-    } on Exception catch (e) {
-      // Account labels are cosmetic; the connection itself succeeded.
+    } catch (e) {
+      // Account labels are cosmetic; the connection itself succeeded, so
+      // no account-fetch failure of any kind may abort the connect.
       _log.warning('Could not fetch Dropbox account info: $e');
     }
 
@@ -198,7 +199,14 @@ class DropboxAuthManager {
         _bodySummary(response),
       );
     }
-    final decoded = jsonDecode(response.body);
+    final Object? decoded;
+    try {
+      decoded = jsonDecode(response.body);
+    } on FormatException {
+      throw const CloudStorageException(
+        'Unexpected response from Dropbox authorization.',
+      );
+    }
     if (decoded is! Map<String, Object?> ||
         decoded['access_token'] is! String) {
       throw const CloudStorageException(
@@ -234,10 +242,14 @@ class DropboxAuthManager {
     }
     final decoded = jsonDecode(response.body);
     if (decoded is! Map<String, Object?>) return (null, null);
+    final email = decoded['email'];
     final name = decoded['name'];
+    final displayName = name is Map<String, Object?>
+        ? name['display_name']
+        : null;
     return (
-      decoded['email'] as String?,
-      name is Map<String, Object?> ? name['display_name'] as String? : null,
+      email is String ? email : null,
+      displayName is String ? displayName : null,
     );
   }
 
