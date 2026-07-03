@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:intl/intl.dart';
 import 'package:submersion/features/checklists/data/repositories/trip_checklist_repository.dart';
 import 'package:submersion/features/checklists/domain/entities/trip_checklist_item.dart';
 import 'package:submersion/features/checklists/presentation/widgets/checklist_item_edit_sheet.dart';
@@ -147,7 +148,12 @@ void main() {
     await _openSheet(tester, tripId: trip.id, item: existing);
 
     // Due-date chip renders the formatted date and a clear button when set.
-    expect(find.text('Aug 1, 2026'), findsOneWidget);
+    // Compute the expected label with the same formatter the widget uses
+    // (DateFormat.yMMMd) so the assertion is locale-independent.
+    expect(
+      find.text(DateFormat.yMMMd().format(DateTime(2026, 8, 1))),
+      findsOneWidget,
+    );
     await tester.tap(find.byIcon(Icons.clear));
     await tester.pump();
     expect(find.text('-'), findsOneWidget);
