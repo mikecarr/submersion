@@ -680,6 +680,8 @@ class CloudSyncPage extends ConsumerWidget {
         return l10n.settings_cloudSync_provider_googleDrive;
       case CloudProviderType.s3:
         return l10n.settings_cloudSync_provider_s3_title;
+      case CloudProviderType.dropbox:
+        return 'Dropbox';
     }
   }
 
