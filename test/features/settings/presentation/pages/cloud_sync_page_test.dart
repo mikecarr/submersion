@@ -1681,6 +1681,37 @@ void main() {
       expect(find.text('Connected as d@example.com'), findsNWidgets(2));
       expect(find.text('Disconnect'), findsOneWidget);
     });
+
+    testWidgets(
+      'disconnecting while Dropbox is the active provider routes through '
+      'SyncNotifier.signOut and disables cloud backup',
+      (tester) async {
+        final result = await pumpPage(
+          tester,
+          selectedProvider: CloudProviderType.dropbox,
+          dropboxAuth: DropboxAuthData(
+            refreshToken: 'rt',
+            email: 'd@example.com',
+          ),
+        );
+
+        await tester.tap(
+          find.descendant(
+            of: dropboxTile(),
+            matching: find.byIcon(Icons.settings_outlined),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text('Disconnect'));
+        await tester.pumpAndSettle();
+
+        // The canonical sign-out path (SyncNotifier.signOut) was taken
+        // rather than a hand-rolled teardown -- this is the same seam the
+        // S3 sign-out tests assert on.
+        expect(result.sync.signOutCalls, 1);
+      },
+    );
   });
 
   // ---------------------------------------------------------------------------

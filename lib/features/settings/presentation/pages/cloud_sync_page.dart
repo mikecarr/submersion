@@ -607,8 +607,9 @@ class CloudSyncPage extends ConsumerWidget {
               provider: ref.read(dropboxStorageProviderInstanceProvider),
             ),
           );
+          if (!context.mounted) return;
           ref.invalidate(dropboxAuthDataProvider);
-          if (connected == true && context.mounted) {
+          if (connected == true) {
             await _selectProvider(context, ref, CloudProviderType.dropbox);
           }
         },
@@ -623,11 +624,24 @@ class CloudSyncPage extends ConsumerWidget {
     final l10n = context.l10n;
     final auth = ref.read(dropboxAuthDataProvider).valueOrNull;
     final account = auth?.email ?? auth?.displayName ?? '';
+    // Disconnecting the active sync provider also takes cloud backup's
+    // destination away; surface that in the same confirmation, mirroring
+    // _confirmSignOut.
+    final isActiveProvider =
+        ref.read(selectedCloudProviderTypeProvider) ==
+        CloudProviderType.dropbox;
+    final backupWarning =
+        isActiveProvider && ref.read(backupSettingsProvider).cloudBackupEnabled
+        ? '\n\n${l10n.settings_cloudSync_signOut_backupWarning}'
+        : '';
     final disconnect = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: Text(l10n.settings_cloudSync_dropbox_account_title),
-        content: Text(l10n.settings_cloudSync_dropbox_connectedAs(account)),
+        content: Text(
+          '${l10n.settings_cloudSync_dropbox_connectedAs(account)}'
+          '$backupWarning',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
@@ -642,19 +656,27 @@ class CloudSyncPage extends ConsumerWidget {
         ],
       ),
     );
-    if (disconnect != true) return;
+    if (disconnect != true || !context.mounted) return;
+
+    if (isActiveProvider) {
+      // Route through the canonical sign-out path: SyncNotifier.signOut()
+      // (via SyncService.signOut()) already calls through to the active
+      // CloudStorageProvider's own signOut() -- the Dropbox token
+      // revoke/blob clear -- so calling provider.signOut() again here would
+      // double-revoke. This also clears the selection, persisted provider,
+      // and sync state in one place, matching the S3 "Remove Configuration"
+      // precedent (s3_config_page.dart _remove).
+      await ref.read(syncStateProvider.notifier).signOut();
+      await ref.read(backupSettingsProvider.notifier).disableCloudBackup();
+      if (!context.mounted) return;
+      ref.invalidate(dropboxAuthDataProvider);
+      return;
+    }
 
     final provider = ref.read(dropboxStorageProviderInstanceProvider);
     await provider.signOut();
+    if (!context.mounted) return;
     ref.invalidate(dropboxAuthDataProvider);
-    // If Dropbox was the active backend, clear the selection so the page
-    // cannot show Sync Now armed against a disconnected provider.
-    if (ref.read(selectedCloudProviderTypeProvider) ==
-        CloudProviderType.dropbox) {
-      ref.read(selectedCloudProviderTypeProvider.notifier).state = null;
-      await ref.read(syncInitializerProvider).saveProvider(null);
-      ref.read(syncStateProvider.notifier).refreshState();
-    }
   }
 
   Future<void> _selectProvider(
