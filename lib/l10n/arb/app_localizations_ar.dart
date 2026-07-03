@@ -2911,17 +2911,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get diveLog_combine_profilePreview => 'الملف المدمج';
 
   @override
-  String get diveLog_combine_overlapBody =>
-      'الغوصات المتداخلة تبدو وكأنها الغوصة نفسها مسجّلة بواسطة عدة أجهزة كمبيوتر غوص. ستتوفر قريبًا ميزة دمج هذه الغوصات في إدخال واحد يعرض بيانات كل جهاز.';
-
-  @override
-  String get diveLog_combine_overlapHintTwoDives =>
-      'لدمج سجلّين لنفس الغوصة الآن، افتح أحدهما واستخدم «دمج مع غوصة أخرى».';
-
-  @override
-  String get diveLog_combine_overlapTitle => 'هذه الغوصات متداخلة زمنياً';
-
-  @override
   String diveLog_combine_previewIntro(int count) {
     return 'ستُدمَج هذه الغوصات الـ $count في غوصة واحدة متواصلة. تتحول الفجوات بينها إلى وقت على السطح.';
   }
@@ -2954,6 +2943,75 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get diveLog_combine_undone => 'تم التراجع عن الدمج';
+
+  @override
+  String get diveLog_computerSource_badge_primary => 'أساسي';
+
+  @override
+  String get diveLog_consolidate_confirm =>
+      'الاحتفاظ بها كغوصة واحدة بجهازي كمبيوتر';
+
+  @override
+  String get diveLog_consolidate_error_generic =>
+      'تعذّر دمج الغوصات. لم يتغيّر أي شيء.';
+
+  @override
+  String get diveLog_consolidate_error_notOverlapping =>
+      'هاتان الغوصتان لا تتداخلان زمنيًا، لذا لا يمكن دمجهما كغوصة واحدة.';
+
+  @override
+  String get diveLog_consolidate_error_sameComputer =>
+      'هاتان الغوصتان من نفس كمبيوتر الغوص ولا يمكن دمجهما بهذه الطريقة.';
+
+  @override
+  String get diveLog_consolidate_selectPrimary => 'كمبيوتر الغوص الأساسي';
+
+  @override
+  String get diveLog_consolidate_snackbar =>
+      'تم دمج الغوصة كجهاز كمبيوتر إضافي.';
+
+  @override
+  String get diveLog_consolidate_undoError => 'تعذّر التراجع عن الدمج.';
+
+  @override
+  String get diveLog_consolidate_undone => 'تم التراجع عن الدمج';
+
+  @override
+  String diveLog_mergeDialog_confirmSubtitle(String time) {
+    return 'سيتم دمج الغوصة في الساعة $time مع هذه الغوصة.';
+  }
+
+  @override
+  String get diveLog_mergeDialog_confirmTitle => 'تأكيد الدمج';
+
+  @override
+  String get diveLog_mergeDialog_empty =>
+      'لم يتم العثور على غوصات أخرى في هذا اليوم.';
+
+  @override
+  String get diveLog_mergeDialog_explanation =>
+      'سيتم دمج ملف هذه الغوصة والأسطوانات والضغوط والأحداث والوسوم ورفقاء الغوص والمشاهدات في هذه الغوصة كمصدر كمبيوتر إضافي. يمكن التراجع عن هذا الإجراء باستخدام \'إلغاء ربط الكمبيوتر\'.';
+
+  @override
+  String diveLog_mergeDialog_loadError(String error) {
+    return 'خطأ في تحميل الغوصات: $error';
+  }
+
+  @override
+  String get diveLog_mergeDialog_merge => 'دمج';
+
+  @override
+  String get diveLog_mergeDialog_next => 'التالي';
+
+  @override
+  String get diveLog_mergeDialog_subtitle =>
+      'اختر غوصة من نفس اليوم لدمجها كجهاز كمبيوتر إضافي.';
+
+  @override
+  String get diveLog_mergeDialog_title => 'دمج مع غوصة أخرى';
+
+  @override
+  String get diveLog_mergeDialog_whatThisDoes => 'ما الذي يفعله هذا';
 
   @override
   String get diveLog_computerSheet_description =>
@@ -4752,12 +4810,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get diveLog_playback_tooltip_speed => 'سرعة التشغيل';
 
   @override
-  String get diveLog_profileSelector_badge_primary => 'أساسي';
-
-  @override
-  String get diveLog_profileSelector_label_diveComputers => 'حواسيب الغوص';
-
-  @override
   String diveLog_profile_axisDepth(Object unit) {
     return 'العمق ($unit)';
   }
@@ -5296,6 +5348,47 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get diveLog_tooltip_tts => 'TTS';
+
+  @override
+  String get diveLog_sources_row_metric => 'المقياس';
+
+  @override
+  String get diveLog_sources_row_maxDepth => 'أقصى عمق';
+
+  @override
+  String get diveLog_sources_row_avgDepth => 'متوسط العمق';
+
+  @override
+  String get diveLog_sources_row_duration => 'المدة';
+
+  @override
+  String get diveLog_sources_row_waterTemp => 'حرارة الماء';
+
+  @override
+  String get diveLog_sources_row_cns => 'CNS';
+
+  @override
+  String get diveLog_sources_row_otu => 'OTU';
+
+  @override
+  String get diveLog_sources_row_decoAlgorithm => 'خوارزمية إزالة التشبع';
+
+  @override
+  String get diveLog_sources_row_gf => 'GF';
+
+  @override
+  String diveLog_sources_minutes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count دقيقة',
+      one: 'دقيقة واحدة',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get diveLog_sources_unknownComputer => 'جهاز غير معروف';
 
   @override
   String get divePlanner_action_addTank => 'إضافة أسطوانة';

@@ -2996,18 +2996,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get diveLog_combine_profilePreview => 'Profil combiné';
 
   @override
-  String get diveLog_combine_overlapBody =>
-      'Des plongées qui se chevauchent ressemblent à la même plongée enregistrée par plusieurs ordinateurs de plongée. La possibilité de les combiner en une seule entrée affichant les données de chaque ordinateur arrivera dans une future version.';
-
-  @override
-  String get diveLog_combine_overlapHintTwoDives =>
-      'Pour fusionner dès maintenant deux enregistrements de la même plongée, ouvre l\'un d\'eux et utilise « Fusionner avec une autre plongée ».';
-
-  @override
-  String get diveLog_combine_overlapTitle =>
-      'Ces plongées se chevauchent dans le temps';
-
-  @override
   String diveLog_combine_previewIntro(int count) {
     return 'Ces $count plongées seront combinées en une seule plongée continue. Les intervalles entre elles deviennent du temps de surface.';
   }
@@ -3041,6 +3029,77 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get diveLog_combine_undone => 'Combinaison annulée';
+
+  @override
+  String get diveLog_computerSource_badge_primary => 'Principal';
+
+  @override
+  String get diveLog_consolidate_confirm =>
+      'Conserver comme une seule plongée avec les deux ordinateurs';
+
+  @override
+  String get diveLog_consolidate_error_generic =>
+      'Impossible de fusionner les plongées. Rien n\'a été modifié.';
+
+  @override
+  String get diveLog_consolidate_error_notOverlapping =>
+      'Ces plongées ne se chevauchent pas dans le temps et ne peuvent donc pas être fusionnées en une seule plongée.';
+
+  @override
+  String get diveLog_consolidate_error_sameComputer =>
+      'Ces plongées proviennent du même ordinateur de plongée et ne peuvent pas être fusionnées de cette façon.';
+
+  @override
+  String get diveLog_consolidate_selectPrimary =>
+      'Ordinateur de plongée principal';
+
+  @override
+  String get diveLog_consolidate_snackbar =>
+      'Plongée fusionnée en tant qu\'ordinateur supplémentaire.';
+
+  @override
+  String get diveLog_consolidate_undoError =>
+      'Impossible d\'annuler la fusion.';
+
+  @override
+  String get diveLog_consolidate_undone => 'Fusion annulée';
+
+  @override
+  String diveLog_mergeDialog_confirmSubtitle(String time) {
+    return 'La plongée de $time sera fusionnée avec cette plongée.';
+  }
+
+  @override
+  String get diveLog_mergeDialog_confirmTitle => 'Confirmer la fusion';
+
+  @override
+  String get diveLog_mergeDialog_empty =>
+      'Aucune autre plongée trouvée ce jour-là.';
+
+  @override
+  String get diveLog_mergeDialog_explanation =>
+      'Le profil, les blocs, les pressions, les événements, les tags, les binômes et les observations de cette plongée seront intégrés à cette plongée en tant qu\'ordinateur supplémentaire. Cette action peut être annulée avec « Dissocier l\'ordinateur ».';
+
+  @override
+  String diveLog_mergeDialog_loadError(String error) {
+    return 'Erreur lors du chargement des plongées : $error';
+  }
+
+  @override
+  String get diveLog_mergeDialog_merge => 'Fusionner';
+
+  @override
+  String get diveLog_mergeDialog_next => 'Suivant';
+
+  @override
+  String get diveLog_mergeDialog_subtitle =>
+      'Sélectionnez une plongée du même jour à fusionner en tant qu\'ordinateur supplémentaire.';
+
+  @override
+  String get diveLog_mergeDialog_title => 'Fusionner avec une autre plongée';
+
+  @override
+  String get diveLog_mergeDialog_whatThisDoes => 'Ce que cela fait';
 
   @override
   String get diveLog_computerSheet_description =>
@@ -4889,13 +4948,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get diveLog_playback_tooltip_speed => 'Vitesse de lecture';
 
   @override
-  String get diveLog_profileSelector_badge_primary => 'Principal';
-
-  @override
-  String get diveLog_profileSelector_label_diveComputers =>
-      'Ordinateurs de plongee';
-
-  @override
   String diveLog_profile_axisDepth(Object unit) {
     return 'Profondeur ($unit)';
   }
@@ -5445,6 +5497,47 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get diveLog_tooltip_tts => 'TDR';
+
+  @override
+  String get diveLog_sources_row_metric => 'Mesure';
+
+  @override
+  String get diveLog_sources_row_maxDepth => 'Prof. max';
+
+  @override
+  String get diveLog_sources_row_avgDepth => 'Prof. moy.';
+
+  @override
+  String get diveLog_sources_row_duration => 'Durée';
+
+  @override
+  String get diveLog_sources_row_waterTemp => 'Temp. eau';
+
+  @override
+  String get diveLog_sources_row_cns => 'CNS';
+
+  @override
+  String get diveLog_sources_row_otu => 'OTU';
+
+  @override
+  String get diveLog_sources_row_decoAlgorithm => 'Algorithme déco';
+
+  @override
+  String get diveLog_sources_row_gf => 'GF';
+
+  @override
+  String diveLog_sources_minutes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count min',
+      one: '1 min',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get diveLog_sources_unknownComputer => 'Ordinateur inconnu';
 
   @override
   String get divePlanner_action_addTank => 'Ajouter une bouteille';

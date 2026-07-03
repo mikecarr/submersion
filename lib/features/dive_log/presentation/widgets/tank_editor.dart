@@ -216,6 +216,9 @@ class _TankEditorState extends ConsumerState<TankEditor> {
         material: _material,
         order: widget.tank.order,
         presetName: _selectedPreset?.name,
+        // Preserve source-computer attribution through edits; only
+        // consolidation/unlink flows may change it.
+        computerId: widget.tank.computerId,
       ),
     );
   }

@@ -46,7 +46,7 @@ class ComputerSourceSelectionSheet extends StatelessWidget {
                 title: Text(reading.displayName),
                 subtitle: reading.isPrimary
                     ? Text(
-                        context.l10n.diveLog_profileSelector_badge_primary,
+                        context.l10n.diveLog_computerSource_badge_primary,
                         style: textTheme.bodySmall?.copyWith(
                           color: colorScheme.primary,
                         ),

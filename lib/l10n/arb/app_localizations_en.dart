@@ -2927,17 +2927,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get diveLog_combine_profilePreview => 'Combined profile';
 
   @override
-  String get diveLog_combine_overlapBody =>
-      'Overlapping dives look like the same dive recorded by multiple dive computers. Combining those into a single entry that shows every computer\'s data is coming in a future release.';
-
-  @override
-  String get diveLog_combine_overlapHintTwoDives =>
-      'To merge two records of the same dive now, open one of them and use \"Merge with another dive\".';
-
-  @override
-  String get diveLog_combine_overlapTitle => 'These dives overlap in time';
-
-  @override
   String diveLog_combine_previewIntro(int count) {
     return 'These $count dives will be combined into one continuous dive. Gaps between them become surface time.';
   }
@@ -2970,6 +2959,74 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get diveLog_combine_undone => 'Combine undone';
+
+  @override
+  String get diveLog_computerSource_badge_primary => 'Primary';
+
+  @override
+  String get diveLog_consolidate_confirm =>
+      'Keep as one dive with both computers';
+
+  @override
+  String get diveLog_consolidate_error_generic =>
+      'Couldn\'t merge the dives. Nothing was changed.';
+
+  @override
+  String get diveLog_consolidate_error_notOverlapping =>
+      'These dives don\'t overlap in time, so they can\'t be merged as the same dive.';
+
+  @override
+  String get diveLog_consolidate_error_sameComputer =>
+      'These dives are from the same dive computer and can\'t be merged this way.';
+
+  @override
+  String get diveLog_consolidate_selectPrimary => 'Primary dive computer';
+
+  @override
+  String get diveLog_consolidate_snackbar =>
+      'Dive merged as an additional computer.';
+
+  @override
+  String get diveLog_consolidate_undoError => 'Couldn\'t undo the merge.';
+
+  @override
+  String get diveLog_consolidate_undone => 'Merge undone';
+
+  @override
+  String diveLog_mergeDialog_confirmSubtitle(String time) {
+    return 'Merging dive at $time into this dive.';
+  }
+
+  @override
+  String get diveLog_mergeDialog_confirmTitle => 'Confirm merge';
+
+  @override
+  String get diveLog_mergeDialog_empty => 'No other dives found on this day.';
+
+  @override
+  String get diveLog_mergeDialog_explanation =>
+      'This dive\'s profile, tanks, pressures, events, tags, buddies, and sightings will be folded into this dive as an additional computer source. This action can be reversed with \'Unlink computer\'.';
+
+  @override
+  String diveLog_mergeDialog_loadError(String error) {
+    return 'Error loading dives: $error';
+  }
+
+  @override
+  String get diveLog_mergeDialog_merge => 'Merge';
+
+  @override
+  String get diveLog_mergeDialog_next => 'Next';
+
+  @override
+  String get diveLog_mergeDialog_subtitle =>
+      'Select a dive from the same day to merge as an additional computer.';
+
+  @override
+  String get diveLog_mergeDialog_title => 'Merge with another dive';
+
+  @override
+  String get diveLog_mergeDialog_whatThisDoes => 'What this does';
 
   @override
   String get diveLog_computerSheet_description =>
@@ -4776,12 +4833,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get diveLog_playback_tooltip_speed => 'Playback speed';
 
   @override
-  String get diveLog_profileSelector_badge_primary => 'Primary';
-
-  @override
-  String get diveLog_profileSelector_label_diveComputers => 'Dive Computers';
-
-  @override
   String diveLog_profile_axisDepth(Object unit) {
     return 'Depth ($unit)';
   }
@@ -5322,6 +5373,47 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get diveLog_tooltip_tts => 'TTS';
+
+  @override
+  String get diveLog_sources_row_metric => 'Metric';
+
+  @override
+  String get diveLog_sources_row_maxDepth => 'Max Depth';
+
+  @override
+  String get diveLog_sources_row_avgDepth => 'Avg Depth';
+
+  @override
+  String get diveLog_sources_row_duration => 'Duration';
+
+  @override
+  String get diveLog_sources_row_waterTemp => 'Water Temp';
+
+  @override
+  String get diveLog_sources_row_cns => 'CNS';
+
+  @override
+  String get diveLog_sources_row_otu => 'OTU';
+
+  @override
+  String get diveLog_sources_row_decoAlgorithm => 'Deco Algorithm';
+
+  @override
+  String get diveLog_sources_row_gf => 'GF';
+
+  @override
+  String diveLog_sources_minutes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count min',
+      one: '1 min',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get diveLog_sources_unknownComputer => 'Unknown Computer';
 
   @override
   String get divePlanner_action_addTank => 'Add Tank';

@@ -2968,18 +2968,6 @@ class AppLocalizationsHu extends AppLocalizations {
   String get diveLog_combine_profilePreview => 'Összevont profil';
 
   @override
-  String get diveLog_combine_overlapBody =>
-      'Az egymást átfedő merülések úgy néznek ki, mintha ugyanaz a merülés lenne, amelyet több merülésszámítógép rögzített. Az ilyen merülések egyetlen, minden számítógép adatait megjelenítő bejegyzéssé történő összevonása egy jövőbeli verzióban lesz elérhető.';
-
-  @override
-  String get diveLog_combine_overlapHintTwoDives =>
-      'Ha most szeretnéd összevonni ugyanannak a merülésnek a két rögzített változatát, nyisd meg az egyiket, és használd az „Összevonás egy másik merüléssel” funkciót.';
-
-  @override
-  String get diveLog_combine_overlapTitle =>
-      'Ezek a merülések időben átfedik egymást';
-
-  @override
   String diveLog_combine_previewIntro(int count) {
     return 'Ez a $count merülés egyetlen folyamatos merüléssé lesz összevonva. A köztük lévő szünetek felszíni idővé válnak.';
   }
@@ -3013,6 +3001,76 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get diveLog_combine_undone => 'Összevonás visszavonva';
+
+  @override
+  String get diveLog_computerSource_badge_primary => 'Elsodleges';
+
+  @override
+  String get diveLog_consolidate_confirm =>
+      'Megtartás egyetlen merülésként mindkét számítógéppel';
+
+  @override
+  String get diveLog_consolidate_error_generic =>
+      'Nem sikerült összevonni a merüléseket. Semmi sem változott.';
+
+  @override
+  String get diveLog_consolidate_error_notOverlapping =>
+      'Ezek a merülések időben nem fedik egymást, ezért nem vonhatók össze egyetlen merülésként.';
+
+  @override
+  String get diveLog_consolidate_error_sameComputer =>
+      'Ezek a merülések ugyanattól a búvárszámítógéptől származnak, ezért így nem vonhatók össze.';
+
+  @override
+  String get diveLog_consolidate_selectPrimary => 'Elsődleges búvárszámítógép';
+
+  @override
+  String get diveLog_consolidate_snackbar =>
+      'A merülés összevonva egy további számítógépként.';
+
+  @override
+  String get diveLog_consolidate_undoError =>
+      'Nem sikerült visszavonni az összevonást.';
+
+  @override
+  String get diveLog_consolidate_undone => 'Összevonás visszavonva';
+
+  @override
+  String diveLog_mergeDialog_confirmSubtitle(String time) {
+    return 'A(z) $time időpontban indult merülés összevonásra kerül ezzel a merüléssel.';
+  }
+
+  @override
+  String get diveLog_mergeDialog_confirmTitle => 'Összevonás megerősítése';
+
+  @override
+  String get diveLog_mergeDialog_empty =>
+      'Nem található más merülés ezen a napon.';
+
+  @override
+  String get diveLog_mergeDialog_explanation =>
+      'Ennek a merülésnek a profilja, palackjai, nyomásai, eseményei, cimkéi, búvártársai és megfigyelései bekerülnek ebbe a merülésbe mint további számítógépes forrás. Ez a művelet visszavonható a „Számítógép leválasztása” funkcióval.';
+
+  @override
+  String diveLog_mergeDialog_loadError(String error) {
+    return 'Hiba a merülések betöltésekor: $error';
+  }
+
+  @override
+  String get diveLog_mergeDialog_merge => 'Összevonás';
+
+  @override
+  String get diveLog_mergeDialog_next => 'Tovább';
+
+  @override
+  String get diveLog_mergeDialog_subtitle =>
+      'Válassz egy merülést ugyanarról a napról, hogy további számítógépként vond össze.';
+
+  @override
+  String get diveLog_mergeDialog_title => 'Összevonás egy másik merüléssel';
+
+  @override
+  String get diveLog_mergeDialog_whatThisDoes => 'Mit csinál ez';
 
   @override
   String get diveLog_computerSheet_description =>
@@ -4850,13 +4908,6 @@ class AppLocalizationsHu extends AppLocalizations {
   String get diveLog_playback_tooltip_speed => 'Lejatszasi sebesseg';
 
   @override
-  String get diveLog_profileSelector_badge_primary => 'Elsodleges';
-
-  @override
-  String get diveLog_profileSelector_label_diveComputers =>
-      'Merulesszamitogepek';
-
-  @override
   String diveLog_profile_axisDepth(Object unit) {
     return 'Melyseg ($unit)';
   }
@@ -5405,6 +5456,47 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get diveLog_tooltip_tts => 'TTS';
+
+  @override
+  String get diveLog_sources_row_metric => 'Adat';
+
+  @override
+  String get diveLog_sources_row_maxDepth => 'Max mélység';
+
+  @override
+  String get diveLog_sources_row_avgDepth => 'Átl. mélység';
+
+  @override
+  String get diveLog_sources_row_duration => 'Időtartam';
+
+  @override
+  String get diveLog_sources_row_waterTemp => 'Víz hőm.';
+
+  @override
+  String get diveLog_sources_row_cns => 'CNS';
+
+  @override
+  String get diveLog_sources_row_otu => 'OTU';
+
+  @override
+  String get diveLog_sources_row_decoAlgorithm => 'Dekó algoritmus';
+
+  @override
+  String get diveLog_sources_row_gf => 'GF';
+
+  @override
+  String diveLog_sources_minutes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count perc',
+      one: '1 perc',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get diveLog_sources_unknownComputer => 'Ismeretlen számítógép';
 
   @override
   String get divePlanner_action_addTank => 'Palack hozzáadása';

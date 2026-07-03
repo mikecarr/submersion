@@ -2980,18 +2980,6 @@ class AppLocalizationsPt extends AppLocalizations {
   String get diveLog_combine_profilePreview => 'Perfil combinado';
 
   @override
-  String get diveLog_combine_overlapBody =>
-      'Mergulhos sobrepostos parecem ser o mesmo mergulho registrado por vários computadores de mergulho. A opção de combiná-los em um único registro que mostra os dados de cada computador chegará em uma versão futura.';
-
-  @override
-  String get diveLog_combine_overlapHintTwoDives =>
-      'Para combinar agora dois registros do mesmo mergulho, abra um deles e use «Mesclar com outro mergulho».';
-
-  @override
-  String get diveLog_combine_overlapTitle =>
-      'Esses mergulhos se sobrepõem no tempo';
-
-  @override
   String diveLog_combine_previewIntro(int count) {
     return 'Estes $count mergulhos serão combinados em um único mergulho contínuo. Os intervalos entre eles se tornam tempo de superfície.';
   }
@@ -3025,6 +3013,77 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get diveLog_combine_undone => 'Combinação desfeita';
+
+  @override
+  String get diveLog_computerSource_badge_primary => 'Principal';
+
+  @override
+  String get diveLog_consolidate_confirm =>
+      'Manter como um único mergulho com os dois computadores';
+
+  @override
+  String get diveLog_consolidate_error_generic =>
+      'Não foi possível mesclar os mergulhos. Nada foi alterado.';
+
+  @override
+  String get diveLog_consolidate_error_notOverlapping =>
+      'Esses mergulhos não se sobrepõem no tempo, portanto não podem ser mesclados como o mesmo mergulho.';
+
+  @override
+  String get diveLog_consolidate_error_sameComputer =>
+      'Esses mergulhos são do mesmo computador de mergulho e não podem ser mesclados dessa forma.';
+
+  @override
+  String get diveLog_consolidate_selectPrimary =>
+      'Computador de mergulho principal';
+
+  @override
+  String get diveLog_consolidate_snackbar =>
+      'Mergulho mesclado como computador adicional.';
+
+  @override
+  String get diveLog_consolidate_undoError =>
+      'Não foi possível desfazer a mesclagem.';
+
+  @override
+  String get diveLog_consolidate_undone => 'Mesclagem desfeita';
+
+  @override
+  String diveLog_mergeDialog_confirmSubtitle(String time) {
+    return 'O mergulho às $time será mesclado a este mergulho.';
+  }
+
+  @override
+  String get diveLog_mergeDialog_confirmTitle => 'Confirmar mesclagem';
+
+  @override
+  String get diveLog_mergeDialog_empty =>
+      'Nenhum outro mergulho encontrado neste dia.';
+
+  @override
+  String get diveLog_mergeDialog_explanation =>
+      'O perfil, os cilindros, as pressões, os eventos, as tags, os parceiros e os avistamentos deste mergulho serão incorporados a este mergulho como uma fonte de computador adicional. Esta ação pode ser revertida com \'Desvincular computador\'.';
+
+  @override
+  String diveLog_mergeDialog_loadError(String error) {
+    return 'Erro ao carregar os mergulhos: $error';
+  }
+
+  @override
+  String get diveLog_mergeDialog_merge => 'Mesclar';
+
+  @override
+  String get diveLog_mergeDialog_next => 'Próximo';
+
+  @override
+  String get diveLog_mergeDialog_subtitle =>
+      'Selecione um mergulho do mesmo dia para mesclar como um computador adicional.';
+
+  @override
+  String get diveLog_mergeDialog_title => 'Mesclar com outro mergulho';
+
+  @override
+  String get diveLog_mergeDialog_whatThisDoes => 'O que isso faz';
 
   @override
   String get diveLog_computerSheet_description =>
@@ -4866,13 +4925,6 @@ class AppLocalizationsPt extends AppLocalizations {
   String get diveLog_playback_tooltip_speed => 'Velocidade de reproducao';
 
   @override
-  String get diveLog_profileSelector_badge_primary => 'Principal';
-
-  @override
-  String get diveLog_profileSelector_label_diveComputers =>
-      'Computadores de Mergulho';
-
-  @override
   String diveLog_profile_axisDepth(Object unit) {
     return 'Profundidade ($unit)';
   }
@@ -5418,6 +5470,47 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get diveLog_tooltip_tts => 'TTS';
+
+  @override
+  String get diveLog_sources_row_metric => 'Medida';
+
+  @override
+  String get diveLog_sources_row_maxDepth => 'Prof. Máxima';
+
+  @override
+  String get diveLog_sources_row_avgDepth => 'Prof. Média';
+
+  @override
+  String get diveLog_sources_row_duration => 'Duração';
+
+  @override
+  String get diveLog_sources_row_waterTemp => 'Temp. Água';
+
+  @override
+  String get diveLog_sources_row_cns => 'CNS';
+
+  @override
+  String get diveLog_sources_row_otu => 'OTU';
+
+  @override
+  String get diveLog_sources_row_decoAlgorithm => 'Algoritmo de Deco';
+
+  @override
+  String get diveLog_sources_row_gf => 'GF';
+
+  @override
+  String diveLog_sources_minutes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count min',
+      one: '1 min',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get diveLog_sources_unknownComputer => 'Computador Desconhecido';
 
   @override
   String get divePlanner_action_addTank => 'Adicionar Cilindro';

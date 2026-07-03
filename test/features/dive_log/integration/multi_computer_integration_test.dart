@@ -2,6 +2,7 @@ import 'package:drift/drift.dart' hide isNull, isNotNull;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:submersion/core/database/database.dart';
 import 'package:submersion/features/dive_log/data/repositories/dive_repository_impl.dart';
+import 'package:submersion/features/dive_log/data/services/dive_consolidation_service.dart';
 
 import '../../../helpers/test_database.dart';
 
@@ -49,33 +50,6 @@ void main() {
           ),
         );
     return id;
-  }
-
-  DiveDataSourcesCompanion buildReading({
-    required String id,
-    required String diveId,
-    bool isPrimary = false,
-    String? computerModel,
-    String? computerSerial,
-    double? maxDepth,
-    double? avgDepth,
-    int? duration,
-    double? waterTemp,
-  }) {
-    final now = DateTime.now();
-    return DiveDataSourcesCompanion(
-      id: Value(id),
-      diveId: Value(diveId),
-      isPrimary: Value(isPrimary),
-      computerModel: Value(computerModel),
-      computerSerial: Value(computerSerial),
-      maxDepth: Value(maxDepth),
-      avgDepth: Value(avgDepth),
-      duration: Value(duration),
-      waterTemp: Value(waterTemp),
-      importedAt: Value(now),
-      createdAt: Value(now),
-    );
   }
 
   Future<void> insertProfile({
@@ -130,39 +104,37 @@ void main() {
         depth: 30.0,
       );
 
-      // 2. Call consolidateComputer to add second computer's data.
-      final secondaryReading = buildReading(
-        id: 'reading-secondary',
-        diveId: diveId,
-        isPrimary: false,
-        computerModel: 'Suunto D5',
-        computerSerial: 'SU-002',
+      // 2. Consolidate a second computer's download into the dive via
+      // DiveConsolidationService (the consolidateComputer repository method
+      // it replaced was removed; see dive_consolidation_service_test.dart
+      // for the service's own suite).
+      final secondaryDiveId = await insertTestDive(
+        id: 'dive-secondary-download',
+        diveComputerModel: 'Suunto D5',
+        diveComputerSerial: 'SU-002',
         maxDepth: 29.5,
         duration: 3580,
         waterTemp: 21.8,
       );
+      await insertProfile(
+        id: 'profile-secondary-0',
+        diveId: secondaryDiveId,
+        isPrimary: true,
+        timestamp: 0,
+        depth: 0.0,
+      );
+      await insertProfile(
+        id: 'profile-secondary-60',
+        diveId: secondaryDiveId,
+        isPrimary: true,
+        timestamp: 60,
+        depth: 29.5,
+      );
 
-      final secondaryProfile = [
-        DiveProfilesCompanion(
-          id: const Value('profile-secondary-0'),
-          diveId: Value(diveId),
-          isPrimary: const Value(false),
-          timestamp: const Value(0),
-          depth: const Value(0.0),
-        ),
-        DiveProfilesCompanion(
-          id: const Value('profile-secondary-60'),
-          diveId: Value(diveId),
-          isPrimary: const Value(false),
-          timestamp: const Value(60),
-          depth: const Value(29.5),
-        ),
-      ];
-
-      await repository.consolidateComputer(
+      final consolidation = DiveConsolidationService(repository);
+      await consolidation.apply(
         targetDiveId: diveId,
-        secondaryReading: secondaryReading,
-        secondaryProfile: secondaryProfile,
+        secondaryDiveIds: [secondaryDiveId],
       );
 
       // 3. Verify: 2 computer readings exist.
@@ -175,9 +147,10 @@ void main() {
       expect(profileSources.length, equals(2));
 
       // 5. Call setPrimaryDataSource to swap primary to the secondary reading.
+      final secondaryReadingId = readings.firstWhere((r) => !r.isPrimary).id;
       await repository.setPrimaryDataSource(
         diveId: diveId,
-        computerReadingId: 'reading-secondary',
+        computerReadingId: secondaryReadingId,
       );
 
       // 6. Verify: dives record updated with new primary's metadata.
@@ -188,7 +161,7 @@ void main() {
       // Confirm reading flags were swapped.
       final readingsAfterSwap = await repository.getDataSources(diveId);
       final newPrimary = readingsAfterSwap.firstWhere((r) => r.isPrimary);
-      expect(newPrimary.id, equals('reading-secondary'));
+      expect(newPrimary.id, equals(secondaryReadingId));
 
       // 7. Call unlinkComputer to detach the (now secondary) original reading.
       final originalReading = readingsAfterSwap.firstWhere((r) => !r.isPrimary);
@@ -267,10 +240,13 @@ void main() {
         depth: 39.5,
       );
 
-      // 2. Call mergeDives (merge dive B into dive A).
-      await repository.mergeDives(
-        primaryDiveId: diveAId,
-        secondaryDiveId: diveBId,
+      // 2. Consolidate dive B into dive A via DiveConsolidationService
+      // (the mergeDives repository method it replaced was removed; see
+      // dive_consolidation_service_test.dart for the service's own suite).
+      final consolidation = DiveConsolidationService(repository);
+      await consolidation.apply(
+        targetDiveId: diveAId,
+        secondaryDiveIds: [diveBId],
       );
 
       // 3. Verify: primary dive has 2 computer readings.

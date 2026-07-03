@@ -207,6 +207,11 @@ class DiveProfileChart extends ConsumerStatefulWidget {
   /// Computers not in this set use a dashed line style.
   final Set<String>? primaryComputers;
 
+  /// Map of computerId -> display name (e.g. "Perdix 2"), used to label
+  /// tank-pressure tooltip rows with their source computer when 2+
+  /// computers contribute pressure curves to the same chart.
+  final Map<String, String>? computerNames;
+
   /// When true, the built-in tooltip is suppressed and tooltip data is
   /// emitted via [onTooltipData] so callers can render it externally
   /// (e.g., below the chart in the profile panel).
@@ -372,6 +377,7 @@ class DiveProfileChart extends ConsumerStatefulWidget {
     this.visibleComputers,
     this.computerLineColors,
     this.primaryComputers,
+    this.computerNames,
     this.tooltipBelow = false,
     this.onTooltipData,
   });
@@ -450,6 +456,69 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
       return orderA.compareTo(orderB);
     });
     return ids;
+  }
+
+  /// Whether data attributed to [computerId] should be drawn, per the
+  /// toggle bar's [widget.visibleComputers].
+  ///
+  /// `null` means "no multi-computer toggle in play" (single-source dive,
+  /// or the caller hasn't wired visibility) — everything is visible. When a
+  /// visibility set IS present, a `null` [computerId] is treated as
+  /// belonging to the primary computer (this is the null-means-primary
+  /// convention used by dive_profiles/dive_profile_events/tank_pressure_
+  /// profiles rows — see database.dart), so it's visible exactly when a
+  /// primary computer is visible.
+  bool _isComputerVisible(String? computerId) {
+    final visible = widget.visibleComputers;
+    if (visible == null) return true;
+    if (computerId == null) {
+      final primaries = widget.primaryComputers;
+      if (primaries == null || primaries.isEmpty) return true;
+      return primaries.any(visible.contains);
+    }
+    return visible.contains(computerId);
+  }
+
+  /// Map of tankId -> owning computerId, derived from [widget.tanks].
+  /// Tanks without attribution (single-source dives, manually entered
+  /// tanks) map to null and are always treated as visible.
+  Map<String, String?> _tankComputerIds() => {
+    for (final t in widget.tanks ?? const <DiveTank>[]) t.id: t.computerId,
+  };
+
+  /// Distinct, currently-visible computer IDs attributed to any of
+  /// [tankIds]'s owning tanks. Used to decide whether tank-pressure tooltip
+  /// rows need a source-computer suffix (only when 2+ computers actually
+  /// contribute pressure data at once — a single contributor is unambiguous).
+  Set<String> _contributingTankComputerIds(
+    Iterable<String> tankIds,
+    Map<String, String?> tankComputerIds,
+  ) {
+    final ids = <String>{};
+    for (final tankId in tankIds) {
+      final computerId = tankComputerIds[tankId];
+      if (computerId != null && _isComputerVisible(computerId)) {
+        ids.add(computerId);
+      }
+    }
+    return ids;
+  }
+
+  /// Suffix identifying a tank's source computer in a tooltip label, e.g.
+  /// " · Perdix 2". Empty when there's nothing to disambiguate: fewer than
+  /// 2 contributing computers, an unattributed tank, or no display name
+  /// available for the tank's computer.
+  String _tankSourceSuffix(
+    String tankId,
+    Map<String, String?> tankComputerIds,
+    Set<String> contributingComputerIds,
+  ) {
+    if (contributingComputerIds.length < 2) return '';
+    final computerId = tankComputerIds[tankId];
+    if (computerId == null) return '';
+    final name = widget.computerNames?[computerId];
+    if (name == null) return '';
+    return ' · $name';
   }
 
   /// Get color for ascent rate category
@@ -1003,9 +1072,15 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
     if (widget.tankPressures != null) {
       final timestamp = point.timestamp;
       final sortedTankIds = _sortedTankIds(widget.tankPressures!.keys);
+      final tankComputerIds = _tankComputerIds();
+      final contributingComputerIds = _contributingTankComputerIds(
+        sortedTankIds,
+        tankComputerIds,
+      );
       for (var i = 0; i < sortedTankIds.length; i++) {
         final tankId = sortedTankIds[i];
         if (!(_showTankPressure[tankId] ?? true)) continue;
+        if (!_isComputerVisible(tankComputerIds[tankId])) continue;
         final pressurePoints = widget.tankPressures![tankId];
         if (pressurePoints == null || pressurePoints.isEmpty) continue;
         final pressure = _interpolateTankPressure(pressurePoints, timestamp);
@@ -1013,10 +1088,9 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
         final color = tank != null
             ? GasColors.forGasMix(tank.gasMix)
             : _getTankColor(i);
-        final tankLabel = DiveProfileChart.tankTooltipLabel(
-          tank,
-          'Tank ${i + 1}',
-        );
+        final tankLabel =
+            DiveProfileChart.tankTooltipLabel(tank, 'Tank ${i + 1}') +
+            _tankSourceSuffix(tankId, tankComputerIds, contributingComputerIds);
         rows.add(
           TooltipRow(
             label: tankLabel,
@@ -1148,7 +1222,16 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
 
     final settings = ref.watch(settingsProvider);
     final units = UnitFormatter(settings);
-    final hasTemperatureData = widget.profile.any((p) => p.temperature != null);
+    // When multi-computer profiles are present, temperature data from any
+    // computer (not just the primary/dive.profile) should surface the
+    // temperature toggle.
+    final cpProfilesForTemp = widget.computerProfiles;
+    final hasTemperatureData =
+        cpProfilesForTemp != null && cpProfilesForTemp.length >= 2
+        ? cpProfilesForTemp.values.any(
+            (points) => points.any((p) => p.temperature != null),
+          )
+        : widget.profile.any((p) => p.temperature != null);
     final hasPressureData = _hasMultiTankPressure;
     final hasHeartRateData = widget.profile.any((p) => p.heartRate != null);
     final colorScheme = Theme.of(context).colorScheme;
@@ -1610,10 +1693,16 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
     final visibleMinDepth = _viewport.offsetY * totalMaxDepth;
     final visibleMaxDepth = visibleMinDepth + visibleRangeY;
 
-    // Temperature bounds (if showing) - convert to user's preferred unit
+    // Temperature bounds (if showing) - convert to user's preferred unit.
+    // With multi-computer profiles, pool every computer's readings (not just
+    // the primary) so the axis range doesn't jump as computers are toggled.
     double? minTemp, maxTemp;
     if (_showTemperature && hasTemperatureData) {
-      final temps = widget.profile
+      final cpProfiles = widget.computerProfiles;
+      final tempSource = cpProfiles != null && cpProfiles.length >= 2
+          ? cpProfiles.values.expand((points) => points)
+          : widget.profile;
+      final temps = tempSource
           .where((p) => p.temperature != null)
           .map((p) => units.convertTemperature(p.temperature!));
       if (temps.isNotEmpty) {
@@ -1845,12 +1934,14 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
                 // Gas switch markers (if showing and data available)
                 if (_showGasSwitchMarkers) ..._buildGasSwitchMarkers(units),
 
-                // Temperature line (if showing)
+                // Temperature line(s) (if showing) — one per visible computer
+                // when multi-computer profiles are present, else a single
+                // curve from the primary profile.
                 if (_showTemperature &&
                     hasTemperatureData &&
                     minTemp != null &&
                     maxTemp != null)
-                  _buildTemperatureLine(
+                  ..._buildTemperatureLines(
                     colorScheme,
                     totalMaxDepth,
                     minTemp,
@@ -2454,10 +2545,19 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
                       final sortedTankIds = _sortedTankIds(
                         widget.tankPressures!.keys,
                       );
+                      final tankComputerIds = _tankComputerIds();
+                      final contributingComputerIds =
+                          _contributingTankComputerIds(
+                            sortedTankIds,
+                            tankComputerIds,
+                          );
 
                       for (var i = 0; i < sortedTankIds.length; i++) {
                         final tankId = sortedTankIds[i];
                         if (!(_showTankPressure[tankId] ?? true)) continue;
+                        if (!_isComputerVisible(tankComputerIds[tankId])) {
+                          continue;
+                        }
 
                         final pressurePoints = widget.tankPressures![tankId];
                         if (pressurePoints == null || pressurePoints.isEmpty) {
@@ -2472,10 +2572,16 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
                         final color = tank != null
                             ? GasColors.forGasMix(tank.gasMix)
                             : _getTankColor(i);
-                        final tankLabel = DiveProfileChart.tankTooltipLabel(
-                          tank,
-                          context.l10n.diveLog_tank_title(i + 1),
-                        );
+                        final tankLabel =
+                            DiveProfileChart.tankTooltipLabel(
+                              tank,
+                              context.l10n.diveLog_tank_title(i + 1),
+                            ) +
+                            _tankSourceSuffix(
+                              tankId,
+                              tankComputerIds,
+                              contributingComputerIds,
+                            );
                         final pressValue = pressure != null
                             ? units.formatPressure(pressure)
                             : '—';
@@ -3094,6 +3200,42 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
     return widget.profile.last.depth;
   }
 
+  /// Build the temperature curve(s) to draw.
+  ///
+  /// Falls back to a single tertiary-coloured curve from [widget.profile]
+  /// (unchanged legacy behaviour) unless [widget.computerProfiles] has 2+
+  /// entries, in which case one curve per VISIBLE computer is drawn instead
+  /// — color-matched to that computer's depth line (via
+  /// [widget.computerLineColors]) at reduced opacity so the temperature
+  /// overlay reads as secondary to the depth curves.
+  List<LineChartBarData> _buildTemperatureLines(
+    ColorScheme colorScheme,
+    double chartMaxDepth,
+    double minTemp,
+    double maxTemp,
+    UnitFormatter units,
+  ) {
+    final cpProfiles = widget.computerProfiles;
+    if (cpProfiles != null && cpProfiles.length >= 2) {
+      return _buildMultiComputerTemperatureLines(
+        cpProfiles,
+        chartMaxDepth,
+        minTemp,
+        maxTemp,
+        units,
+      );
+    }
+    return [
+      _buildTemperatureLine(
+        colorScheme,
+        chartMaxDepth,
+        minTemp,
+        maxTemp,
+        units,
+      ),
+    ];
+  }
+
   LineChartBarData _buildTemperatureLine(
     ColorScheme colorScheme,
     double chartMaxDepth,
@@ -3127,6 +3269,59 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
     );
   }
 
+  /// One temperature curve per visible computer, color-matched to its depth
+  /// line at reduced opacity. Computers with no temperature readings, or
+  /// toggled off via [widget.visibleComputers], are skipped.
+  List<LineChartBarData> _buildMultiComputerTemperatureLines(
+    Map<String, List<DiveProfilePoint>> cpProfiles,
+    double chartMaxDepth,
+    double minTemp,
+    double maxTemp,
+    UnitFormatter units,
+  ) {
+    final lines = <LineChartBarData>[];
+    var index = 0;
+    for (final entry in cpProfiles.entries) {
+      final computerId = entry.key;
+      final points = entry.value;
+      index++;
+
+      if (!_isComputerVisible(computerId)) continue;
+
+      final tempPoints = points.where((p) => p.temperature != null).toList();
+      if (tempPoints.isEmpty) continue;
+
+      final baseColor =
+          widget.computerLineColors?[computerId] ?? _computerColorAt(index - 1);
+
+      lines.add(
+        LineChartBarData(
+          spots: tempPoints
+              .map(
+                (p) => FlSpot(
+                  p.timestamp.toDouble(),
+                  -_mapTempToDepth(
+                    units.convertTemperature(p.temperature!),
+                    chartMaxDepth,
+                    minTemp,
+                    maxTemp,
+                  ),
+                ),
+              )
+              .toList(),
+          isCurved: true,
+          curveSmoothness: 0.2,
+          color: baseColor.withValues(alpha: 0.6),
+          barWidth: 2,
+          isStrokeCapRound: true,
+          dotData: const FlDotData(show: false),
+          dashArray: const [5, 3],
+        ),
+      );
+    }
+    return lines;
+  }
+
   /// Build multiple pressure lines for multi-tank visualization
   List<LineChartBarData> _buildMultiTankPressureLines(double chartMaxDepth) {
     if (!_hasMultiTankPressure) return [];
@@ -3157,6 +3352,7 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
     final maxPressure = globalMaxPressure + (pressureRange * 0.05);
 
     final sortedTankIds = _sortedTankIds(tankPressures.keys);
+    final tankComputerIds = _tankComputerIds();
 
     // Build a line for each visible tank
     for (var i = 0; i < sortedTankIds.length; i++) {
@@ -3164,6 +3360,9 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
 
       // Skip if tank is hidden
       if (_showTankPressure[tankId] == false) continue;
+
+      // Skip tanks attributed to a computer that's been toggled off.
+      if (!_isComputerVisible(tankComputerIds[tankId])) continue;
 
       final pressurePoints = tankPressures[tankId]!;
       if (pressurePoints.isEmpty) continue;
@@ -3831,9 +4030,17 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
     final events = widget.events;
     if (events == null || events.isEmpty) return [];
 
+    // Drop events attributed to a computer that's been toggled off. A null
+    // computerId is treated as belonging to the primary computer (see
+    // _isComputerVisible).
+    final visibleEvents = events
+        .where((e) => _isComputerVisible(e.computerId))
+        .toList();
+    if (visibleEvents.isEmpty) return [];
+
     // Group events by timestamp, keeping only the most severe at each time
     final byTimestamp = <int, ProfileEvent>{};
-    for (final event in events) {
+    for (final event in visibleEvents) {
       final existing = byTimestamp[event.timestamp];
       if (existing == null || event.severity.index > existing.severity.index) {
         byTimestamp[event.timestamp] = event;

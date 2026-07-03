@@ -921,6 +921,11 @@ class DiveTank extends Equatable {
   final int order; // for multi-tank ordering
   final String? presetName; // name of preset used (e.g., 'al80', 'hp100')
 
+  /// The dive computer this tank was attributed to, for multi-source dives.
+  /// Null means the tank is unattributed (single-source dive, or a manually
+  /// entered/edited tank not tied to a specific computer).
+  final String? computerId;
+
   const DiveTank({
     required this.id,
     this.name,
@@ -933,6 +938,7 @@ class DiveTank extends Equatable {
     this.material,
     this.order = 0,
     this.presetName,
+    this.computerId,
   });
 
   /// Pressure consumed during dive
@@ -955,6 +961,7 @@ class DiveTank extends Equatable {
     int? order,
     String? presetName,
     bool clearPresetName = false,
+    String? computerId,
   }) {
     return DiveTank(
       id: id ?? this.id,
@@ -968,6 +975,7 @@ class DiveTank extends Equatable {
       material: material ?? this.material,
       order: order ?? this.order,
       presetName: clearPresetName ? null : (presetName ?? this.presetName),
+      computerId: computerId ?? this.computerId,
     );
   }
 
@@ -984,6 +992,7 @@ class DiveTank extends Equatable {
     material,
     order,
     presetName,
+    computerId,
   ];
 }
 

@@ -2982,18 +2982,6 @@ class AppLocalizationsIt extends AppLocalizations {
   String get diveLog_combine_profilePreview => 'Profilo combinato';
 
   @override
-  String get diveLog_combine_overlapBody =>
-      'Le immersioni sovrapposte sembrano la stessa immersione registrata da più computer subacquei. La possibilità di unirle in un\'unica voce che mostri i dati di ogni computer arriverà in una versione futura.';
-
-  @override
-  String get diveLog_combine_overlapHintTwoDives =>
-      'Per unire ora due registrazioni della stessa immersione, apri una di esse e usa «Unisci con un\'altra immersione».';
-
-  @override
-  String get diveLog_combine_overlapTitle =>
-      'Queste immersioni si sovrappongono nel tempo';
-
-  @override
   String diveLog_combine_previewIntro(int count) {
     return 'Queste $count immersioni verranno unite in un\'unica immersione continua. Gli intervalli tra loro diventeranno tempo in superficie.';
   }
@@ -3026,6 +3014,77 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get diveLog_combine_undone => 'Unione annullata';
+
+  @override
+  String get diveLog_computerSource_badge_primary => 'Primario';
+
+  @override
+  String get diveLog_consolidate_confirm =>
+      'Mantieni come un\'unica immersione con entrambi i computer';
+
+  @override
+  String get diveLog_consolidate_error_generic =>
+      'Impossibile unire le immersioni. Non è stato modificato nulla.';
+
+  @override
+  String get diveLog_consolidate_error_notOverlapping =>
+      'Queste immersioni non si sovrappongono nel tempo, quindi non possono essere unite come la stessa immersione.';
+
+  @override
+  String get diveLog_consolidate_error_sameComputer =>
+      'Queste immersioni provengono dallo stesso computer subacqueo e non possono essere unite in questo modo.';
+
+  @override
+  String get diveLog_consolidate_selectPrimary =>
+      'Computer subacqueo principale';
+
+  @override
+  String get diveLog_consolidate_snackbar =>
+      'Immersione unita come computer aggiuntivo.';
+
+  @override
+  String get diveLog_consolidate_undoError =>
+      'Impossibile annullare l\'unione.';
+
+  @override
+  String get diveLog_consolidate_undone => 'Unione annullata';
+
+  @override
+  String diveLog_mergeDialog_confirmSubtitle(String time) {
+    return 'L\'immersione delle $time verrà unita a questa immersione.';
+  }
+
+  @override
+  String get diveLog_mergeDialog_confirmTitle => 'Conferma unione';
+
+  @override
+  String get diveLog_mergeDialog_empty =>
+      'Nessun\'altra immersione trovata in questo giorno.';
+
+  @override
+  String get diveLog_mergeDialog_explanation =>
+      'Il profilo, le bombole, le pressioni, gli eventi, i tag, i compagni e gli avvistamenti di questa immersione verranno incorporati in questa immersione come fonte di un computer aggiuntivo. Questa azione può essere annullata con \'Scollega computer\'.';
+
+  @override
+  String diveLog_mergeDialog_loadError(String error) {
+    return 'Errore durante il caricamento delle immersioni: $error';
+  }
+
+  @override
+  String get diveLog_mergeDialog_merge => 'Unisci';
+
+  @override
+  String get diveLog_mergeDialog_next => 'Avanti';
+
+  @override
+  String get diveLog_mergeDialog_subtitle =>
+      'Seleziona un\'immersione dello stesso giorno da unire come computer aggiuntivo.';
+
+  @override
+  String get diveLog_mergeDialog_title => 'Unisci a un\'altra immersione';
+
+  @override
+  String get diveLog_mergeDialog_whatThisDoes => 'Cosa fa questa azione';
 
   @override
   String get diveLog_computerSheet_description =>
@@ -4868,13 +4927,6 @@ class AppLocalizationsIt extends AppLocalizations {
   String get diveLog_playback_tooltip_speed => 'Velocita di riproduzione';
 
   @override
-  String get diveLog_profileSelector_badge_primary => 'Primario';
-
-  @override
-  String get diveLog_profileSelector_label_diveComputers =>
-      'Computer subacquei';
-
-  @override
   String diveLog_profile_axisDepth(Object unit) {
     return 'Profondita ($unit)';
   }
@@ -5421,6 +5473,47 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get diveLog_tooltip_tts => 'TTS';
+
+  @override
+  String get diveLog_sources_row_metric => 'Misura';
+
+  @override
+  String get diveLog_sources_row_maxDepth => 'Profondità max';
+
+  @override
+  String get diveLog_sources_row_avgDepth => 'Profondità media';
+
+  @override
+  String get diveLog_sources_row_duration => 'Durata';
+
+  @override
+  String get diveLog_sources_row_waterTemp => 'Temp. acqua';
+
+  @override
+  String get diveLog_sources_row_cns => 'CNS';
+
+  @override
+  String get diveLog_sources_row_otu => 'OTU';
+
+  @override
+  String get diveLog_sources_row_decoAlgorithm => 'Algoritmo deco';
+
+  @override
+  String get diveLog_sources_row_gf => 'GF';
+
+  @override
+  String diveLog_sources_minutes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count min',
+      one: '1 min',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get diveLog_sources_unknownComputer => 'Computer sconosciuto';
 
   @override
   String get divePlanner_action_addTank => 'Aggiungi Bombola';

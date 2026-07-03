@@ -5051,24 +5051,6 @@ abstract class AppLocalizations {
   /// **'Combined profile'**
   String get diveLog_combine_profilePreview;
 
-  /// No description provided for @diveLog_combine_overlapBody.
-  ///
-  /// In en, this message translates to:
-  /// **'Overlapping dives look like the same dive recorded by multiple dive computers. Combining those into a single entry that shows every computer\'s data is coming in a future release.'**
-  String get diveLog_combine_overlapBody;
-
-  /// No description provided for @diveLog_combine_overlapHintTwoDives.
-  ///
-  /// In en, this message translates to:
-  /// **'To merge two records of the same dive now, open one of them and use \"Merge with another dive\".'**
-  String get diveLog_combine_overlapHintTwoDives;
-
-  /// No description provided for @diveLog_combine_overlapTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'These dives overlap in time'**
-  String get diveLog_combine_overlapTitle;
-
   /// No description provided for @diveLog_combine_previewIntro.
   ///
   /// In en, this message translates to:
@@ -5108,6 +5090,120 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Combine undone'**
   String get diveLog_combine_undone;
+
+  /// No description provided for @diveLog_computerSource_badge_primary.
+  ///
+  /// In en, this message translates to:
+  /// **'Primary'**
+  String get diveLog_computerSource_badge_primary;
+
+  /// No description provided for @diveLog_consolidate_confirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep as one dive with both computers'**
+  String get diveLog_consolidate_confirm;
+
+  /// No description provided for @diveLog_consolidate_error_generic.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t merge the dives. Nothing was changed.'**
+  String get diveLog_consolidate_error_generic;
+
+  /// No description provided for @diveLog_consolidate_error_notOverlapping.
+  ///
+  /// In en, this message translates to:
+  /// **'These dives don\'t overlap in time, so they can\'t be merged as the same dive.'**
+  String get diveLog_consolidate_error_notOverlapping;
+
+  /// No description provided for @diveLog_consolidate_error_sameComputer.
+  ///
+  /// In en, this message translates to:
+  /// **'These dives are from the same dive computer and can\'t be merged this way.'**
+  String get diveLog_consolidate_error_sameComputer;
+
+  /// No description provided for @diveLog_consolidate_selectPrimary.
+  ///
+  /// In en, this message translates to:
+  /// **'Primary dive computer'**
+  String get diveLog_consolidate_selectPrimary;
+
+  /// No description provided for @diveLog_consolidate_snackbar.
+  ///
+  /// In en, this message translates to:
+  /// **'Dive merged as an additional computer.'**
+  String get diveLog_consolidate_snackbar;
+
+  /// No description provided for @diveLog_consolidate_undoError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t undo the merge.'**
+  String get diveLog_consolidate_undoError;
+
+  /// No description provided for @diveLog_consolidate_undone.
+  ///
+  /// In en, this message translates to:
+  /// **'Merge undone'**
+  String get diveLog_consolidate_undone;
+
+  /// No description provided for @diveLog_mergeDialog_confirmSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Merging dive at {time} into this dive.'**
+  String diveLog_mergeDialog_confirmSubtitle(String time);
+
+  /// No description provided for @diveLog_mergeDialog_confirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm merge'**
+  String get diveLog_mergeDialog_confirmTitle;
+
+  /// No description provided for @diveLog_mergeDialog_empty.
+  ///
+  /// In en, this message translates to:
+  /// **'No other dives found on this day.'**
+  String get diveLog_mergeDialog_empty;
+
+  /// No description provided for @diveLog_mergeDialog_explanation.
+  ///
+  /// In en, this message translates to:
+  /// **'This dive\'s profile, tanks, pressures, events, tags, buddies, and sightings will be folded into this dive as an additional computer source. This action can be reversed with \'Unlink computer\'.'**
+  String get diveLog_mergeDialog_explanation;
+
+  /// No description provided for @diveLog_mergeDialog_loadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Error loading dives: {error}'**
+  String diveLog_mergeDialog_loadError(String error);
+
+  /// No description provided for @diveLog_mergeDialog_merge.
+  ///
+  /// In en, this message translates to:
+  /// **'Merge'**
+  String get diveLog_mergeDialog_merge;
+
+  /// No description provided for @diveLog_mergeDialog_next.
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get diveLog_mergeDialog_next;
+
+  /// No description provided for @diveLog_mergeDialog_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a dive from the same day to merge as an additional computer.'**
+  String get diveLog_mergeDialog_subtitle;
+
+  /// No description provided for @diveLog_mergeDialog_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Merge with another dive'**
+  String get diveLog_mergeDialog_title;
+
+  /// No description provided for @diveLog_mergeDialog_whatThisDoes.
+  ///
+  /// In en, this message translates to:
+  /// **'What this does'**
+  String get diveLog_mergeDialog_whatThisDoes;
 
   /// Description of the computer profile selection sheet
   ///
@@ -8192,18 +8288,6 @@ abstract class AppLocalizations {
   /// **'Playback speed'**
   String get diveLog_playback_tooltip_speed;
 
-  /// No description provided for @diveLog_profileSelector_badge_primary.
-  ///
-  /// In en, this message translates to:
-  /// **'Primary'**
-  String get diveLog_profileSelector_badge_primary;
-
-  /// No description provided for @diveLog_profileSelector_label_diveComputers.
-  ///
-  /// In en, this message translates to:
-  /// **'Dive Computers'**
-  String get diveLog_profileSelector_label_diveComputers;
-
   /// No description provided for @diveLog_profile_axisDepth.
   ///
   /// In en, this message translates to:
@@ -9217,6 +9301,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'TTS'**
   String get diveLog_tooltip_tts;
+
+  /// No description provided for @diveLog_sources_row_metric.
+  ///
+  /// In en, this message translates to:
+  /// **'Metric'**
+  String get diveLog_sources_row_metric;
+
+  /// No description provided for @diveLog_sources_row_maxDepth.
+  ///
+  /// In en, this message translates to:
+  /// **'Max Depth'**
+  String get diveLog_sources_row_maxDepth;
+
+  /// No description provided for @diveLog_sources_row_avgDepth.
+  ///
+  /// In en, this message translates to:
+  /// **'Avg Depth'**
+  String get diveLog_sources_row_avgDepth;
+
+  /// No description provided for @diveLog_sources_row_duration.
+  ///
+  /// In en, this message translates to:
+  /// **'Duration'**
+  String get diveLog_sources_row_duration;
+
+  /// No description provided for @diveLog_sources_row_waterTemp.
+  ///
+  /// In en, this message translates to:
+  /// **'Water Temp'**
+  String get diveLog_sources_row_waterTemp;
+
+  /// No description provided for @diveLog_sources_row_cns.
+  ///
+  /// In en, this message translates to:
+  /// **'CNS'**
+  String get diveLog_sources_row_cns;
+
+  /// No description provided for @diveLog_sources_row_otu.
+  ///
+  /// In en, this message translates to:
+  /// **'OTU'**
+  String get diveLog_sources_row_otu;
+
+  /// No description provided for @diveLog_sources_row_decoAlgorithm.
+  ///
+  /// In en, this message translates to:
+  /// **'Deco Algorithm'**
+  String get diveLog_sources_row_decoAlgorithm;
+
+  /// No description provided for @diveLog_sources_row_gf.
+  ///
+  /// In en, this message translates to:
+  /// **'GF'**
+  String get diveLog_sources_row_gf;
+
+  /// No description provided for @diveLog_sources_minutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 min} other{{count} min}}'**
+  String diveLog_sources_minutes(int count);
+
+  /// No description provided for @diveLog_sources_unknownComputer.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown Computer'**
+  String get diveLog_sources_unknownComputer;
 
   /// No description provided for @divePlanner_action_addTank.
   ///

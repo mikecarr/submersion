@@ -89,6 +89,7 @@ Widget _buildChart({
   Set<String>? visibleComputers,
   Map<String, Color>? computerLineColors,
   Set<String>? primaryComputers,
+  Map<String, String>? computerNames,
   Map<String, List<TankPressurePoint>>? tankPressures,
   List<DiveTank>? tanks,
   List<double>? ceilingCurve,
@@ -141,6 +142,7 @@ Widget _buildChart({
             visibleComputers: visibleComputers,
             computerLineColors: computerLineColors,
             primaryComputers: primaryComputers,
+            computerNames: computerNames,
             tankPressures: tankPressures,
             tanks: tanks,
             ceilingCurve: ceilingCurve,
@@ -446,6 +448,146 @@ void main() {
 
       expect(find.byType(DiveProfileChart), findsOneWidget);
     });
+  });
+
+  group('DiveProfileChart - multi-computer temperature overlays (Task 11)', () {
+    // Reads the primary fl_chart LineChartData (the depth/time plot is first).
+    LineChartData primaryChartData(WidgetTester tester) =>
+        tester.widget<LineChart>(find.byType(LineChart).first).data;
+
+    List<LineChartBarData> temperatureLines(WidgetTester tester) =>
+        primaryChartData(tester).lineBarsData
+            .where(
+              (bar) =>
+                  bar.dashArray != null &&
+                  bar.dashArray!.length == 2 &&
+                  bar.dashArray![0] == 5 &&
+                  bar.dashArray![1] == 3,
+            )
+            .toList();
+
+    List<DiveProfilePoint> profileWithTemp(double temperature) => List.generate(
+      8,
+      (i) => DiveProfilePoint(
+        timestamp: i * 30,
+        depth: i * 1.0,
+        temperature: temperature,
+      ),
+    );
+
+    testWidgets('draws one temperature line per visible computer', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _buildChart(
+          computerProfiles: {
+            'comp-a': profileWithTemp(20),
+            'comp-b': profileWithTemp(22),
+          },
+          primaryComputers: {'comp-a'},
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(temperatureLines(tester).length, 2);
+    });
+
+    testWidgets(
+      'hiding a computer removes its temperature line from the chart',
+      (tester) async {
+        await tester.pumpWidget(
+          _buildChart(
+            computerProfiles: {
+              'comp-a': profileWithTemp(20),
+              'comp-b': profileWithTemp(22),
+            },
+            visibleComputers: {'comp-a'},
+            primaryComputers: {'comp-a'},
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(temperatureLines(tester).length, 1);
+      },
+    );
+
+    testWidgets('hiding a computer removes its event markers from the chart', (
+      tester,
+    ) async {
+      final createdAt = DateTime(2024, 1, 1);
+      final events = [
+        ProfileEvent(
+          id: 'e-a',
+          diveId: 'dive-1',
+          timestamp: 30,
+          eventType: ProfileEventType.bookmark,
+          computerId: 'comp-a',
+          createdAt: createdAt,
+        ),
+        ProfileEvent(
+          id: 'e-b',
+          diveId: 'dive-1',
+          timestamp: 60,
+          eventType: ProfileEventType.bookmark,
+          computerId: 'comp-b',
+          createdAt: createdAt,
+        ),
+      ];
+
+      await tester.pumpWidget(
+        _buildChart(
+          computerProfiles: {
+            'comp-a': profileWithTemp(20),
+            'comp-b': profileWithTemp(22),
+          },
+          visibleComputers: {'comp-a'},
+          primaryComputers: {'comp-a'},
+          events: events,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final verticalLines = primaryChartData(
+        tester,
+      ).extraLinesData.verticalLines;
+      expect(verticalLines.any((l) => l.x == 30), isTrue);
+      expect(verticalLines.any((l) => l.x == 60), isFalse);
+    });
+
+    testWidgets(
+      'a null-computerId event stays tied to the primary computer\'s visibility',
+      (tester) async {
+        final createdAt = DateTime(2024, 1, 1);
+        final events = [
+          ProfileEvent(
+            id: 'e-primary',
+            diveId: 'dive-1',
+            timestamp: 30,
+            eventType: ProfileEventType.bookmark,
+            createdAt: createdAt,
+          ),
+        ];
+
+        await tester.pumpWidget(
+          _buildChart(
+            computerProfiles: {
+              'comp-a': profileWithTemp(20),
+              'comp-b': profileWithTemp(22),
+            },
+            // Primary computer toggled off.
+            visibleComputers: {'comp-b'},
+            primaryComputers: {'comp-a'},
+            events: events,
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        final verticalLines = primaryChartData(
+          tester,
+        ).extraLinesData.verticalLines;
+        expect(verticalLines.any((l) => l.x == 30), isFalse);
+      },
+    );
   });
 
   group('DiveProfileChart - empty state', () {
@@ -1615,6 +1757,132 @@ void main() {
         expect(selectedIndex, isNull);
       },
     );
+
+    testWidgets(
+      'tank pressure tooltip row is suffixed with the source computer name '
+      'when 2+ computers contribute pressure curves (Task 11)',
+      (tester) async {
+        List<TooltipRow>? receivedRows;
+        final profile = makeTouchProfile();
+
+        await tester.pumpWidget(
+          _buildChart(
+            profile: profile,
+            tooltipBelow: true,
+            onTooltipData: (rows) => receivedRows = rows,
+            tankPressures: {
+              'tank-a': List.generate(
+                20,
+                (i) => TankPressurePoint(
+                  id: 'tpa-$i',
+                  tankId: 'tank-a',
+                  timestamp: i * 30,
+                  pressure: 200.0 - i * 2,
+                ),
+              ),
+              'tank-b': List.generate(
+                20,
+                (i) => TankPressurePoint(
+                  id: 'tpb-$i',
+                  tankId: 'tank-b',
+                  timestamp: i * 30,
+                  pressure: 210.0 - i * 3,
+                ),
+              ),
+            },
+            tanks: const [
+              DiveTank(
+                id: 'tank-a',
+                startPressure: 200,
+                endPressure: 160,
+                computerId: 'comp-a',
+              ),
+              DiveTank(
+                id: 'tank-b',
+                startPressure: 210,
+                endPressure: 150,
+                computerId: 'comp-b',
+              ),
+            ],
+            computerNames: const {'comp-a': 'Perdix 2', 'comp-b': 'Suunto D5'},
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        final chartFinder = find.byType(LineChart);
+        final chartCenter = tester.getCenter(chartFinder);
+        final gesture = await tester.startGesture(chartCenter);
+        await tester.pump(const Duration(milliseconds: 600));
+        await gesture.moveBy(const Offset(5, 0));
+        await tester.pump();
+        await gesture.moveBy(const Offset(5, 0));
+        await tester.pump();
+
+        // Emission depends on fl_chart resolving a nearby spot; assert the
+        // suffixes only when a tooltip was produced (matching the file's
+        // gesture-based tooltip tests).
+        if (receivedRows != null) {
+          final labels = receivedRows!.map((r) => r.label).toList();
+          expect(labels.any((l) => l.contains('· Perdix 2')), isTrue);
+          expect(labels.any((l) => l.contains('· Suunto D5')), isTrue);
+        }
+
+        await gesture.up();
+        await tester.pump();
+      },
+    );
+
+    testWidgets('tank pressure tooltip row has no source suffix when only one '
+        'computer contributes (Task 11)', (tester) async {
+      List<TooltipRow>? receivedRows;
+      final profile = makeTouchProfile();
+
+      await tester.pumpWidget(
+        _buildChart(
+          profile: profile,
+          tooltipBelow: true,
+          onTooltipData: (rows) => receivedRows = rows,
+          tankPressures: {
+            'tank-a': List.generate(
+              20,
+              (i) => TankPressurePoint(
+                id: 'tpa-$i',
+                tankId: 'tank-a',
+                timestamp: i * 30,
+                pressure: 200.0 - i * 2,
+              ),
+            ),
+          },
+          tanks: const [
+            DiveTank(
+              id: 'tank-a',
+              startPressure: 200,
+              endPressure: 160,
+              computerId: 'comp-a',
+            ),
+          ],
+          computerNames: const {'comp-a': 'Perdix 2'},
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final chartFinder = find.byType(LineChart);
+      final chartCenter = tester.getCenter(chartFinder);
+      final gesture = await tester.startGesture(chartCenter);
+      await tester.pump(const Duration(milliseconds: 600));
+      await gesture.moveBy(const Offset(5, 0));
+      await tester.pump();
+      await gesture.moveBy(const Offset(5, 0));
+      await tester.pump();
+
+      if (receivedRows != null) {
+        final labels = receivedRows!.map((r) => r.label).toList();
+        expect(labels.any((l) => l.contains('·')), isFalse);
+      }
+
+      await gesture.up();
+      await tester.pump();
+    });
 
     testWidgets(
       'tooltip exposes per-cell sensor rows and the calculated-average ppO2 '

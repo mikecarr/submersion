@@ -2957,17 +2957,6 @@ class AppLocalizationsNl extends AppLocalizations {
   String get diveLog_combine_profilePreview => 'Samengevoegd profiel';
 
   @override
-  String get diveLog_combine_overlapBody =>
-      'Overlappende duiken lijken op dezelfde duik die door meerdere duikcomputers is vastgelegd. Het samenvoegen daarvan tot één item dat de gegevens van elke computer toont, komt in een toekomstige release.';
-
-  @override
-  String get diveLog_combine_overlapHintTwoDives =>
-      'Om nu twee registraties van dezelfde duik samen te voegen, open je er een en gebruik je ‘Samenvoegen met een andere duik’.';
-
-  @override
-  String get diveLog_combine_overlapTitle => 'Deze duiken overlappen in tijd';
-
-  @override
   String diveLog_combine_previewIntro(int count) {
     return 'Deze $count duiken worden samengevoegd tot één doorlopende duik. Tussenliggende intervallen worden oppervlaktetijd.';
   }
@@ -3001,6 +2990,76 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get diveLog_combine_undone => 'Samenvoeging ongedaan gemaakt';
+
+  @override
+  String get diveLog_computerSource_badge_primary => 'Primair';
+
+  @override
+  String get diveLog_consolidate_confirm =>
+      'Bewaren als één duik met beide computers';
+
+  @override
+  String get diveLog_consolidate_error_generic =>
+      'Kon de duiken niet samenvoegen. Er is niets gewijzigd.';
+
+  @override
+  String get diveLog_consolidate_error_notOverlapping =>
+      'Deze duiken overlappen niet in tijd en kunnen daarom niet als dezelfde duik worden samengevoegd.';
+
+  @override
+  String get diveLog_consolidate_error_sameComputer =>
+      'Deze duiken zijn afkomstig van dezelfde duikcomputer en kunnen op deze manier niet worden samengevoegd.';
+
+  @override
+  String get diveLog_consolidate_selectPrimary => 'Primaire duikcomputer';
+
+  @override
+  String get diveLog_consolidate_snackbar =>
+      'Duik samengevoegd als extra computer.';
+
+  @override
+  String get diveLog_consolidate_undoError =>
+      'Kon het samenvoegen niet ongedaan maken.';
+
+  @override
+  String get diveLog_consolidate_undone => 'Samenvoeging ongedaan gemaakt';
+
+  @override
+  String diveLog_mergeDialog_confirmSubtitle(String time) {
+    return 'De duik om $time wordt samengevoegd met deze duik.';
+  }
+
+  @override
+  String get diveLog_mergeDialog_confirmTitle => 'Samenvoegen bevestigen';
+
+  @override
+  String get diveLog_mergeDialog_empty =>
+      'Geen andere duiken gevonden op deze dag.';
+
+  @override
+  String get diveLog_mergeDialog_explanation =>
+      'Het profiel, de flessen, drukken, gebeurtenissen, tags, buddy\'s en waarnemingen van deze duik worden samengevoegd in deze duik als extra computerbron. Deze actie kan ongedaan worden gemaakt met \'Computer loskoppelen\'.';
+
+  @override
+  String diveLog_mergeDialog_loadError(String error) {
+    return 'Fout bij het laden van duiken: $error';
+  }
+
+  @override
+  String get diveLog_mergeDialog_merge => 'Samenvoegen';
+
+  @override
+  String get diveLog_mergeDialog_next => 'Volgende';
+
+  @override
+  String get diveLog_mergeDialog_subtitle =>
+      'Selecteer een duik van dezelfde dag om samen te voegen als extra computer.';
+
+  @override
+  String get diveLog_mergeDialog_title => 'Samenvoegen met een andere duik';
+
+  @override
+  String get diveLog_mergeDialog_whatThisDoes => 'Wat dit doet';
 
   @override
   String get diveLog_computerSheet_description =>
@@ -4828,12 +4887,6 @@ class AppLocalizationsNl extends AppLocalizations {
   String get diveLog_playback_tooltip_speed => 'Afspeelsnelheid';
 
   @override
-  String get diveLog_profileSelector_badge_primary => 'Primair';
-
-  @override
-  String get diveLog_profileSelector_label_diveComputers => 'Duikcomputers';
-
-  @override
   String diveLog_profile_axisDepth(Object unit) {
     return 'Diepte ($unit)';
   }
@@ -5376,6 +5429,47 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get diveLog_tooltip_tts => 'TTS';
+
+  @override
+  String get diveLog_sources_row_metric => 'Meting';
+
+  @override
+  String get diveLog_sources_row_maxDepth => 'Max diepte';
+
+  @override
+  String get diveLog_sources_row_avgDepth => 'Gem. diepte';
+
+  @override
+  String get diveLog_sources_row_duration => 'Duur';
+
+  @override
+  String get diveLog_sources_row_waterTemp => 'Watertemp.';
+
+  @override
+  String get diveLog_sources_row_cns => 'CNS';
+
+  @override
+  String get diveLog_sources_row_otu => 'OTU';
+
+  @override
+  String get diveLog_sources_row_decoAlgorithm => 'Deco-algoritme';
+
+  @override
+  String get diveLog_sources_row_gf => 'GF';
+
+  @override
+  String diveLog_sources_minutes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count min',
+      one: '1 min',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get diveLog_sources_unknownComputer => 'Onbekende computer';
 
   @override
   String get divePlanner_action_addTank => 'Fles toevoegen';

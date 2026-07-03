@@ -1703,15 +1703,45 @@
   "diveLog_combine_longSurfaceWarning": "One or more surface intervals are longer than 30 minutes. These may be separate dives rather than one continuous dive.",
   "diveLog_combine_mixedDivers": "The selected dives belong to different divers and can't be combined.",
   "diveLog_combine_profilePreview": "Combined profile",
-  "diveLog_combine_overlapBody": "Overlapping dives look like the same dive recorded by multiple dive computers. Combining those into a single entry that shows every computer's data is coming in a future release.",
-  "diveLog_combine_overlapHintTwoDives": "To merge two records of the same dive now, open one of them and use \"Merge with another dive\".",
-  "diveLog_combine_overlapTitle": "These dives overlap in time",
   "diveLog_combine_previewIntro": "These {count} dives will be combined into one continuous dive. Gaps between them become surface time.",
   "diveLog_combine_resultSummary": "Result: {runtime} total, max depth {maxDepth}, {bottomTime} bottom time",
   "diveLog_combine_snackbar": "Combined {count} {count, plural, =1{dive} other{dives}}",
   "diveLog_combine_title": "Combine dives",
   "diveLog_combine_undoError": "Couldn't undo the combine.",
   "diveLog_combine_undone": "Combine undone",
+  "diveLog_computerSource_badge_primary": "Primary",
+  "diveLog_consolidate_confirm": "Keep as one dive with both computers",
+  "diveLog_consolidate_error_generic": "Couldn't merge the dives. Nothing was changed.",
+  "diveLog_consolidate_error_notOverlapping": "These dives don't overlap in time, so they can't be merged as the same dive.",
+  "diveLog_consolidate_error_sameComputer": "These dives are from the same dive computer and can't be merged this way.",
+  "diveLog_consolidate_selectPrimary": "Primary dive computer",
+  "diveLog_consolidate_snackbar": "Dive merged as an additional computer.",
+  "diveLog_consolidate_undoError": "Couldn't undo the merge.",
+  "diveLog_consolidate_undone": "Merge undone",
+  "diveLog_mergeDialog_confirmSubtitle": "Merging dive at {time} into this dive.",
+  "@diveLog_mergeDialog_confirmSubtitle": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "diveLog_mergeDialog_confirmTitle": "Confirm merge",
+  "diveLog_mergeDialog_empty": "No other dives found on this day.",
+  "diveLog_mergeDialog_explanation": "This dive's profile, tanks, pressures, events, tags, buddies, and sightings will be folded into this dive as an additional computer source. This action can be reversed with 'Unlink computer'.",
+  "diveLog_mergeDialog_loadError": "Error loading dives: {error}",
+  "@diveLog_mergeDialog_loadError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "diveLog_mergeDialog_merge": "Merge",
+  "diveLog_mergeDialog_next": "Next",
+  "diveLog_mergeDialog_subtitle": "Select a dive from the same day to merge as an additional computer.",
+  "diveLog_mergeDialog_title": "Merge with another dive",
+  "diveLog_mergeDialog_whatThisDoes": "What this does",
   "diveLog_computerSheet_description": "Select which computer's profile to edit from.",
   "@diveLog_computerSheet_description": {"description": "Description of the computer profile selection sheet"},
   "diveLog_computerSheet_title": "Choose starting profile",
@@ -2323,8 +2353,6 @@
   "diveLog_playback_tooltip_skipEnd": "Skip to end",
   "diveLog_playback_tooltip_skipStart": "Skip to start",
   "diveLog_playback_tooltip_speed": "Playback speed",
-  "diveLog_profileSelector_badge_primary": "Primary",
-  "diveLog_profileSelector_label_diveComputers": "Dive Computers",
   "diveLog_profile_axisDepth": "Depth ({unit})",
   "diveLog_profile_axisTime": "Time (min)",
   "diveLog_profile_emptyState": "No dive profile data",
@@ -2494,6 +2522,24 @@
   "diveLog_tooltip_temp": "Temp",
   "diveLog_tooltip_time": "Time",
   "diveLog_tooltip_tts": "TTS",
+  "diveLog_sources_row_metric": "Metric",
+  "diveLog_sources_row_maxDepth": "Max Depth",
+  "diveLog_sources_row_avgDepth": "Avg Depth",
+  "diveLog_sources_row_duration": "Duration",
+  "diveLog_sources_row_waterTemp": "Water Temp",
+  "diveLog_sources_row_cns": "CNS",
+  "diveLog_sources_row_otu": "OTU",
+  "diveLog_sources_row_decoAlgorithm": "Deco Algorithm",
+  "diveLog_sources_row_gf": "GF",
+  "diveLog_sources_minutes": "{count, plural, =1{1 min} other{{count} min}}",
+  "diveLog_sources_unknownComputer": "Unknown Computer",
+  "@diveLog_sources_minutes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "@diveLog_bulkDelete_confirm": {
     "placeholders": {
       "count": {

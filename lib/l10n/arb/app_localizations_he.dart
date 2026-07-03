@@ -2895,17 +2895,6 @@ class AppLocalizationsHe extends AppLocalizations {
   String get diveLog_combine_profilePreview => 'פרופיל ממוזג';
 
   @override
-  String get diveLog_combine_overlapBody =>
-      'צלילות חופפות נראות כמו אותה צלילה שנרשמה על ידי כמה מחשבי צלילה. מיזוג שלהן לרשומה אחת שמציגה את הנתונים של כל מחשב יגיע בגרסה עתידית.';
-
-  @override
-  String get diveLog_combine_overlapHintTwoDives =>
-      'כדי למזג עכשיו שתי רשומות של אותה צלילה, פתח אחת מהן והשתמש ב«מיזוג עם צלילה אחרת».';
-
-  @override
-  String get diveLog_combine_overlapTitle => 'הצלילות האלה חופפות בזמן';
-
-  @override
   String diveLog_combine_previewIntro(int count) {
     return '$count הצלילות האלה ימוזגו לצלילה אחת רציפה. הפערים ביניהן יהפכו לזמן פני שטח.';
   }
@@ -2938,6 +2927,72 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get diveLog_combine_undone => 'המיזוג בוטל';
+
+  @override
+  String get diveLog_computerSource_badge_primary => 'ראשי';
+
+  @override
+  String get diveLog_consolidate_confirm => 'לשמור כצלילה אחת עם שני המחשבים';
+
+  @override
+  String get diveLog_consolidate_error_generic =>
+      'לא ניתן היה למזג את הצלילות. שום דבר לא השתנה.';
+
+  @override
+  String get diveLog_consolidate_error_notOverlapping =>
+      'הצלילות האלה אינן חופפות בזמן, ולכן לא ניתן למזג אותן כצלילה אחת.';
+
+  @override
+  String get diveLog_consolidate_error_sameComputer =>
+      'הצלילות האלה מגיעות מאותו מחשב צלילה ולא ניתן למזג אותן בדרך זו.';
+
+  @override
+  String get diveLog_consolidate_selectPrimary => 'מחשב הצלילה הראשי';
+
+  @override
+  String get diveLog_consolidate_snackbar => 'הצלילה מוזגה כמחשב נוסף.';
+
+  @override
+  String get diveLog_consolidate_undoError => 'לא ניתן היה לבטל את המיזוג.';
+
+  @override
+  String get diveLog_consolidate_undone => 'המיזוג בוטל';
+
+  @override
+  String diveLog_mergeDialog_confirmSubtitle(String time) {
+    return 'הצלילה בשעה $time תמוזג לתוך צלילה זו.';
+  }
+
+  @override
+  String get diveLog_mergeDialog_confirmTitle => 'אישור מיזוג';
+
+  @override
+  String get diveLog_mergeDialog_empty => 'לא נמצאו צלילות נוספות ביום זה.';
+
+  @override
+  String get diveLog_mergeDialog_explanation =>
+      'הפרופיל, הבלונים, הלחצים, האירועים, התגיות, השותפים והתצפיות של צלילה זו ימוזגו לתוך צלילה זו כמקור מחשב נוסף. ניתן לבטל פעולה זו באמצעות \'ביטול קישור מחשב\'.';
+
+  @override
+  String diveLog_mergeDialog_loadError(String error) {
+    return 'שגיאה בטעינת הצלילות: $error';
+  }
+
+  @override
+  String get diveLog_mergeDialog_merge => 'מיזוג';
+
+  @override
+  String get diveLog_mergeDialog_next => 'הבא';
+
+  @override
+  String get diveLog_mergeDialog_subtitle =>
+      'בחר צלילה מאותו היום למיזוג כמחשב נוסף.';
+
+  @override
+  String get diveLog_mergeDialog_title => 'מיזוג עם צלילה אחרת';
+
+  @override
+  String get diveLog_mergeDialog_whatThisDoes => 'מה זה עושה';
 
   @override
   String get diveLog_computerSheet_description =>
@@ -4732,12 +4787,6 @@ class AppLocalizationsHe extends AppLocalizations {
   String get diveLog_playback_tooltip_speed => 'מהירות הפעלה';
 
   @override
-  String get diveLog_profileSelector_badge_primary => 'ראשי';
-
-  @override
-  String get diveLog_profileSelector_label_diveComputers => 'מחשבי צלילה';
-
-  @override
   String diveLog_profile_axisDepth(Object unit) {
     return 'עומק ($unit)';
   }
@@ -5274,6 +5323,47 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get diveLog_tooltip_tts => 'TTS';
+
+  @override
+  String get diveLog_sources_row_metric => 'מדד';
+
+  @override
+  String get diveLog_sources_row_maxDepth => 'עומק מקסימלי';
+
+  @override
+  String get diveLog_sources_row_avgDepth => 'עומק ממוצע';
+
+  @override
+  String get diveLog_sources_row_duration => 'משך';
+
+  @override
+  String get diveLog_sources_row_waterTemp => 'טמפ\' מים';
+
+  @override
+  String get diveLog_sources_row_cns => 'CNS';
+
+  @override
+  String get diveLog_sources_row_otu => 'OTU';
+
+  @override
+  String get diveLog_sources_row_decoAlgorithm => 'אלגוריתם דקומפרסיה';
+
+  @override
+  String get diveLog_sources_row_gf => 'GF';
+
+  @override
+  String diveLog_sources_minutes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count דקות',
+      one: 'דקה אחת',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get diveLog_sources_unknownComputer => 'מחשב לא ידוע';
 
   @override
   String get divePlanner_action_addTank => 'הוסף מיכל';

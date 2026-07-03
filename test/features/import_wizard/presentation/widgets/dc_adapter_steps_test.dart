@@ -14,6 +14,7 @@ import 'package:submersion/features/dive_computer/presentation/providers/downloa
 import 'package:submersion/features/dive_computer/presentation/widgets/download_step_widget.dart';
 import 'package:submersion/features/dive_log/data/repositories/dive_computer_repository_impl.dart';
 import 'package:submersion/features/dive_log/data/repositories/dive_repository_impl.dart';
+import 'package:submersion/features/dive_log/data/services/dive_consolidation_service.dart';
 import 'package:submersion/features/dive_log/domain/entities/dive_computer.dart';
 import 'package:submersion/features/import_wizard/data/adapters/dive_computer_adapter.dart';
 import 'package:submersion/features/import_wizard/presentation/widgets/dc_adapter_steps.dart';
@@ -174,10 +175,12 @@ DiveComputerAdapter _makeAdapter({
   DiveComputerRepository? computerRepository,
 }) {
   final repo = computerRepository ?? _FakeDiveComputerRepository();
+  final diveRepository = DiveRepository();
   return DiveComputerAdapter(
     importService: DiveImportService(repository: repo),
     computerRepository: repo,
-    diveRepository: DiveRepository(),
+    diveRepository: diveRepository,
+    consolidationService: DiveConsolidationService(diveRepository),
     diverId: 'diver-1',
     knownComputer: knownComputer,
   );
