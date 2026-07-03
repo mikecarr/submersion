@@ -60,14 +60,14 @@ void main() {
         );
   }
 
-  Future<void> species(String id) async {
+  Future<void> species(String id, {String category = 'fish'}) async {
     await db
         .into(db.species)
         .insert(
           SpeciesCompanion(
             id: Value(id),
             commonName: Value(id),
-            category: const Value('fish'),
+            category: Value(category),
           ),
         );
   }
@@ -183,24 +183,35 @@ void main() {
   test('unique species count respects a tag filter', () async {
     await dive('a');
     await dive('b');
-    await species('turtle');
-    for (final id in ['a', 'b']) {
-      await db
-          .into(db.sightings)
-          .insert(
-            SightingsCompanion.insert(
-              id: 'sight-$id',
-              diveId: id,
-              speciesId: 'turtle',
-            ),
-          );
-    }
+    await species('turtle', category: 'reptile');
+    await species('shark');
+    await db
+        .into(db.sightings)
+        .insert(
+          SightingsCompanion.insert(
+            id: 'sight-a',
+            diveId: 'a',
+            speciesId: 'turtle',
+          ),
+        );
+    await db
+        .into(db.sightings)
+        .insert(
+          SightingsCompanion.insert(
+            id: 'sight-b',
+            diveId: 'b',
+            speciesId: 'shark',
+          ),
+        );
     await tag('dry');
     await link('a', 'dry');
+
+    final all = await repo.getUniqueSpeciesCount();
+    expect(all, 2);
 
     final filtered = await repo.getUniqueSpeciesCount(
       filter: const DiveFilterState(tagIds: ['dry']),
     );
-    expect(filtered, 1);
+    expect(filtered, 1); // only turtle, sighted on dive 'a'
   });
 }
