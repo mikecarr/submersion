@@ -883,6 +883,12 @@ class DiveComputerRepository {
                 runtime: Value(durationSeconds),
                 maxDepth: Value(maxDepth),
                 avgDepth: Value(effectiveAvgDepth),
+                // Populated so DiveConsolidationService (Task 5) can attribute
+                // consolidated children and enforce its same-computer guard;
+                // without this the dives row's own computerId stayed null
+                // even though every child row (profiles, tanks, data source)
+                // already carried it.
+                computerId: Value(computerId),
                 diveComputerModel: Value(computer?.fullName),
                 diveComputerSerial: Value(computer?.serialNumber),
                 diveComputerFirmware: Value(computer?.firmwareVersion),

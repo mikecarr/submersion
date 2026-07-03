@@ -562,7 +562,12 @@ class UniversalImportNotifier extends StateNotifier<UniversalImportState> {
         return;
       }
 
-      // Partition dive selections: consolidate vs normal import.
+      // Partition dive selections: consolidate vs normal import. Both are
+      // imported as full standalone dives in the SAME importer.import() call
+      // below (so consolidate-flagged dives get every sample column, tank,
+      // pressure, and event, plus correct cross-references to trips/sites/
+      // buddies from this payload) -- consolidate-flagged indices are then
+      // folded into their matched dive afterwards via performConsolidations.
       final consolidateIndices = <int>{};
       final normalDiveSelection = Set<int>.from(
         state.selectionFor(ImportEntityType.dives),
@@ -578,7 +583,7 @@ class UniversalImportNotifier extends StateNotifier<UniversalImportState> {
       final uddfData = _toUddfResult(payload);
       final uddfSelections = _toUddfSelections({
         ...state.selections,
-        ImportEntityType.dives: normalDiveSelection,
+        ImportEntityType.dives: {...normalDiveSelection, ...consolidateIndices},
       });
 
       final repos = ImportRepositories(
@@ -622,24 +627,24 @@ class UniversalImportNotifier extends StateNotifier<UniversalImportState> {
         },
       );
 
-      // Run consolidations for dives marked with the consolidate resolution.
-      var consolidatedCount = 0;
+      // Fold consolidate-flagged dives (just imported above as standalone
+      // dives) into their matched existing dive.
       if (consolidateIndices.isNotEmpty) {
-        final diveRepo = _ref.read(diveRepositoryProvider);
-        final diveItems = payload.entitiesOf(ImportEntityType.dives);
-        consolidatedCount = await performConsolidations(
+        final consolidationService = _ref.read(
+          diveConsolidationServiceProvider,
+        );
+        await performConsolidations(
           indices: consolidateIndices,
-          diveItems: diveItems,
+          diveIdByIndex: result.diveIdByIndex,
           duplicateResult: state.duplicateResult,
-          diveRepository: diveRepo,
+          consolidationService: consolidationService,
         );
       }
 
       _invalidateProviders();
 
       final counts = <ImportEntityType, int>{
-        if ((result.dives + consolidatedCount) > 0)
-          ImportEntityType.dives: result.dives + consolidatedCount,
+        if (result.dives > 0) ImportEntityType.dives: result.dives,
         if (result.sites > 0) ImportEntityType.sites: result.sites,
         if (result.trips > 0) ImportEntityType.trips: result.trips,
         if (result.equipment > 0) ImportEntityType.equipment: result.equipment,

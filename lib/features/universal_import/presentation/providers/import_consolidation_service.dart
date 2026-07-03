@@ -1,94 +1,38 @@
-import 'package:drift/drift.dart' show Value;
-import 'package:uuid/uuid.dart';
-
-import 'package:submersion/core/database/database.dart'
-    show DiveDataSourcesCompanion, DiveProfilesCompanion;
-import 'package:submersion/core/utils/number_utils.dart';
-import 'package:submersion/features/dive_log/data/repositories/dive_repository_impl.dart';
+import 'package:submersion/features/dive_log/data/services/dive_consolidation_service.dart';
 import 'package:submersion/features/universal_import/data/services/import_duplicate_checker.dart';
 
-/// Attaches consolidate-flagged imported dives as secondary computer
-/// readings on matched existing dives.
+/// Folds consolidate-flagged imported dives into their matched existing
+/// dives.
+///
+/// The dives at [indices] have already been persisted as full standalone
+/// dives (via `UddfEntityImporter.import`, in the same call as the rest of
+/// the payload's dive selection, so cross-references to trips/sites/buddies
+/// from this import resolve correctly) -- [diveIdByIndex] maps each source
+/// index to the id that import produced. This function folds each of those
+/// freshly-imported dives into the dive matched by [duplicateResult] via
+/// [DiveConsolidationService.apply], which carries over every sample
+/// column, tank, pressure, and event with attribution, then tombstones the
+/// now-redundant standalone dive.
 ///
 /// Returns the number of successful consolidations.
 Future<int> performConsolidations({
   required Set<int> indices,
-  required List<Map<String, dynamic>> diveItems,
+  required Map<int, String> diveIdByIndex,
   required ImportDuplicateResult? duplicateResult,
-  required DiveRepository diveRepository,
+  required DiveConsolidationService consolidationService,
 }) async {
-  const uuid = Uuid();
-  final now = DateTime.now();
   var count = 0;
 
   for (final index in indices) {
     final matchResult = duplicateResult?.diveMatchFor(index);
     if (matchResult == null) continue;
 
-    final diveData = diveItems[index];
-    final dateTime = diveData['dateTime'] as DateTime?;
-    if (dateTime == null) continue;
-    final runtime = diveData['runtime'] as Duration?;
-    final duration = diveData['duration'] as Duration?;
-    final effectiveDuration = runtime ?? duration;
-    final exitTime = effectiveDuration != null
-        ? dateTime.add(effectiveDuration)
-        : null;
+    final newDiveId = diveIdByIndex[index];
+    if (newDiveId == null) continue;
 
-    final secondaryReading = DiveDataSourcesCompanion.insert(
-      id: uuid.v4(),
-      diveId: matchResult.diveId,
-      isPrimary: const Value(false),
-      computerModel: Value(diveData['diveComputerModel'] as String?),
-      computerSerial: Value(diveData['diveComputerSerial'] as String?),
-      sourceFormat: Value(diveData['sourceFormat'] as String?),
-      maxDepth: Value(asDoubleOrNull(diveData['maxDepth'])),
-      avgDepth: Value(asDoubleOrNull(diveData['avgDepth'])),
-      duration: Value(effectiveDuration?.inSeconds),
-      waterTemp: Value(asDoubleOrNull(diveData['waterTemp'])),
-      entryTime: Value(dateTime),
-      exitTime: Value(exitTime),
-      cns: Value(asDoubleOrNull(diveData['cnsEnd'])),
-      otu: Value(asDoubleOrNull(diveData['otu'])),
-      importedAt: now,
-      createdAt: now,
-    );
-
-    final profileData =
-        (diveData['profile'] as List?)?.cast<Map<String, dynamic>>() ??
-        const <Map<String, dynamic>>[];
-    final secondaryProfile = profileData
-        .map(
-          (p) => DiveProfilesCompanion.insert(
-            id: uuid.v4(),
-            diveId: matchResult.diveId,
-            isPrimary: const Value(false),
-            timestamp: p['timestamp'] as int? ?? 0,
-            depth: asDoubleOrNull(p['depth']) ?? 0.0,
-            temperature: Value(asDoubleOrNull(p['temperature'])),
-            pressure: const Value(null),
-            heartRate: Value(p['heartRate'] as int?),
-            setpoint: Value(asDoubleOrNull(p['setpoint'])),
-            ppO2: Value(asDoubleOrNull(p['ppO2'])),
-            o2Sensor1: Value(asDoubleOrNull(p['o2Sensor1'])),
-            o2Sensor2: Value(asDoubleOrNull(p['o2Sensor2'])),
-            o2Sensor3: Value(asDoubleOrNull(p['o2Sensor3'])),
-            o2Sensor4: Value(asDoubleOrNull(p['o2Sensor4'])),
-            o2Sensor5: Value(asDoubleOrNull(p['o2Sensor5'])),
-            o2Sensor6: Value(asDoubleOrNull(p['o2Sensor6'])),
-            cns: Value(asDoubleOrNull(p['cns'])),
-            ndl: Value(p['ndl'] as int?),
-            rbt: Value(p['rbt'] as int?),
-            decoType: Value(p['decoType'] as int?),
-            tts: Value(p['tts'] as int?),
-          ),
-        )
-        .toList();
-
-    await diveRepository.consolidateComputer(
+    await consolidationService.apply(
       targetDiveId: matchResult.diveId,
-      secondaryReading: secondaryReading,
-      secondaryProfile: secondaryProfile,
+      secondaryDiveIds: [newDiveId],
     );
     count++;
   }

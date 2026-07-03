@@ -4333,48 +4333,116 @@ class DiveRepository {
     }
   }
 
+  /// Get every non-empty `source_uuid` and hex-encoded `raw_fingerprint`
+  /// across ALL of a dive's `dive_data_sources` rows (not just the primary),
+  /// as a `{ diveId -> { key, key, ... } }` map.
+  ///
+  /// Used by the import duplicate checker to detect exact re-downloads from
+  /// ANY of a dive's consolidated sources — a re-download from a secondary
+  /// (already-consolidated) computer must resolve as an exact duplicate of
+  /// the target dive, not just re-downloads from the primary computer.
+  ///
+  /// Fingerprints are hex-encoded the same way SQLite's `hex()` function
+  /// encodes them (uppercase, no separators) so callers can hex-encode a
+  /// downloaded dive's raw fingerprint bytes the same way before comparing.
+  /// Since fingerprint hex strings never contain a `-` and source UUIDs
+  /// always do, the two kinds of key never collide within the set.
+  ///
+  /// When [diverId] is provided, the result is restricted to that diver's
+  /// dives — callers that have already scoped `existingDives` to a single
+  /// diver should pass it here so the key map shares the same scope.
+  Future<Map<String, Set<String>>> getSourceKeysByDiveId({
+    String? diverId,
+  }) async {
+    try {
+      final sql = StringBuffer(
+        'SELECT s.dive_id, s.source_uuid, hex(s.raw_fingerprint) as fp ',
+      )..write('FROM dive_data_sources s ');
+      final variables = <Variable<Object>>[];
+      if (diverId != null) {
+        sql.write('INNER JOIN dives d ON d.id = s.dive_id ');
+      }
+      sql.write(
+        'WHERE (s.source_uuid IS NOT NULL OR s.raw_fingerprint IS NOT NULL) ',
+      );
+      if (diverId != null) {
+        sql.write('AND d.diver_id = ? ');
+        variables.add(Variable<Object>(diverId));
+      }
+
+      final rows = await _db
+          .customSelect(sql.toString(), variables: variables)
+          .get();
+      final result = <String, Set<String>>{};
+      for (final row in rows) {
+        final diveId = row.read<String>('dive_id');
+        final uuid = row.read<String?>('source_uuid');
+        final fingerprint = row.read<String?>('fp');
+        final keys = result.putIfAbsent(diveId, () => <String>{});
+        if (uuid != null && uuid.isNotEmpty) keys.add(uuid);
+        if (fingerprint != null && fingerprint.isNotEmpty) {
+          keys.add(fingerprint);
+        }
+      }
+      return result;
+    } catch (e, stackTrace) {
+      _log.error(
+        'Failed to load source keys for dives',
+        error: e,
+        stackTrace: stackTrace,
+      );
+      rethrow;
+    }
+  }
+
+  /// A source-uuid-shaped key always contains a hyphen; a hex-encoded
+  /// fingerprint from SQLite's `hex()` never does. Used to filter
+  /// [getSourceKeysByDiveId]'s combined set back down to UUIDs only.
+  static bool _looksLikeSourceUuid(String key) => key.contains('-');
+
   /// Get `source_uuid` for every dive that has a non-null one, as a
   /// `{ diveId -> sourceUuid }` map.
   ///
   /// Used by the import duplicate checker to short-circuit content fuzzy
-  /// matching for dives that already have a known source UUID. When a dive
-  /// has multiple data sources (multi-computer), the primary row's UUID wins;
-  /// otherwise the most recently created row's UUID is used. Dives with no
+  /// matching for dives that already have a known source UUID. Thin wrapper
+  /// over [getSourceKeysByDiveId] so the two queries cannot drift apart; any
+  /// one of a dive's UUIDs (across all of its sources) is returned since
+  /// callers only ever use this for exact-match lookups. Dives with no
   /// source_uuid on any row are absent from the map.
   ///
   /// When [diverId] is provided, the result is restricted to that diver's
   /// dives — callers that have already scoped `existingDives` to a single
   /// diver should pass it here so the UUID map shares the same scope.
   Future<Map<String, String>> getSourceUuidByDiveId({String? diverId}) async {
-    try {
-      final sql = StringBuffer('SELECT s.dive_id, s.source_uuid ')
-        ..write('FROM dive_data_sources s ');
-      final variables = <Variable<Object>>[];
-      if (diverId != null) {
-        sql.write('INNER JOIN dives d ON d.id = s.dive_id ');
+    final keysByDiveId = await getSourceKeysByDiveId(diverId: diverId);
+    final result = <String, String>{};
+    for (final entry in keysByDiveId.entries) {
+      for (final key in entry.value) {
+        if (_looksLikeSourceUuid(key)) {
+          result[entry.key] = key;
+          break;
+        }
       }
-      sql.write('WHERE s.source_uuid IS NOT NULL ');
-      if (diverId != null) {
-        sql.write('AND d.diver_id = ? ');
-        variables.add(Variable<Object>(diverId));
-      }
-      sql.write('ORDER BY s.is_primary DESC, s.created_at DESC');
+    }
+    return result;
+  }
 
-      final rows = await _db
-          .customSelect(sql.toString(), variables: variables)
-          .get();
-      final result = <String, String>{};
-      for (final row in rows) {
-        final diveId = row.read<String>('dive_id');
-        final uuid = row.read<String?>('source_uuid');
-        if (uuid == null || uuid.isEmpty) continue;
-        // First row wins (ordered by isPrimary DESC then createdAt DESC).
-        result.putIfAbsent(diveId, () => uuid);
-      }
-      return result;
+  /// One-column lookup of a dive's `computer_id`.
+  ///
+  /// Used by the import wizard's duplicate matcher to populate
+  /// `DiveMatchResult.matchedComputerId`, since the domain [Dive] entity does
+  /// not carry `computerId`.
+  Future<String?> getComputerIdForDive(String diveId) async {
+    try {
+      final row =
+          await (_db.selectOnly(_db.dives)
+                ..addColumns([_db.dives.computerId])
+                ..where(_db.dives.id.equals(diveId)))
+              .getSingleOrNull();
+      return row?.read(_db.dives.computerId);
     } catch (e, stackTrace) {
       _log.error(
-        'Failed to load source UUIDs for dives',
+        'Failed to load computer id for dive: $diveId',
         error: e,
         stackTrace: stackTrace,
       );
@@ -4540,53 +4608,6 @@ class DiveRepository {
   // ============================================================================
   // Consolidation and merge operations
   // ============================================================================
-
-  /// Adds a secondary computer's data to an existing dive.
-  ///
-  /// If no [DiveDataSources] rows exist yet for [targetDiveId], the primary
-  /// source's data is back-filled from the [Dives] row before the secondary
-  /// reading is inserted.
-  Future<void> consolidateComputer({
-    required String targetDiveId,
-    required DiveDataSourcesCompanion secondaryReading,
-    required List<DiveProfilesCompanion> secondaryProfile,
-  }) async {
-    try {
-      await _db.transaction(() async {
-        // Back-fill primary if this is the first consolidation.
-        final existingReadings = await getDataSources(targetDiveId);
-        if (existingReadings.isEmpty) {
-          await backfillPrimaryDataSource(targetDiveId);
-        }
-
-        // Save the secondary computer reading.
-        await saveComputerReading(secondaryReading);
-
-        // Batch-insert secondary profile points with isPrimary=false.
-        if (secondaryProfile.isNotEmpty) {
-          await _db.batch((batch) {
-            for (final point in secondaryProfile) {
-              batch.insert(
-                _db.diveProfiles,
-                point.copyWith(
-                  diveId: Value(targetDiveId),
-                  isPrimary: const Value(false),
-                ),
-              );
-            }
-          });
-        }
-      });
-      SyncEventBus.notifyLocalChange();
-    } catch (e, stackTrace) {
-      _log.error(
-        'Failed to consolidate computer for dive: $targetDiveId',
-        error: e,
-        stackTrace: stackTrace,
-      );
-      rethrow;
-    }
-  }
 
   /// Reverses a consolidation by detaching one computer's data into a new
   /// standalone dive.

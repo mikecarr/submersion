@@ -133,6 +133,14 @@ class UddfEntityImportResult {
   final int courses;
   final List<String> diveIds;
 
+  /// The persisted dive id created for each imported source-dive index.
+  ///
+  /// Keyed by the index into the `dives` list passed to [import] (the same
+  /// indices used by [UddfImportSelections.dives]), not by import order —
+  /// dives are persisted oldest-first for sequential numbering, so this map
+  /// is how callers recover which dive id corresponds to which input index.
+  final Map<int, String> diveIdByIndex;
+
   const UddfEntityImportResult({
     this.trips = 0,
     this.equipment = 0,
@@ -146,6 +154,7 @@ class UddfEntityImportResult {
     this.dives = 0,
     this.courses = 0,
     this.diveIds = const [],
+    this.diveIdByIndex = const {},
   });
 
   int get total =>
@@ -372,6 +381,7 @@ class UddfEntityImporter {
       dives: divesResult.count,
       courses: coursesCount,
       diveIds: divesResult.diveIds,
+      diveIdByIndex: divesResult.diveIdByIndex,
     );
   }
 
@@ -975,6 +985,7 @@ class UddfEntityImporter {
     onProgress?.call(ImportPhase.dives, 0, selected.length);
     var count = 0;
     final importedDiveIds = <String>[];
+    final diveIdByIndex = <int, String>{};
     final inlineBuddyIds = <String>{};
 
     // Sort selected indices by dateTime (oldest first) for sequential numbering.
@@ -1223,6 +1234,7 @@ class UddfEntityImporter {
 
       await repos.diveRepository.createDive(dive);
       importedDiveIds.add(diveId);
+      diveIdByIndex[i] = diveId;
 
       // Write MacDive dive metadata columns that don't flow through the Dive
       // domain entity. Also plug `weather` into the existing weatherDescription
@@ -1544,7 +1556,12 @@ class UddfEntityImporter {
       onProgress?.call(ImportPhase.dives, count, selected.length);
     }
 
-    return _DiveImportResult(count, inlineBuddyIds.length, importedDiveIds);
+    return _DiveImportResult(
+      count,
+      inlineBuddyIds.length,
+      importedDiveIds,
+      diveIdByIndex,
+    );
   }
 
   // -- Dive helper methods --
@@ -1846,10 +1863,12 @@ class _DiveImportResult {
   final int count;
   final int inlineBuddies;
   final List<String> diveIds;
+  final Map<int, String> diveIdByIndex;
 
   const _DiveImportResult(
     this.count,
     this.inlineBuddies, [
     this.diveIds = const [],
+    this.diveIdByIndex = const {},
   ]);
 }

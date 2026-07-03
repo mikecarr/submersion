@@ -154,6 +154,7 @@ void main() {
       Map<int, DiveMatchResult>? diveMatchResults,
       List<EntityItem>? siteItems,
       Set<int> siteDuplicateIndices = const {},
+      String? currentComputerId,
     }) {
       final groups = <ImportEntityType, EntityGroup>{};
 
@@ -173,9 +174,10 @@ void main() {
       }
 
       return ImportBundle(
-        source: const ImportSourceInfo(
+        source: ImportSourceInfo(
           type: ImportSourceType.uddf,
           displayName: 'test.uddf',
+          currentComputerId: currentComputerId,
         ),
         groups: groups,
       );
@@ -183,9 +185,13 @@ void main() {
 
     EntityItem makeItem(String title) => EntityItem(title: title, subtitle: '');
 
-    DiveMatchResult makeMatchResult(double score) => DiveMatchResult(
+    DiveMatchResult makeMatchResult(
+      double score, {
+      String? matchedComputerId,
+    }) => DiveMatchResult(
       diveId: 'existing-dive',
       score: score,
+      matchedComputerId: matchedComputerId,
       timeDifferenceMs: 0,
     );
 
@@ -308,6 +314,75 @@ void main() {
           diveItems: [makeItem('Dive 1')],
           diveDuplicateIndices: {0},
           diveMatchResults: {0: makeMatchResult(0.7)},
+        );
+
+        notifier.setBundle(bundle);
+
+        expect(
+          notifier.state.duplicateActions[ImportEntityType.dives],
+          anyOf(isNull, isEmpty),
+        );
+        expect(notifier.state.pendingFor(ImportEntityType.dives), equals({0}));
+      });
+
+      // -----------------------------------------------------------------
+      // Cross-computer auto-consolidate default (Task 8)
+      // -----------------------------------------------------------------
+
+      test('score >= kAutoConsolidateScore with a DIFFERENT matchedComputerId '
+          'is auto-seeded with DuplicateAction.consolidate and drained from '
+          'pending', () {
+        final bundle = buildBundle(
+          diveItems: [makeItem('Dive 1')],
+          diveDuplicateIndices: {0},
+          diveMatchResults: {
+            0: makeMatchResult(0.9, matchedComputerId: 'computer-other'),
+          },
+          currentComputerId: 'computer-current',
+        );
+
+        notifier.setBundle(bundle);
+
+        expect(
+          notifier.state.duplicateActions[ImportEntityType.dives]?[0],
+          DuplicateAction.consolidate,
+        );
+        expect(
+          notifier.state.pendingFor(ImportEntityType.dives),
+          isNot(contains(0)),
+        );
+        expect(notifier.state.selections[ImportEntityType.dives], contains(0));
+      });
+
+      test('score >= kAutoConsolidateScore with the SAME matchedComputerId as '
+          'the current computer seeds nothing -- stays pending', () {
+        final bundle = buildBundle(
+          diveItems: [makeItem('Dive 1')],
+          diveDuplicateIndices: {0},
+          diveMatchResults: {
+            0: makeMatchResult(0.9, matchedComputerId: 'computer-current'),
+          },
+          currentComputerId: 'computer-current',
+        );
+
+        notifier.setBundle(bundle);
+
+        expect(
+          notifier.state.duplicateActions[ImportEntityType.dives],
+          anyOf(isNull, isEmpty),
+        );
+        expect(notifier.state.pendingFor(ImportEntityType.dives), equals({0}));
+      });
+
+      test('score below kAutoConsolidateScore with a different computer seeds '
+          'nothing -- stays pending per #200', () {
+        final bundle = buildBundle(
+          diveItems: [makeItem('Dive 1')],
+          diveDuplicateIndices: {0},
+          diveMatchResults: {
+            0: makeMatchResult(0.7, matchedComputerId: 'computer-other'),
+          },
+          currentComputerId: 'computer-current',
         );
 
         notifier.setBundle(bundle);

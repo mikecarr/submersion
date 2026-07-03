@@ -68,10 +68,19 @@ class ImportSourceInfo {
   /// Optional metadata about the source (e.g. device info, file headers).
   final Map<String, dynamic>? metadata;
 
+  /// The id of the dive computer this session is downloading from, when
+  /// [type] is [ImportSourceType.diveComputer].
+  ///
+  /// Used to distinguish a cross-computer duplicate match (auto-suggested
+  /// for consolidation) from a same-computer duplicate match (a plain
+  /// re-download, never auto-suggested for consolidation).
+  final String? currentComputerId;
+
   const ImportSourceInfo({
     required this.type,
     required this.displayName,
     this.metadata,
+    this.currentComputerId,
   });
 }
 

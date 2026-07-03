@@ -116,6 +116,13 @@ class DiveMatchResult {
   /// Site name of the matched existing dive (for display in review UI).
   final String? siteName;
 
+  /// The matched existing dive's `computerId`, when known.
+  ///
+  /// Used by the import wizard to auto-suggest consolidation only for
+  /// cross-computer matches (a re-download from the SAME computer should
+  /// never be auto-suggested for consolidation — that's a plain duplicate).
+  final String? matchedComputerId;
+
   const DiveMatchResult({
     required this.diveId,
     required this.score,
@@ -123,6 +130,7 @@ class DiveMatchResult {
     this.depthDifferenceMeters,
     this.durationDifferenceSeconds,
     this.siteName,
+    this.matchedComputerId,
   });
 
   /// Returns true if this is a probable duplicate (score >= 0.7).

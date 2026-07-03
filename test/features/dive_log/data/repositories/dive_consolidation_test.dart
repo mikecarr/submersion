@@ -140,144 +140,103 @@ void main() {
   }
 
   // ---------------------------------------------------------------------------
-  // consolidateComputer
+  // consolidateComputer was removed in favor of DiveConsolidationService.apply
+  // (Task 8) -- its "back-fill primary on first consolidation" and "insert
+  // secondary profile points" scenarios are exercised directly against the
+  // service in dive_consolidation_service_test.dart. mergeDives was removed
+  // for the same reason -- its "re-parent secondary into primary, delete
+  // secondary, synthesize a data source from secondary metadata" scenarios
+  // are exercised directly against the service in
+  // dive_consolidation_service_test.dart.
   // ---------------------------------------------------------------------------
 
-  group('consolidateComputer', () {
-    test(
-      'adds secondary reading and back-fills primary on first consolidation',
-      () async {
-        // Set up a dive with no existing computer readings.
-        final diveId = await insertTestDive(
-          id: 'dive-primary',
-          diveComputerModel: 'Shearwater Petrel',
-          maxDepth: 30.0,
-        );
+  // ---------------------------------------------------------------------------
+  // getSourceKeysByDiveId (Task 8)
+  // ---------------------------------------------------------------------------
 
-        await insertTestProfile(
-          diveId: diveId,
-          sourceTag: 'primary',
-          isPrimary: true,
-          depth: 30.0,
-        );
+  group('getSourceKeysByDiveId after consolidation', () {
+    Future<void> insertComputer(String id) async {
+      await db
+          .into(db.diveComputers)
+          .insert(
+            DiveComputersCompanion.insert(
+              id: id,
+              name: id,
+              createdAt: 0,
+              updatedAt: 0,
+            ),
+          );
+    }
 
-        final secondaryReading = buildReading(
-          id: 'reading-secondary',
-          diveId: diveId,
-          isPrimary: false,
-          computerModel: 'Suunto D5',
-          maxDepth: 29.5,
-        );
+    test('returns the target dive with BOTH computers\' fingerprints after '
+        'consolidating two downloads', () async {
+      await insertComputer('comp-primary');
+      await insertComputer('comp-secondary');
 
-        await repository.consolidateComputer(
-          targetDiveId: diveId,
-          secondaryReading: secondaryReading,
-          secondaryProfile: [],
-        );
+      // Same entry time and duration so the two dives overlap -- the
+      // builder rejects non-overlapping selections as
+      // ConsolidationInvalid(notOverlapping).
+      final entryMillis = DateTime.utc(2026, 7, 1, 9).millisecondsSinceEpoch;
 
-        final readings = await repository.getDataSources(diveId);
-        // Should have 2 readings: back-filled primary + secondary.
-        expect(readings.length, equals(2));
+      final targetId = await insertTestDive(
+        id: 'dive-target',
+        diveComputerModel: 'Shearwater Petrel',
+        maxDepth: 30.0,
+        entryTime: entryMillis,
+        duration: 1800,
+      );
+      await (db.update(db.dives)..where((t) => t.id.equals(targetId))).write(
+        const DivesCompanion(computerId: Value('comp-primary')),
+      );
 
-        final primary = readings.firstWhere((r) => r.isPrimary);
-        expect(primary.computerModel, equals('Shearwater Petrel'));
-
-        final secondary = readings.firstWhere((r) => !r.isPrimary);
-        expect(secondary.id, equals('reading-secondary'));
-        expect(secondary.computerModel, equals('Suunto D5'));
-      },
-    );
-
-    test(
-      'skips back-fill if primary reading already exists (already multi-computer)',
-      () async {
-        final diveId = await insertTestDive(id: 'dive-multi');
-
-        // Insert an existing primary reading.
-        await repository.saveComputerReading(
-          buildReading(id: 'existing-primary', diveId: diveId, isPrimary: true),
-        );
-
-        final secondaryReading = buildReading(
-          id: 'reading-new-secondary',
-          diveId: diveId,
-          isPrimary: false,
-          computerModel: 'Garmin MK2i',
-        );
-
-        await repository.consolidateComputer(
-          targetDiveId: diveId,
-          secondaryReading: secondaryReading,
-          secondaryProfile: [],
-        );
-
-        final readings = await repository.getDataSources(diveId);
-        // Should be exactly 2: existing primary + new secondary.
-        expect(readings.length, equals(2));
-
-        final primaries = readings.where((r) => r.isPrimary).toList();
-        expect(primaries.length, equals(1));
-        expect(primaries.first.id, equals('existing-primary'));
-
-        final secondaries = readings.where((r) => !r.isPrimary).toList();
-        expect(secondaries.length, equals(1));
-        expect(secondaries.first.id, equals('reading-new-secondary'));
-      },
-    );
-
-    test('inserts secondary profile points with isPrimary=false', () async {
-      final diveId = await insertTestDive(id: 'dive-with-profiles');
-
-      // Insert existing primary reading.
       await repository.saveComputerReading(
-        buildReading(id: 'primary-reading', diveId: diveId, isPrimary: true),
-      );
-
-      final secondaryReading = buildReading(
-        id: 'secondary-reading',
-        diveId: diveId,
-        isPrimary: false,
-      );
-
-      // Provide secondary profile points (computerId null, isPrimary=false).
-      final secondaryProfile = [
-        DiveProfilesCompanion(
-          id: const Value('sp-1'),
-          diveId: Value(diveId),
-          isPrimary: const Value(false),
-          timestamp: const Value(0),
-          depth: const Value(5.0),
+        DiveDataSourcesCompanion.insert(
+          id: 'reading-primary',
+          diveId: targetId,
+          isPrimary: const Value(true),
+          computerId: const Value('comp-primary'),
+          rawFingerprint: Value(Uint8List.fromList([0xAB, 0xCD, 0xEF, 0x01])),
+          importedAt: DateTime.now(),
+          createdAt: DateTime.now(),
         ),
-        DiveProfilesCompanion(
-          id: const Value('sp-2'),
-          diveId: Value(diveId),
-          isPrimary: const Value(false),
-          timestamp: const Value(60),
-          depth: const Value(10.0),
-        ),
-      ];
-
-      await repository.consolidateComputer(
-        targetDiveId: diveId,
-        secondaryReading: secondaryReading,
-        secondaryProfile: secondaryProfile,
       );
 
-      // Verify secondary profiles were inserted with isPrimary=false.
-      final allProfiles = await (db.select(
-        db.diveProfiles,
-      )..where((t) => t.diveId.equals(diveId))).get();
-      final secondaryProfiles = allProfiles.where((p) => !p.isPrimary).toList();
-      expect(secondaryProfiles.length, equals(2));
+      final secondaryId = await insertTestDive(
+        id: 'dive-secondary',
+        diveComputerModel: 'Suunto D5',
+        maxDepth: 29.5,
+        entryTime: entryMillis,
+        duration: 1800,
+      );
+      await (db.update(db.dives)..where((t) => t.id.equals(secondaryId))).write(
+        const DivesCompanion(computerId: Value('comp-secondary')),
+      );
+      await repository.saveComputerReading(
+        DiveDataSourcesCompanion.insert(
+          id: 'reading-secondary',
+          diveId: secondaryId,
+          isPrimary: const Value(true),
+          computerId: const Value('comp-secondary'),
+          rawFingerprint: Value(Uint8List.fromList([0x12, 0x34, 0x56, 0x78])),
+          importedAt: DateTime.now(),
+          createdAt: DateTime.now(),
+        ),
+      );
+
+      final consolidation = DiveConsolidationService(repository);
+      await consolidation.apply(
+        targetDiveId: targetId,
+        secondaryDiveIds: [secondaryId],
+      );
+
+      final keysByDiveId = await repository.getSourceKeysByDiveId();
+
+      expect(keysByDiveId, contains(targetId));
+      final keys = keysByDiveId[targetId]!;
+      expect(keys, contains('ABCDEF01'));
+      expect(keys, contains('12345678'));
     });
   });
-
-  // ---------------------------------------------------------------------------
-  // mergeDives was removed in favor of DiveConsolidationService.apply --
-  // its "re-parent secondary into primary, delete secondary, synthesize a
-  // data source from secondary metadata" scenarios are exercised directly
-  // against the service in dive_consolidation_service_test.dart.
-  // ---------------------------------------------------------------------------
 
   // ---------------------------------------------------------------------------
   // unlinkComputer

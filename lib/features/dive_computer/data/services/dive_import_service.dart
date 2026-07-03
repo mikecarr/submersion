@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:submersion/features/dive_log/data/repositories/dive_computer_repository_impl.dart';
 import 'package:submersion/features/dive_log/data/repositories/dive_repository_impl.dart';
 import 'package:submersion/features/dive_log/domain/entities/dive_computer.dart';
@@ -385,12 +387,39 @@ class DiveImportService {
   }
 
   /// Detect if a downloaded dive matches an existing dive.
+  ///
+  /// Checks for an exact fingerprint match against ANY of a dive's sources
+  /// (primary or consolidated secondary) before falling back to fuzzy
+  /// time/depth/duration matching. This closes the re-download hole where a
+  /// dive that was previously consolidated as a SECONDARY computer's data
+  /// would not be recognized as a duplicate on the next download from that
+  /// same secondary computer, since only the primary computer's fingerprint
+  /// was ever checked.
   Future<DuplicateResult> detectDuplicate(
     DownloadedDive dive, {
     double timeTolerance = 5.0, // minutes
     double depthTolerance = 0.5, // meters
     String? diverId,
   }) async {
+    final rawFingerprint = dive.rawFingerprint;
+    if (rawFingerprint != null &&
+        rawFingerprint.isNotEmpty &&
+        _diveRepository != null) {
+      final hexFingerprint = _hexEncodeUppercase(rawFingerprint);
+      final sourceKeys = await _diveRepository.getSourceKeysByDiveId(
+        diverId: diverId,
+      );
+      for (final entry in sourceKeys.entries) {
+        if (entry.value.contains(hexFingerprint)) {
+          return DuplicateResult(
+            matchingDiveId: entry.key,
+            confidence: DuplicateConfidence.exact,
+            score: 1.0,
+          );
+        }
+      }
+    }
+
     // Use the repository's enhanced matching with scoring
     final match = await _repository.findMatchingDiveWithScore(
       profileStartTime: dive.startTime,
@@ -622,10 +651,22 @@ class DiveImportService {
         return null;
 
       case ConflictResolution.consolidate:
-        // Consolidation is handled by DiveComputerAdapter._consolidateDive()
-        // which calls DiveRepository.consolidateComputer() directly.
+        // Consolidation is handled by DiveComputerAdapter._consolidateDive(),
+        // which imports the download as a new dive then folds it into the
+        // matched dive via DiveConsolidationService.apply().
         return null;
     }
+  }
+
+  /// Hex-encode [bytes] the same way SQLite's `hex()` function does
+  /// (uppercase, no separators), so it can be compared against
+  /// `DiveRepository.getSourceKeysByDiveId`'s fingerprint keys.
+  static String _hexEncodeUppercase(Uint8List bytes) {
+    final buffer = StringBuffer();
+    for (final byte in bytes) {
+      buffer.write(byte.toRadixString(16).padLeft(2, '0'));
+    }
+    return buffer.toString().toUpperCase();
   }
 
   List<EventData> _convertEvents(List<DownloadedEvent> events) {

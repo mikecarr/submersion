@@ -1,10 +1,7 @@
-import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 
-import 'package:submersion/core/database/database.dart'
-    show DiveDataSourcesCompanion, DiveProfilesCompanion;
 import 'package:submersion/core/domain/models/incoming_dive_data.dart';
 import 'package:submersion/core/providers/provider.dart';
 import 'package:submersion/core/utils/unit_formatter.dart';
@@ -19,6 +16,7 @@ import 'package:submersion/features/dive_import/domain/services/dive_matcher.dar
 import 'package:submersion/features/dive_log/data/repositories/dive_computer_repository_impl.dart'
     hide DiveMatchResult;
 import 'package:submersion/features/dive_log/data/repositories/dive_repository_impl.dart';
+import 'package:submersion/features/dive_log/data/services/dive_consolidation_service.dart';
 import 'package:submersion/features/dive_log/domain/entities/dive_computer.dart';
 import 'package:submersion/features/import_wizard/domain/adapters/import_source_adapter.dart';
 import 'package:submersion/features/import_wizard/domain/models/duplicate_action.dart';
@@ -65,6 +63,7 @@ class DiveComputerAdapter implements ImportSourceAdapter {
     required DiveImportService importService,
     required DiveComputerRepository computerRepository,
     required DiveRepository diveRepository,
+    required DiveConsolidationService consolidationService,
     required String diverId,
     DiveComputer? knownComputer,
     String? displayName,
@@ -73,6 +72,7 @@ class DiveComputerAdapter implements ImportSourceAdapter {
   }) : _importService = importService,
        _computerRepository = computerRepository,
        _diveRepository = diveRepository,
+       _consolidationService = consolidationService,
        _diverId = diverId,
        _knownComputer = knownComputer,
        _ref = ref,
@@ -83,6 +83,7 @@ class DiveComputerAdapter implements ImportSourceAdapter {
   final DiveImportService _importService;
   final DiveComputerRepository _computerRepository;
   final DiveRepository _diveRepository;
+  final DiveConsolidationService _consolidationService;
   final String _diverId;
   final DiveComputer? _knownComputer;
   final WidgetRef? _ref;
@@ -314,6 +315,7 @@ class DiveComputerAdapter implements ImportSourceAdapter {
       source: ImportSourceInfo(
         type: ImportSourceType.diveComputer,
         displayName: _displayName,
+        currentComputerId: computer?.id,
       ),
       groups: {ImportEntityType.dives: EntityGroup(items: items)},
     );
@@ -336,12 +338,16 @@ class DiveComputerAdapter implements ImportSourceAdapter {
 
       if (result.isDuplicate && result.score >= 0.5) {
         duplicateIndices.add(i);
+        final matchedComputerId = await _diveRepository.getComputerIdForDive(
+          result.matchingDiveId!,
+        );
         matchResults[i] = DiveMatchResult(
           diveId: result.matchingDiveId!,
           score: result.score,
           timeDifferenceMs: (result.timeDifferenceSeconds ?? 0) * 1000,
           depthDifferenceMeters: result.depthDifferenceMeters,
           durationDifferenceSeconds: null,
+          matchedComputerId: matchedComputerId,
         );
       }
     }
@@ -551,60 +557,31 @@ class DiveComputerAdapter implements ImportSourceAdapter {
 
   /// Consolidate a downloaded dive as a secondary computer reading on an
   /// existing dive.
+  ///
+  /// Imports the download as a standalone new dive first -- persisting every
+  /// sample column, tanks, pressures, events, and the raw-data
+  /// `dive_data_sources` row via [DiveImportService.importSingleDiveAsNew] /
+  /// `importProfile` -- then folds it into [targetDiveId] via
+  /// [DiveConsolidationService.apply]. This gives full-fidelity
+  /// consolidation instead of a hand-rolled copy that would drop heart
+  /// rate, O2 sensors, CNS/TTS samples, tanks, and events.
   Future<void> _consolidateDive(
     DownloadedDive dive,
     String targetDiveId,
     DiveComputer comp,
   ) async {
-    const uuid = Uuid();
-    final now = DateTime.now();
-
-    final secondaryReading = DiveDataSourcesCompanion.insert(
-      id: uuid.v4(),
-      diveId: targetDiveId,
-      isPrimary: const Value(false),
-      computerId: Value(comp.id),
-      computerModel: Value(comp.model),
-      computerSerial: Value(comp.serialNumber),
-      sourceFormat: const Value('dive_computer'),
-      maxDepth: Value(dive.maxDepth),
-      avgDepth: Value(dive.avgDepth),
-      duration: Value(dive.durationSeconds),
-      waterTemp: Value(dive.minTemperature),
-      entryTime: Value(dive.startTime),
-      exitTime: Value(dive.endTime),
-      rawData: Value(dive.rawData),
-      rawFingerprint: Value(dive.rawFingerprint),
-      descriptorVendor: Value(_descriptorVendor),
-      descriptorProduct: Value(_descriptorProduct),
-      descriptorModel: Value(_descriptorModel),
-      libdivecomputerVersion: Value(_libdivecomputerVersion),
-      lastParsedAt: Value(dive.rawData != null ? DateTime.now() : null),
-      importedAt: now,
-      createdAt: now,
+    final newDiveId = await _importService.importSingleDiveAsNew(
+      dive,
+      computerId: comp.id,
+      diverId: _diverId,
+      descriptorVendor: _descriptorVendor,
+      descriptorProduct: _descriptorProduct,
+      descriptorModel: _descriptorModel,
+      libdivecomputerVersion: _libdivecomputerVersion,
     );
-
-    final secondaryProfile = dive.profile
-        .map(
-          (p) => DiveProfilesCompanion.insert(
-            id: uuid.v4(),
-            diveId: targetDiveId,
-            computerId: Value(comp.id),
-            isPrimary: const Value(false),
-            timestamp: p.timeSeconds,
-            depth: p.depth,
-            temperature: Value(p.temperature),
-            pressure: const Value(null),
-            setpoint: Value(p.setpoint),
-            ppO2: Value(p.ppo2),
-          ),
-        )
-        .toList();
-
-    await _diveRepository.consolidateComputer(
+    await _consolidationService.apply(
       targetDiveId: targetDiveId,
-      secondaryReading: secondaryReading,
-      secondaryProfile: secondaryProfile,
+      secondaryDiveIds: [newDiveId],
     );
   }
 

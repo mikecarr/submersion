@@ -21,6 +21,15 @@ class PendingLocation {
   final int index;
 }
 
+/// Match score threshold at or above which a cross-computer duplicate is
+/// auto-suggested for consolidation instead of being left for the user to
+/// decide.
+///
+/// Deliberately higher than the 0.7 "probable duplicate" threshold used
+/// elsewhere -- auto-selecting an action (rather than merely flagging a row
+/// for review) should only happen when the match is very likely correct.
+const double kAutoConsolidateScore = 0.85;
+
 // ============================================================================
 // State
 // ============================================================================
@@ -213,13 +222,26 @@ class ImportWizardNotifier extends StateNotifier<ImportWizardState> {
   /// - All items are selected except those in [EntityGroup.duplicateIndices].
   /// - Every suspected-duplicate index is recorded in
   ///   [ImportWizardState.pendingDuplicateReview] so the user must explicitly
-  ///   choose an action before the row gets a recorded resolution.
-  /// - [ImportWizardState.duplicateActions] is left empty — no auto-defaults
-  ///   are written for probable or possible matches. The user drains the
-  ///   pending set via per-row ([setDuplicateAction]) or bulk actions.
+  ///   choose an action before the row gets a recorded resolution -- UNLESS
+  ///   it qualifies for the cross-computer auto-consolidate default below.
+  /// - [ImportWizardState.duplicateActions] is left empty for every other
+  ///   duplicate — no auto-defaults are written for plain probable or
+  ///   possible matches (#200). The user drains the pending set via per-row
+  ///   ([setDuplicateAction]) or bulk actions.
+  ///
+  /// Auto-consolidate default: a dive duplicate whose [DiveMatchResult.score]
+  /// is at least [kAutoConsolidateScore] AND whose
+  /// [DiveMatchResult.matchedComputerId] is known AND differs from the
+  /// current download's computer is pre-selected with
+  /// [DuplicateAction.consolidate] and removed from the pending-review set.
+  /// A same-computer match (a plain re-download) is never auto-selected —
+  /// it stays pending like any other duplicate.
   void setBundle(ImportBundle bundle) {
     final selections = <ImportEntityType, Set<int>>{};
     final pendingReview = <ImportEntityType, Set<int>>{};
+    final duplicateActions = <ImportEntityType, Map<int, DuplicateAction>>{};
+
+    final currentComputerId = bundle.source.currentComputerId;
 
     for (final entry in bundle.groups.entries) {
       final type = entry.key;
@@ -230,17 +252,36 @@ class ImportWizardNotifier extends StateNotifier<ImportWizardState> {
       );
       selections[type] = allIndices.difference(group.duplicateIndices);
 
-      if (group.duplicateIndices.isNotEmpty) {
-        pendingReview[type] = Set<int>.from(group.duplicateIndices);
+      var pendingForType = Set<int>.from(group.duplicateIndices);
+
+      if (type == ImportEntityType.dives) {
+        final matchResults = group.matchResults;
+        if (matchResults != null) {
+          for (final index in group.duplicateIndices) {
+            final match = matchResults[index];
+            if (match == null) continue;
+            final matchedComputerId = match.matchedComputerId;
+            if (match.score >= kAutoConsolidateScore &&
+                matchedComputerId != null &&
+                matchedComputerId != currentComputerId) {
+              duplicateActions.putIfAbsent(type, () => {})[index] =
+                  DuplicateAction.consolidate;
+              selections[type] = {...selections[type]!, index};
+              pendingForType = pendingForType.difference({index});
+            }
+          }
+        }
+      }
+
+      if (pendingForType.isNotEmpty) {
+        pendingReview[type] = pendingForType;
       }
     }
 
     state = state.copyWith(
       bundle: bundle,
       selections: selections,
-      // Auto-default duplicateActions removed — pending indices are decided
-      // explicitly by the user via setDuplicateAction or applyBulkAction.
-      duplicateActions: const {},
+      duplicateActions: duplicateActions,
       pendingDuplicateReview: pendingReview,
       currentStep: 1,
       clearError: true,
