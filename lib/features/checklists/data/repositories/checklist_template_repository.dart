@@ -177,43 +177,54 @@ class ChecklistTemplateRepository {
   }
 
   /// Replace-all save of a template's items. sortOrder is assigned from
-  /// list position; removed items are tombstoned.
+  /// list position; removed items are tombstoned; kept items retain their
+  /// original createdAt. The read-existing/delete/reinsert sequence runs in
+  /// one transaction so a failure mid-save cannot leave the template with a
+  /// partial item set. Sync bookkeeping (markRecordPending/logDeletion) runs
+  /// only after the transaction commits.
   Future<void> saveItems(
     String templateId,
     List<domain.ChecklistTemplateItem> items,
   ) async {
     try {
-      final existing = await getItemsForTemplate(templateId);
       final now = DateTime.now().millisecondsSinceEpoch;
       final resolved = <({String id, domain.ChecklistTemplateItem item})>[];
       for (final item in items) {
         resolved.add((id: item.id.isEmpty ? _uuid.v4() : item.id, item: item));
       }
       final keptIds = resolved.map((r) => r.id).toSet();
-      final removed = existing.where((e) => !keptIds.contains(e.id)).toList();
 
-      await (_db.delete(
-        _db.checklistTemplateItems,
-      )..where((t) => t.templateId.equals(templateId))).go();
-      await _db.batch((batch) {
-        for (var i = 0; i < resolved.length; i++) {
-          final entry = resolved[i];
-          batch.insert(
-            _db.checklistTemplateItems,
-            ChecklistTemplateItemsCompanion(
-              id: Value(entry.id),
-              templateId: Value(templateId),
-              title: Value(entry.item.title),
-              category: Value(entry.item.category),
-              notes: Value(entry.item.notes),
-              dueOffsetDays: Value(entry.item.dueOffsetDays),
-              sortOrder: Value(i),
-              createdAt: Value(now),
-              updatedAt: Value(now),
-            ),
-            mode: InsertMode.insertOrReplace,
-          );
-        }
+      late final List<domain.ChecklistTemplateItem> removed;
+      await _db.transaction(() async {
+        final existing = await getItemsForTemplate(templateId);
+        removed = existing.where((e) => !keptIds.contains(e.id)).toList();
+        final existingCreatedAt = {
+          for (final e in existing) e.id: e.createdAt.millisecondsSinceEpoch,
+        };
+
+        await (_db.delete(
+          _db.checklistTemplateItems,
+        )..where((t) => t.templateId.equals(templateId))).go();
+        await _db.batch((batch) {
+          for (var i = 0; i < resolved.length; i++) {
+            final entry = resolved[i];
+            batch.insert(
+              _db.checklistTemplateItems,
+              ChecklistTemplateItemsCompanion(
+                id: Value(entry.id),
+                templateId: Value(templateId),
+                title: Value(entry.item.title),
+                category: Value(entry.item.category),
+                notes: Value(entry.item.notes),
+                dueOffsetDays: Value(entry.item.dueOffsetDays),
+                sortOrder: Value(i),
+                createdAt: Value(existingCreatedAt[entry.id] ?? now),
+                updatedAt: Value(now),
+              ),
+              mode: InsertMode.insertOrReplace,
+            );
+          }
+        });
       });
 
       for (final entry in resolved) {
