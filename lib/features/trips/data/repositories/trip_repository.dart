@@ -8,6 +8,7 @@ import 'package:submersion/core/services/database_service.dart';
 import 'package:submersion/core/services/logger_service.dart';
 import 'package:submersion/core/services/sync/sync_event_bus.dart';
 import 'package:submersion/core/constants/enums.dart';
+import 'package:submersion/features/checklists/data/repositories/trip_checklist_repository.dart';
 import 'package:submersion/features/dive_log/data/repositories/dive_repository_impl.dart';
 import 'package:submersion/features/trips/data/repositories/itinerary_day_repository.dart';
 import 'package:submersion/features/trips/data/repositories/liveaboard_details_repository.dart';
@@ -273,6 +274,7 @@ class TripRepository {
       // Delete child records with non-nullable FKs first
       await LiveaboardDetailsRepository().deleteByTripId(id);
       await ItineraryDayRepository().deleteByTripId(id);
+      await TripChecklistRepository().deleteByTripId(id);
 
       // Remove trip association from dives (nullable FK)
       await _db.customUpdate(
