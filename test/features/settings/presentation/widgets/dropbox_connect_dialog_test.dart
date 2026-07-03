@@ -133,6 +133,49 @@ void main() {
     expect(find.text('Connect Dropbox'), findsOneWidget);
   });
 
+  testWidgets(
+    'a non-storage exception (e.g. keychain PlatformException) unwedges the '
+    'dialog with an inline error instead of leaving Connect disabled '
+    'forever',
+    (tester) async {
+      // ProbeFailingKeychain's probe write throws a PlatformException whose
+      // status is not errSecMissingEntitlement (-34018), so
+      // FallbackSecureStorage rethrows it unchanged out of
+      // DropboxAuthStore.save -- a raw PlatformException, not a
+      // CloudStorageException.
+      final auth = DropboxAuthManager(
+        appKey: 'k',
+        store: DropboxAuthStore(storage: ProbeFailingKeychain(-1)),
+        httpClient: happyMock(),
+        verifierGenerator: () => 'a' * 43,
+      );
+      final p = DropboxStorageProvider(
+        authManager: auth,
+        apiClient: DropboxApiClient(
+          getAccessToken: auth.getAccessToken,
+          onAccessTokenRejected: auth.invalidateAccessToken,
+          httpClient: happyMock(),
+        ),
+      );
+      await pumpDialog(tester, p);
+      await tester.enterText(find.byType(TextField), 'the-code');
+      await tester.tap(find.text('Connect'));
+      await tester.pumpAndSettle();
+
+      // The dialog stays open with an inline error and Connect re-enabled,
+      // not permanently wedged with a stuck spinner.
+      expect(find.text('Connect Dropbox'), findsOneWidget);
+      expect(
+        find.textContaining('Could not connect to Dropbox'),
+        findsOneWidget,
+      );
+      final connectButton = tester.widget<FilledButton>(
+        find.widgetWithText(FilledButton, 'Connect'),
+      );
+      expect(connectButton.onPressed, isNotNull);
+    },
+  );
+
   testWidgets('dismissing the dialog mid-exchange does not throw when the '
       'exchange later fails', (tester) async {
     // Gate the token endpoint so the exchange is still in flight when the

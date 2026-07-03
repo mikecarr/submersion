@@ -51,6 +51,12 @@ class _DropboxConnectDialogState extends State<DropboxConnectDialog> {
       // The dialog is barrier-dismissible; the open can outlive this State.
       if (!mounted) return;
       setState(() => _errorText = e.displayMessage);
+    } catch (e) {
+      // launchUrl can throw a raw PlatformException (e.g. no browser
+      // available); surface it the same way instead of leaving the dialog
+      // silently stuck.
+      if (!mounted) return;
+      setState(() => _errorText = e.toString());
     }
   }
 
@@ -78,6 +84,18 @@ class _DropboxConnectDialogState extends State<DropboxConnectDialog> {
         _connecting = false;
         _errorText = l10n.settings_cloudSync_dropbox_connect_failed(
           e.displayMessage,
+        );
+      });
+    } catch (e) {
+      // completeAuthorization's final _store.save() can throw a raw
+      // PlatformException from the keychain (see FallbackSecureStorage,
+      // which rethrows anything except -34018). Without this catch the
+      // dialog would stay wedged forever with _connecting stuck true.
+      if (!mounted) return;
+      setState(() {
+        _connecting = false;
+        _errorText = l10n.settings_cloudSync_dropbox_connect_failed(
+          e.toString(),
         );
       });
     }
