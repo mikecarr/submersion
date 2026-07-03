@@ -121,13 +121,13 @@ class _DiveFilterSheetState extends ConsumerState<DiveFilterSheet> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Filter Dives',
+                    context.l10n.diveLog_filter_title,
                     style: Theme.of(context).textTheme.headlineSmall,
                   ),
                   IconButton(
                     onPressed: () => Navigator.of(context).pop(),
                     icon: const Icon(Icons.close),
-                    tooltip: 'Close filter',
+                    tooltip: context.l10n.diveLog_filter_tooltip_close,
                   ),
                 ],
               ),
