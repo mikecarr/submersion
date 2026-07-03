@@ -214,4 +214,21 @@ void main() {
     );
     expect(filtered, 1); // only turtle, sighted on dive 'a'
   });
+
+  test('dives by day-of-week respects a tag filter', () async {
+    await dive('a');
+    await dive('b');
+    await tag('dry');
+    await link('a', 'dry');
+
+    final all = await repo.getDivesByDayOfWeek();
+    final allTotal = all.fold<int>(0, (s, e) => s + e.count);
+    expect(allTotal, 2);
+
+    final filtered = await repo.getDivesByDayOfWeek(
+      filter: const DiveFilterState(tagIds: ['dry']),
+    );
+    final total = filtered.fold<int>(0, (s, e) => s + e.count);
+    expect(total, 1);
+  });
 }
