@@ -1,0 +1,90 @@
+import 'package:flutter/material.dart';
+
+import 'package:submersion/core/providers/provider.dart';
+import 'package:submersion/features/checklists/presentation/providers/checklist_providers.dart';
+import 'package:submersion/features/trips/domain/entities/trip.dart';
+import 'package:submersion/l10n/l10n_extension.dart';
+
+/// Prompts for a name and snapshots the trip's checklist as a template.
+Future<void> showSaveAsTemplateDialog({
+  required BuildContext context,
+  required Trip trip,
+}) {
+  return showDialog<void>(
+    context: context,
+    builder: (context) => _SaveAsTemplateDialog(trip: trip),
+  );
+}
+
+class _SaveAsTemplateDialog extends ConsumerStatefulWidget {
+  final Trip trip;
+
+  const _SaveAsTemplateDialog({required this.trip});
+
+  @override
+  ConsumerState<_SaveAsTemplateDialog> createState() =>
+      _SaveAsTemplateDialogState();
+}
+
+class _SaveAsTemplateDialogState extends ConsumerState<_SaveAsTemplateDialog> {
+  final _controller = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  Future<void> _save() async {
+    if (!_formKey.currentState!.validate()) return;
+    final messenger = ScaffoldMessenger.of(context);
+    final navigator = Navigator.of(context);
+    final l10n = context.l10n;
+    final repository = ref.read(tripChecklistRepositoryProvider);
+    await repository.saveAsTemplate(
+      tripId: widget.trip.id,
+      tripStartDate: widget.trip.startDate,
+      name: _controller.text.trim(),
+      diverId: widget.trip.diverId,
+    );
+    navigator.pop();
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text(l10n.checklists_saveTemplate_success),
+        duration: const Duration(seconds: 4),
+        showCloseIcon: true,
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text(context.l10n.checklists_saveTemplate_title),
+      content: Form(
+        key: _formKey,
+        child: TextFormField(
+          controller: _controller,
+          autofocus: true,
+          decoration: InputDecoration(
+            labelText: context.l10n.checklists_saveTemplate_nameLabel,
+          ),
+          validator: (value) => (value == null || value.trim().isEmpty)
+              ? context.l10n.checklists_template_nameRequired
+              : null,
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(MaterialLocalizations.of(context).cancelButtonLabel),
+        ),
+        FilledButton(
+          onPressed: _save,
+          child: Text(MaterialLocalizations.of(context).saveButtonLabel),
+        ),
+      ],
+    );
+  }
+}

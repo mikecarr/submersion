@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:submersion/core/providers/provider.dart';
 import 'package:submersion/features/checklists/domain/entities/trip_checklist_item.dart';
 import 'package:submersion/features/checklists/presentation/providers/checklist_providers.dart';
+import 'package:submersion/features/checklists/presentation/widgets/apply_template_sheet.dart';
 import 'package:submersion/features/checklists/presentation/widgets/checklist_item_edit_sheet.dart';
 import 'package:submersion/features/checklists/presentation/widgets/checklist_item_tile.dart';
+import 'package:submersion/features/checklists/presentation/widgets/save_as_template_dialog.dart';
 import 'package:submersion/features/trips/domain/entities/trip.dart';
 import 'package:submersion/l10n/l10n_extension.dart';
 
@@ -103,10 +105,12 @@ class TripChecklistSection extends ConsumerWidget {
   ) {
     return PopupMenuButton<String>(
       onSelected: (value) {
-        // No-ops in this task; wired to the apply/save flows in the
-        // apply-template task.
-        if (value == 'apply') {}
-        if (value == 'save') {}
+        if (value == 'apply') {
+          showApplyTemplateSheet(context: context, trip: trip);
+        }
+        if (value == 'save') {
+          showSaveAsTemplateDialog(context: context, trip: trip);
+        }
       },
       itemBuilder: (context) => [
         PopupMenuItem(
