@@ -4755,6 +4755,9 @@ class AppLocalizationsHe extends AppLocalizations {
   String get diveLog_profile_semantics_chart => 'תרשים פרופיל צלילה, צבוט לזום';
 
   @override
+  String get diveLog_profile_semantics_photoMarker => 'סמן תמונה';
+
+  @override
   String get diveLog_profile_tooltip_moreOptions => 'אפשרויות תרשים נוספות';
 
   @override

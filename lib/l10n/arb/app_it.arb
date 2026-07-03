@@ -1546,6 +1546,7 @@
   "diveLog_profile_rightAxis_none": "Nessuno",
   "diveLog_profile_semantics_changeRightAxis": "Cambia metrica asse destro",
   "diveLog_profile_semantics_chart": "Grafico profilo immersione, pizzica per zoomare",
+  "diveLog_profile_semantics_photoMarker": "Indicatore foto",
   "diveLog_profile_tooltip_moreOptions": "Altre opzioni del grafico",
   "diveLog_profile_tooltip_resetZoom": "Reimposta zoom",
   "diveLog_profile_tooltip_zoomIn": "Zoom avanti",

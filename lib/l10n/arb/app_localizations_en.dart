@@ -4801,6 +4801,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'Dive profile chart, pinch to zoom';
 
   @override
+  String get diveLog_profile_semantics_photoMarker => 'Photo marker';
+
+  @override
   String get diveLog_profile_tooltip_moreOptions => 'More chart options';
 
   @override

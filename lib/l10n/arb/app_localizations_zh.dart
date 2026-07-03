@@ -4652,6 +4652,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get diveLog_profile_semantics_chart => '潜水轮廓图，双指缩放';
 
   @override
+  String get diveLog_profile_semantics_photoMarker => '照片标记';
+
+  @override
   String get diveLog_profile_tooltip_moreOptions => '更多图表选项';
 
   @override

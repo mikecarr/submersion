@@ -8234,6 +8234,12 @@ abstract class AppLocalizations {
   /// **'Dive profile chart, pinch to zoom'**
   String get diveLog_profile_semantics_chart;
 
+  /// No description provided for @diveLog_profile_semantics_photoMarker.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo marker'**
+  String get diveLog_profile_semantics_photoMarker;
+
   /// No description provided for @diveLog_profile_tooltip_moreOptions.
   ///
   /// In en, this message translates to:

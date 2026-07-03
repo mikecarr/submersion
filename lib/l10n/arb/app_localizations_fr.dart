@@ -4915,6 +4915,9 @@ class AppLocalizationsFr extends AppLocalizations {
       'Graphique du profil de plongee, pincer pour zoomer';
 
   @override
+  String get diveLog_profile_semantics_photoMarker => 'Marqueur de photo';
+
+  @override
   String get diveLog_profile_tooltip_moreOptions =>
       'Plus d\'options de graphique';
 

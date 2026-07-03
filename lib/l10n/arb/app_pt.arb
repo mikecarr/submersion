@@ -1580,6 +1580,7 @@
   "diveLog_profile_rightAxis_none": "Nenhum",
   "diveLog_profile_semantics_changeRightAxis": "Alterar metrica do eixo direito",
   "diveLog_profile_semantics_chart": "Grafico do perfil de mergulho, pince para ampliar",
+  "diveLog_profile_semantics_photoMarker": "Marcador de foto",
   "diveLog_profile_tooltip_moreOptions": "Mais opcoes do grafico",
   "diveLog_profile_tooltip_resetZoom": "Redefinir zoom",
   "diveLog_profile_tooltip_zoomIn": "Ampliar",

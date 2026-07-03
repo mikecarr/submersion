@@ -1580,6 +1580,7 @@
   "diveLog_profile_rightAxis_none": "Ninguno",
   "diveLog_profile_semantics_changeRightAxis": "Cambiar métrica del eje derecho",
   "diveLog_profile_semantics_chart": "Gráfico de perfil de inmersión, pellizca para hacer zoom",
+  "diveLog_profile_semantics_photoMarker": "Marcador de foto",
   "diveLog_profile_tooltip_moreOptions": "Más opciones de gráfico",
   "diveLog_profile_tooltip_resetZoom": "Restablecer zoom",
   "diveLog_profile_tooltip_zoomIn": "Acercar",

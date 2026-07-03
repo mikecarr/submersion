@@ -4777,6 +4777,9 @@ class AppLocalizationsAr extends AppLocalizations {
       'مخطط ملف الغوصة، قم بالتكبير بالضم';
 
   @override
+  String get diveLog_profile_semantics_photoMarker => 'علامة صورة';
+
+  @override
   String get diveLog_profile_tooltip_moreOptions => 'خيارات مخطط إضافية';
 
   @override

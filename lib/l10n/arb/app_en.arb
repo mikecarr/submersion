@@ -2330,6 +2330,7 @@
   "diveLog_profile_rightAxis_none": "None",
   "diveLog_profile_semantics_changeRightAxis": "Change right axis metric",
   "diveLog_profile_semantics_chart": "Dive profile chart, pinch to zoom",
+  "diveLog_profile_semantics_photoMarker": "Photo marker",
   "diveLog_profile_tooltip_moreOptions": "More chart options",
   "diveLog_profile_tooltip_resetZoom": "Reset zoom",
   "diveLog_profile_tooltip_zoomIn": "Zoom in",

@@ -1546,6 +1546,7 @@
   "diveLog_profile_rightAxis_none": "Nincs",
   "diveLog_profile_semantics_changeRightAxis": "Jobb tengely metrika valtoztatasa",
   "diveLog_profile_semantics_chart": "Merulesi profil diagram, csipje ossze a nagyitashoz",
+  "diveLog_profile_semantics_photoMarker": "Fotójelölő",
   "diveLog_profile_tooltip_moreOptions": "Tovabbi diagram lehetosegek",
   "diveLog_profile_tooltip_resetZoom": "Nagyitas visszaallitasa",
   "diveLog_profile_tooltip_zoomIn": "Nagyitas",

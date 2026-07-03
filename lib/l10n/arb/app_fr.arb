@@ -1546,6 +1546,7 @@
   "diveLog_profile_rightAxis_none": "Aucun",
   "diveLog_profile_semantics_changeRightAxis": "Changer la metrique de l'axe droit",
   "diveLog_profile_semantics_chart": "Graphique du profil de plongee, pincer pour zoomer",
+  "diveLog_profile_semantics_photoMarker": "Marqueur de photo",
   "diveLog_profile_tooltip_moreOptions": "Plus d'options de graphique",
   "diveLog_profile_tooltip_resetZoom": "Reinitialiser le zoom",
   "diveLog_profile_tooltip_zoomIn": "Zoom avant",

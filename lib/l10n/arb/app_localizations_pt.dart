@@ -4892,6 +4892,9 @@ class AppLocalizationsPt extends AppLocalizations {
       'Grafico do perfil de mergulho, pince para ampliar';
 
   @override
+  String get diveLog_profile_semantics_photoMarker => 'Marcador de foto';
+
+  @override
   String get diveLog_profile_tooltip_moreOptions => 'Mais opcoes do grafico';
 
   @override

@@ -1580,6 +1580,7 @@
   "diveLog_profile_rightAxis_none": "Keine",
   "diveLog_profile_semantics_changeRightAxis": "Rechte Achsenmetrik ändern",
   "diveLog_profile_semantics_chart": "Tauchprofildiagramm, zum Zoomen zusammendrücken",
+  "diveLog_profile_semantics_photoMarker": "Fotomarkierung",
   "diveLog_profile_tooltip_moreOptions": "Weitere Diagrammoptionen",
   "diveLog_profile_tooltip_resetZoom": "Zoom zurücksetzen",
   "diveLog_profile_tooltip_zoomIn": "Vergrößern",

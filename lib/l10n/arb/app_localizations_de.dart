@@ -4887,6 +4887,9 @@ class AppLocalizationsDe extends AppLocalizations {
       'Tauchprofildiagramm, zum Zoomen zusammendrücken';
 
   @override
+  String get diveLog_profile_semantics_photoMarker => 'Fotomarkierung';
+
+  @override
   String get diveLog_profile_tooltip_moreOptions => 'Weitere Diagrammoptionen';
 
   @override

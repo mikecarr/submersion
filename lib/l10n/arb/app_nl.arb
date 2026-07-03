@@ -1580,6 +1580,7 @@
   "diveLog_profile_rightAxis_none": "Geen",
   "diveLog_profile_semantics_changeRightAxis": "Rechter as-meetwaarde wijzigen",
   "diveLog_profile_semantics_chart": "Duikprofielgrafiek, knijp om te zoomen",
+  "diveLog_profile_semantics_photoMarker": "Fotomarkering",
   "diveLog_profile_tooltip_moreOptions": "Meer grafiekopties",
   "diveLog_profile_tooltip_resetZoom": "Zoom resetten",
   "diveLog_profile_tooltip_zoomIn": "Inzoomen",

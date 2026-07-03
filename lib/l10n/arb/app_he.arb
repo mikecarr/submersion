@@ -1546,6 +1546,7 @@
   "diveLog_profile_rightAxis_none": "ללא",
   "diveLog_profile_semantics_changeRightAxis": "שינוי מדד ציר ימני",
   "diveLog_profile_semantics_chart": "תרשים פרופיל צלילה, צבוט לזום",
+  "diveLog_profile_semantics_photoMarker": "סמן תמונה",
   "diveLog_profile_tooltip_moreOptions": "אפשרויות תרשים נוספות",
   "diveLog_profile_tooltip_resetZoom": "איפוס זום",
   "diveLog_profile_tooltip_zoomIn": "הגדלה",

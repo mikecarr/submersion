@@ -4876,6 +4876,9 @@ class AppLocalizationsHu extends AppLocalizations {
       'Merulesi profil diagram, csipje ossze a nagyitashoz';
 
   @override
+  String get diveLog_profile_semantics_photoMarker => 'Fotójelölő';
+
+  @override
   String get diveLog_profile_tooltip_moreOptions =>
       'Tovabbi diagram lehetosegek';
 

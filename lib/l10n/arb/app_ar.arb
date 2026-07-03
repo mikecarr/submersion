@@ -1580,6 +1580,7 @@
   "diveLog_profile_rightAxis_none": "لا شيء",
   "diveLog_profile_semantics_changeRightAxis": "تغيير مقياس المحور الأيمن",
   "diveLog_profile_semantics_chart": "مخطط ملف الغوصة، قم بالتكبير بالضم",
+  "diveLog_profile_semantics_photoMarker": "علامة صورة",
   "diveLog_profile_tooltip_moreOptions": "خيارات مخطط إضافية",
   "diveLog_profile_tooltip_resetZoom": "إعادة تعيين التكبير",
   "diveLog_profile_tooltip_zoomIn": "تكبير",

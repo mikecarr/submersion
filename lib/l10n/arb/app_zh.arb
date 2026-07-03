@@ -1709,6 +1709,7 @@
   "diveLog_profile_rightAxis_none": "无",
   "diveLog_profile_semantics_changeRightAxis": "更改右轴指标",
   "diveLog_profile_semantics_chart": "潜水轮廓图，双指缩放",
+  "diveLog_profile_semantics_photoMarker": "照片标记",
   "diveLog_profile_tooltip_moreOptions": "更多图表选项",
   "diveLog_profile_tooltip_resetZoom": "重置缩放",
   "diveLog_profile_tooltip_zoomIn": "放大",

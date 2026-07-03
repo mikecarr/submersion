@@ -4853,6 +4853,9 @@ class AppLocalizationsNl extends AppLocalizations {
       'Duikprofielgrafiek, knijp om te zoomen';
 
   @override
+  String get diveLog_profile_semantics_photoMarker => 'Fotomarkering';
+
+  @override
   String get diveLog_profile_tooltip_moreOptions => 'Meer grafiekopties';
 
   @override

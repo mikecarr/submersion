@@ -4894,6 +4894,9 @@ class AppLocalizationsIt extends AppLocalizations {
       'Grafico profilo immersione, pizzica per zoomare';
 
   @override
+  String get diveLog_profile_semantics_photoMarker => 'Indicatore foto';
+
+  @override
   String get diveLog_profile_tooltip_moreOptions => 'Altre opzioni del grafico';
 
   @override
