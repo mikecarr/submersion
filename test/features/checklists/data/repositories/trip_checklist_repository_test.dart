@@ -171,6 +171,25 @@ void main() {
       final wetsuit = items.firstWhere((i) => i.title == 'Pack wetsuit');
       expect(wetsuit.dueOffsetDays, isNull);
     });
+
+    test('due date after trip start is stored dateless', () async {
+      await repository.createItem(
+        item(
+          title: 'Rinse gear',
+          category: 'Gear',
+          dueDate: tripStart.add(const Duration(days: 2)),
+        ),
+      );
+
+      final tpl = await repository.saveAsTemplate(
+        tripId: testTrip.id,
+        tripStartDate: testTrip.startDate,
+        name: 'My prep',
+      );
+      final items = await templateRepository.getItemsForTemplate(tpl.id);
+      expect(items, hasLength(1));
+      expect(items.single.dueOffsetDays, isNull);
+    });
   });
 
   group('progress and cascade', () {
