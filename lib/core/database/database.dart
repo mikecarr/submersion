@@ -128,6 +128,9 @@ class TripItineraryDays extends Table {
 
 /// Reusable checklist templates for trip planning (issue #164)
 class ChecklistTemplates extends Table {
+  // coverage:ignore-start
+  // Drift column getters run at build time via drift_dev, not at runtime, so
+  // lcov never records hits (true of every Table class in this file).
   TextColumn get id => text()();
   TextColumn get diverId => text().nullable().references(Divers, #id)();
   TextColumn get name => text()();
@@ -141,10 +144,12 @@ class ChecklistTemplates extends Table {
 
   @override
   Set<Column> get primaryKey => {id};
+  // coverage:ignore-end
 }
 
 /// Items belonging to a checklist template
 class ChecklistTemplateItems extends Table {
+  // coverage:ignore-start
   TextColumn get id => text()();
   TextColumn get templateId => text().references(ChecklistTemplates, #id)();
   TextColumn get title => text()();
@@ -163,10 +168,12 @@ class ChecklistTemplateItems extends Table {
 
   @override
   Set<Column> get primaryKey => {id};
+  // coverage:ignore-end
 }
 
 /// Per-trip checklist items (copied from templates or added ad hoc)
 class TripChecklistItems extends Table {
+  // coverage:ignore-start
   TextColumn get id => text()();
   TextColumn get tripId => text().references(Trips, #id)();
   TextColumn get title => text()();
@@ -187,6 +194,7 @@ class TripChecklistItems extends Table {
 
   @override
   Set<Column> get primaryKey => {id};
+  // coverage:ignore-end
 }
 
 /// Dive log entries
