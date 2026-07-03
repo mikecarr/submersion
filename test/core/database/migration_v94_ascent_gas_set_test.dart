@@ -43,10 +43,10 @@ void main() {
     expect(row.data['ascent_gas_set'], 0);
   });
 
-  test('schema version is 94 and the migration list includes it', () {
-    // Latest-version tripwire: bumping the schema must come with a matching
-    // migration block and an update here.
-    expect(AppDatabase.currentSchemaVersion, 94);
+  test('schema version is at least 94 and the migration list includes it', () {
+    // Superseded by later migration tests' latest-version tripwire; this one
+    // just confirms v94 remains registered.
+    expect(AppDatabase.currentSchemaVersion, greaterThanOrEqualTo(94));
     expect(AppDatabase.migrationVersions, contains(94));
   });
 
