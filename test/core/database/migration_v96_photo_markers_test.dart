@@ -46,8 +46,10 @@ void main() {
     },
   );
 
-  test('v96 is the latest schema version and is in the migration ladder', () {
-    expect(AppDatabase.currentSchemaVersion, 96);
+  test('v96 is in the migration ladder', () {
+    // v96 is now a past migration (the latest-version tripwire lives in the
+    // newest migration's test), so assert membership, not equality.
+    expect(AppDatabase.currentSchemaVersion, greaterThanOrEqualTo(96));
     expect(AppDatabase.migrationVersions, contains(96));
   });
 

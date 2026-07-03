@@ -145,4 +145,66 @@ void main() {
     expect(AppDatabase.currentSchemaVersion, greaterThanOrEqualTo(97));
     expect(AppDatabase.migrationVersions, contains(97));
   });
+
+  test('backstop heals a database stranded past v97 by a parallel-branch '
+      'version collision', () async {
+    // Reproduces the field failure: another branch build that also claims
+    // schema version 97 advanced user_version past this branch's v97 block,
+    // so onUpgrade never runs here and buddy_roles/instructor_id are
+    // missing. The beforeOpen backstop must re-assert them anyway.
+    final nativeDb = NativeDatabase.memory(
+      setup: (rawDb) {
+        rawDb.execute(
+          'PRAGMA user_version = ${AppDatabase.currentSchemaVersion}',
+        );
+        rawDb.execute('''
+          CREATE TABLE buddies (
+            id TEXT NOT NULL PRIMARY KEY,
+            name TEXT NOT NULL,
+            created_at INTEGER NOT NULL,
+            updated_at INTEGER NOT NULL
+          )
+        ''');
+        rawDb.execute('''
+          CREATE TABLE certifications (
+            id TEXT NOT NULL PRIMARY KEY,
+            name TEXT NOT NULL,
+            agency TEXT NOT NULL,
+            instructor_name TEXT,
+            created_at INTEGER NOT NULL,
+            updated_at INTEGER NOT NULL
+          )
+        ''');
+        rawDb.execute(
+          "INSERT INTO certifications "
+          "(id, name, agency, instructor_name, created_at, updated_at) "
+          "VALUES ('c1', 'Open Water Diver', 'PADI', 'Jane Instructor', 1, 1)",
+        );
+      },
+    );
+
+    final db = AppDatabase(nativeDb);
+    addTearDown(() => db.close());
+
+    // No migration runs (user_version == currentSchemaVersion); only the
+    // beforeOpen backstop can create the missing objects.
+    final roleCols = await db
+        .customSelect("PRAGMA table_info('buddy_roles')")
+        .get();
+    expect(roleCols, isNotEmpty, reason: 'buddy_roles must be re-asserted');
+
+    final certCols = await db
+        .customSelect("PRAGMA table_info('certifications')")
+        .get();
+    expect(
+      certCols.map((c) => c.read<String>('name')),
+      contains('instructor_id'),
+    );
+
+    // Existing data untouched.
+    final row = await db
+        .customSelect("SELECT instructor_name FROM certifications")
+        .getSingle();
+    expect(row.data['instructor_name'], 'Jane Instructor');
+  });
 }

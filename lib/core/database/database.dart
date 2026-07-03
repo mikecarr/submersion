@@ -4435,6 +4435,27 @@ class AppDatabase extends _$AppDatabase {
       beforeOpen: (details) async {
         // Enable foreign keys
         await customStatement('PRAGMA foreign_keys = ON');
+
+        // Backstop for schema-version collisions (issue #395; same disease
+        // as the v77/v82/v83 sync-branch incidents): a parallel branch build
+        // that claims the same schema version can advance user_version past
+        // the v97 block without creating its objects, and no later migration
+        // would ever repair that. All DDL here is idempotent (createTable is
+        // IF NOT EXISTS; the ALTER is PRAGMA-guarded), so re-assert the v97
+        // objects on every open.
+        final certCols = await customSelect(
+          "PRAGMA table_info('certifications')",
+        ).get();
+        final hasInstructorId = certCols.any(
+          (c) => c.read<String>('name') == 'instructor_id',
+        );
+        if (certCols.isNotEmpty && !hasInstructorId) {
+          await customStatement(
+            'ALTER TABLE certifications ADD COLUMN instructor_id TEXT '
+            'REFERENCES buddies (id) ON DELETE SET NULL',
+          );
+        }
+        await createMigrator().createTable(buddyRoles);
       },
     );
   }
