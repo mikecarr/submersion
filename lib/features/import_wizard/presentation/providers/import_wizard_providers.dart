@@ -282,7 +282,11 @@ class ImportWizardNotifier extends StateNotifier<ImportWizardState> {
             }
 
             final matchedComputerId = match.matchedComputerId;
+            // Auto-consolidate only for dive-computer downloads
+            // (currentComputerId non-null): a file-based import cannot
+            // prove the match is cross-computer, so it stays pending.
             if (match.score >= kAutoConsolidateScore &&
+                currentComputerId != null &&
                 matchedComputerId != null &&
                 matchedComputerId != currentComputerId) {
               duplicateActions.putIfAbsent(type, () => {})[index] =

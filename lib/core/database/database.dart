@@ -920,6 +920,10 @@ class DiverSettings extends Table {
   BoolColumn get defaultShowAscentRateLine =>
       boolean().withDefault(const Constant(false))();
   // coverage:ignore-end
+  // coverage:ignore-start
+  BoolColumn get defaultShowPhotoMarkers =>
+      boolean().withDefault(const Constant(true))();
+  // coverage:ignore-end
   // Notification settings (v26)
   BoolColumn get notificationsEnabled =>
       boolean().withDefault(const Constant(true))();
@@ -1738,7 +1742,7 @@ class AppDatabase extends _$AppDatabase {
 
   /// The current schema version as a static constant so that pre-open checks
   /// (e.g. version-mismatch guard) can reference it without an instance.
-  static const int currentSchemaVersion = 96;
+  static const int currentSchemaVersion = 97;
 
   /// Every schema version that has a migration block in onUpgrade.
   /// Used to calculate progress step counts. When adding a new migration,
@@ -1838,6 +1842,7 @@ class AppDatabase extends _$AppDatabase {
     94,
     95,
     96,
+    97,
   ];
 
   /// Tables that carry a per-row Hybrid Logical Clock for cross-device conflict
@@ -4379,12 +4384,33 @@ class AppDatabase extends _$AppDatabase {
         }
         if (from < 95) await reportProgress();
         if (from < 96) {
+          // Persisted default for the "Photo Markers" profile overlay
+          // (issue #162). Guarded like v91: skip when diver_settings does
+          // not exist (minimal-schema migration tests) or the column is
+          // already present (interrupted upgrade).
+          final cols = await customSelect(
+            "PRAGMA table_info('diver_settings')",
+          ).get();
+          if (cols.isNotEmpty) {
+            final existing = cols.map((c) => c.read<String>('name')).toSet();
+            if (!existing.contains('default_show_photo_markers')) {
+              await customStatement(
+                'ALTER TABLE diver_settings '
+                'ADD COLUMN default_show_photo_markers '
+                'INTEGER NOT NULL DEFAULT 1',
+              );
+            }
+          }
+        }
+        if (from < 96) await reportProgress();
+        if (from < 97) {
           // Multi-computer consolidation: per-source attribution for tanks,
           // pressure curves, and events. Guarded per table so minimal-schema
           // migration tests without these tables are unaffected; existing
           // rows keep NULL (= primary source / manual entry). (Authored as
-          // v94 on the feature branch; renumbered to v96 on merge after
-          // ascent_gas_set took v94 and dive naming took v95 on main.)
+          // v94 on the feature branch; renumbered on merge as later
+          // migrations landed on main: ascent_gas_set v94, dive naming v95,
+          // photo markers v96.)
           for (final table in [
             'dive_tanks',
             'tank_pressure_profiles',
@@ -4403,7 +4429,7 @@ class AppDatabase extends _$AppDatabase {
             }
           }
         }
-        if (from < 96) await reportProgress();
+        if (from < 97) await reportProgress();
       },
       beforeOpen: (details) async {
         // Enable foreign keys

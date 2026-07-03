@@ -18,20 +18,20 @@ void main() {
     return rows.map((r) => r.read<String>('name')).toSet();
   }
 
-  test('v96 adds computer_id to the three attribution tables', () async {
+  test('v97 adds computer_id to the three attribution tables', () async {
     expect(await columnsOf('dive_tanks'), contains('computer_id'));
     expect(await columnsOf('tank_pressure_profiles'), contains('computer_id'));
     expect(await columnsOf('dive_profile_events'), contains('computer_id'));
   });
 
-  test('schema version is 96 and the migration list includes it', () {
+  test('schema version is 97 and the migration list includes it', () {
     // Latest-version tripwire: bumping the schema must come with a matching
     // migration block and an update here.
-    expect(AppDatabase.currentSchemaVersion, 96);
-    expect(AppDatabase.migrationVersions, contains(96));
+    expect(AppDatabase.currentSchemaVersion, 97);
+    expect(AppDatabase.migrationVersions, contains(97));
     // Latest-version tripwire: bumping the schema must come with a
     // matching migration block and an update here.
-    expect(AppDatabase.migrationVersions.last, 96);
+    expect(AppDatabase.migrationVersions.last, 97);
   });
 
   test('deleting a computer nulls attribution instead of cascading', () async {
@@ -75,15 +75,15 @@ void main() {
   });
 
   test(
-    'v95 -> v96 upgrade adds computer_id to the three attribution tables',
+    'v96 -> v97 upgrade adds computer_id to the three attribution tables',
     () async {
-      // Hand-built pre-v96 shapes (no computer_id column), matching the
+      // Hand-built pre-v97 shapes (no computer_id column), matching the
       // columns those tables had before the multi-computer consolidation
       // migration. Exercises the actual onUpgrade ALTER TABLE loop, unlike
       // the onCreate-only tests above.
       final nativeDb = NativeDatabase.memory(
         setup: (rawDb) {
-          rawDb.execute('PRAGMA user_version = 95');
+          rawDb.execute('PRAGMA user_version = 96');
           rawDb.execute('''
             CREATE TABLE dive_tanks (
               id TEXT NOT NULL PRIMARY KEY,
@@ -161,13 +161,13 @@ void main() {
     },
   );
 
-  test('v96 migration is idempotent when computer_id already exists', () async {
-    // Exercises the PRAGMA guard branch: a database where the v96 columns
+  test('v97 migration is idempotent when computer_id already exists', () async {
+    // Exercises the PRAGMA guard branch: a database where the v97 columns
     // are already present (e.g. an interrupted upgrade) must not fail on a
     // duplicate ALTER, and must not clobber existing values.
     final nativeDb = NativeDatabase.memory(
       setup: (rawDb) {
-        rawDb.execute('PRAGMA user_version = 95');
+        rawDb.execute('PRAGMA user_version = 96');
         rawDb.execute('''
             CREATE TABLE dive_tanks (
               id TEXT NOT NULL PRIMARY KEY,

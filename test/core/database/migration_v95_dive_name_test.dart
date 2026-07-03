@@ -40,10 +40,10 @@ void main() {
   });
 
   test('v95 is in the migration ladder', () {
-    // 95 is no longer the latest schema (the latest-version tripwire
-    // lives in consolidation_attribution_migration_test.dart). Its
-    // migration block must stay registered so upgrade step counts stay
-    // correct.
+    // v95 is now a past migration (the latest-version tripwire lives in the
+    // newest version's test -- currently
+    // consolidation_attribution_migration_test.dart). It must remain in the
+    // ladder so upgrade step counts stay correct.
     expect(AppDatabase.currentSchemaVersion, greaterThanOrEqualTo(95));
     expect(AppDatabase.migrationVersions, contains(95));
   });

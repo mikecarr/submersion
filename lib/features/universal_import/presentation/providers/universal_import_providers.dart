@@ -648,7 +648,8 @@ class UniversalImportNotifier extends StateNotifier<UniversalImportState> {
               severity: ImportWarningSeverity.error,
               message:
                   '${summary.failed} dive(s) could not be consolidated '
-                  'into their matched dive and were not imported.',
+                  'into their matched dive; the partial imports were '
+                  'removed again to avoid duplicates.',
               entityType: ImportEntityType.dives,
             ),
           ];
