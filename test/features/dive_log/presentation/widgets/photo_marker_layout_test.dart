@@ -127,6 +127,17 @@ void main() {
       expect(clusters.single.y, closeTo(50, 0.001));
     });
 
+    test('keeps time-adjacent markers at very different depths separate', () {
+      // 1 px apart horizontally but 80 px apart vertically: on-screen the
+      // chips do not overlap, so they must not merge (2D proximity, not
+      // time-only).
+      final clusters = cluster([
+        (seconds: 500.0, depthDisplay: 5.0), // y = 10 px
+        (seconds: 510.0, depthDisplay: 45.0), // y = 90 px
+      ]);
+      expect(clusters, hasLength(2));
+    });
+
     test('keeps markers beyond the radius separate', () {
       final clusters = cluster([
         (seconds: 100.0, depthDisplay: 10.0),

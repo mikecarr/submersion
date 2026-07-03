@@ -70,8 +70,8 @@ class PhotoMarkerCluster {
 }
 
 /// Maps time-sorted marker [points] into plot pixels for the visible window
-/// and greedily merges neighbors whose x positions fall within
-/// [mergeRadiusPx] of the open cluster's running center. Zooming in grows
+/// and greedily merges neighbors whose on-screen 2D distance to the open
+/// cluster's running centroid is within [mergeRadiusPx]. Zooming in grows
 /// pixels-per-second, so clusters split apart with no extra state. Markers
 /// outside the visible time or depth window are omitted.
 List<PhotoMarkerCluster> clusterPhotoMarkers({
@@ -107,29 +107,37 @@ List<PhotoMarkerCluster> clusterPhotoMarkers({
   }
   if (positioned.isEmpty) return const [];
 
+  // Greedy left-to-right merge on 2D distance to the running cluster
+  // centroid, so only markers that would actually overlap on screen merge.
+  // Running sums keep the pass O(n).
   final clusters = <PhotoMarkerCluster>[];
-  var members = <({int index, double x, double y})>[positioned.first];
-
-  double centerX() =>
-      members.map((m) => m.x).reduce((a, b) => a + b) / members.length;
+  var memberIndexes = <int>[positioned.first.index];
+  var sumX = positioned.first.x;
+  var sumY = positioned.first.y;
 
   void close() {
-    final cy = members.map((m) => m.y).reduce((a, b) => a + b) / members.length;
     clusters.add(
       PhotoMarkerCluster(
-        memberIndexes: [for (final m in members) m.index],
-        x: centerX(),
-        y: cy,
+        memberIndexes: memberIndexes,
+        x: sumX / memberIndexes.length,
+        y: sumY / memberIndexes.length,
       ),
     );
   }
 
+  final radiusSquared = mergeRadiusPx * mergeRadiusPx;
   for (final p in positioned.skip(1)) {
-    if ((p.x - centerX()).abs() <= mergeRadiusPx) {
-      members.add(p);
+    final dx = p.x - sumX / memberIndexes.length;
+    final dy = p.y - sumY / memberIndexes.length;
+    if (dx * dx + dy * dy <= radiusSquared) {
+      memberIndexes.add(p.index);
+      sumX += p.x;
+      sumY += p.y;
     } else {
       close();
-      members = [p];
+      memberIndexes = [p.index];
+      sumX = p.x;
+      sumY = p.y;
     }
   }
   close();

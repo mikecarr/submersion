@@ -154,6 +154,21 @@ void main() {
     expect(find.byKey(const ValueKey('photoMarkerCard')), findsNothing);
   });
 
+  testWidgets('same-length content change does not show a stale card', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_overlay(markers: [_marker(id: 'a')]));
+    await tester.tap(find.byIcon(Icons.camera_alt));
+    await tester.pump();
+    expect(find.byKey(const ValueKey('photoMarkerCard')), findsOneWidget);
+
+    // Replace the marker list with different content but the same length
+    // (e.g. one photo deleted and another imported in one sync tick).
+    await tester.pumpWidget(_overlay(markers: [_marker(id: 'b')]));
+    await tester.pump();
+    expect(find.byKey(const ValueKey('photoMarkerCard')), findsNothing);
+  });
+
   testWidgets('video markers show a videocam icon', (tester) async {
     await tester.pumpWidget(
       _overlay(

@@ -52,9 +52,10 @@ class PhotoMarkerOverlay extends StatefulWidget {
 
 class _PhotoMarkerOverlayState extends State<PhotoMarkerOverlay> {
   /// First member index of the previewed cluster, or null when closed.
-  /// Tracking a member (not the cluster) keeps the selection stable while
-  /// clusters re-form during rebuilds.
-  int? _selectedIndex;
+  /// Tracking the selected MediaItem id (not a list index or cluster) keeps
+  /// the selection pointing at the same photo while clusters re-form during
+  /// rebuilds, and makes it vanish naturally if that photo is removed.
+  String? _selectedMediaId;
 
   static const double _chipSize = 22.0;
   static const double _tapTarget = 32.0;
@@ -64,13 +65,13 @@ class _PhotoMarkerOverlayState extends State<PhotoMarkerOverlay> {
   @override
   void didUpdateWidget(PhotoMarkerOverlay oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // A pan/zoom (or data change) invalidates the card's anchor; dismiss.
+    // A pan/zoom invalidates the card's anchor; dismiss. Content changes are
+    // handled by id: if the selected photo is gone, no cluster resolves.
     if (oldWidget.visibleMinSeconds != widget.visibleMinSeconds ||
         oldWidget.visibleMaxSeconds != widget.visibleMaxSeconds ||
         oldWidget.visibleMinDepth != widget.visibleMinDepth ||
-        oldWidget.visibleMaxDepth != widget.visibleMaxDepth ||
-        oldWidget.markers.length != widget.markers.length) {
-      _selectedIndex = null;
+        oldWidget.visibleMaxDepth != widget.visibleMaxDepth) {
+      _selectedMediaId = null;
     }
   }
 
@@ -126,9 +127,11 @@ class _PhotoMarkerOverlayState extends State<PhotoMarkerOverlay> {
         if (clusters.isEmpty) return const SizedBox.shrink();
 
         PhotoMarkerCluster? selected;
-        if (_selectedIndex != null) {
+        if (_selectedMediaId != null) {
           for (final c in clusters) {
-            if (c.memberIndexes.contains(_selectedIndex)) {
+            if (c.memberIndexes.any(
+              (i) => widget.markers[i].item.id == _selectedMediaId,
+            )) {
               selected = c;
               break;
             }
@@ -143,7 +146,7 @@ class _PhotoMarkerOverlayState extends State<PhotoMarkerOverlay> {
               Positioned.fill(
                 child: GestureDetector(
                   behavior: HitTestBehavior.translucent,
-                  onTap: () => setState(() => _selectedIndex = null),
+                  onTap: () => setState(() => _selectedMediaId = null),
                 ),
               ),
             for (final cluster in clusters)
@@ -176,8 +179,10 @@ class _PhotoMarkerOverlayState extends State<PhotoMarkerOverlay> {
       label: context.l10n.diveLog_profile_semantics_photoMarker,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
-        onTap: () =>
-            setState(() => _selectedIndex = cluster.memberIndexes.first),
+        onTap: () => setState(
+          () => _selectedMediaId =
+              widget.markers[cluster.memberIndexes.first].item.id,
+        ),
         child: Center(
           child: Container(
             width: _chipSize,
