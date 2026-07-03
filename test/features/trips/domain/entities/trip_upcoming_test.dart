@@ -39,6 +39,7 @@ void main() {
         end: today.subtract(const Duration(days: 1)),
       );
       expect(t.isUpcoming, isFalse);
+      expect(t.isInProgress, isFalse);
     });
   });
 
@@ -50,6 +51,7 @@ void main() {
       );
       expect(t.isInProgress, isTrue);
       expect(t.isUpcoming, isTrue);
+      expect(t.daysUntilStart, 0);
     });
 
     test('trip starting today is in progress with zero days until start', () {
