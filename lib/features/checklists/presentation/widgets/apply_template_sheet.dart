@@ -41,7 +41,8 @@ class _ApplyTemplateSheet extends ConsumerWidget {
     // Confirm the append when the trip already has items, showing add/skip
     // counts computed with the same title+category key the repository uses.
     final existing = await repository.getByTripId(trip.id);
-    if (existing.isNotEmpty && context.mounted) {
+    if (!context.mounted) return;
+    if (existing.isNotEmpty) {
       final templateItems = await ref.read(
         checklistTemplateItemsProvider(templateId).future,
       );
@@ -75,6 +76,7 @@ class _ApplyTemplateSheet extends ConsumerWidget {
         ),
       );
       if (confirmed != true) return;
+      if (!context.mounted) return;
     }
 
     try {
