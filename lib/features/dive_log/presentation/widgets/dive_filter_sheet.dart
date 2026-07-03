@@ -148,7 +148,7 @@ class _DiveFilterSheetState extends ConsumerState<DiveFilterSheet> {
 
               // Date Range Section
               Text(
-                'Date Range',
+                context.l10n.diveLog_filter_sectionDateRange,
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               const SizedBox(height: 8),
@@ -210,12 +210,12 @@ class _DiveFilterSheetState extends ConsumerState<DiveFilterSheet> {
                       label: Text(
                         _startDate != null
                             ? units.formatDate(_startDate)
-                            : 'Start Date',
+                            : context.l10n.diveLog_filter_startDate,
                       ),
                     ),
                   ),
                   const SizedBox(width: 8),
-                  const Text('to'),
+                  Text(context.l10n.diveLog_filter_dateSeparator),
                   const SizedBox(width: 8),
                   Expanded(
                     child: OutlinedButton.icon(
@@ -224,7 +224,7 @@ class _DiveFilterSheetState extends ConsumerState<DiveFilterSheet> {
                       label: Text(
                         _endDate != null
                             ? units.formatDate(_endDate)
-                            : 'End Date',
+                            : context.l10n.diveLog_filter_endDate,
                       ),
                     ),
                   ),
@@ -240,13 +240,16 @@ class _DiveFilterSheetState extends ConsumerState<DiveFilterSheet> {
                         _endDate = null;
                       });
                     },
-                    child: const Text('Clear dates'),
+                    child: Text(context.l10n.diveLog_filter_clearDates),
                   ),
                 ),
               const SizedBox(height: 24),
 
               // Dive Type Section
-              Text('Dive Type', style: Theme.of(context).textTheme.titleMedium),
+              Text(
+                context.l10n.diveLog_filter_sectionDiveType,
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
               const SizedBox(height: 8),
               Consumer(
                 builder: (context, ref, child) {
@@ -256,14 +259,14 @@ class _DiveFilterSheetState extends ConsumerState<DiveFilterSheet> {
                     error: (e, st) => Text('Error: $e'),
                     data: (diveTypes) => DropdownButtonFormField<String?>(
                       initialValue: _diveTypeId,
-                      decoration: const InputDecoration(
-                        hintText: 'All types',
-                        prefixIcon: Icon(Icons.category),
+                      decoration: InputDecoration(
+                        hintText: context.l10n.diveLog_filter_allTypes,
+                        prefixIcon: const Icon(Icons.category),
                       ),
                       items: [
-                        const DropdownMenuItem(
+                        DropdownMenuItem(
                           value: null,
-                          child: Text('All types'),
+                          child: Text(context.l10n.diveLog_filter_allTypes),
                         ),
                         ...diveTypes.map((type) {
                           return DropdownMenuItem(
@@ -282,19 +285,22 @@ class _DiveFilterSheetState extends ConsumerState<DiveFilterSheet> {
               const SizedBox(height: 24),
 
               // Site Section
-              Text('Dive Site', style: Theme.of(context).textTheme.titleMedium),
+              Text(
+                context.l10n.diveLog_filter_sectionDiveSite,
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
               const SizedBox(height: 8),
               sites.when(
                 data: (siteList) => DropdownButtonFormField<String?>(
                   initialValue: _siteId,
-                  decoration: const InputDecoration(
-                    hintText: 'All sites',
-                    prefixIcon: Icon(Icons.location_on),
+                  decoration: InputDecoration(
+                    hintText: context.l10n.diveLog_filter_allSites,
+                    prefixIcon: const Icon(Icons.location_on),
                   ),
                   items: [
-                    const DropdownMenuItem(
+                    DropdownMenuItem(
                       value: null,
-                      child: Text('All sites'),
+                      child: Text(context.l10n.diveLog_filter_allSites),
                     ),
                     ...siteList.map((site) {
                       return DropdownMenuItem(
@@ -308,7 +314,8 @@ class _DiveFilterSheetState extends ConsumerState<DiveFilterSheet> {
                   },
                 ),
                 loading: () => const LinearProgressIndicator(),
-                error: (_, _) => const Text('Error loading sites'),
+                error: (_, _) =>
+                    Text(context.l10n.diveLog_filter_errorLoadingSites),
               ),
               const SizedBox(height: 24),
 
@@ -386,7 +393,7 @@ class _DiveFilterSheetState extends ConsumerState<DiveFilterSheet> {
 
               // Depth Range Section
               Text(
-                'Depth Range (meters)',
+                context.l10n.diveLog_filter_sectionDepthRange,
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               const SizedBox(height: 8),
@@ -395,9 +402,9 @@ class _DiveFilterSheetState extends ConsumerState<DiveFilterSheet> {
                   Expanded(
                     child: TextField(
                       controller: _minDepthController,
-                      decoration: const InputDecoration(
-                        labelText: 'Min',
-                        prefixIcon: Icon(Icons.arrow_downward),
+                      decoration: InputDecoration(
+                        labelText: context.l10n.diveLog_filter_min,
+                        prefixIcon: const Icon(Icons.arrow_downward),
                         suffixText: 'm',
                       ),
                       keyboardType: TextInputType.number,
@@ -410,9 +417,9 @@ class _DiveFilterSheetState extends ConsumerState<DiveFilterSheet> {
                   Expanded(
                     child: TextField(
                       controller: _maxDepthController,
-                      decoration: const InputDecoration(
-                        labelText: 'Max',
-                        prefixIcon: Icon(Icons.arrow_downward),
+                      decoration: InputDecoration(
+                        labelText: context.l10n.diveLog_filter_max,
+                        prefixIcon: const Icon(Icons.arrow_downward),
                         suffixText: 'm',
                       ),
                       keyboardType: TextInputType.number,
@@ -427,8 +434,8 @@ class _DiveFilterSheetState extends ConsumerState<DiveFilterSheet> {
 
               // Favorites Section
               SwitchListTile(
-                title: const Text('Favorites Only'),
-                subtitle: const Text('Show only favorite dives'),
+                title: Text(context.l10n.diveLog_filter_favoritesOnly),
+                subtitle: Text(context.l10n.diveLog_filter_showOnlyFavorites),
                 secondary: Icon(
                   Icons.favorite,
                   color: _favoritesOnly ? Colors.red : null,
@@ -441,16 +448,19 @@ class _DiveFilterSheetState extends ConsumerState<DiveFilterSheet> {
               const SizedBox(height: 24),
 
               // Tags Section
-              Text('Tags', style: Theme.of(context).textTheme.titleMedium),
+              Text(
+                context.l10n.diveLog_filter_sectionTags,
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
               const SizedBox(height: 8),
               ref
                   .watch(tagListNotifierProvider)
                   .when(
                     data: (allTags) {
                       if (allTags.isEmpty) {
-                        return const Text(
-                          'No tags created yet',
-                          style: TextStyle(fontStyle: FontStyle.italic),
+                        return Text(
+                          context.l10n.diveLog_filter_noTagsYet,
+                          style: const TextStyle(fontStyle: FontStyle.italic),
                         );
                       }
                       return Wrap(
@@ -482,19 +492,23 @@ class _DiveFilterSheetState extends ConsumerState<DiveFilterSheet> {
                       );
                     },
                     loading: () => const CircularProgressIndicator(),
-                    error: (_, _) => const Text('Error loading tags'),
+                    error: (_, _) =>
+                        Text(context.l10n.diveLog_filter_errorLoadingTags),
                   ),
               const SizedBox(height: 24),
 
               // Buddy Name Filter Section
-              Text('Buddy', style: Theme.of(context).textTheme.titleMedium),
+              Text(
+                context.l10n.diveLog_filter_sectionBuddy,
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
               const SizedBox(height: 8),
               TextField(
                 controller: _buddyNameController,
-                decoration: const InputDecoration(
-                  labelText: 'Buddy Name',
-                  hintText: 'Search by buddy name',
-                  prefixIcon: Icon(Icons.person),
+                decoration: InputDecoration(
+                  labelText: context.l10n.diveLog_filter_buddyName,
+                  hintText: context.l10n.diveLog_filter_buddyHint,
+                  prefixIcon: const Icon(Icons.person),
                 ),
                 onChanged: (value) {
                   _buddyNameFilter = value.isEmpty ? null : value;
@@ -504,7 +518,7 @@ class _DiveFilterSheetState extends ConsumerState<DiveFilterSheet> {
 
               // Gas Mix (O2%) Filter Section
               Text(
-                'Gas Mix (O₂%)',
+                context.l10n.diveLog_filter_sectionGasMix,
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               const SizedBox(height: 8),
@@ -513,7 +527,7 @@ class _DiveFilterSheetState extends ConsumerState<DiveFilterSheet> {
                 runSpacing: 8,
                 children: [
                   ChoiceChip(
-                    label: const Text('All'),
+                    label: Text(context.l10n.diveLog_filter_gasAll),
                     selected: _minO2Percent == null && _maxO2Percent == null,
                     onSelected: (selected) {
                       if (selected) {
@@ -525,7 +539,7 @@ class _DiveFilterSheetState extends ConsumerState<DiveFilterSheet> {
                     },
                   ),
                   ChoiceChip(
-                    label: const Text('Air (21%)'),
+                    label: Text(context.l10n.diveLog_filter_gasAir),
                     selected: _minO2Percent == 20 && _maxO2Percent == 22,
                     onSelected: (selected) {
                       if (selected) {
@@ -537,7 +551,7 @@ class _DiveFilterSheetState extends ConsumerState<DiveFilterSheet> {
                     },
                   ),
                   ChoiceChip(
-                    label: const Text('Nitrox (>21%)'),
+                    label: Text(context.l10n.diveLog_filter_gasNitrox),
                     selected: _minO2Percent == 22 && _maxO2Percent == null,
                     onSelected: (selected) {
                       if (selected) {
@@ -554,7 +568,7 @@ class _DiveFilterSheetState extends ConsumerState<DiveFilterSheet> {
 
               // Rating Filter Section
               Text(
-                'Minimum Rating',
+                context.l10n.diveLog_filter_sectionMinRating,
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               const SizedBox(height: 8),
@@ -587,14 +601,14 @@ class _DiveFilterSheetState extends ConsumerState<DiveFilterSheet> {
                   alignment: AlignmentDirectional.centerStart,
                   child: TextButton(
                     onPressed: () => setState(() => _minRating = null),
-                    child: const Text('Clear rating filter'),
+                    child: Text(context.l10n.diveLog_filter_clearRating),
                   ),
                 ),
               const SizedBox(height: 24),
 
               // Duration Range Filter Section
               Text(
-                'Duration (minutes)',
+                context.l10n.diveLog_filter_sectionDuration,
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               const SizedBox(height: 8),
@@ -603,9 +617,9 @@ class _DiveFilterSheetState extends ConsumerState<DiveFilterSheet> {
                   Expanded(
                     child: TextField(
                       controller: _minDurationController,
-                      decoration: const InputDecoration(
-                        labelText: 'Min',
-                        prefixIcon: Icon(Icons.timer),
+                      decoration: InputDecoration(
+                        labelText: context.l10n.diveLog_filter_min,
+                        prefixIcon: const Icon(Icons.timer),
                         suffixText: 'min',
                       ),
                       keyboardType: TextInputType.number,
@@ -618,9 +632,9 @@ class _DiveFilterSheetState extends ConsumerState<DiveFilterSheet> {
                   Expanded(
                     child: TextField(
                       controller: _maxDurationController,
-                      decoration: const InputDecoration(
-                        labelText: 'Max',
-                        prefixIcon: Icon(Icons.timer),
+                      decoration: InputDecoration(
+                        labelText: context.l10n.diveLog_filter_max,
+                        prefixIcon: const Icon(Icons.timer),
                         suffixText: 'min',
                       ),
                       keyboardType: TextInputType.number,
@@ -643,14 +657,14 @@ class _DiveFilterSheetState extends ConsumerState<DiveFilterSheet> {
                             const DiveFilterState();
                         Navigator.of(context).pop();
                       },
-                      child: const Text('Clear All'),
+                      child: Text(context.l10n.diveLog_filter_clearAll),
                     ),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
                     child: FilledButton(
                       onPressed: _applyFilters,
-                      child: const Text('Apply Filters'),
+                      child: Text(context.l10n.diveLog_filter_apply),
                     ),
                   ),
                 ],
