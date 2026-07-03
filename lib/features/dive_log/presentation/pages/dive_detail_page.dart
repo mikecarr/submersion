@@ -55,6 +55,7 @@ import 'package:submersion/features/dive_log/presentation/widgets/compact_deco_s
 import 'package:submersion/features/dive_log/presentation/widgets/compact_tissue_loading_card.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/computer_toggle_bar.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/dive_profile_chart.dart';
+import 'package:submersion/features/dive_log/presentation/widgets/photo_marker_layout.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/playback_controls.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/playback_stats_panel.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/range_selection_overlay.dart';
@@ -1090,6 +1091,15 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
       tankPressures: tankPressures,
     );
 
+    final photoMedia =
+        ref.watch(mediaForDiveProvider(dive.id)).valueOrNull ?? const [];
+    final photoMarkers = dive.profile.isEmpty
+        ? const <PhotoChartMarker>[]
+        : photoMarkersFromMedia(
+            photoMedia,
+            maxProfileSeconds: dive.profile.last.timestamp,
+          );
+
     // Get profiles grouped by source for multi-computer toggle bar
     final profilesBySource = ref
         .watch(profilesBySourceProvider(dive.id))
@@ -1291,6 +1301,9 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
                           analysis,
                         ),
                         markers: markers,
+                        photoMarkers: photoMarkers.isEmpty
+                            ? null
+                            : photoMarkers,
                         showMaxDepthMarker: showMaxDepthMarker,
                         showPressureThresholdMarkers:
                             showPressureThresholdMarkers,

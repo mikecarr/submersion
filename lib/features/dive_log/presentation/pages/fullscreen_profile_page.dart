@@ -13,7 +13,9 @@ import 'package:submersion/features/dive_log/presentation/providers/profile_play
 import 'package:submersion/features/dive_log/presentation/providers/profile_review_provider.dart';
 import 'package:submersion/features/dive_log/presentation/utils/sac_normalization.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/dive_profile_chart.dart';
+import 'package:submersion/features/dive_log/presentation/widgets/photo_marker_layout.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/profile_instrument_bar.dart';
+import 'package:submersion/features/media/presentation/providers/media_providers.dart';
 import 'package:submersion/features/settings/presentation/providers/settings_providers.dart';
 import 'package:submersion/l10n/l10n_extension.dart';
 
@@ -115,6 +117,9 @@ class _FullscreenProfilePageState extends ConsumerState<FullscreenProfilePage> {
       showPressureThresholdMarkersProvider,
     );
 
+    final photoMedia =
+        ref.watch(mediaForDiveProvider(widget.diveId)).value ?? const [];
+
     if (dive == null) {
       final colorScheme = Theme.of(context).colorScheme;
       return Scaffold(
@@ -162,6 +167,13 @@ class _FullscreenProfilePageState extends ConsumerState<FullscreenProfilePage> {
     }
 
     final notifier = ref.read(playbackProvider(widget.diveId).notifier);
+
+    final photoMarkers = dive.profile.isEmpty
+        ? const <PhotoChartMarker>[]
+        : photoMarkersFromMedia(
+            photoMedia,
+            maxProfileSeconds: dive.profile.last.timestamp,
+          );
 
     return Scaffold(
       body: SafeArea(
@@ -246,6 +258,7 @@ class _FullscreenProfilePageState extends ConsumerState<FullscreenProfilePage> {
                         showMaxDepth: showMaxDepthMarker,
                         showPressureThresholds: showPressureThresholdMarkers,
                       ),
+                      photoMarkers: photoMarkers.isEmpty ? null : photoMarkers,
                       showMaxDepthMarker: showMaxDepthMarker,
                       showPressureThresholdMarkers:
                           showPressureThresholdMarkers,
