@@ -168,7 +168,7 @@ void main() {
     // Confirm dialog appears with the computed add/skip counts and apply
     // has not run yet.
     expect(
-      find.text('1 items will be added, 1 duplicates skipped.'),
+      find.text('1 item will be added, 1 duplicate skipped.'),
       findsOneWidget,
     );
     expect(fakeRepository.applyCallCount, 0);

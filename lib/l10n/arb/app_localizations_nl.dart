@@ -1583,7 +1583,20 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String checklists_applySheet_confirmAppend(int added, int skipped) {
-    return '$added items worden toegevoegd, $skipped duplicaten overgeslagen.';
+    String _temp0 = intl.Intl.pluralLogic(
+      added,
+      locale: localeName,
+      other: '$added items worden toegevoegd',
+      one: '1 item wordt toegevoegd',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      skipped,
+      locale: localeName,
+      other: '$skipped duplicaten overgeslagen',
+      one: '1 duplicaat overgeslagen',
+      zero: 'geen duplicaten overgeslagen',
+    );
+    return '$_temp0, $_temp1.';
   }
 
   @override

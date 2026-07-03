@@ -2769,7 +2769,7 @@ abstract class AppLocalizations {
   /// No description provided for @checklists_applySheet_confirmAppend.
   ///
   /// In en, this message translates to:
-  /// **'{added} items will be added, {skipped} duplicates skipped.'**
+  /// **'{added, plural, =1{1 item will be added} other{{added} items will be added}}, {skipped, plural, =0{no duplicates skipped} =1{1 duplicate skipped} other{{skipped} duplicates skipped}}.'**
   String checklists_applySheet_confirmAppend(int added, int skipped);
 
   /// No description provided for @checklists_apply_success.

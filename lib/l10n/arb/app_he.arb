@@ -457,7 +457,7 @@
   "checklists_applySheet_title": "החלת תבנית",
   "checklists_applySheet_empty": "עדיין אין תבניות. ניתן ליצור אותן בהגדרות.",
   "checklists_applySheet_itemCount": "{count, plural, =1{פריט אחד} other{{count} פריטים}}",
-  "checklists_applySheet_confirmAppend": "{added} פריטים יתווספו, {skipped} כפילויות ידולגו.",
+  "checklists_applySheet_confirmAppend": "{added, plural, =1{פריט אחד יתווסף} other{{added} פריטים יתווספו}}, {skipped, plural, =0{לא ידולגו כפילויות} =1{כפילות אחת תדולג} other{{skipped} כפילויות ידולגו}}.",
   "checklists_apply_success": "{count, plural, =0{לא נוספו פריטים חדשים} =1{פריט אחד נוסף} other{{count} פריטים נוספו}}",
   "checklists_apply_templateGone": "התבנית כבר לא קיימת",
   "checklists_saveTemplate_title": "שמירה כתבנית",

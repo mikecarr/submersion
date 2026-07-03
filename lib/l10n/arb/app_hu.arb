@@ -457,7 +457,7 @@
   "checklists_applySheet_title": "Sablon alkalmazása",
   "checklists_applySheet_empty": "Még nincsenek sablonok. Hozza létre őket a Beállításokban.",
   "checklists_applySheet_itemCount": "{count, plural, =1{1 tétel} other{{count} tétel}}",
-  "checklists_applySheet_confirmAppend": "{added} tétel kerül hozzáadásra, {skipped} duplikátum kihagyva.",
+  "checklists_applySheet_confirmAppend": "{added, plural, =1{1 tétel kerül hozzáadásra} other{{added} tétel kerül hozzáadásra}}, {skipped, plural, =0{nincs kihagyott duplikátum} =1{1 duplikátum kihagyva} other{{skipped} duplikátum kihagyva}}.",
   "checklists_apply_success": "{count, plural, =0{Nem került új tétel hozzáadásra} =1{1 tétel hozzáadva} other{{count} tétel hozzáadva}}",
   "checklists_apply_templateGone": "A sablon már nem létezik",
   "checklists_saveTemplate_title": "Mentés sablonként",

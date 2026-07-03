@@ -1585,7 +1585,20 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String checklists_applySheet_confirmAppend(int added, int skipped) {
-    return '$added tétel kerül hozzáadásra, $skipped duplikátum kihagyva.';
+    String _temp0 = intl.Intl.pluralLogic(
+      added,
+      locale: localeName,
+      other: '$added tétel kerül hozzáadásra',
+      one: '1 tétel kerül hozzáadásra',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      skipped,
+      locale: localeName,
+      other: '$skipped duplikátum kihagyva',
+      one: '1 duplikátum kihagyva',
+      zero: 'nincs kihagyott duplikátum',
+    );
+    return '$_temp0, $_temp1.';
   }
 
   @override

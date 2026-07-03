@@ -457,7 +457,7 @@
   "checklists_applySheet_title": "Sjabloon toepassen",
   "checklists_applySheet_empty": "Nog geen sjablonen. Maak ze aan in Instellingen.",
   "checklists_applySheet_itemCount": "{count, plural, =1{1 item} other{{count} items}}",
-  "checklists_applySheet_confirmAppend": "{added} items worden toegevoegd, {skipped} duplicaten overgeslagen.",
+  "checklists_applySheet_confirmAppend": "{added, plural, =1{1 item wordt toegevoegd} other{{added} items worden toegevoegd}}, {skipped, plural, =0{geen duplicaten overgeslagen} =1{1 duplicaat overgeslagen} other{{skipped} duplicaten overgeslagen}}.",
   "checklists_apply_success": "{count, plural, =0{Geen nieuwe items toegevoegd} =1{1 item toegevoegd} other{{count} items toegevoegd}}",
   "checklists_apply_templateGone": "Sjabloon bestaat niet meer",
   "checklists_saveTemplate_title": "Opslaan als sjabloon",

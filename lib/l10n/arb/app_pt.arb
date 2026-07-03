@@ -457,7 +457,7 @@
   "checklists_applySheet_title": "Aplicar modelo",
   "checklists_applySheet_empty": "Ainda não há modelos. Crie-os em Configurações.",
   "checklists_applySheet_itemCount": "{count, plural, =1{1 item} other{{count} itens}}",
-  "checklists_applySheet_confirmAppend": "{added} itens serão adicionados, {skipped} duplicatas ignoradas.",
+  "checklists_applySheet_confirmAppend": "{added, plural, =1{1 item será adicionado} other{{added} itens serão adicionados}}, {skipped, plural, =0{nenhuma duplicata ignorada} =1{1 duplicata ignorada} other{{skipped} duplicatas ignoradas}}.",
   "checklists_apply_success": "{count, plural, =0{Nenhum item novo adicionado} =1{1 item adicionado} other{{count} itens adicionados}}",
   "checklists_apply_templateGone": "O modelo não existe mais",
   "checklists_saveTemplate_title": "Salvar como modelo",

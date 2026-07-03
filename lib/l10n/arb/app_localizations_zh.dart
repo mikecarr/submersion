@@ -1505,7 +1505,20 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String checklists_applySheet_confirmAppend(int added, int skipped) {
-    return '将添加 $added 项事项，跳过 $skipped 项重复。';
+    String _temp0 = intl.Intl.pluralLogic(
+      added,
+      locale: localeName,
+      other: '将添加 $added 项事项',
+      one: '将添加 1 项事项',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      skipped,
+      locale: localeName,
+      other: '跳过 $skipped 项重复',
+      one: '跳过 1 项重复',
+      zero: '不跳过任何重复项',
+    );
+    return '$_temp0，$_temp1。';
   }
 
   @override

@@ -1599,7 +1599,20 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String checklists_applySheet_confirmAppend(int added, int skipped) {
-    return '$added éléments seront ajoutés, $skipped doublons ignorés.';
+    String _temp0 = intl.Intl.pluralLogic(
+      added,
+      locale: localeName,
+      other: '$added éléments seront ajoutés',
+      one: '1 élément sera ajouté',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      skipped,
+      locale: localeName,
+      other: '$skipped doublons ignorés',
+      one: '1 doublon ignoré',
+      zero: 'aucun doublon ignoré',
+    );
+    return '$_temp0, $_temp1.';
   }
 
   @override

@@ -551,7 +551,7 @@
   "checklists_applySheet_title": "应用模板",
   "checklists_applySheet_empty": "暂无模板。请在设置中创建。",
   "checklists_applySheet_itemCount": "{count, plural, =1{1 项事项} other{{count} 项事项}}",
-  "checklists_applySheet_confirmAppend": "将添加 {added} 项事项，跳过 {skipped} 项重复。",
+  "checklists_applySheet_confirmAppend": "{added, plural, =1{将添加 1 项事项} other{将添加 {added} 项事项}}，{skipped, plural, =0{不跳过任何重复项} =1{跳过 1 项重复} other{跳过 {skipped} 项重复}}。",
   "checklists_apply_success": "{count, plural, =0{未添加新事项} =1{已添加 1 项事项} other{已添加 {count} 项事项}}",
   "checklists_apply_templateGone": "模板已不存在",
   "checklists_saveTemplate_title": "保存为模板",

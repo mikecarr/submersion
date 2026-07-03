@@ -457,7 +457,7 @@
   "checklists_applySheet_title": "تطبيق القالب",
   "checklists_applySheet_empty": "لا توجد قوالب بعد. يمكنك إنشاؤها من الإعدادات.",
   "checklists_applySheet_itemCount": "{count, plural, =1{عنصر واحد} other{{count} عناصر}}",
-  "checklists_applySheet_confirmAppend": "سيتم إضافة {added} عنصر، وتخطي {skipped} عنصر مكرر.",
+  "checklists_applySheet_confirmAppend": "{added, plural, =1{سيتم إضافة عنصر واحد} other{سيتم إضافة {added} عناصر}}، {skipped, plural, =0{دون تخطي أي عناصر مكررة} =1{مع تخطي عنصر مكرر واحد} other{مع تخطي {skipped} عناصر مكررة}}.",
   "checklists_apply_success": "{count, plural, =0{لم تتم إضافة أي عناصر جديدة} =1{تمت إضافة عنصر واحد} other{تمت إضافة {count} عناصر}}",
   "checklists_apply_templateGone": "القالب لم يعد موجودًا",
   "checklists_saveTemplate_title": "حفظ كقالب",

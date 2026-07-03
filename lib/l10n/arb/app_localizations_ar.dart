@@ -1554,7 +1554,20 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String checklists_applySheet_confirmAppend(int added, int skipped) {
-    return 'سيتم إضافة $added عنصر، وتخطي $skipped عنصر مكرر.';
+    String _temp0 = intl.Intl.pluralLogic(
+      added,
+      locale: localeName,
+      other: 'سيتم إضافة $added عناصر',
+      one: 'سيتم إضافة عنصر واحد',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      skipped,
+      locale: localeName,
+      other: 'مع تخطي $skipped عناصر مكررة',
+      one: 'مع تخطي عنصر مكرر واحد',
+      zero: 'دون تخطي أي عناصر مكررة',
+    );
+    return '$_temp0، $_temp1.';
   }
 
   @override

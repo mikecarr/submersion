@@ -1541,7 +1541,20 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String checklists_applySheet_confirmAppend(int added, int skipped) {
-    return '$added פריטים יתווספו, $skipped כפילויות ידולגו.';
+    String _temp0 = intl.Intl.pluralLogic(
+      added,
+      locale: localeName,
+      other: '$added פריטים יתווספו',
+      one: 'פריט אחד יתווסף',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      skipped,
+      locale: localeName,
+      other: '$skipped כפילויות ידולגו',
+      one: 'כפילות אחת תדולג',
+      zero: 'לא ידולגו כפילויות',
+    );
+    return '$_temp0, $_temp1.';
   }
 
   @override

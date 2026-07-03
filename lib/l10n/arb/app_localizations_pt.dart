@@ -1592,7 +1592,20 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String checklists_applySheet_confirmAppend(int added, int skipped) {
-    return '$added itens serão adicionados, $skipped duplicatas ignoradas.';
+    String _temp0 = intl.Intl.pluralLogic(
+      added,
+      locale: localeName,
+      other: '$added itens serão adicionados',
+      one: '1 item será adicionado',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      skipped,
+      locale: localeName,
+      other: '$skipped duplicatas ignoradas',
+      one: '1 duplicata ignorada',
+      zero: 'nenhuma duplicata ignorada',
+    );
+    return '$_temp0, $_temp1.';
   }
 
   @override
