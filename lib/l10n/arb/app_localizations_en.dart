@@ -2927,17 +2927,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get diveLog_combine_profilePreview => 'Combined profile';
 
   @override
-  String get diveLog_combine_overlapBody =>
-      'Overlapping dives look like the same dive recorded by multiple dive computers. Combining those into a single entry that shows every computer\'s data is coming in a future release.';
-
-  @override
-  String get diveLog_combine_overlapHintTwoDives =>
-      'To merge two records of the same dive now, open one of them and use \"Merge with another dive\".';
-
-  @override
-  String get diveLog_combine_overlapTitle => 'These dives overlap in time';
-
-  @override
   String diveLog_combine_previewIntro(int count) {
     return 'These $count dives will be combined into one continuous dive. Gaps between them become surface time.';
   }
@@ -2972,6 +2961,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get diveLog_combine_undone => 'Combine undone';
 
   @override
+  String get diveLog_consolidate_confirm =>
+      'Keep as one dive with both computers';
+
+  @override
   String get diveLog_consolidate_error_generic =>
       'Couldn\'t merge the dives. Nothing was changed.';
 
@@ -2982,6 +2975,9 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get diveLog_consolidate_error_sameComputer =>
       'These dives are from the same dive computer and can\'t be merged this way.';
+
+  @override
+  String get diveLog_consolidate_selectPrimary => 'Primary dive computer';
 
   @override
   String get diveLog_consolidate_snackbar =>

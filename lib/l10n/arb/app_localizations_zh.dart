@@ -2830,17 +2830,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get diveLog_combine_profilePreview => '合并后的剖面';
 
   @override
-  String get diveLog_combine_overlapBody =>
-      '重叠的潜水看起来像是由多台潜水电脑记录的同一次潜水。将它们合并为显示每台电脑数据的单条记录的功能即将在未来版本中推出。';
-
-  @override
-  String get diveLog_combine_overlapHintTwoDives =>
-      '要立即合并同一次潜水的两条记录，请打开其中一条并使用「与另一次潜水合并」。';
-
-  @override
-  String get diveLog_combine_overlapTitle => '这些潜水在时间上重叠';
-
-  @override
   String diveLog_combine_previewIntro(int count) {
     return '这 $count 次潜水将合并为一次连续潜水。它们之间的间隔将变为水面时间。';
   }
@@ -2875,6 +2864,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get diveLog_combine_undone => '已撤消合并';
 
   @override
+  String get diveLog_consolidate_confirm => '保留为一次潜水，包含两台电脑';
+
+  @override
   String get diveLog_consolidate_error_generic => '无法合并这些潜水。未做任何更改。';
 
   @override
@@ -2884,6 +2876,9 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String get diveLog_consolidate_error_sameComputer =>
       '这些潜水来自同一台潜水电脑，无法以这种方式合并。';
+
+  @override
+  String get diveLog_consolidate_selectPrimary => '主潜水电脑';
 
   @override
   String get diveLog_consolidate_snackbar => '潜水已作为附加电脑合并。';

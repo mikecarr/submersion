@@ -2996,18 +2996,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get diveLog_combine_profilePreview => 'Profil combiné';
 
   @override
-  String get diveLog_combine_overlapBody =>
-      'Des plongées qui se chevauchent ressemblent à la même plongée enregistrée par plusieurs ordinateurs de plongée. La possibilité de les combiner en une seule entrée affichant les données de chaque ordinateur arrivera dans une future version.';
-
-  @override
-  String get diveLog_combine_overlapHintTwoDives =>
-      'Pour fusionner dès maintenant deux enregistrements de la même plongée, ouvre l\'un d\'eux et utilise « Fusionner avec une autre plongée ».';
-
-  @override
-  String get diveLog_combine_overlapTitle =>
-      'Ces plongées se chevauchent dans le temps';
-
-  @override
   String diveLog_combine_previewIntro(int count) {
     return 'Ces $count plongées seront combinées en une seule plongée continue. Les intervalles entre elles deviennent du temps de surface.';
   }
@@ -3043,6 +3031,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get diveLog_combine_undone => 'Combinaison annulée';
 
   @override
+  String get diveLog_consolidate_confirm =>
+      'Conserver comme une seule plongée avec les deux ordinateurs';
+
+  @override
   String get diveLog_consolidate_error_generic =>
       'Impossible de fusionner les plongées. Rien n\'a été modifié.';
 
@@ -3053,6 +3045,10 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get diveLog_consolidate_error_sameComputer =>
       'Ces plongées proviennent du même ordinateur de plongée et ne peuvent pas être fusionnées de cette façon.';
+
+  @override
+  String get diveLog_consolidate_selectPrimary =>
+      'Ordinateur de plongée principal';
 
   @override
   String get diveLog_consolidate_snackbar =>

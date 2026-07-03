@@ -25,7 +25,6 @@ import 'package:submersion/features/marine_life/domain/entities/species.dart';
 import 'package:submersion/features/marine_life/presentation/providers/species_providers.dart';
 import 'package:submersion/features/settings/presentation/providers/export_providers.dart';
 import 'package:submersion/features/settings/presentation/providers/settings_providers.dart';
-import 'package:submersion/features/dive_log/data/services/dive_consolidation_service.dart';
 import 'package:submersion/features/dive_log/data/services/gas_usage_segments_service.dart';
 import 'package:submersion/features/dive_log/data/services/profile_analysis_service.dart';
 import 'package:submersion/features/dive_log/data/services/profile_markers_service.dart';
@@ -52,6 +51,7 @@ import 'package:submersion/features/dive_log/presentation/widgets/field_attribut
 import 'package:submersion/features/dive_log/presentation/widgets/dive_detail_row.dart';
 import 'package:submersion/features/dive_log/domain/services/field_attribution_service.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/merge_dive_dialog.dart';
+import 'package:submersion/features/dive_log/presentation/widgets/run_dive_consolidation.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/compact_deco_status_card.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/compact_tissue_loading_card.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/computer_toggle_bar.dart';
@@ -76,7 +76,6 @@ import 'package:submersion/features/signatures/presentation/widgets/signature_ca
 import 'package:submersion/features/signatures/presentation/widgets/signature_display_widget.dart';
 import 'package:submersion/features/signatures/presentation/widgets/buddy_signatures_section.dart';
 import 'package:libdivecomputer_plugin/libdivecomputer_plugin.dart' as pigeon;
-import 'package:submersion/l10n/arb/app_localizations.dart';
 import 'package:submersion/l10n/l10n_extension.dart';
 
 import 'package:submersion/features/dive_computer/presentation/providers/reparse_providers.dart';
@@ -4831,95 +4830,6 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
       }
     }
   }
-}
-
-/// Applies a dive consolidation via [service] and shows the resulting
-/// success-with-undo or error SnackBar.
-///
-/// Extracted out of [_DiveDetailPageState._showMergeDiveDialog]'s `onMerge`
-/// closure so there is a single copy of this logic: the page calls it, and
-/// tests exercise it directly instead of maintaining a hand-copied mirror
-/// (Task 7 review finding).
-Future<void> runDiveConsolidation({
-  required BuildContext context,
-  required DiveConsolidationService service,
-  required String targetDiveId,
-  required List<String> secondaryDiveIds,
-  required VoidCallback onConsolidated,
-}) async {
-  final l10n = context.l10n;
-  final scaffoldMessenger = ScaffoldMessenger.of(context);
-
-  final DiveConsolidationOutcome outcome;
-  try {
-    outcome = await service.apply(
-      targetDiveId: targetDiveId,
-      secondaryDiveIds: secondaryDiveIds,
-    );
-  } on ArgumentError catch (e) {
-    scaffoldMessenger.showSnackBar(
-      SnackBar(content: Text(consolidationErrorText(l10n, e))),
-    );
-    return;
-  }
-
-  onConsolidated();
-
-  scaffoldMessenger.clearSnackBars();
-  scaffoldMessenger.showSnackBar(
-    SnackBar(
-      content: Text(l10n.diveLog_consolidate_snackbar),
-      duration: const Duration(seconds: 5),
-      // #406: an action defaults to persist: true; force auto-dismiss
-      // and allow closing without triggering Undo.
-      persist: false,
-      showCloseIcon: true,
-      action: SnackBarAction(
-        label: l10n.diveLog_bulkDelete_undo,
-        onPressed: () async {
-          try {
-            await service.undo(outcome.snapshot);
-            onConsolidated();
-            scaffoldMessenger.showSnackBar(
-              SnackBar(
-                content: Text(l10n.diveLog_consolidate_undone),
-                duration: const Duration(seconds: 2),
-              ),
-            );
-          } catch (_) {
-            scaffoldMessenger.showSnackBar(
-              SnackBar(
-                content: Text(l10n.diveLog_consolidate_undoError),
-                duration: const Duration(seconds: 4),
-              ),
-            );
-          }
-        },
-      ),
-    ),
-  );
-}
-
-/// Maps a [DiveConsolidationService.apply] failure to user-visible text.
-///
-/// `apply` throws [ArgumentError] whose message either starts with
-/// `sameComputer` (the service's own FK-level guard) or is
-/// `DiveConsolidationBuilder.build`'s `ConsolidationInvalid(reason.name)`
-/// wrapper, which encodes the invalid-consolidation reason by name. Only the
-/// reasons that are actually surfaced with distinct copy are matched here;
-/// anything else -- including tooFewDives/mixedDivers, which do not have
-/// dedicated error strings -- falls back to the generic error text.
-String consolidationErrorText(AppLocalizations l10n, Object error) {
-  if (error is ArgumentError) {
-    final message = error.message?.toString() ?? '';
-    if (message.startsWith('sameComputer')) {
-      return l10n.diveLog_consolidate_error_sameComputer;
-    }
-    if (message.contains('notOverlapping')) {
-      return l10n.diveLog_consolidate_error_notOverlapping;
-    }
-  }
-  return l10n.diveLog_consolidate_error_generic;
 }
 
 /// Fullscreen dive profile page with rotation support

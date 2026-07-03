@@ -2957,17 +2957,6 @@ class AppLocalizationsNl extends AppLocalizations {
   String get diveLog_combine_profilePreview => 'Samengevoegd profiel';
 
   @override
-  String get diveLog_combine_overlapBody =>
-      'Overlappende duiken lijken op dezelfde duik die door meerdere duikcomputers is vastgelegd. Het samenvoegen daarvan tot één item dat de gegevens van elke computer toont, komt in een toekomstige release.';
-
-  @override
-  String get diveLog_combine_overlapHintTwoDives =>
-      'Om nu twee registraties van dezelfde duik samen te voegen, open je er een en gebruik je ‘Samenvoegen met een andere duik’.';
-
-  @override
-  String get diveLog_combine_overlapTitle => 'Deze duiken overlappen in tijd';
-
-  @override
   String diveLog_combine_previewIntro(int count) {
     return 'Deze $count duiken worden samengevoegd tot één doorlopende duik. Tussenliggende intervallen worden oppervlaktetijd.';
   }
@@ -3003,6 +2992,10 @@ class AppLocalizationsNl extends AppLocalizations {
   String get diveLog_combine_undone => 'Samenvoeging ongedaan gemaakt';
 
   @override
+  String get diveLog_consolidate_confirm =>
+      'Bewaren als één duik met beide computers';
+
+  @override
   String get diveLog_consolidate_error_generic =>
       'Kon de duiken niet samenvoegen. Er is niets gewijzigd.';
 
@@ -3013,6 +3006,9 @@ class AppLocalizationsNl extends AppLocalizations {
   @override
   String get diveLog_consolidate_error_sameComputer =>
       'Deze duiken zijn afkomstig van dezelfde duikcomputer en kunnen op deze manier niet worden samengevoegd.';
+
+  @override
+  String get diveLog_consolidate_selectPrimary => 'Primaire duikcomputer';
 
   @override
   String get diveLog_consolidate_snackbar =>

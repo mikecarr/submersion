@@ -2911,17 +2911,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get diveLog_combine_profilePreview => 'الملف المدمج';
 
   @override
-  String get diveLog_combine_overlapBody =>
-      'الغوصات المتداخلة تبدو وكأنها الغوصة نفسها مسجّلة بواسطة عدة أجهزة كمبيوتر غوص. ستتوفر قريبًا ميزة دمج هذه الغوصات في إدخال واحد يعرض بيانات كل جهاز.';
-
-  @override
-  String get diveLog_combine_overlapHintTwoDives =>
-      'لدمج سجلّين لنفس الغوصة الآن، افتح أحدهما واستخدم «دمج مع غوصة أخرى».';
-
-  @override
-  String get diveLog_combine_overlapTitle => 'هذه الغوصات متداخلة زمنياً';
-
-  @override
   String diveLog_combine_previewIntro(int count) {
     return 'ستُدمَج هذه الغوصات الـ $count في غوصة واحدة متواصلة. تتحول الفجوات بينها إلى وقت على السطح.';
   }
@@ -2956,6 +2945,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get diveLog_combine_undone => 'تم التراجع عن الدمج';
 
   @override
+  String get diveLog_consolidate_confirm =>
+      'الاحتفاظ بها كغوصة واحدة بجهازي كمبيوتر';
+
+  @override
   String get diveLog_consolidate_error_generic =>
       'تعذّر دمج الغوصات. لم يتغيّر أي شيء.';
 
@@ -2966,6 +2959,9 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get diveLog_consolidate_error_sameComputer =>
       'هاتان الغوصتان من نفس كمبيوتر الغوص ولا يمكن دمجهما بهذه الطريقة.';
+
+  @override
+  String get diveLog_consolidate_selectPrimary => 'كمبيوتر الغوص الأساسي';
 
   @override
   String get diveLog_consolidate_snackbar =>

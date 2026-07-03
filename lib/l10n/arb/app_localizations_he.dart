@@ -2895,17 +2895,6 @@ class AppLocalizationsHe extends AppLocalizations {
   String get diveLog_combine_profilePreview => 'פרופיל ממוזג';
 
   @override
-  String get diveLog_combine_overlapBody =>
-      'צלילות חופפות נראות כמו אותה צלילה שנרשמה על ידי כמה מחשבי צלילה. מיזוג שלהן לרשומה אחת שמציגה את הנתונים של כל מחשב יגיע בגרסה עתידית.';
-
-  @override
-  String get diveLog_combine_overlapHintTwoDives =>
-      'כדי למזג עכשיו שתי רשומות של אותה צלילה, פתח אחת מהן והשתמש ב«מיזוג עם צלילה אחרת».';
-
-  @override
-  String get diveLog_combine_overlapTitle => 'הצלילות האלה חופפות בזמן';
-
-  @override
   String diveLog_combine_previewIntro(int count) {
     return '$count הצלילות האלה ימוזגו לצלילה אחת רציפה. הפערים ביניהן יהפכו לזמן פני שטח.';
   }
@@ -2940,6 +2929,9 @@ class AppLocalizationsHe extends AppLocalizations {
   String get diveLog_combine_undone => 'המיזוג בוטל';
 
   @override
+  String get diveLog_consolidate_confirm => 'לשמור כצלילה אחת עם שני המחשבים';
+
+  @override
   String get diveLog_consolidate_error_generic =>
       'לא ניתן היה למזג את הצלילות. שום דבר לא השתנה.';
 
@@ -2950,6 +2942,9 @@ class AppLocalizationsHe extends AppLocalizations {
   @override
   String get diveLog_consolidate_error_sameComputer =>
       'הצלילות האלה מגיעות מאותו מחשב צלילה ולא ניתן למזג אותן בדרך זו.';
+
+  @override
+  String get diveLog_consolidate_selectPrimary => 'מחשב הצלילה הראשי';
 
   @override
   String get diveLog_consolidate_snackbar => 'הצלילה מוזגה כמחשב נוסף.';

@@ -8,10 +8,10 @@ import 'package:submersion/features/dive_log/data/repositories/dive_repository_i
 import 'package:submersion/features/dive_log/data/services/dive_consolidation_service.dart';
 import 'package:submersion/features/dive_log/data/services/dive_merge_snapshot.dart';
 import 'package:submersion/features/dive_log/domain/entities/dive.dart';
-import 'package:submersion/features/dive_log/presentation/pages/dive_detail_page.dart'
-    show runDiveConsolidation;
 import 'package:submersion/features/dive_log/presentation/providers/dive_providers.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/merge_dive_dialog.dart';
+import 'package:submersion/features/dive_log/presentation/widgets/run_dive_consolidation.dart'
+    show runDiveConsolidation;
 import 'package:submersion/features/dive_sites/domain/entities/dive_site.dart';
 import 'package:submersion/features/settings/presentation/providers/settings_providers.dart';
 import 'package:submersion/l10n/arb/app_localizations.dart';
@@ -586,7 +586,7 @@ void main() {
   // Consolidation service wiring (Task 7).
   //
   // The dialog itself only plumbs the selected id out via onMerge; the
-  // apply/undo/snackbar wiring lives in dive_detail_page.dart's
+  // apply/undo/snackbar wiring lives in run_dive_consolidation.dart's
   // `runDiveConsolidation`, which is imported and called directly below --
   // there is no hand-copied mirror of that logic in this test file.
   // ---------------------------------------------------------------------------
@@ -669,7 +669,7 @@ void main() {
 }
 
 /// Pumps a dialog whose `onMerge` calls the real
-/// [runDiveConsolidation] extracted from dive_detail_page.dart -- the exact
+/// [runDiveConsolidation] from run_dive_consolidation.dart -- the exact
 /// function production wires up in `_showMergeDiveDialog` -- so there is no
 /// duplicated apply/undo/SnackBar logic in this test file.
 Future<void> _pumpWithConsolidationHandler(

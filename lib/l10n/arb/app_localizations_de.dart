@@ -2987,18 +2987,6 @@ class AppLocalizationsDe extends AppLocalizations {
   String get diveLog_combine_profilePreview => 'Kombiniertes Profil';
 
   @override
-  String get diveLog_combine_overlapBody =>
-      'Sich überschneidende Tauchgänge sehen aus wie derselbe Tauchgang, der von mehreren Tauchcomputern aufgezeichnet wurde. Das Zusammenführen dieser Tauchgänge zu einem einzigen Eintrag, der die Daten jedes Computers zeigt, kommt in einer zukünftigen Version.';
-
-  @override
-  String get diveLog_combine_overlapHintTwoDives =>
-      'Um jetzt zwei Aufzeichnungen desselben Tauchgangs zusammenzuführen, öffnen Sie einen davon und verwenden Sie „Mit einem anderen Tauchgang zusammenführen“.';
-
-  @override
-  String get diveLog_combine_overlapTitle =>
-      'Diese Tauchgänge überschneiden sich zeitlich';
-
-  @override
   String diveLog_combine_previewIntro(int count) {
     return 'Diese $count Tauchgänge werden zu einem durchgehenden Tauchgang kombiniert. Lücken dazwischen werden zu Oberflächenzeit.';
   }
@@ -3034,6 +3022,10 @@ class AppLocalizationsDe extends AppLocalizations {
   String get diveLog_combine_undone => 'Kombination rückgängig gemacht';
 
   @override
+  String get diveLog_consolidate_confirm =>
+      'Als ein Tauchgang mit beiden Computern behalten';
+
+  @override
   String get diveLog_consolidate_error_generic =>
       'Die Tauchgänge konnten nicht zusammengeführt werden. Es wurde nichts geändert.';
 
@@ -3044,6 +3036,9 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get diveLog_consolidate_error_sameComputer =>
       'Diese Tauchgänge stammen vom selben Tauchcomputer und können auf diese Weise nicht zusammengeführt werden.';
+
+  @override
+  String get diveLog_consolidate_selectPrimary => 'Primärer Tauchcomputer';
 
   @override
   String get diveLog_consolidate_snackbar =>

@@ -2977,18 +2977,6 @@ class AppLocalizationsEs extends AppLocalizations {
   String get diveLog_combine_profilePreview => 'Perfil combinado';
 
   @override
-  String get diveLog_combine_overlapBody =>
-      'Las inmersiones superpuestas parecen ser la misma inmersión registrada por varios ordenadores de buceo. Combinarlas en una sola entrada que muestre los datos de cada ordenador llegará en una futura versión.';
-
-  @override
-  String get diveLog_combine_overlapHintTwoDives =>
-      'Para combinar ahora dos registros de la misma inmersión, abre uno de ellos y usa «Combinar con otra inmersión».';
-
-  @override
-  String get diveLog_combine_overlapTitle =>
-      'Estas inmersiones se superponen en el tiempo';
-
-  @override
   String diveLog_combine_previewIntro(int count) {
     return 'Estas $count inmersiones se combinarán en una sola inmersión continua. Los intervalos entre ellas se convertirán en tiempo en superficie.';
   }
@@ -3023,6 +3011,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get diveLog_combine_undone => 'Combinación deshecha';
 
   @override
+  String get diveLog_consolidate_confirm =>
+      'Mantener como una sola inmersión con ambos ordenadores';
+
+  @override
   String get diveLog_consolidate_error_generic =>
       'No se pudieron fusionar las inmersiones. No se realizó ningún cambio.';
 
@@ -3033,6 +3025,10 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get diveLog_consolidate_error_sameComputer =>
       'Estas inmersiones son del mismo ordenador de buceo y no se pueden fusionar de esta manera.';
+
+  @override
+  String get diveLog_consolidate_selectPrimary =>
+      'Ordenador de buceo principal';
 
   @override
   String get diveLog_consolidate_snackbar =>

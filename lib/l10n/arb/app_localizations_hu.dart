@@ -2968,18 +2968,6 @@ class AppLocalizationsHu extends AppLocalizations {
   String get diveLog_combine_profilePreview => 'Összevont profil';
 
   @override
-  String get diveLog_combine_overlapBody =>
-      'Az egymást átfedő merülések úgy néznek ki, mintha ugyanaz a merülés lenne, amelyet több merülésszámítógép rögzített. Az ilyen merülések egyetlen, minden számítógép adatait megjelenítő bejegyzéssé történő összevonása egy jövőbeli verzióban lesz elérhető.';
-
-  @override
-  String get diveLog_combine_overlapHintTwoDives =>
-      'Ha most szeretnéd összevonni ugyanannak a merülésnek a két rögzített változatát, nyisd meg az egyiket, és használd az „Összevonás egy másik merüléssel” funkciót.';
-
-  @override
-  String get diveLog_combine_overlapTitle =>
-      'Ezek a merülések időben átfedik egymást';
-
-  @override
   String diveLog_combine_previewIntro(int count) {
     return 'Ez a $count merülés egyetlen folyamatos merüléssé lesz összevonva. A köztük lévő szünetek felszíni idővé válnak.';
   }
@@ -3015,6 +3003,10 @@ class AppLocalizationsHu extends AppLocalizations {
   String get diveLog_combine_undone => 'Összevonás visszavonva';
 
   @override
+  String get diveLog_consolidate_confirm =>
+      'Megtartás egyetlen merülésként mindkét számítógéppel';
+
+  @override
   String get diveLog_consolidate_error_generic =>
       'Nem sikerült összevonni a merüléseket. Semmi sem változott.';
 
@@ -3025,6 +3017,9 @@ class AppLocalizationsHu extends AppLocalizations {
   @override
   String get diveLog_consolidate_error_sameComputer =>
       'Ezek a merülések ugyanattól a búvárszámítógéptől származnak, ezért így nem vonhatók össze.';
+
+  @override
+  String get diveLog_consolidate_selectPrimary => 'Elsődleges búvárszámítógép';
 
   @override
   String get diveLog_consolidate_snackbar =>

@@ -3,6 +3,16 @@ import 'package:flutter/material.dart';
 
 import 'package:submersion/features/dive_log/domain/entities/dive.dart';
 
+/// An additional depth series drawn alongside [DiveSparkline.profile] on the
+/// same chart (and therefore the same time/depth axes) -- e.g. one line per
+/// source dive when previewing a multi-computer consolidation.
+class DiveSparklineSeries {
+  const DiveSparklineSeries({required this.profile, required this.color});
+
+  final List<DiveProfilePoint> profile;
+  final Color color;
+}
+
 /// A compact, non-interactive depth-vs-time sparkline for dive profiles.
 ///
 /// Renders a minimal [LineChart] showing the dive's depth curve with a subtle
@@ -36,6 +46,12 @@ class DiveSparkline extends StatelessWidget {
   /// Colour for [highlightBands]. Defaults to [ColorScheme.tertiary].
   final Color? highlightColor;
 
+  /// Additional depth series drawn on the same axes as [profile], each in
+  /// its own colour -- e.g. one line per source dive when previewing a
+  /// multi-computer consolidation. Empty by default so existing single-line
+  /// callers are unaffected.
+  final List<DiveSparklineSeries> extraSeries;
+
   const DiveSparkline({
     super.key,
     required this.profile,
@@ -45,6 +61,7 @@ class DiveSparkline extends StatelessWidget {
     this.maxPoints = 40,
     this.highlightBands = const [],
     this.highlightColor,
+    this.extraSeries = const [],
   });
 
   @override
@@ -76,6 +93,16 @@ class DiveSparkline extends StatelessWidget {
 
     final bars = <LineChartBarData>[
       depthBar(samples.map(toSpot).toList(), effectiveColor, 0.15),
+      for (final series in extraSeries)
+        if (series.profile.isNotEmpty)
+          depthBar(
+            downsample(
+              series.profile,
+              maxPoints: maxPoints,
+            ).map(toSpot).toList(),
+            series.color,
+            0.15,
+          ),
     ];
 
     // Re-draw each highlighted x-range on top of the main line in a distinct

@@ -5051,24 +5051,6 @@ abstract class AppLocalizations {
   /// **'Combined profile'**
   String get diveLog_combine_profilePreview;
 
-  /// No description provided for @diveLog_combine_overlapBody.
-  ///
-  /// In en, this message translates to:
-  /// **'Overlapping dives look like the same dive recorded by multiple dive computers. Combining those into a single entry that shows every computer\'s data is coming in a future release.'**
-  String get diveLog_combine_overlapBody;
-
-  /// No description provided for @diveLog_combine_overlapHintTwoDives.
-  ///
-  /// In en, this message translates to:
-  /// **'To merge two records of the same dive now, open one of them and use \"Merge with another dive\".'**
-  String get diveLog_combine_overlapHintTwoDives;
-
-  /// No description provided for @diveLog_combine_overlapTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'These dives overlap in time'**
-  String get diveLog_combine_overlapTitle;
-
   /// No description provided for @diveLog_combine_previewIntro.
   ///
   /// In en, this message translates to:
@@ -5109,6 +5091,12 @@ abstract class AppLocalizations {
   /// **'Combine undone'**
   String get diveLog_combine_undone;
 
+  /// No description provided for @diveLog_consolidate_confirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep as one dive with both computers'**
+  String get diveLog_consolidate_confirm;
+
   /// No description provided for @diveLog_consolidate_error_generic.
   ///
   /// In en, this message translates to:
@@ -5126,6 +5114,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'These dives are from the same dive computer and can\'t be merged this way.'**
   String get diveLog_consolidate_error_sameComputer;
+
+  /// No description provided for @diveLog_consolidate_selectPrimary.
+  ///
+  /// In en, this message translates to:
+  /// **'Primary dive computer'**
+  String get diveLog_consolidate_selectPrimary;
 
   /// No description provided for @diveLog_consolidate_snackbar.
   ///

@@ -2980,18 +2980,6 @@ class AppLocalizationsPt extends AppLocalizations {
   String get diveLog_combine_profilePreview => 'Perfil combinado';
 
   @override
-  String get diveLog_combine_overlapBody =>
-      'Mergulhos sobrepostos parecem ser o mesmo mergulho registrado por vários computadores de mergulho. A opção de combiná-los em um único registro que mostra os dados de cada computador chegará em uma versão futura.';
-
-  @override
-  String get diveLog_combine_overlapHintTwoDives =>
-      'Para combinar agora dois registros do mesmo mergulho, abra um deles e use «Mesclar com outro mergulho».';
-
-  @override
-  String get diveLog_combine_overlapTitle =>
-      'Esses mergulhos se sobrepõem no tempo';
-
-  @override
   String diveLog_combine_previewIntro(int count) {
     return 'Estes $count mergulhos serão combinados em um único mergulho contínuo. Os intervalos entre eles se tornam tempo de superfície.';
   }
@@ -3027,6 +3015,10 @@ class AppLocalizationsPt extends AppLocalizations {
   String get diveLog_combine_undone => 'Combinação desfeita';
 
   @override
+  String get diveLog_consolidate_confirm =>
+      'Manter como um único mergulho com os dois computadores';
+
+  @override
   String get diveLog_consolidate_error_generic =>
       'Não foi possível mesclar os mergulhos. Nada foi alterado.';
 
@@ -3037,6 +3029,10 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get diveLog_consolidate_error_sameComputer =>
       'Esses mergulhos são do mesmo computador de mergulho e não podem ser mesclados dessa forma.';
+
+  @override
+  String get diveLog_consolidate_selectPrimary =>
+      'Computador de mergulho principal';
 
   @override
   String get diveLog_consolidate_snackbar =>

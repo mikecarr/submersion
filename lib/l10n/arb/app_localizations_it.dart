@@ -2982,18 +2982,6 @@ class AppLocalizationsIt extends AppLocalizations {
   String get diveLog_combine_profilePreview => 'Profilo combinato';
 
   @override
-  String get diveLog_combine_overlapBody =>
-      'Le immersioni sovrapposte sembrano la stessa immersione registrata da più computer subacquei. La possibilità di unirle in un\'unica voce che mostri i dati di ogni computer arriverà in una versione futura.';
-
-  @override
-  String get diveLog_combine_overlapHintTwoDives =>
-      'Per unire ora due registrazioni della stessa immersione, apri una di esse e usa «Unisci con un\'altra immersione».';
-
-  @override
-  String get diveLog_combine_overlapTitle =>
-      'Queste immersioni si sovrappongono nel tempo';
-
-  @override
   String diveLog_combine_previewIntro(int count) {
     return 'Queste $count immersioni verranno unite in un\'unica immersione continua. Gli intervalli tra loro diventeranno tempo in superficie.';
   }
@@ -3028,6 +3016,10 @@ class AppLocalizationsIt extends AppLocalizations {
   String get diveLog_combine_undone => 'Unione annullata';
 
   @override
+  String get diveLog_consolidate_confirm =>
+      'Mantieni come un\'unica immersione con entrambi i computer';
+
+  @override
   String get diveLog_consolidate_error_generic =>
       'Impossibile unire le immersioni. Non è stato modificato nulla.';
 
@@ -3038,6 +3030,10 @@ class AppLocalizationsIt extends AppLocalizations {
   @override
   String get diveLog_consolidate_error_sameComputer =>
       'Queste immersioni provengono dallo stesso computer subacqueo e non possono essere unite in questo modo.';
+
+  @override
+  String get diveLog_consolidate_selectPrimary =>
+      'Computer subacqueo principale';
 
   @override
   String get diveLog_consolidate_snackbar =>
