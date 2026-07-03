@@ -75,4 +75,36 @@ void main() {
     expect(filtered.length, 1);
     expect(filtered.first.label, 'Good');
   });
+
+  test('dive-type distribution respects a tag filter', () async {
+    await dive('a');
+    await dive('b');
+    await db
+        .into(db.diveDiveTypes)
+        .insert(
+          DiveDiveTypesCompanion(
+            id: const Value('t-a'),
+            diveId: const Value('a'),
+            diveTypeId: const Value('wreck'),
+            createdAt: Value(now),
+          ),
+        );
+    await db
+        .into(db.diveDiveTypes)
+        .insert(
+          DiveDiveTypesCompanion(
+            id: const Value('t-b'),
+            diveId: const Value('b'),
+            diveTypeId: const Value('wreck'),
+            createdAt: Value(now),
+          ),
+        );
+    await tag('dry');
+    await link('a', 'dry');
+
+    final filtered = await repo.getDiveTypeDistribution(
+      filter: const DiveFilterState(tagIds: ['dry']),
+    );
+    expect(filtered.first.count, 1); // only dive 'a'
+  });
 }

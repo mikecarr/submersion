@@ -623,10 +623,12 @@ class StatisticsRepository {
   /// Get dive type distribution (recreational, night, deep, wreck, etc.)
   Future<List<DistributionSegment>> getDiveTypeDistribution({
     String? diverId,
+    DiveFilterState filter = const DiveFilterState(),
   }) async {
     try {
       final diverFilter = diverId != null ? 'AND diver_id = ?' : '';
-      final params = diverId != null ? [diverId] : <dynamic>[];
+      final df = _diveFilter(filter, alias: 'd');
+      final params = diverId != null ? [diverId, ...df.params] : [...df.params];
 
       final results = await _db.customSelect('''
         SELECT
@@ -634,7 +636,7 @@ class StatisticsRepository {
           COUNT(*) AS count
         FROM dive_dive_types ddt
         JOIN dives d ON d.id = ddt.dive_id
-        WHERE 1=1 $diverFilter
+        WHERE 1=1 $diverFilter ${df.clause}
         GROUP BY ddt.dive_type_id
         ORDER BY count DESC
         ''', variables: params.map((p) => Variable(p)).toList()).get();
@@ -675,6 +677,7 @@ class StatisticsRepository {
   /// Get maximum depth progression by month (last 5 years)
   Future<List<TrendDataPoint>> getDepthProgressionTrend({
     String? diverId,
+    DiveFilterState filter = const DiveFilterState(),
   }) async {
     try {
       final fiveYearsAgo = DateTime.now().subtract(
@@ -683,7 +686,10 @@ class StatisticsRepository {
       final cutoff = fiveYearsAgo.millisecondsSinceEpoch;
 
       final diverFilter = diverId != null ? 'AND diver_id = ?' : '';
-      final params = diverId != null ? [cutoff, diverId] : [cutoff];
+      final df = _diveFilter(filter, alias: 'dives');
+      final params = diverId != null
+          ? [cutoff, diverId, ...df.params]
+          : [cutoff, ...df.params];
 
       final results = await _db.customSelect('''
         SELECT
@@ -691,7 +697,7 @@ class StatisticsRepository {
           strftime('%m', dive_date_time / 1000, 'unixepoch') AS month,
           MAX(max_depth) AS max_depth
         FROM dives
-        WHERE dive_date_time >= ? AND max_depth IS NOT NULL $diverFilter
+        WHERE dive_date_time >= ? AND max_depth IS NOT NULL $diverFilter ${df.clause}
         GROUP BY year, month
         ORDER BY year, month
         ''', variables: params.map((p) => Variable(p)).toList()).get();
@@ -716,7 +722,10 @@ class StatisticsRepository {
   }
 
   /// Get average bottom time trend by month (last 5 years)
-  Future<List<TrendDataPoint>> getBottomTimeTrend({String? diverId}) async {
+  Future<List<TrendDataPoint>> getBottomTimeTrend({
+    String? diverId,
+    DiveFilterState filter = const DiveFilterState(),
+  }) async {
     try {
       final fiveYearsAgo = DateTime.now().subtract(
         const Duration(days: 365 * 5),
@@ -724,7 +733,10 @@ class StatisticsRepository {
       final cutoff = fiveYearsAgo.millisecondsSinceEpoch;
 
       final diverFilter = diverId != null ? 'AND diver_id = ?' : '';
-      final params = diverId != null ? [cutoff, diverId] : [cutoff];
+      final df = _diveFilter(filter, alias: 'dives');
+      final params = diverId != null
+          ? [cutoff, diverId, ...df.params]
+          : [cutoff, ...df.params];
 
       final results = await _db.customSelect('''
         SELECT
@@ -732,7 +744,7 @@ class StatisticsRepository {
           strftime('%m', dive_date_time / 1000, 'unixepoch') AS month,
           AVG(bottom_time / 60.0) AS avg_duration
         FROM dives
-        WHERE dive_date_time >= ? AND bottom_time IS NOT NULL $diverFilter
+        WHERE dive_date_time >= ? AND bottom_time IS NOT NULL $diverFilter ${df.clause}
         GROUP BY year, month
         ORDER BY year, month
         ''', variables: params.map((p) => Variable(p)).toList()).get();
@@ -759,17 +771,19 @@ class StatisticsRepository {
   /// Get dives per year
   Future<List<({int year, int count})>> getDivesPerYear({
     String? diverId,
+    DiveFilterState filter = const DiveFilterState(),
   }) async {
     try {
-      final diverFilter = diverId != null ? 'WHERE diver_id = ?' : '';
-      final params = diverId != null ? [diverId] : <dynamic>[];
+      final diverFilter = diverId != null ? 'AND diver_id = ?' : '';
+      final df = _diveFilter(filter, alias: 'dives');
+      final params = diverId != null ? [diverId, ...df.params] : [...df.params];
 
       final results = await _db.customSelect('''
         SELECT
           strftime('%Y', dive_date_time / 1000, 'unixepoch') AS year,
           COUNT(*) AS count
         FROM dives
-        $diverFilter
+        WHERE 1=1 $diverFilter ${df.clause}
         GROUP BY year
         ORDER BY year
         ''', variables: params.map((p) => Variable(p)).toList()).get();
@@ -791,10 +805,14 @@ class StatisticsRepository {
   }
 
   /// Get cumulative dive count over time
-  Future<List<TrendDataPoint>> getCumulativeDiveCount({String? diverId}) async {
+  Future<List<TrendDataPoint>> getCumulativeDiveCount({
+    String? diverId,
+    DiveFilterState filter = const DiveFilterState(),
+  }) async {
     try {
-      final diverFilter = diverId != null ? 'WHERE diver_id = ?' : '';
-      final params = diverId != null ? [diverId] : <dynamic>[];
+      final diverFilter = diverId != null ? 'AND diver_id = ?' : '';
+      final df = _diveFilter(filter, alias: 'dives');
+      final params = diverId != null ? [diverId, ...df.params] : [...df.params];
 
       final results = await _db.customSelect('''
         SELECT
@@ -802,7 +820,7 @@ class StatisticsRepository {
           strftime('%m', dive_date_time / 1000, 'unixepoch') AS month,
           COUNT(*) AS count
         FROM dives
-        $diverFilter
+        WHERE 1=1 $diverFilter ${df.clause}
         GROUP BY year, month
         ORDER BY year, month
         ''', variables: params.map((p) => Variable(p)).toList()).get();

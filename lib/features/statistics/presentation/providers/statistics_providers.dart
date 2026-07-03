@@ -107,7 +107,11 @@ final diveTypeDistributionProvider = FutureProvider<List<DistributionSegment>>((
   _keepAliveWithExpiry(ref);
   final repository = ref.watch(statisticsRepositoryProvider);
   final currentDiverId = ref.watch(currentDiverIdProvider);
-  return repository.getDiveTypeDistribution(diverId: currentDiverId);
+  final filter = ref.watch(statisticsFilterProvider);
+  return repository.getDiveTypeDistribution(
+    diverId: currentDiverId,
+    filter: filter,
+  );
 });
 
 // ============================================================================
@@ -120,7 +124,11 @@ final depthProgressionTrendProvider = FutureProvider<List<TrendDataPoint>>((
   _keepAliveWithExpiry(ref);
   final repository = ref.watch(statisticsRepositoryProvider);
   final currentDiverId = ref.watch(currentDiverIdProvider);
-  return repository.getDepthProgressionTrend(diverId: currentDiverId);
+  final filter = ref.watch(statisticsFilterProvider);
+  return repository.getDepthProgressionTrend(
+    diverId: currentDiverId,
+    filter: filter,
+  );
 });
 
 final bottomTimeTrendProvider = FutureProvider<List<TrendDataPoint>>((
@@ -129,7 +137,8 @@ final bottomTimeTrendProvider = FutureProvider<List<TrendDataPoint>>((
   _keepAliveWithExpiry(ref);
   final repository = ref.watch(statisticsRepositoryProvider);
   final currentDiverId = ref.watch(currentDiverIdProvider);
-  return repository.getBottomTimeTrend(diverId: currentDiverId);
+  final filter = ref.watch(statisticsFilterProvider);
+  return repository.getBottomTimeTrend(diverId: currentDiverId, filter: filter);
 });
 
 final divesPerYearProvider = FutureProvider<List<({int year, int count})>>((
@@ -138,7 +147,8 @@ final divesPerYearProvider = FutureProvider<List<({int year, int count})>>((
   _keepAliveWithExpiry(ref);
   final repository = ref.watch(statisticsRepositoryProvider);
   final currentDiverId = ref.watch(currentDiverIdProvider);
-  return repository.getDivesPerYear(diverId: currentDiverId);
+  final filter = ref.watch(statisticsFilterProvider);
+  return repository.getDivesPerYear(diverId: currentDiverId, filter: filter);
 });
 
 final cumulativeDiveCountProvider = FutureProvider<List<TrendDataPoint>>((
@@ -147,7 +157,11 @@ final cumulativeDiveCountProvider = FutureProvider<List<TrendDataPoint>>((
   _keepAliveWithExpiry(ref);
   final repository = ref.watch(statisticsRepositoryProvider);
   final currentDiverId = ref.watch(currentDiverIdProvider);
-  return repository.getCumulativeDiveCount(diverId: currentDiverId);
+  final filter = ref.watch(statisticsFilterProvider);
+  return repository.getCumulativeDiveCount(
+    diverId: currentDiverId,
+    filter: filter,
+  );
 });
 
 // ============================================================================
