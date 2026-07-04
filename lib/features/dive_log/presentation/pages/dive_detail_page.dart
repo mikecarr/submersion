@@ -1167,14 +1167,11 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
         ? _visibleComputers
         : multiComputerProfiles?.keys.toSet();
 
-    // Build per-computer color map and primary set
-    Map<String, Color>? computerLineColors;
-    Set<String>? primaryComputers;
+    // Build the per-computer toggle items (transitional: replaced by
+    // SourceBar in the active-source wiring).
     List<ComputerToggleItem>? toggleItems;
 
     if (multiComputerProfiles != null) {
-      computerLineColors = {};
-      primaryComputers = {};
       toggleItems = [];
       var idx = 0;
       for (final computerId in multiComputerProfiles.keys) {
@@ -1186,8 +1183,6 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
         final isPrimary = truePrimaryComputerIds.isNotEmpty
             ? truePrimaryComputerIds.contains(computerId)
             : idx == 0;
-        computerLineColors[computerId] = color;
-        if (isPrimary) primaryComputers.add(computerId);
         toggleItems.add(
           ComputerToggleItem(
             computerId: computerId,
@@ -1377,10 +1372,6 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
                         diveDurationSeconds: dive.profile.isEmpty
                             ? null
                             : dive.profile.last.timestamp,
-                        computerProfiles: multiComputerProfiles,
-                        visibleComputers: effectiveVisible,
-                        computerLineColors: computerLineColors,
-                        primaryComputers: primaryComputers,
                         computerNames: computerNames,
                         playbackTimestamp: playbackState.isActive
                             ? playbackState.currentTimestamp
