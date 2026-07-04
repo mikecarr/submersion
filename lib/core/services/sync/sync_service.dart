@@ -1701,7 +1701,7 @@ class SyncService {
         // remote HLC wins; an exact tie or a local-newer HLC keeps local.
         if (localHlc != null && remoteHlc != null) {
           if (remoteHlc.compareTo(localHlc) > 0) {
-            toUpsert.add(recordToApply);
+            toUpsert.add(_overlayOntoLocal(recordToApply, local));
             applied += 1;
           }
           continue;
@@ -1728,7 +1728,7 @@ class SyncService {
         if (remoteUpdatedAt == null ||
             localUpdatedAt == null ||
             remoteUpdatedAt >= localUpdatedAt) {
-          toUpsert.add(recordToApply);
+          toUpsert.add(_overlayOntoLocal(recordToApply, local));
           applied += 1;
         }
       } catch (e, stackTrace) {
@@ -1768,6 +1768,19 @@ class SyncService {
       recordsFailed: failed,
     );
   }
+
+  /// Overlays a winning remote row onto the receiver's current row so a column
+  /// the remote payload OMITS keeps its local value, while every key the remote
+  /// actually sends -- including an explicit `null` that clears a field (#474)
+  /// -- wins. Rows are applied via `.toCompanion(false)` (so explicit nulls are
+  /// written as SQL NULL); without this overlay that would also write NULL for
+  /// every omitted column, silently clearing values a cross-version peer -- one
+  /// predating a newly-added nullable column -- never intended to touch. Same-
+  /// version peers export full rows, so the overlay is a no-op for them.
+  static Map<String, dynamic> _overlayOntoLocal(
+    Map<String, dynamic> remote,
+    Map<String, dynamic>? local,
+  ) => local == null ? remote : {...local, ...remote};
 
   Future<Map<String, Set<String>>> _pendingRecordMap() async {
     final records = await _syncRepository.getPendingRecords();
@@ -1891,7 +1904,20 @@ class SyncService {
             deletedAt: deletedAt ?? DateTime.now().millisecondsSinceEpoch,
           );
         } else {
-          await _serializer.upsertRecord(entityType, remoteData);
+          // keepRemote overwrites the local row. For HLC-bearing entities the
+          // upsert uses `.toCompanion(false)`, so a cross-version remote map
+          // that OMITS a nullable key would write SQL NULL and clobber the
+          // local value. Overlay onto the current local row first (mirrors
+          // `_mergeEntity`): an omitted key keeps its local value, an explicit
+          // null still clears. Clockless entities upsert with nullToAbsent, so
+          // an omitted key is already preserved -- apply their map directly.
+          final toApply = entityHasUpdatedAt[entityType] == true
+              ? _overlayOntoLocal(
+                  remoteData,
+                  await _serializer.fetchRecord(entityType, recordId),
+                )
+              : remoteData;
+          await _serializer.upsertRecord(entityType, toApply);
         }
         await _syncRepository.clearConflict(
           entityType: entityType,
