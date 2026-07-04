@@ -1090,6 +1090,45 @@ void main() {
       );
     });
 
+    testWidgets(
+      'column header falls back to serial when name and model are absent',
+      (tester) async {
+        final primary = _makeSource(
+          id: 'src-1',
+          isPrimary: true,
+          computerModel: 'Shearwater Perdix',
+          maxDepth: 30.0,
+        );
+        final secondary = _makeSource(
+          id: 'src-2',
+          isPrimary: false,
+          computerName: null,
+          computerModel: null,
+          computerSerial: 'SN-ONLY-42',
+          maxDepth: 31.0,
+        );
+
+        await tester.pumpWidget(
+          testApp(
+            child: SingleChildScrollView(
+              child: DataSourcesSection(
+                dataSources: [primary, secondary],
+                diveCreatedAt: DateTime(2026, 3, 20, 10, 0),
+                diveId: 'dive-1',
+                units: _units,
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        final dataTable = tester.widget<DataTable>(find.byType(DataTable));
+        // No friendly name and no model: the serial identifies the column,
+        // not the generic "Unknown" label.
+        expect((dataTable.columns[2].label as Text).data, equals('SN-ONLY-42'));
+      },
+    );
+
     testWidgets('does not render a comparison grid when single-source', (
       tester,
     ) async {

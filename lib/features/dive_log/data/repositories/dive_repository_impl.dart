@@ -5079,7 +5079,7 @@ class DiveRepository {
     )..where((c) => c.id.isIn(ids))).get();
     return {
       for (final computer in computers)
-        if (computer.name.trim().isNotEmpty) computer.id: computer.name,
+        if (computer.name.trim().isNotEmpty) computer.id: computer.name.trim(),
     };
   }
 

@@ -175,9 +175,7 @@ class _SourceComparisonGrid extends StatelessWidget {
           for (final s in sources)
             DataColumn(
               label: Text(
-                s.computerName ??
-                    s.computerModel ??
-                    l10n.diveLog_sources_unknownComputer,
+                s.computerLabel(l10n.diveLog_sources_unknownComputer),
                 style: s.isPrimary
                     ? const TextStyle(fontWeight: FontWeight.bold)
                     : null,

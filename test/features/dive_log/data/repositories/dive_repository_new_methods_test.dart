@@ -256,6 +256,27 @@ void main() {
       expect(sources.single.displayName, equals('Shearwater Teric'));
     });
 
+    test('trims surrounding whitespace from the friendly name', () async {
+      final diveId = await insertTestDive(id: 'dive-whitespace-name');
+      await insertComputer(
+        id: 'comp-whitespace',
+        name: '  My Perdix  ',
+        model: 'Perdix',
+      );
+      await repository.saveComputerReading(
+        buildReading(
+          id: 'reading-whitespace',
+          diveId: diveId,
+          isPrimary: true,
+          computerModel: 'Shearwater Perdix AI',
+        ).copyWith(computerId: const Value('comp-whitespace')),
+      );
+
+      final sources = await repository.getDataSources(diveId);
+
+      expect(sources.single.computerName, equals('My Perdix'));
+    });
+
     test(
       'returns data sources ordered primary-first then by createdAt',
       () async {
