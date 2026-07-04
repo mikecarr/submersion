@@ -9692,6 +9692,36 @@ abstract class AppLocalizations {
   /// **'Overlay on chart'**
   String get diveLog_sources_overlayTooltip;
 
+  /// No description provided for @diveLog_sources_splitDialog_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Split into separate dive?'**
+  String get diveLog_sources_splitDialog_title;
+
+  /// No description provided for @diveLog_sources_splitDialog_body.
+  ///
+  /// In en, this message translates to:
+  /// **'This source\'s profile, events, and tanks will move to a new dive. The logbook entry stays on this dive.'**
+  String get diveLog_sources_splitDialog_body;
+
+  /// No description provided for @diveLog_sources_splitDialog_confirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Split'**
+  String get diveLog_sources_splitDialog_confirm;
+
+  /// No description provided for @diveLog_sources_splitDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Dive split'**
+  String get diveLog_sources_splitDone;
+
+  /// No description provided for @diveLog_sources_splitFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Split failed'**
+  String get diveLog_sources_splitFailed;
+
   /// No description provided for @divePlanner_action_addTank.
   ///
   /// In en, this message translates to:

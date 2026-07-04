@@ -9,6 +9,7 @@ import 'package:submersion/features/dive_log/data/repositories/dive_repository_i
 import 'package:submersion/features/dive_log/data/repositories/tank_pressure_repository.dart';
 import 'package:submersion/features/dive_log/data/services/dive_consolidation_service.dart';
 import 'package:submersion/features/dive_log/data/services/dive_merge_service.dart';
+import 'package:submersion/features/dive_log/data/services/dive_split_service.dart';
 import 'package:submersion/features/dive_log/presentation/providers/dive_repository_provider.dart';
 import 'package:submersion/features/dive_log/domain/entities/dive.dart'
     as domain;
@@ -119,6 +120,12 @@ final diveConsolidationServiceProvider = Provider<DiveConsolidationService>((
   ref,
 ) {
   return DiveConsolidationService(ref.watch(diveRepositoryProvider));
+});
+
+/// Split-a-source-into-its-own-dive service singleton (inverse of
+/// consolidation).
+final diveSplitServiceProvider = Provider<DiveSplitService>((ref) {
+  return DiveSplitService(ref.watch(diveRepositoryProvider));
 });
 
 /// Autocomplete suggestions: distinct keys this diver has used

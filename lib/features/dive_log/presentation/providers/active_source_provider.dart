@@ -4,13 +4,12 @@ import 'package:submersion/core/providers/provider.dart';
 /// chips, deco and tissue cards). Null means "the primary source" so the
 /// page needs no async initialization. View state only: switching the
 /// active source never writes isPrimary; that changes solely via the
-/// explicit "Set as primary" action.
-final activeDiveSourceProvider = StateProvider.family<String?, String>(
-  (ref, diveId) => null,
-);
+/// explicit "Set as primary" action. autoDispose: leaving the dive resets
+/// the selection, so reopening a dive always starts at the primary source.
+final activeDiveSourceProvider = StateProvider.autoDispose
+    .family<String?, String>((ref, diveId) => null);
 
 /// Source IDs currently overlaid on the profile chart for comparison.
 /// The active source is never a member; activating a source removes it.
-final overlaySourcesProvider = StateProvider.family<Set<String>, String>(
-  (ref, diveId) => const {},
-);
+final overlaySourcesProvider = StateProvider.autoDispose
+    .family<Set<String>, String>((ref, diveId) => const {});

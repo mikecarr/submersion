@@ -2592,6 +2592,11 @@
   "diveLog_sources_menu_unlink": "Unlink",
   "diveLog_sources_menu_split": "Split into separate dive",
   "diveLog_sources_overlayTooltip": "Overlay on chart",
+  "diveLog_sources_splitDialog_title": "Split into separate dive?",
+  "diveLog_sources_splitDialog_body": "This source's profile, events, and tanks will move to a new dive. The logbook entry stays on this dive.",
+  "diveLog_sources_splitDialog_confirm": "Split",
+  "diveLog_sources_splitDone": "Dive split",
+  "diveLog_sources_splitFailed": "Split failed",
   "@diveLog_sources_minutes": {
     "placeholders": {
       "count": {
