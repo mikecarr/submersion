@@ -1900,7 +1900,20 @@ class SyncService {
             deletedAt: deletedAt ?? DateTime.now().millisecondsSinceEpoch,
           );
         } else {
-          await _serializer.upsertRecord(entityType, remoteData);
+          // keepRemote overwrites the local row. For HLC-bearing entities the
+          // upsert uses `.toCompanion(false)`, so a cross-version remote map
+          // that OMITS a nullable key would write SQL NULL and clobber the
+          // local value. Overlay onto the current local row first (mirrors
+          // `_mergeEntity`): an omitted key keeps its local value, an explicit
+          // null still clears. Clockless entities upsert with nullToAbsent, so
+          // an omitted key is already preserved -- apply their map directly.
+          final toApply = entityHasUpdatedAt[entityType] == true
+              ? _overlayOntoLocal(
+                  remoteData,
+                  await _serializer.fetchRecord(entityType, recordId),
+                )
+              : remoteData;
+          await _serializer.upsertRecord(entityType, toApply);
         }
         await _syncRepository.clearConflict(
           entityType: entityType,

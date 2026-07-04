@@ -1538,9 +1538,16 @@ class SyncDataSerializer {
   /// HLC-bearing entities (`entityHasUpdatedAt == true`) apply via
   /// `.toCompanion(false)` so an explicit `null` overwrites the receiver's
   /// value -- this is what makes clearing a field (e.g. a dive name, #474)
-  /// propagate. It is safe for them because `_mergeEntity` only applies a row
-  /// that strictly wins LWW, so a stale base row (tie or older HLC) is never
-  /// applied and cannot clobber a newer local value.
+  /// propagate.
+  ///
+  /// CALLER CONTRACT for HLC entities: because `.toCompanion(false)` writes
+  /// every column, `data` MUST be a full row (its own `row.toJson()`), OR the
+  /// caller MUST overlay the remote map onto the current local row first so a
+  /// key the remote OMITS keeps its local value. `_mergeEntity` does this via
+  /// `_overlayOntoLocal` (and only ever applies a strict LWW winner, so a
+  /// stale/tied base never clobbers); the conflict-resolution `keepRemote`
+  /// branch does the same. A raw partial map passed straight through would
+  /// clear every column it omits.
   ///
   /// Clockless children (`entityHasUpdatedAt == false`: tanks, profiles, the
   /// junction tables, media, ...) are applied UNCONDITIONALLY by `_mergeEntity`
