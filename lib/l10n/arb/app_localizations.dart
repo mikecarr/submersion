@@ -9662,6 +9662,36 @@ abstract class AppLocalizations {
   /// **'(edited)'**
   String get diveLog_sources_editedSuffix;
 
+  /// No description provided for @diveLog_sources_barLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'SOURCES'**
+  String get diveLog_sources_barLabel;
+
+  /// No description provided for @diveLog_sources_menu_setPrimary.
+  ///
+  /// In en, this message translates to:
+  /// **'Set as primary'**
+  String get diveLog_sources_menu_setPrimary;
+
+  /// No description provided for @diveLog_sources_menu_unlink.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlink'**
+  String get diveLog_sources_menu_unlink;
+
+  /// No description provided for @diveLog_sources_menu_split.
+  ///
+  /// In en, this message translates to:
+  /// **'Split into separate dive'**
+  String get diveLog_sources_menu_split;
+
+  /// No description provided for @diveLog_sources_overlayTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Overlay on chart'**
+  String get diveLog_sources_overlayTooltip;
+
   /// No description provided for @divePlanner_action_addTank.
   ///
   /// In en, this message translates to:
