@@ -7,6 +7,7 @@ import 'package:fit_tool/src/utils/logger.dart' as fit_log;
 import 'package:logger/logger.dart' show Level, Logger;
 import 'package:submersion/features/dive_import/data/services/fit/fit_device_mapper.dart';
 import 'package:submersion/features/dive_import/data/services/fit/fit_gas_extractor.dart';
+import 'package:submersion/features/dive_import/data/services/fit/fit_gas_switch_extractor.dart';
 import 'package:submersion/features/dive_import/data/services/fit/fit_profile_extractor.dart';
 import 'package:submersion/features/dive_import/data/services/fit/fit_summary_extractor.dart';
 import 'package:submersion/features/dive_import/data/services/fit/fit_tank_extractor.dart';
@@ -138,6 +139,12 @@ class FitParserService {
     }
 
     final tanks = _buildImportedTanks(realTanks, gases);
+    final gasSwitches = _buildGasSwitches(
+      FitGasSwitchExtractor.extract(messages),
+      gases,
+      samples,
+      sessionStartMs,
+    );
 
     final serial = fileId?.serialNumber ?? 0;
     final sourceId = 'garmin-$serial-$sessionStartMs';
@@ -171,6 +178,7 @@ class FitParserService {
       computerModel: FitDeviceMapper.modelName(productCode),
       computerSerial: serial != 0 ? '$serial' : null,
       tanks: tanks,
+      gasSwitches: gasSwitches,
       profile: profile,
       sourceFileName: fileName,
       sourceFileFormat: 'fit',
@@ -254,6 +262,49 @@ class FitParserService {
         tankPressures: pressuresByRelSec[relSec],
       );
     }).toList();
+  }
+
+  /// Maps gas-switch events onto tank indices, attaching the depth of the
+  /// nearest profile sample. The event's data field holds the dive_gas
+  /// message index, which is the position in [gases] (sorted by index) and
+  /// therefore the tank order used by [_buildImportedTanks].
+  List<ImportedGasSwitch> _buildGasSwitches(
+    List<FitGasSwitchEvent> events,
+    List<FitGas> gases,
+    List<FitSample> samples,
+    int startMs,
+  ) {
+    final tankIndexByGasIndex = <int, int>{
+      for (var i = 0; i < gases.length; i++) gases[i].index: i,
+    };
+    final switches = <ImportedGasSwitch>[];
+    // Events and samples are both timestamp-ordered, so the nearest-sample
+    // cursor only ever advances: one O(events + samples) sweep overall.
+    var sampleIdx = 0;
+    for (final event in events) {
+      final tankIndex = tankIndexByGasIndex[event.gasIndex];
+      if (tankIndex == null) continue;
+
+      double? depth;
+      if (samples.isNotEmpty) {
+        while (sampleIdx + 1 < samples.length &&
+            (samples[sampleIdx + 1].timestampMs - event.timestampMs).abs() <=
+                (samples[sampleIdx].timestampMs - event.timestampMs).abs()) {
+          sampleIdx++;
+        }
+        depth = samples[sampleIdx].depth;
+      }
+
+      final relSec = ((event.timestampMs - startMs) / 1000).round();
+      switches.add(
+        ImportedGasSwitch(
+          timeSeconds: relSec < 0 ? 0 : relSec,
+          tankIndex: tankIndex,
+          depth: depth,
+        ),
+      );
+    }
+    return switches;
   }
 
   /// Builds the tank list, pairing air-integration pressure (when present) with

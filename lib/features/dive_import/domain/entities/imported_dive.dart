@@ -68,6 +68,28 @@ class ImportedTankPressureSample extends Equatable {
   List<Object?> get props => [tankIndex, pressureBar];
 }
 
+/// A gas switch during an imported dive, addressing the tank positionally
+/// (by [ImportedTank.order] / list index).
+class ImportedGasSwitch extends Equatable {
+  const ImportedGasSwitch({
+    required this.timeSeconds,
+    required this.tankIndex,
+    this.depth,
+  });
+
+  /// Seconds since dive start.
+  final int timeSeconds;
+
+  /// Index into [ImportedDive.tanks] of the tank switched to.
+  final int tankIndex;
+
+  /// Depth in meters at the switch, when derivable.
+  final double? depth;
+
+  @override
+  List<Object?> get props => [timeSeconds, tankIndex, depth];
+}
+
 /// A dive imported from an external source (wearable device, file, etc.)
 class ImportedDive extends Equatable {
   final String sourceId;
@@ -98,6 +120,7 @@ class ImportedDive extends Equatable {
   final String? computerSerial;
   final String? computerFirmware;
   final List<ImportedTank> tanks;
+  final List<ImportedGasSwitch> gasSwitches;
   final List<ImportedProfileSample> profile;
   final String? sourceFileName;
   final String? sourceFileFormat;
@@ -131,6 +154,7 @@ class ImportedDive extends Equatable {
     this.computerSerial,
     this.computerFirmware,
     this.tanks = const [],
+    this.gasSwitches = const [],
     required this.profile,
     this.sourceFileName,
     this.sourceFileFormat,
@@ -169,6 +193,7 @@ class ImportedDive extends Equatable {
     computerSerial,
     computerFirmware,
     tanks,
+    gasSwitches,
     profile,
     sourceFileName,
     sourceFileFormat,

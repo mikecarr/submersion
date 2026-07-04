@@ -1086,6 +1086,51 @@ void main() {
       expect(switches[0].tankId, dive.tanks[0].id);
       expect(switches[1].tankId, dive.tanks[1].id);
     });
+
+    test('maps gas switches by tank index to created tank ids', () async {
+      // FIT imports have no UDDF refs; switches address tanks positionally.
+      when(mockDiveRepo.createDive(any)).thenAnswer(
+        (invocation) async => invocation.positionalArguments[0] as Dive,
+      );
+      when(mockDiveRepo.insertGasSwitches(any)).thenAnswer((_) async {});
+
+      final data = UddfImportResult(
+        dives: [
+          {
+            'dateTime': now,
+            'maxDepth': 40.0,
+            'tanks': [
+              {'gasMix': const GasMix(o2: 19, he: 34)},
+              {'gasMix': const GasMix(o2: 32, he: 0)},
+            ],
+            'gasSwitches': [
+              {'timestamp': 0, 'tankIndex': 0},
+              {'timestamp': 2474, 'tankIndex': 1, 'depth': 21.0},
+            ],
+          },
+        ],
+      );
+
+      await importer.import(
+        data: data,
+        selections: UddfImportSelections.selectAll(data),
+        repositories: repos,
+        diverId: diverId,
+      );
+
+      final capturedDive = verify(mockDiveRepo.createDive(captureAny)).captured;
+      final dive = capturedDive.first as Dive;
+      expect(dive.tanks, hasLength(2));
+
+      final capturedSwitches = verify(
+        mockDiveRepo.insertGasSwitches(captureAny),
+      ).captured;
+      final switches = capturedSwitches.first as List<GasSwitch>;
+      expect(switches, hasLength(2));
+      expect(switches[0].tankId, dive.tanks[0].id);
+      expect(switches[1].tankId, dive.tanks[1].id);
+      expect(switches[1].depth, 21.0);
+    });
   });
 
   group('Progress callback', () {

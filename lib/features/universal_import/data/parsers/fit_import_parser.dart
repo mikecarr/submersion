@@ -110,6 +110,17 @@ class FitImportParser implements ImportParser {
       }).toList();
     }
 
+    if (dive.gasSwitches.isNotEmpty) {
+      diveData['gasSwitches'] = dive.gasSwitches.map((s) {
+        final gs = <String, dynamic>{
+          'timestamp': s.timeSeconds,
+          'tankIndex': s.tankIndex,
+        };
+        if (s.depth != null) gs['depth'] = s.depth;
+        return gs;
+      }).toList();
+    }
+
     if (dive.profile.isNotEmpty) {
       diveData['profile'] = dive.profile.map((s) {
         final point = <String, dynamic>{

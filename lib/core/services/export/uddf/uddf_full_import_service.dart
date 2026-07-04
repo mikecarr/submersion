@@ -958,7 +958,33 @@ class UddfFullImportService {
           switchesList.add(gs);
         }
         if (switchesList.isNotEmpty) {
-          diveData['gasSwitches'] = switchesList;
+          // Merge with waypoint-level <switchmix> entries already parsed
+          // from the samples (files like Submersion's own exports carry
+          // both). The top-level entry wins for a shared timestamp because
+          // it carries the richer tankref/depth payload; waypoint-only
+          // timestamps (e.g. the t=0 initial-mix marker) must survive.
+          final existing =
+              (diveData['gasSwitches'] as List<Map<String, dynamic>>?) ??
+              const <Map<String, dynamic>>[];
+          final seenTimestamps = switchesList
+              .map((gs) => gs['timestamp'])
+              .whereType<int>()
+              .toSet();
+          final merged = [
+            ...switchesList,
+            for (final gs in existing)
+              if (gs['timestamp'] is! int ||
+                  !seenTimestamps.contains(gs['timestamp']))
+                gs,
+          ];
+          merged.sort((a, b) {
+            final ta = a['timestamp'];
+            final tb = b['timestamp'];
+            if (ta is! int) return 1;
+            if (tb is! int) return -1;
+            return ta.compareTo(tb);
+          });
+          diveData['gasSwitches'] = merged;
         }
       }
     }
@@ -1769,6 +1795,44 @@ class UddfFullImportService {
           }
         }
         diveData['gasSwitches'] = merged;
+      }
+
+      // Materialize every gas mix that was actually breathed (referenced by a
+      // waypoint <switchmix>) as a tank. Shearwater Cloud exports carry no
+      // <link> from <tankdata> to <mix>, so without this the deco/stage gases
+      // never surface and the importer cannot resolve the emitted gas
+      // switches back to a tank row (it drops them silently).
+      for (final gs in waypointGasSwitches) {
+        final mixRef = gs['gasMixRef'] as String?;
+        if (mixRef == null) continue;
+        final mix = gasMixes[mixRef];
+        if (mix == null) continue;
+        if (tanks.any((t) => t['uddfGasMixRef'] == mixRef)) continue;
+
+        // Claim an existing unlinked tank carrying the same mix (e.g. the
+        // transmitter tank that had the initial switch mix assigned), then
+        // one with no mix at all, before appending a gas-only tank.
+        final sameMix = tanks.firstWhere(
+          (t) => t['uddfGasMixRef'] == null && t['gasMix'] == mix,
+          orElse: () => const <String, dynamic>{},
+        );
+        if (sameMix.isNotEmpty) {
+          sameMix['uddfGasMixRef'] = mixRef;
+          continue;
+        }
+        final noMix = tanks.firstWhere(
+          (t) => t['uddfGasMixRef'] == null && t['gasMix'] == null,
+          orElse: () => const <String, dynamic>{},
+        );
+        if (noMix.isNotEmpty) {
+          noMix['gasMix'] = mix;
+          noMix['uddfGasMixRef'] = mixRef;
+          continue;
+        }
+        tanks.add(<String, dynamic>{'gasMix': mix, 'uddfGasMixRef': mixRef});
+      }
+      if (tanks.isNotEmpty) {
+        diveData['tanks'] = tanks;
       }
     }
 

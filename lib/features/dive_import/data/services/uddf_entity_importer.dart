@@ -1288,6 +1288,8 @@ class UddfEntityImporter {
         // persisted tank row id. MacDive-style switches reference a gas mix
         // UUID (via <switchmix ref>), while top-level <gasswitches>
         // entries reference a tank UUID (via <tankref>); we accept either.
+        // FIT imports carry no refs at all and address tanks positionally
+        // via `tankIndex`.
         final tankIdByRef = <String, String>{};
         final tankIdByGasMixRef = <String, String>{};
         final tanksData = diveData['tanks'] as List<Map<String, dynamic>>?;
@@ -1325,6 +1327,14 @@ class UddfEntityImporter {
                   gasMixRef != null &&
                   gasMixRef.isNotEmpty) {
                 tankId = tankIdByGasMixRef[gasMixRef];
+              }
+              if (tankId == null || tankId.isEmpty) {
+                final tankIndex = gs['tankIndex'] as int?;
+                if (tankIndex != null &&
+                    tankIndex >= 0 &&
+                    tankIndex < tanks.length) {
+                  tankId = tanks[tankIndex].id;
+                }
               }
               if (tankId == null || tankId.isEmpty) return null;
               return GasSwitch(
