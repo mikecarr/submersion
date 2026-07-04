@@ -629,7 +629,7 @@ void main() {
       expect(find.text('dive_log.ssrf'), findsNothing);
     });
 
-    testWidgets('shows "Unknown Source" when computerModel is null', (
+    testWidgets('falls back to the serial when computerModel is null', (
       tester,
     ) async {
       final source = _makeSource(computerModel: null);
@@ -648,7 +648,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('Unknown Source'), findsOneWidget);
+      expect(find.text('SN-12345'), findsWidgets);
     });
 
     testWidgets('shows friendly name as header with model as subtitle', (

@@ -177,18 +177,6 @@ final diveProfileProvider =
       return repository.getDiveProfile(diveId);
     });
 
-/// Profiles grouped by source (computer ID / 'user-edited' / 'original').
-/// Used for multi-computer toggle rendering in the dive profile chart.
-final profilesBySourceProvider =
-    FutureProvider.family<Map<String?, List<domain.DiveProfilePoint>>, String>((
-      ref,
-      diveId,
-    ) async {
-      final repository = ref.watch(diveRepositoryProvider);
-      ref.invalidateSelfWhen(repository.watchDiveDetailChanges());
-      return repository.getProfilesBySource(diveId);
-    });
-
 /// Profiles grouped by owning data source (active-source model). Keys are
 /// dive_data_sources ids, primary source first; null-computerId rows are
 /// attributed to the primary source so no source ever renders as unknown.

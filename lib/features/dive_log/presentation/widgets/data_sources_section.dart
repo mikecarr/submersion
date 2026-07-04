@@ -3,8 +3,21 @@ import 'package:intl/intl.dart';
 
 import 'package:submersion/core/utils/unit_formatter.dart';
 import 'package:submersion/features/dive_log/domain/entities/dive_data_source.dart';
+import 'package:submersion/features/dive_log/domain/services/source_name_resolver.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/collapsible_section.dart';
 import 'package:submersion/l10n/l10n_extension.dart';
+
+/// Localized fallback labels for [resolveSourceName], shared by the
+/// comparison grid header and the source card title.
+SourceNameLabels _labelsOf(BuildContext context) {
+  final l10n = context.l10n;
+  return SourceNameLabels(
+    unknownComputer: l10n.diveLog_sources_unknownComputer,
+    manualEntry: l10n.diveLog_sources_manualEntry,
+    importedFile: l10n.diveLog_sources_importedFile,
+    editedSuffix: l10n.diveLog_sources_editedSuffix,
+  );
+}
 
 /// A collapsible section showing data source provenance for a dive.
 ///
@@ -183,7 +196,7 @@ class _SourceComparisonGrid extends StatelessWidget {
           for (final s in sources)
             DataColumn(
               label: Text(
-                s.computerLabel(l10n.diveLog_sources_unknownComputer),
+                resolveSourceName(s, _labelsOf(context)),
                 style: s.isPrimary
                     ? const TextStyle(fontWeight: FontWeight.bold)
                     : null,
@@ -368,7 +381,7 @@ class _DataSourceCard extends StatelessWidget {
                           children: [
                             Flexible(
                               child: Text(
-                                source.displayName,
+                                resolveSourceName(source, _labelsOf(context)),
                                 style: textTheme.titleSmall?.copyWith(
                                   fontWeight: FontWeight.w600,
                                 ),

@@ -23,8 +23,26 @@ void main() {
   // Helpers
   // ---------------------------------------------------------------------------
 
+  Future<void> insertComputer({
+    required String id,
+    required String name,
+  }) async {
+    final now = DateTime.now().millisecondsSinceEpoch;
+    await db
+        .into(db.diveComputers)
+        .insert(
+          DiveComputersCompanion(
+            id: Value(id),
+            name: Value(name),
+            createdAt: Value(now),
+            updatedAt: Value(now),
+          ),
+        );
+  }
+
   Future<String> insertTestDive({
     required String id,
+    String? computerId,
     String? diveComputerModel,
     String? diveComputerSerial,
     double? maxDepth,
@@ -39,6 +57,7 @@ void main() {
           DivesCompanion(
             id: Value(id),
             diveDateTime: Value(now),
+            computerId: Value(computerId),
             diveComputerModel: Value(diveComputerModel),
             diveComputerSerial: Value(diveComputerSerial),
             maxDepth: Value(maxDepth),
@@ -80,8 +99,11 @@ void main() {
     'full multi-computer workflow: consolidate, set primary, unlink',
     () async {
       // 1. Create a dive with profile data (simulating first computer import).
+      await insertComputer(id: 'dc-petrel', name: 'My Petrel');
+      await insertComputer(id: 'dc-d5', name: 'My D5');
       final diveId = await insertTestDive(
         id: 'dive-main',
+        computerId: 'dc-petrel',
         diveComputerModel: 'Shearwater Petrel',
         diveComputerSerial: 'SW-001',
         maxDepth: 30.0,
@@ -110,6 +132,7 @@ void main() {
       // for the service's own suite).
       final secondaryDiveId = await insertTestDive(
         id: 'dive-secondary-download',
+        computerId: 'dc-d5',
         diveComputerModel: 'Suunto D5',
         diveComputerSerial: 'SU-002',
         maxDepth: 29.5,
@@ -141,9 +164,9 @@ void main() {
       final readings = await repository.getDataSources(diveId);
       expect(readings.length, equals(2));
 
-      // 4. Verify: getProfilesBySource returns 2 entries
+      // 4. Verify: getProfilesByDataSource returns 2 entries
       // (primary profiles vs secondary profiles are two distinct sources).
-      final profileSources = await repository.getProfilesBySource(diveId);
+      final profileSources = await repository.getProfilesByDataSource(diveId);
       expect(profileSources.length, equals(2));
 
       // 5. Call setPrimaryDataSource to swap primary to the secondary reading.

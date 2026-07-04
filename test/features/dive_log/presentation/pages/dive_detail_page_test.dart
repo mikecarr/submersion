@@ -498,9 +498,9 @@ void main() {
               ),
               // No multi-computer profile data -- keeps this scoped to the
               // tanks section badge and out of the chart's toggle bar.
-              profilesBySourceProvider(dive.id).overrideWith(
-                (ref) async => <String?, List<DiveProfilePoint>>{},
-              ),
+              sourceProfilesProvider(
+                dive.id,
+              ).overrideWith((ref) async => <String, SourceProfile>{}),
             ],
             child: MaterialApp(
               localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -559,9 +559,9 @@ void main() {
               tankPressuresProvider(dive.id).overrideWith(
                 (ref) async => <String, List<TankPressurePoint>>{},
               ),
-              profilesBySourceProvider(dive.id).overrideWith(
-                (ref) async => <String?, List<DiveProfilePoint>>{},
-              ),
+              sourceProfilesProvider(
+                dive.id,
+              ).overrideWith((ref) async => <String, SourceProfile>{}),
             ],
             child: MaterialApp(
               localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -723,9 +723,9 @@ void main() {
               tankPressuresProvider(dive.id).overrideWith(
                 (ref) async => <String, List<TankPressurePoint>>{},
               ),
-              profilesBySourceProvider(dive.id).overrideWith(
-                (ref) async => <String?, List<DiveProfilePoint>>{},
-              ),
+              sourceProfilesProvider(
+                dive.id,
+              ).overrideWith((ref) async => <String, SourceProfile>{}),
             ],
             child: MaterialApp(
               localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -781,9 +781,9 @@ void main() {
               tankPressuresProvider(dive.id).overrideWith(
                 (ref) async => <String, List<TankPressurePoint>>{},
               ),
-              profilesBySourceProvider(dive.id).overrideWith(
-                (ref) async => <String?, List<DiveProfilePoint>>{},
-              ),
+              sourceProfilesProvider(
+                dive.id,
+              ).overrideWith((ref) async => <String, SourceProfile>{}),
             ],
             child: MaterialApp(
               localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -869,9 +869,9 @@ void main() {
         tankPressuresProvider(
           dive.id,
         ).overrideWith((ref) async => <String, List<TankPressurePoint>>{}),
-        profilesBySourceProvider(
+        sourceProfilesProvider(
           dive.id,
-        ).overrideWith((ref) async => <String?, List<DiveProfilePoint>>{}),
+        ).overrideWith((ref) async => <String, SourceProfile>{}),
         weeklyOtuProvider(dive.id).overrideWith((ref) async => 0.0),
       ];
     }
@@ -1045,9 +1045,9 @@ void main() {
         tankPressuresProvider(
           dive.id,
         ).overrideWith((ref) async => <String, List<TankPressurePoint>>{}),
-        profilesBySourceProvider(
+        sourceProfilesProvider(
           dive.id,
-        ).overrideWith((ref) async => <String?, List<DiveProfilePoint>>{}),
+        ).overrideWith((ref) async => <String, SourceProfile>{}),
         weeklyOtuProvider(dive.id).overrideWith((ref) async => 0.0),
       ];
     }

@@ -493,50 +493,6 @@ class DiveRepository {
     }
   }
 
-  /// Get all profile sources for a dive.
-  ///
-  /// Returns a map keyed by logical source label to profile points.
-  /// Primary profiles are labeled 'user-edited', non-primary profiles
-  /// are labeled by their computerId or 'original'.
-  Future<Map<String?, List<domain.DiveProfilePoint>>> getProfilesBySource(
-    String diveId,
-  ) async {
-    try {
-      final query = _db.select(_db.diveProfiles)
-        ..where((t) => t.diveId.equals(diveId))
-        ..orderBy([(t) => OrderingTerm.asc(t.timestamp)]);
-      final rows = await query.get();
-
-      // Check whether an edited (non-original) profile exists.
-      // When it does, original rows have isPrimary=false and edited rows
-      // have isPrimary=true. We use this to build meaningful source labels.
-      final hasEditedProfile =
-          rows.any((r) => r.isPrimary) && rows.any((r) => !r.isPrimary);
-
-      final result = <String?, List<domain.DiveProfilePoint>>{};
-      for (final row in rows) {
-        String? source;
-        if (hasEditedProfile) {
-          source = row.isPrimary
-              ? 'user-edited'
-              : (row.computerId ?? 'original');
-        } else {
-          source = row.computerId ?? 'original';
-        }
-
-        result.putIfAbsent(source, () => []).add(_profilePointFromRow(row));
-      }
-      return result;
-    } catch (e, stackTrace) {
-      _log.error(
-        'Failed to get profiles by source for dive: $diveId',
-        error: e,
-        stackTrace: stackTrace,
-      );
-      return {};
-    }
-  }
-
   domain.DiveProfilePoint _profilePointFromRow(DiveProfile row) {
     return domain.DiveProfilePoint(
       timestamp: row.timestamp,

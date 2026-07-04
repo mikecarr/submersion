@@ -1065,22 +1065,19 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
     );
   }
 
-  /// Resolves computerId -> display name for a dive's data sources, using
-  /// the same fallback chain as the Data Sources section: the computer's
-  /// user-assigned friendly name, then model, then serial, then the localized
-  /// "Unknown Computer" label. Sources without a computerId (manual entries,
-  /// edited profiles) are skipped — callers key off computerId, so there's
-  /// nothing to attach the name to.
+  /// Resolves computerId -> display name for a dive's data sources via the
+  /// shared [resolveSourceName] fallback chain. Sources without a computerId
+  /// (manual entries, edited profiles) are skipped — callers key off
+  /// computerId, so there's nothing to attach the name to.
   Map<String, String> _computerDisplayNames(
     BuildContext context,
     List<DiveDataSource> dataSources,
   ) {
+    final labels = _sourceNameLabels(context);
     return {
       for (final source in dataSources)
         if (source.computerId != null)
-          source.computerId!: source.computerLabel(
-            context.l10n.diveLog_sources_unknownComputer,
-          ),
+          source.computerId!: resolveSourceName(source, labels),
     };
   }
 
@@ -4747,7 +4744,7 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
     );
     ref.invalidate(diveProvider(diveId));
     ref.invalidate(diveProfileProvider(diveId));
-    ref.invalidate(profilesBySourceProvider(diveId));
+    ref.invalidate(sourceProfilesProvider(diveId));
     ref.invalidate(diveDataSourcesProvider(diveId));
   }
 
@@ -4789,7 +4786,7 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
     );
     ref.invalidate(diveProvider(diveId));
     ref.invalidate(diveProfileProvider(diveId));
-    ref.invalidate(profilesBySourceProvider(diveId));
+    ref.invalidate(sourceProfilesProvider(diveId));
     ref.invalidate(diveDataSourcesProvider(diveId));
     ref.invalidate(paginatedDiveListProvider);
   }
@@ -4807,7 +4804,7 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
         onConsolidated: () {
           ref.invalidate(diveProvider(diveId));
           ref.invalidate(diveProfileProvider(diveId));
-          ref.invalidate(profilesBySourceProvider(diveId));
+          ref.invalidate(sourceProfilesProvider(diveId));
           ref.invalidate(diveDataSourcesProvider(diveId));
           ref.invalidate(paginatedDiveListProvider);
           ref.invalidate(divesProvider);
@@ -4832,7 +4829,7 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
     // Invalidate providers so the UI reflects the re-parsed data.
     ref.invalidate(diveProvider(dive.id));
     ref.invalidate(diveProfileProvider(dive.id));
-    ref.invalidate(profilesBySourceProvider(dive.id));
+    ref.invalidate(sourceProfilesProvider(dive.id));
     ref.invalidate(diveDataSourcesProvider(dive.id));
 
     if (context.mounted) {
