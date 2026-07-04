@@ -22,6 +22,17 @@ class FitConstants {
   static const int tsEndPressure = 2;
   static const int tsVolumeUsed = 3;
 
+  // event (msg 21) field numbers. Read raw because fit_tool's typed
+  // EventMessage getters throw on event values missing from its outdated
+  // Event enum (gas_switched among them).
+  static const int evTimestamp = 253;
+  static const int evEvent = 0;
+  static const int evData = 3;
+
+  /// FIT SDK `event` value for a gas switch; `data` carries the dive_gas
+  /// message index of the gas switched to.
+  static const int gasSwitchedEvent = 57;
+
   // Scales: raw integer -> physical unit.
   static const double pressureScaleBar = 100.0; // raw / 100 = bar
   static const double volumeScaleLiters = 100.0; // raw / 100 = liters
