@@ -5673,44 +5673,45 @@ class AppLocalizationsHu extends AppLocalizations {
   String get diveLog_sources_unknownComputer => 'Ismeretlen számítógép';
 
   @override
-  String get diveLog_sources_manualEntry => 'Manual Entry';
+  String get diveLog_sources_manualEntry => 'Kézi bejegyzés';
 
   @override
-  String get diveLog_sources_importedFile => 'Imported File';
+  String get diveLog_sources_importedFile => 'Importált fájl';
 
   @override
-  String get diveLog_sources_editedSuffix => '(edited)';
+  String get diveLog_sources_editedSuffix => '(szerkesztett)';
 
   @override
-  String get diveLog_sources_barLabel => 'SOURCES';
+  String get diveLog_sources_barLabel => 'FORRÁSOK';
 
   @override
-  String get diveLog_sources_menu_setPrimary => 'Set as primary';
+  String get diveLog_sources_menu_setPrimary => 'Beállítás elsődlegesként';
 
   @override
-  String get diveLog_sources_menu_unlink => 'Unlink';
+  String get diveLog_sources_menu_unlink => 'Leválasztás';
 
   @override
-  String get diveLog_sources_menu_split => 'Split into separate dive';
+  String get diveLog_sources_menu_split => 'Szétválasztás külön merülésbe';
 
   @override
-  String get diveLog_sources_overlayTooltip => 'Overlay on chart';
+  String get diveLog_sources_overlayTooltip => 'Rávetítés a grafikonra';
 
   @override
-  String get diveLog_sources_splitDialog_title => 'Split into separate dive?';
+  String get diveLog_sources_splitDialog_title =>
+      'Szétválasztás külön merülésbe?';
 
   @override
   String get diveLog_sources_splitDialog_body =>
-      'This source\'s profile, events, and tanks will move to a new dive. The logbook entry stays on this dive.';
+      'A forrás profilja, eseményei és palackjai új merülésbe kerülnek. A naplóbejegyzés ennél a merülésnél marad.';
 
   @override
-  String get diveLog_sources_splitDialog_confirm => 'Split';
+  String get diveLog_sources_splitDialog_confirm => 'Szétválasztás';
 
   @override
-  String get diveLog_sources_splitDone => 'Dive split';
+  String get diveLog_sources_splitDone => 'Merülés szétválasztva';
 
   @override
-  String get diveLog_sources_splitFailed => 'Split failed';
+  String get diveLog_sources_splitFailed => 'A szétválasztás sikertelen';
 
   @override
   String get divePlanner_action_addTank => 'Palack hozzáadása';

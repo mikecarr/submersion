@@ -5714,44 +5714,45 @@ class AppLocalizationsFr extends AppLocalizations {
   String get diveLog_sources_unknownComputer => 'Ordinateur inconnu';
 
   @override
-  String get diveLog_sources_manualEntry => 'Manual Entry';
+  String get diveLog_sources_manualEntry => 'Saisie manuelle';
 
   @override
-  String get diveLog_sources_importedFile => 'Imported File';
+  String get diveLog_sources_importedFile => 'Fichier importé';
 
   @override
-  String get diveLog_sources_editedSuffix => '(edited)';
+  String get diveLog_sources_editedSuffix => '(modifié)';
 
   @override
   String get diveLog_sources_barLabel => 'SOURCES';
 
   @override
-  String get diveLog_sources_menu_setPrimary => 'Set as primary';
+  String get diveLog_sources_menu_setPrimary => 'Définir comme principal';
 
   @override
-  String get diveLog_sources_menu_unlink => 'Unlink';
+  String get diveLog_sources_menu_unlink => 'Dissocier';
 
   @override
-  String get diveLog_sources_menu_split => 'Split into separate dive';
+  String get diveLog_sources_menu_split => 'Scinder en une plongée séparée';
 
   @override
-  String get diveLog_sources_overlayTooltip => 'Overlay on chart';
+  String get diveLog_sources_overlayTooltip => 'Superposer sur le graphique';
 
   @override
-  String get diveLog_sources_splitDialog_title => 'Split into separate dive?';
+  String get diveLog_sources_splitDialog_title =>
+      'Scinder en une plongée séparée ?';
 
   @override
   String get diveLog_sources_splitDialog_body =>
-      'This source\'s profile, events, and tanks will move to a new dive. The logbook entry stays on this dive.';
+      'Le profil, les événements et les blocs de cette source seront déplacés vers une nouvelle plongée. L\'entrée du carnet reste sur cette plongée.';
 
   @override
-  String get diveLog_sources_splitDialog_confirm => 'Split';
+  String get diveLog_sources_splitDialog_confirm => 'Scinder';
 
   @override
-  String get diveLog_sources_splitDone => 'Dive split';
+  String get diveLog_sources_splitDone => 'Plongée scindée';
 
   @override
-  String get diveLog_sources_splitFailed => 'Split failed';
+  String get diveLog_sources_splitFailed => 'Échec de la scission';
 
   @override
   String get divePlanner_action_addTank => 'Ajouter une bouteille';

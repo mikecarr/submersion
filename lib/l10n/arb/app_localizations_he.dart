@@ -5541,44 +5541,44 @@ class AppLocalizationsHe extends AppLocalizations {
   String get diveLog_sources_unknownComputer => 'מחשב לא ידוע';
 
   @override
-  String get diveLog_sources_manualEntry => 'Manual Entry';
+  String get diveLog_sources_manualEntry => 'הזנה ידנית';
 
   @override
-  String get diveLog_sources_importedFile => 'Imported File';
+  String get diveLog_sources_importedFile => 'קובץ מיובא';
 
   @override
-  String get diveLog_sources_editedSuffix => '(edited)';
+  String get diveLog_sources_editedSuffix => '(נערך)';
 
   @override
-  String get diveLog_sources_barLabel => 'SOURCES';
+  String get diveLog_sources_barLabel => 'מקורות';
 
   @override
-  String get diveLog_sources_menu_setPrimary => 'Set as primary';
+  String get diveLog_sources_menu_setPrimary => 'הגדר כראשי';
 
   @override
-  String get diveLog_sources_menu_unlink => 'Unlink';
+  String get diveLog_sources_menu_unlink => 'בטל קישור';
 
   @override
-  String get diveLog_sources_menu_split => 'Split into separate dive';
+  String get diveLog_sources_menu_split => 'פצל לצלילה נפרדת';
 
   @override
-  String get diveLog_sources_overlayTooltip => 'Overlay on chart';
+  String get diveLog_sources_overlayTooltip => 'הצג כשכבה בגרף';
 
   @override
-  String get diveLog_sources_splitDialog_title => 'Split into separate dive?';
+  String get diveLog_sources_splitDialog_title => 'לפצל לצלילה נפרדת?';
 
   @override
   String get diveLog_sources_splitDialog_body =>
-      'This source\'s profile, events, and tanks will move to a new dive. The logbook entry stays on this dive.';
+      'הפרופיל, האירועים והמיכלים של מקור זה יועברו לצלילה חדשה. רישום היומן נשאר בצלילה זו.';
 
   @override
-  String get diveLog_sources_splitDialog_confirm => 'Split';
+  String get diveLog_sources_splitDialog_confirm => 'פצל';
 
   @override
-  String get diveLog_sources_splitDone => 'Dive split';
+  String get diveLog_sources_splitDone => 'הצלילה פוצלה';
 
   @override
-  String get diveLog_sources_splitFailed => 'Split failed';
+  String get diveLog_sources_splitFailed => 'הפיצול נכשל';
 
   @override
   String get divePlanner_action_addTank => 'הוסף מיכל';

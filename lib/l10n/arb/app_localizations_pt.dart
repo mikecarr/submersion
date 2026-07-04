@@ -5690,44 +5690,45 @@ class AppLocalizationsPt extends AppLocalizations {
   String get diveLog_sources_unknownComputer => 'Computador Desconhecido';
 
   @override
-  String get diveLog_sources_manualEntry => 'Manual Entry';
+  String get diveLog_sources_manualEntry => 'Entrada Manual';
 
   @override
-  String get diveLog_sources_importedFile => 'Imported File';
+  String get diveLog_sources_importedFile => 'Arquivo Importado';
 
   @override
-  String get diveLog_sources_editedSuffix => '(edited)';
+  String get diveLog_sources_editedSuffix => '(editado)';
 
   @override
-  String get diveLog_sources_barLabel => 'SOURCES';
+  String get diveLog_sources_barLabel => 'FONTES';
 
   @override
-  String get diveLog_sources_menu_setPrimary => 'Set as primary';
+  String get diveLog_sources_menu_setPrimary => 'Definir como principal';
 
   @override
-  String get diveLog_sources_menu_unlink => 'Unlink';
+  String get diveLog_sources_menu_unlink => 'Desvincular';
 
   @override
-  String get diveLog_sources_menu_split => 'Split into separate dive';
+  String get diveLog_sources_menu_split => 'Dividir em mergulho separado';
 
   @override
-  String get diveLog_sources_overlayTooltip => 'Overlay on chart';
+  String get diveLog_sources_overlayTooltip => 'Sobrepor no gráfico';
 
   @override
-  String get diveLog_sources_splitDialog_title => 'Split into separate dive?';
+  String get diveLog_sources_splitDialog_title =>
+      'Dividir em mergulho separado?';
 
   @override
   String get diveLog_sources_splitDialog_body =>
-      'This source\'s profile, events, and tanks will move to a new dive. The logbook entry stays on this dive.';
+      'O perfil, os eventos e os cilindros desta fonte serão movidos para um novo mergulho. O registro do diário permanece neste mergulho.';
 
   @override
-  String get diveLog_sources_splitDialog_confirm => 'Split';
+  String get diveLog_sources_splitDialog_confirm => 'Dividir';
 
   @override
-  String get diveLog_sources_splitDone => 'Dive split';
+  String get diveLog_sources_splitDone => 'Mergulho dividido';
 
   @override
-  String get diveLog_sources_splitFailed => 'Split failed';
+  String get diveLog_sources_splitFailed => 'Falha ao dividir';
 
   @override
   String get divePlanner_action_addTank => 'Adicionar Cilindro';

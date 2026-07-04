@@ -5692,44 +5692,45 @@ class AppLocalizationsIt extends AppLocalizations {
   String get diveLog_sources_unknownComputer => 'Computer sconosciuto';
 
   @override
-  String get diveLog_sources_manualEntry => 'Manual Entry';
+  String get diveLog_sources_manualEntry => 'Inserimento manuale';
 
   @override
-  String get diveLog_sources_importedFile => 'Imported File';
+  String get diveLog_sources_importedFile => 'File importato';
 
   @override
-  String get diveLog_sources_editedSuffix => '(edited)';
+  String get diveLog_sources_editedSuffix => '(modificato)';
 
   @override
-  String get diveLog_sources_barLabel => 'SOURCES';
+  String get diveLog_sources_barLabel => 'FONTI';
 
   @override
-  String get diveLog_sources_menu_setPrimary => 'Set as primary';
+  String get diveLog_sources_menu_setPrimary => 'Imposta come principale';
 
   @override
-  String get diveLog_sources_menu_unlink => 'Unlink';
+  String get diveLog_sources_menu_unlink => 'Scollega';
 
   @override
-  String get diveLog_sources_menu_split => 'Split into separate dive';
+  String get diveLog_sources_menu_split => 'Dividi in immersione separata';
 
   @override
-  String get diveLog_sources_overlayTooltip => 'Overlay on chart';
+  String get diveLog_sources_overlayTooltip => 'Sovrapponi sul grafico';
 
   @override
-  String get diveLog_sources_splitDialog_title => 'Split into separate dive?';
+  String get diveLog_sources_splitDialog_title =>
+      'Dividere in immersione separata?';
 
   @override
   String get diveLog_sources_splitDialog_body =>
-      'This source\'s profile, events, and tanks will move to a new dive. The logbook entry stays on this dive.';
+      'Il profilo, gli eventi e le bombole di questa fonte verranno spostati in una nuova immersione. La voce del logbook resta su questa immersione.';
 
   @override
-  String get diveLog_sources_splitDialog_confirm => 'Split';
+  String get diveLog_sources_splitDialog_confirm => 'Dividi';
 
   @override
-  String get diveLog_sources_splitDone => 'Dive split';
+  String get diveLog_sources_splitDone => 'Immersione divisa';
 
   @override
-  String get diveLog_sources_splitFailed => 'Split failed';
+  String get diveLog_sources_splitFailed => 'Divisione non riuscita';
 
   @override
   String get divePlanner_action_addTank => 'Aggiungi Bombola';

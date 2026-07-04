@@ -5683,44 +5683,45 @@ class AppLocalizationsDe extends AppLocalizations {
   String get diveLog_sources_unknownComputer => 'Unbekannter Computer';
 
   @override
-  String get diveLog_sources_manualEntry => 'Manual Entry';
+  String get diveLog_sources_manualEntry => 'Manueller Eintrag';
 
   @override
-  String get diveLog_sources_importedFile => 'Imported File';
+  String get diveLog_sources_importedFile => 'Importierte Datei';
 
   @override
-  String get diveLog_sources_editedSuffix => '(edited)';
+  String get diveLog_sources_editedSuffix => '(bearbeitet)';
 
   @override
-  String get diveLog_sources_barLabel => 'SOURCES';
+  String get diveLog_sources_barLabel => 'QUELLEN';
 
   @override
-  String get diveLog_sources_menu_setPrimary => 'Set as primary';
+  String get diveLog_sources_menu_setPrimary => 'Als primär festlegen';
 
   @override
-  String get diveLog_sources_menu_unlink => 'Unlink';
+  String get diveLog_sources_menu_unlink => 'Verknüpfung aufheben';
 
   @override
-  String get diveLog_sources_menu_split => 'Split into separate dive';
+  String get diveLog_sources_menu_split => 'In separaten Tauchgang aufteilen';
 
   @override
-  String get diveLog_sources_overlayTooltip => 'Overlay on chart';
+  String get diveLog_sources_overlayTooltip => 'Im Diagramm überlagern';
 
   @override
-  String get diveLog_sources_splitDialog_title => 'Split into separate dive?';
+  String get diveLog_sources_splitDialog_title =>
+      'In separaten Tauchgang aufteilen?';
 
   @override
   String get diveLog_sources_splitDialog_body =>
-      'This source\'s profile, events, and tanks will move to a new dive. The logbook entry stays on this dive.';
+      'Profil, Ereignisse und Flaschen dieser Quelle werden in einen neuen Tauchgang verschoben. Der Logbucheintrag bleibt bei diesem Tauchgang.';
 
   @override
-  String get diveLog_sources_splitDialog_confirm => 'Split';
+  String get diveLog_sources_splitDialog_confirm => 'Aufteilen';
 
   @override
-  String get diveLog_sources_splitDone => 'Dive split';
+  String get diveLog_sources_splitDone => 'Tauchgang aufgeteilt';
 
   @override
-  String get diveLog_sources_splitFailed => 'Split failed';
+  String get diveLog_sources_splitFailed => 'Aufteilen fehlgeschlagen';
 
   @override
   String get divePlanner_action_addTank => 'Flasche hinzufügen';
