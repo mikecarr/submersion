@@ -378,6 +378,115 @@ void main() {
 
       expect(find.byType(DiveProfileChart), findsOneWidget);
     });
+
+    testWidgets(
+      'hover resolves to the profile sample at the touched time, not the '
+      "touched bar's local index",
+      (tester) async {
+        // Regression: multi-computer depth bars are built from each computer's
+        // OWN point array, which need not align index-for-index with
+        // [widget.profile]. The hover handler used to treat the touched bar's
+        // local spotIndex as a [widget.profile] index, so the "active location"
+        // cursor and tooltip jumped to the wrong time as soon as a second
+        // computer was present (circles tracked the pointer, the line did not).
+        //
+        // [widget.profile] is comp-a, sampled every 20s; comp-b is denser
+        // (every 10s) and, listed first, is rendered as depth bar 0. A touch on
+        // comp-b's sample at t=40s must resolve to the comp-a sample at t=40s
+        // (index 2) -- NOT comp-b's local spotIndex 4, which would address
+        // comp-a's t=80s sample (index 4).
+        final profileA = [
+          for (var i = 0; i < 5; i++)
+            DiveProfilePoint(timestamp: i * 20, depth: i * 3.0),
+        ];
+        final profileB = [
+          for (var i = 0; i < 9; i++)
+            DiveProfilePoint(timestamp: i * 10, depth: i * 1.5),
+        ];
+
+        int? selected;
+        await tester.pumpWidget(
+          _buildChart(
+            profile: profileA,
+            // comp-b first -> it is depth bar 0.
+            computerProfiles: {'comp-b': profileB, 'comp-a': profileA},
+            onPointSelected: (i) => selected = i,
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        final data = tester
+            .widget<LineChart>(find.byType(LineChart).first)
+            .data;
+        final bars = data.lineBarsData;
+        // Depth bars are first; bar 0 is comp-b (9 samples), bar 1 is comp-a.
+        expect(bars[0].spots.length, 9);
+        expect(bars[1].spots.length, 5);
+
+        // Touch comp-b's t=40s sample (its local spotIndex 4).
+        final touchedSpot = bars[0].spots[4];
+        expect(touchedSpot.x, 40.0);
+        data.lineTouchData.touchCallback!(
+          FlPanDownEvent(DragDownDetails()),
+          LineTouchResponse(
+            touchLocation: Offset.zero,
+            touchChartCoordinate: Offset.zero,
+            lineBarSpots: <TouchLineBarSpot>[
+              TouchLineBarSpot(bars[0], 0, touchedSpot, 0),
+            ],
+          ),
+        );
+
+        expect(selected, 2);
+        expect(profileA[selected!].timestamp, 40);
+      },
+    );
+
+    testWidgets('hover on a secondary computer bar still resolves a sample', (
+      tester,
+    ) async {
+      // The depth-spot detection used to accept only barIndex 0, so hovering
+      // a secondary computer's line (barIndex >= 1) produced no selection at
+      // all -- the cursor stayed parked. It must now recognise every visible
+      // computer's depth bar.
+      final profileA = [
+        for (var i = 0; i < 5; i++)
+          DiveProfilePoint(timestamp: i * 20, depth: i * 3.0),
+      ];
+      final profileB = [
+        for (var i = 0; i < 9; i++)
+          DiveProfilePoint(timestamp: i * 10, depth: i * 1.5),
+      ];
+
+      int? selected;
+      await tester.pumpWidget(
+        _buildChart(
+          profile: profileA,
+          computerProfiles: {'comp-a': profileA, 'comp-b': profileB},
+          onPointSelected: (i) => selected = i,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final data = tester.widget<LineChart>(find.byType(LineChart).first).data;
+      final bars = data.lineBarsData;
+      // Touch the SECOND depth bar (comp-b) at t=60s.
+      final secondBar = bars[1];
+      final touchedSpot = secondBar.spots.firstWhere((s) => s.x == 60.0);
+      data.lineTouchData.touchCallback!(
+        FlPanDownEvent(DragDownDetails()),
+        LineTouchResponse(
+          touchLocation: Offset.zero,
+          touchChartCoordinate: Offset.zero,
+          lineBarSpots: <TouchLineBarSpot>[
+            TouchLineBarSpot(secondBar, 1, touchedSpot, 0),
+          ],
+        ),
+      );
+
+      expect(selected, 3);
+      expect(profileA[selected!].timestamp, 60);
+    });
   });
 
   group('DiveProfileChart - multi-tank pressure rendering', () {
@@ -1364,6 +1473,84 @@ void main() {
       expect(
         DiveProfileChart.tooltipRowText('NDL', '12345678', 8, 4),
         'NDL     1234',
+      );
+    });
+  });
+
+  group('DiveProfileChart.depthSpotProfileIndex', () {
+    // A canonical profile sampled every 10 seconds.
+    final profile = [
+      for (var i = 0; i < 6; i++)
+        DiveProfilePoint(timestamp: i * 10, depth: i.toDouble()),
+    ];
+
+    test('single computer maps depthBarStart + spotIndex directly', () {
+      // A velocity band starting at global index 3, touched at local
+      // spotIndex 2, addresses profile sample 5.
+      expect(
+        DiveProfileChart.depthSpotProfileIndex(
+          profile: profile,
+          depthBarStarts: const [0, 3],
+          barIndex: 1,
+          spotIndex: 2,
+          spotX: 50.0,
+          multiComputer: false,
+        ),
+        5,
+      );
+    });
+
+    test(
+      'multi-computer resolves by timestamp, ignoring the local spotIndex',
+      () {
+        // The touched depth bar belongs to a densely-sampled computer whose
+        // local spotIndex (30) does NOT address [profile]. The spot's timestamp
+        // (30s) must map to profile index 3 instead -- this is the bug: the old
+        // code used depthBarStarts[0] + 30 = 30, landing far from the pointer.
+        expect(
+          DiveProfileChart.depthSpotProfileIndex(
+            profile: profile,
+            depthBarStarts: const [0],
+            barIndex: 0,
+            spotIndex: 30,
+            spotX: 30.0,
+            multiComputer: true,
+          ),
+          3,
+        );
+      },
+    );
+
+    test(
+      'multi-computer picks the nearest profile sample to the spot time',
+      () {
+        // Another computer sampled at 32s; the nearest [profile] sample is
+        // index 3 (30s), not index 4 (40s).
+        expect(
+          DiveProfileChart.depthSpotProfileIndex(
+            profile: profile,
+            depthBarStarts: const [0],
+            barIndex: 0,
+            spotIndex: 999,
+            spotX: 32.0,
+            multiComputer: true,
+          ),
+          3,
+        );
+      },
+    );
+
+    test('multi-computer returns -1 for an empty profile', () {
+      expect(
+        DiveProfileChart.depthSpotProfileIndex(
+          profile: const [],
+          depthBarStarts: const [0],
+          barIndex: 0,
+          spotIndex: 0,
+          spotX: 10.0,
+          multiComputer: true,
+        ),
+        -1,
       );
     });
   });

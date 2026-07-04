@@ -368,6 +368,49 @@ class DiveProfileChart extends ConsumerStatefulWidget {
         .toList();
   }
 
+  /// Resolve a touched depth spot to an index into [profile].
+  ///
+  /// fl_chart reports a touched spot as `(barIndex, spotIndex)`, where
+  /// [spotIndex] is local to that bar's own spot list, alongside the spot's x
+  /// coordinate ([spotX], the sample timestamp in seconds).
+  ///
+  /// Single-computer rendering -- including the velocity-split bands -- draws
+  /// every depth bar from a contiguous slice of [profile], so
+  /// `depthBarStarts[barIndex] + spotIndex` addresses the sample directly.
+  ///
+  /// Multi-computer rendering draws one depth bar per computer from that
+  /// computer's OWN point array, which need not align index-for-index with
+  /// [profile] (different sample counts, or the [profile]-backing computer
+  /// toggled off). The local [spotIndex] is then meaningless against [profile],
+  /// so resolve by the spot's actual timestamp: the nearest [profile] sample to
+  /// [spotX]. Without this, the hover cursor and tooltip read the wrong sample
+  /// and stop tracking the pointer once a second computer is present. Returns
+  /// -1 when [profile] is empty.
+  @visibleForTesting
+  static int depthSpotProfileIndex({
+    required List<DiveProfilePoint> profile,
+    required List<int> depthBarStarts,
+    required int barIndex,
+    required int spotIndex,
+    required double spotX,
+    required bool multiComputer,
+  }) {
+    if (!multiComputer) {
+      return depthBarStarts[barIndex] + spotIndex;
+    }
+    if (profile.isEmpty) return -1;
+    var best = 0;
+    var bestDist = double.infinity;
+    for (var i = 0; i < profile.length; i++) {
+      final d = (profile[i].timestamp - spotX).abs();
+      if (d < bestDist) {
+        bestDist = d;
+        best = i;
+      }
+    }
+    return best;
+  }
+
   const DiveProfileChart({
     super.key,
     required this.profile,
@@ -2160,15 +2203,26 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
                       widget.onTooltipData?.call(null);
                     }
                   } else if (active) {
-                    // Velocity colouring splits the depth line into per-band
-                    // bars; find the touched depth spot on any of them and map
-                    // it back to the global profile index.
+                    // The depth line is split into multiple bars (per velocity
+                    // band, or one per computer); find the touched depth spot on
+                    // any of them and map it back to the global profile index.
+                    final multiComputer = _isMultiComputer();
+                    final depthBarCount = multiComputer
+                        ? _depthBarCount()
+                        : starts.length;
                     final depthSpot = spots
-                        .where((s) => s.barIndex < starts.length)
+                        .where((s) => s.barIndex < depthBarCount)
                         .firstOrNull;
                     final index = depthSpot == null
                         ? -1
-                        : starts[depthSpot.barIndex] + depthSpot.spotIndex;
+                        : DiveProfileChart.depthSpotProfileIndex(
+                            profile: widget.profile,
+                            depthBarStarts: starts,
+                            barIndex: depthSpot.barIndex,
+                            spotIndex: depthSpot.spotIndex,
+                            spotX: depthSpot.x,
+                            multiComputer: multiComputer,
+                          );
                     if (depthSpot != null &&
                         index >= 0 &&
                         index < widget.profile.length) {
@@ -2209,13 +2263,23 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
                   // so the depth spot can land on any bar in [0, starts.length)
                   // and its spotIndex is local to that bar.
                   final depthBarStarts = _depthBarStartIndices();
+                  final multiComputer = _isMultiComputer();
+                  final depthBarCount = multiComputer
+                      ? _depthBarCount()
+                      : depthBarStarts.length;
                   final depthSpot = touchedSpots
-                      .where((s) => s.barIndex < depthBarStarts.length)
+                      .where((s) => s.barIndex < depthBarCount)
                       .firstOrNull;
                   final depthIndex = depthSpot == null
                       ? -1
-                      : depthBarStarts[depthSpot.barIndex] +
-                            depthSpot.spotIndex;
+                      : DiveProfileChart.depthSpotProfileIndex(
+                          profile: widget.profile,
+                          depthBarStarts: depthBarStarts,
+                          barIndex: depthSpot.barIndex,
+                          spotIndex: depthSpot.spotIndex,
+                          spotX: depthSpot.x,
+                          multiComputer: multiComputer,
+                        );
                   final hasDepth =
                       depthSpot != null &&
                       depthIndex >= 0 &&
@@ -3109,6 +3173,31 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
           ),
         )
         .toList();
+  }
+
+  /// Whether the depth line is drawn as one bar per computer (2+ computers),
+  /// rather than a single primary line optionally split into velocity bands.
+  bool _isMultiComputer() {
+    final cpProfiles = widget.computerProfiles;
+    return cpProfiles != null && cpProfiles.length >= 2;
+  }
+
+  /// Number of leading depth-line bars fl_chart renders. Depth bars always
+  /// occupy `barIndex` `[0, count)`; a touched spot with a higher barIndex is
+  /// an overlay line (tank, ceiling, ...), not depth.
+  ///
+  /// Multi-computer draws one visible-computer line each; otherwise the depth
+  /// line is a single bar (or one per velocity band). Mirrors the branching in
+  /// [_buildGasColoredDepthLines].
+  int _depthBarCount() {
+    final cpProfiles = widget.computerProfiles;
+    if (cpProfiles != null && cpProfiles.length >= 2) {
+      final visible = widget.visibleComputers;
+      return cpProfiles.keys
+          .where((id) => visible == null || visible.contains(id))
+          .length;
+    }
+    return _depthBarStartIndices().length;
   }
 
   /// Global profile start index of each depth-line bar, in bar order.
