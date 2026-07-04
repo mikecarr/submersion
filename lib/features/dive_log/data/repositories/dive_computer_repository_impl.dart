@@ -883,6 +883,12 @@ class DiveComputerRepository {
                 runtime: Value(durationSeconds),
                 maxDepth: Value(maxDepth),
                 avgDepth: Value(effectiveAvgDepth),
+                // Populated so DiveConsolidationService (Task 5) can attribute
+                // consolidated children and enforce its same-computer guard;
+                // without this the dives row's own computerId stayed null
+                // even though every child row (profiles, tanks, data source)
+                // already carried it.
+                computerId: Value(computerId),
                 diveComputerModel: Value(computer?.fullName),
                 diveComputerSerial: Value(computer?.serialNumber),
                 diveComputerFirmware: Value(computer?.firmwareVersion),
@@ -1051,6 +1057,7 @@ class DiveComputerRepository {
               DiveTanksCompanion(
                 id: Value(tankId),
                 diveId: Value(diveId),
+                computerId: Value(computerId),
                 volume: Value(tank.volumeLiters),
                 startPressure: Value(tank.startPressure),
                 endPressure: Value(tank.endPressure),
@@ -1111,6 +1118,7 @@ class DiveComputerRepository {
                   id: _uuid.v4(),
                   diveId: diveId,
                   tankId: tankId,
+                  computerId: Value(computerId),
                   timestamp: point.timestamp,
                   pressure: point.pressure,
                 ),
@@ -1212,6 +1220,7 @@ class DiveComputerRepository {
               DiveProfileEventsCompanion(
                 id: Value(_uuid.v4()),
                 diveId: Value(diveId),
+                computerId: Value(computerId),
                 timestamp: Value(event.timestamp),
                 eventType: Value(eventType),
                 severity: Value(_eventSeverity(eventType)),

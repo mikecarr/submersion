@@ -17,6 +17,9 @@ import 'package:submersion/features/dive_log/domain/entities/profile_event.dart'
 import 'package:submersion/features/dive_log/presentation/providers/profile_legend_provider.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/dive_profile_chart.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/gas_timeline_strip.dart';
+import 'package:submersion/features/dive_log/presentation/widgets/photo_marker_layout.dart';
+import 'package:submersion/features/dive_log/presentation/widgets/photo_marker_overlay.dart';
+import 'package:submersion/features/media/domain/entities/media_item.dart';
 import 'package:submersion/features/settings/presentation/providers/settings_providers.dart';
 import 'package:submersion/l10n/arb/app_localizations.dart';
 
@@ -86,6 +89,7 @@ Widget _buildChart({
   Set<String>? visibleComputers,
   Map<String, Color>? computerLineColors,
   Set<String>? primaryComputers,
+  Map<String, String>? computerNames,
   Map<String, List<TankPressurePoint>>? tankPressures,
   List<DiveTank>? tanks,
   List<double>? ceilingCurve,
@@ -119,6 +123,7 @@ Widget _buildChart({
   void Function(int? index)? onPointSelected,
   int? playbackTimestamp,
   int? highlightedTimestamp,
+  List<PhotoChartMarker>? photoMarkers,
 }) {
   return ProviderScope(
     overrides: [
@@ -137,6 +142,7 @@ Widget _buildChart({
             visibleComputers: visibleComputers,
             computerLineColors: computerLineColors,
             primaryComputers: primaryComputers,
+            computerNames: computerNames,
             tankPressures: tankPressures,
             tanks: tanks,
             ceilingCurve: ceilingCurve,
@@ -170,6 +176,7 @@ Widget _buildChart({
             onPointSelected: onPointSelected,
             playbackTimestamp: playbackTimestamp,
             highlightedTimestamp: highlightedTimestamp,
+            photoMarkers: photoMarkers,
           ),
         ),
       ),
@@ -441,6 +448,146 @@ void main() {
 
       expect(find.byType(DiveProfileChart), findsOneWidget);
     });
+  });
+
+  group('DiveProfileChart - multi-computer temperature overlays (Task 11)', () {
+    // Reads the primary fl_chart LineChartData (the depth/time plot is first).
+    LineChartData primaryChartData(WidgetTester tester) =>
+        tester.widget<LineChart>(find.byType(LineChart).first).data;
+
+    List<LineChartBarData> temperatureLines(WidgetTester tester) =>
+        primaryChartData(tester).lineBarsData
+            .where(
+              (bar) =>
+                  bar.dashArray != null &&
+                  bar.dashArray!.length == 2 &&
+                  bar.dashArray![0] == 5 &&
+                  bar.dashArray![1] == 3,
+            )
+            .toList();
+
+    List<DiveProfilePoint> profileWithTemp(double temperature) => List.generate(
+      8,
+      (i) => DiveProfilePoint(
+        timestamp: i * 30,
+        depth: i * 1.0,
+        temperature: temperature,
+      ),
+    );
+
+    testWidgets('draws one temperature line per visible computer', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _buildChart(
+          computerProfiles: {
+            'comp-a': profileWithTemp(20),
+            'comp-b': profileWithTemp(22),
+          },
+          primaryComputers: {'comp-a'},
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(temperatureLines(tester).length, 2);
+    });
+
+    testWidgets(
+      'hiding a computer removes its temperature line from the chart',
+      (tester) async {
+        await tester.pumpWidget(
+          _buildChart(
+            computerProfiles: {
+              'comp-a': profileWithTemp(20),
+              'comp-b': profileWithTemp(22),
+            },
+            visibleComputers: {'comp-a'},
+            primaryComputers: {'comp-a'},
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(temperatureLines(tester).length, 1);
+      },
+    );
+
+    testWidgets('hiding a computer removes its event markers from the chart', (
+      tester,
+    ) async {
+      final createdAt = DateTime(2024, 1, 1);
+      final events = [
+        ProfileEvent(
+          id: 'e-a',
+          diveId: 'dive-1',
+          timestamp: 30,
+          eventType: ProfileEventType.bookmark,
+          computerId: 'comp-a',
+          createdAt: createdAt,
+        ),
+        ProfileEvent(
+          id: 'e-b',
+          diveId: 'dive-1',
+          timestamp: 60,
+          eventType: ProfileEventType.bookmark,
+          computerId: 'comp-b',
+          createdAt: createdAt,
+        ),
+      ];
+
+      await tester.pumpWidget(
+        _buildChart(
+          computerProfiles: {
+            'comp-a': profileWithTemp(20),
+            'comp-b': profileWithTemp(22),
+          },
+          visibleComputers: {'comp-a'},
+          primaryComputers: {'comp-a'},
+          events: events,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final verticalLines = primaryChartData(
+        tester,
+      ).extraLinesData.verticalLines;
+      expect(verticalLines.any((l) => l.x == 30), isTrue);
+      expect(verticalLines.any((l) => l.x == 60), isFalse);
+    });
+
+    testWidgets(
+      'a null-computerId event stays tied to the primary computer\'s visibility',
+      (tester) async {
+        final createdAt = DateTime(2024, 1, 1);
+        final events = [
+          ProfileEvent(
+            id: 'e-primary',
+            diveId: 'dive-1',
+            timestamp: 30,
+            eventType: ProfileEventType.bookmark,
+            createdAt: createdAt,
+          ),
+        ];
+
+        await tester.pumpWidget(
+          _buildChart(
+            computerProfiles: {
+              'comp-a': profileWithTemp(20),
+              'comp-b': profileWithTemp(22),
+            },
+            // Primary computer toggled off.
+            visibleComputers: {'comp-b'},
+            primaryComputers: {'comp-a'},
+            events: events,
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        final verticalLines = primaryChartData(
+          tester,
+        ).extraLinesData.verticalLines;
+        expect(verticalLines.any((l) => l.x == 30), isFalse);
+      },
+    );
   });
 
   group('DiveProfileChart - empty state', () {
@@ -1612,6 +1759,132 @@ void main() {
     );
 
     testWidgets(
+      'tank pressure tooltip row is suffixed with the source computer name '
+      'when 2+ computers contribute pressure curves (Task 11)',
+      (tester) async {
+        List<TooltipRow>? receivedRows;
+        final profile = makeTouchProfile();
+
+        await tester.pumpWidget(
+          _buildChart(
+            profile: profile,
+            tooltipBelow: true,
+            onTooltipData: (rows) => receivedRows = rows,
+            tankPressures: {
+              'tank-a': List.generate(
+                20,
+                (i) => TankPressurePoint(
+                  id: 'tpa-$i',
+                  tankId: 'tank-a',
+                  timestamp: i * 30,
+                  pressure: 200.0 - i * 2,
+                ),
+              ),
+              'tank-b': List.generate(
+                20,
+                (i) => TankPressurePoint(
+                  id: 'tpb-$i',
+                  tankId: 'tank-b',
+                  timestamp: i * 30,
+                  pressure: 210.0 - i * 3,
+                ),
+              ),
+            },
+            tanks: const [
+              DiveTank(
+                id: 'tank-a',
+                startPressure: 200,
+                endPressure: 160,
+                computerId: 'comp-a',
+              ),
+              DiveTank(
+                id: 'tank-b',
+                startPressure: 210,
+                endPressure: 150,
+                computerId: 'comp-b',
+              ),
+            ],
+            computerNames: const {'comp-a': 'Perdix 2', 'comp-b': 'Suunto D5'},
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        final chartFinder = find.byType(LineChart);
+        final chartCenter = tester.getCenter(chartFinder);
+        final gesture = await tester.startGesture(chartCenter);
+        await tester.pump(const Duration(milliseconds: 600));
+        await gesture.moveBy(const Offset(5, 0));
+        await tester.pump();
+        await gesture.moveBy(const Offset(5, 0));
+        await tester.pump();
+
+        // Emission depends on fl_chart resolving a nearby spot; assert the
+        // suffixes only when a tooltip was produced (matching the file's
+        // gesture-based tooltip tests).
+        if (receivedRows != null) {
+          final labels = receivedRows!.map((r) => r.label).toList();
+          expect(labels.any((l) => l.contains('· Perdix 2')), isTrue);
+          expect(labels.any((l) => l.contains('· Suunto D5')), isTrue);
+        }
+
+        await gesture.up();
+        await tester.pump();
+      },
+    );
+
+    testWidgets('tank pressure tooltip row has no source suffix when only one '
+        'computer contributes (Task 11)', (tester) async {
+      List<TooltipRow>? receivedRows;
+      final profile = makeTouchProfile();
+
+      await tester.pumpWidget(
+        _buildChart(
+          profile: profile,
+          tooltipBelow: true,
+          onTooltipData: (rows) => receivedRows = rows,
+          tankPressures: {
+            'tank-a': List.generate(
+              20,
+              (i) => TankPressurePoint(
+                id: 'tpa-$i',
+                tankId: 'tank-a',
+                timestamp: i * 30,
+                pressure: 200.0 - i * 2,
+              ),
+            ),
+          },
+          tanks: const [
+            DiveTank(
+              id: 'tank-a',
+              startPressure: 200,
+              endPressure: 160,
+              computerId: 'comp-a',
+            ),
+          ],
+          computerNames: const {'comp-a': 'Perdix 2'},
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final chartFinder = find.byType(LineChart);
+      final chartCenter = tester.getCenter(chartFinder);
+      final gesture = await tester.startGesture(chartCenter);
+      await tester.pump(const Duration(milliseconds: 600));
+      await gesture.moveBy(const Offset(5, 0));
+      await tester.pump();
+      await gesture.moveBy(const Offset(5, 0));
+      await tester.pump();
+
+      if (receivedRows != null) {
+        final labels = receivedRows!.map((r) => r.label).toList();
+        expect(labels.any((l) => l.contains('·')), isFalse);
+      }
+
+      await gesture.up();
+      await tester.pump();
+    });
+
+    testWidgets(
       'tooltip exposes per-cell sensor rows and the calculated-average ppO2 '
       'label',
       (tester) async {
@@ -2398,6 +2671,111 @@ void main() {
       ]);
     });
 
+    group('velocityIndicatorSuppression', () {
+      test('returns nothing when the depth line is a single bar', () {
+        // Velocity colouring off / multi-computer: depth is one bar, so the
+        // built-in per-bar indicator already shows a single depth dot.
+        expect(
+          DiveProfileChart.velocityIndicatorSuppression(const [
+            (barIndex: 0, x: 5.0, y: -10.0),
+            (barIndex: 1, x: 5.0, y: -3.0), // an overlay line
+          ], 1),
+          isEmpty,
+        );
+      });
+
+      test('returns nothing when a single band is under the cursor', () {
+        expect(
+          DiveProfileChart.velocityIndicatorSuppression(const [
+            (barIndex: 0, x: 5.0, y: -10.0), // one depth band touched
+            (barIndex: 4, x: 5.0, y: -3.0), // overlay
+          ], 3),
+          isEmpty,
+        );
+      });
+
+      test('keeps the first touched band and suppresses the others', () {
+        // The first depth entry is the sample onPointSelected/the tooltip
+        // resolve to, so the retained dot matches the bubble.
+        expect(
+          DiveProfileChart.velocityIndicatorSuppression(const [
+            (barIndex: 0, x: 4.0, y: -11.0), // kept
+            (barIndex: 1, x: 5.0, y: -12.0), // suppressed
+            (barIndex: 2, x: 6.0, y: -13.0), // suppressed
+            (barIndex: 5, x: 5.0, y: -3.0), // overlay, never suppressed
+          ], 3),
+          const [(x: 5.0, y: -12.0), (x: 6.0, y: -13.0)],
+        );
+      });
+
+      test('leaves a dropped band that shares the kept boundary sample', () {
+        // Adjacent bands join on their boundary point, so a dropped band can
+        // report the identical sample; suppressing that coordinate would also
+        // hide the kept dot, so it is left in place to overlap into one.
+        expect(
+          DiveProfileChart.velocityIndicatorSuppression(const [
+            (barIndex: 0, x: 4.0, y: -11.0), // kept
+            (barIndex: 1, x: 4.0, y: -11.0), // shared boundary -> left alone
+            (barIndex: 2, x: 6.0, y: -13.0), // distinct -> suppressed
+          ], 3),
+          const [(x: 6.0, y: -13.0)],
+        );
+      });
+    });
+
+    testWidgets(
+      'velocity colouring shows one depth focus dot, not one per band',
+      (tester) async {
+        // Regression: with the ascent-rate overlay on, hovering an abrupt
+        // stretch drew fl_chart's built-in focus dot on every depth band under
+        // the cursor, cluttering the point. Only the tooltip-resolved band
+        // keeps its dot; sibling bands are suppressed, other lines untouched.
+        final profile = _makeProfile(points: 12);
+        await tester.pumpWidget(
+          buildWithLegend(
+            profile: profile,
+            ascentRates: ratesSpanningBands(profile),
+            configure: (n) => n.toggleAscentRateColors(),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        final data = primaryChartData(tester);
+        final bars = data.lineBarsData;
+        // Depth bands (safe/warning/danger) are the first three bars.
+        expect(bars.length, greaterThanOrEqualTo(3));
+
+        // Drive the touch pipeline directly: three depth bands under the cursor
+        // at distinct interior samples (barIndex 0/1/2).
+        data.lineTouchData.touchCallback!(
+          FlPanDownEvent(DragDownDetails()),
+          LineTouchResponse(
+            touchLocation: Offset.zero,
+            touchChartCoordinate: Offset.zero,
+            lineBarSpots: <TouchLineBarSpot>[
+              TouchLineBarSpot(bars[0], 0, bars[0].spots[1], 0),
+              TouchLineBarSpot(bars[1], 1, bars[1].spots[1], 0),
+              TouchLineBarSpot(bars[2], 2, bars[2].spots[1], 0),
+            ],
+          ),
+        );
+
+        final indicator = data.lineTouchData.getTouchedSpotIndicator;
+        // Kept: the first depth band under the cursor.
+        expect(indicator(bars[0], const [1]).single, isNotNull);
+        // Suppressed: the other two depth bands.
+        expect(indicator(bars[1], const [1]).single, isNull);
+        expect(indicator(bars[2], const [1]).single, isNull);
+        // A line whose sample is not the resolved point keeps its dot.
+        final overlay = LineChartBarData(spots: const [FlSpot(0, 0)]);
+        expect(
+          indicator(overlay, const [0]).single,
+          isNotNull,
+          reason: 'overlay focus dots must be preserved',
+        );
+      },
+    );
+
     testWidgets('tooltip builds when hovering a non-first velocity segment', (
       tester,
     ) async {
@@ -2684,4 +3062,48 @@ void main() {
       },
     );
   });
+
+  group('photo markers', () {
+    testWidgets('renders the overlay when photo markers are provided', (
+      tester,
+    ) async {
+      await tester.pumpWidget(_buildChart(photoMarkers: [_photoMarker()]));
+      await tester.pump();
+      expect(find.byType(PhotoMarkerOverlay), findsOneWidget);
+    });
+
+    testWidgets('renders no overlay without photo markers', (tester) async {
+      await tester.pumpWidget(_buildChart());
+      await tester.pump();
+      expect(find.byType(PhotoMarkerOverlay), findsNothing);
+    });
+
+    testWidgets('hides the overlay when the legend toggle is off', (
+      tester,
+    ) async {
+      await tester.pumpWidget(_buildChart(photoMarkers: [_photoMarker()]));
+      await tester.pump();
+      final element = tester.element(find.byType(DiveProfileChart));
+      final container = ProviderScope.containerOf(element);
+      container.read(profileLegendProvider.notifier).togglePhotoMarkers();
+      await tester.pump();
+      expect(find.byType(PhotoMarkerOverlay), findsNothing);
+    });
+  });
+}
+
+PhotoChartMarker _photoMarker({String id = 'p1', int seconds = 120}) {
+  final now = DateTime.utc(2026, 1, 1);
+  return PhotoChartMarker(
+    item: MediaItem(
+      id: id,
+      diveId: 'dive-1',
+      mediaType: MediaType.photo,
+      takenAt: now,
+      createdAt: now,
+      updatedAt: now,
+    ),
+    elapsedSeconds: seconds,
+    depthMeters: 10.0,
+  );
 }

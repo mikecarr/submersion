@@ -5,7 +5,9 @@ import 'package:submersion/core/constants/map_style.dart';
 import 'package:submersion/core/presentation/widgets/dive_sparkline.dart';
 import 'package:submersion/core/providers/provider.dart';
 import 'package:submersion/features/dive_log/data/repositories/dive_repository_impl.dart';
+import 'package:submersion/features/dive_log/data/services/dive_consolidation_service.dart';
 import 'package:submersion/features/dive_log/data/services/dive_merge_service.dart';
+import 'package:submersion/features/dive_log/data/services/dive_merge_snapshot.dart';
 import 'package:submersion/features/dive_log/domain/entities/dive.dart'
     as domain;
 import 'package:submersion/features/dive_log/presentation/providers/dive_providers.dart';
@@ -21,6 +23,8 @@ domain.Dive diveAt(
   int runtimeMin = 30,
   String? diverId = 'diver1',
   List<domain.DiveProfilePoint> profile = const [],
+  String? diveComputerModel,
+  String? diveComputerSerial,
 }) => domain.Dive(
   id: id,
   diverId: diverId,
@@ -28,6 +32,8 @@ domain.Dive diveAt(
   entryTime: entry,
   runtime: Duration(minutes: runtimeMin),
   profile: profile,
+  diveComputerModel: diveComputerModel,
+  diveComputerSerial: diveComputerSerial,
 );
 
 /// A short descend-bottom-ascend profile for the given [runtimeMin].
@@ -75,6 +81,56 @@ class _ThrowingMergeService implements DiveMergeService {
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
+/// Fake [DiveConsolidationService] that records `apply`/`undo` calls so
+/// tests can assert on the wiring contract without touching a real database.
+/// Mirrors the fake in merge_dive_dialog_test.dart (the apply-failure path is
+/// already covered there, since both dialogs share `runDiveConsolidation`).
+class _FakeDiveConsolidationService extends DiveConsolidationService {
+  _FakeDiveConsolidationService() : super(DiveRepository());
+
+  String? capturedTargetDiveId;
+  List<String>? capturedSecondaryDiveIds;
+  DiveMergeSnapshot? undoneSnapshot;
+
+  final DiveMergeSnapshot outcomeSnapshot = const DiveMergeSnapshot(
+    mergedDiveId: 'a',
+    diveRows: [],
+    profileRows: [],
+    tankRows: [],
+    weightRows: [],
+    customFieldRows: [],
+    equipmentRows: [],
+    diveTypeRows: [],
+    tagRows: [],
+    buddyRows: [],
+    sightingRows: [],
+    eventRows: [],
+    gasSwitchRows: [],
+    tankPressureRows: [],
+    dataSourceRows: [],
+    tideRows: [],
+    mediaDiveIds: {},
+  );
+
+  @override
+  Future<DiveConsolidationOutcome> apply({
+    required String targetDiveId,
+    required List<String> secondaryDiveIds,
+  }) async {
+    capturedTargetDiveId = targetDiveId;
+    capturedSecondaryDiveIds = secondaryDiveIds;
+    return DiveConsolidationOutcome(
+      targetDiveId: targetDiveId,
+      snapshot: outcomeSnapshot,
+    );
+  }
+
+  @override
+  Future<void> undo(DiveMergeSnapshot snapshot) async {
+    undoneSnapshot = snapshot;
+  }
+}
+
 /// Minimal SettingsNotifier override that returns default AppSettings.
 class _FakeSettingsNotifier extends StateNotifier<AppSettings>
     implements SettingsNotifier {
@@ -94,6 +150,7 @@ Future<void> pumpCombineDialog(
   WidgetTester tester, {
   required List<domain.Dive> dives,
   DiveMergeService? mergeService,
+  DiveConsolidationService? consolidationService,
   List<String>? requestIds,
   DiveRepository? repository,
 }) async {
@@ -115,6 +172,10 @@ Future<void> pumpCombineDialog(
         settingsProvider.overrideWith((ref) => _FakeSettingsNotifier()),
         if (mergeService != null)
           diveMergeServiceProvider.overrideWithValue(mergeService),
+        if (consolidationService != null)
+          diveConsolidationServiceProvider.overrideWithValue(
+            consolidationService,
+          ),
       ],
       child: MaterialApp(
         localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -249,20 +310,144 @@ void main() {
     expect(find.text('Combine into one dive'), findsOneWidget);
   });
 
-  testWidgets('overlapping selection shows the explanation panel', (
-    tester,
-  ) async {
-    await pumpCombineDialog(
-      tester,
-      dives: [
-        diveAt('a', DateTime.utc(2026, 7, 1, 9), runtimeMin: 90),
-        diveAt('b', DateTime.utc(2026, 7, 1, 10)),
-      ],
+  group('overlapping selection -- multi-computer consolidation', () {
+    /// Two overlapping dives from different computers, each with a short
+    /// profile so the preview chart has something to draw.
+    List<domain.Dive> consolidatableDives() => [
+      diveAt(
+        'a',
+        DateTime.utc(2026, 7, 1, 9),
+        runtimeMin: 30,
+        diveComputerModel: 'Perdix',
+        diveComputerSerial: 'serial-a',
+        profile: _profile(30),
+      ),
+      diveAt(
+        'b',
+        DateTime.utc(2026, 7, 1, 9, 5),
+        runtimeMin: 25,
+        diveComputerModel: 'Teric',
+        diveComputerSerial: 'serial-b',
+        profile: _profile(25),
+      ),
+    ];
+
+    testWidgets(
+      'shows a preview chart with both dives\' depth series on the shared '
+      'timeline',
+      (tester) async {
+        await pumpCombineDialog(tester, dives: consolidatableDives());
+
+        expect(find.byType(DiveSparkline), findsOneWidget);
+        final sparkline = tester.widget<DiveSparkline>(
+          find.byType(DiveSparkline),
+        );
+        expect(sparkline.profile, isNotEmpty);
+        expect(sparkline.extraSeries, hasLength(1));
+        expect(sparkline.extraSeries.single.profile, isNotEmpty);
+      },
     );
-    expect(find.text('These dives overlap in time'), findsOneWidget);
-    expect(find.text('Combine into one dive'), findsNothing);
-    // 2 dives selected -> hint at the existing per-dive merge action.
-    expect(find.textContaining('Merge with another dive'), findsOneWidget);
+
+    testWidgets(
+      'shows a primary selector with one radio tile per dive, defaulting to '
+      'the earliest entry time',
+      (tester) async {
+        await pumpCombineDialog(tester, dives: consolidatableDives());
+
+        expect(find.byType(RadioListTile<String>), findsNWidgets(2));
+        // 'a' (9:00) is earliest -> preselected as the primary via the
+        // ancestor RadioGroup.
+        final radioGroup = tester.widget<RadioGroup<String>>(
+          find.byType(RadioGroup<String>),
+        );
+        expect(radioGroup.groupValue, 'a');
+        expect(find.textContaining('Perdix'), findsOneWidget);
+        expect(find.textContaining('Teric'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'confirming calls DiveConsolidationService.apply with the selected '
+      'primary as target and shows an Undo snackbar',
+      (tester) async {
+        final service = _FakeDiveConsolidationService();
+        await pumpCombineDialog(
+          tester,
+          dives: consolidatableDives(),
+          consolidationService: service,
+        );
+
+        await tester.tap(find.text('Keep as one dive with both computers'));
+        await tester.pumpAndSettle();
+
+        expect(service.capturedTargetDiveId, 'a');
+        expect(service.capturedSecondaryDiveIds, ['b']);
+
+        // The dialog itself is gone.
+        expect(find.text('Combine dives'), findsNothing);
+
+        final snackBar = tester.widget<SnackBar>(find.byType(SnackBar));
+        expect(snackBar.action, isNotNull);
+        expect(snackBar.action!.label, 'Undo');
+        expect(snackBar.persist, isFalse);
+        expect(snackBar.showCloseIcon, isTrue);
+      },
+    );
+
+    testWidgets(
+      'picking the later dive as primary calls apply with that dive as '
+      'target',
+      (tester) async {
+        final service = _FakeDiveConsolidationService();
+        await pumpCombineDialog(
+          tester,
+          dives: consolidatableDives(),
+          consolidationService: service,
+        );
+
+        await tester.tap(find.textContaining('Teric'));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text('Keep as one dive with both computers'));
+        await tester.pumpAndSettle();
+
+        expect(service.capturedTargetDiveId, 'b');
+        expect(service.capturedSecondaryDiveIds, ['a']);
+      },
+    );
+
+    testWidgets(
+      'dives sharing a dive computer serial show the sameComputer error '
+      'instead of the confirm button',
+      (tester) async {
+        await pumpCombineDialog(
+          tester,
+          dives: [
+            diveAt(
+              'a',
+              DateTime.utc(2026, 7, 1, 9),
+              runtimeMin: 30,
+              diveComputerSerial: 'same-serial',
+            ),
+            diveAt(
+              'b',
+              DateTime.utc(2026, 7, 1, 9, 5),
+              runtimeMin: 25,
+              diveComputerSerial: 'same-serial',
+            ),
+          ],
+        );
+
+        expect(
+          find.text(
+            "These dives are from the same dive computer and can't be "
+            'merged this way.',
+          ),
+          findsOneWidget,
+        );
+        expect(find.text('Keep as one dive with both computers'), findsNothing);
+      },
+    );
   });
 
   testWidgets('apply failure closes dialog and shows error snackbar', (

@@ -7,17 +7,23 @@ import 'package:submersion/core/utils/unit_formatter.dart';
 import 'package:submersion/features/dive_log/data/services/dive_merge_service.dart';
 import 'package:submersion/features/dive_log/domain/entities/dive.dart'
     as domain;
+import 'package:submersion/features/dive_log/domain/services/dive_consolidation_builder.dart';
 import 'package:submersion/features/dive_log/domain/services/dive_merge_builder.dart';
 import 'package:submersion/features/dive_log/presentation/providers/dive_providers.dart';
+import 'package:submersion/features/dive_log/presentation/widgets/computer_toggle_bar.dart';
+import 'package:submersion/features/dive_log/presentation/widgets/run_dive_consolidation.dart';
 import 'package:submersion/features/settings/presentation/providers/settings_providers.dart';
 import 'package:submersion/l10n/l10n_extension.dart';
 
 /// Dialog that classifies the current dive selection and either previews a
-/// sequential combine, explains why an overlapping selection can't be
-/// combined yet, or reports an error (mixed divers).
+/// sequential combine, previews a multi-computer consolidation (same dive
+/// recorded by more than one computer), or reports an error (mixed divers,
+/// same computer, non-overlapping).
 ///
-/// See dive_merge_builder.dart / dive_merge_service.dart for the underlying
-/// classification and persistence logic (#449).
+/// See dive_merge_builder.dart / dive_merge_service.dart for the sequential
+/// classification and persistence logic (#449), and
+/// dive_consolidation_builder.dart / dive_consolidation_service.dart for the
+/// overlapping/consolidation path.
 class CombineDivesDialog extends ConsumerStatefulWidget {
   const CombineDivesDialog({super.key, required this.diveIds});
   final List<String> diveIds;
@@ -35,6 +41,12 @@ class _CombineDivesDialogState extends ConsumerState<CombineDivesDialog> {
   DiveMergeClassification? _classification;
   bool _working = false;
   bool _loadFailed = false;
+
+  /// Selected primary dive id for the multi-computer consolidation panel.
+  /// Null until the user picks one, in which case
+  /// [DiveConsolidationBuilder.classify]/`build` default to the earliest
+  /// entry time.
+  String? _selectedPrimaryId;
 
   @override
   void initState() {
@@ -97,7 +109,7 @@ class _CombineDivesDialogState extends ConsumerState<CombineDivesDialog> {
           ),
           null => const Center(child: CircularProgressIndicator()),
           final MergeSequential seq => _buildPreview(context, seq),
-          MergeOverlapping() => _buildOverlapPanel(context),
+          MergeOverlapping() => _buildConsolidationPanel(context),
           final MergeInvalid invalid => _buildErrorPanel(
             context,
             switch (invalid.reason) {
@@ -370,9 +382,63 @@ class _CombineDivesDialogState extends ConsumerState<CombineDivesDialog> {
     );
   }
 
-  Widget _buildOverlapPanel(BuildContext context) {
+  /// An overlapping selection looks like the same physical dive recorded by
+  /// more than one dive computer. Runs [DiveConsolidationBuilder.classify]
+  /// with the currently-selected primary (defaulting to the earliest entry
+  /// time) and renders either the mapped error text or the consolidation
+  /// preview/selector/confirm panel.
+  Widget _buildConsolidationPanel(BuildContext context) {
+    final classification = const DiveConsolidationBuilder().classify(
+      _dives!,
+      primaryDiveId: _selectedPrimaryId,
+    );
+
+    return switch (classification) {
+      final ConsolidationInvalid invalid => _buildErrorPanel(
+        context,
+        switch (invalid.reason) {
+          ConsolidationInvalidReason.sameComputer =>
+            context.l10n.diveLog_consolidate_error_sameComputer,
+          ConsolidationInvalidReason.notOverlapping =>
+            context.l10n.diveLog_consolidate_error_notOverlapping,
+          // Unreachable in practice -- the outer DiveMergeBuilder
+          // classification already rules out mixedDivers/tooFewDives before
+          // this panel is reached -- but handled for completeness.
+          ConsolidationInvalidReason.mixedDivers ||
+          ConsolidationInvalidReason.tooFewDives =>
+            context.l10n.diveLog_consolidate_error_generic,
+        },
+      ),
+      final ConsolidationReady ready => _buildConsolidationReadyPanel(
+        context,
+        ready,
+      ),
+    };
+  }
+
+  Widget _buildConsolidationReadyPanel(
+    BuildContext context,
+    ConsolidationReady ready,
+  ) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final timePattern = ref.watch(timeFormatProvider).pattern;
+
+    // Pure preview computation -- never persisted, same reasoning as the
+    // sequential branch's build() call above.
+    final plan = const DiveConsolidationBuilder().build(
+      _dives!,
+      primaryDiveId: _selectedPrimaryId,
+    );
+
+    // A stable (selection-independent) order for the radio tiles and chart
+    // series/colors, so picking a different primary re-labels rather than
+    // re-shuffling the list.
+    final sortedDives = [..._dives!]
+      ..sort((a, b) => a.effectiveEntryTime.compareTo(b.effectiveEntryTime));
+    final hasProfileData = plan.previewSeries.values.any(
+      (series) => series.isNotEmpty,
+    );
 
     return Padding(
       padding: const EdgeInsets.all(24),
@@ -380,51 +446,167 @@ class _CombineDivesDialogState extends ConsumerState<CombineDivesDialog> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              ExcludeSemantics(
-                child: Icon(
-                  Icons.warning_amber_rounded,
-                  color: colorScheme.error,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Flexible(
-                child: Text(
-                  context.l10n.diveLog_combine_overlapTitle,
-                  style: textTheme.headlineSmall,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Text(
-            context.l10n.diveLog_combine_overlapBody,
-            style: textTheme.bodyMedium,
-          ),
-          if (widget.diveIds.length == 2) ...[
-            const SizedBox(height: 12),
-            Text(
-              context.l10n.diveLog_combine_overlapHintTwoDives,
-              style: textTheme.bodyMedium?.copyWith(
-                color: colorScheme.onSurfaceVariant,
-                fontStyle: FontStyle.italic,
+          Flexible(
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      ExcludeSemantics(
+                        child: Icon(
+                          Icons.call_merge,
+                          color: colorScheme.primary,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Flexible(
+                        child: Text(
+                          context.l10n.diveLog_combine_title,
+                          style: textTheme.headlineSmall,
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (hasProfileData) ...[
+                    const SizedBox(height: 16),
+                    Text(
+                      context.l10n.diveLog_combine_profilePreview,
+                      style: textTheme.labelMedium?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    // One line per source dive on the primary's shared
+                    // timeline, distinct colors matching the radio tiles
+                    // below.
+                    DiveSparkline(
+                      profile:
+                          plan.previewSeries[sortedDives.first.id] ?? const [],
+                      width: double.infinity,
+                      height: 120,
+                      color: computerColorAt(0),
+                      maxPoints: 200,
+                      extraSeries: [
+                        for (var i = 1; i < sortedDives.length; i++)
+                          DiveSparklineSeries(
+                            profile:
+                                plan.previewSeries[sortedDives[i].id] ??
+                                const [],
+                            color: computerColorAt(i),
+                          ),
+                      ],
+                    ),
+                  ],
+                  const SizedBox(height: 16),
+                  Text(
+                    context.l10n.diveLog_consolidate_selectPrimary,
+                    style: textTheme.labelMedium?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  RadioGroup<String>(
+                    groupValue: ready.primary.id,
+                    onChanged: (value) {
+                      if (value == null) return;
+                      setState(() => _selectedPrimaryId = value);
+                    },
+                    child: Column(
+                      children: [
+                        for (var i = 0; i < sortedDives.length; i++)
+                          RadioListTile<String>(
+                            contentPadding: EdgeInsets.zero,
+                            dense: true,
+                            value: sortedDives[i].id,
+                            secondary: ExcludeSemantics(
+                              child: Icon(
+                                Icons.circle,
+                                size: 12,
+                                color: computerColorAt(i),
+                              ),
+                            ),
+                            title: Text(
+                              _computerLabel(sortedDives[i], timePattern),
+                              style: textTheme.bodyMedium,
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ),
-          ],
+          ),
           const SizedBox(height: 16),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
+          // OverflowBar (rather than Row, used elsewhere in this dialog)
+          // because the confirm label is long enough to overflow a 520px
+          // dialog alongside Cancel; OverflowBar stacks the buttons
+          // vertically instead of clipping when they don't fit.
+          OverflowBar(
+            spacing: 8,
+            alignment: MainAxisAlignment.end,
             children: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(null),
-                child: Text(context.l10n.common_action_close),
+                child: Text(context.l10n.common_action_cancel),
+              ),
+              FilledButton(
+                onPressed: () => _confirmConsolidation(ready),
+                child: Text(context.l10n.diveLog_consolidate_confirm),
               ),
             ],
           ),
         ],
       ),
     );
+  }
+
+  /// Applies the consolidation via [runDiveConsolidation] (apply + Undo
+  /// SnackBar + error mapping, shared with the per-dive "Merge with another
+  /// dive" flow). The dialog closes immediately; [runDiveConsolidation] only
+  /// touches [context] synchronously before its first `await`, so doing that
+  /// after [Navigator.pop] is safe (the dialog's element isn't actually
+  /// unmounted until the pop's exit transition finishes).
+  void _confirmConsolidation(ConsolidationReady ready) {
+    final container = ProviderScope.containerOf(context, listen: false);
+    final service = ref.read(diveConsolidationServiceProvider);
+    final targetId = ready.primary.id;
+    final secondaryIds = [for (final s in ready.secondaries) s.id];
+
+    Navigator.of(context).pop(null);
+
+    runDiveConsolidation(
+      context: context,
+      service: service,
+      targetDiveId: targetId,
+      secondaryDiveIds: secondaryIds,
+      onConsolidated: () {
+        // Captured via the container (rather than `ref`) so this still works
+        // once this dialog's own State has been disposed.
+        container.invalidate(paginatedDiveListProvider);
+        container.invalidate(diveListNotifierProvider);
+        container.invalidate(divesProvider);
+        container.invalidate(diveStatisticsProvider);
+        container.invalidate(diveNumberingInfoProvider);
+
+        // Invalidate per-dive detail providers for all involved dive IDs
+        // (target and secondaries) for parity with dive_detail_page.dart.
+        for (final diveId in [targetId, ...secondaryIds]) {
+          container.invalidate(diveProvider(diveId));
+          container.invalidate(diveProfileProvider(diveId));
+          container.invalidate(profilesBySourceProvider(diveId));
+          container.invalidate(diveDataSourcesProvider(diveId));
+        }
+      },
+    );
+  }
+
+  /// "`<model>` · `<entry time>`", or just the entry time when the dive has
+  /// no recorded computer model.
+  String _computerLabel(domain.Dive dive, String timePattern) {
+    final timeStr = DateFormat(timePattern).format(dive.effectiveEntryTime);
+    final model = dive.diveComputerModel;
+    return model != null && model.isNotEmpty ? '$model · $timeStr' : timeStr;
   }
 
   Widget _buildErrorPanel(BuildContext context, String message) {

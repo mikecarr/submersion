@@ -41,6 +41,9 @@ class _MockSettingsNotifier extends StateNotifier<AppSettings>
   Future<void> setDefaultShowAscentRateLine(bool value) async =>
       state = state.copyWith(defaultShowAscentRateLine: value);
   @override
+  Future<void> setDefaultShowPhotoMarkers(bool value) async =>
+      state = state.copyWith(defaultShowPhotoMarkers: value);
+  @override
   Future<void> setDepthUnit(DepthUnit unit) async =>
       state = state.copyWith(depthUnit: unit);
   @override
@@ -317,6 +320,14 @@ class _MockSettingsNotifier extends StateNotifier<AppSettings>
   @override
   Future<void> resetDiveDetailSections() async =>
       state = state.copyWith(clearDiveDetailSections: true);
+  @override
+  Future<void> setFullscreenTilePreferences({
+    required List<String> order,
+    required List<String> hidden,
+  }) async => state = state.copyWith(
+    fullscreenTileOrder: order,
+    fullscreenHiddenTiles: hidden,
+  );
 }
 
 /// Mock CurrentDiverIdNotifier that doesn't access the database
@@ -769,6 +780,56 @@ void main() {
 
       // The section appearance page is shown for sites
       expect(find.byType(SectionAppearancePage), findsOneWidget);
+    });
+  });
+
+  group('ManageSectionContent checklist templates tile', () {
+    /// Build a widget that renders the SettingsPage via GoRouter with
+    /// ?selected=manage, which renders the _SettingsSectionDetailPage
+    /// containing _ManageSectionContent (mobile detail page path) -- mirrors
+    /// buildAppearanceWidget above.
+    Widget buildManageWidget(List<Override> overrides) {
+      final router = GoRouter(
+        initialLocation: '/settings?selected=manage',
+        routes: [
+          GoRoute(
+            path: '/settings',
+            builder: (context, state) => const SettingsPage(),
+          ),
+          GoRoute(
+            path: '/checklist-templates',
+            builder: (context, state) => const Text('Checklist Templates Stub'),
+          ),
+        ],
+      );
+
+      return ProviderScope(
+        overrides: overrides,
+        child: MaterialApp.router(
+          routerConfig: router,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+        ),
+      );
+    }
+
+    testWidgets('renders the checklist templates tile and navigates on tap', (
+      tester,
+    ) async {
+      await tester.pumpWidget(buildManageWidget(getOverrides()));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Checklist Templates'), findsOneWidget);
+      expect(
+        find.text('Reusable to-do lists for trip planning'),
+        findsOneWidget,
+      );
+
+      await tester.tap(find.text('Checklist Templates'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Checklist Templates Stub'), findsOneWidget);
+      expect(tester.takeException(), isNull);
     });
   });
 }

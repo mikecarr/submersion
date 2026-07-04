@@ -19,7 +19,9 @@ import 'package:submersion/features/dive_log/presentation/providers/profile_anal
 import 'package:submersion/features/dive_log/presentation/widgets/collapsible_section.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/compact_deco_status_card.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/compact_tissue_loading_card.dart';
+import 'package:submersion/features/dive_log/presentation/widgets/computer_toggle_bar.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/dive_profile_chart.dart';
+import 'package:submersion/features/dive_log/presentation/widgets/field_attribution_badge.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/o2_toxicity_card.dart';
 import 'package:submersion/l10n/arb/app_localizations.dart';
 
@@ -241,6 +243,330 @@ void main() {
       // Should render with attribution badges
       expect(find.byType(DiveDetailPage), findsOneWidget);
     });
+  });
+
+  // =========================================================================
+  // Multi-computer toggle bar (Task 11) — real names, true primary, and
+  // tank source badges. The toggle bar is built from profilesBySourceProvider
+  // (per-computer profile points) joined against diveDataSourcesProvider
+  // (computer display names + the real isPrimary flag).
+  // =========================================================================
+
+  group('DiveDetailPage multi-computer profile chart (Task 11)', () {
+    Dive diveWithProfile() {
+      return createTestDiveWithBottomTime().copyWith(
+        profile: List.generate(
+          6,
+          (i) => DiveProfilePoint(
+            timestamp: i * 60,
+            depth: (i < 3 ? i * 8.0 : (5 - i) * 8.0),
+          ),
+        ),
+      );
+    }
+
+    DiveDataSource dataSource({
+      required String id,
+      required String computerId,
+      required bool isPrimary,
+      required String computerModel,
+    }) {
+      final now = DateTime(2026, 3, 28);
+      return DiveDataSource(
+        id: id,
+        diveId: 'test-dive-1',
+        computerId: computerId,
+        isPrimary: isPrimary,
+        computerModel: computerModel,
+        importedAt: now,
+        createdAt: now,
+      );
+    }
+
+    List<Override> multiComputerOverrides(
+      Dive dive,
+      List<DiveDataSource> sources,
+    ) => [
+      diveProvider(dive.id).overrideWith((ref) async => dive),
+      diveDataSourcesProvider(dive.id).overrideWith((ref) async => sources),
+      gasSwitchesProvider(
+        dive.id,
+      ).overrideWith((ref) async => <GasSwitchWithTank>[]),
+      tankPressuresProvider(
+        dive.id,
+      ).overrideWith((ref) async => <String, List<TankPressurePoint>>{}),
+      profilesBySourceProvider(dive.id).overrideWith(
+        (ref) async => <String?, List<DiveProfilePoint>>{
+          'comp-uuid-1': dive.profile,
+          'comp-uuid-2': dive.profile,
+        },
+      ),
+    ];
+
+    // The Data Sources section also renders each source's model name (in a
+    // DataTable column header), so a bare find.text(...) is ambiguous.
+    // Scope matches to the toggle bar specifically.
+    Finder toggleBarText(String text) => find.descendant(
+      of: find.byType(ComputerToggleBar),
+      matching: find.text(text),
+    );
+
+    testWidgets(
+      'toggle labels show real computer model names, not raw computer IDs',
+      (tester) async {
+        final dive = diveWithProfile();
+        final base = await getBaseOverrides();
+        final sources = [
+          dataSource(
+            id: 'src-1',
+            computerId: 'comp-uuid-1',
+            isPrimary: true,
+            computerModel: 'Perdix 2',
+          ),
+          dataSource(
+            id: 'src-2',
+            computerId: 'comp-uuid-2',
+            isPrimary: false,
+            computerModel: 'Suunto D5',
+          ),
+        ];
+
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [...base, ...multiComputerOverrides(dive, sources)],
+            child: MaterialApp(
+              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              supportedLocales: AppLocalizations.supportedLocales,
+              home: DiveDetailPage(diveId: dive.id, embedded: true),
+            ),
+          ),
+        );
+        await tester.pump();
+        await tester.pump(const Duration(seconds: 1));
+
+        // The raw computer IDs must never leak into the UI as labels.
+        expect(toggleBarText('comp-uuid-1'), findsNothing);
+        expect(toggleBarText('comp-uuid-2'), findsNothing);
+        // Real model names resolved from the data sources instead.
+        expect(toggleBarText('Perdix 2 (primary)'), findsOneWidget);
+        expect(toggleBarText('Suunto D5'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'the primary toggle chip matches the data source marked primary, '
+      'not map insertion order',
+      (tester) async {
+        final dive = diveWithProfile();
+        final base = await getBaseOverrides();
+        // 'comp-uuid-1' is first in map order (see multiComputerOverrides)
+        // but 'comp-uuid-2' is the real primary per the data sources.
+        final sources = [
+          dataSource(
+            id: 'src-1',
+            computerId: 'comp-uuid-1',
+            isPrimary: false,
+            computerModel: 'Suunto D5',
+          ),
+          dataSource(
+            id: 'src-2',
+            computerId: 'comp-uuid-2',
+            isPrimary: true,
+            computerModel: 'Perdix 2',
+          ),
+        ];
+
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [...base, ...multiComputerOverrides(dive, sources)],
+            child: MaterialApp(
+              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              supportedLocales: AppLocalizations.supportedLocales,
+              home: DiveDetailPage(diveId: dive.id, embedded: true),
+            ),
+          ),
+        );
+        await tester.pump();
+        await tester.pump(const Duration(seconds: 1));
+
+        // The chip for the REAL primary (comp-uuid-2 / Perdix 2) is marked
+        // primary, even though it's second in map iteration order.
+        expect(toggleBarText('Perdix 2 (primary)'), findsOneWidget);
+        expect(toggleBarText('Suunto D5 (primary)'), findsNothing);
+        expect(toggleBarText('Suunto D5'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'unknown computer names fall back to the localized "Unknown Computer" label',
+      (tester) async {
+        final dive = diveWithProfile();
+        final base = await getBaseOverrides();
+        final sources = [
+          // computerModel and computerSerial both null.
+          DiveDataSource(
+            id: 'src-1',
+            diveId: dive.id,
+            computerId: 'comp-uuid-1',
+            isPrimary: true,
+            importedAt: DateTime(2026, 3, 28),
+            createdAt: DateTime(2026, 3, 28),
+          ),
+          dataSource(
+            id: 'src-2',
+            computerId: 'comp-uuid-2',
+            isPrimary: false,
+            computerModel: 'Suunto D5',
+          ),
+        ];
+
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [...base, ...multiComputerOverrides(dive, sources)],
+            child: MaterialApp(
+              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              supportedLocales: AppLocalizations.supportedLocales,
+              home: DiveDetailPage(diveId: dive.id, embedded: true),
+            ),
+          ),
+        );
+        await tester.pump();
+        await tester.pump(const Duration(seconds: 1));
+
+        final l10n = AppLocalizations.of(
+          tester.element(find.byType(DiveDetailPage)),
+        );
+        expect(
+          toggleBarText('${l10n.diveLog_sources_unknownComputer} (primary)'),
+          findsOneWidget,
+        );
+      },
+    );
+
+    testWidgets(
+      'a tank badge appears only for a non-primary attributed tank on a '
+      'multi-source dive',
+      (tester) async {
+        final dive = createTestDiveWithBottomTime().copyWith(
+          tanks: const [
+            // Attributed to the primary computer -- no badge expected.
+            DiveTank(id: 'tank-primary', computerId: 'comp-uuid-1'),
+            // Attributed to the secondary computer -- badge expected.
+            DiveTank(id: 'tank-secondary', computerId: 'comp-uuid-2'),
+            // Unattributed (e.g. manually added) -- no badge expected.
+            DiveTank(id: 'tank-manual'),
+          ],
+        );
+        final base = await getBaseOverrides();
+        final sources = [
+          dataSource(
+            id: 'src-1',
+            computerId: 'comp-uuid-1',
+            isPrimary: true,
+            computerModel: 'Perdix 2',
+          ),
+          dataSource(
+            id: 'src-2',
+            computerId: 'comp-uuid-2',
+            isPrimary: false,
+            computerModel: 'Suunto D5',
+          ),
+        ];
+
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              ...base,
+              diveProvider(dive.id).overrideWith((ref) async => dive),
+              diveDataSourcesProvider(
+                dive.id,
+              ).overrideWith((ref) async => sources),
+              gasSwitchesProvider(
+                dive.id,
+              ).overrideWith((ref) async => <GasSwitchWithTank>[]),
+              tankPressuresProvider(dive.id).overrideWith(
+                (ref) async => <String, List<TankPressurePoint>>{},
+              ),
+              // No multi-computer profile data -- keeps this scoped to the
+              // tanks section badge and out of the chart's toggle bar.
+              profilesBySourceProvider(dive.id).overrideWith(
+                (ref) async => <String?, List<DiveProfilePoint>>{},
+              ),
+            ],
+            child: MaterialApp(
+              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              supportedLocales: AppLocalizations.supportedLocales,
+              home: DiveDetailPage(diveId: dive.id, embedded: true),
+            ),
+          ),
+        );
+        await tester.pump();
+        await tester.pump(const Duration(seconds: 1));
+
+        // Exactly one badge: the secondary-computer tank. Scoped to
+        // FieldAttributionBadge since the Data Sources section separately
+        // renders both model names too.
+        final badgeText = find.descendant(
+          of: find.byType(FieldAttributionBadge),
+          matching: find.text('Suunto D5'),
+        );
+        expect(badgeText, findsOneWidget);
+        expect(
+          find.descendant(
+            of: find.byType(FieldAttributionBadge),
+            matching: find.text('Perdix 2'),
+          ),
+          findsNothing,
+        );
+      },
+    );
+
+    testWidgets(
+      'no tank badges appear on a single-source dive even with a computerId',
+      (tester) async {
+        final dive = createTestDiveWithBottomTime().copyWith(
+          tanks: const [DiveTank(id: 'tank-1', computerId: 'comp-uuid-1')],
+        );
+        final base = await getBaseOverrides();
+
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              ...base,
+              diveProvider(dive.id).overrideWith((ref) async => dive),
+              diveDataSourcesProvider(dive.id).overrideWith(
+                (ref) async => <DiveDataSource>[
+                  dataSource(
+                    id: 'src-1',
+                    computerId: 'comp-uuid-1',
+                    isPrimary: true,
+                    computerModel: 'Perdix 2',
+                  ),
+                ],
+              ),
+              gasSwitchesProvider(
+                dive.id,
+              ).overrideWith((ref) async => <GasSwitchWithTank>[]),
+              tankPressuresProvider(dive.id).overrideWith(
+                (ref) async => <String, List<TankPressurePoint>>{},
+              ),
+              profilesBySourceProvider(dive.id).overrideWith(
+                (ref) async => <String?, List<DiveProfilePoint>>{},
+              ),
+            ],
+            child: MaterialApp(
+              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              supportedLocales: AppLocalizations.supportedLocales,
+              home: DiveDetailPage(diveId: dive.id, embedded: true),
+            ),
+          ),
+        );
+        await tester.pump();
+        await tester.pump(const Duration(seconds: 1));
+
+        expect(find.byType(FieldAttributionBadge), findsNothing);
+      },
+    );
   });
 
   // =========================================================================

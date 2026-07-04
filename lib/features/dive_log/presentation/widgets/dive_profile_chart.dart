@@ -24,6 +24,8 @@ import 'package:submersion/features/dive_log/presentation/widgets/chart_series_c
 import 'package:submersion/features/dive_log/presentation/widgets/dive_profile_legend.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/gas_colors.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/gas_timeline_strip.dart';
+import 'package:submersion/features/dive_log/presentation/widgets/photo_marker_layout.dart';
+import 'package:submersion/features/dive_log/presentation/widgets/photo_marker_overlay.dart';
 import 'package:submersion/l10n/l10n_extension.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/profile_chart_viewport.dart';
 import 'package:submersion/core/ui/trackpad_zoom_recognizer.dart';
@@ -87,6 +89,10 @@ class DiveProfileChart extends ConsumerStatefulWidget {
 
   /// Profile markers to display (max depth, pressure thresholds)
   final List<ProfileMarker>? markers;
+
+  /// Photos positioned on the profile via their import-time enrichment.
+  /// Rendered as a tappable overlay when the legend toggle is on.
+  final List<PhotoChartMarker>? photoMarkers;
 
   /// Whether to show max depth marker (from settings)
   final bool showMaxDepthMarker;
@@ -201,6 +207,11 @@ class DiveProfileChart extends ConsumerStatefulWidget {
   /// Computers not in this set use a dashed line style.
   final Set<String>? primaryComputers;
 
+  /// Map of computerId -> display name (e.g. "Perdix 2"), used to label
+  /// tank-pressure tooltip rows with their source computer when 2+
+  /// computers contribute pressure curves to the same chart.
+  final Map<String, String>? computerNames;
+
   /// When true, the built-in tooltip is suppressed and tooltip data is
   /// emitted via [onTooltipData] so callers can render it externally
   /// (e.g., below the chart in the profile panel).
@@ -209,6 +220,10 @@ class DiveProfileChart extends ConsumerStatefulWidget {
   /// Called with structured tooltip row data when a point is touched
   /// and [tooltipBelow] is true. Null clears the tooltip.
   final void Function(List<TooltipRow>? rows)? onTooltipData;
+
+  /// Optional widget rendered at the start of the legend row (e.g. a close
+  /// button and title in the fullscreen view).
+  final Widget? legendLeading;
 
   /// Returns responsive left axis reserved size based on available chart width.
   /// Tick labels are plain numbers (e.g. "30", "60") so don't need much space.
@@ -318,6 +333,41 @@ class DiveProfileChart extends ConsumerStatefulWidget {
     return runs;
   }
 
+  /// Depth-band touched spots whose built-in focus indicator should be hidden.
+  ///
+  /// Velocity colouring splits the depth line into one [LineChartBarData] per
+  /// ascent-rate band ([velocityBandRuns]). fl_chart's built-in touch handling
+  /// then paints a focus dot on *every* band whose nearest sample falls within
+  /// the touch threshold, so hovering an abrupt (warning/danger) stretch
+  /// clusters several depth dots around the cursor. Keep the dot on the band
+  /// the tooltip resolves to -- the first touched depth bar, matching the
+  /// onPointSelected mapping -- and return the other touched depth-band spots
+  /// so the caller can suppress their indicators.
+  ///
+  /// Returns an empty list when the depth line is a single bar
+  /// ([depthBandCount] <= 1: velocity colouring off, or multi-computer
+  /// rendering) or only one band sits under the cursor, leaving fl_chart's
+  /// default behaviour untouched. A dropped band that shares the kept band's
+  /// exact sample (adjacent bands join on their boundary point) is left in
+  /// place so the two indicators overlap into one dot instead of cancelling.
+  @visibleForTesting
+  static List<({double x, double y})> velocityIndicatorSuppression(
+    List<({int barIndex, double x, double y})> touchedSpots,
+    int depthBandCount,
+  ) {
+    if (depthBandCount <= 1) return const [];
+    final depthSpots = touchedSpots
+        .where((s) => s.barIndex < depthBandCount)
+        .toList();
+    if (depthSpots.length <= 1) return const [];
+    final kept = depthSpots.first;
+    return depthSpots
+        .skip(1)
+        .where((s) => s.x != kept.x || s.y != kept.y)
+        .map((s) => (x: s.x, y: s.y))
+        .toList();
+  }
+
   const DiveProfileChart({
     super.key,
     required this.profile,
@@ -338,6 +388,7 @@ class DiveProfileChart extends ConsumerStatefulWidget {
     this.showEvents = true,
     this.showSac = false,
     this.markers,
+    this.photoMarkers,
     this.showMaxDepthMarker = false,
     this.showPressureThresholdMarkers = false,
     this.gasSwitches,
@@ -365,8 +416,10 @@ class DiveProfileChart extends ConsumerStatefulWidget {
     this.visibleComputers,
     this.computerLineColors,
     this.primaryComputers,
+    this.computerNames,
     this.tooltipBelow = false,
     this.onTooltipData,
+    this.legendLeading,
   });
 
   @override
@@ -395,6 +448,9 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
 
   // Gas switch visualization toggle
   bool _showGasSwitchMarkers = true;
+
+  // Photo marker visualization toggle
+  bool _showPhotoMarkers = true;
 
   // Advanced decompression/gas toggles
   bool _showNdl = false;
@@ -440,6 +496,69 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
       return orderA.compareTo(orderB);
     });
     return ids;
+  }
+
+  /// Whether data attributed to [computerId] should be drawn, per the
+  /// toggle bar's [widget.visibleComputers].
+  ///
+  /// `null` means "no multi-computer toggle in play" (single-source dive,
+  /// or the caller hasn't wired visibility) — everything is visible. When a
+  /// visibility set IS present, a `null` [computerId] is treated as
+  /// belonging to the primary computer (this is the null-means-primary
+  /// convention used by dive_profiles/dive_profile_events/tank_pressure_
+  /// profiles rows — see database.dart), so it's visible exactly when a
+  /// primary computer is visible.
+  bool _isComputerVisible(String? computerId) {
+    final visible = widget.visibleComputers;
+    if (visible == null) return true;
+    if (computerId == null) {
+      final primaries = widget.primaryComputers;
+      if (primaries == null || primaries.isEmpty) return true;
+      return primaries.any(visible.contains);
+    }
+    return visible.contains(computerId);
+  }
+
+  /// Map of tankId -> owning computerId, derived from [widget.tanks].
+  /// Tanks without attribution (single-source dives, manually entered
+  /// tanks) map to null and are always treated as visible.
+  Map<String, String?> _tankComputerIds() => {
+    for (final t in widget.tanks ?? const <DiveTank>[]) t.id: t.computerId,
+  };
+
+  /// Distinct, currently-visible computer IDs attributed to any of
+  /// [tankIds]'s owning tanks. Used to decide whether tank-pressure tooltip
+  /// rows need a source-computer suffix (only when 2+ computers actually
+  /// contribute pressure data at once — a single contributor is unambiguous).
+  Set<String> _contributingTankComputerIds(
+    Iterable<String> tankIds,
+    Map<String, String?> tankComputerIds,
+  ) {
+    final ids = <String>{};
+    for (final tankId in tankIds) {
+      final computerId = tankComputerIds[tankId];
+      if (computerId != null && _isComputerVisible(computerId)) {
+        ids.add(computerId);
+      }
+    }
+    return ids;
+  }
+
+  /// Suffix identifying a tank's source computer in a tooltip label, e.g.
+  /// " · Perdix 2". Empty when there's nothing to disambiguate: fewer than
+  /// 2 contributing computers, an unattributed tank, or no display name
+  /// available for the tank's computer.
+  String _tankSourceSuffix(
+    String tankId,
+    Map<String, String?> tankComputerIds,
+    Set<String> contributingComputerIds,
+  ) {
+    if (contributingComputerIds.length < 2) return '';
+    final computerId = tankComputerIds[tankId];
+    if (computerId == null) return '';
+    final name = widget.computerNames?[computerId];
+    if (name == null) return '';
+    return ' · $name';
   }
 
   /// Get color for ascent rate category
@@ -571,6 +690,12 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
   // Tooltip memoization
   int? _lastTooltipSpotIndex;
   List<LineTooltipItem?> _lastTooltipItems = [];
+
+  // Depth-band touched spots whose built-in focus indicator is hidden, so
+  // velocity colouring shows a single depth dot instead of one per band.
+  // Set from the touch response in the LineTouchData touchCallback and read by
+  // getTouchedSpotIndicator during paint. See [velocityIndicatorSuppression].
+  List<({double x, double y})> _suppressedDepthIndicatorSpots = const [];
 
   // Memoized lineBarsData. The chart's series builders are pure w.r.t.
   // interaction state, so the assembled bars are reused across playback / hover
@@ -993,9 +1118,15 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
     if (widget.tankPressures != null) {
       final timestamp = point.timestamp;
       final sortedTankIds = _sortedTankIds(widget.tankPressures!.keys);
+      final tankComputerIds = _tankComputerIds();
+      final contributingComputerIds = _contributingTankComputerIds(
+        sortedTankIds,
+        tankComputerIds,
+      );
       for (var i = 0; i < sortedTankIds.length; i++) {
         final tankId = sortedTankIds[i];
         if (!(_showTankPressure[tankId] ?? true)) continue;
+        if (!_isComputerVisible(tankComputerIds[tankId])) continue;
         final pressurePoints = widget.tankPressures![tankId];
         if (pressurePoints == null || pressurePoints.isEmpty) continue;
         final pressure = _interpolateTankPressure(pressurePoints, timestamp);
@@ -1003,10 +1134,9 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
         final color = tank != null
             ? GasColors.forGasMix(tank.gasMix)
             : _getTankColor(i);
-        final tankLabel = DiveProfileChart.tankTooltipLabel(
-          tank,
-          'Tank ${i + 1}',
-        );
+        final tankLabel =
+            DiveProfileChart.tankTooltipLabel(tank, 'Tank ${i + 1}') +
+            _tankSourceSuffix(tankId, tankComputerIds, contributingComputerIds);
         rows.add(
           TooltipRow(
             label: tankLabel,
@@ -1138,7 +1268,16 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
 
     final settings = ref.watch(settingsProvider);
     final units = UnitFormatter(settings);
-    final hasTemperatureData = widget.profile.any((p) => p.temperature != null);
+    // When multi-computer profiles are present, temperature data from any
+    // computer (not just the primary/dive.profile) should surface the
+    // temperature toggle.
+    final cpProfilesForTemp = widget.computerProfiles;
+    final hasTemperatureData =
+        cpProfilesForTemp != null && cpProfilesForTemp.length >= 2
+        ? cpProfilesForTemp.values.any(
+            (points) => points.any((p) => p.temperature != null),
+          )
+        : widget.profile.any((p) => p.temperature != null);
     final hasPressureData = _hasMultiTankPressure;
     final hasHeartRateData = widget.profile.any((p) => p.heartRate != null);
     final colorScheme = Theme.of(context).colorScheme;
@@ -1158,6 +1297,7 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
     _showMaxDepthMarkerLocal = legendState.showMaxDepthMarker;
     _showPressureMarkersLocal = legendState.showPressureMarkers;
     _showGasSwitchMarkers = legendState.showGasSwitchMarkers;
+    _showPhotoMarkers = legendState.showPhotoMarkers;
     // Sync advanced deco/gas toggles
     _showNdl = legendState.showNdl;
     _showPpO2 = legendState.showPpO2;
@@ -1214,6 +1354,8 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
           widget.showPressureThresholdMarkers && _hasPressureMarkers,
       hasGasSwitches:
           widget.gasSwitches != null && widget.gasSwitches!.isNotEmpty,
+      hasPhotoMarkers:
+          widget.photoMarkers != null && widget.photoMarkers!.isNotEmpty,
       hasMultiTankPressure: _hasMultiTankPressure,
       hasGasData:
           (widget.gasSegments?.isNotEmpty ?? false) &&
@@ -1242,36 +1384,50 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
             DiveProfileChart._leftRightAxisNameSize +
             DiveProfileChart.leftAxisSize(constraints.maxWidth);
 
+        // The chart with gesture handling
+        // Wrapped in RepaintBoundary for PNG export when exportKey is provided
+        final plot = RepaintBoundary(
+          key: widget.exportKey,
+          child: _buildInteractiveChart(
+            context,
+            units,
+            hasTemperatureData: hasTemperatureData,
+            hasPressureData: hasPressureData,
+            hasHeartRateData: hasHeartRateData,
+          ),
+        );
+
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Chart header with legend and zoom controls (decluttered)
-            DiveProfileLegend(
-              config: legendConfig,
-              zoomLevel: _viewport.zoom,
-              minZoom: ProfileChartViewport.minZoom,
-              maxZoom: ProfileChartViewport.maxZoom,
-              onZoomIn: _zoomIn,
-              onZoomOut: _zoomOut,
-              onResetZoom: _resetZoom,
-              leftPadding: legendLeftPadding,
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (widget.legendLeading != null) widget.legendLeading!,
+                Expanded(
+                  child: DiveProfileLegend(
+                    config: legendConfig,
+                    zoomLevel: _viewport.zoom,
+                    minZoom: ProfileChartViewport.minZoom,
+                    maxZoom: ProfileChartViewport.maxZoom,
+                    onZoomIn: _zoomIn,
+                    onZoomOut: _zoomOut,
+                    onResetZoom: _resetZoom,
+                    leftPadding: widget.legendLeading == null
+                        ? legendLeftPadding
+                        : 0,
+                  ),
+                ),
+              ],
             ),
 
-            // The chart with gesture handling
-            // Wrapped in RepaintBoundary for PNG export when exportKey is provided
-            RepaintBoundary(
-              key: widget.exportKey,
-              child: SizedBox(
-                height: 200,
-                child: _buildInteractiveChart(
-                  context,
-                  units,
-                  hasTemperatureData: hasTemperatureData,
-                  hasPressureData: hasPressureData,
-                  hasHeartRateData: hasHeartRateData,
-                ),
-              ),
-            ),
+            // Fill bounded parents (e.g. fullscreen); keep the 200px default
+            // in unbounded contexts such as inline scroll views.
+            if (constraints.hasBoundedHeight)
+              Expanded(child: plot)
+            else
+              SizedBox(height: 200, child: plot),
             // Zoom hint
             if (_viewport.isZoomed)
               Padding(
@@ -1597,10 +1753,16 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
     final visibleMinDepth = _viewport.offsetY * totalMaxDepth;
     final visibleMaxDepth = visibleMinDepth + visibleRangeY;
 
-    // Temperature bounds (if showing) - convert to user's preferred unit
+    // Temperature bounds (if showing) - convert to user's preferred unit.
+    // With multi-computer profiles, pool every computer's readings (not just
+    // the primary) so the axis range doesn't jump as computers are toggled.
     double? minTemp, maxTemp;
     if (_showTemperature && hasTemperatureData) {
-      final temps = widget.profile
+      final cpProfiles = widget.computerProfiles;
+      final tempSource = cpProfiles != null && cpProfiles.length >= 2
+          ? cpProfiles.values.expand((points) => points)
+          : widget.profile;
+      final temps = tempSource
           .where((p) => p.temperature != null)
           .map((p) => units.convertTemperature(p.temperature!));
       if (temps.isNotEmpty) {
@@ -1832,12 +1994,14 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
                 // Gas switch markers (if showing and data available)
                 if (_showGasSwitchMarkers) ..._buildGasSwitchMarkers(units),
 
-                // Temperature line (if showing)
+                // Temperature line(s) (if showing) — one per visible computer
+                // when multi-computer profiles are present, else a single
+                // curve from the primary profile.
                 if (_showTemperature &&
                     hasTemperatureData &&
                     minTemp != null &&
                     maxTemp != null)
-                  _buildTemperatureLine(
+                  ..._buildTemperatureLines(
                     colorScheme,
                     totalMaxDepth,
                     minTemp,
@@ -1944,24 +2108,62 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
               enabled: true,
               touchSpotThreshold: 20,
               handleBuiltInTouches: true,
+              getTouchedSpotIndicator: (barData, spotIndexes) {
+                final suppressed = _suppressedDepthIndicatorSpots;
+                if (suppressed.isEmpty) {
+                  return defaultTouchedIndicators(barData, spotIndexes);
+                }
+                // Hide the built-in focus dot on the extra velocity bands so a
+                // single depth dot remains; every other line keeps its default
+                // indicator. See [velocityIndicatorSuppression].
+                return [
+                  for (final index in spotIndexes)
+                    if (_isSuppressedIndicatorSpot(barData, index, suppressed))
+                      null
+                    else
+                      defaultTouchedIndicators(barData, [index]).first,
+                ];
+              },
               touchCallback: (event, response) {
+                final isTouchEnd =
+                    event is FlPointerExitEvent ||
+                    event is FlLongPressEnd ||
+                    event is FlTapUpEvent ||
+                    event is FlPanEndEvent;
+                final spots =
+                    response?.lineBarSpots ?? const <TouchLineBarSpot>[];
+                final active = !isTouchEnd && spots.isNotEmpty;
+                // Depth-line bar layout: a single bar normally, one per velocity
+                // band when the ascent-rate overlay splits the line. Shared by
+                // the indicator-suppression list and the spot -> global-index
+                // mapping below.
+                final starts = active
+                    ? _depthBarStartIndices()
+                    : const <int>[0];
+
+                // Collapse velocity colouring's per-band focus dots to a single
+                // depth dot, independently of the external selection/tooltip
+                // callbacks below (so the built-in indicator is de-cluttered
+                // even when neither callback is wired).
+                _suppressedDepthIndicatorSpots = active
+                    ? DiveProfileChart.velocityIndicatorSuppression([
+                        for (final s in spots)
+                          (barIndex: s.barIndex, x: s.x, y: s.y),
+                      ], starts.length)
+                    : const [];
+
                 if (widget.onPointSelected != null ||
                     widget.onTooltipData != null) {
-                  if (event is FlPointerExitEvent ||
-                      event is FlLongPressEnd ||
-                      event is FlTapUpEvent ||
-                      event is FlPanEndEvent) {
+                  if (isTouchEnd) {
                     widget.onPointSelected?.call(null);
                     if (widget.tooltipBelow) {
                       widget.onTooltipData?.call(null);
                     }
-                  } else if (response?.lineBarSpots != null &&
-                      response!.lineBarSpots!.isNotEmpty) {
+                  } else if (active) {
                     // Velocity colouring splits the depth line into per-band
                     // bars; find the touched depth spot on any of them and map
                     // it back to the global profile index.
-                    final starts = _depthBarStartIndices();
-                    final depthSpot = response.lineBarSpots!
+                    final depthSpot = spots
                         .where((s) => s.barIndex < starts.length)
                         .firstOrNull;
                     final index = depthSpot == null
@@ -1975,7 +2177,7 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
                         final settings = ref.read(settingsProvider);
                         final units = UnitFormatter(settings);
                         _emitExternalTooltip(
-                          response.lineBarSpots!,
+                          spots,
                           units,
                           Theme.of(context).colorScheme,
                         );
@@ -2441,10 +2643,19 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
                       final sortedTankIds = _sortedTankIds(
                         widget.tankPressures!.keys,
                       );
+                      final tankComputerIds = _tankComputerIds();
+                      final contributingComputerIds =
+                          _contributingTankComputerIds(
+                            sortedTankIds,
+                            tankComputerIds,
+                          );
 
                       for (var i = 0; i < sortedTankIds.length; i++) {
                         final tankId = sortedTankIds[i];
                         if (!(_showTankPressure[tankId] ?? true)) continue;
+                        if (!_isComputerVisible(tankComputerIds[tankId])) {
+                          continue;
+                        }
 
                         final pressurePoints = widget.tankPressures![tankId];
                         if (pressurePoints == null || pressurePoints.isEmpty) {
@@ -2459,10 +2670,16 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
                         final color = tank != null
                             ? GasColors.forGasMix(tank.gasMix)
                             : _getTankColor(i);
-                        final tankLabel = DiveProfileChart.tankTooltipLabel(
-                          tank,
-                          context.l10n.diveLog_tank_title(i + 1),
-                        );
+                        final tankLabel =
+                            DiveProfileChart.tankTooltipLabel(
+                              tank,
+                              context.l10n.diveLog_tank_title(i + 1),
+                            ) +
+                            _tankSourceSuffix(
+                              tankId,
+                              tankComputerIds,
+                              contributingComputerIds,
+                            );
                         final pressValue = pressure != null
                             ? units.formatPressure(pressure)
                             : '—';
@@ -2626,6 +2843,24 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
             visibleMaxX: visibleMaxX,
             hasRightAxisName:
                 effectiveRightAxisMetric != null && rightAxisRange != null,
+          ),
+        // Photo markers: tappable camera chips at each photo's (time, depth).
+        // A widget layer (not an fl_chart element) so its taps never enter
+        // the chart's gesture arena; insets mirror the plot-rect math used
+        // by the gas strip above.
+        if (_showPhotoMarkers &&
+            widget.photoMarkers != null &&
+            widget.photoMarkers!.isNotEmpty)
+          Positioned.fill(
+            child: PhotoMarkerOverlay(
+              markers: widget.photoMarkers!,
+              visibleMinSeconds: visibleMinX,
+              visibleMaxSeconds: visibleMaxX,
+              visibleMinDepth: visibleMinDepth,
+              visibleMaxDepth: visibleMaxDepth,
+              insets: _plotInsets(availableWidth, units),
+              units: units,
+            ),
           ),
       ],
     );
@@ -2901,6 +3136,27 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
     return const [0];
   }
 
+  /// Whether the built-in focus indicator for [barData]'s spot at [index]
+  /// should be hidden because velocity colouring already shows the depth dot on
+  /// another band (see [velocityIndicatorSuppression]). Matches on the spot
+  /// coordinate because fl_chart hands the indicator callback a copied bar
+  /// without its position in the bar list.
+  bool _isSuppressedIndicatorSpot(
+    LineChartBarData barData,
+    int index,
+    List<({double x, double y})> suppressed,
+  ) {
+    if (index < 0 || index >= barData.spots.length) return false;
+    final spot = barData.spots[index];
+    const epsilon = 1e-6;
+    for (final s in suppressed) {
+      if ((s.x - spot.x).abs() < epsilon && (s.y - spot.y).abs() < epsilon) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   /// Build one depth line per computer for multi-computer rendering.
   List<LineChartBarData> _buildMultiComputerDepthLines(
     Map<String, List<DiveProfilePoint>> cpProfiles,
@@ -3063,6 +3319,42 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
     return widget.profile.last.depth;
   }
 
+  /// Build the temperature curve(s) to draw.
+  ///
+  /// Falls back to a single tertiary-coloured curve from [widget.profile]
+  /// (unchanged legacy behaviour) unless [widget.computerProfiles] has 2+
+  /// entries, in which case one curve per VISIBLE computer is drawn instead
+  /// — color-matched to that computer's depth line (via
+  /// [widget.computerLineColors]) at reduced opacity so the temperature
+  /// overlay reads as secondary to the depth curves.
+  List<LineChartBarData> _buildTemperatureLines(
+    ColorScheme colorScheme,
+    double chartMaxDepth,
+    double minTemp,
+    double maxTemp,
+    UnitFormatter units,
+  ) {
+    final cpProfiles = widget.computerProfiles;
+    if (cpProfiles != null && cpProfiles.length >= 2) {
+      return _buildMultiComputerTemperatureLines(
+        cpProfiles,
+        chartMaxDepth,
+        minTemp,
+        maxTemp,
+        units,
+      );
+    }
+    return [
+      _buildTemperatureLine(
+        colorScheme,
+        chartMaxDepth,
+        minTemp,
+        maxTemp,
+        units,
+      ),
+    ];
+  }
+
   LineChartBarData _buildTemperatureLine(
     ColorScheme colorScheme,
     double chartMaxDepth,
@@ -3096,6 +3388,59 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
     );
   }
 
+  /// One temperature curve per visible computer, color-matched to its depth
+  /// line at reduced opacity. Computers with no temperature readings, or
+  /// toggled off via [widget.visibleComputers], are skipped.
+  List<LineChartBarData> _buildMultiComputerTemperatureLines(
+    Map<String, List<DiveProfilePoint>> cpProfiles,
+    double chartMaxDepth,
+    double minTemp,
+    double maxTemp,
+    UnitFormatter units,
+  ) {
+    final lines = <LineChartBarData>[];
+    var index = 0;
+    for (final entry in cpProfiles.entries) {
+      final computerId = entry.key;
+      final points = entry.value;
+      index++;
+
+      if (!_isComputerVisible(computerId)) continue;
+
+      final tempPoints = points.where((p) => p.temperature != null).toList();
+      if (tempPoints.isEmpty) continue;
+
+      final baseColor =
+          widget.computerLineColors?[computerId] ?? _computerColorAt(index - 1);
+
+      lines.add(
+        LineChartBarData(
+          spots: tempPoints
+              .map(
+                (p) => FlSpot(
+                  p.timestamp.toDouble(),
+                  -_mapTempToDepth(
+                    units.convertTemperature(p.temperature!),
+                    chartMaxDepth,
+                    minTemp,
+                    maxTemp,
+                  ),
+                ),
+              )
+              .toList(),
+          isCurved: true,
+          curveSmoothness: 0.2,
+          color: baseColor.withValues(alpha: 0.6),
+          barWidth: 2,
+          isStrokeCapRound: true,
+          dotData: const FlDotData(show: false),
+          dashArray: const [5, 3],
+        ),
+      );
+    }
+    return lines;
+  }
+
   /// Build multiple pressure lines for multi-tank visualization
   List<LineChartBarData> _buildMultiTankPressureLines(double chartMaxDepth) {
     if (!_hasMultiTankPressure) return [];
@@ -3126,6 +3471,7 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
     final maxPressure = globalMaxPressure + (pressureRange * 0.05);
 
     final sortedTankIds = _sortedTankIds(tankPressures.keys);
+    final tankComputerIds = _tankComputerIds();
 
     // Build a line for each visible tank
     for (var i = 0; i < sortedTankIds.length; i++) {
@@ -3133,6 +3479,9 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
 
       // Skip if tank is hidden
       if (_showTankPressure[tankId] == false) continue;
+
+      // Skip tanks attributed to a computer that's been toggled off.
+      if (!_isComputerVisible(tankComputerIds[tankId])) continue;
 
       final pressurePoints = tankPressures[tankId]!;
       if (pressurePoints.isEmpty) continue;
@@ -3800,9 +4149,17 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
     final events = widget.events;
     if (events == null || events.isEmpty) return [];
 
+    // Drop events attributed to a computer that's been toggled off. A null
+    // computerId is treated as belonging to the primary computer (see
+    // _isComputerVisible).
+    final visibleEvents = events
+        .where((e) => _isComputerVisible(e.computerId))
+        .toList();
+    if (visibleEvents.isEmpty) return [];
+
     // Group events by timestamp, keeping only the most severe at each time
     final byTimestamp = <int, ProfileEvent>{};
-    for (final event in events) {
+    for (final event in visibleEvents) {
       final existing = byTimestamp[event.timestamp];
       if (existing == null || event.severity.index > existing.severity.index) {
         byTimestamp[event.timestamp] = event;

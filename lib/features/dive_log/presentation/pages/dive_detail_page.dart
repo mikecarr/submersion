@@ -2,7 +2,6 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart';
 import 'package:intl/intl.dart' show DateFormat;
 import 'package:submersion/core/icons/mdi_icons.dart';
 import 'package:submersion/core/providers/provider.dart';
@@ -32,13 +31,14 @@ import 'package:submersion/features/dive_log/domain/entities/cylinder_sac.dart';
 import 'package:submersion/features/dive_log/domain/entities/dive_data_source.dart';
 import 'package:submersion/features/dive_log/domain/entities/dive.dart';
 import 'package:submersion/features/dive_log/domain/entities/dive_computer.dart';
-import 'package:submersion/features/dive_log/domain/entities/gas_switch.dart';
 import 'package:submersion/features/dive_log/presentation/providers/dive_computer_providers.dart';
 import 'package:submersion/features/dive_log/presentation/providers/dive_detail_ui_providers.dart';
 import 'package:submersion/features/dive_log/presentation/providers/dive_providers.dart';
 import 'package:submersion/features/dive_log/presentation/providers/gas_analysis_providers.dart';
 import 'package:submersion/features/dive_log/presentation/providers/gas_switch_providers.dart';
 import 'package:submersion/features/dive_log/presentation/providers/profile_analysis_provider.dart';
+import 'package:submersion/features/dive_log/presentation/pages/fullscreen_profile_page.dart';
+import 'package:submersion/features/dive_log/presentation/utils/sac_normalization.dart';
 import 'package:submersion/shared/widgets/master_detail/responsive_breakpoints.dart';
 import 'package:submersion/features/dive_log/presentation/providers/profile_playback_provider.dart';
 import 'package:submersion/features/dive_log/presentation/providers/profile_tracking_provider.dart';
@@ -51,10 +51,12 @@ import 'package:submersion/features/dive_log/presentation/widgets/field_attribut
 import 'package:submersion/features/dive_log/presentation/widgets/dive_detail_row.dart';
 import 'package:submersion/features/dive_log/domain/services/field_attribution_service.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/merge_dive_dialog.dart';
+import 'package:submersion/features/dive_log/presentation/widgets/run_dive_consolidation.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/compact_deco_status_card.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/compact_tissue_loading_card.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/computer_toggle_bar.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/dive_profile_chart.dart';
+import 'package:submersion/features/dive_log/presentation/widgets/photo_marker_layout.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/playback_controls.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/playback_stats_panel.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/range_selection_overlay.dart';
@@ -78,35 +80,6 @@ import 'package:libdivecomputer_plugin/libdivecomputer_plugin.dart' as pigeon;
 import 'package:submersion/l10n/l10n_extension.dart';
 
 import 'package:submersion/features/dive_computer/presentation/providers/reparse_providers.dart';
-
-/// Calculate normalization factor to align profile-based SAC with tank-based SAC.
-/// The segments are calculated from profile pressure data, but dive.sacPressure
-/// uses tank start/end pressures - these can differ, so we normalize.
-double calculateSacNormalizationFactor(Dive dive, ProfileAnalysis? analysis) {
-  if (analysis?.sacSegments == null || analysis!.sacSegments!.isEmpty) {
-    return 1.0;
-  }
-
-  final diveSacPressure = dive.sacPressure;
-  if (diveSacPressure == null || diveSacPressure <= 0) {
-    return 1.0;
-  }
-
-  // Calculate weighted average of segment SAC (weighted by duration)
-  double totalWeightedSac = 0;
-  int totalDuration = 0;
-  for (final segment in analysis.sacSegments!) {
-    totalWeightedSac += segment.sacRate * segment.durationSeconds;
-    totalDuration += segment.durationSeconds;
-  }
-
-  if (totalDuration <= 0) return 1.0;
-
-  final avgSegmentSac = totalWeightedSac / totalDuration;
-  if (avgSegmentSac <= 0) return 1.0;
-
-  return diveSacPressure / avgSegmentSac;
-}
 
 class DiveDetailPage extends ConsumerStatefulWidget {
   final String diveId;
@@ -656,12 +629,22 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  dive.site?.name ?? context.l10n.diveLog_listPage_unknownSite,
+                  dive.effectiveName ??
+                      dive.site?.name ??
+                      context.l10n.diveLog_listPage_unknownSite,
                   style: Theme.of(
                     context,
                   ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
                   overflow: TextOverflow.ellipsis,
                 ),
+                if (dive.effectiveName != null && dive.site != null)
+                  Text(
+                    dive.site!.name,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 if (dive.site?.locationString.isNotEmpty == true)
                   Text(
                     dive.site!.locationString,
@@ -819,10 +802,18 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      dive.site?.name ??
+                      dive.effectiveName ??
+                          dive.site?.name ??
                           context.l10n.diveLog_listPage_unknownSite,
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
+                    if (dive.effectiveName != null && dive.site != null)
+                      Text(
+                        dive.site!.name,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                      ),
                     if (dive.site?.locationString.isNotEmpty == true)
                       Text(
                         dive.site!.locationString,
@@ -1048,6 +1039,25 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
     );
   }
 
+  /// Resolves computerId -> display name for a dive's data sources, using
+  /// the same fallback chain as the Data Sources section: model, then
+  /// serial, then the localized "Unknown Computer" label. Sources without a
+  /// computerId (manual entries, edited profiles) are skipped — callers key
+  /// off computerId, so there's nothing to attach the name to.
+  Map<String, String> _computerDisplayNames(
+    BuildContext context,
+    List<DiveDataSource> dataSources,
+  ) {
+    return {
+      for (final source in dataSources)
+        if (source.computerId != null)
+          source.computerId!:
+              source.computerModel ??
+              source.computerSerial ??
+              context.l10n.diveLog_sources_unknownComputer,
+    };
+  }
+
   Widget _buildProfileSection(BuildContext context, WidgetRef ref, Dive dive) {
     // Get profile analysis (async to avoid blocking UI with Buhlmann computation)
     final analysis = ref.watch(profileAnalysisProvider(dive.id)).valueOrNull;
@@ -1101,10 +1111,29 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
       tankPressures: tankPressures,
     );
 
+    final photoMedia =
+        ref.watch(mediaForDiveProvider(dive.id)).valueOrNull ?? const [];
+    final photoMarkers = dive.profile.isEmpty
+        ? const <PhotoChartMarker>[]
+        : photoMarkersFromMedia(
+            photoMedia,
+            maxProfileSeconds: dive.profile.last.timestamp,
+          );
+
     // Get profiles grouped by source for multi-computer toggle bar
     final profilesBySource = ref
         .watch(profilesBySourceProvider(dive.id))
         .valueOrNull;
+
+    // Data sources drive the real computer display names and the true
+    // primary source (reused from the Data Sources section's provider).
+    final dataSources =
+        ref.watch(diveDataSourcesProvider(dive.id)).valueOrNull ?? const [];
+    final computerNames = _computerDisplayNames(context, dataSources);
+    final truePrimaryComputerIds = <String>{
+      for (final source in dataSources)
+        if (source.computerId != null && source.isPrimary) source.computerId!,
+    };
 
     // Build multi-computer data when 2+ sources exist
     final multiComputerProfiles =
@@ -1134,13 +1163,21 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
       var idx = 0;
       for (final computerId in multiComputerProfiles.keys) {
         final color = computerColorAt(idx);
-        final isPrimary = idx == 0;
+        // Prefer the data sources' real isPrimary flag; only fall back to
+        // map order (idx == 0) when no source row is marked primary yet
+        // (e.g. data sources still loading), so the bar always has exactly
+        // one primary chip.
+        final isPrimary = truePrimaryComputerIds.isNotEmpty
+            ? truePrimaryComputerIds.contains(computerId)
+            : idx == 0;
         computerLineColors[computerId] = color;
         if (isPrimary) primaryComputers.add(computerId);
         toggleItems.add(
           ComputerToggleItem(
             computerId: computerId,
-            label: computerId,
+            label:
+                computerNames[computerId] ??
+                context.l10n.diveLog_sources_unknownComputer,
             isPrimary: isPrimary,
             isEnabled: effectiveVisible?.contains(computerId) ?? true,
             color: color,
@@ -1302,6 +1339,9 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
                           analysis,
                         ),
                         markers: markers,
+                        photoMarkers: photoMarkers.isEmpty
+                            ? null
+                            : photoMarkers,
                         showMaxDepthMarker: showMaxDepthMarker,
                         showPressureThresholdMarkers:
                             showPressureThresholdMarkers,
@@ -1325,6 +1365,7 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
                         visibleComputers: effectiveVisible,
                         computerLineColors: computerLineColors,
                         primaryComputers: primaryComputers,
+                        computerNames: computerNames,
                         playbackTimestamp: playbackState.isActive
                             ? playbackState.currentTimestamp
                             : null,
@@ -2530,17 +2571,9 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
   }
 
   void _showFullscreenProfile(BuildContext context, WidgetRef ref, Dive dive) {
-    final analysis = ref.read(profileAnalysisProvider(dive.id)).valueOrNull;
-    final gasSwitches = ref.read(gasSwitchesProvider(dive.id)).valueOrNull;
-    final tankPressures = ref.read(tankPressuresProvider(dive.id)).valueOrNull;
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => _FullscreenProfilePage(
-          dive: dive,
-          analysis: analysis,
-          gasSwitches: gasSwitches,
-          tankPressures: tankPressures,
-        ),
+        builder: (context) => FullscreenProfilePage(diveId: dive.id),
       ),
     );
   }
@@ -3769,6 +3802,16 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
   ) {
     final tankPressuresAsync = ref.watch(tankPressuresProvider(dive.id));
     final tankPressures = tankPressuresAsync.valueOrNull;
+    final dataSources =
+        ref.watch(diveDataSourcesProvider(dive.id)).valueOrNull ?? const [];
+    final computerNames = _computerDisplayNames(context, dataSources);
+    final primaryComputerId = dataSources
+        .where((s) => s.isPrimary)
+        .map((s) => s.computerId)
+        .firstOrNull;
+    // Only badge tanks once there's more than one source to disambiguate —
+    // a single-source dive never needs attribution.
+    final showTankSourceBadges = dataSources.length >= 2;
 
     return Card(
       child: Padding(
@@ -3835,6 +3878,23 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
                 modDepth,
                 mndDepth,
               );
+              // Shown when this tank's readings came from a non-primary
+              // computer on a multi-source dive, so divers can tell which
+              // instrument's pressure log a tank's numbers came from.
+              final showSourceBadge =
+                  showTankSourceBadges &&
+                  tank.computerId != null &&
+                  tank.computerId != primaryComputerId;
+              final trailingChildren = <Widget>[
+                if (showSourceBadge)
+                  Padding(
+                    padding: const EdgeInsets.only(right: 6),
+                    child: FieldAttributionBadge(
+                      sourceName: computerNames[tank.computerId],
+                    ),
+                  ),
+                if (tankLabel != null) Text(tankLabel),
+              ];
               return ListTile(
                 contentPadding: EdgeInsets.zero,
                 leading: const Icon(MdiIcons.divingScubaTank),
@@ -3853,7 +3913,12 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
                     ),
                   ],
                 ),
-                trailing: tankLabel != null ? Text(tankLabel) : null,
+                trailing: trailingChildren.isEmpty
+                    ? null
+                    : Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: trailingChildren,
+                      ),
               );
             }),
           ],
@@ -4616,24 +4681,20 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
       context: context,
       currentDiveId: diveId,
       currentDiveDate: dive.entryTime ?? dive.dateTime,
-      onMerge: (selectedDiveId) async {
-        final repository = ref.read(diveRepositoryProvider);
-        await repository.mergeDives(
-          primaryDiveId: diveId,
-          secondaryDiveId: selectedDiveId,
-        );
-        ref.invalidate(diveProvider(diveId));
-        ref.invalidate(diveProfileProvider(diveId));
-        ref.invalidate(profilesBySourceProvider(diveId));
-        ref.invalidate(diveDataSourcesProvider(diveId));
-        ref.invalidate(paginatedDiveListProvider);
-        ref.invalidate(divesProvider);
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Dive merged successfully.')),
-          );
-        }
-      },
+      onMerge: (secondaryDiveIds) => runDiveConsolidation(
+        context: context,
+        service: ref.read(diveConsolidationServiceProvider),
+        targetDiveId: diveId,
+        secondaryDiveIds: secondaryDiveIds,
+        onConsolidated: () {
+          ref.invalidate(diveProvider(diveId));
+          ref.invalidate(diveProfileProvider(diveId));
+          ref.invalidate(profilesBySourceProvider(diveId));
+          ref.invalidate(diveDataSourcesProvider(diveId));
+          ref.invalidate(paginatedDiveListProvider);
+          ref.invalidate(divesProvider);
+        },
+      ),
     );
   }
 
@@ -4832,795 +4893,6 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
         );
       }
     }
-  }
-}
-
-/// Fullscreen dive profile page with rotation support
-class _FullscreenProfilePage extends ConsumerStatefulWidget {
-  final Dive dive;
-  final ProfileAnalysis? analysis;
-  final List<GasSwitchWithTank>? gasSwitches;
-  final Map<String, List<TankPressurePoint>>? tankPressures;
-
-  const _FullscreenProfilePage({
-    required this.dive,
-    this.analysis,
-    this.gasSwitches,
-    this.tankPressures,
-  });
-
-  @override
-  ConsumerState<_FullscreenProfilePage> createState() =>
-      _FullscreenProfilePageState();
-}
-
-class _FullscreenProfilePageState
-    extends ConsumerState<_FullscreenProfilePage> {
-  DiveProfilePoint? _selectedPoint;
-  int? _selectedPointIndex;
-
-  @override
-  void initState() {
-    super.initState();
-    // Allow all orientations for fullscreen view
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.portraitDown,
-      DeviceOrientation.landscapeLeft,
-      DeviceOrientation.landscapeRight,
-    ]);
-  }
-
-  @override
-  void dispose() {
-    // Reset to portrait only when leaving fullscreen
-    SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final dive = widget.dive;
-    final isLandscape =
-        MediaQuery.of(context).orientation == Orientation.landscape;
-
-    // Get marker settings
-    final showMaxDepthMarker = ref.watch(showMaxDepthMarkerProvider);
-    final showPressureThresholdMarkers = ref.watch(
-      showPressureThresholdMarkersProvider,
-    );
-
-    // Calculate profile markers
-    final markers = _calculateMarkers(
-      dive: dive,
-      showMaxDepth: showMaxDepthMarker,
-      showPressureThresholds: showPressureThresholdMarkers,
-    );
-
-    return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.surface,
-      appBar: isLandscape
-          ? null
-          : AppBar(
-              title: Text(
-                context.l10n.diveLog_fullscreenProfile_title(
-                  dive.diveNumber ?? 0,
-                ),
-              ),
-              leading: IconButton(
-                icon: const Icon(Icons.close),
-                tooltip: context.l10n.diveLog_fullscreenProfile_close,
-                onPressed: () => Navigator.of(context).pop(),
-              ),
-            ),
-      body: SafeArea(
-        child: Stack(
-          children: [
-            SingleChildScrollView(
-              padding: EdgeInsets.only(
-                left: isLandscape ? 48.0 : 16.0,
-                right: 16.0,
-                top: 16.0,
-                bottom: 16.0,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (isLandscape)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 8),
-                      child: Text(
-                        context.l10n.diveLog_fullscreenProfile_title(
-                          dive.diveNumber ?? 0,
-                        ),
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                    ),
-                  SizedBox(
-                    height: isLandscape ? 280 : 350,
-                    child: DiveProfileChart(
-                      profile: dive.profile,
-                      diveDuration: dive.effectiveRuntime,
-                      maxDepth: dive.maxDepth,
-                      ceilingCurve: widget.analysis?.ceilingCurve,
-                      ascentRates: widget.analysis?.ascentRates,
-                      events: widget.analysis?.events,
-                      ndlCurve: widget.analysis?.ndlCurve,
-                      sacCurve: widget.analysis?.smoothedSacCurve,
-                      ppO2Curve: widget.analysis?.ppO2Curve,
-                      o2SensorCurves: widget.analysis?.o2SensorCurves,
-                      ppO2FromSensorAverage:
-                          widget.analysis?.ppO2FromSensorAverage ?? false,
-                      ppN2Curve: widget.analysis?.ppN2Curve,
-                      ppHeCurve: widget.analysis?.ppHeCurve,
-                      modCurve: widget.analysis?.modCurve,
-                      densityCurve: widget.analysis?.densityCurve,
-                      gfCurve: widget.analysis?.gfCurve,
-                      surfaceGfCurve: widget.analysis?.surfaceGfCurve,
-                      meanDepthCurve: widget.analysis?.meanDepthCurve,
-                      ttsCurve: widget.analysis?.ttsCurve,
-                      cnsCurve: widget.analysis?.cnsCurve,
-                      otuCurve: widget.analysis?.otuCurve,
-                      tankVolume: dive.tanks
-                          .where((t) => t.volume != null && t.volume! > 0)
-                          .map((t) => t.volume!)
-                          .firstOrNull,
-                      sacNormalizationFactor: calculateSacNormalizationFactor(
-                        dive,
-                        widget.analysis,
-                      ),
-                      markers: markers,
-                      showMaxDepthMarker: showMaxDepthMarker,
-                      showPressureThresholdMarkers:
-                          showPressureThresholdMarkers,
-                      tanks: dive.tanks,
-                      tankPressures: widget.tankPressures,
-                      gasSwitches: widget.gasSwitches,
-                      gasSegments: (dive.tanks.isEmpty || dive.profile.isEmpty)
-                          ? null
-                          : buildGasUsageSegments(
-                              tanks: dive.tanks,
-                              gasSwitches: widget.gasSwitches ?? const [],
-                              diveDurationSeconds: dive.profile.last.timestamp,
-                            ),
-                      diveDurationSeconds: dive.profile.isEmpty
-                          ? null
-                          : dive.profile.last.timestamp,
-                      highlightedTimestamp:
-                          _selectedPointIndex != null &&
-                              _selectedPointIndex! < dive.profile.length
-                          ? dive.profile[_selectedPointIndex!].timestamp
-                          : null,
-                      onPointSelected: (index) {
-                        setState(() {
-                          _selectedPoint = index != null
-                              ? dive.profile[index]
-                              : null;
-                          _selectedPointIndex = index;
-                        });
-                      },
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  _buildMetricsTable(context, compact: isLandscape),
-                ],
-              ),
-            ),
-            if (isLandscape)
-              Positioned(
-                top: 8,
-                left: 8,
-                child: IconButton(
-                  icon: const Icon(Icons.close),
-                  tooltip: context.l10n.diveLog_fullscreenProfile_close,
-                  onPressed: () => Navigator.of(context).pop(),
-                  style: IconButton.styleFrom(
-                    backgroundColor: Theme.of(
-                      context,
-                    ).colorScheme.surface.withValues(alpha: 0.8),
-                  ),
-                ),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  /// Calculate profile markers for fullscreen view
-  List<ProfileMarker> _calculateMarkers({
-    required Dive dive,
-    required bool showMaxDepth,
-    required bool showPressureThresholds,
-  }) {
-    final markers = <ProfileMarker>[];
-
-    if (dive.profile.isEmpty) return markers;
-
-    // Add max depth marker
-    if (showMaxDepth && widget.analysis != null) {
-      final maxDepthMarker = ProfileMarkersService.getMaxDepthMarker(
-        profile: dive.profile,
-        maxDepthTimestamp: widget.analysis!.maxDepthTimestamp,
-        maxDepth: widget.analysis!.maxDepth,
-      );
-      if (maxDepthMarker != null) {
-        markers.add(maxDepthMarker);
-      }
-    }
-
-    // Add pressure threshold markers (using per-tank data when available)
-    if (showPressureThresholds && dive.tanks.isNotEmpty) {
-      markers.addAll(
-        ProfileMarkersService.getPressureThresholdMarkers(
-          profile: dive.profile,
-          tanks: dive.tanks,
-          tankPressures: widget.tankPressures,
-        ),
-      );
-    }
-
-    return markers;
-  }
-
-  Widget _buildMetricsTable(BuildContext context, {bool compact = false}) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final settings = ref.watch(settingsProvider);
-    final units = UnitFormatter(settings);
-    final point = _selectedPoint;
-
-    return Container(
-      padding: EdgeInsets.all(compact ? 12 : 16),
-      decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(
-                Icons.touch_app,
-                size: compact ? 14 : 16,
-                color: colorScheme.onSurfaceVariant,
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  point == null
-                      ? context.l10n.diveLog_detail_fullscreen_touchChart
-                      : context.l10n.diveLog_detail_fullscreen_sampleData,
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
-                    fontSize: compact ? 12 : null,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: compact ? 8 : 12),
-          if (point == null)
-            Text(
-              compact
-                  ? context.l10n.diveLog_detail_fullscreen_tapChartCompact
-                  : context.l10n.diveLog_detail_fullscreen_tapChartFull,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: colorScheme.onSurfaceVariant,
-              ),
-            )
-          else if (compact)
-            _buildCompactMetrics(context, point, units)
-          else
-            _buildFullMetricsTable(context, point, units),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildFullMetricsTable(
-    BuildContext context,
-    DiveProfilePoint point,
-    UnitFormatter units,
-  ) {
-    final analysis = widget.analysis;
-    final index = _selectedPointIndex;
-
-    // Helper to get curve value at index
-    String? getCurveValue<T>(List<T>? curve, String Function(T) format) {
-      if (curve == null || index == null || index >= curve.length) return null;
-      return format(curve[index]);
-    }
-
-    // Build metric rows
-    final rows = <Widget>[];
-
-    // Basic metrics row
-    rows.add(
-      _buildMetricRow(context, [
-        (context.l10n.diveLog_tooltip_time, _formatTime(point.timestamp)),
-        (context.l10n.diveLog_tooltip_depth, units.formatDepth(point.depth)),
-      ]),
-    );
-
-    // Temperature row
-    if (point.temperature != null) {
-      rows.add(
-        _buildMetricRow(context, [
-          (
-            context.l10n.diveLog_legend_label_temp,
-            units.formatTemperature(point.temperature),
-          ),
-        ]),
-      );
-    }
-
-    // Heart rate
-    if (point.heartRate != null) {
-      rows.add(
-        _buildMetricRow(context, [
-          (
-            context.l10n.diveLog_legend_label_heartRate,
-            '${point.heartRate!} bpm',
-          ),
-        ]),
-      );
-    }
-
-    // NDL
-    final ndlValue = getCurveValue(analysis?.ndlCurve, (ndl) {
-      if (ndl < 0) return context.l10n.diveLog_playbackStats_deco;
-      if (ndl >= 3600) return '>60 min';
-      final min = ndl ~/ 60;
-      final sec = ndl % 60;
-      return '$min:${sec.toString().padLeft(2, '0')}';
-    });
-    if (ndlValue != null) {
-      rows.add(
-        _buildMetricRow(context, [
-          (context.l10n.diveLog_legend_label_ndl, ndlValue),
-        ]),
-      );
-    }
-
-    // Partial pressures row
-    final ppItems = <(String, String)>[];
-    final ppO2Value = getCurveValue(
-      analysis?.ppO2Curve,
-      (v) => '${v.toStringAsFixed(2)} bar',
-    );
-    if (ppO2Value != null) {
-      ppItems.add((context.l10n.diveLog_legend_label_ppO2, ppO2Value));
-    }
-
-    final ppN2Value = getCurveValue(
-      analysis?.ppN2Curve,
-      (v) => '${v.toStringAsFixed(2)} bar',
-    );
-    if (ppN2Value != null) {
-      ppItems.add((context.l10n.diveLog_legend_label_ppN2, ppN2Value));
-    }
-
-    final ppHeRaw =
-        (index != null &&
-            analysis?.ppHeCurve != null &&
-            index < analysis!.ppHeCurve!.length)
-        ? analysis.ppHeCurve![index]
-        : null;
-    if (ppHeRaw != null && ppHeRaw > 0.001) {
-      ppItems.add((
-        context.l10n.diveLog_legend_label_ppHe,
-        '${ppHeRaw.toStringAsFixed(2)} bar',
-      ));
-    }
-
-    if (ppItems.isNotEmpty) {
-      rows.add(_buildMetricRow(context, ppItems));
-    }
-
-    // MOD and Density row
-    final modDensityItems = <(String, String)>[];
-    final modRaw =
-        (index != null &&
-            analysis?.modCurve != null &&
-            index < analysis!.modCurve!.length)
-        ? analysis.modCurve![index]
-        : null;
-    if (modRaw != null && modRaw > 0 && modRaw < 200) {
-      modDensityItems.add((
-        context.l10n.diveLog_legend_label_mod,
-        units.formatDepth(modRaw),
-      ));
-    }
-
-    final densityValue = getCurveValue(
-      analysis?.densityCurve,
-      (v) => '${v.toStringAsFixed(2)} g/L',
-    );
-    if (densityValue != null) {
-      modDensityItems.add((
-        context.l10n.diveLog_legend_label_gasDensity,
-        densityValue,
-      ));
-    }
-
-    if (modDensityItems.isNotEmpty) {
-      rows.add(_buildMetricRow(context, modDensityItems));
-    }
-
-    // GF row
-    final gfItems = <(String, String)>[];
-    final gfValue = getCurveValue(
-      analysis?.gfCurve,
-      (v) => '${v.toStringAsFixed(0)}%',
-    );
-    if (gfValue != null) {
-      gfItems.add((context.l10n.diveLog_legend_label_gfPercent, gfValue));
-    }
-
-    final surfaceGfValue = getCurveValue(
-      analysis?.surfaceGfCurve,
-      (v) => '${v.toStringAsFixed(0)}%',
-    );
-    if (surfaceGfValue != null) {
-      gfItems.add((
-        context.l10n.diveLog_legend_label_surfaceGf,
-        surfaceGfValue,
-      ));
-    }
-
-    if (gfItems.isNotEmpty) {
-      rows.add(_buildMetricRow(context, gfItems));
-    }
-
-    // Mean depth and TTS row
-    final depthTimeItems = <(String, String)>[];
-    final meanDepthValue = getCurveValue(
-      analysis?.meanDepthCurve,
-      (v) => units.formatDepth(v),
-    );
-    if (meanDepthValue != null) {
-      depthTimeItems.add((
-        context.l10n.diveLog_legend_label_meanDepth,
-        meanDepthValue,
-      ));
-    }
-
-    final ttsValue = getCurveValue(analysis?.ttsCurve, (v) {
-      if (v <= 0) return '0 min';
-      return '${(v / 60).ceil()} min';
-    });
-    if (ttsValue != null) {
-      depthTimeItems.add((context.l10n.diveLog_legend_label_tts, ttsValue));
-    }
-
-    final cnsValue = getCurveValue(
-      analysis?.cnsCurve,
-      (v) => '${v.toStringAsFixed(1)}%',
-    );
-    if (cnsValue != null) {
-      depthTimeItems.add((context.l10n.diveLog_legend_label_cns, cnsValue));
-    }
-
-    final otuValue = getCurveValue(
-      analysis?.otuCurve,
-      (v) => v.toStringAsFixed(0),
-    );
-    if (otuValue != null) {
-      depthTimeItems.add((context.l10n.diveLog_legend_label_otu, otuValue));
-    }
-
-    if (depthTimeItems.isNotEmpty) {
-      rows.add(_buildMetricRow(context, depthTimeItems));
-    }
-
-    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: rows);
-  }
-
-  Widget _buildMetricRow(BuildContext context, List<(String, String)> items) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        children: [
-          for (var i = 0; i < items.length; i++) ...[
-            if (i > 0) const SizedBox(width: 24),
-            Expanded(
-              child: Row(
-                children: [
-                  Text(
-                    items[i].$1,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    items[i].$2,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCompactMetrics(
-    BuildContext context,
-    DiveProfilePoint point,
-    UnitFormatter units,
-  ) {
-    final analysis = widget.analysis;
-    final index = _selectedPointIndex;
-
-    // Helper to get curve value at index
-    String? getCurveValue<T>(List<T>? curve, String Function(T) format) {
-      if (curve == null || index == null || index >= curve.length) return null;
-      return format(curve[index]);
-    }
-
-    // Build list of metric widgets
-    final metrics = <Widget>[
-      _buildCompactMetricRow(
-        context,
-        context.l10n.diveLog_tooltip_time,
-        _formatTime(point.timestamp),
-      ),
-      _buildCompactMetricRow(
-        context,
-        context.l10n.diveLog_tooltip_depth,
-        units.formatDepth(point.depth),
-      ),
-    ];
-
-    if (point.temperature != null) {
-      metrics.add(
-        _buildCompactMetricRow(
-          context,
-          context.l10n.diveLog_tooltip_temp,
-          units.formatTemperature(point.temperature),
-        ),
-      );
-    }
-
-    if (point.heartRate != null) {
-      metrics.add(
-        _buildCompactMetricRow(
-          context,
-          context.l10n.diveLog_tooltip_hr,
-          '${point.heartRate!} bpm',
-        ),
-      );
-    }
-
-    // NDL
-    final ndlValue = getCurveValue(analysis?.ndlCurve, (v) {
-      if (v < 0) return context.l10n.diveLog_playbackStats_deco;
-      if (v >= 3600) return '>60 min';
-      return '${v ~/ 60}:${(v % 60).toString().padLeft(2, '0')}';
-    });
-    if (ndlValue != null) {
-      metrics.add(
-        _buildCompactMetricRow(
-          context,
-          context.l10n.diveLog_tooltip_ndl,
-          ndlValue,
-        ),
-      );
-    }
-
-    // ppO2
-    final ppO2Value = getCurveValue(
-      analysis?.ppO2Curve,
-      (v) => '${v.toStringAsFixed(2)} bar',
-    );
-    if (ppO2Value != null) {
-      metrics.add(
-        _buildCompactMetricRow(
-          context,
-          context.l10n.diveLog_tooltip_ppO2,
-          ppO2Value,
-        ),
-      );
-    }
-
-    // ppN2
-    final ppN2Value = getCurveValue(
-      analysis?.ppN2Curve,
-      (v) => '${v.toStringAsFixed(2)} bar',
-    );
-    if (ppN2Value != null) {
-      metrics.add(
-        _buildCompactMetricRow(
-          context,
-          context.l10n.diveLog_tooltip_ppN2,
-          ppN2Value,
-        ),
-      );
-    }
-
-    // ppHe
-    final ppHeRaw =
-        (index != null &&
-            analysis?.ppHeCurve != null &&
-            index < analysis!.ppHeCurve!.length)
-        ? analysis.ppHeCurve![index]
-        : null;
-    if (ppHeRaw != null && ppHeRaw > 0.001) {
-      metrics.add(
-        _buildCompactMetricRow(
-          context,
-          context.l10n.diveLog_tooltip_ppHe,
-          '${ppHeRaw.toStringAsFixed(2)} bar',
-        ),
-      );
-    }
-
-    // MOD
-    final modRaw =
-        (index != null &&
-            analysis?.modCurve != null &&
-            index < analysis!.modCurve!.length)
-        ? analysis.modCurve![index]
-        : null;
-    if (modRaw != null && modRaw > 0 && modRaw < 200) {
-      metrics.add(
-        _buildCompactMetricRow(
-          context,
-          context.l10n.diveLog_tooltip_mod,
-          units.formatDepth(modRaw),
-        ),
-      );
-    }
-
-    // Density
-    final densityValue = getCurveValue(
-      analysis?.densityCurve,
-      (v) => '${v.toStringAsFixed(2)} g/L',
-    );
-    if (densityValue != null) {
-      metrics.add(
-        _buildCompactMetricRow(
-          context,
-          context.l10n.diveLog_tooltip_density,
-          densityValue,
-        ),
-      );
-    }
-
-    // GF%
-    final gfValue = getCurveValue(
-      analysis?.gfCurve,
-      (v) => '${v.toStringAsFixed(0)}%',
-    );
-    if (gfValue != null) {
-      metrics.add(
-        _buildCompactMetricRow(
-          context,
-          context.l10n.diveLog_tooltip_gfPercent,
-          gfValue,
-        ),
-      );
-    }
-
-    // Surface GF
-    final surfaceGfValue = getCurveValue(
-      analysis?.surfaceGfCurve,
-      (v) => '${v.toStringAsFixed(0)}%',
-    );
-    if (surfaceGfValue != null) {
-      metrics.add(
-        _buildCompactMetricRow(
-          context,
-          context.l10n.diveLog_tooltip_srfGf,
-          surfaceGfValue,
-        ),
-      );
-    }
-
-    // Mean Depth
-    final meanDepthValue = getCurveValue(
-      analysis?.meanDepthCurve,
-      (v) => units.formatDepth(v),
-    );
-    if (meanDepthValue != null) {
-      metrics.add(
-        _buildCompactMetricRow(
-          context,
-          context.l10n.diveLog_tooltip_mean,
-          meanDepthValue,
-        ),
-      );
-    }
-
-    // TTS
-    final ttsValue = getCurveValue(analysis?.ttsCurve, (v) {
-      if (v <= 0) return '0 min';
-      return '${(v / 60).ceil()} min';
-    });
-    if (ttsValue != null) {
-      metrics.add(
-        _buildCompactMetricRow(
-          context,
-          context.l10n.diveLog_tooltip_tts,
-          ttsValue,
-        ),
-      );
-    }
-
-    // CNS%
-    final cnsValue = getCurveValue(
-      analysis?.cnsCurve,
-      (v) => '${v.toStringAsFixed(1)}%',
-    );
-    if (cnsValue != null) {
-      metrics.add(
-        _buildCompactMetricRow(
-          context,
-          context.l10n.diveLog_tooltip_cns,
-          cnsValue,
-        ),
-      );
-    }
-
-    // OTU
-    final otuValue = getCurveValue(
-      analysis?.otuCurve,
-      (v) => v.toStringAsFixed(0),
-    );
-    if (otuValue != null) {
-      metrics.add(
-        _buildCompactMetricRow(
-          context,
-          context.l10n.diveLog_tooltip_otu,
-          otuValue,
-        ),
-      );
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: metrics,
-    );
-  }
-
-  Widget _buildCompactMetricRow(
-    BuildContext context,
-    String label,
-    String value,
-  ) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            label,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
-          ),
-          Text(
-            value,
-            style: Theme.of(
-              context,
-            ).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600),
-          ),
-        ],
-      ),
-    );
-  }
-
-  String _formatTime(int seconds) {
-    final minutes = seconds ~/ 60;
-    final secs = seconds % 60;
-    return '$minutes:${secs.toString().padLeft(2, '0')}';
   }
 }
 

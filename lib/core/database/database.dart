@@ -126,11 +126,85 @@ class TripItineraryDays extends Table {
   Set<Column> get primaryKey => {id};
 }
 
+/// Reusable checklist templates for trip planning (issue #164)
+class ChecklistTemplates extends Table {
+  // coverage:ignore-start
+  // Drift column getters run at build time via drift_dev, not at runtime, so
+  // lcov never records hits (true of every Table class in this file).
+  TextColumn get id => text()();
+  TextColumn get diverId => text().nullable().references(Divers, #id)();
+  TextColumn get name => text()();
+  TextColumn get description => text().withDefault(const Constant(''))();
+  IntColumn get createdAt => integer()();
+  IntColumn get updatedAt => integer()();
+
+  /// Hybrid Logical Clock for cross-device conflict resolution
+  /// (nullable: rows written before HLC rollout fall back to updatedAt).
+  TextColumn get hlc => text().nullable()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+  // coverage:ignore-end
+}
+
+/// Items belonging to a checklist template
+class ChecklistTemplateItems extends Table {
+  // coverage:ignore-start
+  TextColumn get id => text()();
+  TextColumn get templateId => text().references(ChecklistTemplates, #id)();
+  TextColumn get title => text()();
+  TextColumn get category => text().nullable()();
+  TextColumn get notes => text().withDefault(const Constant(''))();
+
+  /// Days before trip start the item is due (14 = "two weeks out").
+  IntColumn get dueOffsetDays => integer().nullable()();
+  IntColumn get sortOrder => integer().withDefault(const Constant(0))();
+  IntColumn get createdAt => integer()();
+  IntColumn get updatedAt => integer()();
+
+  /// Hybrid Logical Clock for cross-device conflict resolution
+  /// (nullable: rows written before HLC rollout fall back to updatedAt).
+  TextColumn get hlc => text().nullable()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+  // coverage:ignore-end
+}
+
+/// Per-trip checklist items (copied from templates or added ad hoc)
+class TripChecklistItems extends Table {
+  // coverage:ignore-start
+  TextColumn get id => text()();
+  TextColumn get tripId => text().references(Trips, #id)();
+  TextColumn get title => text()();
+  TextColumn get category => text().nullable()();
+  TextColumn get notes => text().withDefault(const Constant(''))();
+
+  /// Absolute due date, resolved from the template offset at apply time.
+  IntColumn get dueDate => integer().nullable()();
+  BoolColumn get isDone => boolean().withDefault(const Constant(false))();
+  IntColumn get completedAt => integer().nullable()();
+  IntColumn get sortOrder => integer().withDefault(const Constant(0))();
+  IntColumn get createdAt => integer()();
+  IntColumn get updatedAt => integer()();
+
+  /// Hybrid Logical Clock for cross-device conflict resolution
+  /// (nullable: rows written before HLC rollout fall back to updatedAt).
+  TextColumn get hlc => text().nullable()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+  // coverage:ignore-end
+}
+
 /// Dive log entries
 class Dives extends Table {
   TextColumn get id => text()();
   TextColumn get diverId => text().nullable().references(Divers, #id)();
   IntColumn get diveNumber => integer().nullable()();
+  // User-defined dive name (#400). Null = never named; display falls back
+  // to the site name.
+  TextColumn get name => text().nullable()();
   IntColumn get diveDateTime =>
       integer()(); // Unix timestamp (legacy, kept for compatibility)
   IntColumn get entryTime =>
@@ -401,6 +475,14 @@ class DiveTanks extends Table {
       text().nullable()(); // user-friendly name like "Primary AL80"
   TextColumn get presetName =>
       text().nullable()(); // preset name (e.g., 'al80', 'hp100')
+  // Which computer contributed this tank (null = primary source / manual).
+  // Same null-means-primary semantics as dive_profiles.computerId; deletes
+  // set null.
+  TextColumn get computerId => text().nullable().references(
+    DiveComputers,
+    #id,
+    onDelete: KeyAction.setNull,
+  )();
 
   @override
   Set<Column> get primaryKey => {id};
@@ -909,6 +991,10 @@ class DiverSettings extends Table {
   BoolColumn get defaultShowAscentRateLine =>
       boolean().withDefault(const Constant(false))();
   // coverage:ignore-end
+  // coverage:ignore-start
+  BoolColumn get defaultShowPhotoMarkers =>
+      boolean().withDefault(const Constant(true))();
+  // coverage:ignore-end
   // Notification settings (v26)
   BoolColumn get notificationsEnabled =>
       boolean().withDefault(const Constant(true))();
@@ -988,6 +1074,29 @@ class DiveBuddies extends Table {
   Set<Column> get primaryKey => {id};
 }
 
+/// Professional credentials held by a buddy (instructor, divemaster,
+/// dive guide). One row per (buddy, role); the repository enforces that
+/// logical uniqueness. Issue #395.
+@DataClassName('BuddyRoleRow')
+class BuddyRoles extends Table {
+  TextColumn get id => text()();
+  TextColumn get buddyId =>
+      text().references(Buddies, #id, onDelete: KeyAction.cascade)();
+  TextColumn get role => text()(); // BuddyRole enum name
+  TextColumn get credentialNumber => text().nullable()();
+  TextColumn get agency => text().nullable()(); // CertificationAgency enum name
+  TextColumn get notes => text().withDefault(const Constant(''))();
+  IntColumn get createdAt => integer()();
+  IntColumn get updatedAt => integer()();
+
+  /// Hybrid Logical Clock for cross-device conflict resolution
+  /// (nullable: rows written before HLC rollout fall back to updatedAt).
+  TextColumn get hlc => text().nullable()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
 /// Diver certifications
 class Certifications extends Table {
   TextColumn get id => text()();
@@ -1000,6 +1109,10 @@ class Certifications extends Table {
   IntColumn get expiryDate => integer().nullable()(); // For certs that expire
   TextColumn get instructorName => text().nullable()();
   TextColumn get instructorNumber => text().nullable()();
+  // Structured instructor link (issue #395). The text fields above remain
+  // the historical snapshot and survive buddy deletion.
+  TextColumn get instructorId =>
+      text().nullable().references(Buddies, #id, onDelete: KeyAction.setNull)();
   TextColumn get photoFrontPath => text()
       .nullable()(); // Front of cert card (deprecated, kept for migration)
   TextColumn get photoBackPath =>
@@ -1311,6 +1424,14 @@ class DiveProfileEvents extends Table {
   TextColumn get tankId => text().nullable()(); // for gas switch events
   TextColumn get source =>
       text().withDefault(const Constant('imported'))(); // EventSource.name
+  // Which computer contributed this event (null = primary source / manual).
+  // Same null-means-primary semantics as dive_profiles.computerId; deletes
+  // set null.
+  TextColumn get computerId => text().nullable().references(
+    DiveComputers,
+    #id,
+    onDelete: KeyAction.setNull,
+  )();
   IntColumn get createdAt => integer()();
 
   @override
@@ -1342,6 +1463,14 @@ class TankPressureProfiles extends Table {
       text().references(DiveTanks, #id, onDelete: KeyAction.cascade)();
   IntColumn get timestamp => integer()(); // seconds from dive start
   RealColumn get pressure => real()(); // bar
+  // Which computer contributed this pressure sample (null = primary source /
+  // manual). Same null-means-primary semantics as dive_profiles.computerId;
+  // deletes set null.
+  TextColumn get computerId => text().nullable().references(
+    DiveComputers,
+    #id,
+    onDelete: KeyAction.setNull,
+  )();
 
   @override
   Set<Column> get primaryKey => {id};
@@ -1659,6 +1788,7 @@ class FieldPresets extends Table {
     Settings,
     Buddies,
     DiveBuddies,
+    BuddyRoles,
     Certifications,
     ServiceRecords,
     DiveCenters,
@@ -1692,6 +1822,9 @@ class FieldPresets extends Table {
     // Liveaboard tracking (v2.0)
     LiveaboardDetailRecords,
     TripItineraryDays,
+    ChecklistTemplates,
+    ChecklistTemplateItems,
+    TripChecklistItems,
     // CSV import presets (local-only)
     CsvPresets,
     // Column view configuration
@@ -1711,7 +1844,7 @@ class AppDatabase extends _$AppDatabase {
 
   /// The current schema version as a static constant so that pre-open checks
   /// (e.g. version-mismatch guard) can reference it without an instance.
-  static const int currentSchemaVersion = 94;
+  static const int currentSchemaVersion = 99;
 
   /// Every schema version that has a migration block in onUpgrade.
   /// Used to calculate progress step counts. When adding a new migration,
@@ -1809,6 +1942,11 @@ class AppDatabase extends _$AppDatabase {
     92,
     93,
     94,
+    95,
+    96,
+    97,
+    98,
+    99,
   ];
 
   /// Tables that carry a per-row Hybrid Logical Clock for cross-device conflict
@@ -1822,6 +1960,7 @@ class AppDatabase extends _$AppDatabase {
     'divers',
     'diver_settings',
     'buddies',
+    'buddy_roles',
     'dive_centers',
     'trips',
     'liveaboard_detail_records',
@@ -4334,10 +4473,180 @@ class AppDatabase extends _$AppDatabase {
           }
         }
         if (from < 94) await reportProgress();
+        if (from < 95) {
+          // Dive naming (#400): optional user-defined dive name. Guarded by a
+          // PRAGMA check so an interrupted upgrade that already added the
+          // column does not fail on a duplicate ALTER, and so minimal-schema
+          // migration tests without a dives table are unaffected (empty
+          // table_info means no dives table).
+          final diveCols = await customSelect(
+            "PRAGMA table_info('dives')",
+          ).get();
+          final hasName = diveCols.any((c) => c.read<String>('name') == 'name');
+          if (diveCols.isNotEmpty && !hasName) {
+            await customStatement('ALTER TABLE dives ADD COLUMN name TEXT');
+          }
+        }
+        if (from < 95) await reportProgress();
+        if (from < 96) {
+          // Persisted default for the "Photo Markers" profile overlay
+          // (issue #162). Guarded like v91: skip when diver_settings does
+          // not exist (minimal-schema migration tests) or the column is
+          // already present (interrupted upgrade).
+          final cols = await customSelect(
+            "PRAGMA table_info('diver_settings')",
+          ).get();
+          if (cols.isNotEmpty) {
+            final existing = cols.map((c) => c.read<String>('name')).toSet();
+            if (!existing.contains('default_show_photo_markers')) {
+              await customStatement(
+                'ALTER TABLE diver_settings '
+                'ADD COLUMN default_show_photo_markers '
+                'INTEGER NOT NULL DEFAULT 1',
+              );
+            }
+          }
+        }
+        if (from < 96) await reportProgress();
+        if (from < 97) {
+          // Multi-computer consolidation: per-source attribution for tanks,
+          // pressure curves, and events. Guarded per table so minimal-schema
+          // migration tests without these tables are unaffected; existing
+          // rows keep NULL (= primary source / manual entry). (Authored as
+          // v94 on the feature branch; renumbered on merge as later
+          // migrations landed on main: ascent_gas_set v94, dive naming v95,
+          // photo markers v96.)
+          for (final table in [
+            'dive_tanks',
+            'tank_pressure_profiles',
+            'dive_profile_events',
+          ]) {
+            final cols = await customSelect(
+              "PRAGMA table_info('$table')",
+            ).get();
+            if (cols.isEmpty) continue;
+            final names = cols.map((c) => c.read<String>('name')).toSet();
+            if (!names.contains('computer_id')) {
+              await customStatement(
+                'ALTER TABLE $table ADD COLUMN computer_id TEXT '
+                'REFERENCES dive_computers (id) ON DELETE SET NULL',
+              );
+            }
+          }
+        }
+        if (from < 97) await reportProgress();
+        if (from < 98) {
+          // Checklist tables for trip planning (issue #164). Raw idempotent
+          // DDL (matches the v84 idiom) so interrupted migrations are safe.
+          // Renumbered v95 -> v96 -> v97 -> v98 as parallel branches each
+          // consumed a version before this merged (dive naming v95, photo
+          // markers v96, multi-computer consolidation v97), stranding some
+          // live databases at those versions without the checklist tables.
+          // Re-running the idempotent CREATE TABLE/INDEX IF NOT EXISTS
+          // statements here recovers them without disturbing what earlier
+          // versions added — the same recovery pattern as the v82/v83
+          // schema-version-collision blocks above.
+          await customStatement('''
+            CREATE TABLE IF NOT EXISTS checklist_templates (
+              id TEXT NOT NULL PRIMARY KEY,
+              diver_id TEXT REFERENCES divers (id),
+              name TEXT NOT NULL,
+              description TEXT NOT NULL DEFAULT '',
+              created_at INTEGER NOT NULL,
+              updated_at INTEGER NOT NULL,
+              hlc TEXT
+            )
+          ''');
+          await customStatement('''
+            CREATE TABLE IF NOT EXISTS checklist_template_items (
+              id TEXT NOT NULL PRIMARY KEY,
+              template_id TEXT NOT NULL REFERENCES checklist_templates (id),
+              title TEXT NOT NULL,
+              category TEXT,
+              notes TEXT NOT NULL DEFAULT '',
+              due_offset_days INTEGER,
+              sort_order INTEGER NOT NULL DEFAULT 0,
+              created_at INTEGER NOT NULL,
+              updated_at INTEGER NOT NULL,
+              hlc TEXT
+            )
+          ''');
+          await customStatement('''
+            CREATE TABLE IF NOT EXISTS trip_checklist_items (
+              id TEXT NOT NULL PRIMARY KEY,
+              trip_id TEXT NOT NULL REFERENCES trips (id),
+              title TEXT NOT NULL,
+              category TEXT,
+              notes TEXT NOT NULL DEFAULT '',
+              due_date INTEGER,
+              is_done INTEGER NOT NULL DEFAULT 0,
+              completed_at INTEGER,
+              sort_order INTEGER NOT NULL DEFAULT 0,
+              created_at INTEGER NOT NULL,
+              updated_at INTEGER NOT NULL,
+              hlc TEXT
+            )
+          ''');
+          await customStatement('''
+            CREATE INDEX IF NOT EXISTS idx_checklist_template_items_template_id
+            ON checklist_template_items(template_id)
+          ''');
+          await customStatement('''
+            CREATE INDEX IF NOT EXISTS idx_trip_checklist_items_trip_id
+            ON trip_checklist_items(trip_id)
+          ''');
+        }
+        if (from < 98) await reportProgress();
+        if (from < 99) {
+          // Buddy professional credentials + structured instructor link on
+          // certifications (issue #395). PRAGMA-guarded so a healthy database
+          // no-ops and an interrupted upgrade does not fail on a duplicate
+          // ALTER. createTable is IF NOT EXISTS. (v99: renumbered from v94
+          // repeatedly as main claimed 94-96, then 97, then 98 while the
+          // branch was in review; a beforeOpen backstop re-asserts these
+          // objects too, so a version collision can't strand them.)
+          final certCols = await customSelect(
+            "PRAGMA table_info('certifications')",
+          ).get();
+          if (certCols.isNotEmpty) {
+            final existing = certCols
+                .map((c) => c.read<String>('name'))
+                .toSet();
+            if (!existing.contains('instructor_id')) {
+              await customStatement(
+                'ALTER TABLE certifications ADD COLUMN instructor_id TEXT '
+                'REFERENCES buddies (id) ON DELETE SET NULL',
+              );
+            }
+          }
+          await m.createTable(buddyRoles);
+        }
+        if (from < 99) await reportProgress();
       },
       beforeOpen: (details) async {
         // Enable foreign keys
         await customStatement('PRAGMA foreign_keys = ON');
+
+        // Backstop for schema-version collisions (issue #395; same disease
+        // as the v77/v82/v83 sync-branch incidents): a parallel branch build
+        // that claims the same schema version can advance user_version past
+        // the v99 block without creating its objects, and no later migration
+        // would ever repair that. All DDL here is idempotent (createTable is
+        // IF NOT EXISTS; the ALTER is PRAGMA-guarded), so re-assert the v99
+        // objects on every open.
+        final certCols = await customSelect(
+          "PRAGMA table_info('certifications')",
+        ).get();
+        final hasInstructorId = certCols.any(
+          (c) => c.read<String>('name') == 'instructor_id',
+        );
+        if (certCols.isNotEmpty && !hasInstructorId) {
+          await customStatement(
+            'ALTER TABLE certifications ADD COLUMN instructor_id TEXT '
+            'REFERENCES buddies (id) ON DELETE SET NULL',
+          );
+        }
+        await createMigrator().createTable(buddyRoles);
       },
     );
   }

@@ -374,14 +374,17 @@ void main() {
       String diveId,
       String uuid, {
       bool isPrimary = true,
+      DateTime? createdAt,
     }) async {
-      await repository.saveComputerReading(
-        buildReading(
-          id: readingId,
-          diveId: diveId,
-          isPrimary: isPrimary,
-        ).copyWith(sourceUuid: Value(uuid)),
-      );
+      var reading = buildReading(
+        id: readingId,
+        diveId: diveId,
+        isPrimary: isPrimary,
+      ).copyWith(sourceUuid: Value(uuid));
+      if (createdAt != null) {
+        reading = reading.copyWith(createdAt: Value(createdAt));
+      }
+      await repository.saveComputerReading(reading);
     }
 
     test('returns all UUIDs when no diverId is provided', () async {
@@ -434,20 +437,206 @@ void main() {
       expect(result, isEmpty);
     });
 
-    test('primary data source wins over secondary for same dive', () async {
+    test('deterministically prefers the primary row\'s UUID over a more '
+        'recently created secondary\'s (Task 8 finding 3)', () async {
+      // The underlying getSourceKeysByDiveId query orders by
+      // `is_primary DESC, created_at DESC`, so is_primary must win even
+      // when the secondary reading was saved AFTER (more recently than)
+      // the primary -- recency alone must never override primacy.
       await insertTestDiver('diver-primary');
       final d = await insertTestDive(
         id: 'dive-primary-pick',
         diverId: 'diver-primary',
       );
-      await saveUuidReading('read-sec', d, 'uuid-secondary', isPrimary: false);
-      await saveUuidReading('read-prim', d, 'uuid-primary', isPrimary: true);
+      final earlier = DateTime(2026, 1, 1);
+      final later = DateTime(2026, 6, 1);
+      await saveUuidReading(
+        'read-prim',
+        d,
+        'uuid-primary',
+        isPrimary: true,
+        createdAt: earlier,
+      );
+      await saveUuidReading(
+        'read-sec',
+        d,
+        'uuid-secondary',
+        isPrimary: false,
+        createdAt: later,
+      );
 
       final result = await repository.getSourceUuidByDiveId(
         diverId: 'diver-primary',
       );
 
       expect(result[d], 'uuid-primary');
+    });
+
+    test('falls back to the most recently created secondary\'s UUID when '
+        'there is no primary UUID', () async {
+      await insertTestDiver('diver-recency');
+      final d = await insertTestDive(
+        id: 'dive-recency-pick',
+        diverId: 'diver-recency',
+      );
+      final earlier = DateTime(2026, 1, 1);
+      final later = DateTime(2026, 6, 1);
+      await saveUuidReading(
+        'read-old',
+        d,
+        'uuid-old',
+        isPrimary: false,
+        createdAt: earlier,
+      );
+      await saveUuidReading(
+        'read-new',
+        d,
+        'uuid-new',
+        isPrimary: false,
+        createdAt: later,
+      );
+
+      final result = await repository.getSourceUuidByDiveId(
+        diverId: 'diver-recency',
+      );
+
+      expect(result[d], 'uuid-new');
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // getSourceKeysByDiveId
+  // ---------------------------------------------------------------------------
+
+  group('getSourceKeysByDiveId', () {
+    test(
+      'combines source UUID and hex fingerprint for the same dive',
+      () async {
+        final d = await insertTestDive(id: 'dive-keys');
+        await repository.saveComputerReading(
+          buildReading(id: 'read-keys', diveId: d, isPrimary: true).copyWith(
+            sourceUuid: const Value('uuid-keys'),
+            rawFingerprint: Value(Uint8List.fromList([0xDE, 0xAD, 0xBE, 0xEF])),
+          ),
+        );
+
+        final result = await repository.getSourceKeysByDiveId();
+
+        expect(result[d], containsAll(['uuid-keys', 'DEADBEEF']));
+      },
+    );
+
+    test(
+      'unions keys from ALL of a dive\'s sources, not just the primary',
+      () async {
+        final d = await insertTestDive(id: 'dive-multi-keys');
+        await repository.saveComputerReading(
+          buildReading(
+            id: 'read-primary-keys',
+            diveId: d,
+            isPrimary: true,
+          ).copyWith(sourceUuid: const Value('uuid-a')),
+        );
+        await repository.saveComputerReading(
+          buildReading(
+            id: 'read-secondary-keys',
+            diveId: d,
+            isPrimary: false,
+          ).copyWith(sourceUuid: const Value('uuid-b')),
+        );
+
+        final result = await repository.getSourceKeysByDiveId();
+
+        expect(result[d], containsAll(['uuid-a', 'uuid-b']));
+      },
+    );
+
+    test(
+      'dives with no UUID or fingerprint on any source are absent',
+      () async {
+        final d = await insertTestDive(id: 'dive-no-keys');
+        await repository.saveComputerReading(
+          buildReading(id: 'read-no-keys', diveId: d, isPrimary: true),
+        );
+
+        final result = await repository.getSourceKeysByDiveId();
+
+        expect(result.containsKey(d), isFalse);
+      },
+    );
+
+    test('restricts result to the specified diver', () async {
+      await insertTestDiver('diver-keys-a');
+      await insertTestDiver('diver-keys-b');
+      final dA = await insertTestDive(
+        id: 'dive-keys-a',
+        diverId: 'diver-keys-a',
+      );
+      final dB = await insertTestDive(
+        id: 'dive-keys-b',
+        diverId: 'diver-keys-b',
+      );
+      await repository.saveComputerReading(
+        buildReading(
+          id: 'read-keys-a',
+          diveId: dA,
+          isPrimary: true,
+        ).copyWith(sourceUuid: const Value('uuid-keys-a')),
+      );
+      await repository.saveComputerReading(
+        buildReading(
+          id: 'read-keys-b',
+          diveId: dB,
+          isPrimary: true,
+        ).copyWith(sourceUuid: const Value('uuid-keys-b')),
+      );
+
+      final result = await repository.getSourceKeysByDiveId(
+        diverId: 'diver-keys-a',
+      );
+
+      expect(result.keys, [dA]);
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // getComputerIdForDive
+  // ---------------------------------------------------------------------------
+
+  group('getComputerIdForDive', () {
+    test('returns the dive\'s computer_id', () async {
+      await db
+          .into(db.diveComputers)
+          .insert(
+            DiveComputersCompanion.insert(
+              id: 'computer-x',
+              name: 'computer-x',
+              createdAt: 0,
+              updatedAt: 0,
+            ),
+          );
+      final d = await insertTestDive(id: 'dive-comp-id');
+      await (db.update(db.dives)..where((t) => t.id.equals(d))).write(
+        const DivesCompanion(computerId: Value('computer-x')),
+      );
+
+      final result = await repository.getComputerIdForDive(d);
+
+      expect(result, 'computer-x');
+    });
+
+    test('returns null when the dive has no computer_id', () async {
+      final d = await insertTestDive(id: 'dive-no-comp-id');
+
+      final result = await repository.getComputerIdForDive(d);
+
+      expect(result, isNull);
+    });
+
+    test('returns null when the dive does not exist', () async {
+      final result = await repository.getComputerIdForDive('missing-dive');
+
+      expect(result, isNull);
     });
   });
 

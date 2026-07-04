@@ -922,6 +922,37 @@ class AppLocalizationsAr extends AppLocalizations {
       'لا يوجد عدد كافٍ من الرفاق للدمج.';
 
   @override
+  String get buddies_section_professionalRoles => 'الأدوار المهنية';
+
+  @override
+  String get buddies_roles_addRole => 'إضافة دور';
+
+  @override
+  String get buddies_roles_role => 'الدور';
+
+  @override
+  String get buddies_roles_agency => 'الجهة';
+
+  @override
+  String get buddies_roles_credentialNumber => 'رقم الاعتماد';
+
+  @override
+  String get buddies_roles_removeTooltip => 'إزالة الدور';
+
+  @override
+  String get buddies_roles_emptyHint =>
+      'أضف بيانات اعتماد المدرب أو مدرب الغوص الرئيسي لإعادة استخدامها عند تسجيل الشهادات والدورات.';
+
+  @override
+  String get buddies_instructorPicker_label => 'المدرب من قائمة الرفاق';
+
+  @override
+  String get buddies_instructorPicker_none => 'لا يوجد (إدخال يدوي)';
+
+  @override
+  String get buddies_detail_section_professionalRoles => 'الأدوار المهنية';
+
+  @override
   String get certifications_appBar_addCertification => 'إضافة شهادة';
 
   @override
@@ -1481,6 +1512,152 @@ class AppLocalizationsAr extends AppLocalizations {
   String get certifications_wallet_tooltip_share => 'مشاركة الشهادة';
 
   @override
+  String get checklists_section_title => 'قائمة التحقق';
+
+  @override
+  String checklists_progress(int done, int total) {
+    return 'تم إنجاز $done من $total من المهام';
+  }
+
+  @override
+  String get checklists_empty_upcoming =>
+      'خطط لرحلتك - أضف مهامًا أو طبّق قالبًا';
+
+  @override
+  String get checklists_empty_past => 'لا توجد عناصر في قائمة التحقق';
+
+  @override
+  String get checklists_addItem => 'إضافة عنصر';
+
+  @override
+  String get checklists_item_titleLabel => 'العنوان';
+
+  @override
+  String get checklists_item_titleRequired => 'العنوان مطلوب';
+
+  @override
+  String get checklists_item_categoryLabel => 'الفئة';
+
+  @override
+  String get checklists_item_notesLabel => 'ملاحظات';
+
+  @override
+  String get checklists_item_dueDateLabel => 'تاريخ الاستحقاق';
+
+  @override
+  String get checklists_item_dueOffsetLabel => 'عدد الأيام قبل بدء الرحلة';
+
+  @override
+  String get checklists_item_dueOffsetInvalid => 'أدخل 0 يومًا أو أكثر';
+
+  @override
+  String get checklists_item_overdue => 'متأخر';
+
+  @override
+  String get checklists_item_edit => 'تعديل العنصر';
+
+  @override
+  String get checklists_item_delete => 'حذف العنصر';
+
+  @override
+  String get checklists_menu_applyTemplate => 'تطبيق قالب...';
+
+  @override
+  String get checklists_menu_saveAsTemplate => 'حفظ كقالب...';
+
+  @override
+  String get checklists_applySheet_title => 'تطبيق القالب';
+
+  @override
+  String get checklists_applySheet_empty =>
+      'لا توجد قوالب بعد. يمكنك إنشاؤها من الإعدادات.';
+
+  @override
+  String checklists_applySheet_itemCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count عناصر',
+      one: 'عنصر واحد',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String checklists_applySheet_confirmAppend(int added, int skipped) {
+    String _temp0 = intl.Intl.pluralLogic(
+      added,
+      locale: localeName,
+      other: 'سيتم إضافة $added عناصر',
+      one: 'سيتم إضافة عنصر واحد',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      skipped,
+      locale: localeName,
+      other: 'مع تخطي $skipped عناصر مكررة',
+      one: 'مع تخطي عنصر مكرر واحد',
+      zero: 'دون تخطي أي عناصر مكررة',
+    );
+    return '$_temp0، $_temp1.';
+  }
+
+  @override
+  String checklists_apply_success(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'تمت إضافة $count عناصر',
+      one: 'تمت إضافة عنصر واحد',
+      zero: 'لم تتم إضافة أي عناصر جديدة',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get checklists_apply_templateGone => 'القالب لم يعد موجودًا';
+
+  @override
+  String get checklists_saveTemplate_title => 'حفظ كقالب';
+
+  @override
+  String get checklists_saveTemplate_nameLabel => 'اسم القالب';
+
+  @override
+  String get checklists_saveTemplate_success => 'تم حفظ القالب';
+
+  @override
+  String get checklists_templates_pageTitle => 'قوالب قوائم التحقق';
+
+  @override
+  String get checklists_templates_addTemplate => 'إضافة قالب';
+
+  @override
+  String get checklists_templates_empty => 'لا توجد قوالب بعد';
+
+  @override
+  String get checklists_templates_deleteTitle => 'حذف القالب';
+
+  @override
+  String checklists_templates_deleteContent(Object name) {
+    return 'هل تريد حذف \"$name\"؟ ستحتفظ الرحلات التي طبّقته مسبقًا بعناصرها.';
+  }
+
+  @override
+  String get checklists_template_nameLabel => 'الاسم';
+
+  @override
+  String get checklists_template_nameRequired => 'الاسم مطلوب';
+
+  @override
+  String get checklists_template_descriptionLabel => 'الوصف';
+
+  @override
+  String get checklists_template_itemsHeader => 'العناصر';
+
+  @override
+  String get checklists_template_addItem => 'إضافة عنصر';
+
+  @override
   String get common_action_back => 'رجوع';
 
   @override
@@ -1642,9 +1819,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get courses_field_notes => 'ملاحظات';
 
   @override
-  String get courses_field_selectFromBuddies => 'اختر من الرفاق (اختياري)';
-
-  @override
   String get courses_filter_all => 'الكل';
 
   @override
@@ -1667,9 +1841,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get courses_label_name => 'الاسم';
-
-  @override
-  String get courses_label_none => '-- لا شيء --';
 
   @override
   String get courses_label_startDate => 'تاريخ البدء';
@@ -2911,17 +3082,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get diveLog_combine_profilePreview => 'الملف المدمج';
 
   @override
-  String get diveLog_combine_overlapBody =>
-      'الغوصات المتداخلة تبدو وكأنها الغوصة نفسها مسجّلة بواسطة عدة أجهزة كمبيوتر غوص. ستتوفر قريبًا ميزة دمج هذه الغوصات في إدخال واحد يعرض بيانات كل جهاز.';
-
-  @override
-  String get diveLog_combine_overlapHintTwoDives =>
-      'لدمج سجلّين لنفس الغوصة الآن، افتح أحدهما واستخدم «دمج مع غوصة أخرى».';
-
-  @override
-  String get diveLog_combine_overlapTitle => 'هذه الغوصات متداخلة زمنياً';
-
-  @override
   String diveLog_combine_previewIntro(int count) {
     return 'ستُدمَج هذه الغوصات الـ $count في غوصة واحدة متواصلة. تتحول الفجوات بينها إلى وقت على السطح.';
   }
@@ -2954,6 +3114,75 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get diveLog_combine_undone => 'تم التراجع عن الدمج';
+
+  @override
+  String get diveLog_computerSource_badge_primary => 'أساسي';
+
+  @override
+  String get diveLog_consolidate_confirm =>
+      'الاحتفاظ بها كغوصة واحدة بجهازي كمبيوتر';
+
+  @override
+  String get diveLog_consolidate_error_generic =>
+      'تعذّر دمج الغوصات. لم يتغيّر أي شيء.';
+
+  @override
+  String get diveLog_consolidate_error_notOverlapping =>
+      'هاتان الغوصتان لا تتداخلان زمنيًا، لذا لا يمكن دمجهما كغوصة واحدة.';
+
+  @override
+  String get diveLog_consolidate_error_sameComputer =>
+      'هاتان الغوصتان من نفس كمبيوتر الغوص ولا يمكن دمجهما بهذه الطريقة.';
+
+  @override
+  String get diveLog_consolidate_selectPrimary => 'كمبيوتر الغوص الأساسي';
+
+  @override
+  String get diveLog_consolidate_snackbar =>
+      'تم دمج الغوصة كجهاز كمبيوتر إضافي.';
+
+  @override
+  String get diveLog_consolidate_undoError => 'تعذّر التراجع عن الدمج.';
+
+  @override
+  String get diveLog_consolidate_undone => 'تم التراجع عن الدمج';
+
+  @override
+  String diveLog_mergeDialog_confirmSubtitle(String time) {
+    return 'سيتم دمج الغوصة في الساعة $time مع هذه الغوصة.';
+  }
+
+  @override
+  String get diveLog_mergeDialog_confirmTitle => 'تأكيد الدمج';
+
+  @override
+  String get diveLog_mergeDialog_empty =>
+      'لم يتم العثور على غوصات أخرى في هذا اليوم.';
+
+  @override
+  String get diveLog_mergeDialog_explanation =>
+      'سيتم دمج ملف هذه الغوصة والأسطوانات والضغوط والأحداث والوسوم ورفقاء الغوص والمشاهدات في هذه الغوصة كمصدر كمبيوتر إضافي. يمكن التراجع عن هذا الإجراء باستخدام \'إلغاء ربط الكمبيوتر\'.';
+
+  @override
+  String diveLog_mergeDialog_loadError(String error) {
+    return 'خطأ في تحميل الغوصات: $error';
+  }
+
+  @override
+  String get diveLog_mergeDialog_merge => 'دمج';
+
+  @override
+  String get diveLog_mergeDialog_next => 'التالي';
+
+  @override
+  String get diveLog_mergeDialog_subtitle =>
+      'اختر غوصة من نفس اليوم لدمجها كجهاز كمبيوتر إضافي.';
+
+  @override
+  String get diveLog_mergeDialog_title => 'دمج مع غوصة أخرى';
+
+  @override
+  String get diveLog_mergeDialog_whatThisDoes => 'ما الذي يفعله هذا';
 
   @override
   String get diveLog_computerSheet_description =>
@@ -3150,21 +3379,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get diveLog_detail_errorLoading => 'خطأ في تحميل الغوصة';
-
-  @override
-  String get diveLog_detail_fullscreen_sampleData => 'بيانات العينة';
-
-  @override
-  String get diveLog_detail_fullscreen_tapChartCompact =>
-      'اضغط على المخطط للعرض المدمج';
-
-  @override
-  String get diveLog_detail_fullscreen_tapChartFull =>
-      'اضغط على المخطط للعرض بملء الشاشة';
-
-  @override
-  String get diveLog_detail_fullscreen_touchChart =>
-      'المس المخطط لرؤية البيانات عند تلك النقطة';
 
   @override
   String get diveLog_detail_label_airTemp => 'درجة حرارة الهواء';
@@ -3563,6 +3777,12 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get diveLog_edit_label_diveNumber => 'رقم الغوصة';
+
+  @override
+  String get diveLog_edit_label_diveName => 'الاسم';
+
+  @override
+  String get diveLog_edit_diveNamePlaceholder => 'اسم اختياري لهذه الغطسة';
 
   @override
   String get diveLog_edit_hint_diveNumber => 'يُعيَّن تلقائياً إذا تُرك فارغاً';
@@ -4144,6 +4364,18 @@ class AppLocalizationsAr extends AppLocalizations {
   String get diveLog_filter_noTagsYet => 'لم يتم إنشاء وسوم بعد';
 
   @override
+  String get diveLog_filter_presetAllTime => 'كل الوقت';
+
+  @override
+  String get diveLog_filter_presetLast12Months => 'آخر 12 شهرًا';
+
+  @override
+  String get diveLog_filter_presetLastYear => 'العام الماضي';
+
+  @override
+  String get diveLog_filter_presetThisYear => 'هذا العام';
+
+  @override
   String get diveLog_filter_sectionBuddy => 'زميل الغوص';
 
   @override
@@ -4191,6 +4423,13 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
+  String get diveLog_instruments_customize => 'تخصيص الأدوات';
+
+  @override
+  String get diveLog_instruments_customizeHint =>
+      'قم بتشغيل الأدوات أو إيقافها. اسحب لإعادة الترتيب.';
+
+  @override
   String get diveLog_legend_label_ascentRate => 'معدل الصعود';
 
   @override
@@ -4234,6 +4473,9 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get diveLog_legend_label_otu => 'OTU';
+
+  @override
+  String get diveLog_legend_label_photoMarkers => 'الصور';
 
   @override
   String get diveLog_legend_label_ppHe => 'ppHe';
@@ -4743,12 +4985,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get diveLog_playback_tooltip_speed => 'سرعة التشغيل';
 
   @override
-  String get diveLog_profileSelector_badge_primary => 'أساسي';
-
-  @override
-  String get diveLog_profileSelector_label_diveComputers => 'حواسيب الغوص';
-
-  @override
   String diveLog_profile_axisDepth(Object unit) {
     return 'العمق ($unit)';
   }
@@ -4769,6 +5005,9 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get diveLog_profile_semantics_chart =>
       'مخطط ملف الغوصة، قم بالتكبير بالضم';
+
+  @override
+  String get diveLog_profile_semantics_photoMarker => 'علامة صورة';
 
   @override
   String get diveLog_profile_tooltip_moreOptions => 'خيارات مخطط إضافية';
@@ -5284,6 +5523,47 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get diveLog_tooltip_tts => 'TTS';
+
+  @override
+  String get diveLog_sources_row_metric => 'المقياس';
+
+  @override
+  String get diveLog_sources_row_maxDepth => 'أقصى عمق';
+
+  @override
+  String get diveLog_sources_row_avgDepth => 'متوسط العمق';
+
+  @override
+  String get diveLog_sources_row_duration => 'المدة';
+
+  @override
+  String get diveLog_sources_row_waterTemp => 'حرارة الماء';
+
+  @override
+  String get diveLog_sources_row_cns => 'CNS';
+
+  @override
+  String get diveLog_sources_row_otu => 'OTU';
+
+  @override
+  String get diveLog_sources_row_decoAlgorithm => 'خوارزمية إزالة التشبع';
+
+  @override
+  String get diveLog_sources_row_gf => 'GF';
+
+  @override
+  String diveLog_sources_minutes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count دقيقة',
+      one: 'دقيقة واحدة',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get diveLog_sources_unknownComputer => 'جهاز غير معروف';
 
   @override
   String get divePlanner_action_addTank => 'إضافة أسطوانة';
@@ -10384,6 +10664,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get settings_appearance_metric_otu => 'OTU (وحدات تحمل الأكسجين)';
 
   @override
+  String get settings_appearance_metric_photoMarkers => 'علامات الصور';
+
+  @override
   String settings_appearance_metricsEnabledCount(int count, int total) {
     return '$count من $total مفعّل';
   }
@@ -10638,6 +10921,57 @@ class AppLocalizationsAr extends AppLocalizations {
   ) {
     return 'فشل الاتصال بـ $providerName: $error';
   }
+
+  @override
+  String get settings_cloudSync_dropbox_account_title => 'حساب Dropbox';
+
+  @override
+  String get settings_cloudSync_dropbox_connect_browserFailed =>
+      'تعذر فتح المتصفح. جرب زر إعادة فتح المتصفح.';
+
+  @override
+  String get settings_cloudSync_dropbox_connect_codeLabel => 'رمز التفويض';
+
+  @override
+  String get settings_cloudSync_dropbox_connect_emptyCode =>
+      'أدخل رمز التفويض الظاهر في متصفحك';
+
+  @override
+  String settings_cloudSync_dropbox_connect_failed(Object error) {
+    return 'فشل الاتصال بـ Dropbox: $error';
+  }
+
+  @override
+  String get settings_cloudSync_dropbox_connect_instructions =>
+      'فتح متصفحك صفحة تفويض من Dropbox. وافق على الوصول، ثم الصق هنا الرمز الذي يعرضه Dropbox.';
+
+  @override
+  String get settings_cloudSync_dropbox_connect_reopenBrowser =>
+      'إعادة فتح المتصفح';
+
+  @override
+  String get settings_cloudSync_dropbox_connect_submit => 'اتصال';
+
+  @override
+  String get settings_cloudSync_dropbox_connect_title => 'الاتصال بـ Dropbox';
+
+  @override
+  String get settings_cloudSync_dropbox_connected => 'متصل بـ Dropbox';
+
+  @override
+  String settings_cloudSync_dropbox_connectedAs(Object account) {
+    return 'متصل كـ $account';
+  }
+
+  @override
+  String get settings_cloudSync_dropbox_disconnect => 'قطع الاتصال';
+
+  @override
+  String get settings_cloudSync_provider_dropbox_subtitle =>
+      'المزامنة عبر Dropbox (Apps/Submersion)';
+
+  @override
+  String get settings_cloudSync_provider_dropbox_title => 'Dropbox';
 
   @override
   String get settings_cloudSync_provider_googleDrive => 'Google Drive';
@@ -11223,6 +11557,13 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get settings_language_systemDefault => 'الافتراضي للنظام';
+
+  @override
+  String get settings_manage_checklistTemplates => 'قوالب قوائم التحقق';
+
+  @override
+  String get settings_manage_checklistTemplates_subtitle =>
+      'قوائم مهام قابلة لإعادة الاستخدام للتخطيط للرحلات';
 
   @override
   String get settings_manage_diveTypes => 'أنواع الغوص';
@@ -12193,6 +12534,20 @@ class AppLocalizationsAr extends AppLocalizations {
   String get statistics_error_loadingStatistics => 'خطأ في تحميل الإحصائيات';
 
   @override
+  String get statistics_filterBar_clear => 'مسح التصفية';
+
+  @override
+  String statistics_filterBar_diveCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count غوصات',
+      one: 'غوصة واحدة',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get statistics_gas_appBar_title => 'استهلاك الهواء';
 
   @override
@@ -12927,6 +13282,9 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get statistics_tooltip_diveRecords => 'أرقام الغوص القياسية';
+
+  @override
+  String get statistics_tooltip_filter => 'تصفية الإحصائيات';
 
   @override
   String get statistics_tooltip_refreshRecords => 'تحديث الأرقام القياسية';
@@ -13883,6 +14241,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get trips_detail_stat_totalDives => 'إجمالي الغوصات';
 
   @override
+  String get trips_detail_tab_checklist => 'قائمة التحقق';
+
+  @override
   String get trips_detail_tooltip_edit => 'تعديل الرحلة';
 
   @override
@@ -14118,6 +14479,18 @@ class AppLocalizationsAr extends AppLocalizations {
   String get trips_list_button_retry => 'إعادة المحاولة';
 
   @override
+  String trips_list_countdown(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: 'خلال $days أيام',
+      one: 'خلال يوم واحد',
+      zero: 'يبدأ اليوم',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get trips_list_empty_button => 'أضف رحلتك الأولى';
 
   @override
@@ -14146,6 +14519,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get trips_list_filters_clearAll => 'مسح الكل';
 
   @override
+  String get trips_list_inProgress => 'جارية';
+
+  @override
+  String get trips_list_pastSection => 'الرحلات السابقة';
+
+  @override
   String get trips_list_sort_title => 'ترتيب الرحلات';
 
   @override
@@ -14161,6 +14540,9 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get trips_list_tooltip_sort => 'ترتيب';
+
+  @override
+  String get trips_list_upcomingSection => 'القادمة';
 
   @override
   String get trips_photos_empty_scanButton => 'مسح معرض الجهاز';

@@ -33,6 +33,9 @@ class _MockSettingsNotifier extends StateNotifier<AppSettings>
   Future<void> setDefaultShowAscentRateLine(bool value) async =>
       state = state.copyWith(defaultShowAscentRateLine: value);
   @override
+  Future<void> setDefaultShowPhotoMarkers(bool value) async =>
+      state = state.copyWith(defaultShowPhotoMarkers: value);
+  @override
   Future<void> setDepthUnit(DepthUnit unit) async =>
       state = state.copyWith(depthUnit: unit);
   @override
@@ -309,6 +312,14 @@ class _MockSettingsNotifier extends StateNotifier<AppSettings>
   @override
   Future<void> resetDiveDetailSections() async =>
       state = state.copyWith(clearDiveDetailSections: true);
+  @override
+  Future<void> setFullscreenTilePreferences({
+    required List<String> order,
+    required List<String> hidden,
+  }) async => state = state.copyWith(
+    fullscreenTileOrder: order,
+    fullscreenHiddenTiles: hidden,
+  );
 }
 
 /// Mock CurrentDiverIdNotifier that doesn't access the database

@@ -11,6 +11,7 @@ import 'package:submersion/features/tags/domain/entities/tag.dart';
 class DiveSummary extends Equatable {
   final String id;
   final int? diveNumber;
+  final String? name;
   final DateTime dateTime;
   final DateTime? entryTime;
   final double? maxDepth;
@@ -35,6 +36,7 @@ class DiveSummary extends Equatable {
   const DiveSummary({
     required this.id,
     this.diveNumber,
+    this.name,
     required this.dateTime,
     this.entryTime,
     this.maxDepth,
@@ -63,6 +65,7 @@ class DiveSummary extends Equatable {
     return DiveSummary(
       id: dive.id,
       diveNumber: dive.diveNumber,
+      name: dive.name,
       dateTime: dive.dateTime,
       entryTime: dive.entryTime,
       maxDepth: dive.maxDepth,
@@ -80,6 +83,14 @@ class DiveSummary extends Equatable {
       siteLongitude: dive.site?.location?.longitude,
       sortTimestamp: ts.millisecondsSinceEpoch,
     );
+  }
+
+  /// User-defined name, normalized for display: trimmed, with empty or
+  /// whitespace-only values treated as unset (null). Mirrors
+  /// [Dive.effectiveName].
+  String? get effectiveName {
+    final trimmed = name?.trim();
+    return (trimmed == null || trimmed.isEmpty) ? null : trimmed;
   }
 
   /// Formatted location string matching DiveSite.locationString
@@ -101,6 +112,7 @@ class DiveSummary extends Equatable {
   DiveSummary copyWith({
     String? id,
     int? diveNumber,
+    String? name,
     DateTime? dateTime,
     DateTime? entryTime,
     double? maxDepth,
@@ -121,6 +133,7 @@ class DiveSummary extends Equatable {
     return DiveSummary(
       id: id ?? this.id,
       diveNumber: diveNumber ?? this.diveNumber,
+      name: name ?? this.name,
       dateTime: dateTime ?? this.dateTime,
       entryTime: entryTime ?? this.entryTime,
       maxDepth: maxDepth ?? this.maxDepth,
@@ -144,6 +157,7 @@ class DiveSummary extends Equatable {
   List<Object?> get props => [
     id,
     diveNumber,
+    name,
     dateTime,
     entryTime,
     maxDepth,

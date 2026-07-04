@@ -815,6 +815,7 @@ class SyncService {
             hasUpdatedAt: true,
           ),
           (type: 'buddies', records: data.buddies, hasUpdatedAt: true),
+          (type: 'buddyRoles', records: data.buddyRoles, hasUpdatedAt: true),
           (type: 'diveCenters', records: data.diveCenters, hasUpdatedAt: true),
           (type: 'trips', records: data.trips, hasUpdatedAt: true),
           (
@@ -825,6 +826,21 @@ class SyncService {
           (
             type: 'itineraryDays',
             records: data.itineraryDays,
+            hasUpdatedAt: true,
+          ),
+          (
+            type: 'checklistTemplates',
+            records: data.checklistTemplates,
+            hasUpdatedAt: true,
+          ),
+          (
+            type: 'checklistTemplateItems',
+            records: data.checklistTemplateItems,
+            hasUpdatedAt: true,
+          ),
+          (
+            type: 'tripChecklistItems',
+            records: data.tripChecklistItems,
             hasUpdatedAt: true,
           ),
           (type: 'equipment', records: data.equipment, hasUpdatedAt: true),
@@ -1411,10 +1427,14 @@ class SyncService {
     'divers': true,
     'diverSettings': true,
     'buddies': true,
+    'buddyRoles': true,
     'diveCenters': true,
     'trips': true,
     'liveaboardDetails': true,
     'itineraryDays': true,
+    'checklistTemplates': true,
+    'checklistTemplateItems': true,
+    'tripChecklistItems': true,
     'equipment': true,
     'equipmentSets': true,
     'equipmentSetItems': false,
@@ -1479,6 +1499,7 @@ class SyncService {
     'diveTanks': [
       (field: 'diveId', parent: 'dives', nullable: false),
       (field: 'equipmentId', parent: 'equipment', nullable: true),
+      (field: 'computerId', parent: 'diveComputers', nullable: true),
     ],
     'diveWeights': [(field: 'diveId', parent: 'dives', nullable: false)],
     'diveEquipment': [
@@ -1489,16 +1510,21 @@ class SyncService {
       (field: 'diveId', parent: 'dives', nullable: false),
       (field: 'buddyId', parent: 'buddies', nullable: false),
     ],
+    'buddyRoles': [(field: 'buddyId', parent: 'buddies', nullable: false)],
     'diveTags': [
       (field: 'diveId', parent: 'dives', nullable: false),
       (field: 'tagId', parent: 'tags', nullable: false),
     ],
     'diveDiveTypes': [(field: 'diveId', parent: 'dives', nullable: false)],
-    'diveProfileEvents': [(field: 'diveId', parent: 'dives', nullable: false)],
+    'diveProfileEvents': [
+      (field: 'diveId', parent: 'dives', nullable: false),
+      (field: 'computerId', parent: 'diveComputers', nullable: true),
+    ],
     'gasSwitches': [(field: 'diveId', parent: 'dives', nullable: false)],
     'diveCustomFields': [(field: 'diveId', parent: 'dives', nullable: false)],
     'tankPressureProfiles': [
       (field: 'diveId', parent: 'dives', nullable: false),
+      (field: 'computerId', parent: 'diveComputers', nullable: true),
     ],
     'tideRecords': [(field: 'diveId', parent: 'dives', nullable: false)],
     'diveDataSources': [
@@ -1520,7 +1546,14 @@ class SyncService {
     ],
     'liveaboardDetails': [(field: 'tripId', parent: 'trips', nullable: false)],
     'itineraryDays': [(field: 'tripId', parent: 'trips', nullable: false)],
-    'certifications': [(field: 'courseId', parent: 'courses', nullable: true)],
+    'checklistTemplateItems': [
+      (field: 'templateId', parent: 'checklistTemplates', nullable: false),
+    ],
+    'tripChecklistItems': [(field: 'tripId', parent: 'trips', nullable: false)],
+    'certifications': [
+      (field: 'courseId', parent: 'courses', nullable: true),
+      (field: 'instructorId', parent: 'buddies', nullable: true),
+    ],
     'courses': [(field: 'instructorId', parent: 'buddies', nullable: true)],
     'equipmentSetItems': [
       (field: 'setId', parent: 'equipmentSets', nullable: false),

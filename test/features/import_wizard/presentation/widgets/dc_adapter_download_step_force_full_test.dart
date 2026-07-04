@@ -68,6 +68,7 @@ void main() {
         importService: deps.importService,
         computerRepository: deps.computerRepo,
         diveRepository: deps.diveRepo,
+        consolidationService: deps.consolidationService,
         diverId: 'diver-1',
         forceFullDownload: true,
       );
@@ -97,6 +98,7 @@ void main() {
         importService: deps.importService,
         computerRepository: deps.computerRepo,
         diveRepository: deps.diveRepo,
+        consolidationService: deps.consolidationService,
         diverId: 'diver-1',
       );
 

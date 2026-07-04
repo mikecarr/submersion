@@ -1674,6 +1674,66 @@ abstract class AppLocalizations {
   /// **'Not enough buddies to merge.'**
   String get buddies_edit_merge_notEnoughBody;
 
+  /// No description provided for @buddies_section_professionalRoles.
+  ///
+  /// In en, this message translates to:
+  /// **'Professional Roles'**
+  String get buddies_section_professionalRoles;
+
+  /// No description provided for @buddies_roles_addRole.
+  ///
+  /// In en, this message translates to:
+  /// **'Add role'**
+  String get buddies_roles_addRole;
+
+  /// No description provided for @buddies_roles_role.
+  ///
+  /// In en, this message translates to:
+  /// **'Role'**
+  String get buddies_roles_role;
+
+  /// No description provided for @buddies_roles_agency.
+  ///
+  /// In en, this message translates to:
+  /// **'Agency'**
+  String get buddies_roles_agency;
+
+  /// No description provided for @buddies_roles_credentialNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Credential number'**
+  String get buddies_roles_credentialNumber;
+
+  /// No description provided for @buddies_roles_removeTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove role'**
+  String get buddies_roles_removeTooltip;
+
+  /// No description provided for @buddies_roles_emptyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Add instructor or divemaster credentials to reuse them when logging certifications and courses.'**
+  String get buddies_roles_emptyHint;
+
+  /// No description provided for @buddies_instructorPicker_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Instructor from buddies'**
+  String get buddies_instructorPicker_label;
+
+  /// No description provided for @buddies_instructorPicker_none.
+  ///
+  /// In en, this message translates to:
+  /// **'None (manual entry)'**
+  String get buddies_instructorPicker_none;
+
+  /// No description provided for @buddies_detail_section_professionalRoles.
+  ///
+  /// In en, this message translates to:
+  /// **'Professional Roles'**
+  String get buddies_detail_section_professionalRoles;
+
   /// No description provided for @certifications_appBar_addCertification.
   ///
   /// In en, this message translates to:
@@ -2646,6 +2706,222 @@ abstract class AppLocalizations {
   /// **'Share certification'**
   String get certifications_wallet_tooltip_share;
 
+  /// No description provided for @checklists_section_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Checklist'**
+  String get checklists_section_title;
+
+  /// No description provided for @checklists_progress.
+  ///
+  /// In en, this message translates to:
+  /// **'{done} of {total} to-dos done'**
+  String checklists_progress(int done, int total);
+
+  /// No description provided for @checklists_empty_upcoming.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan your trip - add to-dos or apply a template'**
+  String get checklists_empty_upcoming;
+
+  /// No description provided for @checklists_empty_past.
+  ///
+  /// In en, this message translates to:
+  /// **'No checklist items'**
+  String get checklists_empty_past;
+
+  /// No description provided for @checklists_addItem.
+  ///
+  /// In en, this message translates to:
+  /// **'Add item'**
+  String get checklists_addItem;
+
+  /// No description provided for @checklists_item_titleLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get checklists_item_titleLabel;
+
+  /// No description provided for @checklists_item_titleRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Title is required'**
+  String get checklists_item_titleRequired;
+
+  /// No description provided for @checklists_item_categoryLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get checklists_item_categoryLabel;
+
+  /// No description provided for @checklists_item_notesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes'**
+  String get checklists_item_notesLabel;
+
+  /// No description provided for @checklists_item_dueDateLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Due date'**
+  String get checklists_item_dueDateLabel;
+
+  /// No description provided for @checklists_item_dueOffsetLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Days before trip start'**
+  String get checklists_item_dueOffsetLabel;
+
+  /// No description provided for @checklists_item_dueOffsetInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter 0 or more days'**
+  String get checklists_item_dueOffsetInvalid;
+
+  /// No description provided for @checklists_item_overdue.
+  ///
+  /// In en, this message translates to:
+  /// **'Overdue'**
+  String get checklists_item_overdue;
+
+  /// No description provided for @checklists_item_edit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit item'**
+  String get checklists_item_edit;
+
+  /// No description provided for @checklists_item_delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete item'**
+  String get checklists_item_delete;
+
+  /// No description provided for @checklists_menu_applyTemplate.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply template...'**
+  String get checklists_menu_applyTemplate;
+
+  /// No description provided for @checklists_menu_saveAsTemplate.
+  ///
+  /// In en, this message translates to:
+  /// **'Save as template...'**
+  String get checklists_menu_saveAsTemplate;
+
+  /// No description provided for @checklists_applySheet_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply template'**
+  String get checklists_applySheet_title;
+
+  /// No description provided for @checklists_applySheet_empty.
+  ///
+  /// In en, this message translates to:
+  /// **'No templates yet. Create them in Settings.'**
+  String get checklists_applySheet_empty;
+
+  /// No description provided for @checklists_applySheet_itemCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 item} other{{count} items}}'**
+  String checklists_applySheet_itemCount(int count);
+
+  /// No description provided for @checklists_applySheet_confirmAppend.
+  ///
+  /// In en, this message translates to:
+  /// **'{added, plural, =1{1 item will be added} other{{added} items will be added}}, {skipped, plural, =0{no duplicates skipped} =1{1 duplicate skipped} other{{skipped} duplicates skipped}}.'**
+  String checklists_applySheet_confirmAppend(int added, int skipped);
+
+  /// No description provided for @checklists_apply_success.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No new items added} =1{1 item added} other{{count} items added}}'**
+  String checklists_apply_success(int count);
+
+  /// No description provided for @checklists_apply_templateGone.
+  ///
+  /// In en, this message translates to:
+  /// **'Template no longer exists'**
+  String get checklists_apply_templateGone;
+
+  /// No description provided for @checklists_saveTemplate_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Save as template'**
+  String get checklists_saveTemplate_title;
+
+  /// No description provided for @checklists_saveTemplate_nameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Template name'**
+  String get checklists_saveTemplate_nameLabel;
+
+  /// No description provided for @checklists_saveTemplate_success.
+  ///
+  /// In en, this message translates to:
+  /// **'Template saved'**
+  String get checklists_saveTemplate_success;
+
+  /// No description provided for @checklists_templates_pageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Checklist Templates'**
+  String get checklists_templates_pageTitle;
+
+  /// No description provided for @checklists_templates_addTemplate.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Template'**
+  String get checklists_templates_addTemplate;
+
+  /// No description provided for @checklists_templates_empty.
+  ///
+  /// In en, this message translates to:
+  /// **'No templates yet'**
+  String get checklists_templates_empty;
+
+  /// No description provided for @checklists_templates_deleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Template'**
+  String get checklists_templates_deleteTitle;
+
+  /// No description provided for @checklists_templates_deleteContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete \"{name}\"? Trips that already applied it keep their items.'**
+  String checklists_templates_deleteContent(Object name);
+
+  /// No description provided for @checklists_template_nameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get checklists_template_nameLabel;
+
+  /// No description provided for @checklists_template_nameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Name is required'**
+  String get checklists_template_nameRequired;
+
+  /// No description provided for @checklists_template_descriptionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get checklists_template_descriptionLabel;
+
+  /// No description provided for @checklists_template_itemsHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'Items'**
+  String get checklists_template_itemsHeader;
+
+  /// No description provided for @checklists_template_addItem.
+  ///
+  /// In en, this message translates to:
+  /// **'Add item'**
+  String get checklists_template_addItem;
+
   /// Back navigation tooltip
   ///
   /// In en, this message translates to:
@@ -2946,12 +3222,6 @@ abstract class AppLocalizations {
   /// **'Notes'**
   String get courses_field_notes;
 
-  /// No description provided for @courses_field_selectFromBuddies.
-  ///
-  /// In en, this message translates to:
-  /// **'Select from Buddies (Optional)'**
-  String get courses_field_selectFromBuddies;
-
   /// No description provided for @courses_filter_all.
   ///
   /// In en, this message translates to:
@@ -2999,12 +3269,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Name'**
   String get courses_label_name;
-
-  /// No description provided for @courses_label_none.
-  ///
-  /// In en, this message translates to:
-  /// **'-- None --'**
-  String get courses_label_none;
 
   /// No description provided for @courses_label_startDate.
   ///
@@ -5051,24 +5315,6 @@ abstract class AppLocalizations {
   /// **'Combined profile'**
   String get diveLog_combine_profilePreview;
 
-  /// No description provided for @diveLog_combine_overlapBody.
-  ///
-  /// In en, this message translates to:
-  /// **'Overlapping dives look like the same dive recorded by multiple dive computers. Combining those into a single entry that shows every computer\'s data is coming in a future release.'**
-  String get diveLog_combine_overlapBody;
-
-  /// No description provided for @diveLog_combine_overlapHintTwoDives.
-  ///
-  /// In en, this message translates to:
-  /// **'To merge two records of the same dive now, open one of them and use \"Merge with another dive\".'**
-  String get diveLog_combine_overlapHintTwoDives;
-
-  /// No description provided for @diveLog_combine_overlapTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'These dives overlap in time'**
-  String get diveLog_combine_overlapTitle;
-
   /// No description provided for @diveLog_combine_previewIntro.
   ///
   /// In en, this message translates to:
@@ -5108,6 +5354,120 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Combine undone'**
   String get diveLog_combine_undone;
+
+  /// No description provided for @diveLog_computerSource_badge_primary.
+  ///
+  /// In en, this message translates to:
+  /// **'Primary'**
+  String get diveLog_computerSource_badge_primary;
+
+  /// No description provided for @diveLog_consolidate_confirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep as one dive with both computers'**
+  String get diveLog_consolidate_confirm;
+
+  /// No description provided for @diveLog_consolidate_error_generic.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t merge the dives. Nothing was changed.'**
+  String get diveLog_consolidate_error_generic;
+
+  /// No description provided for @diveLog_consolidate_error_notOverlapping.
+  ///
+  /// In en, this message translates to:
+  /// **'These dives don\'t overlap in time, so they can\'t be merged as the same dive.'**
+  String get diveLog_consolidate_error_notOverlapping;
+
+  /// No description provided for @diveLog_consolidate_error_sameComputer.
+  ///
+  /// In en, this message translates to:
+  /// **'These dives are from the same dive computer and can\'t be merged this way.'**
+  String get diveLog_consolidate_error_sameComputer;
+
+  /// No description provided for @diveLog_consolidate_selectPrimary.
+  ///
+  /// In en, this message translates to:
+  /// **'Primary dive computer'**
+  String get diveLog_consolidate_selectPrimary;
+
+  /// No description provided for @diveLog_consolidate_snackbar.
+  ///
+  /// In en, this message translates to:
+  /// **'Dive merged as an additional computer.'**
+  String get diveLog_consolidate_snackbar;
+
+  /// No description provided for @diveLog_consolidate_undoError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t undo the merge.'**
+  String get diveLog_consolidate_undoError;
+
+  /// No description provided for @diveLog_consolidate_undone.
+  ///
+  /// In en, this message translates to:
+  /// **'Merge undone'**
+  String get diveLog_consolidate_undone;
+
+  /// No description provided for @diveLog_mergeDialog_confirmSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Merging dive at {time} into this dive.'**
+  String diveLog_mergeDialog_confirmSubtitle(String time);
+
+  /// No description provided for @diveLog_mergeDialog_confirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm merge'**
+  String get diveLog_mergeDialog_confirmTitle;
+
+  /// No description provided for @diveLog_mergeDialog_empty.
+  ///
+  /// In en, this message translates to:
+  /// **'No other dives found on this day.'**
+  String get diveLog_mergeDialog_empty;
+
+  /// No description provided for @diveLog_mergeDialog_explanation.
+  ///
+  /// In en, this message translates to:
+  /// **'This dive\'s profile, tanks, pressures, events, tags, buddies, and sightings will be folded into this dive as an additional computer source. This action can be reversed with \'Unlink computer\'.'**
+  String get diveLog_mergeDialog_explanation;
+
+  /// No description provided for @diveLog_mergeDialog_loadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Error loading dives: {error}'**
+  String diveLog_mergeDialog_loadError(String error);
+
+  /// No description provided for @diveLog_mergeDialog_merge.
+  ///
+  /// In en, this message translates to:
+  /// **'Merge'**
+  String get diveLog_mergeDialog_merge;
+
+  /// No description provided for @diveLog_mergeDialog_next.
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get diveLog_mergeDialog_next;
+
+  /// No description provided for @diveLog_mergeDialog_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a dive from the same day to merge as an additional computer.'**
+  String get diveLog_mergeDialog_subtitle;
+
+  /// No description provided for @diveLog_mergeDialog_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Merge with another dive'**
+  String get diveLog_mergeDialog_title;
+
+  /// No description provided for @diveLog_mergeDialog_whatThisDoes.
+  ///
+  /// In en, this message translates to:
+  /// **'What this does'**
+  String get diveLog_mergeDialog_whatThisDoes;
 
   /// Description of the computer profile selection sheet
   ///
@@ -5401,30 +5761,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Error loading dive'**
   String get diveLog_detail_errorLoading;
-
-  /// No description provided for @diveLog_detail_fullscreen_sampleData.
-  ///
-  /// In en, this message translates to:
-  /// **'Sample Data'**
-  String get diveLog_detail_fullscreen_sampleData;
-
-  /// No description provided for @diveLog_detail_fullscreen_tapChartCompact.
-  ///
-  /// In en, this message translates to:
-  /// **'Tap chart for compact view'**
-  String get diveLog_detail_fullscreen_tapChartCompact;
-
-  /// No description provided for @diveLog_detail_fullscreen_tapChartFull.
-  ///
-  /// In en, this message translates to:
-  /// **'Tap chart for full-screen view'**
-  String get diveLog_detail_fullscreen_tapChartFull;
-
-  /// No description provided for @diveLog_detail_fullscreen_touchChart.
-  ///
-  /// In en, this message translates to:
-  /// **'Touch the chart to see data at that point'**
-  String get diveLog_detail_fullscreen_touchChart;
 
   /// No description provided for @diveLog_detail_label_airTemp.
   ///
@@ -6145,6 +6481,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Dive #'**
   String get diveLog_edit_label_diveNumber;
+
+  /// Label for the optional dive name field in the dive edit form
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get diveLog_edit_label_diveName;
+
+  /// Placeholder shown in the empty dive name field
+  ///
+  /// In en, this message translates to:
+  /// **'Optional name for this dive'**
+  String get diveLog_edit_diveNamePlaceholder;
 
   /// No description provided for @diveLog_edit_hint_diveNumber.
   ///
@@ -7124,6 +7472,30 @@ abstract class AppLocalizations {
   /// **'No tags created yet'**
   String get diveLog_filter_noTagsYet;
 
+  /// No description provided for @diveLog_filter_presetAllTime.
+  ///
+  /// In en, this message translates to:
+  /// **'All time'**
+  String get diveLog_filter_presetAllTime;
+
+  /// No description provided for @diveLog_filter_presetLast12Months.
+  ///
+  /// In en, this message translates to:
+  /// **'Last 12 months'**
+  String get diveLog_filter_presetLast12Months;
+
+  /// No description provided for @diveLog_filter_presetLastYear.
+  ///
+  /// In en, this message translates to:
+  /// **'Last year'**
+  String get diveLog_filter_presetLastYear;
+
+  /// No description provided for @diveLog_filter_presetThisYear.
+  ///
+  /// In en, this message translates to:
+  /// **'This year'**
+  String get diveLog_filter_presetThisYear;
+
   /// No description provided for @diveLog_filter_sectionBuddy.
   ///
   /// In en, this message translates to:
@@ -7214,6 +7586,18 @@ abstract class AppLocalizations {
   /// **'Dive #{number} Profile'**
   String diveLog_fullscreenProfile_title(Object number);
 
+  /// No description provided for @diveLog_instruments_customize.
+  ///
+  /// In en, this message translates to:
+  /// **'Customize instruments'**
+  String get diveLog_instruments_customize;
+
+  /// No description provided for @diveLog_instruments_customizeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Toggle instruments on or off. Drag to reorder.'**
+  String get diveLog_instruments_customizeHint;
+
   /// No description provided for @diveLog_legend_label_ascentRate.
   ///
   /// In en, this message translates to:
@@ -7303,6 +7687,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'OTU'**
   String get diveLog_legend_label_otu;
+
+  /// No description provided for @diveLog_legend_label_photoMarkers.
+  ///
+  /// In en, this message translates to:
+  /// **'Photos'**
+  String get diveLog_legend_label_photoMarkers;
 
   /// No description provided for @diveLog_legend_label_ppHe.
   ///
@@ -8174,18 +8564,6 @@ abstract class AppLocalizations {
   /// **'Playback speed'**
   String get diveLog_playback_tooltip_speed;
 
-  /// No description provided for @diveLog_profileSelector_badge_primary.
-  ///
-  /// In en, this message translates to:
-  /// **'Primary'**
-  String get diveLog_profileSelector_badge_primary;
-
-  /// No description provided for @diveLog_profileSelector_label_diveComputers.
-  ///
-  /// In en, this message translates to:
-  /// **'Dive Computers'**
-  String get diveLog_profileSelector_label_diveComputers;
-
   /// No description provided for @diveLog_profile_axisDepth.
   ///
   /// In en, this message translates to:
@@ -8221,6 +8599,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Dive profile chart, pinch to zoom'**
   String get diveLog_profile_semantics_chart;
+
+  /// No description provided for @diveLog_profile_semantics_photoMarker.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo marker'**
+  String get diveLog_profile_semantics_photoMarker;
 
   /// No description provided for @diveLog_profile_tooltip_moreOptions.
   ///
@@ -9193,6 +9577,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'TTS'**
   String get diveLog_tooltip_tts;
+
+  /// No description provided for @diveLog_sources_row_metric.
+  ///
+  /// In en, this message translates to:
+  /// **'Metric'**
+  String get diveLog_sources_row_metric;
+
+  /// No description provided for @diveLog_sources_row_maxDepth.
+  ///
+  /// In en, this message translates to:
+  /// **'Max Depth'**
+  String get diveLog_sources_row_maxDepth;
+
+  /// No description provided for @diveLog_sources_row_avgDepth.
+  ///
+  /// In en, this message translates to:
+  /// **'Avg Depth'**
+  String get diveLog_sources_row_avgDepth;
+
+  /// No description provided for @diveLog_sources_row_duration.
+  ///
+  /// In en, this message translates to:
+  /// **'Duration'**
+  String get diveLog_sources_row_duration;
+
+  /// No description provided for @diveLog_sources_row_waterTemp.
+  ///
+  /// In en, this message translates to:
+  /// **'Water Temp'**
+  String get diveLog_sources_row_waterTemp;
+
+  /// No description provided for @diveLog_sources_row_cns.
+  ///
+  /// In en, this message translates to:
+  /// **'CNS'**
+  String get diveLog_sources_row_cns;
+
+  /// No description provided for @diveLog_sources_row_otu.
+  ///
+  /// In en, this message translates to:
+  /// **'OTU'**
+  String get diveLog_sources_row_otu;
+
+  /// No description provided for @diveLog_sources_row_decoAlgorithm.
+  ///
+  /// In en, this message translates to:
+  /// **'Deco Algorithm'**
+  String get diveLog_sources_row_decoAlgorithm;
+
+  /// No description provided for @diveLog_sources_row_gf.
+  ///
+  /// In en, this message translates to:
+  /// **'GF'**
+  String get diveLog_sources_row_gf;
+
+  /// No description provided for @diveLog_sources_minutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 min} other{{count} min}}'**
+  String diveLog_sources_minutes(int count);
+
+  /// No description provided for @diveLog_sources_unknownComputer.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown Computer'**
+  String get diveLog_sources_unknownComputer;
 
   /// No description provided for @divePlanner_action_addTank.
   ///
@@ -18086,6 +18536,12 @@ abstract class AppLocalizations {
   /// **'OTU (O2 Tolerance Units)'**
   String get settings_appearance_metric_otu;
 
+  /// No description provided for @settings_appearance_metric_photoMarkers.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo Markers'**
+  String get settings_appearance_metric_photoMarkers;
+
   /// No description provided for @settings_appearance_metricsEnabledCount.
   ///
   /// In en, this message translates to:
@@ -18446,6 +18902,90 @@ abstract class AppLocalizations {
     Object providerName,
     Object error,
   );
+
+  /// No description provided for @settings_cloudSync_dropbox_account_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Dropbox account'**
+  String get settings_cloudSync_dropbox_account_title;
+
+  /// No description provided for @settings_cloudSync_dropbox_connect_browserFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open your browser. Try the Reopen browser button.'**
+  String get settings_cloudSync_dropbox_connect_browserFailed;
+
+  /// No description provided for @settings_cloudSync_dropbox_connect_codeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Authorization code'**
+  String get settings_cloudSync_dropbox_connect_codeLabel;
+
+  /// No description provided for @settings_cloudSync_dropbox_connect_emptyCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the authorization code shown in your browser'**
+  String get settings_cloudSync_dropbox_connect_emptyCode;
+
+  /// No description provided for @settings_cloudSync_dropbox_connect_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not connect to Dropbox: {error}'**
+  String settings_cloudSync_dropbox_connect_failed(Object error);
+
+  /// No description provided for @settings_cloudSync_dropbox_connect_instructions.
+  ///
+  /// In en, this message translates to:
+  /// **'Your browser opened a Dropbox authorization page. Approve access, then paste the code Dropbox shows you here.'**
+  String get settings_cloudSync_dropbox_connect_instructions;
+
+  /// No description provided for @settings_cloudSync_dropbox_connect_reopenBrowser.
+  ///
+  /// In en, this message translates to:
+  /// **'Reopen browser'**
+  String get settings_cloudSync_dropbox_connect_reopenBrowser;
+
+  /// No description provided for @settings_cloudSync_dropbox_connect_submit.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect'**
+  String get settings_cloudSync_dropbox_connect_submit;
+
+  /// No description provided for @settings_cloudSync_dropbox_connect_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect Dropbox'**
+  String get settings_cloudSync_dropbox_connect_title;
+
+  /// No description provided for @settings_cloudSync_dropbox_connected.
+  ///
+  /// In en, this message translates to:
+  /// **'Connected to Dropbox'**
+  String get settings_cloudSync_dropbox_connected;
+
+  /// No description provided for @settings_cloudSync_dropbox_connectedAs.
+  ///
+  /// In en, this message translates to:
+  /// **'Connected as {account}'**
+  String settings_cloudSync_dropbox_connectedAs(Object account);
+
+  /// No description provided for @settings_cloudSync_dropbox_disconnect.
+  ///
+  /// In en, this message translates to:
+  /// **'Disconnect'**
+  String get settings_cloudSync_dropbox_disconnect;
+
+  /// No description provided for @settings_cloudSync_provider_dropbox_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync via Dropbox (Apps/Submersion)'**
+  String get settings_cloudSync_provider_dropbox_subtitle;
+
+  /// No description provided for @settings_cloudSync_provider_dropbox_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Dropbox'**
+  String get settings_cloudSync_provider_dropbox_title;
 
   /// No description provided for @settings_cloudSync_provider_googleDrive.
   ///
@@ -19422,6 +19962,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'System Default'**
   String get settings_language_systemDefault;
+
+  /// No description provided for @settings_manage_checklistTemplates.
+  ///
+  /// In en, this message translates to:
+  /// **'Checklist Templates'**
+  String get settings_manage_checklistTemplates;
+
+  /// No description provided for @settings_manage_checklistTemplates_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reusable to-do lists for trip planning'**
+  String get settings_manage_checklistTemplates_subtitle;
 
   /// No description provided for @settings_manage_diveTypes.
   ///
@@ -21116,6 +21668,18 @@ abstract class AppLocalizations {
   /// **'Error loading statistics'**
   String get statistics_error_loadingStatistics;
 
+  /// No description provided for @statistics_filterBar_clear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear filter'**
+  String get statistics_filterBar_clear;
+
+  /// No description provided for @statistics_filterBar_diveCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 dive} other{{count} dives}}'**
+  String statistics_filterBar_diveCount(int count);
+
   /// No description provided for @statistics_gas_appBar_title.
   ///
   /// In en, this message translates to:
@@ -22347,6 +22911,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Dive Records'**
   String get statistics_tooltip_diveRecords;
+
+  /// No description provided for @statistics_tooltip_filter.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter statistics'**
+  String get statistics_tooltip_filter;
 
   /// No description provided for @statistics_tooltip_refreshRecords.
   ///
@@ -23929,6 +24499,12 @@ abstract class AppLocalizations {
   /// **'Total Dives'**
   String get trips_detail_stat_totalDives;
 
+  /// No description provided for @trips_detail_tab_checklist.
+  ///
+  /// In en, this message translates to:
+  /// **'Checklist'**
+  String get trips_detail_tab_checklist;
+
   /// No description provided for @trips_detail_tooltip_edit.
   ///
   /// In en, this message translates to:
@@ -24319,6 +24895,12 @@ abstract class AppLocalizations {
   /// **'Retry'**
   String get trips_list_button_retry;
 
+  /// No description provided for @trips_list_countdown.
+  ///
+  /// In en, this message translates to:
+  /// **'{days, plural, =0{Starting today} =1{In 1 day} other{In {days} days}}'**
+  String trips_list_countdown(int days);
+
   /// No description provided for @trips_list_empty_button.
   ///
   /// In en, this message translates to:
@@ -24367,6 +24949,18 @@ abstract class AppLocalizations {
   /// **'Clear all'**
   String get trips_list_filters_clearAll;
 
+  /// No description provided for @trips_list_inProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'In progress'**
+  String get trips_list_inProgress;
+
+  /// No description provided for @trips_list_pastSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Past Trips'**
+  String get trips_list_pastSection;
+
   /// No description provided for @trips_list_sort_title.
   ///
   /// In en, this message translates to:
@@ -24396,6 +24990,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Sort'**
   String get trips_list_tooltip_sort;
+
+  /// No description provided for @trips_list_upcomingSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming'**
+  String get trips_list_upcomingSection;
 
   /// No description provided for @trips_photos_empty_scanButton.
   ///

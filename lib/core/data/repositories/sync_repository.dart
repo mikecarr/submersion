@@ -11,7 +11,7 @@ import 'package:submersion/core/services/sync/sync_clock.dart';
 enum SyncStatus { synced, pending, conflict }
 
 /// Cloud provider types
-enum CloudProviderType { icloud, googledrive, s3 }
+enum CloudProviderType { icloud, googledrive, s3, dropbox }
 
 /// Repository for managing sync metadata and tracking
 class SyncRepository {
@@ -30,10 +30,14 @@ class SyncRepository {
     'divers': (table: 'divers', pk: 'id'),
     'diverSettings': (table: 'diver_settings', pk: 'id'),
     'buddies': (table: 'buddies', pk: 'id'),
+    'buddyRoles': (table: 'buddy_roles', pk: 'id'),
     'diveCenters': (table: 'dive_centers', pk: 'id'),
     'trips': (table: 'trips', pk: 'id'),
     'liveaboardDetails': (table: 'liveaboard_detail_records', pk: 'id'),
     'itineraryDays': (table: 'trip_itinerary_days', pk: 'id'),
+    'checklistTemplates': (table: 'checklist_templates', pk: 'id'),
+    'checklistTemplateItems': (table: 'checklist_template_items', pk: 'id'),
+    'tripChecklistItems': (table: 'trip_checklist_items', pk: 'id'),
     'equipment': (table: 'equipment', pk: 'id'),
     'equipmentSets': (table: 'equipment_sets', pk: 'id'),
     'diveTypes': (table: 'dive_types', pk: 'id'),

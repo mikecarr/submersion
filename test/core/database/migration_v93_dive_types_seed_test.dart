@@ -69,7 +69,9 @@ void main() {
 
   test('v93 is in the migration ladder', () {
     // v93 is now a past migration (the latest-version tripwire lives in the
-    // newest version's test). It must remain in the ladder.
+    // newest version's test -- currently
+    // consolidation_attribution_migration_test.dart). It must remain in the
+    // ladder so upgrade step counts stay correct.
     expect(AppDatabase.currentSchemaVersion, greaterThanOrEqualTo(93));
     expect(AppDatabase.migrationVersions, contains(93));
   });

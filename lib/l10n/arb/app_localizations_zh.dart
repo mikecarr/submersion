@@ -890,6 +890,36 @@ class AppLocalizationsZh extends AppLocalizations {
   String get buddies_edit_merge_notEnoughBody => '潜伴数量不足，无法合并。';
 
   @override
+  String get buddies_section_professionalRoles => '专业角色';
+
+  @override
+  String get buddies_roles_addRole => '添加角色';
+
+  @override
+  String get buddies_roles_role => '角色';
+
+  @override
+  String get buddies_roles_agency => '机构';
+
+  @override
+  String get buddies_roles_credentialNumber => '资质编号';
+
+  @override
+  String get buddies_roles_removeTooltip => '移除角色';
+
+  @override
+  String get buddies_roles_emptyHint => '添加教练或潜水长资质，以便在记录认证和课程时重复使用。';
+
+  @override
+  String get buddies_instructorPicker_label => '来自潜伴的教练';
+
+  @override
+  String get buddies_instructorPicker_none => '无（手动输入）';
+
+  @override
+  String get buddies_detail_section_professionalRoles => '专业角色';
+
+  @override
   String get certifications_appBar_addCertification => '添加证书';
 
   @override
@@ -1434,6 +1464,150 @@ class AppLocalizationsZh extends AppLocalizations {
   String get certifications_wallet_tooltip_share => '分享证书';
 
   @override
+  String get checklists_section_title => '清单';
+
+  @override
+  String checklists_progress(int done, int total) {
+    return '已完成 $done/$total 项待办';
+  }
+
+  @override
+  String get checklists_empty_upcoming => '规划您的旅行 - 添加待办事项或应用模板';
+
+  @override
+  String get checklists_empty_past => '暂无清单事项';
+
+  @override
+  String get checklists_addItem => '添加事项';
+
+  @override
+  String get checklists_item_titleLabel => '标题';
+
+  @override
+  String get checklists_item_titleRequired => '标题为必填项';
+
+  @override
+  String get checklists_item_categoryLabel => '类别';
+
+  @override
+  String get checklists_item_notesLabel => '备注';
+
+  @override
+  String get checklists_item_dueDateLabel => '截止日期';
+
+  @override
+  String get checklists_item_dueOffsetLabel => '旅行开始前的天数';
+
+  @override
+  String get checklists_item_dueOffsetInvalid => '请输入0天或以上';
+
+  @override
+  String get checklists_item_overdue => '已逾期';
+
+  @override
+  String get checklists_item_edit => '编辑事项';
+
+  @override
+  String get checklists_item_delete => '删除事项';
+
+  @override
+  String get checklists_menu_applyTemplate => '应用模板…';
+
+  @override
+  String get checklists_menu_saveAsTemplate => '保存为模板…';
+
+  @override
+  String get checklists_applySheet_title => '应用模板';
+
+  @override
+  String get checklists_applySheet_empty => '暂无模板。请在设置中创建。';
+
+  @override
+  String checklists_applySheet_itemCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 项事项',
+      one: '1 项事项',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String checklists_applySheet_confirmAppend(int added, int skipped) {
+    String _temp0 = intl.Intl.pluralLogic(
+      added,
+      locale: localeName,
+      other: '将添加 $added 项事项',
+      one: '将添加 1 项事项',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      skipped,
+      locale: localeName,
+      other: '跳过 $skipped 项重复',
+      one: '跳过 1 项重复',
+      zero: '不跳过任何重复项',
+    );
+    return '$_temp0，$_temp1。';
+  }
+
+  @override
+  String checklists_apply_success(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '已添加 $count 项事项',
+      one: '已添加 1 项事项',
+      zero: '未添加新事项',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get checklists_apply_templateGone => '模板已不存在';
+
+  @override
+  String get checklists_saveTemplate_title => '保存为模板';
+
+  @override
+  String get checklists_saveTemplate_nameLabel => '模板名称';
+
+  @override
+  String get checklists_saveTemplate_success => '模板已保存';
+
+  @override
+  String get checklists_templates_pageTitle => '清单模板';
+
+  @override
+  String get checklists_templates_addTemplate => '添加模板';
+
+  @override
+  String get checklists_templates_empty => '暂无模板';
+
+  @override
+  String get checklists_templates_deleteTitle => '删除模板';
+
+  @override
+  String checklists_templates_deleteContent(Object name) {
+    return '删除“$name”？已应用该模板的旅行仍会保留其事项。';
+  }
+
+  @override
+  String get checklists_template_nameLabel => '名称';
+
+  @override
+  String get checklists_template_nameRequired => '名称为必填项';
+
+  @override
+  String get checklists_template_descriptionLabel => '描述';
+
+  @override
+  String get checklists_template_itemsHeader => '事项';
+
+  @override
+  String get checklists_template_addItem => '添加事项';
+
+  @override
   String get common_action_back => '返回';
 
   @override
@@ -1592,9 +1766,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get courses_field_notes => '备注';
 
   @override
-  String get courses_field_selectFromBuddies => '从潜伴中选择（可选）';
-
-  @override
   String get courses_filter_all => '全部';
 
   @override
@@ -1617,9 +1788,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get courses_label_name => '名称';
-
-  @override
-  String get courses_label_none => '-- 无 --';
 
   @override
   String get courses_label_startDate => '开始日期';
@@ -2830,17 +2998,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get diveLog_combine_profilePreview => '合并后的剖面';
 
   @override
-  String get diveLog_combine_overlapBody =>
-      '重叠的潜水看起来像是由多台潜水电脑记录的同一次潜水。将它们合并为显示每台电脑数据的单条记录的功能即将在未来版本中推出。';
-
-  @override
-  String get diveLog_combine_overlapHintTwoDives =>
-      '要立即合并同一次潜水的两条记录，请打开其中一条并使用「与另一次潜水合并」。';
-
-  @override
-  String get diveLog_combine_overlapTitle => '这些潜水在时间上重叠';
-
-  @override
   String diveLog_combine_previewIntro(int count) {
     return '这 $count 次潜水将合并为一次连续潜水。它们之间的间隔将变为水面时间。';
   }
@@ -2873,6 +3030,70 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get diveLog_combine_undone => '已撤消合并';
+
+  @override
+  String get diveLog_computerSource_badge_primary => '主要';
+
+  @override
+  String get diveLog_consolidate_confirm => '保留为一次潜水，包含两台电脑';
+
+  @override
+  String get diveLog_consolidate_error_generic => '无法合并这些潜水。未做任何更改。';
+
+  @override
+  String get diveLog_consolidate_error_notOverlapping =>
+      '这些潜水在时间上不重叠，因此无法合并为同一次潜水。';
+
+  @override
+  String get diveLog_consolidate_error_sameComputer =>
+      '这些潜水来自同一台潜水电脑，无法以这种方式合并。';
+
+  @override
+  String get diveLog_consolidate_selectPrimary => '主潜水电脑';
+
+  @override
+  String get diveLog_consolidate_snackbar => '潜水已作为附加电脑合并。';
+
+  @override
+  String get diveLog_consolidate_undoError => '无法撤消合并。';
+
+  @override
+  String get diveLog_consolidate_undone => '已撤消合并';
+
+  @override
+  String diveLog_mergeDialog_confirmSubtitle(String time) {
+    return '$time 的潜水将合并到此次潜水中。';
+  }
+
+  @override
+  String get diveLog_mergeDialog_confirmTitle => '确认合并';
+
+  @override
+  String get diveLog_mergeDialog_empty => '当天未找到其他潜水记录。';
+
+  @override
+  String get diveLog_mergeDialog_explanation =>
+      '此次潜水的剖面、气瓶、压力、事件、标签、潜伴和目击记录将作为附加电脑来源合并到此次潜水中。此操作可通过“取消关联电脑”撤消。';
+
+  @override
+  String diveLog_mergeDialog_loadError(String error) {
+    return '加载潜水记录时出错：$error';
+  }
+
+  @override
+  String get diveLog_mergeDialog_merge => '合并';
+
+  @override
+  String get diveLog_mergeDialog_next => '下一步';
+
+  @override
+  String get diveLog_mergeDialog_subtitle => '选择同一天的一次潜水，将其作为附加电脑合并。';
+
+  @override
+  String get diveLog_mergeDialog_title => '与另一次潜水合并';
+
+  @override
+  String get diveLog_mergeDialog_whatThisDoes => '这将执行以下操作';
 
   @override
   String get diveLog_computerSheet_description => '选择要从哪台电脑的轮廓开始编辑。';
@@ -3065,18 +3286,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get diveLog_detail_errorLoading => '加载潜水出错';
-
-  @override
-  String get diveLog_detail_fullscreen_sampleData => '采样数据';
-
-  @override
-  String get diveLog_detail_fullscreen_tapChartCompact => '点击图表切换紧凑视图';
-
-  @override
-  String get diveLog_detail_fullscreen_tapChartFull => '点击图表切换全屏视图';
-
-  @override
-  String get diveLog_detail_fullscreen_touchChart => '触摸图表查看该点的数据';
 
   @override
   String get diveLog_detail_label_airTemp => '气温';
@@ -3467,6 +3676,12 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get diveLog_edit_label_diveNumber => '潜水编号';
+
+  @override
+  String get diveLog_edit_label_diveName => '名称';
+
+  @override
+  String get diveLog_edit_diveNamePlaceholder => '此次潜水的可选名称';
 
   @override
   String get diveLog_edit_hint_diveNumber => '留空则自动分配';
@@ -4034,6 +4249,18 @@ class AppLocalizationsZh extends AppLocalizations {
   String get diveLog_filter_noTagsYet => '尚未创建标签';
 
   @override
+  String get diveLog_filter_presetAllTime => '全部时间';
+
+  @override
+  String get diveLog_filter_presetLast12Months => '最近12个月';
+
+  @override
+  String get diveLog_filter_presetLastYear => '去年';
+
+  @override
+  String get diveLog_filter_presetThisYear => '今年';
+
+  @override
   String get diveLog_filter_sectionBuddy => '潜伴';
 
   @override
@@ -4081,6 +4308,12 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get diveLog_instruments_customize => '自定义仪表';
+
+  @override
+  String get diveLog_instruments_customizeHint => '开启或关闭仪表。拖动以重新排序。';
+
+  @override
   String get diveLog_legend_label_ascentRate => '上升速率';
 
   @override
@@ -4124,6 +4357,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get diveLog_legend_label_otu => 'OTU';
+
+  @override
+  String get diveLog_legend_label_photoMarkers => '照片';
 
   @override
   String get diveLog_legend_label_ppHe => '氦分压';
@@ -4620,12 +4856,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get diveLog_playback_tooltip_speed => '回放速度';
 
   @override
-  String get diveLog_profileSelector_badge_primary => '主要';
-
-  @override
-  String get diveLog_profileSelector_label_diveComputers => '潜水电脑';
-
-  @override
   String diveLog_profile_axisDepth(Object unit) {
     return '深度 ($unit)';
   }
@@ -4644,6 +4874,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get diveLog_profile_semantics_chart => '潜水轮廓图，双指缩放';
+
+  @override
+  String get diveLog_profile_semantics_photoMarker => '照片标记';
 
   @override
   String get diveLog_profile_tooltip_moreOptions => '更多图表选项';
@@ -5158,6 +5391,47 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get diveLog_tooltip_tts => 'TTS';
+
+  @override
+  String get diveLog_sources_row_metric => '指标';
+
+  @override
+  String get diveLog_sources_row_maxDepth => '最大深度';
+
+  @override
+  String get diveLog_sources_row_avgDepth => '平均深度';
+
+  @override
+  String get diveLog_sources_row_duration => '时长';
+
+  @override
+  String get diveLog_sources_row_waterTemp => '水温';
+
+  @override
+  String get diveLog_sources_row_cns => 'CNS';
+
+  @override
+  String get diveLog_sources_row_otu => 'OTU';
+
+  @override
+  String get diveLog_sources_row_decoAlgorithm => '减压算法';
+
+  @override
+  String get diveLog_sources_row_gf => 'GF';
+
+  @override
+  String diveLog_sources_minutes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 分钟',
+      one: '1 分钟',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get diveLog_sources_unknownComputer => '未知电脑';
 
   @override
   String get divePlanner_action_addTank => '添加气瓶';
@@ -10096,6 +10370,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_appearance_metric_otu => 'OTU (O2 耐受单位)';
 
   @override
+  String get settings_appearance_metric_photoMarkers => '照片标记';
+
+  @override
   String settings_appearance_metricsEnabledCount(int count, int total) {
     return '已启用 $count/$total';
   }
@@ -10338,6 +10615,55 @@ class AppLocalizationsZh extends AppLocalizations {
   ) {
     return '$providerName 连接失败：$error';
   }
+
+  @override
+  String get settings_cloudSync_dropbox_account_title => 'Dropbox 账户';
+
+  @override
+  String get settings_cloudSync_dropbox_connect_browserFailed =>
+      '无法打开浏览器。请尝试“重新打开浏览器”按钮。';
+
+  @override
+  String get settings_cloudSync_dropbox_connect_codeLabel => '授权码';
+
+  @override
+  String get settings_cloudSync_dropbox_connect_emptyCode => '输入浏览器中显示的授权码';
+
+  @override
+  String settings_cloudSync_dropbox_connect_failed(Object error) {
+    return '无法连接到 Dropbox：$error';
+  }
+
+  @override
+  String get settings_cloudSync_dropbox_connect_instructions =>
+      '浏览器已打开 Dropbox 授权页面。请批准访问权限，然后将 Dropbox 显示的代码粘贴到此处。';
+
+  @override
+  String get settings_cloudSync_dropbox_connect_reopenBrowser => '重新打开浏览器';
+
+  @override
+  String get settings_cloudSync_dropbox_connect_submit => '连接';
+
+  @override
+  String get settings_cloudSync_dropbox_connect_title => '连接 Dropbox';
+
+  @override
+  String get settings_cloudSync_dropbox_connected => '已连接到 Dropbox';
+
+  @override
+  String settings_cloudSync_dropbox_connectedAs(Object account) {
+    return '已连接为 $account';
+  }
+
+  @override
+  String get settings_cloudSync_dropbox_disconnect => '断开连接';
+
+  @override
+  String get settings_cloudSync_provider_dropbox_subtitle =>
+      '通过 Dropbox 同步（Apps/Submersion）';
+
+  @override
+  String get settings_cloudSync_provider_dropbox_title => 'Dropbox';
 
   @override
   String get settings_cloudSync_provider_googleDrive => 'Google Drive';
@@ -10901,6 +11227,12 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get settings_language_systemDefault => '系统默认';
+
+  @override
+  String get settings_manage_checklistTemplates => '清单模板';
+
+  @override
+  String get settings_manage_checklistTemplates_subtitle => '用于旅行规划的可重复使用待办清单';
 
   @override
   String get settings_manage_diveTypes => '潜水类型';
@@ -11820,6 +12152,20 @@ class AppLocalizationsZh extends AppLocalizations {
   String get statistics_error_loadingStatistics => '加载统计数据时出错';
 
   @override
+  String get statistics_filterBar_clear => '清除筛选';
+
+  @override
+  String statistics_filterBar_diveCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 次潜水',
+      one: '1 次潜水',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get statistics_gas_appBar_title => '空气消耗';
 
   @override
@@ -12507,6 +12853,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get statistics_tooltip_diveRecords => '潜水记录';
+
+  @override
+  String get statistics_tooltip_filter => '筛选统计';
 
   @override
   String get statistics_tooltip_refreshRecords => '刷新纪录';
@@ -13437,6 +13786,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get trips_detail_stat_totalDives => '总计潜水';
 
   @override
+  String get trips_detail_tab_checklist => '清单';
+
+  @override
   String get trips_detail_tooltip_edit => '编辑旅行';
 
   @override
@@ -13670,6 +14022,18 @@ class AppLocalizationsZh extends AppLocalizations {
   String get trips_list_button_retry => '重试';
 
   @override
+  String trips_list_countdown(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days 天后出发',
+      one: '1 天后出发',
+      zero: '今天出发',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get trips_list_empty_button => '添加您的第一次旅行';
 
   @override
@@ -13696,6 +14060,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get trips_list_filters_clearAll => '清除全部';
 
   @override
+  String get trips_list_inProgress => '进行中';
+
+  @override
+  String get trips_list_pastSection => '过往旅行';
+
+  @override
   String get trips_list_sort_title => '排序旅行';
 
   @override
@@ -13711,6 +14081,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get trips_list_tooltip_sort => '排序';
+
+  @override
+  String get trips_list_upcomingSection => '即将到来';
 
   @override
   String get trips_photos_empty_scanButton => '扫描设备图库';

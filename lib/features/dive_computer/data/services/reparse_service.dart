@@ -78,7 +78,9 @@ class ReparseService {
 
       // ------------------------------------------------------------------
       // 5. Replace DiveProfileEvents, GasSwitches, TankPressureProfiles
-      //    These tables have no computerId column, so delete by diveId.
+      //    GasSwitches has no computerId column, so it is always deleted by
+      //    diveId; events and tank pressure carry computerId and are stamped
+      //    with this source's computer below.
       // ------------------------------------------------------------------
 
       // Check if this is a multi-source dive
@@ -89,7 +91,7 @@ class ReparseService {
 
       // Only replace events/switches/pressure for single-source dives.
       // Multi-source dives skip this to avoid destroying data from other
-      // sources (these tables lack a computerId column for per-source
+      // sources (gas_switches lacks a computerId column for per-source
       // scoping).
       if (!isMultiSource) {
         await (db.delete(
@@ -103,21 +105,28 @@ class ReparseService {
         )..where((t) => t.diveId.equals(diveId))).go();
 
         // Re-insert events from parsed data
-        await _insertEvents(diveId: diveId, parsed: parsed, now: now);
+        await _insertEvents(
+          diveId: diveId,
+          computerId: computerId,
+          parsed: parsed,
+          now: now,
+        );
       }
 
       // ------------------------------------------------------------------
       // 6. DiveTanks carry-over (primary + single-source only)
-      //    dive_tanks has no computerId, so skip for non-primary or
-      //    multi-source dives to avoid overwriting data from other sources.
+      //    Skip for non-primary or multi-source dives to avoid overwriting
+      //    tank data owned by other sources.
       // ------------------------------------------------------------------
       if (sourceRow.isPrimary && !isMultiSource) {
         final tankIdsByIndex = await _carryOverTanks(
           diveId: diveId,
+          computerId: computerId,
           parsed: parsed,
         );
         await _replaceTankPressureProfiles(
           diveId: diveId,
+          computerId: computerId,
           parsed: parsed,
           tankIdsByIndex: tankIdsByIndex,
         );
@@ -438,6 +447,7 @@ class ReparseService {
 
   Future<void> _insertEvents({
     required String diveId,
+    required String? computerId,
     required pigeon.ParsedDive parsed,
     required DateTime now,
   }) async {
@@ -455,6 +465,7 @@ class ReparseService {
           DiveProfileEventsCompanion(
             id: Value(_uuid.v4()),
             diveId: Value(diveId),
+            computerId: Value(computerId),
             timestamp: Value(e.timeSeconds),
             eventType: Value(eventType),
             severity: Value(_eventSeverity(eventType)),
@@ -511,6 +522,7 @@ class ReparseService {
   /// tank index -> tank row id, used to attach tank pressure profiles.
   Future<Map<int, String>> _carryOverTanks({
     required String diveId,
+    required String? computerId,
     required pigeon.ParsedDive parsed,
   }) async {
     final tankIdsByIndex = <int, String>{};
@@ -561,6 +573,7 @@ class ReparseService {
               DiveTanksCompanion(
                 id: Value(newTankId),
                 diveId: Value(diveId),
+                computerId: Value(computerId),
                 volume: Value(tank.volumeLiters),
                 startPressure: Value(tank.startPressure),
                 endPressure: Value(tank.endPressure),
@@ -593,6 +606,7 @@ class ReparseService {
   /// were already cleared by the single-source replace step above.
   Future<void> _replaceTankPressureProfiles({
     required String diveId,
+    required String? computerId,
     required pigeon.ParsedDive parsed,
     required Map<int, String> tankIdsByIndex,
   }) async {
@@ -624,6 +638,7 @@ class ReparseService {
               id: _uuid.v4(),
               diveId: diveId,
               tankId: tankId,
+              computerId: Value(computerId),
               timestamp: point.timestamp,
               pressure: point.pressure,
             ),

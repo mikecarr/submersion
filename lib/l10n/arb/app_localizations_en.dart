@@ -915,6 +915,37 @@ class AppLocalizationsEn extends AppLocalizations {
   String get buddies_edit_merge_notEnoughBody => 'Not enough buddies to merge.';
 
   @override
+  String get buddies_section_professionalRoles => 'Professional Roles';
+
+  @override
+  String get buddies_roles_addRole => 'Add role';
+
+  @override
+  String get buddies_roles_role => 'Role';
+
+  @override
+  String get buddies_roles_agency => 'Agency';
+
+  @override
+  String get buddies_roles_credentialNumber => 'Credential number';
+
+  @override
+  String get buddies_roles_removeTooltip => 'Remove role';
+
+  @override
+  String get buddies_roles_emptyHint =>
+      'Add instructor or divemaster credentials to reuse them when logging certifications and courses.';
+
+  @override
+  String get buddies_instructorPicker_label => 'Instructor from buddies';
+
+  @override
+  String get buddies_instructorPicker_none => 'None (manual entry)';
+
+  @override
+  String get buddies_detail_section_professionalRoles => 'Professional Roles';
+
+  @override
   String get certifications_appBar_addCertification => 'Add Certification';
 
   @override
@@ -1491,6 +1522,152 @@ class AppLocalizationsEn extends AppLocalizations {
   String get certifications_wallet_tooltip_share => 'Share certification';
 
   @override
+  String get checklists_section_title => 'Checklist';
+
+  @override
+  String checklists_progress(int done, int total) {
+    return '$done of $total to-dos done';
+  }
+
+  @override
+  String get checklists_empty_upcoming =>
+      'Plan your trip - add to-dos or apply a template';
+
+  @override
+  String get checklists_empty_past => 'No checklist items';
+
+  @override
+  String get checklists_addItem => 'Add item';
+
+  @override
+  String get checklists_item_titleLabel => 'Title';
+
+  @override
+  String get checklists_item_titleRequired => 'Title is required';
+
+  @override
+  String get checklists_item_categoryLabel => 'Category';
+
+  @override
+  String get checklists_item_notesLabel => 'Notes';
+
+  @override
+  String get checklists_item_dueDateLabel => 'Due date';
+
+  @override
+  String get checklists_item_dueOffsetLabel => 'Days before trip start';
+
+  @override
+  String get checklists_item_dueOffsetInvalid => 'Enter 0 or more days';
+
+  @override
+  String get checklists_item_overdue => 'Overdue';
+
+  @override
+  String get checklists_item_edit => 'Edit item';
+
+  @override
+  String get checklists_item_delete => 'Delete item';
+
+  @override
+  String get checklists_menu_applyTemplate => 'Apply template...';
+
+  @override
+  String get checklists_menu_saveAsTemplate => 'Save as template...';
+
+  @override
+  String get checklists_applySheet_title => 'Apply template';
+
+  @override
+  String get checklists_applySheet_empty =>
+      'No templates yet. Create them in Settings.';
+
+  @override
+  String checklists_applySheet_itemCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items',
+      one: '1 item',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String checklists_applySheet_confirmAppend(int added, int skipped) {
+    String _temp0 = intl.Intl.pluralLogic(
+      added,
+      locale: localeName,
+      other: '$added items will be added',
+      one: '1 item will be added',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      skipped,
+      locale: localeName,
+      other: '$skipped duplicates skipped',
+      one: '1 duplicate skipped',
+      zero: 'no duplicates skipped',
+    );
+    return '$_temp0, $_temp1.';
+  }
+
+  @override
+  String checklists_apply_success(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items added',
+      one: '1 item added',
+      zero: 'No new items added',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get checklists_apply_templateGone => 'Template no longer exists';
+
+  @override
+  String get checklists_saveTemplate_title => 'Save as template';
+
+  @override
+  String get checklists_saveTemplate_nameLabel => 'Template name';
+
+  @override
+  String get checklists_saveTemplate_success => 'Template saved';
+
+  @override
+  String get checklists_templates_pageTitle => 'Checklist Templates';
+
+  @override
+  String get checklists_templates_addTemplate => 'Add Template';
+
+  @override
+  String get checklists_templates_empty => 'No templates yet';
+
+  @override
+  String get checklists_templates_deleteTitle => 'Delete Template';
+
+  @override
+  String checklists_templates_deleteContent(Object name) {
+    return 'Delete \"$name\"? Trips that already applied it keep their items.';
+  }
+
+  @override
+  String get checklists_template_nameLabel => 'Name';
+
+  @override
+  String get checklists_template_nameRequired => 'Name is required';
+
+  @override
+  String get checklists_template_descriptionLabel => 'Description';
+
+  @override
+  String get checklists_template_itemsHeader => 'Items';
+
+  @override
+  String get checklists_template_addItem => 'Add item';
+
+  @override
   String get common_action_back => 'Back';
 
   @override
@@ -1652,10 +1829,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get courses_field_notes => 'Notes';
 
   @override
-  String get courses_field_selectFromBuddies =>
-      'Select from Buddies (Optional)';
-
-  @override
   String get courses_filter_all => 'All';
 
   @override
@@ -1678,9 +1851,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get courses_label_name => 'Name';
-
-  @override
-  String get courses_label_none => '-- None --';
 
   @override
   String get courses_label_startDate => 'Start Date';
@@ -2927,17 +3097,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get diveLog_combine_profilePreview => 'Combined profile';
 
   @override
-  String get diveLog_combine_overlapBody =>
-      'Overlapping dives look like the same dive recorded by multiple dive computers. Combining those into a single entry that shows every computer\'s data is coming in a future release.';
-
-  @override
-  String get diveLog_combine_overlapHintTwoDives =>
-      'To merge two records of the same dive now, open one of them and use \"Merge with another dive\".';
-
-  @override
-  String get diveLog_combine_overlapTitle => 'These dives overlap in time';
-
-  @override
   String diveLog_combine_previewIntro(int count) {
     return 'These $count dives will be combined into one continuous dive. Gaps between them become surface time.';
   }
@@ -2970,6 +3129,74 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get diveLog_combine_undone => 'Combine undone';
+
+  @override
+  String get diveLog_computerSource_badge_primary => 'Primary';
+
+  @override
+  String get diveLog_consolidate_confirm =>
+      'Keep as one dive with both computers';
+
+  @override
+  String get diveLog_consolidate_error_generic =>
+      'Couldn\'t merge the dives. Nothing was changed.';
+
+  @override
+  String get diveLog_consolidate_error_notOverlapping =>
+      'These dives don\'t overlap in time, so they can\'t be merged as the same dive.';
+
+  @override
+  String get diveLog_consolidate_error_sameComputer =>
+      'These dives are from the same dive computer and can\'t be merged this way.';
+
+  @override
+  String get diveLog_consolidate_selectPrimary => 'Primary dive computer';
+
+  @override
+  String get diveLog_consolidate_snackbar =>
+      'Dive merged as an additional computer.';
+
+  @override
+  String get diveLog_consolidate_undoError => 'Couldn\'t undo the merge.';
+
+  @override
+  String get diveLog_consolidate_undone => 'Merge undone';
+
+  @override
+  String diveLog_mergeDialog_confirmSubtitle(String time) {
+    return 'Merging dive at $time into this dive.';
+  }
+
+  @override
+  String get diveLog_mergeDialog_confirmTitle => 'Confirm merge';
+
+  @override
+  String get diveLog_mergeDialog_empty => 'No other dives found on this day.';
+
+  @override
+  String get diveLog_mergeDialog_explanation =>
+      'This dive\'s profile, tanks, pressures, events, tags, buddies, and sightings will be folded into this dive as an additional computer source. This action can be reversed with \'Unlink computer\'.';
+
+  @override
+  String diveLog_mergeDialog_loadError(String error) {
+    return 'Error loading dives: $error';
+  }
+
+  @override
+  String get diveLog_mergeDialog_merge => 'Merge';
+
+  @override
+  String get diveLog_mergeDialog_next => 'Next';
+
+  @override
+  String get diveLog_mergeDialog_subtitle =>
+      'Select a dive from the same day to merge as an additional computer.';
+
+  @override
+  String get diveLog_mergeDialog_title => 'Merge with another dive';
+
+  @override
+  String get diveLog_mergeDialog_whatThisDoes => 'What this does';
 
   @override
   String get diveLog_computerSheet_description =>
@@ -3166,21 +3393,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get diveLog_detail_errorLoading => 'Error loading dive';
-
-  @override
-  String get diveLog_detail_fullscreen_sampleData => 'Sample Data';
-
-  @override
-  String get diveLog_detail_fullscreen_tapChartCompact =>
-      'Tap chart for compact view';
-
-  @override
-  String get diveLog_detail_fullscreen_tapChartFull =>
-      'Tap chart for full-screen view';
-
-  @override
-  String get diveLog_detail_fullscreen_touchChart =>
-      'Touch the chart to see data at that point';
 
   @override
   String get diveLog_detail_label_airTemp => 'Air Temp';
@@ -3581,6 +3793,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get diveLog_edit_label_diveNumber => 'Dive #';
+
+  @override
+  String get diveLog_edit_label_diveName => 'Name';
+
+  @override
+  String get diveLog_edit_diveNamePlaceholder => 'Optional name for this dive';
 
   @override
   String get diveLog_edit_hint_diveNumber => 'Auto-assigned if left blank';
@@ -4169,6 +4387,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get diveLog_filter_noTagsYet => 'No tags created yet';
 
   @override
+  String get diveLog_filter_presetAllTime => 'All time';
+
+  @override
+  String get diveLog_filter_presetLast12Months => 'Last 12 months';
+
+  @override
+  String get diveLog_filter_presetLastYear => 'Last year';
+
+  @override
+  String get diveLog_filter_presetThisYear => 'This year';
+
+  @override
   String get diveLog_filter_sectionBuddy => 'Buddy';
 
   @override
@@ -4216,6 +4446,13 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get diveLog_instruments_customize => 'Customize instruments';
+
+  @override
+  String get diveLog_instruments_customizeHint =>
+      'Toggle instruments on or off. Drag to reorder.';
+
+  @override
   String get diveLog_legend_label_ascentRate => 'Ascent Rate';
 
   @override
@@ -4259,6 +4496,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get diveLog_legend_label_otu => 'OTU';
+
+  @override
+  String get diveLog_legend_label_photoMarkers => 'Photos';
 
   @override
   String get diveLog_legend_label_ppHe => 'ppHe';
@@ -4767,12 +5007,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get diveLog_playback_tooltip_speed => 'Playback speed';
 
   @override
-  String get diveLog_profileSelector_badge_primary => 'Primary';
-
-  @override
-  String get diveLog_profileSelector_label_diveComputers => 'Dive Computers';
-
-  @override
   String diveLog_profile_axisDepth(Object unit) {
     return 'Depth ($unit)';
   }
@@ -4793,6 +5027,9 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get diveLog_profile_semantics_chart =>
       'Dive profile chart, pinch to zoom';
+
+  @override
+  String get diveLog_profile_semantics_photoMarker => 'Photo marker';
 
   @override
   String get diveLog_profile_tooltip_moreOptions => 'More chart options';
@@ -5310,6 +5547,47 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get diveLog_tooltip_tts => 'TTS';
+
+  @override
+  String get diveLog_sources_row_metric => 'Metric';
+
+  @override
+  String get diveLog_sources_row_maxDepth => 'Max Depth';
+
+  @override
+  String get diveLog_sources_row_avgDepth => 'Avg Depth';
+
+  @override
+  String get diveLog_sources_row_duration => 'Duration';
+
+  @override
+  String get diveLog_sources_row_waterTemp => 'Water Temp';
+
+  @override
+  String get diveLog_sources_row_cns => 'CNS';
+
+  @override
+  String get diveLog_sources_row_otu => 'OTU';
+
+  @override
+  String get diveLog_sources_row_decoAlgorithm => 'Deco Algorithm';
+
+  @override
+  String get diveLog_sources_row_gf => 'GF';
+
+  @override
+  String diveLog_sources_minutes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count min',
+      one: '1 min',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get diveLog_sources_unknownComputer => 'Unknown Computer';
 
   @override
   String get divePlanner_action_addTank => 'Add Tank';
@@ -10415,6 +10693,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settings_appearance_metric_otu => 'OTU (O2 Tolerance Units)';
 
   @override
+  String get settings_appearance_metric_photoMarkers => 'Photo Markers';
+
+  @override
   String settings_appearance_metricsEnabledCount(int count, int total) {
     return '$count of $total enabled';
   }
@@ -10666,6 +10947,58 @@ class AppLocalizationsEn extends AppLocalizations {
   ) {
     return '$providerName connection failed: $error';
   }
+
+  @override
+  String get settings_cloudSync_dropbox_account_title => 'Dropbox account';
+
+  @override
+  String get settings_cloudSync_dropbox_connect_browserFailed =>
+      'Could not open your browser. Try the Reopen browser button.';
+
+  @override
+  String get settings_cloudSync_dropbox_connect_codeLabel =>
+      'Authorization code';
+
+  @override
+  String get settings_cloudSync_dropbox_connect_emptyCode =>
+      'Enter the authorization code shown in your browser';
+
+  @override
+  String settings_cloudSync_dropbox_connect_failed(Object error) {
+    return 'Could not connect to Dropbox: $error';
+  }
+
+  @override
+  String get settings_cloudSync_dropbox_connect_instructions =>
+      'Your browser opened a Dropbox authorization page. Approve access, then paste the code Dropbox shows you here.';
+
+  @override
+  String get settings_cloudSync_dropbox_connect_reopenBrowser =>
+      'Reopen browser';
+
+  @override
+  String get settings_cloudSync_dropbox_connect_submit => 'Connect';
+
+  @override
+  String get settings_cloudSync_dropbox_connect_title => 'Connect Dropbox';
+
+  @override
+  String get settings_cloudSync_dropbox_connected => 'Connected to Dropbox';
+
+  @override
+  String settings_cloudSync_dropbox_connectedAs(Object account) {
+    return 'Connected as $account';
+  }
+
+  @override
+  String get settings_cloudSync_dropbox_disconnect => 'Disconnect';
+
+  @override
+  String get settings_cloudSync_provider_dropbox_subtitle =>
+      'Sync via Dropbox (Apps/Submersion)';
+
+  @override
+  String get settings_cloudSync_provider_dropbox_title => 'Dropbox';
 
   @override
   String get settings_cloudSync_provider_googleDrive => 'Google Drive';
@@ -11252,6 +11585,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settings_language_systemDefault => 'System Default';
+
+  @override
+  String get settings_manage_checklistTemplates => 'Checklist Templates';
+
+  @override
+  String get settings_manage_checklistTemplates_subtitle =>
+      'Reusable to-do lists for trip planning';
 
   @override
   String get settings_manage_diveTypes => 'Dive Types';
@@ -12222,6 +12562,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String get statistics_error_loadingStatistics => 'Error loading statistics';
 
   @override
+  String get statistics_filterBar_clear => 'Clear filter';
+
+  @override
+  String statistics_filterBar_diveCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count dives',
+      one: '1 dive',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get statistics_gas_appBar_title => 'Air Consumption';
 
   @override
@@ -12959,6 +13313,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get statistics_tooltip_diveRecords => 'Dive Records';
+
+  @override
+  String get statistics_tooltip_filter => 'Filter statistics';
 
   @override
   String get statistics_tooltip_refreshRecords => 'Refresh records';
@@ -13914,6 +14271,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get trips_detail_stat_totalDives => 'Total Dives';
 
   @override
+  String get trips_detail_tab_checklist => 'Checklist';
+
+  @override
   String get trips_detail_tooltip_edit => 'Edit trip';
 
   @override
@@ -14149,6 +14509,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get trips_list_button_retry => 'Retry';
 
   @override
+  String trips_list_countdown(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: 'In $days days',
+      one: 'In 1 day',
+      zero: 'Starting today',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get trips_list_empty_button => 'Add Your First Trip';
 
   @override
@@ -14177,6 +14549,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get trips_list_filters_clearAll => 'Clear all';
 
   @override
+  String get trips_list_inProgress => 'In progress';
+
+  @override
+  String get trips_list_pastSection => 'Past Trips';
+
+  @override
   String get trips_list_sort_title => 'Sort Trips';
 
   @override
@@ -14192,6 +14570,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get trips_list_tooltip_sort => 'Sort';
+
+  @override
+  String get trips_list_upcomingSection => 'Upcoming';
 
   @override
   String get trips_photos_empty_scanButton => 'Scan device gallery';

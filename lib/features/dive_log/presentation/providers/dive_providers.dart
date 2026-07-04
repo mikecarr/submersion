@@ -7,6 +7,7 @@ import 'package:submersion/core/services/database_service.dart';
 import 'package:submersion/features/dive_log/data/repositories/dive_custom_field_repository.dart';
 import 'package:submersion/features/dive_log/data/repositories/dive_repository_impl.dart';
 import 'package:submersion/features/dive_log/data/repositories/tank_pressure_repository.dart';
+import 'package:submersion/features/dive_log/data/services/dive_consolidation_service.dart';
 import 'package:submersion/features/dive_log/data/services/dive_merge_service.dart';
 import 'package:submersion/features/dive_log/presentation/providers/dive_repository_provider.dart';
 import 'package:submersion/features/dive_log/domain/entities/dive.dart'
@@ -109,6 +110,13 @@ final diveCustomFieldRepositoryProvider = Provider<DiveCustomFieldRepository>((
 /// Sequential dive-combine service singleton (#449).
 final diveMergeServiceProvider = Provider<DiveMergeService>((ref) {
   return DiveMergeService(ref.watch(diveRepositoryProvider));
+});
+
+/// Multi-computer consolidation service singleton.
+final diveConsolidationServiceProvider = Provider<DiveConsolidationService>((
+  ref,
+) {
+  return DiveConsolidationService(ref.watch(diveRepositoryProvider));
 });
 
 /// Autocomplete suggestions: distinct keys this diver has used
