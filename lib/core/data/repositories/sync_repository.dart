@@ -81,7 +81,14 @@ class SyncRepository {
       }
       if (existing != null) return existing;
 
-      // Create new metadata with a unique device ID
+      // Create new metadata with a unique device ID. The seed uses
+      // insertOrIgnore because getSingleOrNull above and this insert are not
+      // atomic: on a fresh database two callers race to seed the 'global' row
+      // (the launch reconcile via getDeviceId and the Cloud Sync page via
+      // getLastSyncTime). Without insertOrIgnore the loser throws
+      // SqliteException(1555) UNIQUE constraint failed, which the page surfaces
+      // as "Failed to load sync state". First writer wins; the loser is a
+      // no-op and re-reads the winning row below.
       final now = DateTime.now().millisecondsSinceEpoch;
       final deviceId = _uuid.v4();
 
@@ -95,6 +102,7 @@ class SyncRepository {
               createdAt: Value(now),
               updatedAt: Value(now),
             ),
+            mode: InsertMode.insertOrIgnore,
           );
 
       _log.info('Created sync metadata with deviceId: $deviceId');
