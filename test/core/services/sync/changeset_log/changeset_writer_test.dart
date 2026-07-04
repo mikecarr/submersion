@@ -406,6 +406,33 @@ void main() {
       },
     );
 
+    test('a null adopted watermark falls back to a streamed base publish '
+        '(never exportChangeset(null), the in-memory OOM path)', () async {
+      // maxRowHlc() can legitimately be null at adopt: an empty adopted
+      // library, or one whose rows all predate HLC stamping. A null
+      // watermark in the changeset path would export the ENTIRE library
+      // in memory -- the exact full-upload/OOM this mode exists to avoid.
+      await DiveRepository().createDive(
+        createTestDiveWithBottomTime(id: 'legacy-dive', diveNumber: 1),
+      );
+      await PublishStateStore(
+        DatabaseService.instance.database,
+      ).markAdoptedPendingBase(provider.providerId, null);
+      await DiveRepository().createDive(
+        createTestDiveWithBottomTime(id: 'my-edit', diveNumber: 2),
+      );
+
+      final result = await publish();
+
+      expect(
+        result.kind,
+        ChangesetWriteKind.base,
+        reason:
+            'with no watermark to delta against, the only safe publish '
+            'is the streamed full base',
+      );
+    });
+
     test(
       'a base-less log folds into a real base when compaction trips',
       () async {

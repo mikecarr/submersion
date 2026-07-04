@@ -61,6 +61,7 @@ class ChangesetWriter {
     // recovers the seq counter (knownHeadSeq) so the new base never reuses a
     // number.
     final hasBase = ownManifest?.baseSeq != null;
+    final watermark = ownManifest?.publishedHlcHigh ?? state?.publishedHlcHigh;
     // The post-adopt marker (a publish-state row with a null baseSeq): this
     // device's library IS the adopted epoch the peers already published, so
     // publishing its own base would redundantly re-upload the whole library --
@@ -70,8 +71,14 @@ class ChangesetWriter {
     // a base-less manifest by applying changesets from seq 1 (the adopted
     // content itself comes from the epoch peers' bases). Compaction
     // eventually folds the log into a real base, clearing the marker.
-    final adoptedNoBase = !hasBase && state != null && state.baseSeq == null;
-    final watermark = ownManifest?.publishedHlcHigh ?? state?.publishedHlcHigh;
+    //
+    // A null watermark disables this mode: with nothing to delta against,
+    // exportChangeset would materialize the ENTIRE library in memory (the
+    // exact full-upload/OOM this path avoids, #358). maxRowHlc() is null at
+    // adopt for an empty library (the base below no-ops) or one whose rows
+    // all predate HLC stamping (one streamed base publish, safely bounded).
+    final adoptedNoBase =
+        !hasBase && state != null && state.baseSeq == null && watermark != null;
 
     final newSeq = knownHeadSeq + 1;
     final now = DateTime.now().millisecondsSinceEpoch;
