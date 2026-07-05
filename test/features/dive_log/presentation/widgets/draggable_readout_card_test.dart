@@ -57,9 +57,10 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Hover or scrub the profile'), findsNothing);
-    expect(find.text('Depth'), findsOneWidget);
-    expect(find.text('18.2 m'), findsOneWidget);
-    expect(find.text('Temp'), findsOneWidget);
+    // Rows render as one monospace column-aligned string per row.
+    expect(find.textContaining('Depth'), findsOneWidget);
+    expect(find.textContaining('18.2 m'), findsOneWidget);
+    expect(find.textContaining('Temp'), findsOneWidget);
   });
 
   testWidgets('defaults to the top-right corner', (tester) async {
@@ -89,6 +90,43 @@ void main() {
     // Clamped to (1, 0): flush to the inset top-right corner.
     expect(cardRect.right, closeTo(stackRect.right - 12, 1.0));
     expect(cardRect.top, closeTo(stackRect.top + 12, 1.0));
+  });
+
+  testWidgets('card width stays constant as value text lengths change '
+      '(no resize jitter while scrubbing)', (tester) async {
+    // Short values (early in a dive).
+    await tester.pumpWidget(
+      _wrap(
+        rows: const [
+          TooltipRow(label: 'Depth', value: '3.4 m', bulletColor: Colors.blue),
+          TooltipRow(label: 'Time', value: '2:00', bulletColor: Colors.grey),
+        ],
+      ),
+    );
+    await tester.pumpAndSettle();
+    final narrow = tester.getSize(find.byKey(_cardKey));
+
+    // Longer values (deep, late in the dive) with the same row set.
+    await tester.pumpWidget(
+      _wrap(
+        rows: const [
+          TooltipRow(
+            label: 'Depth',
+            value: '102.3 m',
+            bulletColor: Colors.blue,
+          ),
+          TooltipRow(label: 'Time', value: '148:30', bulletColor: Colors.grey),
+        ],
+      ),
+    );
+    await tester.pumpAndSettle();
+    final wide = tester.getSize(find.byKey(_cardKey));
+
+    expect(
+      wide.width,
+      narrow.width,
+      reason: 'value-length changes must not resize the card',
+    );
   });
 
   testWidgets('a non-finite initial fraction falls back to the default '

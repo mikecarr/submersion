@@ -40,6 +40,15 @@ class DraggableReadoutCard extends StatefulWidget {
 
 class _DraggableReadoutCardState extends State<DraggableReadoutCard> {
   static const _inset = 12.0;
+
+  // Fixed character columns, mirroring the detail-page tooltip
+  // (DiveProfileChart's labelWidth/valueWidth). Every row pads to the same
+  // character count and renders in monospace, so value-length changes while
+  // scrubbing never resize the card.
+  static const _labelChars = 8;
+  static const _valueChars = 16;
+  static const _rowChars = _labelChars + _valueChars;
+
   final GlobalKey _cardKey = GlobalKey();
   late Offset _fraction = _sanitize(
     widget.initialFraction ?? DraggableReadoutCard.defaultFraction,
@@ -97,7 +106,7 @@ class _DraggableReadoutCardState extends State<DraggableReadoutCard> {
               onPanEnd: (_) => widget.onDragEnd(_fraction),
               child: Container(
                 key: const ValueKey('readout-card'),
-                constraints: const BoxConstraints(maxWidth: 240),
+                constraints: const BoxConstraints(maxWidth: 320),
                 padding: const EdgeInsets.symmetric(
                   horizontal: 10,
                   vertical: 8,
@@ -135,15 +144,22 @@ class _DraggableReadoutCardState extends State<DraggableReadoutCard> {
                                   const SizedBox(width: 6),
                                   Flexible(
                                     child: Text(
-                                      row.label,
-                                      overflow: TextOverflow.ellipsis,
+                                      DiveProfileChart.tooltipRowText(
+                                        row.label,
+                                        row.value,
+                                        _labelChars,
+                                        _valueChars,
+                                      ).padRight(_rowChars),
+                                      softWrap: false,
+                                      overflow: TextOverflow.clip,
                                       style: textTheme.bodySmall?.copyWith(
-                                        color: colorScheme.onSurfaceVariant,
+                                        fontFamily: 'RobotoMono',
+                                        fontFeatures: const [
+                                          FontFeature.tabularFigures(),
+                                        ],
                                       ),
                                     ),
                                   ),
-                                  const SizedBox(width: 8),
-                                  Text(row.value, style: textTheme.bodySmall),
                                 ],
                               ),
                             ),

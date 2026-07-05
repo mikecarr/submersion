@@ -146,7 +146,16 @@ class _FullscreenProfilePageState extends ConsumerState<FullscreenProfilePage> {
     final showPressureThresholdMarkers = ref.watch(
       showPressureThresholdMarkersProvider,
     );
-    final settings = ref.watch(settingsProvider);
+    // Select only the readout-card fields: watching all of settings would
+    // rebuild the whole page on every unrelated settings write.
+    final settings = ref.watch(
+      settingsProvider.select(
+        (s) => (
+          fullscreenReadoutCardX: s.fullscreenReadoutCardX,
+          fullscreenReadoutCardY: s.fullscreenReadoutCardY,
+        ),
+      ),
+    );
 
     final photoMedia =
         ref.watch(mediaForDiveProvider(widget.diveId)).value ?? const [];
