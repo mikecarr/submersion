@@ -6038,12 +6038,6 @@ abstract class AppLocalizations {
   /// **'Oxygen Toxicity'**
   String get diveLog_detail_section_oxygenToxicity;
 
-  /// No description provided for @diveLog_detail_section_sacByCylinder.
-  ///
-  /// In en, this message translates to:
-  /// **'SAC by Cylinder'**
-  String get diveLog_detail_section_sacByCylinder;
-
   /// No description provided for @diveLog_detail_section_sacRateBySegment.
   ///
   /// In en, this message translates to:
@@ -6061,12 +6055,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Cylinders'**
   String get diveLog_detail_section_cylinders;
-
-  /// No description provided for @diveLog_detail_section_tanks.
-  ///
-  /// In en, this message translates to:
-  /// **'Tanks'**
-  String get diveLog_detail_section_tanks;
 
   /// No description provided for @diveLog_detail_section_tide.
   ///
@@ -6133,12 +6121,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count} {count, plural, =1{tag} other{tags}}'**
   String diveLog_detail_tagCount(int count);
-
-  /// No description provided for @diveLog_detail_tankCount.
-  ///
-  /// In en, this message translates to:
-  /// **'{count} {count, plural, =1{tank} other{tanks}}'**
-  String diveLog_detail_tankCount(int count);
 
   /// No description provided for @diveLog_detail_tideCalculated.
   ///

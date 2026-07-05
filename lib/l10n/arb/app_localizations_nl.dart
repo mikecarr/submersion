@@ -3569,9 +3569,6 @@ class AppLocalizationsNl extends AppLocalizations {
   String get diveLog_detail_section_oxygenToxicity => 'Zuurstoftoxiciteit';
 
   @override
-  String get diveLog_detail_section_sacByCylinder => 'SAC per fles';
-
-  @override
   String get diveLog_detail_section_sacRateBySegment =>
       'SAC-verbruik per segment';
 
@@ -3580,9 +3577,6 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get diveLog_detail_section_cylinders => 'Flessen';
-
-  @override
-  String get diveLog_detail_section_tanks => 'Flessen';
 
   @override
   String get diveLog_detail_section_tide => 'Getij';
@@ -3626,17 +3620,6 @@ class AppLocalizationsNl extends AppLocalizations {
       locale: localeName,
       other: 'tags',
       one: 'tag',
-    );
-    return '$count $_temp0';
-  }
-
-  @override
-  String diveLog_detail_tankCount(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'flessen',
-      one: 'fles',
     );
     return '$count $_temp0';
   }

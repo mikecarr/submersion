@@ -3501,9 +3501,6 @@ class AppLocalizationsHe extends AppLocalizations {
   String get diveLog_detail_section_oxygenToxicity => 'רעילות חמצן';
 
   @override
-  String get diveLog_detail_section_sacByCylinder => 'SAC לפי בלון';
-
-  @override
   String get diveLog_detail_section_sacRateBySegment => 'קצב SAC לפי מקטע';
 
   @override
@@ -3511,9 +3508,6 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get diveLog_detail_section_cylinders => 'בלונים';
-
-  @override
-  String get diveLog_detail_section_tanks => 'בלונים';
 
   @override
   String get diveLog_detail_section_tide => 'גאות ושפל';
@@ -3555,17 +3549,6 @@ class AppLocalizationsHe extends AppLocalizations {
       locale: localeName,
       other: 'תגיות',
       one: 'תגית',
-    );
-    return '$count $_temp0';
-  }
-
-  @override
-  String diveLog_detail_tankCount(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'בלונים',
-      one: 'בלון',
     );
     return '$count $_temp0';
   }

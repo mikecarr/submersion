@@ -3595,9 +3595,6 @@ class AppLocalizationsEs extends AppLocalizations {
   String get diveLog_detail_section_oxygenToxicity => 'Toxicidad del oxígeno';
 
   @override
-  String get diveLog_detail_section_sacByCylinder => 'SAC por cilindro';
-
-  @override
   String get diveLog_detail_section_sacRateBySegment =>
       'Consumo SAC por segmento';
 
@@ -3606,9 +3603,6 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get diveLog_detail_section_cylinders => 'Tanques';
-
-  @override
-  String get diveLog_detail_section_tanks => 'Tanques';
 
   @override
   String get diveLog_detail_section_tide => 'Marea';
@@ -3652,17 +3646,6 @@ class AppLocalizationsEs extends AppLocalizations {
       locale: localeName,
       other: 'etiquetas',
       one: 'etiqueta',
-    );
-    return '$count $_temp0';
-  }
-
-  @override
-  String diveLog_detail_tankCount(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'tanques',
-      one: 'tanque',
     );
     return '$count $_temp0';
   }
