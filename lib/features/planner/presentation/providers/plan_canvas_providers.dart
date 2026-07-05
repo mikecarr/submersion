@@ -10,6 +10,7 @@ import 'package:submersion/features/planner/domain/services/dive_plan_state_mapp
 import 'package:submersion/features/planner/domain/services/plan_engine.dart';
 import 'package:submersion/features/planner/domain/services/tissue_seed.dart';
 import 'package:submersion/features/settings/presentation/providers/settings_providers.dart';
+import 'package:submersion/features/statistics/presentation/providers/statistics_providers.dart';
 
 /// PlanEngine thresholds sourced from the diver's deco settings.
 final planEngineConfigProvider = Provider<PlanEngineConfig>((ref) {
@@ -34,6 +35,15 @@ final planOutcomeProvider = Provider<PlanOutcome>((ref) {
     environment: DiveEnvironment.forConditions(altitudeMeters: state.altitude),
   );
   return engine.compute(divePlanFromState(state), startState: startState);
+});
+
+/// The diver's logged average back-gas SAC in L/min ("from your log");
+/// null when no logged dive carries enough tank data to compute one.
+final loggedAverageSacProvider = FutureProvider<double?>((ref) async {
+  final repository = ref.watch(statisticsRepositoryProvider);
+  final sacByRole = await repository.getSacVolumeByTankRole();
+  return sacByRole['backGas'] ??
+      (sacByRole.isEmpty ? null : sacByRole.values.first);
 });
 
 /// Scrub cursor position along the plan, in seconds (null = not scrubbing).

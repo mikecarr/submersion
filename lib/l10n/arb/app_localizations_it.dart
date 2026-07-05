@@ -10438,6 +10438,27 @@ class AppLocalizationsIt extends AppLocalizations {
       'Regola pressione di rientro';
 
   @override
+  String get plannerCanvas_convert_success => 'Dive created from plan';
+
+  @override
+  String get plannerCanvas_convert_view => 'View';
+
+  @override
+  String plannerCanvas_follow_chip(String name) {
+    return 'Following $name';
+  }
+
+  @override
+  String get plannerCanvas_follow_empty => 'No logged dives yet';
+
+  @override
+  String get plannerCanvas_follow_noTissues =>
+      'No profile data on that dive — surface interval set without tissue seeding';
+
+  @override
+  String get plannerCanvas_follow_title => 'Follow a dive';
+
+  @override
   String plannerCanvas_gas_minGas(String pressure) {
     return 'gas minimo $pressure';
   }
@@ -10476,6 +10497,9 @@ class AppLocalizationsIt extends AppLocalizations {
       'Decompressione necessaria ma nessun gas deco a bordo';
 
   @override
+  String get plannerCanvas_overlay_plan => 'Plan';
+
+  @override
   String get plannerCanvas_results_noDeco =>
       'Nessuna decompressione necessaria';
 
@@ -10486,6 +10510,11 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get plannerCanvas_saved_deleteConfirmTitle => 'Eliminare il piano?';
+
+  @override
+  String plannerCanvas_sac_useLogged(String sac) {
+    return 'Use logged average ($sac)';
+  }
 
   @override
   String get plannerCanvas_saved_duplicate => 'Duplica';

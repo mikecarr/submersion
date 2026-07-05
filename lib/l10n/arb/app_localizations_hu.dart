@@ -10409,6 +10409,27 @@ class AppLocalizationsHu extends AppLocalizations {
   String get plannerCanvas_contingency_turnRule => 'Fordulónyomás-szabály';
 
   @override
+  String get plannerCanvas_convert_success => 'Dive created from plan';
+
+  @override
+  String get plannerCanvas_convert_view => 'View';
+
+  @override
+  String plannerCanvas_follow_chip(String name) {
+    return 'Following $name';
+  }
+
+  @override
+  String get plannerCanvas_follow_empty => 'No logged dives yet';
+
+  @override
+  String get plannerCanvas_follow_noTissues =>
+      'No profile data on that dive — surface interval set without tissue seeding';
+
+  @override
+  String get plannerCanvas_follow_title => 'Follow a dive';
+
+  @override
   String plannerCanvas_gas_minGas(String pressure) {
     return 'min. gáz $pressure';
   }
@@ -10447,6 +10468,9 @@ class AppLocalizationsHu extends AppLocalizations {
       'Dekompresszió szükséges, de nincs deco gáz';
 
   @override
+  String get plannerCanvas_overlay_plan => 'Plan';
+
+  @override
   String get plannerCanvas_results_noDeco => 'Nincs szükség dekompresszióra';
 
   @override
@@ -10456,6 +10480,11 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get plannerCanvas_saved_deleteConfirmTitle => 'Törli a tervet?';
+
+  @override
+  String plannerCanvas_sac_useLogged(String sac) {
+    return 'Use logged average ($sac)';
+  }
 
   @override
   String get plannerCanvas_saved_duplicate => 'Duplikálás';

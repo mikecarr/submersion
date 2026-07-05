@@ -13,6 +13,7 @@ import 'package:submersion/features/planner/presentation/providers/plan_canvas_p
 import 'package:submersion/features/planner/presentation/widgets/ccr_settings_section.dart';
 import 'package:submersion/features/planner/presentation/widgets/contingency_chips.dart';
 import 'package:submersion/features/planner/presentation/widgets/contingency_settings_section.dart';
+import 'package:submersion/features/planner/presentation/widgets/follow_dive_sheet.dart';
 import 'package:submersion/features/planner/presentation/widgets/plan_canvas_chart.dart';
 import 'package:submersion/features/planner/presentation/widgets/plan_results_sheet.dart';
 import 'package:submersion/features/planner/presentation/widgets/plan_status_chips.dart';
@@ -110,6 +111,11 @@ class _PlanCanvasPageState extends ConsumerState<PlanCanvasPage> {
                 context.l10n.plannerCanvas_saved_title,
               ),
               _menuItem(
+                'follow',
+                Icons.history,
+                context.l10n.plannerCanvas_follow_title,
+              ),
+              _menuItem(
                 'settings',
                 Icons.tune,
                 context.l10n.divePlanner_label_planSettings,
@@ -152,6 +158,8 @@ class _PlanCanvasPageState extends ConsumerState<PlanCanvasPage> {
         );
       case 'saved':
         showSavedPlansSheet(context);
+      case 'follow':
+        showFollowDiveSheet(context);
       case 'settings':
         _showSettingsSheet(context);
       case 'convert':
