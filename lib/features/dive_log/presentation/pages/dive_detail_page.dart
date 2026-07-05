@@ -54,8 +54,6 @@ import 'package:submersion/features/dive_log/domain/services/field_attribution_s
 import 'package:submersion/features/dive_log/domain/services/source_name_resolver.dart';
 import 'package:submersion/features/dive_log/presentation/providers/active_source_provider.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/source_bar.dart';
-import 'package:submersion/features/dive_log/presentation/widgets/merge_dive_dialog.dart';
-import 'package:submersion/features/dive_log/presentation/widgets/run_dive_consolidation.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/compact_deco_status_card.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/compact_tissue_loading_card.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/dive_profile_chart.dart';
@@ -524,9 +522,6 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
                 case 'export':
                   _showExportOptions(context, ref, dive);
                   break;
-                case 'merge':
-                  _showMergeDiveDialog(context, ref, dive);
-                  break;
                 case 'reparse':
                   _reparseDive(context, ref, dive);
                   break;
@@ -541,15 +536,6 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
                 child: ListTile(
                   leading: const Icon(Icons.download),
                   title: Text(context.l10n.diveLog_detail_menu_export),
-                  contentPadding: EdgeInsets.zero,
-                ),
-              ),
-              const PopupMenuItem(
-                enabled: false,
-                value: 'merge',
-                child: ListTile(
-                  leading: Icon(Icons.merge),
-                  title: Text('Merge with another dive'),
                   contentPadding: EdgeInsets.zero,
                 ),
               ),
@@ -687,9 +673,6 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
                 case 'export':
                   _showExportOptions(context, ref, dive);
                   break;
-                case 'merge':
-                  _showMergeDiveDialog(context, ref, dive);
-                  break;
                 case 'reparse':
                   _reparseDive(context, ref, dive);
                   break;
@@ -716,15 +699,6 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
                 child: ListTile(
                   leading: const Icon(Icons.download),
                   title: Text(context.l10n.diveLog_detail_menu_export),
-                  contentPadding: EdgeInsets.zero,
-                ),
-              ),
-              const PopupMenuItem(
-                enabled: false,
-                value: 'merge',
-                child: ListTile(
-                  leading: Icon(Icons.merge),
-                  title: Text('Merge with another dive'),
                   contentPadding: EdgeInsets.zero,
                 ),
               ),
@@ -4735,28 +4709,6 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
     ref.invalidate(diveProfileProvider(diveId));
     ref.invalidate(sourceProfilesProvider(diveId));
     ref.invalidate(diveDataSourcesProvider(diveId));
-  }
-
-  void _showMergeDiveDialog(BuildContext context, WidgetRef ref, Dive dive) {
-    showMergeDiveDialog(
-      context: context,
-      currentDiveId: diveId,
-      currentDiveDate: dive.entryTime ?? dive.dateTime,
-      onMerge: (secondaryDiveIds) => runDiveConsolidation(
-        context: context,
-        service: ref.read(diveConsolidationServiceProvider),
-        targetDiveId: diveId,
-        secondaryDiveIds: secondaryDiveIds,
-        onConsolidated: () {
-          ref.invalidate(diveProvider(diveId));
-          ref.invalidate(diveProfileProvider(diveId));
-          ref.invalidate(sourceProfilesProvider(diveId));
-          ref.invalidate(diveDataSourcesProvider(diveId));
-          ref.invalidate(paginatedDiveListProvider);
-          ref.invalidate(divesProvider);
-        },
-      ),
-    );
   }
 
   Future<void> _reparseDive(
