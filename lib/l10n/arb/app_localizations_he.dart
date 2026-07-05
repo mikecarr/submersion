@@ -10231,7 +10231,22 @@ class AppLocalizationsHe extends AppLocalizations {
       'נדרשת דקומפרסיה אך לא נלקח גז דקו';
 
   @override
+  String get plannerCanvas_range_base => 'Base';
+
+  @override
+  String get plannerCanvas_range_legend =>
+      'Cells show time to surface; red = not diveable as planned';
+
+  @override
+  String get plannerCanvas_range_title => 'Range table';
+
+  @override
   String get plannerCanvas_results_noDeco => 'לא נדרשת דקומפרסיה';
+
+  @override
+  String plannerCanvas_sac_useLogged(String sac) {
+    return 'השתמש בממוצע המתועד ($sac)';
+  }
 
   @override
   String plannerCanvas_saved_deleteConfirmBody(String name) {
@@ -10240,11 +10255,6 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get plannerCanvas_saved_deleteConfirmTitle => 'למחוק את התוכנית?';
-
-  @override
-  String plannerCanvas_sac_useLogged(String sac) {
-    return 'השתמש בממוצע המתועד ($sac)';
-  }
 
   @override
   String get plannerCanvas_saved_duplicate => 'שכפול';

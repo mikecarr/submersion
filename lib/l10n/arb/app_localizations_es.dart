@@ -10483,7 +10483,22 @@ class AppLocalizationsEs extends AppLocalizations {
       'Se requiere descompresión pero no se lleva gas de deco';
 
   @override
+  String get plannerCanvas_range_base => 'Base';
+
+  @override
+  String get plannerCanvas_range_legend =>
+      'Cells show time to surface; red = not diveable as planned';
+
+  @override
+  String get plannerCanvas_range_title => 'Range table';
+
+  @override
   String get plannerCanvas_results_noDeco => 'No se requiere descompresión';
+
+  @override
+  String plannerCanvas_sac_useLogged(String sac) {
+    return 'Usar promedio registrado ($sac)';
+  }
 
   @override
   String plannerCanvas_saved_deleteConfirmBody(String name) {
@@ -10492,11 +10507,6 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get plannerCanvas_saved_deleteConfirmTitle => '¿Eliminar plan?';
-
-  @override
-  String plannerCanvas_sac_useLogged(String sac) {
-    return 'Usar promedio registrado ($sac)';
-  }
 
   @override
   String get plannerCanvas_saved_duplicate => 'Duplicar';

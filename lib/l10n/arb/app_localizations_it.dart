@@ -10497,8 +10497,23 @@ class AppLocalizationsIt extends AppLocalizations {
       'Decompressione necessaria ma nessun gas deco a bordo';
 
   @override
+  String get plannerCanvas_range_base => 'Base';
+
+  @override
+  String get plannerCanvas_range_legend =>
+      'Cells show time to surface; red = not diveable as planned';
+
+  @override
+  String get plannerCanvas_range_title => 'Range table';
+
+  @override
   String get plannerCanvas_results_noDeco =>
       'Nessuna decompressione necessaria';
+
+  @override
+  String plannerCanvas_sac_useLogged(String sac) {
+    return 'Usa media registrata ($sac)';
+  }
 
   @override
   String plannerCanvas_saved_deleteConfirmBody(String name) {
@@ -10507,11 +10522,6 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get plannerCanvas_saved_deleteConfirmTitle => 'Eliminare il piano?';
-
-  @override
-  String plannerCanvas_sac_useLogged(String sac) {
-    return 'Usa media registrata ($sac)';
-  }
 
   @override
   String get plannerCanvas_saved_duplicate => 'Duplica';

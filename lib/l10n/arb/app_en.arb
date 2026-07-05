@@ -5739,7 +5739,16 @@
   },
   "plannerCanvas_issue_noBailout": "CCR decompression plan carries no bailout gas",
   "plannerCanvas_issue_noDecoGas": "Decompression required but no deco gas carried",
+  "plannerCanvas_range_base": "Base",
+  "plannerCanvas_range_legend": "Cells show time to surface; red = not diveable as planned",
+  "plannerCanvas_range_title": "Range table",
   "plannerCanvas_results_noDeco": "No decompression required",
+  "plannerCanvas_sac_useLogged": "Use logged average ({sac})",
+  "@plannerCanvas_sac_useLogged": {
+    "placeholders": {
+      "sac": { "type": "String" }
+    }
+  },
   "plannerCanvas_saved_deleteConfirmBody": "Permanently delete \"{name}\"?",
   "@plannerCanvas_saved_deleteConfirmBody": {
     "placeholders": {
@@ -5747,12 +5756,6 @@
     }
   },
   "plannerCanvas_saved_deleteConfirmTitle": "Delete plan?",
-  "plannerCanvas_sac_useLogged": "Use logged average ({sac})",
-  "@plannerCanvas_sac_useLogged": {
-    "placeholders": {
-      "sac": { "type": "String" }
-    }
-  },
   "plannerCanvas_saved_duplicate": "Duplicate",
   "plannerCanvas_saved_empty": "No saved plans yet",
   "plannerCanvas_saved_title": "Saved plans",

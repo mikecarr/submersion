@@ -17846,11 +17846,35 @@ abstract class AppLocalizations {
   /// **'Decompression required but no deco gas carried'**
   String get plannerCanvas_issue_noDecoGas;
 
+  /// No description provided for @plannerCanvas_range_base.
+  ///
+  /// In en, this message translates to:
+  /// **'Base'**
+  String get plannerCanvas_range_base;
+
+  /// No description provided for @plannerCanvas_range_legend.
+  ///
+  /// In en, this message translates to:
+  /// **'Cells show time to surface; red = not diveable as planned'**
+  String get plannerCanvas_range_legend;
+
+  /// No description provided for @plannerCanvas_range_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Range table'**
+  String get plannerCanvas_range_title;
+
   /// No description provided for @plannerCanvas_results_noDeco.
   ///
   /// In en, this message translates to:
   /// **'No decompression required'**
   String get plannerCanvas_results_noDeco;
+
+  /// No description provided for @plannerCanvas_sac_useLogged.
+  ///
+  /// In en, this message translates to:
+  /// **'Use logged average ({sac})'**
+  String plannerCanvas_sac_useLogged(String sac);
 
   /// No description provided for @plannerCanvas_saved_deleteConfirmBody.
   ///
@@ -17863,12 +17887,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Delete plan?'**
   String get plannerCanvas_saved_deleteConfirmTitle;
-
-  /// No description provided for @plannerCanvas_sac_useLogged.
-  ///
-  /// In en, this message translates to:
-  /// **'Use logged average ({sac})'**
-  String plannerCanvas_sac_useLogged(String sac);
 
   /// No description provided for @plannerCanvas_saved_duplicate.
   ///

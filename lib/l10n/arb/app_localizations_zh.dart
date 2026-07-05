@@ -10042,7 +10042,22 @@ class AppLocalizationsZh extends AppLocalizations {
   String get plannerCanvas_issue_noDecoGas => '需要减压但未携带减压气体';
 
   @override
+  String get plannerCanvas_range_base => 'Base';
+
+  @override
+  String get plannerCanvas_range_legend =>
+      'Cells show time to surface; red = not diveable as planned';
+
+  @override
+  String get plannerCanvas_range_title => 'Range table';
+
+  @override
   String get plannerCanvas_results_noDeco => '无需减压';
+
+  @override
+  String plannerCanvas_sac_useLogged(String sac) {
+    return '使用记录的平均值（$sac）';
+  }
 
   @override
   String plannerCanvas_saved_deleteConfirmBody(String name) {
@@ -10051,11 +10066,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get plannerCanvas_saved_deleteConfirmTitle => '删除计划？';
-
-  @override
-  String plannerCanvas_sac_useLogged(String sac) {
-    return '使用记录的平均值（$sac）';
-  }
 
   @override
   String get plannerCanvas_saved_duplicate => '复制';

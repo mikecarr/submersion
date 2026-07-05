@@ -10298,7 +10298,22 @@ class AppLocalizationsAr extends AppLocalizations {
       'يلزم تخفيف الضغط ولكن لا يوجد غاز تخفيف';
 
   @override
+  String get plannerCanvas_range_base => 'Base';
+
+  @override
+  String get plannerCanvas_range_legend =>
+      'Cells show time to surface; red = not diveable as planned';
+
+  @override
+  String get plannerCanvas_range_title => 'Range table';
+
+  @override
   String get plannerCanvas_results_noDeco => 'لا يلزم تخفيف الضغط';
+
+  @override
+  String plannerCanvas_sac_useLogged(String sac) {
+    return 'استخدام المتوسط المسجل ($sac)';
+  }
 
   @override
   String plannerCanvas_saved_deleteConfirmBody(String name) {
@@ -10307,11 +10322,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get plannerCanvas_saved_deleteConfirmTitle => 'حذف الخطة؟';
-
-  @override
-  String plannerCanvas_sac_useLogged(String sac) {
-    return 'استخدام المتوسط المسجل ($sac)';
-  }
 
   @override
   String get plannerCanvas_saved_duplicate => 'تكرار';

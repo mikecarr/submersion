@@ -10468,7 +10468,22 @@ class AppLocalizationsHu extends AppLocalizations {
       'Dekompresszió szükséges, de nincs deco gáz';
 
   @override
+  String get plannerCanvas_range_base => 'Base';
+
+  @override
+  String get plannerCanvas_range_legend =>
+      'Cells show time to surface; red = not diveable as planned';
+
+  @override
+  String get plannerCanvas_range_title => 'Range table';
+
+  @override
   String get plannerCanvas_results_noDeco => 'Nincs szükség dekompresszióra';
+
+  @override
+  String plannerCanvas_sac_useLogged(String sac) {
+    return 'Naplózott átlag használata ($sac)';
+  }
 
   @override
   String plannerCanvas_saved_deleteConfirmBody(String name) {
@@ -10477,11 +10492,6 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get plannerCanvas_saved_deleteConfirmTitle => 'Törli a tervet?';
-
-  @override
-  String plannerCanvas_sac_useLogged(String sac) {
-    return 'Naplózott átlag használata ($sac)';
-  }
 
   @override
   String get plannerCanvas_saved_duplicate => 'Duplikálás';
