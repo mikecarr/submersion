@@ -666,9 +666,10 @@ final profileAnalysisProvider = FutureProvider.family<ProfileAnalysis?, String>(
 /// Extracted from [profileAnalysisProvider] so per-source analysis
 /// ([sourceProfileAnalysisProvider]) can run the identical pipeline over one
 /// data source's own samples. [computerId] scopes tank data to the owning
-/// computer: null keeps the legacy behavior (all tanks, used for the primary
-/// source); non-null restricts gas mix and tank pressures to that computer's
-/// tanks.
+/// computer: null keeps the legacy behavior (all tanks, used for
+/// single-source dives); non-null restricts gas mix and tank pressures to
+/// that computer's tanks plus unattributed (manually added) tanks, which
+/// belong to the dive rather than to either computer.
 ///
 /// Throws on failure; callers wrap with their own error handling.
 Future<ProfileAnalysis?> computeAnalysisForProfile(
@@ -681,7 +682,9 @@ Future<ProfileAnalysis?> computeAnalysisForProfile(
     final diveId = dive.id;
     final tanks = computerId == null
         ? dive.tanks
-        : dive.tanks.where((t) => t.computerId == computerId).toList();
+        : dive.tanks
+              .where((t) => t.computerId == null || t.computerId == computerId)
+              .toList();
     final repository = ref.watch(diveRepositoryProvider);
     // Resolve GF values: use dive-specific if provided, else user settings
     final double gfLow;
@@ -866,31 +869,40 @@ Future<ProfileAnalysis?> computeAnalysisForProfile(
 /// Key for per-source analysis. sourceId null = the primary source.
 typedef DiveSourceKey = ({String diveId, String? sourceId});
 
-/// Analysis computed from one data source's own samples. Delegates to
-/// [profileAnalysisProvider] for the primary source (or a null sourceId) so
-/// its cache and residual-CNS recursion are shared; other sources run the
-/// same pipeline over their own points with tank data scoped to their
-/// computer.
+/// Analysis computed from one data source's own samples -- the exact
+/// series the chart draws, index for index. On multi-source dives EVERY
+/// source (the primary included) is computed from its own bucket:
+/// `dive.profile` can be a merged superset of the primary's samples (e.g.
+/// dives consolidated by older app versions flagged both computers'
+/// rows primary), and index-pairing a merged-length analysis against the
+/// primary's bucket stretches every chart curve. Single-source dives
+/// delegate to [profileAnalysisProvider] so its cache and residual-CNS
+/// recursion are shared.
 final sourceProfileAnalysisProvider =
     FutureProvider.family<ProfileAnalysis?, DiveSourceKey>((ref, key) async {
       try {
         final sources = await ref.watch(
           diveDataSourcesProvider(key.diveId).future,
         );
-        final primaryId = sources
-            .where((s) => s.isPrimary)
-            .map((s) => s.id)
-            .firstOrNull;
-        if (key.sourceId == null || key.sourceId == primaryId) {
+        if (sources.length < 2) {
           return await ref.watch(profileAnalysisProvider(key.diveId).future);
         }
+        final primaryId =
+            sources.where((s) => s.isPrimary).map((s) => s.id).firstOrNull ??
+            sources.first.id;
+        final effectiveSourceId = key.sourceId ?? primaryId;
         final dive = await ref.watch(diveProvider(key.diveId).future);
         if (dive == null) return null;
         final profiles = await ref.watch(
           sourceProfilesProvider(key.diveId).future,
         );
-        final sourceProfile = profiles[key.sourceId];
-        if (sourceProfile == null || sourceProfile.points.isEmpty) {
+        final sourceProfile = profiles[effectiveSourceId];
+        if (sourceProfile == null) {
+          // Bucket unavailable (still loading, or stale id): fall back to
+          // the dive-level analysis rather than blanking the panels.
+          return await ref.watch(profileAnalysisProvider(key.diveId).future);
+        }
+        if (sourceProfile.points.isEmpty) {
           return null;
         }
         return await computeAnalysisForProfile(
