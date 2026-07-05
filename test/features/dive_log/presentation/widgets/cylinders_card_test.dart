@@ -240,12 +240,12 @@ void main() {
       await tester.pumpWidget(
         _buildCard(
           dive: _makeDive([
-            DiveTank(
+            const DiveTank(
               id: 'tank-1',
               presetName: 'al80',
               startPressure: 200,
               endPressure: 50,
-              gasMix: const GasMix(o2: 32),
+              gasMix: GasMix(o2: 32),
             ),
           ]),
         ),
