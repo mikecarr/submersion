@@ -4,10 +4,12 @@ import 'package:submersion/core/providers/provider.dart';
 import 'package:submersion/features/dive_log/data/repositories/dive_repository_impl.dart';
 import 'package:submersion/features/dive_log/data/services/dive_split_service.dart';
 import 'package:submersion/features/dive_log/domain/entities/dive.dart';
+import 'package:submersion/features/dive_log/domain/entities/dive_computer.dart';
 import 'package:submersion/features/dive_log/domain/entities/dive_data_source.dart';
 import 'package:submersion/features/dive_log/domain/entities/gas_switch.dart';
 import 'package:submersion/features/dive_log/domain/entities/source_profile.dart';
 import 'package:submersion/features/dive_log/presentation/pages/dive_detail_page.dart';
+import 'package:submersion/features/dive_log/presentation/providers/dive_computer_providers.dart';
 import 'package:submersion/features/dive_log/presentation/providers/dive_providers.dart';
 import 'package:submersion/features/dive_log/presentation/providers/gas_switch_providers.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/dive_profile_chart.dart';
@@ -124,6 +126,22 @@ void main() {
             dive.id,
           ).overrideWith((ref) async => <String, List<TankPressurePoint>>{}),
           diveSplitServiceProvider.overrideWithValue(splitService),
+          computersForDiveProvider(dive.id).overrideWith(
+            (ref) async => [
+              DiveComputer(
+                id: 'dc-a',
+                name: 'Black Computer',
+                createdAt: now,
+                updatedAt: now,
+              ),
+              DiveComputer(
+                id: 'dc-b',
+                name: 'Bronze Computer',
+                createdAt: now,
+                updatedAt: now,
+              ),
+            ],
+          ),
         ],
         child: MaterialApp(
           localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -245,4 +263,21 @@ void main() {
       expect(find.text('Dive split'), findsOneWidget);
     },
   );
+  testWidgets('the Details card Dive Computer row follows the active source', (
+    tester,
+  ) async {
+    await pumpPage(tester);
+
+    expect(find.text('Black Computer'), findsOneWidget);
+    expect(find.text('Bronze Computer'), findsNothing);
+
+    await tester.ensureVisible(inSourceBar(find.text('Erics Teric')));
+    await tester.pump();
+    await tester.tap(inSourceBar(find.text('Erics Teric')));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(find.text('Bronze Computer'), findsOneWidget);
+    expect(find.text('Black Computer'), findsNothing);
+  });
 }

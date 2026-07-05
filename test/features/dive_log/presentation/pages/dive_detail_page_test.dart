@@ -452,83 +452,84 @@ void main() {
       },
     );
 
-    testWidgets(
-      'a tank badge appears only for a non-primary attributed tank on a '
-      'multi-source dive',
-      (tester) async {
-        final dive = createTestDiveWithBottomTime().copyWith(
-          tanks: const [
-            // Attributed to the primary computer -- no badge expected.
-            DiveTank(id: 'tank-primary', computerId: 'comp-uuid-1'),
-            // Attributed to the secondary computer -- badge expected.
-            DiveTank(id: 'tank-secondary', computerId: 'comp-uuid-2'),
-            // Unattributed (e.g. manually added) -- no badge expected.
-            DiveTank(id: 'tank-manual'),
+    testWidgets('every computer-attributed tank shows a source badge on a '
+        'multi-source dive; manual tanks stay unbadged', (tester) async {
+      final dive = createTestDiveWithBottomTime().copyWith(
+        tanks: const [
+          // Attributed to the primary computer -- no badge expected.
+          DiveTank(id: 'tank-primary', computerId: 'comp-uuid-1'),
+          // Attributed to the secondary computer -- badge expected.
+          DiveTank(id: 'tank-secondary', computerId: 'comp-uuid-2'),
+          // Unattributed (e.g. manually added) -- no badge expected.
+          DiveTank(id: 'tank-manual'),
+        ],
+      );
+      final base = await getBaseOverrides();
+      final sources = [
+        dataSource(
+          id: 'src-1',
+          computerId: 'comp-uuid-1',
+          isPrimary: true,
+          computerModel: 'Perdix 2',
+        ),
+        dataSource(
+          id: 'src-2',
+          computerId: 'comp-uuid-2',
+          isPrimary: false,
+          computerModel: 'Suunto D5',
+        ),
+      ];
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            ...base,
+            diveProvider(dive.id).overrideWith((ref) async => dive),
+            diveDataSourcesProvider(
+              dive.id,
+            ).overrideWith((ref) async => sources),
+            gasSwitchesProvider(
+              dive.id,
+            ).overrideWith((ref) async => <GasSwitchWithTank>[]),
+            tankPressuresProvider(
+              dive.id,
+            ).overrideWith((ref) async => <String, List<TankPressurePoint>>{}),
+            // No multi-computer profile data -- keeps this scoped to the
+            // tanks section badge and out of the chart's toggle bar.
+            sourceProfilesProvider(
+              dive.id,
+            ).overrideWith((ref) async => <String, SourceProfile>{}),
           ],
-        );
-        final base = await getBaseOverrides();
-        final sources = [
-          dataSource(
-            id: 'src-1',
-            computerId: 'comp-uuid-1',
-            isPrimary: true,
-            computerModel: 'Perdix 2',
+          child: MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: DiveDetailPage(diveId: dive.id, embedded: true),
           ),
-          dataSource(
-            id: 'src-2',
-            computerId: 'comp-uuid-2',
-            isPrimary: false,
-            computerModel: 'Suunto D5',
-          ),
-        ];
+        ),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
 
-        await tester.pumpWidget(
-          ProviderScope(
-            overrides: [
-              ...base,
-              diveProvider(dive.id).overrideWith((ref) async => dive),
-              diveDataSourcesProvider(
-                dive.id,
-              ).overrideWith((ref) async => sources),
-              gasSwitchesProvider(
-                dive.id,
-              ).overrideWith((ref) async => <GasSwitchWithTank>[]),
-              tankPressuresProvider(dive.id).overrideWith(
-                (ref) async => <String, List<TankPressurePoint>>{},
-              ),
-              // No multi-computer profile data -- keeps this scoped to the
-              // tanks section badge and out of the chart's toggle bar.
-              sourceProfilesProvider(
-                dive.id,
-              ).overrideWith((ref) async => <String, SourceProfile>{}),
-            ],
-            child: MaterialApp(
-              localizationsDelegates: AppLocalizations.localizationsDelegates,
-              supportedLocales: AppLocalizations.supportedLocales,
-              home: DiveDetailPage(diveId: dive.id, embedded: true),
-            ),
-          ),
-        );
-        await tester.pump();
-        await tester.pump(const Duration(seconds: 1));
-
-        // Exactly one badge: the secondary-computer tank. Scoped to
-        // FieldAttributionBadge since the Data Sources section separately
-        // renders both model names too.
-        final badgeText = find.descendant(
+      // Both attributed tanks are badged (the primary's included);
+      // the manual tank is not, so exactly two badges render. Scoped to
+      // FieldAttributionBadge since the Data Sources section separately
+      // renders both model names too.
+      expect(
+        find.descendant(
           of: find.byType(FieldAttributionBadge),
           matching: find.text('Suunto D5'),
-        );
-        expect(badgeText, findsOneWidget);
-        expect(
-          find.descendant(
-            of: find.byType(FieldAttributionBadge),
-            matching: find.text('Perdix 2'),
-          ),
-          findsNothing,
-        );
-      },
-    );
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: find.byType(FieldAttributionBadge),
+          matching: find.text('Perdix 2'),
+        ),
+        findsOneWidget,
+      );
+      expect(find.byType(FieldAttributionBadge), findsNWidgets(2));
+    });
 
     testWidgets(
       'no tank badges appear on a single-source dive even with a computerId',

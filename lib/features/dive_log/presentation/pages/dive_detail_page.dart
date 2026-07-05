@@ -267,12 +267,19 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
               );
               final showBadges =
                   settings.showDataSourceBadges && attribution.isNotEmpty;
+              // The Dive Computer row follows the active source.
+              final activeSource = viewedSourceId == null
+                  ? dataSources.where((s) => s.isPrimary).firstOrNull
+                  : dataSources
+                        .where((s) => s.id == viewedSourceId)
+                        .firstOrNull;
               return _buildDetailsSection(
                 context,
                 ref,
                 dive,
                 units,
                 attribution: showBadges ? attribution : null,
+                activeComputerId: activeSource?.computerId,
               );
             },
           ),
@@ -2634,6 +2641,7 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
     Dive dive,
     UnitFormatter units, {
     Map<String, String>? attribution,
+    String? activeComputerId,
   }) {
     final surfaceIntervalAsync = ref.watch(surfaceIntervalProvider(diveId));
 
@@ -2696,7 +2704,12 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
                 'GF ${dive.gradientFactorLow}/${dive.gradientFactorHigh}',
               ),
             // Dive computer info (from profile link or string fields)
-            ..._buildDiveComputerRows(context, ref, dive),
+            ..._buildDiveComputerRows(
+              context,
+              ref,
+              dive,
+              activeComputerId: activeComputerId,
+            ),
             // Surface interval - prefer imported value, fall back to calculated
             if (dive.surfaceInterval != null)
               Builder(
@@ -3555,14 +3568,20 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
   List<Widget> _buildDiveComputerRows(
     BuildContext context,
     WidgetRef ref,
-    Dive dive,
-  ) {
+    Dive dive, {
+    String? activeComputerId,
+  }) {
     final computersAsync = ref.watch(computersForDiveProvider(dive.id));
 
     return computersAsync.when(
       data: (computers) {
         if (computers.isNotEmpty) {
-          return [_buildLinkedComputerRow(context, computers.first)];
+          // Show the active source's computer when one is selected; fall
+          // back to the first linked computer.
+          final active = activeComputerId == null
+              ? null
+              : computers.where((c) => c.id == activeComputerId).firstOrNull;
+          return [_buildLinkedComputerRow(context, active ?? computers.first)];
         }
         // Fall back to string fields on Dive entity
         return _buildDiveComputerStringRows(context, dive);
@@ -3855,10 +3874,6 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
     final dataSources =
         ref.watch(diveDataSourcesProvider(dive.id)).valueOrNull ?? const [];
     final computerNames = _computerDisplayNames(context, dataSources);
-    final primaryComputerId = dataSources
-        .where((s) => s.isPrimary)
-        .map((s) => s.computerId)
-        .firstOrNull;
     // Only badge tanks once there's more than one source to disambiguate —
     // a single-source dive never needs attribution.
     final showTankSourceBadges = dataSources.length >= 2;
@@ -3928,13 +3943,12 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
                 modDepth,
                 mndDepth,
               );
-              // Shown when this tank's readings came from a non-primary
-              // computer on a multi-source dive, so divers can tell which
-              // instrument's pressure log a tank's numbers came from.
+              // Shown for every computer-attributed tank on a
+              // multi-source dive (the primary's included), so divers can
+              // tell which instrument's pressure log a tank's numbers came
+              // from. Manually added tanks carry no attribution.
               final showSourceBadge =
-                  showTankSourceBadges &&
-                  tank.computerId != null &&
-                  tank.computerId != primaryComputerId;
+                  showTankSourceBadges && tank.computerId != null;
               final trailingChildren = <Widget>[
                 if (showSourceBadge)
                   Padding(
