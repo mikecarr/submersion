@@ -458,16 +458,10 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
                   activeDiveSourceProvider(dive.id),
                 );
                 final dataSources = computerReadingsAsync.valueOrNull ?? [];
-                final attribution = FieldAttributionService.computeAttribution(
-                  dataSources,
-                  viewedSourceId: viewedSourceId,
-                  nameOf: (s) =>
-                      resolveSourceName(s, _sourceNameLabels(context)),
-                );
-                final showBadges =
-                    settings.showDataSourceBadges && attribution.isNotEmpty;
                 // Header stat values follow the active source when a
-                // non-primary source is selected on a multi-source dive.
+                // non-primary source is selected on a multi-source dive;
+                // the SOURCES bar carries the attribution, so the stat
+                // metrics themselves stay badge-free.
                 final activeSource = viewedSourceId == null
                     ? null
                     : dataSources
@@ -478,7 +472,6 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
                   ref,
                   dive,
                   units,
-                  attribution: showBadges ? attribution : null,
                   activeSource: activeSource,
                 );
               },
@@ -775,7 +768,6 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
     WidgetRef ref,
     Dive dive,
     UnitFormatter units, {
-    Map<String, String>? attribution,
     DiveDataSource? activeSource,
   }) {
     final entryLoc = dive.entryLocation;
@@ -873,14 +865,12 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
                 Icons.arrow_downward,
                 units.formatDepth(activeSource?.maxDepth ?? dive.maxDepth),
                 context.l10n.diveLog_detail_stat_maxDepth,
-                sourceName: attribution?['maxDepth'],
               ),
               _buildStatItem(
                 context,
                 Icons.timelapse,
                 _formatRuntimeForSource(dive, activeSource),
                 context.l10n.diveLog_detail_stat_runtime,
-                sourceName: attribution?['bottomTime'],
               ),
               _buildStatItem(
                 context,
@@ -891,7 +881,6 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
                     ? '${dive.bottomTime!.inMinutes} min'
                     : '--',
                 context.l10n.diveLog_detail_stat_bottomTime,
-                sourceName: attribution?['bottomTime'],
               ),
               _buildStatItem(
                 context,
@@ -900,7 +889,6 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
                   activeSource?.waterTemp ?? dive.waterTemp,
                 ),
                 context.l10n.diveLog_detail_stat_waterTemp,
-                sourceName: attribution?['waterTemp'],
               ),
             ],
           ),
@@ -1037,9 +1025,8 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
     BuildContext context,
     IconData icon,
     String value,
-    String label, {
-    String? sourceName,
-  }) {
+    String label,
+  ) {
     return Column(
       children: [
         ExcludeSemantics(
@@ -1053,10 +1040,6 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
             color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
         ),
-        if (sourceName != null) ...[
-          const SizedBox(height: 2),
-          FieldAttributionBadge(sourceName: sourceName),
-        ],
       ],
     );
   }

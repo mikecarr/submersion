@@ -13,7 +13,6 @@ import 'package:submersion/features/dive_log/presentation/providers/dive_compute
 import 'package:submersion/features/dive_log/presentation/providers/dive_providers.dart';
 import 'package:submersion/features/dive_log/presentation/providers/gas_switch_providers.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/dive_profile_chart.dart';
-import 'package:submersion/features/dive_log/presentation/widgets/field_attribution_badge.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/source_bar.dart';
 import 'package:submersion/l10n/arb/app_localizations.dart';
 
@@ -170,17 +169,26 @@ void main() {
   );
 
   testWidgets(
-    'attribution badges show the primary source until a chip is tapped, '
-    'then follow the active source together with the chart profile',
+    'header stat values and the chart profile follow the active source',
     (tester) async {
       await pumpPage(tester);
 
-      bool badgeWith(String name) => tester
-          .widgetList<FieldAttributionBadge>(find.byType(FieldAttributionBadge))
-          .any((b) => b.sourceName == name);
+      // Value shown in the header stat column labeled [label] (the value
+      // Text precedes the label inside the stat Column).
+      String statValue(String label) {
+        final column = find
+            .ancestor(of: find.text(label), matching: find.byType(Column))
+            .first;
+        return tester
+            .widgetList<Text>(
+              find.descendant(of: column, matching: find.byType(Text)),
+            )
+            .first
+            .data!;
+      }
 
-      expect(badgeWith('Kiyans Teric'), isTrue);
-      expect(badgeWith('Erics Teric'), isFalse);
+      // Primary active: dive-level bottom time (45 min fixture default).
+      expect(statValue('Bottom Time'), '45 min');
 
       final chartBefore = tester.widget<DiveProfileChart>(
         find.byType(DiveProfileChart),
@@ -193,7 +201,8 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(seconds: 1));
 
-      expect(badgeWith('Erics Teric'), isTrue);
+      // Bronze active: its 3300s duration renders as 55 min.
+      expect(statValue('Bottom Time'), '55 min');
       final chartAfter = tester.widget<DiveProfileChart>(
         find.byType(DiveProfileChart),
       );
