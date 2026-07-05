@@ -616,6 +616,13 @@ class _GasUsageTracker {
   final double hePercent;
   double gasUsedLiters = 0;
 
+  // Memoized remaining pressure. The bisection solver is read up to three times
+  // per tank at plan finalization (directly and via gasUsedBar/percentUsed);
+  // keying the cache on gasUsedLiters makes it self-invalidating, so no manual
+  // reset is needed in addGasUsed.
+  double? _cachedRemaining;
+  double? _cachedForLiters;
+
   _GasUsageTracker({
     this.startPressure,
     required this.volume,
@@ -627,16 +634,22 @@ class _GasUsageTracker {
     gasUsedLiters += liters;
   }
 
-  /// Remaining pressure honoring gas compressibility.
+  /// Remaining pressure honoring gas compressibility. Memoized on
+  /// [gasUsedLiters] so repeated reads (including via gasUsedBar/percentUsed)
+  /// don't rerun the bisection.
   double? get remainingPressure {
     if (startPressure == null) return null;
-    return pressureAfterConsuming(
-      tankSizeLiters: volume,
-      startPressureBar: startPressure!,
-      litersConsumed: gasUsedLiters,
-      o2Percent: o2Percent,
-      hePercent: hePercent,
-    );
+    if (_cachedForLiters != gasUsedLiters) {
+      _cachedRemaining = pressureAfterConsuming(
+        tankSizeLiters: volume,
+        startPressureBar: startPressure!,
+        litersConsumed: gasUsedLiters,
+        o2Percent: o2Percent,
+        hePercent: hePercent,
+      );
+      _cachedForLiters = gasUsedLiters;
+    }
+    return _cachedRemaining;
   }
 
   /// Bar consumed (start minus compressibility-aware remaining).

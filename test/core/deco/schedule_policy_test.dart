@@ -96,6 +96,55 @@ void main() {
     expect(annotated.airBreakSeconds, lessThan(annotated.durationSeconds));
   });
 
+  test('air-break annotation reflects a gas-switch-extended O2 stop', () {
+    // A large gas-switch minimum forces the O2 switch stop far past its natural
+    // clearance. airBreakSeconds must be computed over that final, extended
+    // duration -- not the shorter pre-extension search result -- so breaks that
+    // fall inside the extension are counted.
+    const o2Seconds = 12 * 60;
+    const breakSeconds = 6 * 60;
+    const gasSwitchStopSeconds = 30 * 60;
+    const policy = SchedulePolicy(
+      gasSwitchStopSeconds: gasSwitchStopSeconds,
+      airBreaks: AirBreakPolicy(
+        o2Seconds: o2Seconds,
+        breakSeconds: breakSeconds,
+      ),
+    );
+    final stops = _loadedAlgo().calculateDecoSchedule(
+      currentDepth: 45,
+      ascentGas: _airPlusO2(),
+      policy: policy,
+    );
+
+    // The 6 m O2 switch stop is the deepest stop at or above 6 m.
+    final switchStop = stops.firstWhere((s) => s.depthMeters <= 6.0);
+    expect(
+      switchStop.durationSeconds,
+      greaterThanOrEqualTo(gasSwitchStopSeconds),
+      reason: 'gas-switch minimum should extend the O2 stop',
+    );
+
+    // Independently walk the air-break cycle over the FINAL duration; each whole
+    // minute (and any sub-minute remainder) is O2 for the first o2Seconds of the
+    // cycle, then break gas.
+    int expectedBreakSeconds(int stopSeconds) {
+      const cycle = o2Seconds + breakSeconds;
+      var total = 0;
+      for (var t = 0; t < stopSeconds; t += 60) {
+        final chunk = (stopSeconds - t) < 60 ? stopSeconds - t : 60;
+        if (t % cycle >= o2Seconds) total += chunk;
+      }
+      return total;
+    }
+
+    expect(switchStop.airBreakSeconds, greaterThan(0));
+    expect(
+      switchStop.airBreakSeconds,
+      expectedBreakSeconds(switchStop.durationSeconds),
+    );
+  });
+
   test('breakGasForDepth: OptimalOcAscentGas offers a non-O2 gas', () {
     final plan = _airPlusO2();
     final atSix = plan.breakGasForDepth(6.0);

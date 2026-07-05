@@ -373,8 +373,7 @@ class BuhlmannAlgorithm {
       final switched =
           stopGas.fN2 != previousGas.fN2 || stopGas.fHe != previousGas.fHe;
 
-      final result = _calculateStopTime(currentStopDepth, plan, p);
-      int stopTime = result.totalSeconds;
+      int stopTime = _calculateStopTime(currentStopDepth, plan, p);
       if (switched && p.gasSwitchStopSeconds > 0) {
         stopTime = math.max(stopTime, p.gasSwitchStopSeconds);
       }
@@ -385,7 +384,16 @@ class BuhlmannAlgorithm {
             depthMeters: currentStopDepth,
             durationSeconds: stopTime,
             isDeepStop: currentStopDepth > 9,
-            airBreakSeconds: result.breakSeconds,
+            // Derived from the FINAL stop time (a gas-switch minimum may extend
+            // it past the natural clearance) using the same gas sequence
+            // _loadStopMinutes applies, so the annotation cannot diverge from
+            // the break gas actually loaded onto the tissues.
+            airBreakSeconds: _breakSecondsForStop(
+              currentStopDepth,
+              stopTime,
+              plan,
+              p,
+            ),
           ),
         );
 
@@ -427,6 +435,20 @@ class BuhlmannAlgorithm {
     return posInCycle < breaks.o2Seconds ? primary : breakGas;
   }
 
+  /// Whether O2 air breaks apply at [stopDepth]: the plan's stop gas is
+  /// effectively pure O2, the policy defines a break cycle, and the plan offers
+  /// a non-O2 break gas here. When false, the stop breathes one gas throughout.
+  bool _airBreaksActive(
+    double stopDepth,
+    AscentGasPlan plan,
+    SchedulePolicy policy,
+  ) {
+    final primary = plan.gasForDepth(stopDepth);
+    return policy.airBreaks != null &&
+        (primary.fN2 + primary.fHe) < 0.01 &&
+        plan.breakGasForDepth(stopDepth) != null;
+  }
+
   /// Calculate time required at a stop depth, breathing the plan's gas there
   /// (with air breaks per policy).
   ///
@@ -435,7 +457,7 @@ class BuhlmannAlgorithm {
   /// (calculateDecoSchedule) applies the stop's loading once via
   /// _loadStopMinutes. Snapshot the entry state and restore it before
   /// returning so those search minutes do not persist and get double-counted.
-  ({int totalSeconds, int breakSeconds}) _calculateStopTime(
+  int _calculateStopTime(
     double stopDepth,
     AscentGasPlan ascentGas,
     SchedulePolicy policy,
@@ -444,7 +466,6 @@ class BuhlmannAlgorithm {
         ? 0.0
         : stopDepth - policy.stopIncrement;
     int stopTime = 0;
-    int breakTime = 0;
     const maxStopTime = 120 * 60;
 
     final entryCompartments = List<TissueCompartment>.from(_compartments);
@@ -457,9 +478,6 @@ class BuhlmannAlgorithm {
         ascentGas,
         policy,
       );
-      final primary = ascentGas.gasForDepth(stopDepth);
-      final onBreak =
-          minuteGas.fN2 != primary.fN2 || minuteGas.fHe != primary.fHe;
 
       final testCompartments = List<TissueCompartment>.from(_compartments);
       final testAnchor = _gfLowCeilingAnchor;
@@ -498,32 +516,79 @@ class BuhlmannAlgorithm {
         fHe: minuteGas.fHe,
       );
       stopTime += 60;
-      if (onBreak) breakTime += 60;
     }
 
     // Undo the search loading; the caller applies the stop's loading once.
     _compartments = entryCompartments;
     _gfLowCeilingAnchor = entryAnchor;
 
-    return (totalSeconds: stopTime, breakSeconds: breakTime);
+    return stopTime;
   }
 
-  /// Apply a stop's tissue loading using the same gas sequence the
-  /// stop-time search used (air breaks included). When the gas cannot vary
-  /// (no air breaks in play), load in ONE Schreiner call — bit-identical to
-  /// the legacy single-segment application, so pinned TTS tests stay exact.
+  /// The gas breathed over a stop of [stopSeconds] at [stopDepth], as
+  /// (gas, seconds) chunks: one per whole minute plus a final sub-minute
+  /// remainder. Every chunk — the remainder included — uses _gasForStopMinute
+  /// for the minute it falls in, so a non-whole-minute stop time (possible when
+  /// a gas-switch minimum is not a whole number of minutes) still follows the
+  /// air-break cycle. Both tissue loading (_loadStopMinutes) and the annotation
+  /// (_breakSecondsForStop) consume this one sequence so they cannot diverge.
+  /// Only meaningful when _airBreaksActive is true.
+  List<({AscentGas gas, int seconds})> _stopGasChunks(
+    double stopDepth,
+    int stopSeconds,
+    AscentGasPlan plan,
+    SchedulePolicy policy,
+  ) {
+    final chunks = <({AscentGas gas, int seconds})>[];
+    final wholeMinutes = stopSeconds ~/ 60;
+    for (int minute = 0; minute < wholeMinutes; minute++) {
+      chunks.add((
+        gas: _gasForStopMinute(stopDepth, minute, plan, policy),
+        seconds: 60,
+      ));
+    }
+    final remainder = stopSeconds % 60;
+    if (remainder > 0) {
+      chunks.add((
+        gas: _gasForStopMinute(stopDepth, wholeMinutes, plan, policy),
+        seconds: remainder,
+      ));
+    }
+    return chunks;
+  }
+
+  /// Seconds of a stop of [stopSeconds] at [stopDepth] spent breathing a break
+  /// gas rather than the primary stop gas, from the same chunk sequence
+  /// _loadStopMinutes applies. Zero unless air breaks are active here.
+  int _breakSecondsForStop(
+    double stopDepth,
+    int stopSeconds,
+    AscentGasPlan plan,
+    SchedulePolicy policy,
+  ) {
+    if (!_airBreaksActive(stopDepth, plan, policy)) return 0;
+    final primary = plan.gasForDepth(stopDepth);
+    int seconds = 0;
+    for (final chunk in _stopGasChunks(stopDepth, stopSeconds, plan, policy)) {
+      final onBreak =
+          chunk.gas.fN2 != primary.fN2 || chunk.gas.fHe != primary.fHe;
+      if (onBreak) seconds += chunk.seconds;
+    }
+    return seconds;
+  }
+
+  /// Apply a stop's tissue loading using the same gas sequence the stop-time
+  /// search used. When air breaks are not in play the gas cannot vary, so load
+  /// in ONE Schreiner call — bit-identical to the legacy single-segment
+  /// application, so pinned TTS tests stay exact.
   void _loadStopMinutes(
     double stopDepth,
     int stopSeconds,
     AscentGasPlan plan,
     SchedulePolicy policy,
   ) {
-    final primary = plan.gasForDepth(stopDepth);
-    final canBreak =
-        policy.airBreaks != null &&
-        (primary.fN2 + primary.fHe) < 0.01 &&
-        plan.breakGasForDepth(stopDepth) != null;
-    if (!canBreak) {
+    if (!_airBreaksActive(stopDepth, plan, policy)) {
+      final primary = plan.gasForDepth(stopDepth);
       calculateSegment(
         depthMeters: stopDepth,
         durationSeconds: stopSeconds,
@@ -532,22 +597,12 @@ class BuhlmannAlgorithm {
       );
       return;
     }
-    for (int minute = 0; minute < stopSeconds ~/ 60; minute++) {
-      final gas = _gasForStopMinute(stopDepth, minute, plan, policy);
+    for (final chunk in _stopGasChunks(stopDepth, stopSeconds, plan, policy)) {
       calculateSegment(
         depthMeters: stopDepth,
-        durationSeconds: 60,
-        fN2: gas.fN2,
-        fHe: gas.fHe,
-      );
-    }
-    final remainder = stopSeconds % 60;
-    if (remainder > 0) {
-      calculateSegment(
-        depthMeters: stopDepth,
-        durationSeconds: remainder,
-        fN2: primary.fN2,
-        fHe: primary.fHe,
+        durationSeconds: chunk.seconds,
+        fN2: chunk.gas.fN2,
+        fHe: chunk.gas.fHe,
       );
     }
   }

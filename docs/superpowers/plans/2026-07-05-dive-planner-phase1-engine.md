@@ -2764,7 +2764,7 @@ void main() {
       }
     });
 
-    test('higher altitude never shortens NDL', () {
+    test('higher altitude never lengthens NDL', () {
       int? previous;
       for (double alt = 0; alt <= 3000; alt += 500) {
         final algo = BuhlmannAlgorithm(
