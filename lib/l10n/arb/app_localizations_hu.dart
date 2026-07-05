@@ -5688,9 +5688,6 @@ class AppLocalizationsHu extends AppLocalizations {
   String get diveLog_sources_menu_setPrimary => 'Beállítás elsődlegesként';
 
   @override
-  String get diveLog_sources_menu_unlink => 'Leválasztás';
-
-  @override
   String get diveLog_sources_menu_split => 'Szétválasztás külön merülésbe';
 
   @override

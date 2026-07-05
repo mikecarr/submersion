@@ -1820,7 +1820,6 @@
   "diveLog_sources_editedSuffix": " (editado)",
   "diveLog_sources_barLabel": "FONTES",
   "diveLog_sources_menu_setPrimary": "Definir como principal",
-  "diveLog_sources_menu_unlink": "Desvincular",
   "diveLog_sources_menu_split": "Dividir em mergulho separado",
   "diveLog_sources_overlayTooltip": "Sobrepor no gráfico",
   "diveLog_sources_splitDialog_title": "Dividir em mergulho separado?",

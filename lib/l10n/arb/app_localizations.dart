@@ -9674,12 +9674,6 @@ abstract class AppLocalizations {
   /// **'Set as primary'**
   String get diveLog_sources_menu_setPrimary;
 
-  /// No description provided for @diveLog_sources_menu_unlink.
-  ///
-  /// In en, this message translates to:
-  /// **'Unlink'**
-  String get diveLog_sources_menu_unlink;
-
   /// No description provided for @diveLog_sources_menu_split.
   ///
   /// In en, this message translates to:

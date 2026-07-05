@@ -144,6 +144,22 @@ void main() {
     return id;
   }
 
+  Future<String> insertGasSwitch(String diveId, String tankId) async {
+    final id = 'gs-${rowCounter++}';
+    await db
+        .into(db.gasSwitches)
+        .insert(
+          GasSwitchesCompanion(
+            id: Value(id),
+            diveId: Value(diveId),
+            tankId: Value(tankId),
+            timestamp: const Value(600),
+            createdAt: Value(baseTime),
+          ),
+        );
+    return id;
+  }
+
   setUp(() async {
     db = await setUpTestDatabase();
     repository = DiveRepository();
@@ -366,6 +382,134 @@ void main() {
         db.dives,
       )..where((t) => t.id.equals(newDiveId))).getSingle();
       expect(newDive.computerId, 'dc-b');
+
+      expect(await fkViolations(), isEmpty);
+    },
+  );
+  test('a deduped shared tank stays behind with attribution cleared while a '
+      'clone carries the departing pressures', () async {
+    await insertDive('dive-1', computerId: 'dc-a');
+    await insertSource('src-a', 'dive-1', 'dc-a', isPrimary: true);
+    await insertSource('src-b', 'dive-1', 'dc-b', isPrimary: false);
+    await insertProfileRow('dive-1', 'dc-a', isPrimary: true);
+    await insertProfileRow('dive-1', 'dc-b', isPrimary: false);
+    // One tank deduped during consolidation: attributed to the departing
+    // computer but carrying BOTH computers' pressure curves.
+    final sharedTank = await insertTank('dive-1', 'dc-b');
+    final stayingPressure = await insertTankPressure(
+      'dive-1',
+      sharedTank,
+      'dc-a',
+    );
+    final movingPressure = await insertTankPressure(
+      'dive-1',
+      sharedTank,
+      'dc-b',
+    );
+
+    final newDiveId = await service.split(diveId: 'dive-1', sourceId: 'src-b');
+
+    // The shared tank stays on the original, attribution cleared.
+    final originalTanks = await (db.select(
+      db.diveTanks,
+    )..where((t) => t.diveId.equals('dive-1'))).get();
+    expect(originalTanks.map((t) => t.id), contains(sharedTank));
+    expect(
+      originalTanks.firstWhere((t) => t.id == sharedTank).computerId,
+      isNull,
+    );
+
+    // The other computer's pressure curve stays with it.
+    final stayingRows = await (db.select(
+      db.tankPressureProfiles,
+    )..where((t) => t.diveId.equals('dive-1'))).get();
+    expect(stayingRows.map((r) => r.id), contains(stayingPressure));
+
+    // A clone on the new dive carries the departing computer's rows.
+    final newTanks = await (db.select(
+      db.diveTanks,
+    )..where((t) => t.diveId.equals(newDiveId))).get();
+    expect(newTanks, hasLength(1));
+    expect(newTanks.single.computerId, 'dc-b');
+    final movedRows = await (db.select(
+      db.tankPressureProfiles,
+    )..where((t) => t.diveId.equals(newDiveId))).get();
+    expect(movedRows, hasLength(1));
+    expect(movedRows.single.tankId, newTanks.single.id);
+
+    // The moved pressure row was tombstoned; the shared tank was not.
+    final tombstones = await db.select(db.deletionLog).get();
+    expect(tombstones.map((t) => t.recordId), contains(movingPressure));
+    expect(tombstones.map((t) => t.recordId), isNot(contains(sharedTank)));
+
+    expect(await fkViolations(), isEmpty);
+  });
+
+  test('a gas switch pins its tank to the original dive', () async {
+    await insertDive('dive-1', computerId: 'dc-a');
+    await insertSource('src-a', 'dive-1', 'dc-a', isPrimary: true);
+    await insertSource('src-b', 'dive-1', 'dc-b', isPrimary: false);
+    await insertProfileRow('dive-1', 'dc-a', isPrimary: true);
+    await insertProfileRow('dive-1', 'dc-b', isPrimary: false);
+    final tank = await insertTank('dive-1', 'dc-b');
+    final gasSwitch = await insertGasSwitch('dive-1', tank);
+
+    final newDiveId = await service.split(diveId: 'dive-1', sourceId: 'src-b');
+
+    // The switch and its tank stay on the original (gas plan intact).
+    final switches = await (db.select(
+      db.gasSwitches,
+    )..where((t) => t.diveId.equals('dive-1'))).get();
+    expect(switches.map((g) => g.id), contains(gasSwitch));
+    final originalTanks = await (db.select(
+      db.diveTanks,
+    )..where((t) => t.diveId.equals('dive-1'))).get();
+    expect(originalTanks.map((t) => t.id), contains(tank));
+
+    // The departing computer still gets its clone on the new dive.
+    final newTanks = await (db.select(
+      db.diveTanks,
+    )..where((t) => t.diveId.equals(newDiveId))).get();
+    expect(newTanks, hasLength(1));
+    expect(newTanks.single.computerId, 'dc-b');
+
+    expect(await fkViolations(), isEmpty);
+  });
+
+  test(
+    'departing pressures on a tank the source never owned get a clone',
+    () async {
+      await insertDive('dive-1', computerId: 'dc-a');
+      await insertSource('src-a', 'dive-1', 'dc-a', isPrimary: true);
+      await insertSource('src-b', 'dive-1', 'dc-b', isPrimary: false);
+      await insertProfileRow('dive-1', 'dc-a', isPrimary: true);
+      await insertProfileRow('dive-1', 'dc-b', isPrimary: false);
+      final primaryTank = await insertTank('dive-1', 'dc-a');
+      await insertTankPressure('dive-1', primaryTank, 'dc-a');
+      await insertTankPressure('dive-1', primaryTank, 'dc-b');
+
+      final newDiveId = await service.split(
+        diveId: 'dive-1',
+        sourceId: 'src-b',
+      );
+
+      // Primary tank untouched on the original.
+      final originalTanks = await (db.select(
+        db.diveTanks,
+      )..where((t) => t.diveId.equals('dive-1'))).get();
+      expect(originalTanks.single.id, primaryTank);
+      expect(originalTanks.single.computerId, 'dc-a');
+
+      // New dive gets a clone carrying dc-b's pressure rows.
+      final newTanks = await (db.select(
+        db.diveTanks,
+      )..where((t) => t.diveId.equals(newDiveId))).get();
+      expect(newTanks, hasLength(1));
+      final movedRows = await (db.select(
+        db.tankPressureProfiles,
+      )..where((t) => t.diveId.equals(newDiveId))).get();
+      expect(movedRows, hasLength(1));
+      expect(movedRows.single.tankId, newTanks.single.id);
 
       expect(await fkViolations(), isEmpty);
     },

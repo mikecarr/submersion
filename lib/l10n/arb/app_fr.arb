@@ -1786,7 +1786,6 @@
   "diveLog_sources_editedSuffix": " (modifié)",
   "diveLog_sources_barLabel": "SOURCES",
   "diveLog_sources_menu_setPrimary": "Définir comme principal",
-  "diveLog_sources_menu_unlink": "Dissocier",
   "diveLog_sources_menu_split": "Scinder en une plongée séparée",
   "diveLog_sources_overlayTooltip": "Superposer sur le graphique",
   "diveLog_sources_splitDialog_title": "Scinder en une plongée séparée ?",

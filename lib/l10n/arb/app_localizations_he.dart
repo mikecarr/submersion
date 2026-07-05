@@ -5556,9 +5556,6 @@ class AppLocalizationsHe extends AppLocalizations {
   String get diveLog_sources_menu_setPrimary => 'הגדר כראשי';
 
   @override
-  String get diveLog_sources_menu_unlink => 'בטל קישור';
-
-  @override
   String get diveLog_sources_menu_split => 'פצל לצלילה נפרדת';
 
   @override

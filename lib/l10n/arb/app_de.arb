@@ -1820,7 +1820,6 @@
   "diveLog_sources_editedSuffix": " (bearbeitet)",
   "diveLog_sources_barLabel": "QUELLEN",
   "diveLog_sources_menu_setPrimary": "Als primär festlegen",
-  "diveLog_sources_menu_unlink": "Verknüpfung aufheben",
   "diveLog_sources_menu_split": "In separaten Tauchgang aufteilen",
   "diveLog_sources_overlayTooltip": "Im Diagramm überlagern",
   "diveLog_sources_splitDialog_title": "In separaten Tauchgang aufteilen?",

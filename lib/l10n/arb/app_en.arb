@@ -2589,7 +2589,6 @@
   "diveLog_sources_editedSuffix": " (edited)",
   "diveLog_sources_barLabel": "SOURCES",
   "diveLog_sources_menu_setPrimary": "Set as primary",
-  "diveLog_sources_menu_unlink": "Unlink",
   "diveLog_sources_menu_split": "Split into separate dive",
   "diveLog_sources_overlayTooltip": "Overlay on chart",
   "diveLog_sources_splitDialog_title": "Split into separate dive?",

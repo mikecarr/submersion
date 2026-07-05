@@ -5729,9 +5729,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get diveLog_sources_menu_setPrimary => 'Définir comme principal';
 
   @override
-  String get diveLog_sources_menu_unlink => 'Dissocier';
-
-  @override
   String get diveLog_sources_menu_split => 'Scinder en une plongée séparée';
 
   @override

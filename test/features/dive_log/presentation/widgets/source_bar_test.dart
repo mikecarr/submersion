@@ -155,9 +155,7 @@ void main() {
     expect(find.byIcon(Icons.star), findsOneWidget);
   });
 
-  testWidgets('menu offers set primary, unlink, and split; split fires', (
-    tester,
-  ) async {
+  testWidgets('menu offers set primary and split; split fires', (tester) async {
     final actions = <(String, SourceMenuAction)>[];
     await tester.pumpWidget(
       _harness(
@@ -183,7 +181,6 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Set as primary'), findsOneWidget);
-    expect(find.text('Unlink'), findsOneWidget);
     expect(find.text('Split into separate dive'), findsOneWidget);
 
     await tester.tap(find.text('Split into separate dive'));
@@ -216,7 +213,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Set as primary'), findsNothing);
-    expect(find.text('Unlink'), findsOneWidget);
+    expect(find.text('Split into separate dive'), findsOneWidget);
   });
 
   testWidgets('profile-less source has a disabled eye', (tester) async {

@@ -22,7 +22,7 @@ Color sourceColorAt(int index) {
 }
 
 /// Management actions available from a source chip's overflow menu.
-enum SourceMenuAction { setPrimary, unlink, split }
+enum SourceMenuAction { setPrimary, split }
 
 /// One data source entry in the [SourceBar].
 class SourceBarItem {
@@ -221,14 +221,6 @@ class _SourceChip extends StatelessWidget {
                             contentPadding: EdgeInsets.zero,
                           ),
                         ),
-                      PopupMenuItem(
-                        value: SourceMenuAction.unlink,
-                        child: ListTile(
-                          leading: const Icon(Icons.link_off),
-                          title: Text(l10n.diveLog_sources_menu_unlink),
-                          contentPadding: EdgeInsets.zero,
-                        ),
-                      ),
                       PopupMenuItem(
                         value: SourceMenuAction.split,
                         child: ListTile(

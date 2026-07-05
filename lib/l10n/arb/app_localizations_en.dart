@@ -5605,9 +5605,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get diveLog_sources_menu_setPrimary => 'Set as primary';
 
   @override
-  String get diveLog_sources_menu_unlink => 'Unlink';
-
-  @override
   String get diveLog_sources_menu_split => 'Split into separate dive';
 
   @override

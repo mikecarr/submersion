@@ -5705,9 +5705,6 @@ class AppLocalizationsPt extends AppLocalizations {
   String get diveLog_sources_menu_setPrimary => 'Definir como principal';
 
   @override
-  String get diveLog_sources_menu_unlink => 'Desvincular';
-
-  @override
   String get diveLog_sources_menu_split => 'Dividir em mergulho separado';
 
   @override

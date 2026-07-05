@@ -1820,7 +1820,6 @@
   "diveLog_sources_editedSuffix": " (bewerkt)",
   "diveLog_sources_barLabel": "BRONNEN",
   "diveLog_sources_menu_setPrimary": "Instellen als primair",
-  "diveLog_sources_menu_unlink": "Ontkoppelen",
   "diveLog_sources_menu_split": "Splitsen naar aparte duik",
   "diveLog_sources_overlayTooltip": "Overlay op grafiek",
   "diveLog_sources_splitDialog_title": "Splitsen naar aparte duik?",

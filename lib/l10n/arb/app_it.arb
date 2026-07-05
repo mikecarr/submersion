@@ -1786,7 +1786,6 @@
   "diveLog_sources_editedSuffix": " (modificato)",
   "diveLog_sources_barLabel": "FONTI",
   "diveLog_sources_menu_setPrimary": "Imposta come principale",
-  "diveLog_sources_menu_unlink": "Scollega",
   "diveLog_sources_menu_split": "Dividi in immersione separata",
   "diveLog_sources_overlayTooltip": "Sovrapponi sul grafico",
   "diveLog_sources_splitDialog_title": "Dividere in immersione separata?",

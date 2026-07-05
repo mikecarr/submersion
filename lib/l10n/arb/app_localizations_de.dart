@@ -5698,9 +5698,6 @@ class AppLocalizationsDe extends AppLocalizations {
   String get diveLog_sources_menu_setPrimary => 'Als primär festlegen';
 
   @override
-  String get diveLog_sources_menu_unlink => 'Verknüpfung aufheben';
-
-  @override
   String get diveLog_sources_menu_split => 'In separaten Tauchgang aufteilen';
 
   @override

@@ -206,7 +206,7 @@ void main() {
                 diveId: 'dive-1',
                 units: _units,
                 onSetPrimary: (id) => setPrimaryId = id,
-                onUnlink: (_) {},
+                onSplit: (_) {},
               ),
             ),
           ),
@@ -224,7 +224,6 @@ void main() {
 
         // "Set as primary" should appear for secondary card
         expect(find.text('Set as primary'), findsOneWidget);
-        expect(find.text('Unlink'), findsOneWidget);
 
         // Tap "Set as primary"
         await tester.tap(find.text('Set as primary'));
@@ -253,7 +252,7 @@ void main() {
               diveId: 'dive-1',
               units: _units,
               onSetPrimary: (_) {},
-              onUnlink: (_) {},
+              onSplit: (_) {},
             ),
           ),
         ),
@@ -267,8 +266,8 @@ void main() {
 
       // "Set as primary" should NOT appear for primary card
       expect(find.text('Set as primary'), findsNothing);
-      // "Unlink" should still appear
-      expect(find.text('Unlink'), findsOneWidget);
+      // "Split into separate dive" should still appear
+      expect(find.text('Split into separate dive'), findsOneWidget);
     });
 
     testWidgets(
@@ -423,7 +422,7 @@ void main() {
               diveCreatedAt: DateTime(2026, 3, 20, 10, 0),
               diveId: 'dive-1',
               units: _units,
-              onUnlink: (_) {},
+              onSplit: (_) {},
             ),
           ),
         ),
@@ -758,7 +757,7 @@ void main() {
               diveCreatedAt: DateTime(2026, 3, 20, 10, 0),
               diveId: 'dive-1',
               units: _units,
-              // onSetPrimary and onUnlink are null
+              // onSetPrimary and onSplit are null
             ),
           ),
         ),
@@ -835,7 +834,7 @@ void main() {
       expect(foundBorderedContainer, isTrue);
     });
 
-    testWidgets('onUnlink callback fires from overflow menu', (tester) async {
+    testWidgets('onSplit callback fires from overflow menu', (tester) async {
       final primary = _makeSource(id: 'src-1', isPrimary: true);
       final secondary = _makeSource(
         id: 'src-2',
@@ -843,7 +842,7 @@ void main() {
         computerModel: 'Suunto D5',
       );
 
-      String? unlinkedId;
+      String? splitId;
 
       await tester.pumpWidget(
         testApp(
@@ -854,7 +853,7 @@ void main() {
               diveId: 'dive-1',
               units: _units,
               onSetPrimary: (_) {},
-              onUnlink: (id) => unlinkedId = id,
+              onSplit: (id) => splitId = id,
             ),
           ),
         ),
@@ -866,11 +865,11 @@ void main() {
       await tester.tap(menuButtons.last);
       await tester.pumpAndSettle();
 
-      // Tap "Unlink"
-      await tester.tap(find.text('Unlink'));
+      // Tap "Split into separate dive"
+      await tester.tap(find.text('Split into separate dive'));
       await tester.pumpAndSettle();
 
-      expect(unlinkedId, equals('src-2'));
+      expect(splitId, equals('src-2'));
     });
 
     testWidgets('three sources show two dividers', (tester) async {

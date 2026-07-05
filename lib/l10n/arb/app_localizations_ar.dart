@@ -5581,9 +5581,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get diveLog_sources_menu_setPrimary => 'تعيين كمصدر أساسي';
 
   @override
-  String get diveLog_sources_menu_unlink => 'إلغاء الربط';
-
-  @override
   String get diveLog_sources_menu_split => 'فصل إلى غطسة منفصلة';
 
   @override

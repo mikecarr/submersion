@@ -1949,7 +1949,6 @@
   "diveLog_sources_editedSuffix": "（已编辑）",
   "diveLog_sources_barLabel": "数据来源",
   "diveLog_sources_menu_setPrimary": "设为主要来源",
-  "diveLog_sources_menu_unlink": "取消关联",
   "diveLog_sources_menu_split": "拆分为单独潜水",
   "diveLog_sources_overlayTooltip": "叠加到图表",
   "diveLog_sources_splitDialog_title": "拆分为单独潜水？",

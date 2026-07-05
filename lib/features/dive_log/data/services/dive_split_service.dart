@@ -58,8 +58,11 @@ class DiveSplitService {
     final newDiveId = _uuid.v4();
     final now = DateTime.now().millisecondsSinceEpoch;
 
-    // Rows move by computer attribution: the source's computerId, or the
-    // computerId-IS-NULL rows for a computer-less (manual) source.
+    // Rows move by computer attribution. A computer-less source cannot be
+    // attributed at the row level, so only non-primary null-computerId
+    // profile rows follow it (never user-edited isPrimary rows) and no
+    // tanks, pressures, or events move — the retired unlinkComputer's
+    // convention.
     Expression<bool> ownedBySource(GeneratedColumn<String> computerId) =>
         source.computerId == null
         ? computerId.isNull()
@@ -133,15 +136,47 @@ class DiveSplitService {
         recordId: source.id,
       );
 
-      // 3. Tanks move first so pressure rows and gas switches can re-point
-      // at their new ids.
-      final tankRows =
-          await (_db.select(_db.diveTanks)..where(
-                (t) => t.diveId.equals(diveId) & ownedBySource(t.computerId),
-              ))
-              .get();
+      // 3. Tanks (clone-on-demand, inherited from the retired
+      // unlinkComputer path). A tank owned by the departing source moves
+      // only when nothing remaining still references it: another
+      // computer's (or unattributed) pressure rows or events, or any gas
+      // switch — switches carry no computer attribution and always stay
+      // with the original dive's gas plan. A still-referenced tank stays
+      // behind with its attribution cleared, and a clone on the new dive
+      // carries the departing computer's rows. Departing pressure rows on
+      // a tank the source never owned get the same clone-on-demand
+      // treatment.
+      final allTanks = await (_db.select(
+        _db.diveTanks,
+      )..where((t) => t.diveId.equals(diveId))).get();
+      final allPressures = await (_db.select(
+        _db.tankPressureProfiles,
+      )..where((t) => t.diveId.equals(diveId))).get();
+      final allEvents = await (_db.select(
+        _db.diveProfileEvents,
+      )..where((t) => t.diveId.equals(diveId))).get();
+      final switchRows = await (_db.select(
+        _db.gasSwitches,
+      )..where((t) => t.diveId.equals(diveId))).get();
+
+      bool owned(String? computerId) =>
+          source.computerId != null && computerId == source.computerId;
+
+      final pressureRows = allPressures
+          .where((r) => owned(r.computerId))
+          .toList();
+      final eventRows = allEvents.where((r) => owned(r.computerId)).toList();
+
       final tankIdMap = <String, String>{};
-      for (final tank in tankRows) {
+      final movedTankIds = <String>[];
+      for (final tank in allTanks.where((t) => owned(t.computerId))) {
+        final hasRemainingRefs =
+            allPressures.any(
+              (r) => r.tankId == tank.id && !owned(r.computerId),
+            ) ||
+            allEvents.any((r) => r.tankId == tank.id && !owned(r.computerId)) ||
+            switchRows.any((r) => r.tankId == tank.id);
+
         final freshId = _uuid.v4();
         tankIdMap[tank.id] = freshId;
         await _db
@@ -156,40 +191,56 @@ class DiveSplitService {
           recordId: freshId,
           localUpdatedAt: now,
         );
+
+        if (hasRemainingRefs) {
+          await (_db.update(_db.diveTanks)..where((t) => t.id.equals(tank.id)))
+              .write(const DiveTanksCompanion(computerId: Value(null)));
+          await _sync.markRecordPending(
+            entityType: 'diveTanks',
+            recordId: tank.id,
+            localUpdatedAt: now,
+          );
+        } else {
+          movedTankIds.add(tank.id);
+        }
       }
 
-      // 4. Gas switches on moved tanks follow their tank (their tank FK
-      // would otherwise dangle when the old tank rows are deleted).
-      final switchRows = await (_db.select(
-        _db.gasSwitches,
-      )..where((t) => t.diveId.equals(diveId))).get();
-      final movedSwitches = switchRows
-          .where((r) => tankIdMap.containsKey(r.tankId))
-          .toList();
-      for (final row in movedSwitches) {
+      // Shared tanks the departing computer recorded pressures on but
+      // never owned: clone them so the moved rows have a home.
+      for (final row in pressureRows) {
+        if (tankIdMap.containsKey(row.tankId)) continue;
+        final tank = allTanks.where((t) => t.id == row.tankId).firstOrNull;
+        if (tank == null) continue;
         final freshId = _uuid.v4();
+        tankIdMap[tank.id] = freshId;
         await _db
-            .into(_db.gasSwitches)
+            .into(_db.diveTanks)
             .insert(
-              row
+              tank
                   .toCompanion(false)
                   .copyWith(
                     id: Value(freshId),
                     diveId: Value(newDiveId),
-                    tankId: Value(tankIdMap[row.tankId]!),
+                    computerId: Value(source.computerId),
                   ),
             );
         await _sync.markRecordPending(
-          entityType: 'gasSwitches',
+          entityType: 'diveTanks',
           recordId: freshId,
           localUpdatedAt: now,
         );
       }
 
-      // 5. Profile rows: primary on the new dive.
+      // 5. Profile rows: primary on the new dive. For a computer-less
+      // source only non-primary null rows move (user-edited primary rows
+      // stay with the original dive).
       final profileRows =
           await (_db.select(_db.diveProfiles)..where(
-                (t) => t.diveId.equals(diveId) & ownedBySource(t.computerId),
+                (t) => source.computerId == null
+                    ? t.diveId.equals(diveId) &
+                          t.computerId.isNull() &
+                          t.isPrimary.equals(false)
+                    : t.diveId.equals(diveId) & ownedBySource(t.computerId),
               ))
               .get();
       await _db.batch((batch) {
@@ -207,12 +258,7 @@ class DiveSplitService {
         }
       });
 
-      // 6. Tank pressures, re-pointed at the moved tanks.
-      final pressureRows =
-          await (_db.select(_db.tankPressureProfiles)..where(
-                (t) => t.diveId.equals(diveId) & ownedBySource(t.computerId),
-              ))
-              .get();
+      // 6. Tank pressures, re-pointed at the moved or cloned tanks.
       await _db.batch((batch) {
         for (final row in pressureRows) {
           batch.insert(
@@ -229,11 +275,6 @@ class DiveSplitService {
       });
 
       // 7. Profile events.
-      final eventRows =
-          await (_db.select(_db.diveProfileEvents)..where(
-                (t) => t.diveId.equals(diveId) & ownedBySource(t.computerId),
-              ))
-              .get();
       for (final row in eventRows) {
         final freshId = _uuid.v4();
         await _db
@@ -260,49 +301,46 @@ class DiveSplitService {
 
       // 8. Delete the originals, children before parents, tombstoning each
       // row (the original dive survives; without explicit tombstones peers
-      // that already pulled these rows keep them forever).
-      for (final row in movedSwitches) {
-        await _sync.logDeletion(entityType: 'gasSwitches', recordId: row.id);
-      }
-      if (movedSwitches.isNotEmpty) {
-        await (_db.delete(
-          _db.gasSwitches,
-        )..where((t) => t.id.isIn([for (final r in movedSwitches) r.id]))).go();
-      }
+      // that already pulled these rows keep them forever). Gas switches
+      // never move, and only unreferenced tanks were moved.
       for (final row in pressureRows) {
         await _sync.logDeletion(
           entityType: 'tankPressureProfiles',
           recordId: row.id,
         );
       }
-      await (_db.delete(_db.tankPressureProfiles)..where(
-            (t) => t.diveId.equals(diveId) & ownedBySource(t.computerId),
-          ))
-          .go();
+      if (pressureRows.isNotEmpty) {
+        await (_db.delete(
+          _db.tankPressureProfiles,
+        )..where((t) => t.id.isIn([for (final r in pressureRows) r.id]))).go();
+      }
       for (final row in eventRows) {
         await _sync.logDeletion(
           entityType: 'diveProfileEvents',
           recordId: row.id,
         );
       }
-      await (_db.delete(_db.diveProfileEvents)..where(
-            (t) => t.diveId.equals(diveId) & ownedBySource(t.computerId),
-          ))
-          .go();
+      if (eventRows.isNotEmpty) {
+        await (_db.delete(
+          _db.diveProfileEvents,
+        )..where((t) => t.id.isIn([for (final r in eventRows) r.id]))).go();
+      }
       for (final row in profileRows) {
         await _sync.logDeletion(entityType: 'diveProfiles', recordId: row.id);
       }
-      await (_db.delete(_db.diveProfiles)..where(
-            (t) => t.diveId.equals(diveId) & ownedBySource(t.computerId),
-          ))
-          .go();
-      for (final row in tankRows) {
-        await _sync.logDeletion(entityType: 'diveTanks', recordId: row.id);
+      if (profileRows.isNotEmpty) {
+        await (_db.delete(
+          _db.diveProfiles,
+        )..where((t) => t.id.isIn([for (final r in profileRows) r.id]))).go();
       }
-      await (_db.delete(_db.diveTanks)..where(
-            (t) => t.diveId.equals(diveId) & ownedBySource(t.computerId),
-          ))
-          .go();
+      for (final id in movedTankIds) {
+        await _sync.logDeletion(entityType: 'diveTanks', recordId: id);
+      }
+      if (movedTankIds.isNotEmpty) {
+        await (_db.delete(
+          _db.diveTanks,
+        )..where((t) => t.id.isIn(movedTankIds))).go();
+      }
 
       // 9. If the split source was the primary, promote the remaining
       // source with the earliest creation timestamp and refresh the

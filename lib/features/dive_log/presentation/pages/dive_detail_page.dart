@@ -413,12 +413,6 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
                   diveId: dive.id,
                   readingId: readingId,
                 ),
-                onUnlink: (readingId) => _onUnlinkDataSource(
-                  context,
-                  ref,
-                  diveId: dive.id,
-                  readingId: readingId,
-                ),
                 onSplit: (readingId) => _confirmAndSplit(dive, readingId),
               );
             },
@@ -4676,8 +4670,6 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
           diveId: dive.id,
           readingId: sourceId,
         );
-      case SourceMenuAction.unlink:
-        _onUnlinkDataSource(context, ref, diveId: dive.id, readingId: sourceId);
       case SourceMenuAction.split:
         _confirmAndSplit(dive, sourceId);
     }
@@ -4743,49 +4735,6 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
     ref.invalidate(diveProfileProvider(diveId));
     ref.invalidate(sourceProfilesProvider(diveId));
     ref.invalidate(diveDataSourcesProvider(diveId));
-  }
-
-  Future<void> _onUnlinkDataSource(
-    BuildContext context,
-    WidgetRef ref, {
-    required String diveId,
-    required String readingId,
-  }) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('Unlink data source'),
-        content: const Text(
-          'This will split the data source into a separate dive. '
-          'The linked profile and readings from this source will be removed '
-          'from the current dive. This cannot be undone.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            style: FilledButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.error,
-            ),
-            child: const Text('Unlink'),
-          ),
-        ],
-      ),
-    );
-    if (confirmed != true) return;
-    final repository = ref.read(diveRepositoryProvider);
-    await repository.unlinkComputer(
-      diveId: diveId,
-      computerReadingId: readingId,
-    );
-    ref.invalidate(diveProvider(diveId));
-    ref.invalidate(diveProfileProvider(diveId));
-    ref.invalidate(sourceProfilesProvider(diveId));
-    ref.invalidate(diveDataSourcesProvider(diveId));
-    ref.invalidate(paginatedDiveListProvider);
   }
 
   void _showMergeDiveDialog(BuildContext context, WidgetRef ref, Dive dive) {

@@ -5449,9 +5449,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get diveLog_sources_menu_setPrimary => '设为主要来源';
 
   @override
-  String get diveLog_sources_menu_unlink => '取消关联';
-
-  @override
   String get diveLog_sources_menu_split => '拆分为单独潜水';
 
   @override

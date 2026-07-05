@@ -1820,7 +1820,6 @@
   "diveLog_sources_editedSuffix": " (معدل)",
   "diveLog_sources_barLabel": "المصادر",
   "diveLog_sources_menu_setPrimary": "تعيين كمصدر أساسي",
-  "diveLog_sources_menu_unlink": "إلغاء الربط",
   "diveLog_sources_menu_split": "فصل إلى غطسة منفصلة",
   "diveLog_sources_overlayTooltip": "عرض على الرسم البياني",
   "diveLog_sources_splitDialog_title": "فصل إلى غطسة منفصلة؟",

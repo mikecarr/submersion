@@ -1786,7 +1786,6 @@
   "diveLog_sources_editedSuffix": " (נערך)",
   "diveLog_sources_barLabel": "מקורות",
   "diveLog_sources_menu_setPrimary": "הגדר כראשי",
-  "diveLog_sources_menu_unlink": "בטל קישור",
   "diveLog_sources_menu_split": "פצל לצלילה נפרדת",
   "diveLog_sources_overlayTooltip": "הצג כשכבה בגרף",
   "diveLog_sources_splitDialog_title": "לפצל לצלילה נפרדת?",

@@ -42,9 +42,6 @@ class DataSourcesSection extends StatefulWidget {
   /// Called with the reading ID when the user confirms "Set as primary".
   final void Function(String readingId)? onSetPrimary;
 
-  /// Called with the reading ID when the user confirms "Unlink".
-  final void Function(String readingId)? onUnlink;
-
   /// Called with the reading ID when the user chooses "Split into
   /// separate dive" (confirmation happens in the caller).
   final void Function(String readingId)? onSplit;
@@ -60,7 +57,6 @@ class DataSourcesSection extends StatefulWidget {
     required this.units,
     this.viewedSourceId,
     this.onSetPrimary,
-    this.onUnlink,
     this.onSplit,
     this.onTapSource,
   });
@@ -116,9 +112,6 @@ class _DataSourcesSectionState extends State<DataSourcesSection> {
           isViewing: isViewing,
           onSetPrimary: widget.onSetPrimary != null
               ? () => widget.onSetPrimary!(source.id)
-              : null,
-          onUnlink: widget.onUnlink != null
-              ? () => widget.onUnlink!(source.id)
               : null,
           onSplit: widget.onSplit != null && isMultiSource
               ? () => widget.onSplit!(source.id)
@@ -291,7 +284,6 @@ class _DataSourceCard extends StatelessWidget {
   final bool showBadges;
   final bool isViewing;
   final VoidCallback? onSetPrimary;
-  final VoidCallback? onUnlink;
   final VoidCallback? onSplit;
   final VoidCallback? onTap;
 
@@ -301,7 +293,6 @@ class _DataSourceCard extends StatelessWidget {
     required this.showBadges,
     required this.isViewing,
     this.onSetPrimary,
-    this.onUnlink,
     this.onSplit,
     this.onTap,
   });
@@ -356,8 +347,7 @@ class _DataSourceCard extends StatelessWidget {
       );
     }
 
-    final hasOverflowMenu =
-        onSetPrimary != null || onUnlink != null || onSplit != null;
+    final hasOverflowMenu = onSetPrimary != null || onSplit != null;
 
     return GestureDetector(
       onTap: onTap,
@@ -427,8 +417,6 @@ class _DataSourceCard extends StatelessWidget {
                         switch (action) {
                           case _SourceMenuAction.setPrimary:
                             onSetPrimary?.call();
-                          case _SourceMenuAction.unlink:
-                            onUnlink?.call();
                           case _SourceMenuAction.split:
                             onSplit?.call();
                         }
@@ -441,17 +429,6 @@ class _DataSourceCard extends StatelessWidget {
                               leading: const Icon(Icons.star_outline),
                               title: Text(
                                 context.l10n.diveLog_sources_menu_setPrimary,
-                              ),
-                              contentPadding: EdgeInsets.zero,
-                            ),
-                          ),
-                        if (onUnlink != null)
-                          PopupMenuItem(
-                            value: _SourceMenuAction.unlink,
-                            child: ListTile(
-                              leading: const Icon(Icons.link_off),
-                              title: Text(
-                                context.l10n.diveLog_sources_menu_unlink,
                               ),
                               contentPadding: EdgeInsets.zero,
                             ),
@@ -648,7 +625,7 @@ class _DetailsGrid extends StatelessWidget {
 // Shared Widgets
 // ---------------------------------------------------------------------------
 
-enum _SourceMenuAction { setPrimary, unlink, split }
+enum _SourceMenuAction { setPrimary, split }
 
 /// A small badge chip with customizable background color.
 class _Badge extends StatelessWidget {

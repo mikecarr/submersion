@@ -5661,9 +5661,6 @@ class AppLocalizationsNl extends AppLocalizations {
   String get diveLog_sources_menu_setPrimary => 'Instellen als primair';
 
   @override
-  String get diveLog_sources_menu_unlink => 'Ontkoppelen';
-
-  @override
   String get diveLog_sources_menu_split => 'Splitsen naar aparte duik';
 
   @override
