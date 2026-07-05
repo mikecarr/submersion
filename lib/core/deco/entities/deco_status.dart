@@ -42,6 +42,9 @@ class DecoStatus extends Equatable {
   /// Current ambient pressure in bar absolute
   final double ambientPressureBar;
 
+  /// Surface pressure in bar used for surface-referenced metrics (SurfGF).
+  final double surfacePressureBar;
+
   const DecoStatus({
     required this.compartments,
     required this.ndlSeconds,
@@ -53,6 +56,7 @@ class DecoStatus extends Equatable {
     required this.decoStops,
     required this.currentDepthMeters,
     required this.ambientPressureBar,
+    this.surfacePressureBar = 1.0,
   });
 
   /// Whether the diver is currently in decompression obligation.
@@ -104,7 +108,7 @@ class DecoStatus extends Equatable {
     if (compartments.isEmpty) return 0.0;
     double maxGf = double.negativeInfinity;
     for (final comp in compartments) {
-      final gf = comp.surfaceGradientFactor;
+      final gf = comp.gradientFactor(surfacePressureBar);
       if (gf > maxGf) maxGf = gf;
     }
     // Clamp at 0: negative SurfGF means all tissues are below surface
@@ -184,6 +188,7 @@ class DecoStatus extends Equatable {
     List<DecoStop>? decoStops,
     double? currentDepthMeters,
     double? ambientPressureBar,
+    double? surfacePressureBar,
   }) {
     return DecoStatus(
       compartments: compartments ?? this.compartments,
@@ -196,6 +201,7 @@ class DecoStatus extends Equatable {
       decoStops: decoStops ?? this.decoStops,
       currentDepthMeters: currentDepthMeters ?? this.currentDepthMeters,
       ambientPressureBar: ambientPressureBar ?? this.ambientPressureBar,
+      surfacePressureBar: surfacePressureBar ?? this.surfacePressureBar,
     );
   }
 
@@ -211,6 +217,7 @@ class DecoStatus extends Equatable {
     decoStops,
     currentDepthMeters,
     ambientPressureBar,
+    surfacePressureBar,
   ];
 }
 
