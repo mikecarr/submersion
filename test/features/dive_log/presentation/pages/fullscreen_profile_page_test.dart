@@ -321,6 +321,16 @@ void main() {
         tester.widget<DiveProfileChart>(find.byType(DiveProfileChart)).profile,
         hasLength(61),
       );
+      // The instrument bar must resolve tiles against the SAME profile the
+      // chart renders and the analysis is computed from; indexing analysis
+      // curves with dive.profile positions reads wrong/blank values once the
+      // arrays differ (issue: gauges wrong/blank mid-dive on 2-source dives).
+      expect(
+        tester
+            .widget<ProfileInstrumentBar>(find.byType(ProfileInstrumentBar))
+            .profile,
+        hasLength(61),
+      );
 
       await tester.tap(
         find.descendant(
@@ -333,6 +343,12 @@ void main() {
 
       expect(
         tester.widget<DiveProfileChart>(find.byType(DiveProfileChart)).profile,
+        hasLength(40),
+      );
+      expect(
+        tester
+            .widget<ProfileInstrumentBar>(find.byType(ProfileInstrumentBar))
+            .profile,
         hasLength(40),
       );
     },

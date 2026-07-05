@@ -488,7 +488,9 @@ class _FullscreenProfilePageState extends ConsumerState<FullscreenProfilePage> {
                   ),
                 ProfileInstrumentBar(
                   diveId: widget.diveId,
-                  dive: dive,
+                  // The same profile the chart renders and the analysis is
+                  // computed from; tile values are index-aligned to it.
+                  profile: chartProfile,
                   analysis: analysis,
                   tankPressures: tankPressures,
                 ),
