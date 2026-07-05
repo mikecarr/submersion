@@ -2350,10 +2350,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get decoCalculator_title => 'حاسبة تخفيف الضغط';
 
   @override
-  String get decoCalculator_waterType => 'Water type';
+  String get decoCalculator_waterType => 'نوع الماء';
 
   @override
-  String get decoCalculator_waterType_standard => 'Standard';
+  String get decoCalculator_waterType_standard => 'قياسي';
 
   @override
   String diveCenters_accessibility_markerLabel(Object name) {
@@ -10222,14 +10222,13 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get plannerCanvas_compare_action => 'Compare';
+  String get plannerCanvas_compare_action => 'مقارنة';
 
   @override
-  String get plannerCanvas_compare_needTwo =>
-      'Select at least two plans to compare';
+  String get plannerCanvas_compare_needTwo => 'اختر خطتين على الأقل للمقارنة';
 
   @override
-  String get plannerCanvas_compare_title => 'Compare plans';
+  String get plannerCanvas_compare_title => 'مقارنة الخطط';
 
   @override
   String get plannerCanvas_contingency_base => 'أساسي';
@@ -10314,14 +10313,14 @@ class AppLocalizationsAr extends AppLocalizations {
       'يلزم تخفيف الضغط ولكن لا يوجد غاز تخفيف';
 
   @override
-  String get plannerCanvas_range_base => 'Base';
+  String get plannerCanvas_range_base => 'أساسي';
 
   @override
   String get plannerCanvas_range_legend =>
-      'Cells show time to surface; red = not diveable as planned';
+      'تعرض الخلايا زمن الصعود إلى السطح؛ الأحمر = غير قابلة للغطس كما هو مخطط';
 
   @override
-  String get plannerCanvas_range_title => 'Range table';
+  String get plannerCanvas_range_title => 'جدول النطاقات';
 
   @override
   String get plannerCanvas_results_noDeco => 'لا يلزم تخفيف الضغط';
@@ -10359,24 +10358,24 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get plannerCanvas_share_import => 'Import';
+  String get plannerCanvas_share_import => 'استيراد';
 
   @override
   String plannerCanvas_share_importFailed(String reason) {
-    return 'Couldn\'t import plan: $reason';
+    return 'تعذر استيراد الخطة: $reason';
   }
 
   @override
-  String get plannerCanvas_share_menu => 'Share plan file';
+  String get plannerCanvas_share_menu => 'مشاركة ملف الخطة';
 
   @override
-  String get plannerCanvas_slate_menu => 'Export slate (PDF)';
+  String get plannerCanvas_slate_menu => 'تصدير اللوح (PDF)';
 
   @override
-  String get plannerCanvas_slate_minGas => 'Min gas';
+  String get plannerCanvas_slate_minGas => 'الحد الأدنى من الغاز';
 
   @override
-  String get plannerCanvas_slate_turn => 'Turn';
+  String get plannerCanvas_slate_turn => 'العودة';
 
   @override
   String get plannerCanvas_table_depth => 'العمق';
@@ -10468,10 +10467,10 @@ class AppLocalizationsAr extends AppLocalizations {
       'هذه الأدوات لأغراض التخطيط فقط. تحقق دائمًا من الحسابات واتبع تدريبك على الغوص.';
 
   @override
-  String get planning_newPlan => 'New plan';
+  String get planning_newPlan => 'خطة جديدة';
 
   @override
-  String get planning_section_tools => 'Tools';
+  String get planning_section_tools => 'أدوات';
 
   @override
   String get planning_sidebar_appBar_title => 'التخطيط';

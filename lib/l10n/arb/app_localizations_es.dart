@@ -2409,10 +2409,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get decoCalculator_title => 'Calculadora de Descompresión';
 
   @override
-  String get decoCalculator_waterType => 'Water type';
+  String get decoCalculator_waterType => 'Tipo de agua';
 
   @override
-  String get decoCalculator_waterType_standard => 'Standard';
+  String get decoCalculator_waterType_standard => 'Estándar';
 
   @override
   String diveCenters_accessibility_markerLabel(Object name) {
@@ -10405,14 +10405,14 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get plannerCanvas_compare_action => 'Compare';
+  String get plannerCanvas_compare_action => 'Comparar';
 
   @override
   String get plannerCanvas_compare_needTwo =>
-      'Select at least two plans to compare';
+      'Selecciona al menos dos planes para comparar';
 
   @override
-  String get plannerCanvas_compare_title => 'Compare plans';
+  String get plannerCanvas_compare_title => 'Comparar planes';
 
   @override
   String get plannerCanvas_contingency_base => 'Base';
@@ -10503,10 +10503,10 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get plannerCanvas_range_legend =>
-      'Cells show time to surface; red = not diveable as planned';
+      'Las celdas muestran el tiempo hasta la superficie; rojo = no buceable según lo planeado';
 
   @override
-  String get plannerCanvas_range_title => 'Range table';
+  String get plannerCanvas_range_title => 'Tabla de rangos';
 
   @override
   String get plannerCanvas_results_noDeco => 'No se requiere descompresión';
@@ -10544,24 +10544,24 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get plannerCanvas_share_import => 'Import';
+  String get plannerCanvas_share_import => 'Importar';
 
   @override
   String plannerCanvas_share_importFailed(String reason) {
-    return 'Couldn\'t import plan: $reason';
+    return 'No se pudo importar el plan: $reason';
   }
 
   @override
-  String get plannerCanvas_share_menu => 'Share plan file';
+  String get plannerCanvas_share_menu => 'Compartir archivo del plan';
 
   @override
-  String get plannerCanvas_slate_menu => 'Export slate (PDF)';
+  String get plannerCanvas_slate_menu => 'Exportar pizarra (PDF)';
 
   @override
-  String get plannerCanvas_slate_minGas => 'Min gas';
+  String get plannerCanvas_slate_minGas => 'Gas mínimo';
 
   @override
-  String get plannerCanvas_slate_turn => 'Turn';
+  String get plannerCanvas_slate_turn => 'Retorno';
 
   @override
   String get plannerCanvas_table_depth => 'Profundidad';
@@ -10653,10 +10653,10 @@ class AppLocalizationsEs extends AppLocalizations {
       'Estas herramientas son solo para fines de planificacion. Siempre verifica los calculos y sigue tu formacion de buceo.';
 
   @override
-  String get planning_newPlan => 'New plan';
+  String get planning_newPlan => 'Nuevo plan';
 
   @override
-  String get planning_section_tools => 'Tools';
+  String get planning_section_tools => 'Herramientas';
 
   @override
   String get planning_sidebar_appBar_title => 'Planificacion';

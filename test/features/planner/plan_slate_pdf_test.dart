@@ -87,7 +87,7 @@ Future<List<int>> _build(domain.DivePlan plan) {
     lostGas: contingency.lostGas(plan),
     rangeTable: rangeService.compute(plan),
     bailout: const BailoutSolver().solve(plan),
-    units: UnitFormatter(const AppSettings()),
+    units: const UnitFormatter(AppSettings()),
     labels: _labels,
   );
 }

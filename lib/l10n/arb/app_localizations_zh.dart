@@ -2288,10 +2288,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get decoCalculator_title => '减压计算器';
 
   @override
-  String get decoCalculator_waterType => 'Water type';
+  String get decoCalculator_waterType => '水体类型';
 
   @override
-  String get decoCalculator_waterType_standard => 'Standard';
+  String get decoCalculator_waterType_standard => '标准';
 
   @override
   String diveCenters_accessibility_markerLabel(Object name) {
@@ -9969,14 +9969,13 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get plannerCanvas_compare_action => 'Compare';
+  String get plannerCanvas_compare_action => '比较';
 
   @override
-  String get plannerCanvas_compare_needTwo =>
-      'Select at least two plans to compare';
+  String get plannerCanvas_compare_needTwo => '请至少选择两个计划进行比较';
 
   @override
-  String get plannerCanvas_compare_title => 'Compare plans';
+  String get plannerCanvas_compare_title => '比较计划';
 
   @override
   String get plannerCanvas_contingency_base => '基准';
@@ -10058,14 +10057,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get plannerCanvas_issue_noDecoGas => '需要减压但未携带减压气体';
 
   @override
-  String get plannerCanvas_range_base => 'Base';
+  String get plannerCanvas_range_base => '基准';
 
   @override
-  String get plannerCanvas_range_legend =>
-      'Cells show time to surface; red = not diveable as planned';
+  String get plannerCanvas_range_legend => '单元格显示到达水面所需时间；红色 = 无法按计划潜水';
 
   @override
-  String get plannerCanvas_range_title => 'Range table';
+  String get plannerCanvas_range_title => '范围表';
 
   @override
   String get plannerCanvas_results_noDeco => '无需减压';
@@ -10103,24 +10101,24 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get plannerCanvas_share_import => 'Import';
+  String get plannerCanvas_share_import => '导入';
 
   @override
   String plannerCanvas_share_importFailed(String reason) {
-    return 'Couldn\'t import plan: $reason';
+    return '无法导入计划：$reason';
   }
 
   @override
-  String get plannerCanvas_share_menu => 'Share plan file';
+  String get plannerCanvas_share_menu => '分享计划文件';
 
   @override
-  String get plannerCanvas_slate_menu => 'Export slate (PDF)';
+  String get plannerCanvas_slate_menu => '导出潜水板（PDF）';
 
   @override
-  String get plannerCanvas_slate_minGas => 'Min gas';
+  String get plannerCanvas_slate_minGas => '最低气量';
 
   @override
-  String get plannerCanvas_slate_turn => 'Turn';
+  String get plannerCanvas_slate_turn => '折返';
 
   @override
   String get plannerCanvas_table_depth => '深度';
@@ -10206,10 +10204,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get planning_info_disclaimer => '这些工具仅供计划参考。请务必验证计算结果并遵循您的潜水训练。';
 
   @override
-  String get planning_newPlan => 'New plan';
+  String get planning_newPlan => '新建计划';
 
   @override
-  String get planning_section_tools => 'Tools';
+  String get planning_section_tools => '工具';
 
   @override
   String get planning_sidebar_appBar_title => '计划';

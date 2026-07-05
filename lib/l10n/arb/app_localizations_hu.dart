@@ -2395,10 +2395,10 @@ class AppLocalizationsHu extends AppLocalizations {
   String get decoCalculator_title => 'Dekompressziós kalkulátor';
 
   @override
-  String get decoCalculator_waterType => 'Water type';
+  String get decoCalculator_waterType => 'Víztípus';
 
   @override
-  String get decoCalculator_waterType_standard => 'Standard';
+  String get decoCalculator_waterType_standard => 'Normál';
 
   @override
   String diveCenters_accessibility_markerLabel(Object name) {
@@ -10392,14 +10392,14 @@ class AppLocalizationsHu extends AppLocalizations {
   }
 
   @override
-  String get plannerCanvas_compare_action => 'Compare';
+  String get plannerCanvas_compare_action => 'Összehasonlítás';
 
   @override
   String get plannerCanvas_compare_needTwo =>
-      'Select at least two plans to compare';
+      'Válassz ki legalább két tervet az összehasonlításhoz';
 
   @override
-  String get plannerCanvas_compare_title => 'Compare plans';
+  String get plannerCanvas_compare_title => 'Tervek összehasonlítása';
 
   @override
   String get plannerCanvas_contingency_base => 'Alap';
@@ -10484,14 +10484,14 @@ class AppLocalizationsHu extends AppLocalizations {
       'Dekompresszió szükséges, de nincs deco gáz';
 
   @override
-  String get plannerCanvas_range_base => 'Base';
+  String get plannerCanvas_range_base => 'Alap';
 
   @override
   String get plannerCanvas_range_legend =>
-      'Cells show time to surface; red = not diveable as planned';
+      'A cellák a felszínre érés idejét mutatják; piros = a terv szerint nem merülhető';
 
   @override
-  String get plannerCanvas_range_title => 'Range table';
+  String get plannerCanvas_range_title => 'Tartománytáblázat';
 
   @override
   String get plannerCanvas_results_noDeco => 'Nincs szükség dekompresszióra';
@@ -10529,24 +10529,24 @@ class AppLocalizationsHu extends AppLocalizations {
   }
 
   @override
-  String get plannerCanvas_share_import => 'Import';
+  String get plannerCanvas_share_import => 'Importálás';
 
   @override
   String plannerCanvas_share_importFailed(String reason) {
-    return 'Couldn\'t import plan: $reason';
+    return 'A terv importálása nem sikerült: $reason';
   }
 
   @override
-  String get plannerCanvas_share_menu => 'Share plan file';
+  String get plannerCanvas_share_menu => 'Tervfájl megosztása';
 
   @override
-  String get plannerCanvas_slate_menu => 'Export slate (PDF)';
+  String get plannerCanvas_slate_menu => 'Tábla exportálása (PDF)';
 
   @override
-  String get plannerCanvas_slate_minGas => 'Min gas';
+  String get plannerCanvas_slate_minGas => 'Minimális gáz';
 
   @override
-  String get plannerCanvas_slate_turn => 'Turn';
+  String get plannerCanvas_slate_turn => 'Forduló';
 
   @override
   String get plannerCanvas_table_depth => 'Mélység';
@@ -10638,10 +10638,10 @@ class AppLocalizationsHu extends AppLocalizations {
       'Ezek az eszkozök kizarolag tervezesi celokat szolgalnak. Mindig ellenorizze a szamitasokat es kövesse merülesi kepzesenek iranyelveit.';
 
   @override
-  String get planning_newPlan => 'New plan';
+  String get planning_newPlan => 'Új terv';
 
   @override
-  String get planning_section_tools => 'Tools';
+  String get planning_section_tools => 'Eszközök';
 
   @override
   String get planning_sidebar_appBar_title => 'Tervezes';
