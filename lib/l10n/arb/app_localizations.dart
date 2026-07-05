@@ -4157,6 +4157,18 @@ abstract class AppLocalizations {
   /// **'Deco Calculator'**
   String get decoCalculator_title;
 
+  /// No description provided for @decoCalculator_waterType.
+  ///
+  /// In en, this message translates to:
+  /// **'Water type'**
+  String get decoCalculator_waterType;
+
+  /// No description provided for @decoCalculator_waterType_standard.
+  ///
+  /// In en, this message translates to:
+  /// **'Standard'**
+  String get decoCalculator_waterType_standard;
+
   /// No description provided for @diveCenters_accessibility_markerLabel.
   ///
   /// In en, this message translates to:
@@ -18127,6 +18139,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'These tools are for planning purposes only. Always verify calculations and follow your dive training.'**
   String get planning_info_disclaimer;
+
+  /// No description provided for @planning_newPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'New plan'**
+  String get planning_newPlan;
+
+  /// No description provided for @planning_section_tools.
+  ///
+  /// In en, this message translates to:
+  /// **'Tools'**
+  String get planning_section_tools;
 
   /// No description provided for @planning_sidebar_appBar_title.
   ///

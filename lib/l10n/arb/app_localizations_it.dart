@@ -2411,6 +2411,12 @@ class AppLocalizationsIt extends AppLocalizations {
   String get decoCalculator_title => 'Calcolatore Deco';
 
   @override
+  String get decoCalculator_waterType => 'Water type';
+
+  @override
+  String get decoCalculator_waterType_standard => 'Standard';
+
+  @override
   String diveCenters_accessibility_markerLabel(Object name) {
     return 'Centro immersioni: $name';
   }
@@ -10660,6 +10666,12 @@ class AppLocalizationsIt extends AppLocalizations {
   @override
   String get planning_info_disclaimer =>
       'Questi strumenti sono solo per la pianificazione. Verifica sempre i calcoli e segui la tua formazione subacquea.';
+
+  @override
+  String get planning_newPlan => 'New plan';
+
+  @override
+  String get planning_section_tools => 'Tools';
 
   @override
   String get planning_sidebar_appBar_title => 'Pianificazione';

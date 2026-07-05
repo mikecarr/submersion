@@ -2409,6 +2409,12 @@ class AppLocalizationsPt extends AppLocalizations {
   String get decoCalculator_title => 'Calculadora de Descompressão';
 
   @override
+  String get decoCalculator_waterType => 'Water type';
+
+  @override
+  String get decoCalculator_waterType_standard => 'Standard';
+
+  @override
   String diveCenters_accessibility_markerLabel(Object name) {
     return 'Centro de mergulho: $name';
   }
@@ -10666,6 +10672,12 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get planning_info_disclaimer =>
       'Estas ferramentas sao apenas para fins de planejamento. Sempre verifique os calculos e siga seu treinamento de mergulho.';
+
+  @override
+  String get planning_newPlan => 'New plan';
+
+  @override
+  String get planning_section_tools => 'Tools';
 
   @override
   String get planning_sidebar_appBar_title => 'Planejamento';
