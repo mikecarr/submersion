@@ -44,6 +44,16 @@ class PlanEngine {
   const PlanEngine({this.config = const PlanEngineConfig()});
 
   PlanOutcome compute(domain.DivePlan plan, {TissueState? startState}) {
+    // The engine hard-codes BuhlmannGf and casts state back to BuhlmannState;
+    // reject a foreign seed up front so misuse fails predictably instead of
+    // crashing mid-computation on an opaque cast.
+    if (startState != null && startState is! BuhlmannState) {
+      throw ArgumentError.value(
+        startState,
+        'startState',
+        'PlanEngine only accepts a BuhlmannState tissue seed',
+      );
+    }
     final environment = DiveEnvironment.forConditions(
       altitudeMeters: plan.altitude,
       waterType: plan.waterType,
@@ -162,6 +172,27 @@ class PlanEngine {
         ? model.schedule(state, currentDepth: lastDepth, gases: ascentPlan)
         : const DecoSchedule(stops: [], ttsSeconds: 0);
     final stops = _mapStops(schedule, plan, ascentPlan, lastDepth, runtime);
+
+    // Decompression stops carry O2 exposure too — a long stop on a rich deco
+    // gas is where CNS/OTU pile up — so accumulate them before issues and the
+    // outcome are built. Each stop splits into its primary gas and, when air
+    // breaks apply, the break gas for that portion.
+    for (final stop in stops) {
+      final stopPressure = environment.pressureAtDepth(stop.depthMeters);
+      final primarySeconds = stop.durationSeconds - stop.airBreakSeconds;
+      final primaryPpO2 = stopPressure * stop.gasFO2;
+      cns += o2Calc.calculateCnsForSegment(primaryPpO2, primarySeconds);
+      otu += o2Calc.calculateOtuForSegment(primaryPpO2, primarySeconds);
+      if (stop.airBreakSeconds > 0) {
+        final breakGas = ascentPlan.breakGasForDepth(stop.depthMeters);
+        final breakFO2 = breakGas != null
+            ? 1.0 - breakGas.fN2 - breakGas.fHe
+            : stop.gasFO2;
+        final breakPpO2 = stopPressure * breakFO2;
+        cns += o2Calc.calculateCnsForSegment(breakPpO2, stop.airBreakSeconds);
+        otu += o2Calc.calculateOtuForSegment(breakPpO2, stop.airBreakSeconds);
+      }
+    }
 
     final tankUsages = _computeTankUsages(
       plan,
