@@ -715,11 +715,12 @@ Future<ProfileAnalysis?> computeAnalysisForProfile(
       );
       // Scope pressure curves to the requested computer's tanks; null keeps
       // every tank (primary-source / legacy behavior).
+      final tankIds = {for (final t in tanks) t.id};
       final tankPressures = computerId == null
           ? allTankPressures
           : <String, List<TankPressurePoint>>{
               for (final entry in allTankPressures.entries)
-                if (tanks.any((t) => t.id == entry.key)) entry.key: entry.value,
+                if (tankIds.contains(entry.key)) entry.key: entry.value,
             };
 
       if (tankPressures.isNotEmpty) {
