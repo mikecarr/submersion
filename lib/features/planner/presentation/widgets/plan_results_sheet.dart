@@ -144,16 +144,20 @@ class PlanResultsSheet extends ConsumerWidget {
     );
   }
 
-  /// Deviation and lost-gas mini tables; null when there is nothing to show.
+  /// Collapsible deviation and lost-gas mini tables; null when the plan has no
+  /// segments to vary. Collapsed by default so the expensive per-variant engine
+  /// runs happen only when the diver opens the section (the providers return
+  /// empty while [contingenciesExpandedProvider] is false).
   List<Widget>? _contingencySections(
     BuildContext context,
     WidgetRef ref,
     UnitFormatter units,
   ) {
+    final state = ref.watch(divePlanNotifierProvider);
+    if (state.segments.isEmpty) return null;
+    final expanded = ref.watch(contingenciesExpandedProvider);
     final deviations = ref.watch(planDeviationsProvider);
     final lostGas = ref.watch(planLostGasProvider);
-    if (deviations.isEmpty && lostGas.isEmpty) return null;
-    final state = ref.read(divePlanNotifierProvider);
     final theme = Theme.of(context);
 
     String deviationLabel(String key) {
@@ -179,16 +183,34 @@ class PlanResultsSheet extends ConsumerWidget {
 
     return [
       const SizedBox(height: 20),
-      _SectionHeader(context.l10n.plannerCanvas_contingency_title),
-      for (final deviation in deviations) ...[
-        subHeader(deviationLabel(deviation.key)),
-        _RuntimeTable(outcome: deviation.outcome, units: units),
-      ],
-      for (final lost in lostGas) ...[
-        subHeader(
-          context.l10n.plannerCanvas_contingency_lostGas(lost.tank.gasMix.name),
+      InkWell(
+        onTap: () =>
+            ref.read(contingenciesExpandedProvider.notifier).state = !expanded,
+        child: Row(
+          children: [
+            _SectionHeader(context.l10n.plannerCanvas_contingency_title),
+            const Spacer(),
+            Icon(
+              expanded ? Icons.expand_less : Icons.expand_more,
+              size: 20,
+              color: theme.colorScheme.outline,
+            ),
+          ],
         ),
-        _RuntimeTable(outcome: lost.outcome, units: units),
+      ),
+      if (expanded) ...[
+        for (final deviation in deviations) ...[
+          subHeader(deviationLabel(deviation.key)),
+          _RuntimeTable(outcome: deviation.outcome, units: units),
+        ],
+        for (final lost in lostGas) ...[
+          subHeader(
+            context.l10n.plannerCanvas_contingency_lostGas(
+              lost.tank.gasMix.name,
+            ),
+          ),
+          _RuntimeTable(outcome: lost.outcome, units: units),
+        ],
       ],
     ];
   }

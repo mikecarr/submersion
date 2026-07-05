@@ -99,7 +99,9 @@ void main() {
       );
       expect(usage.remainingPressure, isNull);
       expect(usage.reserveViolation, isFalse);
-      expect(usage.props, hasLength(5));
+      expect(usage.turnPressureBar, isNull);
+      expect(usage.minGasBar, isNull);
+      expect(usage.props, hasLength(7));
     });
   });
 

@@ -211,7 +211,13 @@ final planBailoutProvider = Provider<BailoutOutcome?>((ref) {
 });
 
 /// Deviation (deeper/longer/both) outcomes for the current plan.
+/// Whether the results sheet's contingency section is expanded. The full
+/// deviation + lost-gas tables (3 engine runs + one per deco/stage tank) are
+/// only computed while this is true, so a collapsed sheet costs nothing.
+final contingenciesExpandedProvider = StateProvider<bool>((_) => false);
+
 final planDeviationsProvider = Provider<List<DeviationOutcome>>((ref) {
+  if (!ref.watch(contingenciesExpandedProvider)) return const [];
   final state = ref.watch(divePlanNotifierProvider);
   final service = ContingencyService(
     config: ref.watch(planEngineConfigProvider),
@@ -221,6 +227,7 @@ final planDeviationsProvider = Provider<List<DeviationOutcome>>((ref) {
 
 /// Lost-gas outcomes for the current OC plan.
 final planLostGasProvider = Provider<List<LostGasOutcome>>((ref) {
+  if (!ref.watch(contingenciesExpandedProvider)) return const [];
   final state = ref.watch(divePlanNotifierProvider);
   final service = ContingencyService(
     config: ref.watch(planEngineConfigProvider),
@@ -232,18 +239,20 @@ final planLostGasProvider = Provider<List<LostGasOutcome>>((ref) {
 /// none).
 final selectedDeviationProvider = StateProvider<String?>((_) => null);
 
-/// Chart series for the selected deviation, drawn as a ghost overlay.
+/// Chart series for the selected deviation, drawn as a ghost overlay. Runs
+/// ONLY the one selected variant (not the full deviation set), so ghosting a
+/// contingency from the chips costs a single engine run.
 final deviationGhostSeriesProvider = Provider<PlanCanvasSeries?>((ref) {
   final key = ref.watch(selectedDeviationProvider);
   if (key == null) return null;
-  final deviations = ref.watch(planDeviationsProvider);
-  for (final deviation in deviations) {
-    if (deviation.key == key) {
-      return buildCanvasSeries(
-        segments: deviation.plan.segments,
-        outcome: deviation.outcome,
-      );
-    }
-  }
-  return null;
+  final state = ref.watch(divePlanNotifierProvider);
+  final service = ContingencyService(
+    config: ref.watch(planEngineConfigProvider),
+  );
+  final deviation = service.deviationFor(divePlanFromState(state), key);
+  if (deviation == null) return null;
+  return buildCanvasSeries(
+    segments: deviation.plan.segments,
+    outcome: deviation.outcome,
+  );
 });

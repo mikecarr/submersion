@@ -8,6 +8,7 @@ import 'package:submersion/features/planner/domain/entities/dive_plan.dart'
     as domain;
 import 'package:submersion/features/planner/presentation/providers/plan_canvas_providers.dart';
 import 'package:submersion/features/planner/presentation/widgets/contingency_chips.dart';
+import 'package:submersion/features/planner/presentation/widgets/contingency_settings_section.dart';
 import 'package:submersion/features/planner/presentation/widgets/plan_canvas_chart.dart';
 import 'package:submersion/features/planner/presentation/widgets/plan_results_sheet.dart';
 import 'package:submersion/features/settings/presentation/providers/settings_providers.dart';
@@ -98,11 +99,70 @@ void main() {
       scrollable: find.byType(Scrollable).first,
     );
     expect(find.text('CONTINGENCIES'), findsOneWidget);
+
+    // The deviation tables are collapsed by default (they cost extra engine
+    // runs); expand the section before the sub-tables render.
+    expect(find.text('+5′'), findsNothing);
+    expect(container.read(contingenciesExpandedProvider), isFalse);
+    await tester.tap(find.text('CONTINGENCIES'));
+    await tester.pumpAndSettle();
+    expect(container.read(contingenciesExpandedProvider), isTrue);
+
     await tester.scrollUntilVisible(
       find.text('+5′'),
       200,
       scrollable: find.byType(Scrollable).first,
     );
     expect(find.text('+5′'), findsOneWidget);
+  });
+
+  testWidgets('settings section edits deltas, turn rule, and custom fraction', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      testApp(
+        overrides: _overrides(),
+        child: const SizedBox(
+          width: 500,
+          child: SingleChildScrollView(child: ContingencySettingsSection()),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final container = ProviderScope.containerOf(
+      tester.element(find.byType(ContingencySettingsSection)),
+    );
+
+    final fields = find.byType(TextFormField);
+    // Depth delta and time delta fields (fraction appears only for custom).
+    await tester.enterText(fields.at(0), '8');
+    await tester.enterText(fields.at(1), '12');
+    await tester.pumpAndSettle();
+    expect(container.read(divePlanNotifierProvider).deviationDepthDelta, 8.0);
+    expect(container.read(divePlanNotifierProvider).deviationTimeMinutes, 12);
+
+    // Pick a turn-pressure rule from the dropdown.
+    await tester.tap(
+      find.byType(DropdownButtonFormField<domain.TurnPressureRule?>),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Thirds').last);
+    await tester.pumpAndSettle();
+    expect(
+      container.read(divePlanNotifierProvider).turnPressureRule,
+      domain.TurnPressureRule.thirds,
+    );
+
+    // Custom exposes a fraction field.
+    await tester.tap(
+      find.byType(DropdownButtonFormField<domain.TurnPressureRule?>),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Custom').last);
+    await tester.pumpAndSettle();
+    final fractionField = find.byType(TextFormField).last;
+    await tester.enterText(fractionField, '0.4');
+    await tester.pumpAndSettle();
+    expect(container.read(divePlanNotifierProvider).turnPressureFraction, 0.4);
   });
 }
