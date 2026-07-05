@@ -4,6 +4,7 @@ import 'package:submersion/features/dive_log/domain/entities/dive.dart';
 import 'package:submersion/features/dive_planner/domain/entities/plan_segment.dart';
 import 'package:submersion/features/planner/domain/entities/dive_plan.dart'
     as domain;
+import 'package:submersion/features/planner/domain/entities/plan_outcome.dart';
 import 'package:submersion/features/planner/domain/services/contingency_service.dart';
 import 'package:submersion/features/planner/domain/services/plan_engine.dart';
 
@@ -99,6 +100,71 @@ void main() {
 
   test('CCR plans yield no lost-gas outcomes', () {
     expect(service.lostGas(_plan(mode: domain.PlanMode.ccr)), isEmpty);
+  });
+
+  test('deviationFor runs a single named variant', () {
+    final deeper = service.deviationFor(_plan(), 'deeper');
+    expect(deeper, isNotNull);
+    expect(deeper!.key, 'deeper');
+    expect(deeper.outcome.maxDepth, closeTo(65.0, 0.01));
+    expect(service.deviationFor(_plan(), 'longer')!.key, 'longer');
+    // Empty plan yields nothing to vary.
+    final empty = domain.DivePlan(
+      id: 'e',
+      name: 'e',
+      gfLow: 50,
+      gfHigh: 80,
+      createdAt: DateTime(2026, 7, 5),
+      updatedAt: DateTime(2026, 7, 5),
+    );
+    expect(service.deviationFor(empty, 'deeper'), isNull);
+  });
+
+  test('losing a gas remaps user segments that breathed it onto back gas', () {
+    // A (contrived) plan whose bottom segment breathes the EAN50 deco tank.
+    // Losing EAN50 must remap that segment to back gas, so the contingency
+    // does not keep breathing 50% at 60 m (which would be ppO2-critical).
+    final plan = domain.DivePlan(
+      id: 'plan-x',
+      name: 'Segment on deco gas',
+      gfLow: 50,
+      gfHigh: 80,
+      tanks: const [_backTank, _ean50],
+      segments: [
+        PlanSegment.descent(
+          id: 'seg-1',
+          targetDepth: 60.0,
+          tankId: 'back',
+          gasMix: _backGas,
+          order: 0,
+        ),
+        PlanSegment.bottom(
+          id: 'seg-2',
+          depth: 60.0,
+          durationMinutes: 20,
+          tankId: 'ean50',
+          gasMix: const GasMix(o2: 50),
+          order: 1,
+        ),
+      ],
+      createdAt: DateTime(2026, 7, 5),
+      updatedAt: DateTime(2026, 7, 5),
+    );
+
+    final lost = service.lostGas(plan);
+    expect(lost, hasLength(1));
+    final outcome = lost.single.outcome;
+    // Back gas (18/45) at 60 m is safe; EAN50 at 60 m would be ppO2-critical.
+    expect(
+      outcome.issues.map((i) => i.type),
+      isNot(contains(PlanIssueType.ppO2Critical)),
+      reason: 'remapped segment should breathe back gas, not the lost EAN50',
+    );
+  });
+
+  test('losing the only cylinder yields no lost-gas outcome', () {
+    final plan = _plan(tanks: const [_ean50]);
+    expect(service.lostGas(plan), isEmpty);
   });
 
   test('no segments yields no deviations', () {

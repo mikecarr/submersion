@@ -38,26 +38,31 @@ class ContingencyService {
 
   PlanEngine get _engine => PlanEngine(config: config);
 
+  /// The three deviation keys, in slate order.
+  static const deviationKeys = ['deeper', 'longer', 'both'];
+
   /// The deeper / longer / both variants (empty when the plan has no
   /// segments).
   List<DeviationOutcome> deviations(domain.DivePlan plan) {
     if (plan.segments.isEmpty) return const [];
-    final deeper = _deepened(plan);
-    final longer = _lengthened(plan);
-    final both = _lengthened(deeper);
-    return [
-      DeviationOutcome(
-        key: 'deeper',
-        plan: deeper,
-        outcome: _engine.compute(deeper),
-      ),
-      DeviationOutcome(
-        key: 'longer',
-        plan: longer,
-        outcome: _engine.compute(longer),
-      ),
-      DeviationOutcome(key: 'both', plan: both, outcome: _engine.compute(both)),
-    ];
+    return [for (final key in deviationKeys) deviationFor(plan, key)!];
+  }
+
+  /// A single deviation variant by [key] ('deeper' | 'longer' | 'both'), or
+  /// null when the plan has no segments. Lets callers (the chart ghost) run
+  /// just the one variant the user selected instead of all three.
+  DeviationOutcome? deviationFor(domain.DivePlan plan, String key) {
+    if (plan.segments.isEmpty) return null;
+    final variant = switch (key) {
+      'deeper' => _deepened(plan),
+      'longer' => _lengthened(plan),
+      _ => _lengthened(_deepened(plan)),
+    };
+    return DeviationOutcome(
+      key: key,
+      plan: variant,
+      outcome: _engine.compute(variant),
+    );
   }
 
   /// One outcome per lost deco/stage cylinder. Empty for CCR plans (loop
@@ -69,8 +74,25 @@ class ContingencyService {
     final results = <LostGasOutcome>[];
     for (final tank in plan.tanks) {
       if (tank.role != TankRole.deco && tank.role != TankRole.stage) continue;
+      final remaining = plan.tanks.where((t) => t.id != tank.id).toList();
+      // Nothing left to breathe — a lost-gas schedule would be meaningless.
+      if (remaining.isEmpty) continue;
+      // Any user segment that breathed the lost cylinder is remapped onto a
+      // fallback (prefer back gas). Without this the contingency would still
+      // "breathe" the lost gas and its consumption would go unaccounted, since
+      // the engine only reports usage for tanks present in plan.tanks.
+      final fallback = remaining.firstWhere(
+        (t) => t.role == TankRole.backGas,
+        orElse: () => remaining.first,
+      );
       final without = plan.copyWith(
-        tanks: plan.tanks.where((t) => t.id != tank.id).toList(),
+        tanks: remaining,
+        segments: [
+          for (final segment in plan.segments)
+            segment.tankId == tank.id
+                ? segment.copyWith(tankId: fallback.id, gasMix: fallback.gasMix)
+                : segment,
+        ],
       );
       results.add(
         LostGasOutcome(tank: tank, outcome: _engine.compute(without)),

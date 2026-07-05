@@ -10341,7 +10341,7 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String plannerCanvas_bailout_available(String liters) {
-    return 'Elérhető $liters L';
+    return 'Elérhető $liters';
   }
 
   @override
@@ -10350,7 +10350,7 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String plannerCanvas_bailout_required(String liters) {
-    return 'Szükséges $liters L';
+    return 'Szükséges $liters';
   }
 
   @override

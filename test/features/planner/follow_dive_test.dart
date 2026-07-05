@@ -4,9 +4,11 @@ import 'package:submersion/core/constants/map_style.dart';
 import 'package:submersion/core/providers/provider.dart';
 import 'package:submersion/features/dive_log/domain/entities/dive.dart';
 import 'package:submersion/features/dive_log/presentation/providers/dive_providers.dart';
+import 'package:submersion/features/dive_log/presentation/providers/profile_analysis_provider.dart';
 import 'package:submersion/features/dive_planner/presentation/providers/dive_planner_providers.dart';
 import 'package:submersion/features/dive_planner/presentation/widgets/plan_settings_panel.dart';
 import 'package:submersion/features/planner/presentation/providers/plan_canvas_providers.dart';
+import 'package:submersion/features/planner/presentation/widgets/follow_dive_sheet.dart';
 import 'package:submersion/features/planner/presentation/widgets/plan_status_chips.dart';
 import 'package:submersion/features/settings/presentation/providers/settings_providers.dart';
 
@@ -98,5 +100,60 @@ void main() {
     );
     // Button hides once the plan matches the logged average.
     expect(find.textContaining('17.6 '), findsNothing);
+  });
+
+  testWidgets('FollowDiveSheet lists dives and follows the tapped one', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      testApp(
+        overrides: [
+          settingsProvider.overrideWith((ref) => _TestSettingsNotifier()),
+          divesProvider.overrideWith((ref) async => [stubDive]),
+          // No profile analysis -> follows with a surface interval but no
+          // tissue seed (the null-compartments branch).
+          profileAnalysisProvider.overrideWith((ref, id) async => null),
+        ],
+        child: Builder(
+          builder: (context) => ElevatedButton(
+            onPressed: () => showFollowDiveSheet(context),
+            child: const Text('open'),
+          ),
+        ),
+      ),
+    );
+    final container = ProviderScope.containerOf(
+      tester.element(find.text('open')),
+    );
+
+    await tester.tap(find.text('open'));
+    await tester.pumpAndSettle();
+    expect(find.byType(FollowDiveSheet), findsOneWidget);
+    expect(find.text('Reef drift'), findsOneWidget);
+
+    await tester.tap(find.text('Reef drift'));
+    await tester.pumpAndSettle();
+
+    final state = container.read(divePlanNotifierProvider);
+    expect(state.sourceDiveId, 'dive-9');
+    expect(state.surfaceInterval, isNotNull);
+    // The sheet closed after following.
+    expect(find.byType(FollowDiveSheet), findsNothing);
+  });
+
+  testWidgets('FollowDiveSheet shows an empty state with no logged dives', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      testApp(
+        overrides: [
+          settingsProvider.overrideWith((ref) => _TestSettingsNotifier()),
+          divesProvider.overrideWith((ref) async => <Dive>[]),
+        ],
+        child: const FollowDiveSheet(),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('No logged dives yet'), findsOneWidget);
   });
 }
