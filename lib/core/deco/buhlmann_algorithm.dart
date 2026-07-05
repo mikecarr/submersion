@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:submersion/core/deco/ascent/ascent_gas_plan.dart';
 import 'package:submersion/core/deco/constants/buhlmann_coefficients.dart';
+import 'package:submersion/core/deco/entities/breathing_config.dart';
 import 'package:submersion/core/deco/entities/deco_status.dart';
 import 'package:submersion/core/deco/entities/dive_environment.dart';
 import 'package:submersion/core/deco/entities/profile_gas_segment.dart';
@@ -132,10 +133,19 @@ class BuhlmannAlgorithm {
     required int durationSeconds,
     double fN2 = airN2Fraction,
     double fHe = 0.0,
+    BreathingConfig? breathing,
   }) {
     final ambientPressure = environment.pressureAtDepth(depthMeters);
-    final inspiredN2 = calculateInspiredN2(ambientPressure, fN2);
-    final inspiredHe = calculateInspiredHe(ambientPressure, fHe);
+    final double inspiredN2;
+    final double inspiredHe;
+    if (breathing != null) {
+      final inspired = breathing.inspiredAt(ambientPressure);
+      inspiredN2 = inspired.pN2;
+      inspiredHe = inspired.pHe;
+    } else {
+      inspiredN2 = calculateInspiredN2(ambientPressure, fN2);
+      inspiredHe = calculateInspiredHe(ambientPressure, fHe);
+    }
     final durationMinutes = durationSeconds / 60.0;
 
     final newCompartments = <TissueCompartment>[];
@@ -270,6 +280,7 @@ class BuhlmannAlgorithm {
     double fN2 = airN2Fraction,
     double fHe = 0.0,
     int maxNdl = 999 * 60,
+    BreathingConfig? breathing,
   }) {
     // Check if already in deco using GF High (surface target).
     // NDL is about whether we can ascend directly to the surface.
@@ -297,6 +308,7 @@ class BuhlmannAlgorithm {
         durationSeconds: mid,
         fN2: fN2,
         fHe: fHe,
+        breathing: breathing,
       );
 
       // Check if this creates a deco obligation using GF High
@@ -530,9 +542,15 @@ class BuhlmannAlgorithm {
     double fHe = 0.0,
     int safetyStopTimeAccumulated = 0,
     AscentGasPlan? ascentGas,
+    BreathingConfig? breathing,
   }) {
     final plan = ascentGas ?? FixedAscentGas(fN2: fN2, fHe: fHe);
-    final ndl = calculateNdl(depthMeters: currentDepth, fN2: fN2, fHe: fHe);
+    final ndl = calculateNdl(
+      depthMeters: currentDepth,
+      fN2: fN2,
+      fHe: fHe,
+      breathing: breathing,
+    );
 
     // Only calculate ceiling/stops when actually in deco (NDL < 0).
     // The GF-interpolated ceiling is for ascent planning during deco,
@@ -699,6 +717,7 @@ class BuhlmannAlgorithm {
             durationSeconds: duration,
             fN2: gas.fN2,
             fHe: gas.fHe,
+            breathing: _breathingFor(gas),
           );
 
           // Accumulate time if average depth was in the safety-stop zone,
@@ -712,13 +731,15 @@ class BuhlmannAlgorithm {
         }
       }
 
+      final sampleGas = _activeGasAtTimestamp(timestamps[i], gasSegments);
       results.add(
         getDecoStatus(
           currentDepth: depths[i],
-          fN2: _activeGasAtTimestamp(timestamps[i], gasSegments).fN2,
-          fHe: _activeGasAtTimestamp(timestamps[i], gasSegments).fHe,
+          fN2: sampleGas.fN2,
+          fHe: sampleGas.fHe,
           safetyStopTimeAccumulated: safetyStopTimeAccumulated,
           ascentGas: ascentGasPlan,
+          breathing: _breathingFor(sampleGas),
         ),
       );
     }
@@ -740,6 +761,19 @@ class BuhlmannAlgorithm {
     final progress =
         (targetTimestamp - startTimestamp) / (endTimestamp - startTimestamp);
     return startDepth + ((endDepth - startDepth) * progress);
+  }
+
+  /// Breathing config for a profile gas segment: constant-ppO2 CCR when the
+  /// segment carries a setpoint (fN2/fHe describe the diluent), else null
+  /// (open-circuit fractions).
+  BreathingConfig? _breathingFor(ProfileGasSegment gas) {
+    final setpoint = gas.setpoint;
+    if (setpoint == null) return null;
+    return ClosedCircuit(
+      setpoint: setpoint,
+      diluentFO2: 1.0 - gas.fN2 - gas.fHe,
+      diluentFHe: gas.fHe,
+    );
   }
 
   ProfileGasSegment _activeGasAtTimestamp(
