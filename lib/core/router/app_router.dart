@@ -36,6 +36,7 @@ import 'package:submersion/features/dive_centers/presentation/pages/dive_center_
 import 'package:submersion/features/dive_log/presentation/pages/dive_list_page.dart';
 import 'package:submersion/features/dive_log/presentation/pages/dive_detail_page.dart';
 import 'package:submersion/features/dive_log/domain/entities/dive_prefill.dart';
+import 'package:submersion/features/ocr_import/presentation/pages/ocr_scan_page.dart';
 import 'package:submersion/features/dive_log/presentation/pages/bulk_dive_edit_page.dart';
 import 'package:submersion/features/dive_log/presentation/pages/dive_edit_page.dart';
 import 'package:submersion/features/dive_log/presentation/pages/dive_search_page.dart';
@@ -274,6 +275,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                 name: 'newDive',
                 builder: (context, state) =>
                     DiveEditPage(prefill: state.extra as DivePrefill?),
+              ),
+              GoRoute(
+                path: 'scan',
+                name: 'scanPaperLog',
+                builder: (context, state) => const OcrScanPage(),
               ),
               GoRoute(
                 path: 'search',

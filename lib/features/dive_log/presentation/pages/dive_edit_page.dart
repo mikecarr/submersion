@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart' hide Visibility;
 import 'package:go_router/go_router.dart';
 import 'package:submersion/core/icons/mdi_icons.dart';
@@ -31,6 +33,7 @@ import 'package:submersion/features/settings/presentation/providers/settings_pro
 import 'package:submersion/features/trips/presentation/widgets/trip_picker.dart';
 import 'package:submersion/features/dive_log/domain/entities/dive.dart';
 import 'package:submersion/features/dive_log/domain/entities/dive_prefill.dart';
+import 'package:submersion/features/media/presentation/providers/photo_picker_providers.dart';
 import 'package:submersion/features/dive_log/domain/entities/dive_custom_field.dart';
 import 'package:submersion/features/dive_log/domain/entities/dive_weight.dart';
 import 'package:submersion/features/dive_log/domain/entities/dive_data_source.dart';
@@ -4125,6 +4128,32 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
       } else {
         final savedDive = await notifier.addDive(dive);
         savedDiveId = savedDive.id;
+
+        // Attach the scanned logbook page photo (OCR flow). Failure must
+        // never block the save.
+        final photoPath = widget.prefill?.photoPath;
+        if (photoPath != null) {
+          try {
+            await ref
+                .read(mediaImportServiceProvider)
+                .importLocalFileForDive(
+                  sourceFile: File(photoPath),
+                  diveId: savedDive.id,
+                  takenAt: dive.dateTime,
+                );
+          } catch (_) {
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text(
+                    'The dive was saved, but attaching the scanned page '
+                    'failed',
+                  ),
+                ),
+              );
+            }
+          }
+        }
 
         // Auto-fetch weather for new dives with coordinates
         if (_selectedSite != null && _selectedSite!.hasCoordinates) {
