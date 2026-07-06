@@ -129,6 +129,10 @@ class DiveProfileChart extends ConsumerStatefulWidget {
   /// Used for multi-tank pressure visualization
   final Map<String, List<TankPressurePoint>>? tankPressures;
 
+  /// Tank IDs whose pressure series is a synthesized linear estimate (no AI
+  /// data). Rendered as a straight line and labelled "(est.)".
+  final Set<String>? estimatedTankIds;
+
   /// Gas-usage segments rendered as a horizontal strip directly between the
   /// plot area and the X-axis tick labels. When non-empty, the chart
   /// reserves [gasTimelineHeight] of extra space at the bottom and the
@@ -451,6 +455,7 @@ class DiveProfileChart extends ConsumerStatefulWidget {
     this.gasSwitches,
     this.tanks,
     this.tankPressures,
+    this.estimatedTankIds,
     this.gasSegments,
     this.diveDurationSeconds,
     this.exportKey,
@@ -3650,7 +3655,9 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
                 ),
               )
               .toList(),
-          isCurved: true,
+          // Synthesized estimates are straight (flat-drop-flat); curve
+          // smoothing would round their corners. Real AI data stays curved.
+          isCurved: !(widget.estimatedTankIds?.contains(tankId) ?? false),
           curveSmoothness: 0.2,
           color: color,
           barWidth: 2,
