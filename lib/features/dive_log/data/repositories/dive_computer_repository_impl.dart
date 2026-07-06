@@ -625,7 +625,6 @@ class DiveComputerRepository {
     int toleranceMinutes = 5,
     int? durationSeconds,
     double? maxDepth,
-    String? fingerprint,
     String? diverId,
   }) async {
     try {

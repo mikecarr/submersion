@@ -421,7 +421,6 @@ class DiveImportService {
   Future<DuplicateResult> detectDuplicate(
     DownloadedDive dive, {
     double timeTolerance = 5.0, // minutes
-    double depthTolerance = 0.5, // meters
     String? diverId,
     Map<String, Set<String>>? sourceKeysCache,
   }) async {
@@ -454,7 +453,6 @@ class DiveImportService {
       toleranceMinutes: timeTolerance.round(),
       durationSeconds: dive.durationSeconds,
       maxDepth: dive.maxDepth,
-      fingerprint: dive.fingerprint,
       diverId: diverId,
     );
 
