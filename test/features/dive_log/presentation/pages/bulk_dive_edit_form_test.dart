@@ -65,10 +65,11 @@ void main() {
       // (dive type moved from a scalar gate to the collection lane, #414)
       expect(find.byType(BulkFieldGate), findsNWidgets(26));
       expect(find.text('Favorite'), findsOneWidget);
-      // 6 collections still use a mode selector (tags, diveTypes, buddies,
-      // weights, tanks, sightings); equipment now uses the tri-state editor.
-      expect(find.byType(BulkCollectionModeSelector), findsNWidgets(6));
-      expect(find.byType(BulkMembershipEditor), findsOneWidget);
+      // Only the 3 owned collections (weights, tanks, sightings) still use a
+      // mode selector; the 4 reference collections (tags, diveTypes,
+      // equipment, buddies) use the tri-state membership editor.
+      expect(find.byType(BulkCollectionModeSelector), findsNWidgets(3));
+      expect(find.byType(BulkMembershipEditor), findsNWidgets(4));
     });
 
     testWidgets('equipment membership reflects current gear and a toggle', (
@@ -179,11 +180,22 @@ void main() {
       expect(find.byType(SnackBar), findsOneWidget);
     });
 
-    testWidgets('selecting a collection mode is included in the save', (
+    testWidgets('a membership toggle flows through the bulk apply to the DB', (
       tester,
     ) async {
+      const reg = EquipmentItem(
+        id: 'e1',
+        name: 'Regulator',
+        type: EquipmentType.regulator,
+      );
+      await EquipmentRepository().createEquipment(reg);
       final d1 = await repository.createDive(
-        createTestDiveWithBottomTime().copyWith(id: 'coll-1'),
+        Dive(
+          id: 'coll-1',
+          dateTime: DateTime(2026, 1, 1),
+          notes: '',
+          equipment: const [reg],
+        ),
       );
       final overrides = await getBaseOverrides();
       await tester.pumpWidget(
@@ -200,9 +212,10 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // Turn on the first collection's "Add" mode (Tags).
-      await tester.ensureVisible(find.text('Add').first);
-      await tester.tap(find.text('Add').first);
+      // e1 is on the (single) dive -> checked. Toggle it off -> remove op.
+      final toggle = find.byKey(const ValueKey('membership-toggle-e1'));
+      await tester.ensureVisible(toggle);
+      await tester.tap(toggle);
       await tester.pumpAndSettle();
 
       await tester.ensureVisible(find.text('Save'));
@@ -211,8 +224,9 @@ void main() {
       await tester.tap(find.text('Apply'));
       await tester.pumpAndSettle();
 
-      // The apply path (collection op) ran and reported success.
+      // The apply path ran end-to-end: e1 was removed from the dive.
       expect(find.byType(SnackBar), findsOneWidget);
+      expect((await repository.getDiveById(d1.id))!.equipment, isEmpty);
     });
 
     testWidgets('OC mode with a rebreather field enabled is blocked', (
