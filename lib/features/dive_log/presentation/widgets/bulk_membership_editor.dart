@@ -1,4 +1,6 @@
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
+
+import 'package:submersion/l10n/l10n_extension.dart';
 
 /// Initial presence of an item across the selected dives.
 enum MembershipPresence { all, some, none }
@@ -51,5 +53,217 @@ class MembershipDelta {
       }
     }
     return MembershipDelta(add, remove);
+  }
+}
+
+/// A tri-state membership editor for one id-based collection in bulk mode.
+///
+/// Shows every [items] row with a tri-state checkbox reflecting how many of
+/// the [totalDives] selected dives currently have it (from [counts]):
+/// checked = on all, dash = on some (leave as-is), and lets the user ensure
+/// an item onto all or off all dives. Reports the resulting add/remove sets
+/// via [onChanged]. The parent owns the [items] list and handles [onAdd]
+/// (opening the collection's picker to bring in new items).
+class BulkMembershipEditor extends StatefulWidget {
+  const BulkMembershipEditor({
+    super.key,
+    required this.title,
+    required this.totalDives,
+    required this.items,
+    required this.counts,
+    required this.onAdd,
+    required this.onChanged,
+    this.addLabel,
+    this.secondaryAction,
+  });
+
+  final String title;
+  final int totalDives;
+  final List<BulkMembershipItem> items;
+  final Map<String, int> counts;
+  final VoidCallback onAdd;
+  final ValueChanged<MembershipDelta> onChanged;
+  final String? addLabel;
+  final Widget? secondaryAction;
+
+  @override
+  State<BulkMembershipEditor> createState() => _BulkMembershipEditorState();
+}
+
+class _BulkMembershipEditorState extends State<BulkMembershipEditor> {
+  final Map<String, MembershipChoice> _choices = {};
+
+  @override
+  void initState() {
+    super.initState();
+    for (final item in widget.items) {
+      _choices[item.id] = _defaultChoice(_presenceOf(item.id));
+    }
+    // Emit the baseline so the parent has a delta before any interaction.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) widget.onChanged(_delta());
+    });
+  }
+
+  @override
+  void didUpdateWidget(BulkMembershipEditor old) {
+    super.didUpdateWidget(old);
+    final ids = widget.items.map((e) => e.id).toSet();
+    var changed = false;
+    for (final item in widget.items) {
+      if (!_choices.containsKey(item.id)) {
+        _choices[item.id] = _defaultChoice(_presenceOf(item.id));
+        changed = true;
+      }
+    }
+    final before = _choices.length;
+    _choices.removeWhere((id, _) => !ids.contains(id));
+    changed = changed || _choices.length != before;
+    if (changed) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) widget.onChanged(_delta());
+      });
+    }
+  }
+
+  MembershipPresence _presenceOf(String id) {
+    final c = widget.counts[id] ?? 0;
+    if (widget.totalDives > 0 && c >= widget.totalDives) {
+      return MembershipPresence.all;
+    }
+    if (c <= 0) return MembershipPresence.none;
+    return MembershipPresence.some;
+  }
+
+  MembershipChoice _defaultChoice(MembershipPresence p) => switch (p) {
+    MembershipPresence.all => MembershipChoice.ensureOn,
+    MembershipPresence.none => MembershipChoice.ensureOn,
+    MembershipPresence.some => MembershipChoice.leaveAsIs,
+  };
+
+  MembershipDelta _delta() => MembershipDelta.from({
+    for (final item in widget.items) item.id: _presenceOf(item.id),
+  }, _choices);
+
+  void _cycle(String id) {
+    final presence = _presenceOf(id);
+    final current = _choices[id] ?? _defaultChoice(presence);
+    setState(() => _choices[id] = _next(presence, current));
+    widget.onChanged(_delta());
+  }
+
+  // "some" items cycle through all three states so the user can add-to-all,
+  // remove-from-all, or leave the mix untouched; "all"/"none" items toggle.
+  MembershipChoice _next(MembershipPresence p, MembershipChoice c) {
+    if (p == MembershipPresence.some) {
+      return switch (c) {
+        MembershipChoice.leaveAsIs => MembershipChoice.ensureOn,
+        MembershipChoice.ensureOn => MembershipChoice.ensureOff,
+        MembershipChoice.ensureOff => MembershipChoice.leaveAsIs,
+      };
+    }
+    return c == MembershipChoice.ensureOn
+        ? MembershipChoice.ensureOff
+        : MembershipChoice.ensureOn;
+  }
+
+  bool? _checkboxValue(MembershipChoice c) => switch (c) {
+    MembershipChoice.ensureOn => true,
+    MembershipChoice.ensureOff => false,
+    MembershipChoice.leaveAsIs => null,
+  };
+
+  String _subtitle(BuildContext context, String id) {
+    final l10n = context.l10n;
+    final presence = _presenceOf(id);
+    final choice = _choices[id] ?? _defaultChoice(presence);
+    final count = widget.counts[id] ?? 0;
+    if (choice == MembershipChoice.ensureOn &&
+        presence != MembershipPresence.all) {
+      return l10n.diveLog_bulkEdit_membership_adding(widget.totalDives);
+    }
+    if (choice == MembershipChoice.ensureOff &&
+        presence != MembershipPresence.none) {
+      return l10n.diveLog_bulkEdit_membership_removing;
+    }
+    return switch (presence) {
+      MembershipPresence.all => l10n.diveLog_bulkEdit_membership_onAll(
+        widget.totalDives,
+      ),
+      MembershipPresence.some => l10n.diveLog_bulkEdit_membership_onSome(
+        count,
+        widget.totalDives,
+      ),
+      MembershipPresence.none => l10n.diveLog_bulkEdit_membership_adding(
+        widget.totalDives,
+      ),
+    };
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final l10n = context.l10n;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(14, 10, 14, 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Text(widget.title, style: theme.textTheme.titleMedium),
+              ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ?widget.secondaryAction,
+                  TextButton.icon(
+                    onPressed: widget.onAdd,
+                    icon: const Icon(Icons.add, size: 18),
+                    label: Text(widget.addLabel ?? l10n.diveLog_edit_add),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          if (widget.items.isEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              child: Text(
+                l10n.diveLog_bulkEdit_membership_empty,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            )
+          else
+            for (final item in widget.items)
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: Checkbox(
+                  key: ValueKey('membership-toggle-${item.id}'),
+                  tristate: true,
+                  value: _checkboxValue(
+                    _choices[item.id] ?? _defaultChoice(_presenceOf(item.id)),
+                  ),
+                  onChanged: (_) => _cycle(item.id),
+                ),
+                title: Row(
+                  children: [
+                    if (item.icon != null) ...[
+                      Icon(item.icon, size: 18),
+                      const SizedBox(width: 8),
+                    ],
+                    Expanded(child: Text(item.label)),
+                  ],
+                ),
+                subtitle: Text(_subtitle(context, item.id)),
+                onTap: () => _cycle(item.id),
+              ),
+        ],
+      ),
+    );
   }
 }
