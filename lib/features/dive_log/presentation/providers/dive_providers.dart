@@ -10,7 +10,9 @@ import 'package:submersion/features/dive_log/data/repositories/tank_pressure_rep
 import 'package:submersion/features/dive_log/data/services/dive_consolidation_service.dart';
 import 'package:submersion/features/dive_log/data/services/dive_merge_service.dart';
 import 'package:submersion/features/dive_log/data/services/dive_split_service.dart';
+import 'package:submersion/features/dive_log/data/services/estimated_tank_pressure_synthesizer.dart';
 import 'package:submersion/features/dive_log/presentation/providers/dive_repository_provider.dart';
+import 'package:submersion/features/dive_log/presentation/providers/gas_switch_providers.dart';
 import 'package:submersion/features/dive_log/domain/entities/dive.dart'
     as domain;
 import 'package:submersion/features/dive_log/domain/entities/dive_data_source.dart';
@@ -956,6 +958,28 @@ final tankPressuresProvider =
         ref.watch(diveRepositoryProvider).watchDiveDetailChanges(),
       );
       return repository.getTankPressuresForDive(diveId);
+    });
+
+/// Real per-tank pressures augmented with in-memory linear estimates for tanks
+/// that have start/end pressures but no transmitter data. Chart-only; the
+/// estimates are never persisted, so SAC analysis and exports (which read the
+/// repository directly) still see real measured data only.
+final estimatedTankPressuresProvider =
+    FutureProvider.family<EstimatedTankPressures, String>((ref, diveId) async {
+      final real = await ref.watch(tankPressuresProvider(diveId).future);
+      final dive = await ref.watch(diveProvider(diveId).future);
+      final switches = await ref.watch(gasSwitchesProvider(diveId).future);
+      if (dive == null) {
+        return EstimatedTankPressures(real, const <String>{});
+      }
+      return synthesizeEstimatedTankPressures(
+        existing: real,
+        tanks: dive.tanks,
+        gasSwitches: switches,
+        diveDurationSeconds: dive.profile.isEmpty
+            ? 0
+            : dive.profile.last.timestamp,
+      );
     });
 
 /// Provider to load data sources for a dive.
