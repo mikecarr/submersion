@@ -423,6 +423,17 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
     if (p.notes != null) _notesController.text = p.notes!;
     if (p.rating != null) _rating = p.rating!;
     if (p.site != null) _selectedSite = p.site;
+    if (p.weightKg != null) {
+      // Paper logs record a total; the carry type is unknown.
+      _weights = [
+        DiveWeight(
+          id: _uuid.v4(),
+          diveId: widget.diveId ?? '',
+          weightType: WeightType.mixed,
+          amountKg: p.weightKg!,
+        ),
+      ];
+    }
     // Expand sections that received prefilled content so the user can
     // review what the scan extracted without hunting for it.
     if (p.notes != null || p.rating != null) {

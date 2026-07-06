@@ -19,7 +19,19 @@ import 'package:submersion/l10n/l10n_extension.dart';
 /// Scan a paper logbook page: acquire a photo, run on-device OCR, and
 /// open the dive edit form prefilled with whatever was extracted.
 class OcrScanPage extends ConsumerStatefulWidget {
-  const OcrScanPage({super.key});
+  const OcrScanPage({
+    super.key,
+    @visibleForTesting this.pickImageOverride,
+    @visibleForTesting this.forceMobileLayout,
+  });
+
+  /// Test seam: replaces the platform image picker. Receives the source
+  /// and returns a file path, or null when the user cancels.
+  final Future<String?> Function(ImageSource source)? pickImageOverride;
+
+  /// Test seam: forces the mobile (camera + gallery) or desktop
+  /// (file picker only) layout regardless of the host platform.
+  final bool? forceMobileLayout;
 
   @override
   ConsumerState<OcrScanPage> createState() => _OcrScanPageState();
@@ -28,22 +40,29 @@ class OcrScanPage extends ConsumerStatefulWidget {
 class _OcrScanPageState extends ConsumerState<OcrScanPage> {
   bool _processing = false;
 
-  bool get _isMobile => Platform.isAndroid || Platform.isIOS;
+  bool get _isMobile =>
+      widget.forceMobileLayout ?? (Platform.isAndroid || Platform.isIOS);
+
+  Future<String?> _pick(ImageSource source) async {
+    if (widget.pickImageOverride != null) {
+      return widget.pickImageOverride!(source);
+    }
+    if (_isMobile) {
+      final file = await ImagePicker().pickImage(source: source);
+      return file?.path;
+    }
+    final result = await FilePicker.pickFiles(type: FileType.image);
+    return result?.files.single.path;
+  }
 
   Future<void> _pickFromCamera() async {
-    final file = await ImagePicker().pickImage(source: ImageSource.camera);
-    if (file != null) await _process(file.path);
+    final path = await _pick(ImageSource.camera);
+    if (path != null) await _process(path);
   }
 
   Future<void> _pickFromGallery() async {
-    if (_isMobile) {
-      final file = await ImagePicker().pickImage(source: ImageSource.gallery);
-      if (file != null) await _process(file.path);
-    } else {
-      final result = await FilePicker.pickFiles(type: FileType.image);
-      final path = result?.files.single.path;
-      if (path != null) await _process(path);
-    }
+    final path = await _pick(ImageSource.gallery);
+    if (path != null) await _process(path);
   }
 
   Future<void> _process(String photoPath) async {

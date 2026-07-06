@@ -21,4 +21,31 @@ void main() {
       expect(block.height, 14);
     });
   });
+
+  group('equality', () {
+    test('identical blocks and results are equal', () {
+      const a = OcrTextBlock(
+        text: 'DEPTH',
+        boundingBox: Rect.fromLTWH(10, 20, 40, 10),
+        confidence: 0.9,
+      );
+      const b = OcrTextBlock(
+        text: 'DEPTH',
+        boundingBox: Rect.fromLTWH(10, 20, 40, 10),
+        confidence: 0.9,
+      );
+      expect(a, b);
+      // Non-const on purpose: identical const instances short-circuit
+      // Equatable's == and props would never be evaluated.
+      // ignore: prefer_const_constructors
+      final resultA = OcrResult(blocks: [a], imageSize: const Size(100, 100));
+      // ignore: prefer_const_constructors
+      final resultB = OcrResult(blocks: [b], imageSize: const Size(100, 100));
+      expect(resultA, resultB);
+    });
+
+    test('isEmpty reflects block count', () {
+      expect(const OcrResult(blocks: [], imageSize: Size.zero).isEmpty, isTrue);
+    });
+  });
 }

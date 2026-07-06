@@ -71,6 +71,13 @@ void main() {
       );
     });
 
+    test('day greater than twelve in first position', () {
+      expect(
+        parseDateToken('14/05/2023', preferDayFirst: false),
+        DateTime(2023, 5, 14),
+      );
+    });
+
     test('ISO date', () {
       expect(
         parseDateToken('2023-05-14', preferDayFirst: true),

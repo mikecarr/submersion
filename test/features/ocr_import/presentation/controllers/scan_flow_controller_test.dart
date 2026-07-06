@@ -75,6 +75,19 @@ void main() {
     expect(prefill.notes, contains('HUMPBACK WHALE'));
   });
 
+  test('unresolved location text joins the appendix', () async {
+    final controller = ScanFlowController(
+      engine: FakeEngine(typewriterBoxed()),
+      parser: LogbookParser(),
+      existingSites: const [],
+      fallbackUnits: metric,
+      preferDayFirst: false,
+    );
+    final prefill = await controller.process(Uint8List(4), '/tmp/p.jpg');
+    expect(prefill.notes, contains('Site: Chac Mool Cenote'));
+    expect(prefill.notes, contains('Location: Mexico'));
+  });
+
   test('engine failure degrades to photo-only prefill', () async {
     final controller = ScanFlowController(
       engine: ThrowingEngine(),

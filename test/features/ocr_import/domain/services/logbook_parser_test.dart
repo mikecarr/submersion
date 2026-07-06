@@ -120,4 +120,134 @@ void main() {
     );
     expect(result.isEmpty, isTrue);
   });
+
+  group('branch coverage', () {
+    test('rating and nitrox labels bind', () {
+      final result = parser.parse(
+        page([
+          block('Rating', 0, 0),
+          block('5', 90, 0, w: 20),
+          block('Nitrox', 0, 40),
+          block('EAN32', 90, 40, w: 60),
+        ]),
+        fallbackUnits: metric,
+        preferDayFirst: false,
+      );
+      expect(result.rating, 5);
+      expect(result.o2Percent, 32);
+    });
+
+    test('explicit kg weight stays metric', () {
+      final result = parser.parse(
+        page([
+          block('Weight Used :', 0, 0, w: 110),
+          block('11 kg', 120, 0, w: 50),
+        ]),
+        fallbackUnits: metric,
+        preferDayFirst: false,
+      );
+      expect(result.weightKg, 11);
+    });
+
+    test('implausible air temperature is dropped', () {
+      final result = parser.parse(
+        page([block('Air', 0, 0, w: 40), block('90', 50, 0, w: 30)]),
+        fallbackUnits: metric,
+        preferDayFirst: false,
+      );
+      expect(result.airTempCelsius, isNull);
+    });
+
+    test('start pressure below end pressure drops both', () {
+      final result = parser.parse(
+        page([
+          block('Start', 0, 0, w: 60),
+          block('100 bar', 70, 0, w: 60),
+          block('End', 0, 40, w: 60),
+          block('150 bar', 70, 40, w: 60),
+        ]),
+        fallbackUnits: metric,
+        preferDayFirst: false,
+      );
+      expect(result.startPressureBar, isNull);
+      expect(result.endPressureBar, isNull);
+    });
+
+    test('implausible duration is dropped', () {
+      final result = parser.parse(
+        page([block('Bottom Time', 0, 0, w: 100), block('900', 110, 0, w: 40)]),
+        fallbackUnits: metric,
+        preferDayFirst: false,
+      );
+      expect(result.durationMinutes, isNull);
+    });
+
+    test('pattern pass fills date, depth, and duration from bare values', () {
+      final result = parser.parse(
+        page([
+          block('05/14/2023', 0, 0, w: 110),
+          block('18m', 0, 40, w: 40),
+          block('42 min', 0, 80, w: 60),
+          block('150 bar', 0, 120, w: 60),
+        ]),
+        fallbackUnits: metric,
+        preferDayFirst: false,
+      );
+      expect(result.date, DateTime(2023, 5, 14));
+      expect(result.maxDepthMeters, 18);
+      expect(result.durationMinutes, 42);
+      // A single free pressure becomes the start pressure only.
+      expect(result.startPressureBar, 150);
+      expect(result.endPressureBar, isNull);
+    });
+
+    test('pattern pass handles imperial free values', () {
+      final result = parser.parse(
+        page([
+          block('60 ft', 0, 0, w: 50),
+          block('3000 psi', 0, 40, w: 80),
+          block('2200 psi', 0, 80, w: 80),
+        ]),
+        fallbackUnits: metric,
+        preferDayFirst: false,
+      );
+      expect(result.maxDepthMeters, closeTo(18.29, 0.01));
+      expect(result.startPressureBar, closeTo(206.8, 0.5));
+      expect(result.endPressureBar, closeTo(151.7, 0.5));
+    });
+
+    test('a bare number never becomes a site name', () {
+      final result = parser.parse(
+        page([block('Location', 0, 0), block('42', 110, 0, w: 30)]),
+        fallbackUnits: metric,
+        preferDayFirst: false,
+      );
+      expect(result.siteName, isNull);
+    });
+
+    test('dive number zero is rejected', () {
+      final result = parser.parse(
+        page([block('Dive No.', 0, 0), block('0', 100, 0, w: 20)]),
+        fallbackUnits: metric,
+        preferDayFirst: false,
+      );
+      expect(result.diveNumber, isNull);
+    });
+
+    test('time out alone yields neither duration nor time of day', () {
+      final result = parser.parse(
+        page([
+          block('Time OUT', 0, 0),
+          block('10:32', 0, 20, w: 50),
+          block('Date', 200, 0, w: 50),
+          block('05/14/2023', 260, 0, w: 110),
+        ]),
+        fallbackUnits: metric,
+        preferDayFirst: false,
+      );
+      expect(result.durationMinutes, isNull);
+      expect(result.hasTimeOfDay, isFalse);
+      expect(result.date, DateTime(2023, 5, 14));
+    });
+  });
 }
