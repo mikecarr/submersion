@@ -1,7 +1,7 @@
 # OCR Paper Logbook Import - Design
 
 Date: 2026-07-06
-Status: Approved design, pending implementation plan
+Status: Implemented (plan: docs/superpowers/plans/2026-07-06-ocr-logbook-import.md); device smoke pending
 
 ## Summary
 
