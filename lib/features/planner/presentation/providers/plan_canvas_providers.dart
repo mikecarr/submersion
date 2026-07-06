@@ -3,6 +3,7 @@ import 'package:submersion/features/dive_log/domain/entities/dive.dart';
 import 'package:submersion/features/dive_planner/domain/entities/plan_segment.dart';
 import 'package:submersion/features/dive_planner/presentation/providers/dive_planner_providers.dart';
 import 'package:submersion/features/planner/domain/entities/plan_outcome.dart';
+import 'package:submersion/features/planner/domain/services/bailout_solver.dart';
 import 'package:submersion/features/planner/domain/services/dive_plan_state_mapper.dart';
 import 'package:submersion/features/planner/domain/services/plan_engine.dart';
 import 'package:submersion/features/settings/presentation/providers/settings_providers.dart';
@@ -190,4 +191,12 @@ final planCanvasSeriesProvider = Provider<PlanCanvasSeries>((ref) {
     maxTimeSeconds: outcome.runtimeSeconds.toDouble(),
     maxDepth: outcome.maxDepth,
   );
+});
+
+/// Worst-case bailout for the current CCR plan; null for OC plans or when
+/// no bailout-role tank is carried. Recomputed live with the plan.
+final planBailoutProvider = Provider<BailoutOutcome?>((ref) {
+  final state = ref.watch(divePlanNotifierProvider);
+  final solver = BailoutSolver(config: ref.watch(planEngineConfigProvider));
+  return solver.solve(divePlanFromState(state));
 });

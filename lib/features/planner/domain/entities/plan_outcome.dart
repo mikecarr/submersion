@@ -19,6 +19,7 @@ enum PlanIssueType {
   gasReserveViolation,
   gasOut,
   ndlExceededNoDecoGas,
+  noBailoutCarried,
 }
 
 /// One issue found while computing a plan.

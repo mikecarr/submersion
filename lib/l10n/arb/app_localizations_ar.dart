@@ -10168,6 +10168,42 @@ class AppLocalizationsAr extends AppLocalizations {
   String get onboarding_welcome_title => 'مرحباً بك في Submersion';
 
   @override
+  String plannerCanvas_bailout_available(String liters) {
+    return 'المتاح $liters';
+  }
+
+  @override
+  String get plannerCanvas_bailout_insufficient =>
+      'غاز الإنقاذ غير كافٍ لأسوأ حالة';
+
+  @override
+  String plannerCanvas_bailout_required(String liters) {
+    return 'المطلوب $liters';
+  }
+
+  @override
+  String get plannerCanvas_bailout_title => 'إنقاذ (دائرة مفتوحة)';
+
+  @override
+  String plannerCanvas_bailout_tts(String minutes) {
+    return 'TTS للإنقاذ $minutes′';
+  }
+
+  @override
+  String plannerCanvas_bailout_worstCase(String minutes, String depth) {
+    return 'أسوأ حالة عند $minutes′ · $depth';
+  }
+
+  @override
+  String get plannerCanvas_ccr_setpointHigh => 'نقطة الضبط العليا (bar)';
+
+  @override
+  String get plannerCanvas_ccr_setpointLow => 'نقطة الضبط الدنيا (bar)';
+
+  @override
+  String get plannerCanvas_ccr_switchDepth => 'عمق تبديل نقطة الضبط';
+
+  @override
   String plannerCanvas_chip_cns(String value) {
     return 'CNS $value%';
   }
@@ -10199,6 +10235,10 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
+  String get plannerCanvas_issue_noBailout =>
+      'خطة تخفيف الضغط CCR لا تتضمن غاز إنقاذ (bailout)';
+
+  @override
   String get plannerCanvas_issue_noDecoGas =>
       'يلزم تخفيف الضغط ولكن لا يوجد غاز تخفيف';
 
@@ -10221,6 +10261,11 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get plannerCanvas_saved_title => 'الخطط المحفوظة';
+
+  @override
+  String plannerCanvas_scrub_bailout(String minutes) {
+    return 'BO $minutes′';
+  }
 
   @override
   String plannerCanvas_scrub_readout(String minutes, String depth) {

@@ -17660,6 +17660,60 @@ abstract class AppLocalizations {
   /// **'Welcome to Submersion'**
   String get onboarding_welcome_title;
 
+  /// No description provided for @plannerCanvas_bailout_available.
+  ///
+  /// In en, this message translates to:
+  /// **'Available {liters}'**
+  String plannerCanvas_bailout_available(String liters);
+
+  /// No description provided for @plannerCanvas_bailout_insufficient.
+  ///
+  /// In en, this message translates to:
+  /// **'Bailout gas insufficient for the worst case'**
+  String get plannerCanvas_bailout_insufficient;
+
+  /// No description provided for @plannerCanvas_bailout_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Required {liters}'**
+  String plannerCanvas_bailout_required(String liters);
+
+  /// No description provided for @plannerCanvas_bailout_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Bailout (open circuit)'**
+  String get plannerCanvas_bailout_title;
+
+  /// No description provided for @plannerCanvas_bailout_tts.
+  ///
+  /// In en, this message translates to:
+  /// **'Bailout TTS {minutes}′'**
+  String plannerCanvas_bailout_tts(String minutes);
+
+  /// No description provided for @plannerCanvas_bailout_worstCase.
+  ///
+  /// In en, this message translates to:
+  /// **'Worst case at {minutes}′ · {depth}'**
+  String plannerCanvas_bailout_worstCase(String minutes, String depth);
+
+  /// No description provided for @plannerCanvas_ccr_setpointHigh.
+  ///
+  /// In en, this message translates to:
+  /// **'Setpoint high (bar)'**
+  String get plannerCanvas_ccr_setpointHigh;
+
+  /// No description provided for @plannerCanvas_ccr_setpointLow.
+  ///
+  /// In en, this message translates to:
+  /// **'Setpoint low (bar)'**
+  String get plannerCanvas_ccr_setpointLow;
+
+  /// No description provided for @plannerCanvas_ccr_switchDepth.
+  ///
+  /// In en, this message translates to:
+  /// **'Setpoint switch depth'**
+  String get plannerCanvas_ccr_switchDepth;
+
   /// No description provided for @plannerCanvas_chip_cns.
   ///
   /// In en, this message translates to:
@@ -17689,6 +17743,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Hypoxic gas at {depth} (ppO₂ {value} bar)'**
   String plannerCanvas_issue_hypoxic(String depth, String value);
+
+  /// No description provided for @plannerCanvas_issue_noBailout.
+  ///
+  /// In en, this message translates to:
+  /// **'CCR decompression plan carries no bailout gas'**
+  String get plannerCanvas_issue_noBailout;
 
   /// No description provided for @plannerCanvas_issue_noDecoGas.
   ///
@@ -17731,6 +17791,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Saved plans'**
   String get plannerCanvas_saved_title;
+
+  /// No description provided for @plannerCanvas_scrub_bailout.
+  ///
+  /// In en, this message translates to:
+  /// **'BO {minutes}′'**
+  String plannerCanvas_scrub_bailout(String minutes);
 
   /// No description provided for @plannerCanvas_scrub_readout.
   ///

@@ -2,13 +2,13 @@ import 'package:submersion/features/dive_planner/domain/entities/plan_result.dar
 import 'package:submersion/features/planner/domain/entities/dive_plan.dart'
     as domain;
 
-/// Maps between the legacy planner UI state ([DivePlanState]) and the
-/// persisted [domain.DivePlan] aggregate.
+/// Maps between the planner UI state ([DivePlanState]) and the persisted
+/// [domain.DivePlan] aggregate.
 ///
-/// The legacy state carries a subset of the aggregate; [existing] preserves
-/// fields the state does not know about (mode, rates, CCR/contingency
-/// config, water type, dive links) across an edit-save cycle so a plan
-/// touched by the old UI does not lose them.
+/// The UI state carries a subset of the aggregate; [existing] preserves
+/// fields the state does not know about (rates, contingency config, water
+/// type, dive links) across an edit-save cycle so a plan touched by the UI
+/// does not lose them. Mode and setpoints travel WITH the state.
 domain.DivePlan divePlanFromState(
   DivePlanState state, {
   domain.DivePlan? existing,
@@ -31,6 +31,13 @@ domain.DivePlan divePlanFromState(
     clearSiteId: state.siteId == null,
     altitude: state.altitude,
     clearAltitude: state.altitude == null,
+    mode: state.mode,
+    setpointLow: state.setpointLow,
+    clearSetpointLow: state.setpointLow == null,
+    setpointHigh: state.setpointHigh,
+    clearSetpointHigh: state.setpointHigh == null,
+    setpointSwitchDepth: state.setpointSwitchDepth,
+    clearSetpointSwitchDepth: state.setpointSwitchDepth == null,
     gfLow: state.gfLow,
     gfHigh: state.gfHigh,
     sacBottom: state.sacRate,
@@ -52,6 +59,10 @@ DivePlanState stateFromDivePlan(domain.DivePlan plan) {
     notes: plan.notes,
     siteId: plan.siteId,
     altitude: plan.altitude,
+    mode: plan.mode,
+    setpointLow: plan.setpointLow,
+    setpointHigh: plan.setpointHigh,
+    setpointSwitchDepth: plan.setpointSwitchDepth,
     gfLow: plan.gfLow,
     gfHigh: plan.gfHigh,
     sacRate: plan.sacBottom,

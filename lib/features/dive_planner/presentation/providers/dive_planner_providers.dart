@@ -341,6 +341,26 @@ class DivePlanNotifier extends StateNotifier<DivePlanState> {
     );
   }
 
+  /// Switch between open circuit and CCR.
+  void updateMode(domain.PlanMode mode) {
+    state = state.copyWith(
+      mode: mode,
+      isDirty: true,
+      updatedAt: DateTime.now(),
+    );
+  }
+
+  /// Update CCR setpoints; only supplied values change.
+  void updateSetpoints({double? low, double? high, double? switchDepth}) {
+    state = state.copyWith(
+      setpointLow: low,
+      setpointHigh: high,
+      setpointSwitchDepth: switchDepth,
+      isDirty: true,
+      updatedAt: DateTime.now(),
+    );
+  }
+
   // --------------------------------------------------------------------------
   // Repetitive Dive Support
   // --------------------------------------------------------------------------

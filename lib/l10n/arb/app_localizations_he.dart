@@ -10100,6 +10100,42 @@ class AppLocalizationsHe extends AppLocalizations {
   String get onboarding_welcome_title => 'ברוכים הבאים ל-Submersion';
 
   @override
+  String plannerCanvas_bailout_available(String liters) {
+    return 'זמין $liters';
+  }
+
+  @override
+  String get plannerCanvas_bailout_insufficient =>
+      'גז חילוץ אינו מספיק למקרה הגרוע ביותר';
+
+  @override
+  String plannerCanvas_bailout_required(String liters) {
+    return 'נדרש $liters';
+  }
+
+  @override
+  String get plannerCanvas_bailout_title => 'חילוץ (מעגל פתוח)';
+
+  @override
+  String plannerCanvas_bailout_tts(String minutes) {
+    return 'TTS חילוץ $minutes′';
+  }
+
+  @override
+  String plannerCanvas_bailout_worstCase(String minutes, String depth) {
+    return 'המקרה הגרוע ב-$minutes′ · $depth';
+  }
+
+  @override
+  String get plannerCanvas_ccr_setpointHigh => 'נקודת כיוון גבוהה (bar)';
+
+  @override
+  String get plannerCanvas_ccr_setpointLow => 'נקודת כיוון נמוכה (bar)';
+
+  @override
+  String get plannerCanvas_ccr_switchDepth => 'עומק החלפת נקודת הכיוון';
+
+  @override
   String plannerCanvas_chip_cns(String value) {
     return 'CNS $value%';
   }
@@ -10131,6 +10167,10 @@ class AppLocalizationsHe extends AppLocalizations {
   }
 
   @override
+  String get plannerCanvas_issue_noBailout =>
+      'תוכנית דקומפרסיה CCR ללא גז חילוץ (bailout)';
+
+  @override
   String get plannerCanvas_issue_noDecoGas =>
       'נדרשת דקומפרסיה אך לא נלקח גז דקו';
 
@@ -10153,6 +10193,11 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get plannerCanvas_saved_title => 'תוכניות שמורות';
+
+  @override
+  String plannerCanvas_scrub_bailout(String minutes) {
+    return 'BO $minutes′';
+  }
 
   @override
   String plannerCanvas_scrub_readout(String minutes, String depth) {

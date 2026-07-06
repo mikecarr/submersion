@@ -10400,6 +10400,43 @@ class AppLocalizationsFr extends AppLocalizations {
   String get onboarding_welcome_title => 'Bienvenue dans Submersion';
 
   @override
+  String plannerCanvas_bailout_available(String liters) {
+    return 'Disponible $liters';
+  }
+
+  @override
+  String get plannerCanvas_bailout_insufficient =>
+      'Gaz de bailout insuffisant pour le pire cas';
+
+  @override
+  String plannerCanvas_bailout_required(String liters) {
+    return 'Nécessaire $liters';
+  }
+
+  @override
+  String get plannerCanvas_bailout_title => 'Bailout (circuit ouvert)';
+
+  @override
+  String plannerCanvas_bailout_tts(String minutes) {
+    return 'TTS bailout $minutes′';
+  }
+
+  @override
+  String plannerCanvas_bailout_worstCase(String minutes, String depth) {
+    return 'Pire cas à $minutes′ · $depth';
+  }
+
+  @override
+  String get plannerCanvas_ccr_setpointHigh => 'Setpoint haut (bar)';
+
+  @override
+  String get plannerCanvas_ccr_setpointLow => 'Setpoint bas (bar)';
+
+  @override
+  String get plannerCanvas_ccr_switchDepth =>
+      'Profondeur de bascule du setpoint';
+
+  @override
   String plannerCanvas_chip_cns(String value) {
     return 'CNS $value%';
   }
@@ -10431,6 +10468,10 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String get plannerCanvas_issue_noBailout =>
+      'Le plan de décompression CCR n\'emporte aucun gaz de bailout';
+
+  @override
   String get plannerCanvas_issue_noDecoGas =>
       'Décompression requise mais aucun gaz de déco emporté';
 
@@ -10453,6 +10494,11 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get plannerCanvas_saved_title => 'Plans enregistrés';
+
+  @override
+  String plannerCanvas_scrub_bailout(String minutes) {
+    return 'BO $minutes′';
+  }
 
   @override
   String plannerCanvas_scrub_readout(String minutes, String depth) {

@@ -77,18 +77,38 @@ void main() {
     );
 
     final merged = divePlanFromState(state(), existing: existing);
-    // Legacy-owned fields come from the state...
+    // State-owned fields come from the state (mode/setpoints joined that
+    // set in Phase 4: the state defaults to OC with null setpoints)...
     expect(merged.name, 'Reef dive');
     expect(merged.gfLow, 45);
     expect(merged.sacBottom, 17.0);
+    expect(merged.mode, domain.PlanMode.oc);
+    expect(merged.setpointHigh, isNull);
     // ...while aggregate-only fields survive the cycle.
-    expect(merged.mode, domain.PlanMode.ccr);
     expect(merged.waterType, WaterType.fresh);
     expect(merged.descentRate, 20.0);
     expect(merged.airBreaks, isNotNull);
-    expect(merged.setpointHigh, 1.3);
     expect(merged.turnPressureRule, domain.TurnPressureRule.thirds);
     expect(merged.sourceDiveId, 'dive-9');
+  });
+
+  test('mode and setpoints round-trip through the state', () {
+    final ccrState = state().copyWith(
+      mode: domain.PlanMode.ccr,
+      setpointLow: 0.7,
+      setpointHigh: 1.4,
+      setpointSwitchDepth: 12.0,
+    );
+    final plan = divePlanFromState(ccrState);
+    expect(plan.mode, domain.PlanMode.ccr);
+    expect(plan.setpointHigh, 1.4);
+    expect(plan.setpointSwitchDepth, 12.0);
+
+    final restored = stateFromDivePlan(plan);
+    expect(restored.mode, domain.PlanMode.ccr);
+    expect(restored.setpointLow, 0.7);
+    expect(restored.setpointHigh, 1.4);
+    expect(restored.setpointSwitchDepth, 12.0);
   });
 
   test('null state fields clear stale values from the existing plan', () {

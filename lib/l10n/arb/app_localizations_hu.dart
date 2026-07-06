@@ -10338,6 +10338,42 @@ class AppLocalizationsHu extends AppLocalizations {
   String get onboarding_welcome_title => 'Üdvözöl a Submersion';
 
   @override
+  String plannerCanvas_bailout_available(String liters) {
+    return 'Elérhető $liters';
+  }
+
+  @override
+  String get plannerCanvas_bailout_insufficient =>
+      'A bailout gáz nem elegendő a legrosszabb esethez';
+
+  @override
+  String plannerCanvas_bailout_required(String liters) {
+    return 'Szükséges $liters';
+  }
+
+  @override
+  String get plannerCanvas_bailout_title => 'Bailout (nyitott rendszer)';
+
+  @override
+  String plannerCanvas_bailout_tts(String minutes) {
+    return 'Bailout TTS $minutes′';
+  }
+
+  @override
+  String plannerCanvas_bailout_worstCase(String minutes, String depth) {
+    return 'Legrosszabb eset $minutes′-nél · $depth';
+  }
+
+  @override
+  String get plannerCanvas_ccr_setpointHigh => 'Magas setpoint (bar)';
+
+  @override
+  String get plannerCanvas_ccr_setpointLow => 'Alacsony setpoint (bar)';
+
+  @override
+  String get plannerCanvas_ccr_switchDepth => 'Setpoint váltási mélység';
+
+  @override
   String plannerCanvas_chip_cns(String value) {
     return 'CNS $value%';
   }
@@ -10369,6 +10405,10 @@ class AppLocalizationsHu extends AppLocalizations {
   }
 
   @override
+  String get plannerCanvas_issue_noBailout =>
+      'A CCR dekompressziós terv nem tartalmaz bailout gázt';
+
+  @override
   String get plannerCanvas_issue_noDecoGas =>
       'Dekompresszió szükséges, de nincs deco gáz';
 
@@ -10391,6 +10431,11 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get plannerCanvas_saved_title => 'Mentett tervek';
+
+  @override
+  String plannerCanvas_scrub_bailout(String minutes) {
+    return 'BO $minutes′';
+  }
 
   @override
   String plannerCanvas_scrub_readout(String minutes, String depth) {

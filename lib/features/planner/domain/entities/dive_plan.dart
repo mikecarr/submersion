@@ -100,6 +100,11 @@ class DivePlan extends Equatable {
     this.tanks = const [],
   });
 
+  /// CCR setpoints with the spec defaults (0.7 shallow, 1.3 below 10 m).
+  double get effectiveSetpointLow => setpointLow ?? 0.7;
+  double get effectiveSetpointHigh => setpointHigh ?? 1.3;
+  double get effectiveSetpointSwitchDepth => setpointSwitchDepth ?? 10.0;
+
   /// Deco SAC: explicit value or the 0.8x-of-bottom default.
   double get sacDecoEffective => sacDeco ?? sacBottom * 0.8;
 
