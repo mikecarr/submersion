@@ -55,7 +55,7 @@ class ImportDuplicateResult {
 
 /// Checks import payload entities against existing data for duplicates.
 ///
-/// Uses the same matching strategies as [UddfDuplicateChecker]:
+/// Matching strategies:
 /// - Name matching (case-insensitive) for simple entities
 /// - Lat/lon proximity (100m) for sites
 /// - Name + type compound matching for equipment and certifications

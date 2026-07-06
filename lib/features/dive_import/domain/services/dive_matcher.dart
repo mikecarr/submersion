@@ -1,3 +1,5 @@
+import 'package:submersion/core/matching/match_scorer.dart';
+
 /// Service for matching imported dives to existing dive log entries.
 ///
 /// Uses fuzzy matching based on time, depth, and duration to detect
@@ -5,6 +7,24 @@
 class DiveMatcher {
   /// Creates a [DiveMatcher] instance.
   const DiveMatcher();
+
+  /// Weighted scorer for file imports: time 50%, depth 30%, duration 20%.
+  ///
+  /// Time is scored over 5-15 min (whole minutes), depth as a percentage
+  /// (10%-20%), and duration over 3-10 min; a zero time score gates the whole
+  /// match to 0.0 (see [MatchScorer.gateOnZeroTime]).
+  static const _scorer = MatchScorer(
+    timeWeight: 0.50,
+    depthWeight: 0.30,
+    durationWeight: 0.20,
+    timeFull: 5, // minutes
+    timeZero: 15,
+    depthFull: 0.10, // fraction
+    depthZero: 0.20,
+    durationFull: 3, // minutes
+    durationZero: 10,
+    gateOnZeroTime: true,
+  );
 
   /// Calculate a match score between an imported dive and an existing dive.
   ///
@@ -22,74 +42,25 @@ class DiveMatcher {
     required double existingMaxDepth,
     required int existingDurationSeconds,
   }) {
-    final timeScore = _calculateTimeScore(wearableStartTime, existingStartTime);
+    final timeMinutes = wearableStartTime
+        .difference(existingStartTime)
+        .abs()
+        .inMinutes
+        .toDouble();
+    // Percent depth difference. A non-positive existing depth is treated as
+    // maximally different (infinity -> depth score 0), preserving the previous
+    // zero/negative-depth guard.
+    final depthValue = existingMaxDepth <= 0
+        ? double.infinity
+        : (wearableMaxDepth - existingMaxDepth).abs() / existingMaxDepth;
+    final durationMinutes =
+        (wearableDurationSeconds - existingDurationSeconds).abs() / 60.0;
 
-    // Time is a NECESSARY condition, not just a weighted term.
-    // `_calculateTimeScore` is 0.0 once the two starts are >= 15 min apart;
-    // with no time evidence, a depth + duration coincidence (0.30 + 0.20 =
-    // 0.50) must not be able to reach the possible-duplicate threshold. Two
-    // recordings that do not line up in time cannot be the same physical dive.
-    if (timeScore <= 0) return 0.0;
-
-    final depthScore = _calculateDepthScore(wearableMaxDepth, existingMaxDepth);
-    final durationScore = _calculateDurationScore(
-      wearableDurationSeconds,
-      existingDurationSeconds,
+    return _scorer.score(
+      timeValue: timeMinutes,
+      depthValue: depthValue,
+      durationValue: durationMinutes,
     );
-
-    // Weighted composite score
-    return (timeScore * 0.50) + (depthScore * 0.30) + (durationScore * 0.20);
-  }
-
-  /// Calculate time score: within 5 min = 100%, 15 min = 0%
-  double _calculateTimeScore(DateTime wearableTime, DateTime existingTime) {
-    final timeDiff = wearableTime.difference(existingTime).abs();
-    final timeMinutes = timeDiff.inMinutes;
-
-    if (timeMinutes <= 5) {
-      return 1.0;
-    } else if (timeMinutes >= 15) {
-      return 0.0;
-    } else {
-      return 1.0 - ((timeMinutes - 5) / 10);
-    }
-  }
-
-  /// Calculate depth score: within 10% = 100%, 20%+ diff = 0%
-  double _calculateDepthScore(double wearableDepth, double existingDepth) {
-    if (existingDepth <= 0) {
-      // Handle edge case of zero or negative depth
-      return 0.0;
-    }
-
-    final depthDiff = (wearableDepth - existingDepth).abs();
-    final depthPercent = depthDiff / existingDepth;
-
-    if (depthPercent <= 0.10) {
-      return 1.0;
-    } else if (depthPercent >= 0.20) {
-      return 0.0;
-    } else {
-      return 1.0 - ((depthPercent - 0.10) / 0.10);
-    }
-  }
-
-  /// Calculate duration score: within 3 min = 100%, 10 min = 0%
-  double _calculateDurationScore(
-    int wearableDurationSeconds,
-    int existingDurationSeconds,
-  ) {
-    final durationDiff = (wearableDurationSeconds - existingDurationSeconds)
-        .abs();
-    final durationDiffMinutes = durationDiff / 60;
-
-    if (durationDiffMinutes <= 3) {
-      return 1.0;
-    } else if (durationDiffMinutes >= 10) {
-      return 0.0;
-    } else {
-      return 1.0 - ((durationDiffMinutes - 3) / 7);
-    }
   }
 
   /// Check if the score indicates a probable duplicate (high confidence).
