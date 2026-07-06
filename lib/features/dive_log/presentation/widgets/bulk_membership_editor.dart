@@ -191,16 +191,12 @@ class _BulkMembershipEditorState extends State<BulkMembershipEditor> {
         presence == MembershipPresence.none
             ? null
             : l10n.diveLog_bulkEdit_membership_removing,
-      MembershipChoice.leaveAsIs => switch (presence) {
-        MembershipPresence.some => l10n.diveLog_bulkEdit_membership_onSome(
-          count,
-          widget.totalDives,
-        ),
-        MembershipPresence.all => l10n.diveLog_bulkEdit_membership_onAll(
-          widget.totalDives,
-        ),
-        MembershipPresence.none => null,
-      },
+      // leaveAsIs only arises for a "some" item (all/none default to a
+      // definite choice), so any other presence is a no-op -> no status line.
+      MembershipChoice.leaveAsIs =>
+        presence == MembershipPresence.some
+            ? l10n.diveLog_bulkEdit_membership_onSome(count, widget.totalDives)
+            : null,
     };
   }
 
