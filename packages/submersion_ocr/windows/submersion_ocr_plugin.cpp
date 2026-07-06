@@ -42,6 +42,9 @@ void RecognizeOnWorker(
         data.data(), data.data() + data.size()));
     writer.StoreAsync().get();
     writer.FlushAsync().get();
+    // Rewind: the decoder reads from the stream's current position,
+    // which is at the end after writing.
+    stream.Seek(0);
 
     auto decoder =
         winrt::Windows::Graphics::Imaging::BitmapDecoder::CreateAsync(stream)

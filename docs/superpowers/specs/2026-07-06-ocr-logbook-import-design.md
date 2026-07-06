@@ -32,7 +32,7 @@ A Dart interface with one job: image bytes in, positioned text out.
 ```dart
 abstract class OcrEngine {
   Future<OcrResult> recognize(Uint8List imageBytes);
-  bool get isAvailable;
+  Future<bool> get isAvailable;
 }
 
 class OcrResult {
@@ -42,7 +42,7 @@ class OcrResult {
 
 class OcrTextBlock {
   final String text;
-  final Rect boundingBox; // normalized to a common coordinate space
+  final Rect boundingBox; // image pixel coordinates, top-left origin
   final double? confidence;
 }
 ```
@@ -52,7 +52,7 @@ Per-platform implementations:
 | Platform | Engine | Integration |
 | --- | --- | --- |
 | iOS / macOS | Apple Vision (`VNRecognizeTextRequest`, accurate mode) | New in-repo plugin `submersion_ocr` (same pattern as `submersion_saf`) |
-| Android | ML Kit Text Recognition v2 | `google_mlkit_text_recognition` pub package |
+| Android | ML Kit Text Recognition (Latin, bundled model) | `submersion_ocr` plugin, native Kotlin implementation (the `google_mlkit_text_recognition` pub package was dropped: its iOS pods force a higher deployment target and its multi-script references break R8) |
 | Windows | Windows.Media.Ocr (WinRT) | `submersion_ocr` plugin, Windows implementation |
 | Linux | Tesseract system binary invoked as a process | Thin Dart wrapper; graceful degradation when not installed |
 
