@@ -46,7 +46,6 @@ void main() {
         toleranceMinutes: anyNamed('toleranceMinutes'),
         durationSeconds: anyNamed('durationSeconds'),
         maxDepth: anyNamed('maxDepth'),
-        fingerprint: anyNamed('fingerprint'),
         diverId: anyNamed('diverId'),
       ),
     ).thenAnswer((_) async => null);
@@ -391,7 +390,6 @@ void main() {
             toleranceMinutes: anyNamed('toleranceMinutes'),
             durationSeconds: anyNamed('durationSeconds'),
             maxDepth: anyNamed('maxDepth'),
-            fingerprint: anyNamed('fingerprint'),
             diverId: anyNamed('diverId'),
           ),
         ).thenAnswer(
@@ -802,7 +800,6 @@ void main() {
           toleranceMinutes: anyNamed('toleranceMinutes'),
           durationSeconds: anyNamed('durationSeconds'),
           maxDepth: anyNamed('maxDepth'),
-          fingerprint: anyNamed('fingerprint'),
           diverId: anyNamed('diverId'),
         ),
       );
@@ -862,7 +859,6 @@ void main() {
           toleranceMinutes: anyNamed('toleranceMinutes'),
           durationSeconds: anyNamed('durationSeconds'),
           maxDepth: anyNamed('maxDepth'),
-          fingerprint: anyNamed('fingerprint'),
           diverId: anyNamed('diverId'),
         ),
       ).thenAnswer(

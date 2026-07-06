@@ -141,6 +141,10 @@ class _FullscreenProfilePageState extends ConsumerState<FullscreenProfilePage> {
     final overlayIds = ref.watch(overlaySourcesProvider(widget.diveId));
     final gasSwitches = ref.watch(gasSwitchesProvider(widget.diveId)).value;
     final tankPressures = ref.watch(tankPressuresProvider(widget.diveId)).value;
+    // Chart-only: real pressures augmented with linear estimates (#197).
+    final estimatedTankPressures = ref
+        .watch(estimatedTankPressuresProvider(widget.diveId))
+        .value;
     final reviewTimestamp = ref.watch(profileReviewProvider(widget.diveId));
     final showMaxDepthMarker = ref.watch(showMaxDepthMarkerProvider);
     final showPressureThresholdMarkers = ref.watch(
@@ -362,7 +366,11 @@ class _FullscreenProfilePageState extends ConsumerState<FullscreenProfilePage> {
                           showPressureThresholdMarkers:
                               showPressureThresholdMarkers,
                           tanks: dive.tanks,
-                          tankPressures: tankPressures,
+                          tankPressures:
+                              estimatedTankPressures?.pressures ??
+                              tankPressures,
+                          estimatedTankIds:
+                              estimatedTankPressures?.estimatedTankIds,
                           gasSwitches: gasSwitches,
                           gasSegments:
                               (dive.tanks.isEmpty || chartProfile.isEmpty)

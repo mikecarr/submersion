@@ -1066,6 +1066,10 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
     // Get per-tank pressure data for multi-tank visualization
     final tankPressuresAsync = ref.watch(tankPressuresProvider(dive.id));
     final tankPressures = tankPressuresAsync.valueOrNull;
+    // Chart-only: real pressures augmented with linear estimates (#197).
+    final estimatedTankPressures = ref
+        .watch(estimatedTankPressuresProvider(dive.id))
+        .valueOrNull;
 
     // Get playback state
     final playbackState = ref.watch(playbackProvider(dive.id));
@@ -1341,7 +1345,10 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
                         showPressureThresholdMarkers:
                             showPressureThresholdMarkers,
                         tanks: dive.tanks,
-                        tankPressures: tankPressures,
+                        tankPressures:
+                            estimatedTankPressures?.pressures ?? tankPressures,
+                        estimatedTankIds:
+                            estimatedTankPressures?.estimatedTankIds,
                         gasSwitches: gasSwitchesAsync.valueOrNull,
                         gasSegments:
                             (dive.tanks.isEmpty || chartProfile.isEmpty)
