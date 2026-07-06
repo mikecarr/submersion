@@ -16,6 +16,7 @@ import 'package:submersion/core/database/database.dart'
         DiveProfile,
         DiveProfileEvent,
         TankPressureProfilesCompanion;
+import 'package:submersion/core/matching/match_scorer.dart';
 import 'package:submersion/core/services/database_service.dart';
 import 'package:submersion/core/services/logger_service.dart';
 import 'package:submersion/core/services/sync/sync_event_bus.dart';
@@ -667,6 +668,23 @@ class DiveComputerRepository {
 
       if (result.isEmpty) return null;
 
+      // Weighted scorer for downloads: time 40%, depth 35%, duration 25%.
+      // Time is scored in milliseconds over the SQL tolerance window, depth in
+      // absolute meters (0-5 m), duration in seconds (0-10 min). Missing depth
+      // or duration scores 1.0 (a `full: 0` band on a 0 value). No time gate:
+      // the SQL pre-filter already bounds candidates to the tolerance window.
+      final scorer = MatchScorer(
+        timeWeight: 0.40,
+        depthWeight: 0.35,
+        durationWeight: 0.25,
+        timeFull: 0,
+        timeZero: toleranceMs.toDouble(),
+        depthFull: 0,
+        depthZero: 5.0,
+        durationFull: 0,
+        durationZero: 600,
+      );
+
       // Score each candidate and find the best match
       DiveMatchResult? bestMatch;
       double bestScore = 0.0;
@@ -677,31 +695,18 @@ class DiveComputerRepository {
         final diveDuration = row.data['bottom_time'] as int?;
         final diveMaxDepth = row.data['max_depth'] as double?;
 
-        // Calculate component scores
-        final timeScore = 1.0 - (timeDiff / toleranceMs).clamp(0.0, 1.0);
-        var durationScore = 1.0;
-        var depthScore = 1.0;
-        int? durationDiff;
-        double? depthDiff;
+        final durationDiff = (durationSeconds != null && diveDuration != null)
+            ? (diveDuration - durationSeconds).abs()
+            : null;
+        final depthDiff = (maxDepth != null && diveMaxDepth != null)
+            ? (diveMaxDepth - maxDepth).abs()
+            : null;
 
-        // Duration comparison (if available)
-        if (durationSeconds != null && diveDuration != null) {
-          durationDiff = (diveDuration - durationSeconds).abs();
-          // Score based on duration difference (within 5 min = 100%, 10 min = 0%)
-          durationScore = 1.0 - (durationDiff / 600).clamp(0.0, 1.0);
-        }
-
-        // Depth comparison (if available)
-        if (maxDepth != null && diveMaxDepth != null) {
-          depthDiff = (diveMaxDepth - maxDepth).abs();
-          // Score based on depth difference (within 0.5m = 100%, 5m = 0%)
-          depthScore = 1.0 - (depthDiff / 5.0).clamp(0.0, 1.0);
-        }
-
-        // Weighted composite score
-        // Time is most important (40%), then depth (35%), then duration (25%)
-        final score =
-            (timeScore * 0.40) + (depthScore * 0.35) + (durationScore * 0.25);
+        final score = scorer.score(
+          timeValue: timeDiff.toDouble(),
+          depthValue: depthDiff ?? 0.0,
+          durationValue: durationDiff?.toDouble() ?? 0.0,
+        );
 
         if (score > bestScore) {
           bestScore = score;
