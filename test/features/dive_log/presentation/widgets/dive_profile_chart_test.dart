@@ -90,6 +90,7 @@ Widget _buildChart({
   Map<String, String>? computerNames,
   Map<String, List<TankPressurePoint>>? tankPressures,
   List<DiveTank>? tanks,
+  Set<String>? estimatedTankIds,
   List<double>? ceilingCurve,
   List<AscentRatePoint>? ascentRates,
   List<ProfileEvent>? events,
@@ -141,6 +142,7 @@ Widget _buildChart({
             computerNames: computerNames,
             tankPressures: tankPressures,
             tanks: tanks,
+            estimatedTankIds: estimatedTankIds,
             ceilingCurve: ceilingCurve,
             ascentRates: ascentRates,
             events: events,
@@ -186,6 +188,7 @@ Widget _buildChartAllMetrics({
   List<DiveProfilePoint>? profile,
   Map<String, List<TankPressurePoint>>? tankPressures,
   List<DiveTank>? tanks,
+  Set<String>? estimatedTankIds,
   List<double>? ceilingCurve,
   List<AscentRatePoint>? ascentRates,
   List<int>? ndlCurve,
@@ -227,6 +230,7 @@ Widget _buildChartAllMetrics({
             profile: profile ?? _makeProfile(),
             tankPressures: tankPressures,
             tanks: tanks,
+            estimatedTankIds: estimatedTankIds,
             ceilingCurve: ceilingCurve,
             ascentRates: ascentRates,
             ndlCurve: ndlCurve,
@@ -264,6 +268,91 @@ Widget _buildChartAllMetrics({
 // ---------------------------------------------------------------------------
 
 void main() {
+  group('DiveProfileChart - estimated tank pressure', () {
+    testWidgets('estimated tank pressure line is straight (isCurved false)', (
+      tester,
+    ) async {
+      const tank = DiveTank(id: 't1', gasMix: GasMix(o2: 21), order: 0);
+      const points = [
+        TankPressurePoint(id: 'e0', tankId: 't1', timestamp: 0, pressure: 200),
+        TankPressurePoint(id: 'e1', tankId: 't1', timestamp: 270, pressure: 60),
+      ];
+
+      await tester.pumpWidget(
+        _buildChart(
+          tanks: const [tank],
+          tankPressures: {'t1': points},
+          estimatedTankIds: const {'t1'},
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final chart = tester.widget<LineChart>(find.byType(LineChart));
+      final estimatedBars = chart.data.lineBarsData
+          .where((b) => b.dashArray != null && b.isCurved == false)
+          .toList();
+      expect(estimatedBars, isNotEmpty);
+
+      // Control: same data, NOT estimated -> pressure line is curved.
+      await tester.pumpWidget(
+        _buildChart(tanks: const [tank], tankPressures: {'t1': points}),
+      );
+      await tester.pumpAndSettle();
+      final chart2 = tester.widget<LineChart>(find.byType(LineChart));
+      expect(
+        chart2.data.lineBarsData.where(
+          (b) => b.dashArray != null && b.isCurved == false,
+        ),
+        isEmpty,
+      );
+    });
+
+    testWidgets('tooltip labels an estimated tank with the (est.) suffix', (
+      tester,
+    ) async {
+      // 20-point profile matching the proven long-press tooltip tests, so the
+      // gesture reliably lands on a data point and emits external tooltip rows.
+      final profile = List.generate(
+        20,
+        (i) => DiveProfilePoint(
+          timestamp: i * 30,
+          depth: i < 10 ? i * 3.0 : (19 - i) * 3.0,
+        ),
+      );
+      const tank = DiveTank(id: 't1', gasMix: GasMix(o2: 21), order: 0);
+      // A straight two-point estimate spanning the whole profile (0..570s).
+      const points = [
+        TankPressurePoint(id: 'e0', tankId: 't1', timestamp: 0, pressure: 200),
+        TankPressurePoint(id: 'e1', tankId: 't1', timestamp: 570, pressure: 60),
+      ];
+      List<TooltipRow>? rows;
+
+      await tester.pumpWidget(
+        _buildChart(
+          profile: profile,
+          tanks: const [tank],
+          tankPressures: {'t1': points},
+          estimatedTankIds: const {'t1'},
+          tooltipBelow: true,
+          onTooltipData: (r) => rows = r,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Long-press near the center; assert BEFORE releasing (release clears).
+      final gesture = await tester.startGesture(
+        tester.getCenter(find.byType(LineChart)),
+      );
+      await tester.pump(const Duration(milliseconds: 600));
+      await gesture.moveBy(const Offset(2, 0));
+      await tester.pump();
+
+      expect(rows, isNotNull);
+      expect(rows!.where((r) => r.label.contains('(est.)')), isNotEmpty);
+      await gesture.up();
+    });
+  });
+
   group('DiveProfileChart - single profile rendering', () {
     testWidgets('renders without crashing with profile data', (tester) async {
       await tester.pumpWidget(_buildChart());

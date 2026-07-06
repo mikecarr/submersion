@@ -4631,6 +4631,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get diveLog_chartSection_tankPressures => 'Flaschendrucke';
 
   @override
+  String get diveLog_pressure_estimatedSuffix => '(gesch.)';
+
+  @override
   String get diveLog_listPage_appBar_diveMap => 'Tauchkarte';
 
   @override

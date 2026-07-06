@@ -200,4 +200,104 @@ void main() {
       expect(segments.single.label, 'Tx 18/45');
     });
   });
+
+  group('buildActiveTankIntervals', () {
+    test('empty when no tanks or zero duration', () {
+      expect(
+        buildActiveTankIntervals(
+          tanks: const [],
+          gasSwitches: const [],
+          diveDurationSeconds: 1800,
+        ),
+        isEmpty,
+      );
+      expect(
+        buildActiveTankIntervals(
+          tanks: [_tank(id: 't1', o2: 21)],
+          gasSwitches: const [],
+          diveDurationSeconds: 0,
+        ),
+        isEmpty,
+      );
+    });
+
+    test(
+      'single tank, no switches -> one full-dive interval for lowest order',
+      () {
+        final result = buildActiveTankIntervals(
+          tanks: [
+            _tank(id: 'late', o2: 100, order: 2),
+            _tank(id: 'first', o2: 21),
+          ],
+          gasSwitches: const [],
+          diveDurationSeconds: 2400,
+        );
+        expect(result.keys, ['first']);
+        expect(result['first'], [(start: 0, end: 2400)]);
+      },
+    );
+
+    test('deco bottle owns only its switch window', () {
+      final result = buildActiveTankIntervals(
+        tanks: [
+          _tank(id: 'back', o2: 21),
+          _tank(id: 'deco', o2: 50, order: 1),
+        ],
+        gasSwitches: [
+          _switch(tankId: 'deco', timestamp: 1200, o2Fraction: 0.50),
+        ],
+        diveDurationSeconds: 1800,
+      );
+      expect(result['back'], [(start: 0, end: 1200)]);
+      expect(result['deco'], [(start: 1200, end: 1800)]);
+    });
+
+    test('back gas returned to yields two intervals with a gap', () {
+      final result = buildActiveTankIntervals(
+        tanks: [
+          _tank(id: 'back', o2: 21),
+          _tank(id: 'deco', o2: 50, order: 1),
+        ],
+        gasSwitches: [
+          _switch(tankId: 'deco', timestamp: 1200, o2Fraction: 0.50),
+          _switch(tankId: 'back', timestamp: 1800, o2Fraction: 0.21),
+        ],
+        diveDurationSeconds: 2400,
+      );
+      expect(result['back'], [(start: 0, end: 1200), (start: 1800, end: 2400)]);
+      expect(result['deco'], [(start: 1200, end: 1800)]);
+    });
+
+    test('switch exactly at t=0 produces no zero-length leading interval', () {
+      final result = buildActiveTankIntervals(
+        tanks: [
+          _tank(id: 'back', o2: 21),
+          _tank(id: 'deco', o2: 50, order: 1),
+        ],
+        gasSwitches: [
+          _switch(tankId: 'back', timestamp: 0, o2Fraction: 0.21),
+          _switch(tankId: 'deco', timestamp: 1500, o2Fraction: 0.50),
+        ],
+        diveDurationSeconds: 3000,
+      );
+      expect(result['back'], [(start: 0, end: 1500)]);
+      expect(result['deco'], [(start: 1500, end: 3000)]);
+    });
+
+    test('out-of-bounds switches are dropped', () {
+      final result = buildActiveTankIntervals(
+        tanks: [
+          _tank(id: 'back', o2: 21),
+          _tank(id: 'deco', o2: 50, order: 1),
+        ],
+        gasSwitches: [
+          _switch(tankId: 'deco', timestamp: -10, o2Fraction: 0.50),
+          _switch(tankId: 'deco', timestamp: 9000, o2Fraction: 0.50),
+        ],
+        diveDurationSeconds: 1800,
+      );
+      expect(result['back'], [(start: 0, end: 1800)]);
+      expect(result.containsKey('deco'), isFalse);
+    });
+  });
 }

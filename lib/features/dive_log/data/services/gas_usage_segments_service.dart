@@ -127,3 +127,51 @@ List<GasUsageSegment> _mergeAdjacentSameGas(List<GasUsageSegment> segments) {
   }
   return merged;
 }
+
+/// Per-tank active intervals: for each tankId, the ascending, non-overlapping
+/// [start, end) windows during which it was the breathed gas.
+///
+/// Uses the same starting-tank + switch-walk rules as [buildGasUsageSegments]
+/// (starting tank = lowest [DiveTank.order]; switches sorted and clamped to
+/// [0, diveDurationSeconds]; the initial window runs from t=0 to the first
+/// switch), but keys by tankId with no gas-mix merging.
+///
+/// Returns an empty map when there are no tanks or the dive has no duration.
+Map<String, List<({int start, int end})>> buildActiveTankIntervals({
+  required List<DiveTank> tanks,
+  required List<GasSwitchWithTank> gasSwitches,
+  required int diveDurationSeconds,
+}) {
+  final result = <String, List<({int start, int end})>>{};
+  if (tanks.isEmpty || diveDurationSeconds <= 0) return result;
+
+  final startingTank = ([
+    ...tanks,
+  ]..sort((a, b) => a.order.compareTo(b.order))).first;
+
+  final inBounds =
+      ([...gasSwitches]..sort((a, b) => a.timestamp.compareTo(b.timestamp)))
+          .where((s) => s.timestamp >= 0 && s.timestamp <= diveDurationSeconds)
+          .toList(growable: false);
+
+  void add(String tankId, int start, int end) {
+    if (start >= end) return;
+    result.putIfAbsent(tankId, () => []).add((start: start, end: end));
+  }
+
+  if (inBounds.isEmpty) {
+    add(startingTank.id, 0, diveDurationSeconds);
+    return result;
+  }
+
+  if (inBounds.first.timestamp > 0) {
+    add(startingTank.id, 0, inBounds.first.timestamp);
+  }
+  for (var i = 0; i < inBounds.length; i++) {
+    final end = i + 1 < inBounds.length
+        ? inBounds[i + 1].timestamp
+        : diveDurationSeconds;
+    add(inBounds[i].tankId, inBounds[i].timestamp, end);
+  }
+  return result;
+}
