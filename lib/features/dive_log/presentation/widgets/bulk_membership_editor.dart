@@ -173,30 +173,34 @@ class _BulkMembershipEditorState extends State<BulkMembershipEditor> {
     MembershipChoice.leaveAsIs => null,
   };
 
-  String _subtitle(BuildContext context, String id) {
+  /// The status line for a row, or null when the choice is a no-op for this
+  /// item (e.g. a just-added "none" item toggled back off) so the subtitle
+  /// never claims a change the delta won't actually make.
+  String? _subtitle(BuildContext context, String id) {
     final l10n = context.l10n;
     final presence = _presenceOf(id);
     final choice = _choices[id] ?? _defaultChoice(presence);
     final count = widget.counts[id] ?? 0;
-    if (choice == MembershipChoice.ensureOn &&
-        presence != MembershipPresence.all) {
-      return l10n.diveLog_bulkEdit_membership_adding(widget.totalDives);
-    }
-    if (choice == MembershipChoice.ensureOff &&
-        presence != MembershipPresence.none) {
-      return l10n.diveLog_bulkEdit_membership_removing;
-    }
-    return switch (presence) {
-      MembershipPresence.all => l10n.diveLog_bulkEdit_membership_onAll(
-        widget.totalDives,
-      ),
-      MembershipPresence.some => l10n.diveLog_bulkEdit_membership_onSome(
-        count,
-        widget.totalDives,
-      ),
-      MembershipPresence.none => l10n.diveLog_bulkEdit_membership_adding(
-        widget.totalDives,
-      ),
+    return switch (choice) {
+      MembershipChoice.ensureOn =>
+        presence == MembershipPresence.all
+            ? l10n.diveLog_bulkEdit_membership_onAll(widget.totalDives)
+            : l10n.diveLog_bulkEdit_membership_adding(widget.totalDives),
+      // "off" on an item that's on no dives changes nothing -> no status line.
+      MembershipChoice.ensureOff =>
+        presence == MembershipPresence.none
+            ? null
+            : l10n.diveLog_bulkEdit_membership_removing,
+      MembershipChoice.leaveAsIs => switch (presence) {
+        MembershipPresence.some => l10n.diveLog_bulkEdit_membership_onSome(
+          count,
+          widget.totalDives,
+        ),
+        MembershipPresence.all => l10n.diveLog_bulkEdit_membership_onAll(
+          widget.totalDives,
+        ),
+        MembershipPresence.none => null,
+      },
     };
   }
 
@@ -259,7 +263,10 @@ class _BulkMembershipEditorState extends State<BulkMembershipEditor> {
                     Expanded(child: Text(item.label)),
                   ],
                 ),
-                subtitle: Text(_subtitle(context, item.id)),
+                subtitle: switch (_subtitle(context, item.id)) {
+                  final s? => Text(s),
+                  _ => null,
+                },
                 onTap: () => _cycle(item.id),
               ),
         ],

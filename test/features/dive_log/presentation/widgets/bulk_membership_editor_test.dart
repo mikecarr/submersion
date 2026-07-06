@@ -84,4 +84,22 @@ void main() {
     expect(last!.addIds, isNot(contains('b')));
     expect(last!.removeIds, isNot(contains('b')));
   });
+
+  testWidgets(
+    'unchecking a just-added item is a no-op with no false subtitle',
+    (tester) async {
+      MembershipDelta? last;
+      await pumpEditor(tester, onChanged: (d) => last = d);
+      // c (on no dives) starts checked -> "adding to all 3".
+      expect(find.text('adding to all 3'), findsOneWidget);
+
+      // Toggle c off: it changes nothing, so the subtitle must not still claim
+      // "adding to all", and c must not appear in the delta.
+      await tester.tap(find.byKey(const ValueKey('membership-toggle-c')));
+      await tester.pump();
+      expect(find.text('adding to all 3'), findsNothing);
+      expect(last!.addIds, isNot(contains('c')));
+      expect(last!.removeIds, isNot(contains('c')));
+    },
+  );
 }

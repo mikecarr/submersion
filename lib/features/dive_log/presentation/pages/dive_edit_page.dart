@@ -734,9 +734,9 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
   final Map<BulkCollectionType, BulkCollectionMode> _collectionModes = {};
   bool _bulkTankOnlyIfEmpty = false;
 
-  // Bulk tri-state membership: equipment members shown across the selected
-  // dives (existing + picker-added), their per-item dive counts, and the
-  // resulting add/remove delta. Tags/diveTypes/buddies follow in a later task.
+  // Bulk tri-state membership state for each reference collection: the members
+  // shown across the selected dives (existing + picker-added), their per-item
+  // dive counts, and the resulting add/remove delta.
   Map<String, int> _equipmentCounts = {};
   List<BulkMembershipItem> _equipmentMembers = [];
   MembershipDelta _equipmentDelta = MembershipDelta.empty;
