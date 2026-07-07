@@ -2850,6 +2850,10 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
     final tagName = {for (final t in allTags) t.id: t.name};
     final typeName = {for (final t in allTypes) t.id: t.name};
     final buddyMap = {for (final b in allBuddies) b.id: b};
+    // The count queries group by id with no ORDER BY, so sort each member list
+    // by label to keep the bulk editor's row order stable across loads/devices.
+    int byLabel(BulkMembershipItem a, BulkMembershipItem b) =>
+        a.label.toLowerCase().compareTo(b.label.toLowerCase());
     setState(() {
       _equipmentCounts = equipCounts;
       _equipmentMembers = [
@@ -2859,7 +2863,7 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
             label: e.name,
             icon: _getEquipmentIcon(e.type),
           ),
-      ];
+      ]..sort(byLabel);
       _tagCounts = tagCounts;
       _tagMembers = [
         for (final id in tagCounts.keys)
@@ -2868,7 +2872,7 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
             label: tagName[id] ?? id,
             icon: Icons.label_outline,
           ),
-      ];
+      ]..sort(byLabel);
       _diveTypeCounts = typeCounts;
       _diveTypeNames
         ..clear()
@@ -2880,7 +2884,7 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
             label: typeName[id] ?? id,
             icon: Icons.scuba_diving,
           ),
-      ];
+      ]..sort(byLabel);
       _buddyCounts = buddyCounts;
       _buddyById
         ..clear()
@@ -2892,7 +2896,7 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
             label: buddyMap[id]?.name ?? id,
             icon: Icons.person_outline,
           ),
-      ];
+      ]..sort(byLabel);
     });
   }
 
