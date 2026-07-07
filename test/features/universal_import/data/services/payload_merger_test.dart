@@ -203,14 +203,14 @@ void main() {
     });
 
     test('concatenates warnings from all files', () {
-      final a = ImportPayload(
-        entities: const {},
-        warnings: const [
+      const a = ImportPayload(
+        entities: {},
+        warnings: [
           ImportWarning(severity: ImportWarningSeverity.warning, message: 'w1'),
         ],
       );
       final merged = merger.merge([
-        FilePayload(fileId: 'f0', fileName: 'a.uddf', payload: a),
+        const FilePayload(fileId: 'f0', fileName: 'a.uddf', payload: a),
       ]);
       expect(merged.warnings, hasLength(1));
     });

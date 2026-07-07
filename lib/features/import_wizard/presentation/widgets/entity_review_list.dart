@@ -311,7 +311,8 @@ class EntityReviewList extends StatelessWidget {
       final match = matchResults[i];
       return match != null &&
           match.score >= 0.7 &&
-          !match.matchedExistingSource;
+          !match.matchedExistingSource &&
+          match.inBatchIndex == null;
     }).length;
   }
 

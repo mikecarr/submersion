@@ -114,6 +114,13 @@ class DiveMatchResult {
   /// a match, regardless of [matchedComputerId] or [score].
   final bool matchedExistingSource;
 
+  /// When non-null, this match is against ANOTHER DIVE IN THE SAME IMPORT
+  /// BATCH (the dive at this payload index), not an existing database dive.
+  /// [diveId] is empty for such matches. In-batch duplicates default to
+  /// skip and are never eligible for consolidation (there is no existing
+  /// dive to fold into).
+  final int? inBatchIndex;
+
   const DiveMatchResult({
     required this.diveId,
     required this.score,
@@ -123,6 +130,7 @@ class DiveMatchResult {
     this.siteName,
     this.matchedComputerId,
     this.matchedExistingSource = false,
+    this.inBatchIndex,
   });
 
   /// Returns true if this is a probable duplicate (score >= 0.7).

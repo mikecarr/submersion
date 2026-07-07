@@ -30,6 +30,7 @@ void main() {
     List<Tag> tags = const [],
     List<DiveTypeEntity> diveTypes = const [],
     Map<String, String> existingSourceUuidByDiveId = const {},
+    bool checkIntraBatch = false,
   }) {
     return checker.check(
       payload: payload ?? const ImportPayload(entities: {}),
@@ -43,6 +44,7 @@ void main() {
       existingTags: tags,
       existingDiveTypes: diveTypes,
       existingSourceUuidByDiveId: existingSourceUuidByDiveId,
+      checkIntraBatch: checkIntraBatch,
     );
   }
 
@@ -779,6 +781,151 @@ void main() {
       expect(result.duplicates[ImportEntityType.trips], {0});
       expect(result.duplicates[ImportEntityType.buddies], {0});
       expect(result.diveMatches, contains(0));
+    });
+  });
+
+  group('Intra-batch dive duplicates', () {
+    test('flags the later of two in-batch dives matching by sourceUuid', () {
+      final result = checkWith(
+        payload: ImportPayload(
+          entities: {
+            ImportEntityType.dives: [
+              {
+                'dateTime': DateTime(2026, 1, 1, 9),
+                'maxDepth': 18.0,
+                'duration': const Duration(minutes: 45),
+                'sourceUuid': 'uuid-1',
+                '_sourceFile': 'a.fit',
+              },
+              {
+                'dateTime': DateTime(2026, 1, 1, 9),
+                'maxDepth': 18.0,
+                'duration': const Duration(minutes: 45),
+                'sourceUuid': 'uuid-1',
+                '_sourceFile': 'b.uddf',
+              },
+            ],
+          },
+        ),
+        checkIntraBatch: true,
+      );
+
+      expect(result.diveMatches, hasLength(1));
+      final match = result.diveMatches[1]!;
+      expect(match.inBatchIndex, 0);
+      expect(match.diveId, '');
+      expect(match.score, 1.0);
+      expect(match.siteName, 'a.fit');
+    });
+
+    test('flags the later of two in-batch dives matching fuzzily', () {
+      final result = checkWith(
+        payload: ImportPayload(
+          entities: {
+            ImportEntityType.dives: [
+              {
+                'dateTime': DateTime(2026, 1, 1, 9, 0),
+                'maxDepth': 18.0,
+                'duration': const Duration(minutes: 45),
+              },
+              {
+                'dateTime': DateTime(2026, 1, 1, 9, 1), // 1 min apart
+                'maxDepth': 18.2,
+                'duration': const Duration(minutes: 44),
+              },
+            ],
+          },
+        ),
+        checkIntraBatch: true,
+      );
+
+      expect(result.diveMatches.keys, [1]);
+      expect(result.diveMatches[1]!.inBatchIndex, 0);
+    });
+
+    test('does not flag far-apart in-batch dives (time gate respected)', () {
+      final result = checkWith(
+        payload: ImportPayload(
+          entities: {
+            ImportEntityType.dives: [
+              {
+                'dateTime': DateTime(2026, 1, 1, 9),
+                'maxDepth': 18.0,
+                'duration': const Duration(minutes: 45),
+              },
+              {
+                'dateTime': DateTime(2026, 3, 1, 9), // months apart
+                'maxDepth': 18.0,
+                'duration': const Duration(minutes: 45),
+              },
+            ],
+          },
+        ),
+        checkIntraBatch: true,
+      );
+
+      expect(result.diveMatches, isEmpty);
+    });
+
+    test('checkIntraBatch=false (default) preserves existing behavior', () {
+      final result = checkWith(
+        payload: ImportPayload(
+          entities: {
+            ImportEntityType.dives: [
+              {
+                'dateTime': DateTime(2026, 1, 1, 9),
+                'maxDepth': 18.0,
+                'duration': const Duration(minutes: 45),
+              },
+              {
+                'dateTime': DateTime(2026, 1, 1, 9),
+                'maxDepth': 18.0,
+                'duration': const Duration(minutes: 45),
+              },
+            ],
+          },
+        ),
+      );
+
+      expect(result.diveMatches, isEmpty);
+    });
+
+    test('in-batch duplicate is not double-reported against the database', () {
+      final diveTime = DateTime(2026, 1, 1, 9);
+      final result = checkWith(
+        payload: ImportPayload(
+          entities: {
+            ImportEntityType.dives: [
+              {
+                'dateTime': diveTime,
+                'maxDepth': 18.0,
+                'duration': const Duration(minutes: 45),
+              },
+              {
+                'dateTime': diveTime,
+                'maxDepth': 18.0,
+                'duration': const Duration(minutes: 45),
+              },
+            ],
+          },
+        ),
+        dives: [
+          Dive(
+            id: 'existing-1',
+            dateTime: diveTime,
+            maxDepth: 18.0,
+            bottomTime: const Duration(minutes: 45),
+          ),
+        ],
+        checkIntraBatch: true,
+      );
+
+      // Dive 1 is an in-batch duplicate of dive 0; dive 0 matches the DB.
+      expect(result.diveMatches, hasLength(2));
+      expect(result.diveMatches[1]!.inBatchIndex, 0);
+      expect(result.diveMatches[1]!.diveId, '');
+      expect(result.diveMatches[0]!.inBatchIndex, isNull);
+      expect(result.diveMatches[0]!.diveId, 'existing-1');
     });
   });
 }
