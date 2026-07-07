@@ -15304,7 +15304,12 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String diveComputer_downloadStep_importPartialCount(int count) {
-    return '导入 $count 次已下载的潜水';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '导入 $count 次已下载的潜水',
+    );
+    return '$_temp0';
   }
 
   @override

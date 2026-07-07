@@ -15784,7 +15784,13 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String diveComputer_downloadStep_importPartialCount(int count) {
-    return 'استيراد $count غطسة تم تنزيلها';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'استيراد $count غطسات تم تنزيلها',
+      one: 'استيراد غطسة واحدة تم تنزيلها',
+    );
+    return '$_temp0';
   }
 
   @override

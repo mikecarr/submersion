@@ -15956,7 +15956,13 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String diveComputer_downloadStep_importPartialCount(int count) {
-    return '$count gedownloade duiken importeren';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count gedownloade duiken importeren',
+      one: '1 gedownloade duik importeren',
+    );
+    return '$_temp0';
   }
 
   @override

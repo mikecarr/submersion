@@ -16046,7 +16046,13 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String diveComputer_downloadStep_importPartialCount(int count) {
-    return '$count letöltött merülés importálása';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count letöltött merülés importálása',
+      one: '1 letöltött merülés importálása',
+    );
+    return '$_temp0';
   }
 
   @override

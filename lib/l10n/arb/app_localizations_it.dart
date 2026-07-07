@@ -16090,7 +16090,13 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String diveComputer_downloadStep_importPartialCount(int count) {
-    return 'Importa $count immersioni scaricate';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Importa $count immersioni scaricate',
+      one: 'Importa 1 immersione scaricata',
+    );
+    return '$_temp0';
   }
 
   @override

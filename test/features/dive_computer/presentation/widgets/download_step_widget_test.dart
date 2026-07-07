@@ -628,10 +628,30 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Import 1 downloaded dives'));
+      // A single dive uses the grammatical singular form.
+      await tester.tap(find.text('Import 1 downloaded dive'));
       await tester.pumpAndSettle();
 
       expect(importPartialCalled, isTrue);
+    });
+
+    testWidgets('import-partial button uses singular label for one dive', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _buildWidget(
+          initialState: DownloadState(
+            phase: DownloadPhase.error,
+            errorMessage: 'Connection timed out',
+            downloadedDives: [_makeDive(diveNumber: 1)],
+          ),
+          onImportPartial: () {},
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Import 1 downloaded dive'), findsOneWidget);
+      expect(find.text('Import 1 downloaded dives'), findsNothing);
     });
 
     testWidgets('shows import-partial button in cancelled state with dives', (

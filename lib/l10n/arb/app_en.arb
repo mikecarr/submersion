@@ -9640,7 +9640,7 @@
     }
   },
   "diveComputer_downloadStep_retry": "Retry",
-  "diveComputer_downloadStep_importPartialCount": "Import {count} downloaded dives",
+  "diveComputer_downloadStep_importPartialCount": "{count, plural, =1{Import 1 downloaded dive} other{Import {count} downloaded dives}}",
   "@diveComputer_downloadStep_importPartialCount": {
     "placeholders": {
       "count": {

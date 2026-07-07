@@ -27119,7 +27119,7 @@ abstract class AppLocalizations {
   /// No description provided for @diveComputer_downloadStep_importPartialCount.
   ///
   /// In en, this message translates to:
-  /// **'Import {count} downloaded dives'**
+  /// **'{count, plural, =1{Import 1 downloaded dive} other{Import {count} downloaded dives}}'**
   String diveComputer_downloadStep_importPartialCount(int count);
 
   /// No description provided for @diveComputer_download_cancel.

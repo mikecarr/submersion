@@ -16153,7 +16153,13 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String diveComputer_downloadStep_importPartialCount(int count) {
-    return 'Importer $count plongées téléchargées';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Importer $count plongées téléchargées',
+      one: 'Importer 1 plongée téléchargée',
+    );
+    return '$_temp0';
   }
 
   @override
