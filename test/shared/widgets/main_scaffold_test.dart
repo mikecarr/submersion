@@ -7,12 +7,18 @@ import 'package:submersion/core/providers/provider.dart';
 import 'package:submersion/features/auto_update/domain/entities/update_status.dart';
 import 'package:submersion/features/auto_update/presentation/providers/update_providers.dart';
 import 'package:submersion/features/dive_computer/presentation/providers/download_providers.dart';
+import 'package:submersion/features/gps_log/data/services/gps_track_recorder.dart';
+import 'package:submersion/features/gps_log/presentation/providers/gps_log_providers.dart';
 import 'package:submersion/features/settings/data/repositories/app_settings_repository.dart';
 import 'package:submersion/features/settings/presentation/providers/settings_providers.dart';
 import 'package:submersion/l10n/arb/app_localizations.dart';
 import 'package:submersion/shared/widgets/main_scaffold.dart';
 
-Future<Widget> _buildTestApp({String initialLocation = '/dashboard'}) async {
+Future<Widget> _buildTestApp({
+  String initialLocation = '/dashboard',
+  // Riverpod's sealed Override type is not re-exported; see test_app.dart.
+  List<dynamic> extraOverrides = const [],
+}) async {
   SharedPreferences.setMockInitialValues({});
   final prefs = await SharedPreferences.getInstance();
 
@@ -61,6 +67,7 @@ Future<Widget> _buildTestApp({String initialLocation = '/dashboard'}) async {
       updateServiceProvider.overrideWith((ref) async => null),
       updateStatusProvider.overrideWith((ref) => _StubUpdateStatusNotifier()),
       downloadNotifierProvider.overrideWith((ref) => _StubDownloadNotifier()),
+      ...extraOverrides.cast(),
     ],
     child: MaterialApp.router(
       routerConfig: router,
@@ -159,6 +166,40 @@ void main() {
 
       // "Dives" appears both in rail label and route content.
       expect(find.text('Dives'), findsWidgets);
+    });
+
+    testWidgets('recording strip appears while a GPS session is active', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(400, 800);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+      await tester.pumpWidget(
+        await _buildTestApp(
+          extraOverrides: [
+            gpsRecorderStateProvider.overrideWith(
+              (ref) => Stream.value(
+                const GpsRecorderState(
+                  status: GpsRecorderStatus.recording,
+                  trackId: 't1',
+                  pointCount: 3,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Recording GPS track · 3 points'), findsOneWidget);
+    });
+
+    testWidgets('recording strip is absent while idle', (tester) async {
+      tester.view.physicalSize = const Size(400, 800);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+      await tester.pumpWidget(await _buildTestApp());
+      await tester.pumpAndSettle();
+      expect(find.textContaining('Recording GPS track'), findsNothing);
     });
 
     testWidgets('mobile layout shows NavigationBar', (tester) async {

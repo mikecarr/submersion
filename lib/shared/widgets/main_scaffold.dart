@@ -5,6 +5,7 @@ import 'package:submersion/core/providers/provider.dart';
 import 'package:submersion/features/auto_update/presentation/widgets/update_banner.dart';
 import 'package:submersion/features/dive_computer/presentation/providers/download_providers.dart';
 import 'package:submersion/features/dive_computer/presentation/widgets/download_exit_dialog.dart';
+import 'package:submersion/features/gps_log/presentation/widgets/gps_recording_strip.dart';
 import 'package:submersion/l10n/l10n_extension.dart';
 import 'package:submersion/shared/widgets/global_drop_target.dart';
 import 'package:submersion/shared/widgets/nav/nav_primary_provider.dart';
@@ -319,6 +320,7 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
                     children: [
                       const UpdateBanner(),
                       Expanded(child: widget.child),
+                      const GpsRecordingStrip(),
                     ],
                   ),
                 ),
@@ -336,6 +338,7 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
           children: [
             const UpdateBanner(),
             Expanded(child: widget.child),
+            const GpsRecordingStrip(),
           ],
         ),
       ),
