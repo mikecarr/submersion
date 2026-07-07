@@ -317,6 +317,7 @@ class UniversalAdapter implements ImportSourceAdapter {
       existingTags: existingTags,
       existingDiveTypes: existingDiveTypes,
       existingSourceUuidByDiveId: existingSourceUuidByDiveId,
+      checkIntraBatch: (payload.metadata['batchFileCount'] as int? ?? 1) > 1,
     );
 
     final updatedGroups = Map<wizard.ImportEntityType, EntityGroup>.from(

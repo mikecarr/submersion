@@ -40,7 +40,7 @@ class FileSelectionStep extends ConsumerWidget {
                   ? null
                   : () => ref
                         .read(universalImportNotifierProvider.notifier)
-                        .pickFile(),
+                        .pickFiles(),
             ),
           ),
           if (state.error != null) ...[
