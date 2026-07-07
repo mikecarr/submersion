@@ -101,6 +101,7 @@ static void script_reset(void) {
 }
 
 static void script_add_dive(unsigned char id, int fail) {
+  assert(g_script.ndives < MAX_DIVES);  // fail fast on script overflow
   g_script.dives[g_script.ndives].id = id;
   g_script.dives[g_script.ndives].fail = fail;
   g_script.ndives++;
@@ -109,6 +110,8 @@ static void script_add_dive(unsigned char id, int fail) {
 // Writes one manifest record. deleted records get the 0x5A23 header and no
 // payload fields, matching what the device leaves behind after a delete.
 static void set_record(int page, int slot, int deleted, unsigned char id) {
+  assert(page >= 0 && page < MAX_PAGES);
+  assert(slot >= 0 && slot < (int)RECORD_COUNT);
   unsigned char *r = g_script.pages[page] + slot * RECORD_SIZE;
   memset(r, 0, RECORD_SIZE);
   if (deleted) {
