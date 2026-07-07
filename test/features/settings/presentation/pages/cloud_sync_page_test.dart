@@ -193,6 +193,10 @@ class _FakeSyncNotifier extends StateNotifier<SyncState>
   @override
   Future<void> resetSyncState() async => resetSyncStateCalls++;
 
+  int repairSyncCalls = 0;
+  @override
+  Future<void> repairSync() async => repairSyncCalls++;
+
   @override
   Future<void> signOut() async => signOutCalls++;
 
@@ -569,7 +573,7 @@ void main() {
       expect(find.text('Sync on Resume'), findsOneWidget);
       // Advanced section.
       expect(find.text('Advanced'), findsOneWidget);
-      expect(find.text('Reset Sync State'), findsOneWidget);
+      expect(find.text('Troubleshoot Sync'), findsOneWidget);
       expect(find.text('Sign Out'), findsOneWidget);
       // Sync Now action present; no provider selected => hint shown + disabled.
       expect(find.text('Sync Now'), findsOneWidget);
@@ -1227,31 +1231,19 @@ void main() {
     });
   });
 
-  group('CloudSyncPage - reset sync state dialog', () {
-    testWidgets('cancel does not call resetSyncState', (tester) async {
-      final handles = await pumpPage(tester);
-
-      await tester.tap(find.text('Reset Sync State'));
-      await tester.pumpAndSettle();
-      expect(find.text('Reset Sync State?'), findsOneWidget);
-
-      await tester.tap(find.text('Cancel'));
-      await tester.pumpAndSettle();
-      expect(handles.sync.resetSyncStateCalls, 0);
-    });
-
-    testWidgets('confirm calls resetSyncState and shows snackbar', (
+  group('CloudSyncPage - Advanced troubleshoot entry', () {
+    testWidgets('tapping Troubleshoot Sync opens the Troubleshoot page', (
       tester,
     ) async {
-      final handles = await pumpPage(tester);
+      await pumpPage(tester);
 
-      await tester.tap(find.text('Reset Sync State'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.widgetWithText(TextButton, 'Reset'));
+      // The recovery actions moved off the standalone "Reset Sync State" tile
+      // onto a dedicated Troubleshoot Sync screen.
+      await tester.tap(find.text('Troubleshoot Sync'));
       await tester.pumpAndSettle();
 
-      expect(handles.sync.resetSyncStateCalls, 1);
-      expect(find.text('Sync state reset'), findsOneWidget);
+      // The Troubleshoot page's app bar title and its primary Repair action.
+      expect(find.text('Repair Sync'), findsOneWidget);
     });
   });
 

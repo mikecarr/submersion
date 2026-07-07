@@ -13,6 +13,7 @@ import 'package:submersion/features/backup/presentation/providers/backup_provide
 import 'package:submersion/features/divers/data/repositories/diver_merge_repository.dart';
 import 'package:submersion/features/divers/presentation/providers/diver_providers.dart';
 import 'package:submersion/features/settings/presentation/providers/sync_providers.dart';
+import 'package:submersion/features/settings/presentation/pages/troubleshoot_sync_page.dart';
 import 'package:submersion/features/settings/presentation/widgets/adopt_replaced_library_dialog.dart';
 import 'package:submersion/features/settings/presentation/widgets/conflict_resolution_dialog.dart';
 import 'package:submersion/features/settings/presentation/widgets/dropbox_connect_dialog.dart';
@@ -1169,7 +1170,6 @@ class CloudSyncPage extends ConsumerWidget {
   }
 
   Widget _buildAdvancedSection(BuildContext context, WidgetRef ref) {
-    final isSyncing = ref.watch(syncStateProvider).status == SyncStatus.syncing;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1183,11 +1183,12 @@ class CloudSyncPage extends ConsumerWidget {
           ),
         ),
         ListTile(
-          leading: const Icon(Icons.refresh),
-          title: const Text('Reset Sync State'),
-          subtitle: const Text('Clear sync history and start fresh'),
-          enabled: !isSyncing,
-          onTap: isSyncing ? null : () => _confirmResetSyncState(context, ref),
+          leading: const Icon(Icons.build),
+          title: const Text('Troubleshoot Sync'),
+          subtitle: const Text('Fix a stuck sync or free cloud space'),
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute(builder: (_) => const TroubleshootSyncPage()),
+          ),
         ),
         ListTile(
           leading: const Icon(Icons.logout),
@@ -1241,42 +1242,6 @@ class CloudSyncPage extends ConsumerWidget {
     );
     if (confirmed == true) {
       await notifier.performSync();
-    }
-  }
-
-  Future<void> _confirmResetSyncState(
-    BuildContext context,
-    WidgetRef ref,
-  ) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Reset Sync State?'),
-        content: const Text(
-          'This will clear sync history and give this device a new '
-          'sync identity. Your data is not deleted, and the record of '
-          'past deletions is kept so deleted items do not come back.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Reset'),
-          ),
-        ],
-      ),
-    );
-
-    if (confirmed == true) {
-      await ref.read(syncStateProvider.notifier).resetSyncState();
-      if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Sync state reset')));
-      }
     }
   }
 
