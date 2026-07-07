@@ -918,6 +918,19 @@ class SyncNotifier extends StateNotifier<SyncState> {
     await refreshState();
   }
 
+  /// Comprehensive local repair: the full [resetSyncState] (fresh identity,
+  /// this device's cloud file removed, pending-replace/awaiting-adoption
+  /// cleared) PLUS the last-accepted epoch marker and leftover base temp files,
+  /// ending with any error cleared. The guaranteed local escape from a wedged
+  /// sync (issue #509); dive data is never touched.
+  Future<void> repairSync() async {
+    await resetSyncState();
+    await _ref.read(libraryEpochStoreProvider).clear();
+    await _syncService.deleteLeftoverBaseTempFiles();
+    state = state.copyWith(status: SyncStatus.idle, message: null);
+    await refreshState();
+  }
+
   @override
   void dispose() {
     _autoSyncTimer?.cancel();

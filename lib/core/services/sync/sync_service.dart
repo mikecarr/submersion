@@ -4,6 +4,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart' show visibleForTesting;
+import 'package:path_provider/path_provider.dart';
 import 'package:submersion/core/data/repositories/sync_repository.dart';
 import 'package:submersion/core/database/database.dart'
     show SyncRecord, DeletionLogData;
@@ -2002,6 +2003,40 @@ class SyncService {
   Future<void> resetSyncState() async {
     await _syncRepository.resetSyncState(clearDeletionLog: false);
     _log.info('Sync state reset');
+  }
+
+  /// Comprehensive local sync reset: everything [resetSyncState] clears, PLUS
+  /// the SharedPreferences epoch markers (the one local sync state a DB reset
+  /// misses -- see [LibraryEpochStore.clear]) and any leftover base temp files.
+  /// A true reinstall-equivalent for sync state that never touches dive data.
+  /// The notifier-level caller still runs the identity/cloud-file cleanup.
+  Future<void> repairLocalSyncState() async {
+    await resetSyncState();
+    await _epochStore?.clear();
+    await deleteLeftoverBaseTempFiles();
+    _log.info('Local sync state repaired');
+  }
+
+  /// Best-effort sweep of leftover streaming-base temp files (base export
+  /// `ssv1_base_*` and assembled `*.base` parts) from the app temp dir. Failure
+  /// is logged and ignored -- a stale temp file is harmless.
+  Future<void> deleteLeftoverBaseTempFiles() async {
+    try {
+      final dir = await getTemporaryDirectory();
+      await for (final entity in dir.list(followLinks: false)) {
+        if (entity is! File) continue;
+        final name = entity.uri.pathSegments.last;
+        if (name.startsWith('ssv1_base_') || name.endsWith('.base')) {
+          try {
+            await entity.delete();
+          } catch (_) {
+            // best effort
+          }
+        }
+      }
+    } catch (e) {
+      _log.warning('Could not sweep leftover base temp files: $e');
+    }
   }
 
   /// Best-effort removal of [deviceId]'s entire changeset log from the cloud
