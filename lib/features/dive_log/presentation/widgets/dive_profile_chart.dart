@@ -129,6 +129,10 @@ class DiveProfileChart extends ConsumerStatefulWidget {
   /// Used for multi-tank pressure visualization
   final Map<String, List<TankPressurePoint>>? tankPressures;
 
+  /// Tank IDs whose pressure series is a synthesized linear estimate (no AI
+  /// data). Rendered as a straight line and labelled "(est.)".
+  final Set<String>? estimatedTankIds;
+
   /// Gas-usage segments rendered as a horizontal strip directly between the
   /// plot area and the X-axis tick labels. When non-empty, the chart
   /// reserves [gasTimelineHeight] of extra space at the bottom and the
@@ -451,6 +455,7 @@ class DiveProfileChart extends ConsumerStatefulWidget {
     this.gasSwitches,
     this.tanks,
     this.tankPressures,
+    this.estimatedTankIds,
     this.gasSegments,
     this.diveDurationSeconds,
     this.exportKey,
@@ -738,6 +743,13 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
         return [4, 2];
     }
   }
+
+  /// Localized " (est.)" suffix for a synthesized (estimated) tank; empty for
+  /// tanks backed by real air-integrated data.
+  String _estimatedSuffix(String tankId) =>
+      (widget.estimatedTankIds?.contains(tankId) ?? false)
+      ? ' ${context.l10n.diveLog_pressure_estimatedSuffix}'
+      : '';
 
   // Zoom/pan state — see profile_chart_viewport.dart.
   ProfileChartViewport _viewport = ProfileChartViewport.reset;
@@ -1253,7 +1265,12 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
             : _getTankColor(i);
         final tankLabel =
             DiveProfileChart.tankTooltipLabel(tank, 'Tank ${i + 1}') +
-            _tankSourceSuffix(tankId, tankComputerIds, contributingComputerIds);
+            _tankSourceSuffix(
+              tankId,
+              tankComputerIds,
+              contributingComputerIds,
+            ) +
+            _estimatedSuffix(tankId);
         rows.add(
           TooltipRow(
             label: tankLabel,
@@ -1476,6 +1493,7 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
               widget.diveDurationSeconds! > 0),
       tanks: widget.tanks,
       tankPressures: widget.tankPressures,
+      estimatedTankIds: widget.estimatedTankIds ?? const {},
       hasNdlData: hasNdlData,
       hasPpO2Data: hasPpO2Data,
       hasPpN2Data: hasPpN2Data,
@@ -2849,7 +2867,8 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
                               tankId,
                               tankComputerIds,
                               contributingComputerIds,
-                            );
+                            ) +
+                            _estimatedSuffix(tankId);
                         final pressValue = pressure != null
                             ? units.formatPressure(pressure)
                             : '—';
@@ -3650,7 +3669,9 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
                 ),
               )
               .toList(),
-          isCurved: true,
+          // Synthesized estimates are straight (flat-drop-flat); curve
+          // smoothing would round their corners. Real AI data stays curved.
+          isCurved: !(widget.estimatedTankIds?.contains(tankId) ?? false),
           curveSmoothness: 0.2,
           color: color,
           barWidth: 2,

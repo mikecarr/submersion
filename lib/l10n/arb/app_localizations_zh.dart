@@ -2288,6 +2288,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get decoCalculator_title => '减压计算器';
 
   @override
+  String get decoCalculator_waterType => '水体类型';
+
+  @override
+  String get decoCalculator_waterType_standard => '标准';
+
+  @override
   String diveCenters_accessibility_markerLabel(Object name) {
     return '潜水中心：$name';
   }
@@ -3428,16 +3434,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get diveLog_detail_section_oxygenToxicity => '氧中毒';
 
   @override
-  String get diveLog_detail_section_sacByCylinder => '按气瓶的气体消耗率';
-
-  @override
   String get diveLog_detail_section_sacRateBySegment => '按分段的气体消耗率';
 
   @override
   String get diveLog_detail_section_tags => '标签';
 
   @override
-  String get diveLog_detail_section_tanks => '气瓶';
+  String get diveLog_detail_section_cylinders => '气瓶';
 
   @override
   String get diveLog_detail_section_tide => '潮汐';
@@ -3478,17 +3481,6 @@ class AppLocalizationsZh extends AppLocalizations {
       locale: localeName,
       other: '个标签',
       one: '个标签',
-    );
-    return '$count $_temp0';
-  }
-
-  @override
-  String diveLog_detail_tankCount(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '个气瓶',
-      one: '个气瓶',
     );
     return '$count $_temp0';
   }
@@ -4419,6 +4411,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get diveLog_chartSection_tankPressures => '气瓶压力';
 
   @override
+  String get diveLog_pressure_estimatedSuffix => '(估算)';
+
+  @override
   String get diveLog_listPage_appBar_diveMap => '潜水地图';
 
   @override
@@ -4431,6 +4426,28 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get diveLog_listPage_bottomSheet_importFromComputer => '从电脑导入';
+
+  @override
+  String get diveLog_listPage_bottomSheet_scanPaperLog => '扫描纸质潜水日志';
+
+  @override
+  String get ocrImport_scanPage_processing => '正在读取页面...';
+
+  @override
+  String get ocrImport_scanPage_pickPhoto => '选择照片';
+
+  @override
+  String get ocrImport_scanPage_takePhoto => '拍摄照片';
+
+  @override
+  String get ocrImport_scanPage_nothingRead => '无法从此页面读取太多内容 - 字段留空';
+
+  @override
+  String get ocrImport_scanPage_engineMissing =>
+      '文本识别不可用。请安装 Tesseract 以扫描纸质日志（例如：sudo apt install tesseract-ocr）。';
+
+  @override
+  String get ocrImport_editPage_photoAttachFailed => '潜水已保存，但附加扫描页面失败';
 
   @override
   String get diveLog_listPage_bottomSheet_logManually => '手动记录潜水';
@@ -9847,6 +9864,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get nav_equipment => '装备';
 
   @override
+  String get nav_gpsLog => 'GPS 记录';
+
+  @override
   String get nav_home => '首页';
 
   @override
@@ -9916,6 +9936,235 @@ class AppLocalizationsZh extends AppLocalizations {
   String get onboarding_welcome_title => '欢迎使用 Submersion';
 
   @override
+  String plannerCanvas_bailout_available(String liters) {
+    return '可用 $liters';
+  }
+
+  @override
+  String get plannerCanvas_bailout_insufficient => '逃生气体不足以应对最坏情况';
+
+  @override
+  String plannerCanvas_bailout_required(String liters) {
+    return '需要 $liters';
+  }
+
+  @override
+  String get plannerCanvas_bailout_title => '逃生（开式呼吸）';
+
+  @override
+  String plannerCanvas_bailout_tts(String minutes) {
+    return '逃生 TTS $minutes′';
+  }
+
+  @override
+  String plannerCanvas_bailout_worstCase(String minutes, String depth) {
+    return '最坏情况在 $minutes′ · $depth';
+  }
+
+  @override
+  String get plannerCanvas_ccr_setpointHigh => '高设定点（bar）';
+
+  @override
+  String get plannerCanvas_ccr_setpointLow => '低设定点（bar）';
+
+  @override
+  String get plannerCanvas_ccr_switchDepth => '设定点切换深度';
+
+  @override
+  String plannerCanvas_chip_cns(String value) {
+    return 'CNS $value%';
+  }
+
+  @override
+  String plannerCanvas_chip_issues(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 个问题',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get plannerCanvas_compare_action => '比较';
+
+  @override
+  String get plannerCanvas_compare_needTwo => '请至少选择两个计划进行比较';
+
+  @override
+  String get plannerCanvas_compare_title => '比较计划';
+
+  @override
+  String get plannerCanvas_contingency_base => '基准';
+
+  @override
+  String get plannerCanvas_contingency_depthDelta => '额外深度';
+
+  @override
+  String plannerCanvas_contingency_lostGas(String gas) {
+    return '失去 $gas';
+  }
+
+  @override
+  String get plannerCanvas_contingency_timeDelta => '额外分钟';
+
+  @override
+  String get plannerCanvas_contingency_title => '应急计划';
+
+  @override
+  String get plannerCanvas_contingency_turnFraction => '折返比例';
+
+  @override
+  String get plannerCanvas_contingency_turnRule => '折返压力规则';
+
+  @override
+  String get plannerCanvas_convert_success => '已从计划创建潜水';
+
+  @override
+  String get plannerCanvas_convert_view => '查看';
+
+  @override
+  String plannerCanvas_follow_chip(String name) {
+    return '跟随 $name';
+  }
+
+  @override
+  String get plannerCanvas_follow_empty => '还没有记录的潜水';
+
+  @override
+  String get plannerCanvas_follow_noTissues => '该潜水没有剖面数据 — 已设置水面间隔但未载入组织饱和度';
+
+  @override
+  String get plannerCanvas_follow_title => '跟随一次潜水';
+
+  @override
+  String plannerCanvas_gas_minGas(String pressure) {
+    return '最低气量 $pressure';
+  }
+
+  @override
+  String plannerCanvas_gas_turnAt(String pressure) {
+    return '$pressure 时折返';
+  }
+
+  @override
+  String plannerCanvas_issue_gasDensityCritical(String value) {
+    return '气体密度 $value g/L 超过硬性上限';
+  }
+
+  @override
+  String plannerCanvas_issue_gasDensityHigh(String value) {
+    return '气体密度 $value g/L 超过建议上限';
+  }
+
+  @override
+  String plannerCanvas_issue_hypoxic(String depth, String value) {
+    return '$depth 处为低氧气体（ppO₂ $value bar）';
+  }
+
+  @override
+  String plannerCanvas_issue_minGas(String pressure) {
+    return '气瓶终压低于最低保底气量 $pressure';
+  }
+
+  @override
+  String get plannerCanvas_issue_noBailout => 'CCR 减压计划未携带逃生气体';
+
+  @override
+  String get plannerCanvas_issue_noDecoGas => '需要减压但未携带减压气体';
+
+  @override
+  String get plannerCanvas_range_base => '基准';
+
+  @override
+  String get plannerCanvas_range_legend => '单元格显示到达水面所需时间；红色 = 无法按计划潜水';
+
+  @override
+  String get plannerCanvas_range_title => '范围表';
+
+  @override
+  String get plannerCanvas_results_noDeco => '无需减压';
+
+  @override
+  String plannerCanvas_sac_useLogged(String sac) {
+    return '使用记录的平均值（$sac）';
+  }
+
+  @override
+  String plannerCanvas_saved_deleteConfirmBody(String name) {
+    return '永久删除“$name”？';
+  }
+
+  @override
+  String get plannerCanvas_saved_deleteConfirmTitle => '删除计划？';
+
+  @override
+  String get plannerCanvas_saved_duplicate => '复制';
+
+  @override
+  String get plannerCanvas_saved_empty => '尚无已保存的计划';
+
+  @override
+  String get plannerCanvas_saved_title => '已保存的计划';
+
+  @override
+  String plannerCanvas_scrub_bailout(String minutes) {
+    return 'BO $minutes′';
+  }
+
+  @override
+  String plannerCanvas_scrub_readout(String minutes, String depth) {
+    return 'RT $minutes′ · $depth';
+  }
+
+  @override
+  String get plannerCanvas_share_import => '导入';
+
+  @override
+  String plannerCanvas_share_importFailed(String reason) {
+    return '无法导入计划：$reason';
+  }
+
+  @override
+  String get plannerCanvas_share_menu => '分享计划文件';
+
+  @override
+  String get plannerCanvas_slate_menu => '导出潜水板（PDF）';
+
+  @override
+  String get plannerCanvas_slate_minGas => '最低气量';
+
+  @override
+  String get plannerCanvas_slate_turn => '折返';
+
+  @override
+  String get plannerCanvas_table_depth => '深度';
+
+  @override
+  String get plannerCanvas_table_gas => '气体';
+
+  @override
+  String get plannerCanvas_table_runtime => 'RT';
+
+  @override
+  String get plannerCanvas_table_stop => '停留';
+
+  @override
+  String get plannerCanvas_turnRule_allUsable => '全部可用';
+
+  @override
+  String get plannerCanvas_turnRule_custom => '自定义';
+
+  @override
+  String get plannerCanvas_turnRule_halves => '对半';
+
+  @override
+  String get plannerCanvas_turnRule_none => '无';
+
+  @override
+  String get plannerCanvas_turnRule_thirds => '三分之一';
+
+  @override
   String get planning_appBar_title => '计划';
 
   @override
@@ -9970,6 +10219,12 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get planning_info_disclaimer => '这些工具仅供计划参考。请务必验证计算结果并遵循您的潜水训练。';
+
+  @override
+  String get planning_newPlan => '新建计划';
+
+  @override
+  String get planning_section_tools => '工具';
 
   @override
   String get planning_sidebar_appBar_title => '计划';
@@ -10165,7 +10420,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get diveDetailSection_sacSegments_name => '分段耗气率';
 
   @override
-  String get diveDetailSection_sacSegments_description => '阶段/时间分段、气瓶分解';
+  String get diveDetailSection_sacSegments_description => '按阶段/时间的SAC分段';
 
   @override
   String get diveDetailSection_details_name => '详情';
@@ -15937,6 +16192,91 @@ class AppLocalizationsZh extends AppLocalizations {
   String get gasCalculators_rockBottom_yourSac => '您的 SAC';
 
   @override
+  String get gpsLogger_androidNotificationText => '正在记录水面轨迹';
+
+  @override
+  String get gpsLogger_androidNotificationTitle => 'Submersion GPS 记录器';
+
+  @override
+  String get gpsLogger_deleteTrackMessage => '将删除已记录的 GPS 轨迹。已标注到潜水记录的位置会保留。';
+
+  @override
+  String get gpsLogger_deleteTrackTitle => '删除轨迹？';
+
+  @override
+  String get gpsLogger_interruptedNotice => '上次记录被中断，轨迹已保存。';
+
+  @override
+  String gpsLogger_lastFix(String age, String accuracy) {
+    return '上次定位于 $age 前（$accuracy）';
+  }
+
+  @override
+  String get gpsLogger_locationOff => '定位服务已关闭。';
+
+  @override
+  String get gpsLogger_matchButton => '将潜水与 GPS 记录匹配';
+
+  @override
+  String gpsLogger_matchResult(int count) {
+    return '已定位 $count 次潜水';
+  }
+
+  @override
+  String get gpsLogger_matchResultNone => '没有潜水与已记录的轨迹匹配';
+
+  @override
+  String get gpsLogger_noFixYet => '正在等待 GPS 定位';
+
+  @override
+  String get gpsLogger_noTracks => '尚未记录 GPS 轨迹';
+
+  @override
+  String get gpsLogger_permissionDenied => '记录 GPS 轨迹需要位置权限。请在系统设置中启用。';
+
+  @override
+  String gpsLogger_recordingStatus(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 个点',
+    );
+    return '记录中 - $_temp0';
+  }
+
+  @override
+  String get gpsLogger_reviewSites => '查看潜点匹配';
+
+  @override
+  String get gpsLogger_startButton => '开始记录';
+
+  @override
+  String get gpsLogger_stopButton => '停止记录';
+
+  @override
+  String gpsLogger_stripStatus(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 个点',
+    );
+    return '正在记录 GPS 轨迹 · $_temp0';
+  }
+
+  @override
+  String gpsLogger_trackSubtitle(num count, String duration) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 个点',
+    );
+    return '$_temp0，$duration';
+  }
+
+  @override
+  String get gpsLogger_tracksHeader => '已记录的轨迹';
+
+  @override
   String get maps_heatMap_hide => '隐藏热力图';
 
   @override
@@ -16293,6 +16633,15 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get tools_gas_title => '气体计算器';
+
+  @override
+  String get tools_gpsLogger_description => '在潜水日记录你的位置，自动将导入的潜水与 GPS 位置匹配。';
+
+  @override
+  String get tools_gpsLogger_subtitle => '记录水面轨迹';
+
+  @override
+  String get tools_gpsLogger_title => 'GPS 记录器';
 
   @override
   String get tools_title => '工具';
@@ -17003,4 +17352,25 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get db_location_external_note => '卸载应用后，此处的文件将被删除。';
+
+  @override
+  String diveLog_bulkEdit_membership_onAll(int count) {
+    return '全部 $count 次潜水';
+  }
+
+  @override
+  String diveLog_bulkEdit_membership_onSome(int count, int total) {
+    return '$count/$total 次潜水';
+  }
+
+  @override
+  String diveLog_bulkEdit_membership_adding(int total) {
+    return '添加到全部 $total 次';
+  }
+
+  @override
+  String get diveLog_bulkEdit_membership_removing => '从全部移除';
+
+  @override
+  String get diveLog_bulkEdit_membership_empty => '所选潜水尚无项目';
 }

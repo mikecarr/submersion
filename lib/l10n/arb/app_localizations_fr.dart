@@ -2418,6 +2418,12 @@ class AppLocalizationsFr extends AppLocalizations {
   String get decoCalculator_title => 'Calculateur de décompression';
 
   @override
+  String get decoCalculator_waterType => 'Type d\'eau';
+
+  @override
+  String get decoCalculator_waterType_standard => 'Standard';
+
+  @override
   String diveCenters_accessibility_markerLabel(Object name) {
     return 'Centre de plongée : $name';
   }
@@ -3611,9 +3617,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get diveLog_detail_section_oxygenToxicity => 'Toxicite de l\'oxygene';
 
   @override
-  String get diveLog_detail_section_sacByCylinder => 'SAC par bloc';
-
-  @override
   String get diveLog_detail_section_sacRateBySegment =>
       'Consommation SAC par segment';
 
@@ -3621,7 +3624,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get diveLog_detail_section_tags => 'Tags';
 
   @override
-  String get diveLog_detail_section_tanks => 'Blocs';
+  String get diveLog_detail_section_cylinders => 'Blocs';
 
   @override
   String get diveLog_detail_section_tide => 'Maree';
@@ -3665,17 +3668,6 @@ class AppLocalizationsFr extends AppLocalizations {
       locale: localeName,
       other: 'tags',
       one: 'tag',
-    );
-    return '$count $_temp0';
-  }
-
-  @override
-  String diveLog_detail_tankCount(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'blocs',
-      one: 'bloc',
     );
     return '$count $_temp0';
   }
@@ -4663,6 +4655,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get diveLog_chartSection_tankPressures => 'Pressions des blocs';
 
   @override
+  String get diveLog_pressure_estimatedSuffix => '(est.)';
+
+  @override
   String get diveLog_listPage_appBar_diveMap => 'Carte des plongees';
 
   @override
@@ -4676,6 +4671,31 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get diveLog_listPage_bottomSheet_importFromComputer =>
       'Importer depuis l\'ordinateur';
+
+  @override
+  String get diveLog_listPage_bottomSheet_scanPaperLog =>
+      'Scanner un carnet papier';
+
+  @override
+  String get ocrImport_scanPage_processing => 'Lecture de la page...';
+
+  @override
+  String get ocrImport_scanPage_pickPhoto => 'Choisir une photo';
+
+  @override
+  String get ocrImport_scanPage_takePhoto => 'Prendre une photo';
+
+  @override
+  String get ocrImport_scanPage_nothingRead =>
+      'Peu de texte lisible sur cette page - champs laissés vides';
+
+  @override
+  String get ocrImport_scanPage_engineMissing =>
+      'La reconnaissance de texte n\'est pas disponible. Installez Tesseract pour scanner les carnets papier (par exemple : sudo apt install tesseract-ocr).';
+
+  @override
+  String get ocrImport_editPage_photoAttachFailed =>
+      'La plongée a été enregistrée, mais l\'ajout de la page scannée a échoué';
 
   @override
   String get diveLog_listPage_bottomSheet_logManually =>
@@ -10330,6 +10350,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get nav_equipment => 'Equipement';
 
   @override
+  String get nav_gpsLog => 'Journal GPS';
+
+  @override
   String get nav_home => 'Accueil';
 
   @override
@@ -10400,6 +10423,245 @@ class AppLocalizationsFr extends AppLocalizations {
   String get onboarding_welcome_title => 'Bienvenue dans Submersion';
 
   @override
+  String plannerCanvas_bailout_available(String liters) {
+    return 'Disponible $liters';
+  }
+
+  @override
+  String get plannerCanvas_bailout_insufficient =>
+      'Gaz de bailout insuffisant pour le pire cas';
+
+  @override
+  String plannerCanvas_bailout_required(String liters) {
+    return 'Nécessaire $liters';
+  }
+
+  @override
+  String get plannerCanvas_bailout_title => 'Bailout (circuit ouvert)';
+
+  @override
+  String plannerCanvas_bailout_tts(String minutes) {
+    return 'TTS bailout $minutes′';
+  }
+
+  @override
+  String plannerCanvas_bailout_worstCase(String minutes, String depth) {
+    return 'Pire cas à $minutes′ · $depth';
+  }
+
+  @override
+  String get plannerCanvas_ccr_setpointHigh => 'Setpoint haut (bar)';
+
+  @override
+  String get plannerCanvas_ccr_setpointLow => 'Setpoint bas (bar)';
+
+  @override
+  String get plannerCanvas_ccr_switchDepth =>
+      'Profondeur de bascule du setpoint';
+
+  @override
+  String plannerCanvas_chip_cns(String value) {
+    return 'CNS $value%';
+  }
+
+  @override
+  String plannerCanvas_chip_issues(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count problèmes',
+      one: '1 problème',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get plannerCanvas_compare_action => 'Comparer';
+
+  @override
+  String get plannerCanvas_compare_needTwo =>
+      'Sélectionnez au moins deux plans à comparer';
+
+  @override
+  String get plannerCanvas_compare_title => 'Comparer les plans';
+
+  @override
+  String get plannerCanvas_contingency_base => 'Base';
+
+  @override
+  String get plannerCanvas_contingency_depthDelta => 'Profondeur en plus';
+
+  @override
+  String plannerCanvas_contingency_lostGas(String gas) {
+    return '$gas perdu';
+  }
+
+  @override
+  String get plannerCanvas_contingency_timeDelta => 'Minutes en plus';
+
+  @override
+  String get plannerCanvas_contingency_title => 'Plans de secours';
+
+  @override
+  String get plannerCanvas_contingency_turnFraction => 'Fraction de demi-tour';
+
+  @override
+  String get plannerCanvas_contingency_turnRule =>
+      'Règle de pression de demi-tour';
+
+  @override
+  String get plannerCanvas_convert_success => 'Plongée créée à partir du plan';
+
+  @override
+  String get plannerCanvas_convert_view => 'Voir';
+
+  @override
+  String plannerCanvas_follow_chip(String name) {
+    return 'Suit $name';
+  }
+
+  @override
+  String get plannerCanvas_follow_empty =>
+      'Aucune plongée enregistrée pour l\'instant';
+
+  @override
+  String get plannerCanvas_follow_noTissues =>
+      'Pas de données de profil pour cette plongée — intervalle de surface défini sans saturation des tissus';
+
+  @override
+  String get plannerCanvas_follow_title => 'Suivre une plongée';
+
+  @override
+  String plannerCanvas_gas_minGas(String pressure) {
+    return 'gaz mini $pressure';
+  }
+
+  @override
+  String plannerCanvas_gas_turnAt(String pressure) {
+    return 'demi-tour à $pressure';
+  }
+
+  @override
+  String plannerCanvas_issue_gasDensityCritical(String value) {
+    return 'Densité du gaz $value g/L au-dessus de la limite stricte';
+  }
+
+  @override
+  String plannerCanvas_issue_gasDensityHigh(String value) {
+    return 'Densité du gaz $value g/L au-dessus de la limite recommandée';
+  }
+
+  @override
+  String plannerCanvas_issue_hypoxic(String depth, String value) {
+    return 'Gaz hypoxique à $depth (ppO₂ $value bar)';
+  }
+
+  @override
+  String plannerCanvas_issue_minGas(String pressure) {
+    return 'Le bloc finit sous le minimum rock bottom de $pressure';
+  }
+
+  @override
+  String get plannerCanvas_issue_noBailout =>
+      'Le plan de décompression CCR n\'emporte aucun gaz de bailout';
+
+  @override
+  String get plannerCanvas_issue_noDecoGas =>
+      'Décompression requise mais aucun gaz de déco emporté';
+
+  @override
+  String get plannerCanvas_range_base => 'Base';
+
+  @override
+  String get plannerCanvas_range_legend =>
+      'Les cellules indiquent le temps de remontée ; rouge = non plongeable comme prévu';
+
+  @override
+  String get plannerCanvas_range_title => 'Table de variations';
+
+  @override
+  String get plannerCanvas_results_noDeco => 'Aucune décompression requise';
+
+  @override
+  String plannerCanvas_sac_useLogged(String sac) {
+    return 'Utiliser la moyenne enregistrée ($sac)';
+  }
+
+  @override
+  String plannerCanvas_saved_deleteConfirmBody(String name) {
+    return 'Supprimer définitivement « $name » ?';
+  }
+
+  @override
+  String get plannerCanvas_saved_deleteConfirmTitle => 'Supprimer le plan ?';
+
+  @override
+  String get plannerCanvas_saved_duplicate => 'Dupliquer';
+
+  @override
+  String get plannerCanvas_saved_empty => 'Aucun plan enregistré';
+
+  @override
+  String get plannerCanvas_saved_title => 'Plans enregistrés';
+
+  @override
+  String plannerCanvas_scrub_bailout(String minutes) {
+    return 'BO $minutes′';
+  }
+
+  @override
+  String plannerCanvas_scrub_readout(String minutes, String depth) {
+    return 'RT $minutes′ · $depth';
+  }
+
+  @override
+  String get plannerCanvas_share_import => 'Importer';
+
+  @override
+  String plannerCanvas_share_importFailed(String reason) {
+    return 'Impossible d\'importer le plan : $reason';
+  }
+
+  @override
+  String get plannerCanvas_share_menu => 'Partager le fichier du plan';
+
+  @override
+  String get plannerCanvas_slate_menu => 'Exporter la plaquette (PDF)';
+
+  @override
+  String get plannerCanvas_slate_minGas => 'Gaz minimum';
+
+  @override
+  String get plannerCanvas_slate_turn => 'Demi-tour';
+
+  @override
+  String get plannerCanvas_table_depth => 'Profondeur';
+
+  @override
+  String get plannerCanvas_table_gas => 'Gaz';
+
+  @override
+  String get plannerCanvas_table_runtime => 'RT';
+
+  @override
+  String get plannerCanvas_table_stop => 'Palier';
+
+  @override
+  String get plannerCanvas_turnRule_allUsable => 'Tout utilisable';
+
+  @override
+  String get plannerCanvas_turnRule_custom => 'Personnalisée';
+
+  @override
+  String get plannerCanvas_turnRule_halves => 'Moitiés';
+
+  @override
+  String get plannerCanvas_turnRule_none => 'Aucune';
+
+  @override
+  String get plannerCanvas_turnRule_thirds => 'Tiers';
+
+  @override
   String get planning_appBar_title => 'Planification';
 
   @override
@@ -10460,6 +10722,12 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get planning_info_disclaimer =>
       'Ces outils sont destines a la planification uniquement. Verifiez toujours les calculs et suivez votre formation de plongee.';
+
+  @override
+  String get planning_newPlan => 'Nouveau plan';
+
+  @override
+  String get planning_section_tools => 'Outils';
 
   @override
   String get planning_sidebar_appBar_title => 'Planification';
@@ -10679,7 +10947,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get diveDetailSection_sacSegments_description =>
-      'Segmentation par phase/temps, repartition par bouteille';
+      'Segmentation SAC par phase/temps';
 
   @override
   String get diveDetailSection_details_name => 'Details';
@@ -16815,6 +17083,102 @@ class AppLocalizationsFr extends AppLocalizations {
   String get gasCalculators_rockBottom_yourSac => 'Votre SAC';
 
   @override
+  String get gpsLogger_androidNotificationText =>
+      'Enregistrement de votre trace de surface';
+
+  @override
+  String get gpsLogger_androidNotificationTitle =>
+      'Enregistreur GPS Submersion';
+
+  @override
+  String get gpsLogger_deleteTrackMessage =>
+      'Supprime la trace GPS enregistrée. Les positions déjà attribuées aux plongées sont conservées.';
+
+  @override
+  String get gpsLogger_deleteTrackTitle => 'Supprimer la trace ?';
+
+  @override
+  String get gpsLogger_interruptedNotice =>
+      'Un enregistrement précédent a été interrompu. La trace a été sauvegardée.';
+
+  @override
+  String gpsLogger_lastFix(String age, String accuracy) {
+    return 'Dernière position il y a $age ($accuracy)';
+  }
+
+  @override
+  String get gpsLogger_locationOff =>
+      'Les services de localisation sont désactivés.';
+
+  @override
+  String get gpsLogger_matchButton => 'Associer les plongées aux journaux GPS';
+
+  @override
+  String gpsLogger_matchResult(int count) {
+    return '$count plongées positionnées';
+  }
+
+  @override
+  String get gpsLogger_matchResultNone =>
+      'Aucune plongée ne correspond à une trace enregistrée';
+
+  @override
+  String get gpsLogger_noFixYet => 'En attente du signal GPS';
+
+  @override
+  String get gpsLogger_noTracks =>
+      'Aucune trace GPS enregistrée pour le moment';
+
+  @override
+  String get gpsLogger_permissionDenied =>
+      'L\'autorisation de localisation est requise pour enregistrer une trace GPS. Activez-la dans les réglages du système.';
+
+  @override
+  String gpsLogger_recordingStatus(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count points',
+      one: '$count point',
+    );
+    return 'Enregistrement - $_temp0';
+  }
+
+  @override
+  String get gpsLogger_reviewSites => 'Vérifier les correspondances de sites';
+
+  @override
+  String get gpsLogger_startButton => 'Démarrer l\'enregistrement';
+
+  @override
+  String get gpsLogger_stopButton => 'Arrêter l\'enregistrement';
+
+  @override
+  String gpsLogger_stripStatus(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count points',
+      one: '$count point',
+    );
+    return 'Enregistrement du tracé GPS · $_temp0';
+  }
+
+  @override
+  String gpsLogger_trackSubtitle(num count, String duration) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count points',
+      one: '$count point',
+    );
+    return '$_temp0, $duration';
+  }
+
+  @override
+  String get gpsLogger_tracksHeader => 'Traces enregistrées';
+
+  @override
   String get maps_heatMap_hide => 'Masquer la carte de chaleur';
 
   @override
@@ -17184,6 +17548,16 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get tools_gas_title => 'Calculateurs de gaz';
+
+  @override
+  String get tools_gpsLogger_description =>
+      'Enregistrez votre position pendant une journée de plongée et associez automatiquement les plongées importées à des positions GPS.';
+
+  @override
+  String get tools_gpsLogger_subtitle => 'Enregistrer une trace de surface';
+
+  @override
+  String get tools_gpsLogger_title => 'Enregistreur GPS';
 
   @override
   String get tools_title => 'Outils';
@@ -17928,4 +18302,26 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get db_location_external_note =>
       'Les fichiers ici sont supprimés si vous désinstallez l\'application.';
+
+  @override
+  String diveLog_bulkEdit_membership_onAll(int count) {
+    return 'sur toutes les $count';
+  }
+
+  @override
+  String diveLog_bulkEdit_membership_onSome(int count, int total) {
+    return 'sur $count sur $total';
+  }
+
+  @override
+  String diveLog_bulkEdit_membership_adding(int total) {
+    return 'ajout à toutes les $total';
+  }
+
+  @override
+  String get diveLog_bulkEdit_membership_removing => 'retrait de toutes';
+
+  @override
+  String get diveLog_bulkEdit_membership_empty =>
+      'Aucun élément sur les plongées sélectionnées pour l\'instant';
 }

@@ -4157,6 +4157,18 @@ abstract class AppLocalizations {
   /// **'Deco Calculator'**
   String get decoCalculator_title;
 
+  /// No description provided for @decoCalculator_waterType.
+  ///
+  /// In en, this message translates to:
+  /// **'Water type'**
+  String get decoCalculator_waterType;
+
+  /// No description provided for @decoCalculator_waterType_standard.
+  ///
+  /// In en, this message translates to:
+  /// **'Standard'**
+  String get decoCalculator_waterType_standard;
+
   /// No description provided for @diveCenters_accessibility_markerLabel.
   ///
   /// In en, this message translates to:
@@ -6038,12 +6050,6 @@ abstract class AppLocalizations {
   /// **'Oxygen Toxicity'**
   String get diveLog_detail_section_oxygenToxicity;
 
-  /// No description provided for @diveLog_detail_section_sacByCylinder.
-  ///
-  /// In en, this message translates to:
-  /// **'SAC by Cylinder'**
-  String get diveLog_detail_section_sacByCylinder;
-
   /// No description provided for @diveLog_detail_section_sacRateBySegment.
   ///
   /// In en, this message translates to:
@@ -6056,11 +6062,11 @@ abstract class AppLocalizations {
   /// **'Tags'**
   String get diveLog_detail_section_tags;
 
-  /// No description provided for @diveLog_detail_section_tanks.
+  /// No description provided for @diveLog_detail_section_cylinders.
   ///
   /// In en, this message translates to:
-  /// **'Tanks'**
-  String get diveLog_detail_section_tanks;
+  /// **'Cylinders'**
+  String get diveLog_detail_section_cylinders;
 
   /// No description provided for @diveLog_detail_section_tide.
   ///
@@ -6127,12 +6133,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count} {count, plural, =1{tag} other{tags}}'**
   String diveLog_detail_tagCount(int count);
-
-  /// No description provided for @diveLog_detail_tankCount.
-  ///
-  /// In en, this message translates to:
-  /// **'{count} {count, plural, =1{tank} other{tanks}}'**
-  String diveLog_detail_tankCount(int count);
 
   /// No description provided for @diveLog_detail_tideCalculated.
   ///
@@ -7808,6 +7808,12 @@ abstract class AppLocalizations {
   /// **'Tank Pressures'**
   String get diveLog_chartSection_tankPressures;
 
+  /// Short suffix appended to a tank label when its pressure line is a linear start-to-end estimate rather than measured air-integrated data. Abbreviation of 'estimated'.
+  ///
+  /// In en, this message translates to:
+  /// **'(est.)'**
+  String get diveLog_pressure_estimatedSuffix;
+
   /// No description provided for @diveLog_listPage_appBar_diveMap.
   ///
   /// In en, this message translates to:
@@ -7831,6 +7837,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Import from Computer'**
   String get diveLog_listPage_bottomSheet_importFromComputer;
+
+  /// No description provided for @diveLog_listPage_bottomSheet_scanPaperLog.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan Paper Log'**
+  String get diveLog_listPage_bottomSheet_scanPaperLog;
+
+  /// No description provided for @ocrImport_scanPage_processing.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading page...'**
+  String get ocrImport_scanPage_processing;
+
+  /// No description provided for @ocrImport_scanPage_pickPhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose Photo'**
+  String get ocrImport_scanPage_pickPhoto;
+
+  /// No description provided for @ocrImport_scanPage_takePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Take Photo'**
+  String get ocrImport_scanPage_takePhoto;
+
+  /// No description provided for @ocrImport_scanPage_nothingRead.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t read much from this page - fields left blank'**
+  String get ocrImport_scanPage_nothingRead;
+
+  /// No description provided for @ocrImport_scanPage_engineMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Text recognition is not available. Install Tesseract to scan paper logs (for example: sudo apt install tesseract-ocr).'**
+  String get ocrImport_scanPage_engineMissing;
+
+  /// No description provided for @ocrImport_editPage_photoAttachFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The dive was saved, but attaching the scanned page failed'**
+  String get ocrImport_editPage_photoAttachFailed;
 
   /// No description provided for @diveLog_listPage_bottomSheet_logManually.
   ///
@@ -17528,6 +17576,12 @@ abstract class AppLocalizations {
   /// **'Equipment'**
   String get nav_equipment;
 
+  /// No description provided for @nav_gpsLog.
+  ///
+  /// In en, this message translates to:
+  /// **'GPS Log'**
+  String get nav_gpsLog;
+
   /// Navigation label for home/dashboard
   ///
   /// In en, this message translates to:
@@ -17660,6 +17714,378 @@ abstract class AppLocalizations {
   /// **'Welcome to Submersion'**
   String get onboarding_welcome_title;
 
+  /// No description provided for @plannerCanvas_bailout_available.
+  ///
+  /// In en, this message translates to:
+  /// **'Available {liters}'**
+  String plannerCanvas_bailout_available(String liters);
+
+  /// No description provided for @plannerCanvas_bailout_insufficient.
+  ///
+  /// In en, this message translates to:
+  /// **'Bailout gas insufficient for the worst case'**
+  String get plannerCanvas_bailout_insufficient;
+
+  /// No description provided for @plannerCanvas_bailout_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Required {liters}'**
+  String plannerCanvas_bailout_required(String liters);
+
+  /// No description provided for @plannerCanvas_bailout_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Bailout (open circuit)'**
+  String get plannerCanvas_bailout_title;
+
+  /// No description provided for @plannerCanvas_bailout_tts.
+  ///
+  /// In en, this message translates to:
+  /// **'Bailout TTS {minutes}′'**
+  String plannerCanvas_bailout_tts(String minutes);
+
+  /// No description provided for @plannerCanvas_bailout_worstCase.
+  ///
+  /// In en, this message translates to:
+  /// **'Worst case at {minutes}′ · {depth}'**
+  String plannerCanvas_bailout_worstCase(String minutes, String depth);
+
+  /// No description provided for @plannerCanvas_ccr_setpointHigh.
+  ///
+  /// In en, this message translates to:
+  /// **'Setpoint high (bar)'**
+  String get plannerCanvas_ccr_setpointHigh;
+
+  /// No description provided for @plannerCanvas_ccr_setpointLow.
+  ///
+  /// In en, this message translates to:
+  /// **'Setpoint low (bar)'**
+  String get plannerCanvas_ccr_setpointLow;
+
+  /// No description provided for @plannerCanvas_ccr_switchDepth.
+  ///
+  /// In en, this message translates to:
+  /// **'Setpoint switch depth'**
+  String get plannerCanvas_ccr_switchDepth;
+
+  /// No description provided for @plannerCanvas_chip_cns.
+  ///
+  /// In en, this message translates to:
+  /// **'CNS {value}%'**
+  String plannerCanvas_chip_cns(String value);
+
+  /// No description provided for @plannerCanvas_chip_issues.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 issue} other{{count} issues}}'**
+  String plannerCanvas_chip_issues(int count);
+
+  /// No description provided for @plannerCanvas_compare_action.
+  ///
+  /// In en, this message translates to:
+  /// **'Compare'**
+  String get plannerCanvas_compare_action;
+
+  /// No description provided for @plannerCanvas_compare_needTwo.
+  ///
+  /// In en, this message translates to:
+  /// **'Select at least two plans to compare'**
+  String get plannerCanvas_compare_needTwo;
+
+  /// No description provided for @plannerCanvas_compare_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Compare plans'**
+  String get plannerCanvas_compare_title;
+
+  /// No description provided for @plannerCanvas_contingency_base.
+  ///
+  /// In en, this message translates to:
+  /// **'Base'**
+  String get plannerCanvas_contingency_base;
+
+  /// No description provided for @plannerCanvas_contingency_depthDelta.
+  ///
+  /// In en, this message translates to:
+  /// **'Extra depth'**
+  String get plannerCanvas_contingency_depthDelta;
+
+  /// No description provided for @plannerCanvas_contingency_lostGas.
+  ///
+  /// In en, this message translates to:
+  /// **'Lost {gas}'**
+  String plannerCanvas_contingency_lostGas(String gas);
+
+  /// No description provided for @plannerCanvas_contingency_timeDelta.
+  ///
+  /// In en, this message translates to:
+  /// **'Extra minutes'**
+  String get plannerCanvas_contingency_timeDelta;
+
+  /// No description provided for @plannerCanvas_contingency_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Contingencies'**
+  String get plannerCanvas_contingency_title;
+
+  /// No description provided for @plannerCanvas_contingency_turnFraction.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn fraction'**
+  String get plannerCanvas_contingency_turnFraction;
+
+  /// No description provided for @plannerCanvas_contingency_turnRule.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn pressure rule'**
+  String get plannerCanvas_contingency_turnRule;
+
+  /// No description provided for @plannerCanvas_convert_success.
+  ///
+  /// In en, this message translates to:
+  /// **'Dive created from plan'**
+  String get plannerCanvas_convert_success;
+
+  /// No description provided for @plannerCanvas_convert_view.
+  ///
+  /// In en, this message translates to:
+  /// **'View'**
+  String get plannerCanvas_convert_view;
+
+  /// No description provided for @plannerCanvas_follow_chip.
+  ///
+  /// In en, this message translates to:
+  /// **'Following {name}'**
+  String plannerCanvas_follow_chip(String name);
+
+  /// No description provided for @plannerCanvas_follow_empty.
+  ///
+  /// In en, this message translates to:
+  /// **'No logged dives yet'**
+  String get plannerCanvas_follow_empty;
+
+  /// No description provided for @plannerCanvas_follow_noTissues.
+  ///
+  /// In en, this message translates to:
+  /// **'No profile data on that dive — surface interval set without tissue seeding'**
+  String get plannerCanvas_follow_noTissues;
+
+  /// No description provided for @plannerCanvas_follow_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Follow a dive'**
+  String get plannerCanvas_follow_title;
+
+  /// No description provided for @plannerCanvas_gas_minGas.
+  ///
+  /// In en, this message translates to:
+  /// **'min gas {pressure}'**
+  String plannerCanvas_gas_minGas(String pressure);
+
+  /// No description provided for @plannerCanvas_gas_turnAt.
+  ///
+  /// In en, this message translates to:
+  /// **'turn @ {pressure}'**
+  String plannerCanvas_gas_turnAt(String pressure);
+
+  /// No description provided for @plannerCanvas_issue_gasDensityCritical.
+  ///
+  /// In en, this message translates to:
+  /// **'Gas density {value} g/L over hard limit'**
+  String plannerCanvas_issue_gasDensityCritical(String value);
+
+  /// No description provided for @plannerCanvas_issue_gasDensityHigh.
+  ///
+  /// In en, this message translates to:
+  /// **'Gas density {value} g/L over recommended limit'**
+  String plannerCanvas_issue_gasDensityHigh(String value);
+
+  /// No description provided for @plannerCanvas_issue_hypoxic.
+  ///
+  /// In en, this message translates to:
+  /// **'Hypoxic gas at {depth} (ppO₂ {value} bar)'**
+  String plannerCanvas_issue_hypoxic(String depth, String value);
+
+  /// No description provided for @plannerCanvas_issue_minGas.
+  ///
+  /// In en, this message translates to:
+  /// **'Tank ends below the rock-bottom minimum of {pressure}'**
+  String plannerCanvas_issue_minGas(String pressure);
+
+  /// No description provided for @plannerCanvas_issue_noBailout.
+  ///
+  /// In en, this message translates to:
+  /// **'CCR decompression plan carries no bailout gas'**
+  String get plannerCanvas_issue_noBailout;
+
+  /// No description provided for @plannerCanvas_issue_noDecoGas.
+  ///
+  /// In en, this message translates to:
+  /// **'Decompression required but no deco gas carried'**
+  String get plannerCanvas_issue_noDecoGas;
+
+  /// No description provided for @plannerCanvas_range_base.
+  ///
+  /// In en, this message translates to:
+  /// **'Base'**
+  String get plannerCanvas_range_base;
+
+  /// No description provided for @plannerCanvas_range_legend.
+  ///
+  /// In en, this message translates to:
+  /// **'Cells show time to surface; red = not diveable as planned'**
+  String get plannerCanvas_range_legend;
+
+  /// No description provided for @plannerCanvas_range_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Range table'**
+  String get plannerCanvas_range_title;
+
+  /// No description provided for @plannerCanvas_results_noDeco.
+  ///
+  /// In en, this message translates to:
+  /// **'No decompression required'**
+  String get plannerCanvas_results_noDeco;
+
+  /// No description provided for @plannerCanvas_sac_useLogged.
+  ///
+  /// In en, this message translates to:
+  /// **'Use logged average ({sac})'**
+  String plannerCanvas_sac_useLogged(String sac);
+
+  /// No description provided for @plannerCanvas_saved_deleteConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Permanently delete \"{name}\"?'**
+  String plannerCanvas_saved_deleteConfirmBody(String name);
+
+  /// No description provided for @plannerCanvas_saved_deleteConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete plan?'**
+  String get plannerCanvas_saved_deleteConfirmTitle;
+
+  /// No description provided for @plannerCanvas_saved_duplicate.
+  ///
+  /// In en, this message translates to:
+  /// **'Duplicate'**
+  String get plannerCanvas_saved_duplicate;
+
+  /// No description provided for @plannerCanvas_saved_empty.
+  ///
+  /// In en, this message translates to:
+  /// **'No saved plans yet'**
+  String get plannerCanvas_saved_empty;
+
+  /// No description provided for @plannerCanvas_saved_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved plans'**
+  String get plannerCanvas_saved_title;
+
+  /// No description provided for @plannerCanvas_scrub_bailout.
+  ///
+  /// In en, this message translates to:
+  /// **'BO {minutes}′'**
+  String plannerCanvas_scrub_bailout(String minutes);
+
+  /// No description provided for @plannerCanvas_scrub_readout.
+  ///
+  /// In en, this message translates to:
+  /// **'RT {minutes}′ · {depth}'**
+  String plannerCanvas_scrub_readout(String minutes, String depth);
+
+  /// No description provided for @plannerCanvas_share_import.
+  ///
+  /// In en, this message translates to:
+  /// **'Import'**
+  String get plannerCanvas_share_import;
+
+  /// No description provided for @plannerCanvas_share_importFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t import plan: {reason}'**
+  String plannerCanvas_share_importFailed(String reason);
+
+  /// No description provided for @plannerCanvas_share_menu.
+  ///
+  /// In en, this message translates to:
+  /// **'Share plan file'**
+  String get plannerCanvas_share_menu;
+
+  /// No description provided for @plannerCanvas_slate_menu.
+  ///
+  /// In en, this message translates to:
+  /// **'Export slate (PDF)'**
+  String get plannerCanvas_slate_menu;
+
+  /// No description provided for @plannerCanvas_slate_minGas.
+  ///
+  /// In en, this message translates to:
+  /// **'Min gas'**
+  String get plannerCanvas_slate_minGas;
+
+  /// No description provided for @plannerCanvas_slate_turn.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn'**
+  String get plannerCanvas_slate_turn;
+
+  /// No description provided for @plannerCanvas_table_depth.
+  ///
+  /// In en, this message translates to:
+  /// **'Depth'**
+  String get plannerCanvas_table_depth;
+
+  /// No description provided for @plannerCanvas_table_gas.
+  ///
+  /// In en, this message translates to:
+  /// **'Gas'**
+  String get plannerCanvas_table_gas;
+
+  /// No description provided for @plannerCanvas_table_runtime.
+  ///
+  /// In en, this message translates to:
+  /// **'RT'**
+  String get plannerCanvas_table_runtime;
+
+  /// No description provided for @plannerCanvas_table_stop.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop'**
+  String get plannerCanvas_table_stop;
+
+  /// No description provided for @plannerCanvas_turnRule_allUsable.
+  ///
+  /// In en, this message translates to:
+  /// **'All usable'**
+  String get plannerCanvas_turnRule_allUsable;
+
+  /// No description provided for @plannerCanvas_turnRule_custom.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom'**
+  String get plannerCanvas_turnRule_custom;
+
+  /// No description provided for @plannerCanvas_turnRule_halves.
+  ///
+  /// In en, this message translates to:
+  /// **'Halves'**
+  String get plannerCanvas_turnRule_halves;
+
+  /// No description provided for @plannerCanvas_turnRule_none.
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get plannerCanvas_turnRule_none;
+
+  /// No description provided for @plannerCanvas_turnRule_thirds.
+  ///
+  /// In en, this message translates to:
+  /// **'Thirds'**
+  String get plannerCanvas_turnRule_thirds;
+
   /// No description provided for @planning_appBar_title.
   ///
   /// In en, this message translates to:
@@ -17761,6 +18187,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'These tools are for planning purposes only. Always verify calculations and follow your dive training.'**
   String get planning_info_disclaimer;
+
+  /// No description provided for @planning_newPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'New plan'**
+  String get planning_newPlan;
+
+  /// No description provided for @planning_section_tools.
+  ///
+  /// In en, this message translates to:
+  /// **'Tools'**
+  String get planning_section_tools;
 
   /// No description provided for @planning_sidebar_appBar_title.
   ///
@@ -18137,7 +18575,7 @@ abstract class AppLocalizations {
   /// No description provided for @diveDetailSection_sacSegments_description.
   ///
   /// In en, this message translates to:
-  /// **'Phase/time segmentation, cylinder breakdown'**
+  /// **'Phase/time SAC segmentation'**
   String get diveDetailSection_sacSegments_description;
 
   /// No description provided for @diveDetailSection_details_name.
@@ -18275,13 +18713,13 @@ abstract class AppLocalizations {
   /// No description provided for @diveDetailSection_tanks_name.
   ///
   /// In en, this message translates to:
-  /// **'Tanks'**
+  /// **'Cylinders'**
   String get diveDetailSection_tanks_name;
 
   /// No description provided for @diveDetailSection_tanks_description.
   ///
   /// In en, this message translates to:
-  /// **'Tank list, gas mixes, pressures, per-tank SAC'**
+  /// **'Cylinder list, gas mixes, pressures, MOD/MND, per-tank SAC'**
   String get diveDetailSection_tanks_description;
 
   /// No description provided for @diveDetailSection_buddies_name.
@@ -28149,6 +28587,126 @@ abstract class AppLocalizations {
   /// **'Your SAC'**
   String get gasCalculators_rockBottom_yourSac;
 
+  /// No description provided for @gpsLogger_androidNotificationText.
+  ///
+  /// In en, this message translates to:
+  /// **'Recording your surface track'**
+  String get gpsLogger_androidNotificationText;
+
+  /// No description provided for @gpsLogger_androidNotificationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Submersion GPS Logger'**
+  String get gpsLogger_androidNotificationTitle;
+
+  /// No description provided for @gpsLogger_deleteTrackMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This removes the recorded GPS track. Positions already stamped on dives are kept.'**
+  String get gpsLogger_deleteTrackMessage;
+
+  /// No description provided for @gpsLogger_deleteTrackTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete track?'**
+  String get gpsLogger_deleteTrackTitle;
+
+  /// No description provided for @gpsLogger_interruptedNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'A previous recording was interrupted. The track was saved.'**
+  String get gpsLogger_interruptedNotice;
+
+  /// No description provided for @gpsLogger_lastFix.
+  ///
+  /// In en, this message translates to:
+  /// **'Last fix {age} ago ({accuracy})'**
+  String gpsLogger_lastFix(String age, String accuracy);
+
+  /// No description provided for @gpsLogger_locationOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Location services are turned off.'**
+  String get gpsLogger_locationOff;
+
+  /// No description provided for @gpsLogger_matchButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Match dives to GPS logs'**
+  String get gpsLogger_matchButton;
+
+  /// No description provided for @gpsLogger_matchResult.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} dives positioned'**
+  String gpsLogger_matchResult(int count);
+
+  /// No description provided for @gpsLogger_matchResultNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No dives matched a recorded track'**
+  String get gpsLogger_matchResultNone;
+
+  /// No description provided for @gpsLogger_noFixYet.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for GPS fix'**
+  String get gpsLogger_noFixYet;
+
+  /// No description provided for @gpsLogger_noTracks.
+  ///
+  /// In en, this message translates to:
+  /// **'No GPS tracks recorded yet'**
+  String get gpsLogger_noTracks;
+
+  /// No description provided for @gpsLogger_permissionDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Location permission is required to record a GPS track. Enable it in system settings.'**
+  String get gpsLogger_permissionDenied;
+
+  /// No description provided for @gpsLogger_recordingStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Recording - {count, plural, one{{count} point} other{{count} points}}'**
+  String gpsLogger_recordingStatus(num count);
+
+  /// No description provided for @gpsLogger_reviewSites.
+  ///
+  /// In en, this message translates to:
+  /// **'Review site matches'**
+  String get gpsLogger_reviewSites;
+
+  /// No description provided for @gpsLogger_startButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Start logging'**
+  String get gpsLogger_startButton;
+
+  /// No description provided for @gpsLogger_stopButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop logging'**
+  String get gpsLogger_stopButton;
+
+  /// No description provided for @gpsLogger_stripStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Recording GPS track · {count, plural, one{{count} point} other{{count} points}}'**
+  String gpsLogger_stripStatus(num count);
+
+  /// No description provided for @gpsLogger_trackSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{{count} point} other{{count} points}}, {duration}'**
+  String gpsLogger_trackSubtitle(num count, String duration);
+
+  /// No description provided for @gpsLogger_tracksHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'Recorded tracks'**
+  String get gpsLogger_tracksHeader;
+
   /// No description provided for @maps_heatMap_hide.
   ///
   /// In en, this message translates to:
@@ -28737,6 +29295,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Gas Calculators'**
   String get tools_gas_title;
+
+  /// No description provided for @tools_gpsLogger_description.
+  ///
+  /// In en, this message translates to:
+  /// **'Record your position during a dive day and match imported dives to GPS locations automatically.'**
+  String get tools_gpsLogger_description;
+
+  /// No description provided for @tools_gpsLogger_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Record a surface track'**
+  String get tools_gpsLogger_subtitle;
+
+  /// No description provided for @tools_gpsLogger_title.
+  ///
+  /// In en, this message translates to:
+  /// **'GPS Logger'**
+  String get tools_gpsLogger_title;
 
   /// No description provided for @tools_title.
   ///
@@ -29971,6 +30547,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Files here are removed if you uninstall the app.'**
   String get db_location_external_note;
+
+  /// No description provided for @diveLog_bulkEdit_membership_onAll.
+  ///
+  /// In en, this message translates to:
+  /// **'on all {count}'**
+  String diveLog_bulkEdit_membership_onAll(int count);
+
+  /// No description provided for @diveLog_bulkEdit_membership_onSome.
+  ///
+  /// In en, this message translates to:
+  /// **'on {count} of {total}'**
+  String diveLog_bulkEdit_membership_onSome(int count, int total);
+
+  /// No description provided for @diveLog_bulkEdit_membership_adding.
+  ///
+  /// In en, this message translates to:
+  /// **'adding to all {total}'**
+  String diveLog_bulkEdit_membership_adding(int total);
+
+  /// No description provided for @diveLog_bulkEdit_membership_removing.
+  ///
+  /// In en, this message translates to:
+  /// **'removing from all'**
+  String get diveLog_bulkEdit_membership_removing;
+
+  /// No description provided for @diveLog_bulkEdit_membership_empty.
+  ///
+  /// In en, this message translates to:
+  /// **'No items on the selected dives yet'**
+  String get diveLog_bulkEdit_membership_empty;
 }
 
 class _AppLocalizationsDelegate

@@ -2350,6 +2350,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get decoCalculator_title => 'حاسبة تخفيف الضغط';
 
   @override
+  String get decoCalculator_waterType => 'نوع الماء';
+
+  @override
+  String get decoCalculator_waterType_standard => 'قياسي';
+
+  @override
   String diveCenters_accessibility_markerLabel(Object name) {
     return 'مركز غوص: $name';
   }
@@ -3521,16 +3527,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get diveLog_detail_section_oxygenToxicity => 'سمية الأكسجين';
 
   @override
-  String get diveLog_detail_section_sacByCylinder => 'SAC حسب الأسطوانة';
-
-  @override
   String get diveLog_detail_section_sacRateBySegment => 'معدل SAC حسب القطاع';
 
   @override
   String get diveLog_detail_section_tags => 'الوسوم';
 
   @override
-  String get diveLog_detail_section_tanks => 'الأسطوانات';
+  String get diveLog_detail_section_cylinders => 'الأسطوانات';
 
   @override
   String get diveLog_detail_section_tide => 'المد والجزر';
@@ -3572,17 +3575,6 @@ class AppLocalizationsAr extends AppLocalizations {
       locale: localeName,
       other: 'وسوم',
       one: 'وسم',
-    );
-    return '$count $_temp0';
-  }
-
-  @override
-  String diveLog_detail_tankCount(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'أسطوانات',
-      one: 'أسطوانة',
     );
     return '$count $_temp0';
   }
@@ -4536,6 +4528,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get diveLog_chartSection_tankPressures => 'ضغوط الأسطوانات';
 
   @override
+  String get diveLog_pressure_estimatedSuffix => '(تقديري)';
+
+  @override
   String get diveLog_listPage_appBar_diveMap => 'خريطة الغوص';
 
   @override
@@ -4549,6 +4544,31 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get diveLog_listPage_bottomSheet_importFromComputer =>
       'استيراد من حاسوب الغوص';
+
+  @override
+  String get diveLog_listPage_bottomSheet_scanPaperLog =>
+      'مسح دفتر السجل الورقي';
+
+  @override
+  String get ocrImport_scanPage_processing => 'جارٍ قراءة الصفحة...';
+
+  @override
+  String get ocrImport_scanPage_pickPhoto => 'اختيار صورة';
+
+  @override
+  String get ocrImport_scanPage_takePhoto => 'التقاط صورة';
+
+  @override
+  String get ocrImport_scanPage_nothingRead =>
+      'تعذرت قراءة الكثير من هذه الصفحة - تُركت الحقول فارغة';
+
+  @override
+  String get ocrImport_scanPage_engineMissing =>
+      'التعرف على النص غير متوفر. ثبّت Tesseract لمسح السجلات الورقية (مثلاً: sudo apt install tesseract-ocr).';
+
+  @override
+  String get ocrImport_editPage_photoAttachFailed =>
+      'تم حفظ الغطسة، لكن فشل إرفاق الصفحة الممسوحة';
 
   @override
   String get diveLog_listPage_bottomSheet_logManually => 'تسجيل غوصة يدويا';
@@ -10099,6 +10119,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get nav_equipment => 'المعدات';
 
   @override
+  String get nav_gpsLog => 'سجل GPS';
+
+  @override
   String get nav_home => 'الرئيسية';
 
   @override
@@ -10168,6 +10191,241 @@ class AppLocalizationsAr extends AppLocalizations {
   String get onboarding_welcome_title => 'مرحباً بك في Submersion';
 
   @override
+  String plannerCanvas_bailout_available(String liters) {
+    return 'المتاح $liters';
+  }
+
+  @override
+  String get plannerCanvas_bailout_insufficient =>
+      'غاز الإنقاذ غير كافٍ لأسوأ حالة';
+
+  @override
+  String plannerCanvas_bailout_required(String liters) {
+    return 'المطلوب $liters';
+  }
+
+  @override
+  String get plannerCanvas_bailout_title => 'إنقاذ (دائرة مفتوحة)';
+
+  @override
+  String plannerCanvas_bailout_tts(String minutes) {
+    return 'TTS للإنقاذ $minutes′';
+  }
+
+  @override
+  String plannerCanvas_bailout_worstCase(String minutes, String depth) {
+    return 'أسوأ حالة عند $minutes′ · $depth';
+  }
+
+  @override
+  String get plannerCanvas_ccr_setpointHigh => 'نقطة الضبط العليا (bar)';
+
+  @override
+  String get plannerCanvas_ccr_setpointLow => 'نقطة الضبط الدنيا (bar)';
+
+  @override
+  String get plannerCanvas_ccr_switchDepth => 'عمق تبديل نقطة الضبط';
+
+  @override
+  String plannerCanvas_chip_cns(String value) {
+    return 'CNS $value%';
+  }
+
+  @override
+  String plannerCanvas_chip_issues(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count مشكلات',
+      one: 'مشكلة واحدة',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get plannerCanvas_compare_action => 'مقارنة';
+
+  @override
+  String get plannerCanvas_compare_needTwo => 'اختر خطتين على الأقل للمقارنة';
+
+  @override
+  String get plannerCanvas_compare_title => 'مقارنة الخطط';
+
+  @override
+  String get plannerCanvas_contingency_base => 'أساسي';
+
+  @override
+  String get plannerCanvas_contingency_depthDelta => 'عمق إضافي';
+
+  @override
+  String plannerCanvas_contingency_lostGas(String gas) {
+    return 'فقدان $gas';
+  }
+
+  @override
+  String get plannerCanvas_contingency_timeDelta => 'دقائق إضافية';
+
+  @override
+  String get plannerCanvas_contingency_title => 'خطط الطوارئ';
+
+  @override
+  String get plannerCanvas_contingency_turnFraction => 'نسبة العودة';
+
+  @override
+  String get plannerCanvas_contingency_turnRule => 'قاعدة ضغط العودة';
+
+  @override
+  String get plannerCanvas_convert_success => 'تم إنشاء غطسة من الخطة';
+
+  @override
+  String get plannerCanvas_convert_view => 'عرض';
+
+  @override
+  String plannerCanvas_follow_chip(String name) {
+    return 'يتبع $name';
+  }
+
+  @override
+  String get plannerCanvas_follow_empty => 'لا توجد غطسات مسجلة بعد';
+
+  @override
+  String get plannerCanvas_follow_noTissues =>
+      'لا توجد بيانات ملف تعريف لهذه الغطسة — تم ضبط الفاصل السطحي دون تحميل الأنسجة';
+
+  @override
+  String get plannerCanvas_follow_title => 'اتباع غطسة';
+
+  @override
+  String plannerCanvas_gas_minGas(String pressure) {
+    return 'الحد الأدنى للغاز $pressure';
+  }
+
+  @override
+  String plannerCanvas_gas_turnAt(String pressure) {
+    return 'العودة عند $pressure';
+  }
+
+  @override
+  String plannerCanvas_issue_gasDensityCritical(String value) {
+    return 'كثافة الغاز $value g/L تتجاوز الحد الأقصى';
+  }
+
+  @override
+  String plannerCanvas_issue_gasDensityHigh(String value) {
+    return 'كثافة الغاز $value g/L تتجاوز الحد الموصى به';
+  }
+
+  @override
+  String plannerCanvas_issue_hypoxic(String depth, String value) {
+    return 'غاز ناقص الأكسجين عند $depth (ppO₂ $value bar)';
+  }
+
+  @override
+  String plannerCanvas_issue_minGas(String pressure) {
+    return 'تنتهي الأسطوانة تحت الحد الأدنى الآمن $pressure';
+  }
+
+  @override
+  String get plannerCanvas_issue_noBailout =>
+      'خطة تخفيف الضغط CCR لا تتضمن غاز إنقاذ (bailout)';
+
+  @override
+  String get plannerCanvas_issue_noDecoGas =>
+      'يلزم تخفيف الضغط ولكن لا يوجد غاز تخفيف';
+
+  @override
+  String get plannerCanvas_range_base => 'أساسي';
+
+  @override
+  String get plannerCanvas_range_legend =>
+      'تعرض الخلايا زمن الصعود إلى السطح؛ الأحمر = غير قابلة للغطس كما هو مخطط';
+
+  @override
+  String get plannerCanvas_range_title => 'جدول النطاقات';
+
+  @override
+  String get plannerCanvas_results_noDeco => 'لا يلزم تخفيف الضغط';
+
+  @override
+  String plannerCanvas_sac_useLogged(String sac) {
+    return 'استخدام المتوسط المسجل ($sac)';
+  }
+
+  @override
+  String plannerCanvas_saved_deleteConfirmBody(String name) {
+    return 'حذف \"$name\" نهائيًا؟';
+  }
+
+  @override
+  String get plannerCanvas_saved_deleteConfirmTitle => 'حذف الخطة؟';
+
+  @override
+  String get plannerCanvas_saved_duplicate => 'تكرار';
+
+  @override
+  String get plannerCanvas_saved_empty => 'لا توجد خطط محفوظة بعد';
+
+  @override
+  String get plannerCanvas_saved_title => 'الخطط المحفوظة';
+
+  @override
+  String plannerCanvas_scrub_bailout(String minutes) {
+    return 'BO $minutes′';
+  }
+
+  @override
+  String plannerCanvas_scrub_readout(String minutes, String depth) {
+    return 'RT $minutes′ · $depth';
+  }
+
+  @override
+  String get plannerCanvas_share_import => 'استيراد';
+
+  @override
+  String plannerCanvas_share_importFailed(String reason) {
+    return 'تعذر استيراد الخطة: $reason';
+  }
+
+  @override
+  String get plannerCanvas_share_menu => 'مشاركة ملف الخطة';
+
+  @override
+  String get plannerCanvas_slate_menu => 'تصدير اللوح (PDF)';
+
+  @override
+  String get plannerCanvas_slate_minGas => 'الحد الأدنى من الغاز';
+
+  @override
+  String get plannerCanvas_slate_turn => 'العودة';
+
+  @override
+  String get plannerCanvas_table_depth => 'العمق';
+
+  @override
+  String get plannerCanvas_table_gas => 'الغاز';
+
+  @override
+  String get plannerCanvas_table_runtime => 'RT';
+
+  @override
+  String get plannerCanvas_table_stop => 'توقف';
+
+  @override
+  String get plannerCanvas_turnRule_allUsable => 'كل القابل للاستخدام';
+
+  @override
+  String get plannerCanvas_turnRule_custom => 'مخصص';
+
+  @override
+  String get plannerCanvas_turnRule_halves => 'أنصاف';
+
+  @override
+  String get plannerCanvas_turnRule_none => 'بدون';
+
+  @override
+  String get plannerCanvas_turnRule_thirds => 'أثلاث';
+
+  @override
   String get planning_appBar_title => 'التخطيط';
 
   @override
@@ -10228,6 +10486,12 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get planning_info_disclaimer =>
       'هذه الأدوات لأغراض التخطيط فقط. تحقق دائمًا من الحسابات واتبع تدريبك على الغوص.';
+
+  @override
+  String get planning_newPlan => 'خطة جديدة';
+
+  @override
+  String get planning_section_tools => 'أدوات';
 
   @override
   String get planning_sidebar_appBar_title => 'التخطيط';
@@ -10443,7 +10707,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get diveDetailSection_sacSegments_description =>
-      'تقسيم المراحل/الوقت، تفصيل الأسطوانات';
+      'تقسيم SAC حسب المراحل/الوقت';
 
   @override
   String get diveDetailSection_details_name => 'التفاصيل';
@@ -16437,6 +16701,103 @@ class AppLocalizationsAr extends AppLocalizations {
   String get gasCalculators_rockBottom_yourSac => 'SAC الخاص بك';
 
   @override
+  String get gpsLogger_androidNotificationText => 'يجري تسجيل مسار السطح';
+
+  @override
+  String get gpsLogger_androidNotificationTitle => 'مسجّل GPS في Submersion';
+
+  @override
+  String get gpsLogger_deleteTrackMessage =>
+      'سيؤدي هذا إلى إزالة مسار GPS المسجّل. تبقى المواقع المسندة إلى الغطسات محفوظة.';
+
+  @override
+  String get gpsLogger_deleteTrackTitle => 'حذف المسار؟';
+
+  @override
+  String get gpsLogger_interruptedNotice =>
+      'توقف تسجيل سابق قبل اكتماله. تم حفظ المسار.';
+
+  @override
+  String gpsLogger_lastFix(String age, String accuracy) {
+    return 'آخر إشارة قبل $age ($accuracy)';
+  }
+
+  @override
+  String get gpsLogger_locationOff => 'خدمات الموقع متوقفة.';
+
+  @override
+  String get gpsLogger_matchButton => 'مطابقة الغطسات مع سجلات GPS';
+
+  @override
+  String gpsLogger_matchResult(int count) {
+    return 'تم تحديد موقع $count غطسة';
+  }
+
+  @override
+  String get gpsLogger_matchResultNone => 'لا توجد غطسات تطابق مسارًا مسجّلًا';
+
+  @override
+  String get gpsLogger_noFixYet => 'في انتظار إشارة GPS';
+
+  @override
+  String get gpsLogger_noTracks => 'لا توجد مسارات GPS مسجّلة بعد';
+
+  @override
+  String get gpsLogger_permissionDenied =>
+      'يلزم إذن الموقع لتسجيل مسار GPS. فعّله من إعدادات النظام.';
+
+  @override
+  String gpsLogger_recordingStatus(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count نقطة',
+      few: '$count نقاط',
+      two: 'نقطتان',
+      one: 'نقطة واحدة',
+    );
+    return 'جارٍ التسجيل - $_temp0';
+  }
+
+  @override
+  String get gpsLogger_reviewSites => 'مراجعة مطابقات مواقع الغطس';
+
+  @override
+  String get gpsLogger_startButton => 'بدء التسجيل';
+
+  @override
+  String get gpsLogger_stopButton => 'إيقاف التسجيل';
+
+  @override
+  String gpsLogger_stripStatus(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count نقطة',
+      few: '$count نقاط',
+      two: 'نقطتان',
+      one: 'نقطة واحدة',
+    );
+    return 'جارٍ تسجيل مسار GPS · $_temp0';
+  }
+
+  @override
+  String gpsLogger_trackSubtitle(num count, String duration) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count نقطة',
+      few: '$count نقاط',
+      two: 'نقطتان',
+      one: 'نقطة واحدة',
+    );
+    return '$_temp0، $duration';
+  }
+
+  @override
+  String get gpsLogger_tracksHeader => 'المسارات المسجّلة';
+
+  @override
   String get maps_heatMap_hide => 'إخفاء خريطة الحرارة';
 
   @override
@@ -16800,6 +17161,16 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get tools_gas_title => 'حاسبات الغاز';
+
+  @override
+  String get tools_gpsLogger_description =>
+      'سجّل موقعك خلال يوم الغطس وتتم مطابقة الغطسات المستوردة مع مواقع GPS تلقائيًا.';
+
+  @override
+  String get tools_gpsLogger_subtitle => 'تسجيل مسار السطح';
+
+  @override
+  String get tools_gpsLogger_title => 'مسجّل GPS';
 
   @override
   String get tools_title => 'الأدوات';
@@ -17532,4 +17903,26 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get db_location_external_note =>
       'تُحذف الملفات هنا عند إلغاء تثبيت التطبيق.';
+
+  @override
+  String diveLog_bulkEdit_membership_onAll(int count) {
+    return 'في كل الـ $count';
+  }
+
+  @override
+  String diveLog_bulkEdit_membership_onSome(int count, int total) {
+    return 'في $count من $total';
+  }
+
+  @override
+  String diveLog_bulkEdit_membership_adding(int total) {
+    return 'إضافة إلى كل الـ $total';
+  }
+
+  @override
+  String get diveLog_bulkEdit_membership_removing => 'إزالة من الكل';
+
+  @override
+  String get diveLog_bulkEdit_membership_empty =>
+      'لا توجد عناصر في الغطسات المحددة بعد';
 }

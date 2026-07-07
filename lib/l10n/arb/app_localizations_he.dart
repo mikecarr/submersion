@@ -2334,6 +2334,12 @@ class AppLocalizationsHe extends AppLocalizations {
   String get decoCalculator_title => 'מחשבון דקומפרסיה';
 
   @override
+  String get decoCalculator_waterType => 'סוג מים';
+
+  @override
+  String get decoCalculator_waterType_standard => 'רגיל';
+
+  @override
   String diveCenters_accessibility_markerLabel(Object name) {
     return 'מרכז צלילה: $name';
   }
@@ -3501,16 +3507,13 @@ class AppLocalizationsHe extends AppLocalizations {
   String get diveLog_detail_section_oxygenToxicity => 'רעילות חמצן';
 
   @override
-  String get diveLog_detail_section_sacByCylinder => 'SAC לפי בלון';
-
-  @override
   String get diveLog_detail_section_sacRateBySegment => 'קצב SAC לפי מקטע';
 
   @override
   String get diveLog_detail_section_tags => 'תגיות';
 
   @override
-  String get diveLog_detail_section_tanks => 'בלונים';
+  String get diveLog_detail_section_cylinders => 'בלונים';
 
   @override
   String get diveLog_detail_section_tide => 'גאות ושפל';
@@ -3552,17 +3555,6 @@ class AppLocalizationsHe extends AppLocalizations {
       locale: localeName,
       other: 'תגיות',
       one: 'תגית',
-    );
-    return '$count $_temp0';
-  }
-
-  @override
-  String diveLog_detail_tankCount(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'בלונים',
-      one: 'בלון',
     );
     return '$count $_temp0';
   }
@@ -4514,6 +4506,9 @@ class AppLocalizationsHe extends AppLocalizations {
   String get diveLog_chartSection_tankPressures => 'לחצי מיכלים';
 
   @override
+  String get diveLog_pressure_estimatedSuffix => '(משוער)';
+
+  @override
   String get diveLog_listPage_appBar_diveMap => 'מפת צלילות';
 
   @override
@@ -4527,6 +4522,31 @@ class AppLocalizationsHe extends AppLocalizations {
   @override
   String get diveLog_listPage_bottomSheet_importFromComputer =>
       'ייבוא ממחשב צלילה';
+
+  @override
+  String get diveLog_listPage_bottomSheet_scanPaperLog =>
+      'סריקת יומן צלילה מנייר';
+
+  @override
+  String get ocrImport_scanPage_processing => 'קורא את העמוד...';
+
+  @override
+  String get ocrImport_scanPage_pickPhoto => 'בחירת תמונה';
+
+  @override
+  String get ocrImport_scanPage_takePhoto => 'צילום תמונה';
+
+  @override
+  String get ocrImport_scanPage_nothingRead =>
+      'לא ניתן היה לקרוא הרבה מהעמוד הזה - השדות נותרו ריקים';
+
+  @override
+  String get ocrImport_scanPage_engineMissing =>
+      'זיהוי טקסט אינו זמין. התקינו את Tesseract כדי לסרוק יומנים מנייר (לדוגמה: sudo apt install tesseract-ocr).';
+
+  @override
+  String get ocrImport_editPage_photoAttachFailed =>
+      'הצלילה נשמרה, אך צירוף העמוד הסרוק נכשל';
 
   @override
   String get diveLog_listPage_bottomSheet_logManually => 'רישום צלילה ידנית';
@@ -10031,6 +10051,9 @@ class AppLocalizationsHe extends AppLocalizations {
   String get nav_equipment => 'ציוד';
 
   @override
+  String get nav_gpsLog => 'יומן GPS';
+
+  @override
   String get nav_home => 'בית';
 
   @override
@@ -10100,6 +10123,241 @@ class AppLocalizationsHe extends AppLocalizations {
   String get onboarding_welcome_title => 'ברוכים הבאים ל-Submersion';
 
   @override
+  String plannerCanvas_bailout_available(String liters) {
+    return 'זמין $liters';
+  }
+
+  @override
+  String get plannerCanvas_bailout_insufficient =>
+      'גז חילוץ אינו מספיק למקרה הגרוע ביותר';
+
+  @override
+  String plannerCanvas_bailout_required(String liters) {
+    return 'נדרש $liters';
+  }
+
+  @override
+  String get plannerCanvas_bailout_title => 'חילוץ (מעגל פתוח)';
+
+  @override
+  String plannerCanvas_bailout_tts(String minutes) {
+    return 'TTS חילוץ $minutes′';
+  }
+
+  @override
+  String plannerCanvas_bailout_worstCase(String minutes, String depth) {
+    return 'המקרה הגרוע ב-$minutes′ · $depth';
+  }
+
+  @override
+  String get plannerCanvas_ccr_setpointHigh => 'נקודת כיוון גבוהה (bar)';
+
+  @override
+  String get plannerCanvas_ccr_setpointLow => 'נקודת כיוון נמוכה (bar)';
+
+  @override
+  String get plannerCanvas_ccr_switchDepth => 'עומק החלפת נקודת הכיוון';
+
+  @override
+  String plannerCanvas_chip_cns(String value) {
+    return 'CNS $value%';
+  }
+
+  @override
+  String plannerCanvas_chip_issues(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count בעיות',
+      one: 'בעיה אחת',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get plannerCanvas_compare_action => 'השוואה';
+
+  @override
+  String get plannerCanvas_compare_needTwo => 'בחר לפחות שתי תוכניות להשוואה';
+
+  @override
+  String get plannerCanvas_compare_title => 'השוואת תוכניות';
+
+  @override
+  String get plannerCanvas_contingency_base => 'בסיס';
+
+  @override
+  String get plannerCanvas_contingency_depthDelta => 'עומק נוסף';
+
+  @override
+  String plannerCanvas_contingency_lostGas(String gas) {
+    return 'אבדן $gas';
+  }
+
+  @override
+  String get plannerCanvas_contingency_timeDelta => 'דקות נוספות';
+
+  @override
+  String get plannerCanvas_contingency_title => 'תוכניות חירום';
+
+  @override
+  String get plannerCanvas_contingency_turnFraction => 'שבר פנייה';
+
+  @override
+  String get plannerCanvas_contingency_turnRule => 'כלל לחץ פנייה';
+
+  @override
+  String get plannerCanvas_convert_success => 'נוצרה צלילה מהתוכנית';
+
+  @override
+  String get plannerCanvas_convert_view => 'הצג';
+
+  @override
+  String plannerCanvas_follow_chip(String name) {
+    return 'עוקב אחרי $name';
+  }
+
+  @override
+  String get plannerCanvas_follow_empty => 'אין עדיין צלילות מתועדות';
+
+  @override
+  String get plannerCanvas_follow_noTissues =>
+      'אין נתוני פרופיל לצלילה זו — מרווח הפנים נקבע ללא העמסת רקמות';
+
+  @override
+  String get plannerCanvas_follow_title => 'עקוב אחרי צלילה';
+
+  @override
+  String plannerCanvas_gas_minGas(String pressure) {
+    return 'גז מינימלי $pressure';
+  }
+
+  @override
+  String plannerCanvas_gas_turnAt(String pressure) {
+    return 'פנייה ב-$pressure';
+  }
+
+  @override
+  String plannerCanvas_issue_gasDensityCritical(String value) {
+    return 'צפיפות הגז $value g/L מעל הגבול המרבי';
+  }
+
+  @override
+  String plannerCanvas_issue_gasDensityHigh(String value) {
+    return 'צפיפות הגז $value g/L מעל הגבול המומלץ';
+  }
+
+  @override
+  String plannerCanvas_issue_hypoxic(String depth, String value) {
+    return 'גז היפוקסי ב-$depth (ppO₂ $value bar)';
+  }
+
+  @override
+  String plannerCanvas_issue_minGas(String pressure) {
+    return 'המיכל מסתיים מתחת למינימום rock bottom של $pressure';
+  }
+
+  @override
+  String get plannerCanvas_issue_noBailout =>
+      'תוכנית דקומפרסיה CCR ללא גז חילוץ (bailout)';
+
+  @override
+  String get plannerCanvas_issue_noDecoGas =>
+      'נדרשת דקומפרסיה אך לא נלקח גז דקו';
+
+  @override
+  String get plannerCanvas_range_base => 'בסיס';
+
+  @override
+  String get plannerCanvas_range_legend =>
+      'התאים מציגים את זמן העלייה לפני המים; אדום = לא ניתן לצלול כמתוכנן';
+
+  @override
+  String get plannerCanvas_range_title => 'טבלת טווחים';
+
+  @override
+  String get plannerCanvas_results_noDeco => 'לא נדרשת דקומפרסיה';
+
+  @override
+  String plannerCanvas_sac_useLogged(String sac) {
+    return 'השתמש בממוצע המתועד ($sac)';
+  }
+
+  @override
+  String plannerCanvas_saved_deleteConfirmBody(String name) {
+    return 'למחוק לצמיתות את \"$name\"?';
+  }
+
+  @override
+  String get plannerCanvas_saved_deleteConfirmTitle => 'למחוק את התוכנית?';
+
+  @override
+  String get plannerCanvas_saved_duplicate => 'שכפול';
+
+  @override
+  String get plannerCanvas_saved_empty => 'אין עדיין תוכניות שמורות';
+
+  @override
+  String get plannerCanvas_saved_title => 'תוכניות שמורות';
+
+  @override
+  String plannerCanvas_scrub_bailout(String minutes) {
+    return 'BO $minutes′';
+  }
+
+  @override
+  String plannerCanvas_scrub_readout(String minutes, String depth) {
+    return 'RT $minutes′ · $depth';
+  }
+
+  @override
+  String get plannerCanvas_share_import => 'ייבוא';
+
+  @override
+  String plannerCanvas_share_importFailed(String reason) {
+    return 'לא ניתן לייבא את התוכנית: $reason';
+  }
+
+  @override
+  String get plannerCanvas_share_menu => 'שיתוף קובץ תוכנית';
+
+  @override
+  String get plannerCanvas_slate_menu => 'ייצוא לוח (PDF)';
+
+  @override
+  String get plannerCanvas_slate_minGas => 'גז מינימלי';
+
+  @override
+  String get plannerCanvas_slate_turn => 'נקודת חזרה';
+
+  @override
+  String get plannerCanvas_table_depth => 'עומק';
+
+  @override
+  String get plannerCanvas_table_gas => 'גז';
+
+  @override
+  String get plannerCanvas_table_runtime => 'RT';
+
+  @override
+  String get plannerCanvas_table_stop => 'עצירה';
+
+  @override
+  String get plannerCanvas_turnRule_allUsable => 'הכול שמיש';
+
+  @override
+  String get plannerCanvas_turnRule_custom => 'מותאם אישית';
+
+  @override
+  String get plannerCanvas_turnRule_halves => 'חצאים';
+
+  @override
+  String get plannerCanvas_turnRule_none => 'ללא';
+
+  @override
+  String get plannerCanvas_turnRule_thirds => 'שלישים';
+
+  @override
   String get planning_appBar_title => 'תכנון';
 
   @override
@@ -10159,6 +10417,12 @@ class AppLocalizationsHe extends AppLocalizations {
   @override
   String get planning_info_disclaimer =>
       'כלים אלה מיועדים למטרות תכנון בלבד. תמיד אמת חישובים ופעל לפי הכשרת הצלילה שלך.';
+
+  @override
+  String get planning_newPlan => 'תוכנית חדשה';
+
+  @override
+  String get planning_section_tools => 'כלים';
 
   @override
   String get planning_sidebar_appBar_title => 'תכנון';
@@ -10368,7 +10632,7 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get diveDetailSection_sacSegments_description =>
-      'פילוח לפי שלב/זמן, פירוט בלונים';
+      'פילוח SAC לפי שלב/זמן';
 
   @override
   String get diveDetailSection_details_name => 'פרטים';
@@ -16316,6 +16580,99 @@ class AppLocalizationsHe extends AppLocalizations {
   String get gasCalculators_rockBottom_yourSac => 'ה-SAC שלך';
 
   @override
+  String get gpsLogger_androidNotificationText => 'מקליט את מסלול פני המים';
+
+  @override
+  String get gpsLogger_androidNotificationTitle => 'מקליט ה-GPS של Submersion';
+
+  @override
+  String get gpsLogger_deleteTrackMessage =>
+      'פעולה זו תסיר את מסלול ה-GPS שהוקלט. מיקומים שכבר הוצמדו לצלילות יישמרו.';
+
+  @override
+  String get gpsLogger_deleteTrackTitle => 'למחוק את המסלול?';
+
+  @override
+  String get gpsLogger_interruptedNotice => 'הקלטה קודמת נקטעה. המסלול נשמר.';
+
+  @override
+  String gpsLogger_lastFix(String age, String accuracy) {
+    return 'איתור אחרון לפני $age ($accuracy)';
+  }
+
+  @override
+  String get gpsLogger_locationOff => 'שירותי המיקום כבויים.';
+
+  @override
+  String get gpsLogger_matchButton => 'התאמת צלילות ליומני GPS';
+
+  @override
+  String gpsLogger_matchResult(int count) {
+    return '$count צלילות מוקמו';
+  }
+
+  @override
+  String get gpsLogger_matchResultNone => 'אף צלילה לא תואמת מסלול שהוקלט';
+
+  @override
+  String get gpsLogger_noFixYet => 'ממתין לאות GPS';
+
+  @override
+  String get gpsLogger_noTracks => 'עדיין לא הוקלטו מסלולי GPS';
+
+  @override
+  String get gpsLogger_permissionDenied =>
+      'נדרשת הרשאת מיקום כדי להקליט מסלול GPS. יש להפעיל אותה בהגדרות המערכת.';
+
+  @override
+  String gpsLogger_recordingStatus(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count נקודות',
+      two: 'שתי נקודות',
+      one: 'נקודה אחת',
+    );
+    return 'מקליט - $_temp0';
+  }
+
+  @override
+  String get gpsLogger_reviewSites => 'סקירת התאמות אתרי צלילה';
+
+  @override
+  String get gpsLogger_startButton => 'התחל הקלטה';
+
+  @override
+  String get gpsLogger_stopButton => 'עצור הקלטה';
+
+  @override
+  String gpsLogger_stripStatus(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count נקודות',
+      two: 'שתי נקודות',
+      one: 'נקודה אחת',
+    );
+    return 'מקליט מסלול GPS · $_temp0';
+  }
+
+  @override
+  String gpsLogger_trackSubtitle(num count, String duration) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count נקודות',
+      two: 'שתי נקודות',
+      one: 'נקודה אחת',
+    );
+    return '$_temp0, $duration';
+  }
+
+  @override
+  String get gpsLogger_tracksHeader => 'מסלולים שהוקלטו';
+
+  @override
   String get maps_heatMap_hide => 'הסתר מפת חום';
 
   @override
@@ -16678,6 +17035,16 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get tools_gas_title => 'מחשבוני גז';
+
+  @override
+  String get tools_gpsLogger_description =>
+      'הקלט את מיקומך במהלך יום צלילה והתאם אוטומטית צלילות מיובאות למיקומי GPS.';
+
+  @override
+  String get tools_gpsLogger_subtitle => 'הקלטת מסלול פני המים';
+
+  @override
+  String get tools_gpsLogger_title => 'מקליט GPS';
 
   @override
   String get tools_title => 'כלים';
@@ -17406,4 +17773,26 @@ class AppLocalizationsHe extends AppLocalizations {
   @override
   String get db_location_external_note =>
       'הקבצים כאן נמחקים אם מסירים את האפליקציה.';
+
+  @override
+  String diveLog_bulkEdit_membership_onAll(int count) {
+    return 'בכל $count';
+  }
+
+  @override
+  String diveLog_bulkEdit_membership_onSome(int count, int total) {
+    return 'ב-$count מתוך $total';
+  }
+
+  @override
+  String diveLog_bulkEdit_membership_adding(int total) {
+    return 'מוסיף לכל $total';
+  }
+
+  @override
+  String get diveLog_bulkEdit_membership_removing => 'מסיר מהכול';
+
+  @override
+  String get diveLog_bulkEdit_membership_empty =>
+      'אין עדיין פריטים בצלילות שנבחרו';
 }

@@ -3,6 +3,8 @@ import 'package:equatable/equatable.dart';
 import 'package:submersion/core/deco/entities/tissue_compartment.dart';
 import 'package:submersion/features/dive_log/domain/entities/dive.dart';
 import 'package:submersion/features/dive_planner/domain/entities/plan_segment.dart';
+import 'package:submersion/features/planner/domain/entities/dive_plan.dart'
+    show PlanMode, TurnPressureRule;
 
 /// Types of warnings that can occur during dive planning.
 enum PlanWarningType {
@@ -491,11 +493,35 @@ class DivePlanState extends Equatable {
   /// Initial tissue state from previous dive.
   final List<TissueCompartment>? initialTissueState;
 
+  /// Logged dive this plan follows (tissue seeding source).
+  final String? sourceDiveId;
+
+  /// Dive created from this plan via convert-to-dive.
+  final String? linkedDiveId;
+
   /// Dive site for the plan.
   final String? siteId;
 
   /// Altitude above sea level in meters (for altitude diving).
   final double? altitude;
+
+  /// Breathing mode (open circuit or CCR).
+  final PlanMode mode;
+
+  /// CCR setpoints in bar; null = the engine's defaults (0.7 / 1.3).
+  final double? setpointLow;
+  final double? setpointHigh;
+
+  /// Depth below which the high setpoint is in force; null = default 10 m.
+  final double? setpointSwitchDepth;
+
+  /// Contingency deviation deltas (Phase 5).
+  final double deviationDepthDelta;
+  final int deviationTimeMinutes;
+
+  /// Turn-pressure rule for penetration planning; null = none.
+  final TurnPressureRule? turnPressureRule;
+  final double? turnPressureFraction;
 
   /// Reserve pressure in bar.
   final double reservePressure;
@@ -522,8 +548,18 @@ class DivePlanState extends Equatable {
     this.sacRate = 15.0,
     this.surfaceInterval,
     this.initialTissueState,
+    this.sourceDiveId,
+    this.linkedDiveId,
     this.siteId,
     this.altitude,
+    this.mode = PlanMode.oc,
+    this.setpointLow,
+    this.setpointHigh,
+    this.setpointSwitchDepth,
+    this.deviationDepthDelta = 5.0,
+    this.deviationTimeMinutes = 5,
+    this.turnPressureRule,
+    this.turnPressureFraction,
     this.reservePressure = kDefaultReservePressureBar,
     this.notes = '',
     this.isDirty = false,
@@ -569,8 +605,19 @@ class DivePlanState extends Equatable {
     double? sacRate,
     Duration? surfaceInterval,
     List<TissueCompartment>? initialTissueState,
+    String? sourceDiveId,
+    String? linkedDiveId,
     String? siteId,
     double? altitude,
+    PlanMode? mode,
+    double? setpointLow,
+    double? setpointHigh,
+    double? setpointSwitchDepth,
+    double? deviationDepthDelta,
+    int? deviationTimeMinutes,
+    TurnPressureRule? turnPressureRule,
+    double? turnPressureFraction,
+    bool clearTurnPressureRule = false,
     double? reservePressure,
     String? notes,
     bool? isDirty,
@@ -578,8 +625,11 @@ class DivePlanState extends Equatable {
     DateTime? updatedAt,
     bool clearSurfaceInterval = false,
     bool clearInitialTissueState = false,
+    bool clearSourceDiveId = false,
+    bool clearLinkedDiveId = false,
     bool clearSiteId = false,
     bool clearAltitude = false,
+    bool clearSetpoints = false,
   }) {
     return DivePlanState(
       id: id ?? this.id,
@@ -595,8 +645,28 @@ class DivePlanState extends Equatable {
       initialTissueState: clearInitialTissueState
           ? null
           : (initialTissueState ?? this.initialTissueState),
+      sourceDiveId: clearSourceDiveId
+          ? null
+          : (sourceDiveId ?? this.sourceDiveId),
+      linkedDiveId: clearLinkedDiveId
+          ? null
+          : (linkedDiveId ?? this.linkedDiveId),
       siteId: clearSiteId ? null : (siteId ?? this.siteId),
       altitude: clearAltitude ? null : (altitude ?? this.altitude),
+      mode: mode ?? this.mode,
+      setpointLow: clearSetpoints ? null : (setpointLow ?? this.setpointLow),
+      setpointHigh: clearSetpoints ? null : (setpointHigh ?? this.setpointHigh),
+      setpointSwitchDepth: clearSetpoints
+          ? null
+          : (setpointSwitchDepth ?? this.setpointSwitchDepth),
+      deviationDepthDelta: deviationDepthDelta ?? this.deviationDepthDelta,
+      deviationTimeMinutes: deviationTimeMinutes ?? this.deviationTimeMinutes,
+      turnPressureRule: clearTurnPressureRule
+          ? null
+          : (turnPressureRule ?? this.turnPressureRule),
+      turnPressureFraction: clearTurnPressureRule
+          ? null
+          : (turnPressureFraction ?? this.turnPressureFraction),
       reservePressure: reservePressure ?? this.reservePressure,
       notes: notes ?? this.notes,
       isDirty: isDirty ?? this.isDirty,
@@ -616,8 +686,18 @@ class DivePlanState extends Equatable {
     sacRate,
     surfaceInterval,
     initialTissueState,
+    sourceDiveId,
+    linkedDiveId,
     siteId,
     altitude,
+    mode,
+    setpointLow,
+    setpointHigh,
+    setpointSwitchDepth,
+    deviationDepthDelta,
+    deviationTimeMinutes,
+    turnPressureRule,
+    turnPressureFraction,
     reservePressure,
     notes,
     isDirty,

@@ -35,6 +35,8 @@ import 'package:submersion/features/dive_centers/presentation/pages/dive_center_
 import 'package:submersion/features/dive_centers/presentation/pages/dive_center_map_page.dart';
 import 'package:submersion/features/dive_log/presentation/pages/dive_list_page.dart';
 import 'package:submersion/features/dive_log/presentation/pages/dive_detail_page.dart';
+import 'package:submersion/features/dive_log/domain/entities/dive_prefill.dart';
+import 'package:submersion/features/ocr_import/presentation/pages/ocr_scan_page.dart';
 import 'package:submersion/features/dive_log/presentation/pages/bulk_dive_edit_page.dart';
 import 'package:submersion/features/dive_log/presentation/pages/dive_edit_page.dart';
 import 'package:submersion/features/dive_log/presentation/pages/dive_search_page.dart';
@@ -106,6 +108,7 @@ import 'package:submersion/features/marine_life/presentation/pages/species_detai
 import 'package:submersion/features/planning/presentation/pages/planning_page.dart';
 import 'package:submersion/features/planning/presentation/widgets/planning_shell.dart';
 import 'package:submersion/features/planning/presentation/widgets/planning_welcome.dart';
+import 'package:submersion/features/gps_log/presentation/pages/gps_logger_page.dart';
 import 'package:submersion/features/tools/presentation/pages/weight_calculator_page.dart';
 import 'package:submersion/features/deco_calculator/presentation/pages/deco_calculator_page.dart';
 import 'package:submersion/features/gas_calculators/presentation/pages/gas_calculators_page.dart';
@@ -116,7 +119,8 @@ import 'package:submersion/features/dive_computer/presentation/providers/downloa
 import 'package:submersion/features/dive_log/presentation/providers/dive_computer_providers.dart';
 import 'package:submersion/features/import_wizard/data/adapters/dive_computer_adapter.dart';
 import 'package:submersion/features/dashboard/presentation/pages/dashboard_page.dart';
-import 'package:submersion/features/dive_planner/presentation/pages/dive_planner_page.dart';
+import 'package:submersion/features/planner/presentation/pages/plan_canvas_page.dart';
+import 'package:submersion/features/planner/presentation/pages/plan_compare_page.dart';
 import 'package:submersion/features/surface_interval_tool/presentation/pages/surface_interval_tool_page.dart';
 import 'package:submersion/features/import_wizard/data/adapters/universal_adapter.dart';
 import 'package:submersion/l10n/l10n_extension.dart';
@@ -206,12 +210,22 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                   GoRoute(
                     path: 'dive-planner',
                     name: 'divePlanner',
-                    builder: (context, state) => const DivePlannerPage(),
+                    builder: (context, state) => const PlanCanvasPage(),
                     routes: [
+                      GoRoute(
+                        path: 'compare',
+                        name: 'comparePlans',
+                        builder: (context, state) => PlanComparePage(
+                          planIds: (state.uri.queryParameters['ids'] ?? '')
+                              .split(',')
+                              .where((id) => id.isNotEmpty)
+                              .toList(),
+                        ),
+                      ),
                       GoRoute(
                         path: ':planId',
                         name: 'editPlan',
-                        builder: (context, state) => DivePlannerPage(
+                        builder: (context, state) => PlanCanvasPage(
                           planId: state.pathParameters['planId'],
                         ),
                       ),
@@ -238,6 +252,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                     builder: (context, state) =>
                         const SurfaceIntervalToolPage(),
                   ),
+                  // GPS Logger moved to top-level /gps-log; keep old deep
+                  // links working.
+                  GoRoute(
+                    path: 'gps-logger',
+                    redirect: (context, state) => '/gps-log',
+                  ),
                 ],
               ),
             ],
@@ -260,7 +280,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: 'new',
                 name: 'newDive',
-                builder: (context, state) => const DiveEditPage(),
+                builder: (context, state) =>
+                    DiveEditPage(prefill: state.extra as DivePrefill?),
+              ),
+              GoRoute(
+                path: 'scan',
+                name: 'scanPaperLog',
+                builder: (context, state) => const OcrScanPage(),
               ),
               GoRoute(
                 path: 'search',
@@ -729,6 +755,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                     const _UniversalImportWizardRoute(),
               ),
             ],
+          ),
+
+          // GPS surface track logger
+          GoRoute(
+            path: '/gps-log',
+            name: 'gpsLog',
+            pageBuilder: (context, state) => NoTransitionPage(
+              key: state.pageKey,
+              child: const GpsLoggerPage(),
+            ),
           ),
 
           // Settings

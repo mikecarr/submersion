@@ -847,6 +847,18 @@ class SyncService {
             records: data.tripChecklistItems,
             hasUpdatedAt: true,
           ),
+          (type: 'gpsTracks', records: data.gpsTracks, hasUpdatedAt: true),
+          (type: 'divePlans', records: data.divePlans, hasUpdatedAt: true),
+          (
+            type: 'divePlanTanks',
+            records: data.divePlanTanks,
+            hasUpdatedAt: true,
+          ),
+          (
+            type: 'divePlanSegments',
+            records: data.divePlanSegments,
+            hasUpdatedAt: true,
+          ),
           (type: 'equipment', records: data.equipment, hasUpdatedAt: true),
           (
             type: 'equipmentSets',
@@ -1439,6 +1451,10 @@ class SyncService {
     'checklistTemplates': true,
     'checklistTemplateItems': true,
     'tripChecklistItems': true,
+    'gpsTracks': true,
+    'divePlans': true,
+    'divePlanTanks': true,
+    'divePlanSegments': true,
     'equipment': true,
     'equipmentSets': true,
     'equipmentSetItems': false,
@@ -1554,6 +1570,16 @@ class SyncService {
       (field: 'templateId', parent: 'checklistTemplates', nullable: false),
     ],
     'tripChecklistItems': [(field: 'tripId', parent: 'trips', nullable: false)],
+    'divePlans': [
+      (field: 'siteId', parent: 'diveSites', nullable: true),
+      (field: 'sourceDiveId', parent: 'dives', nullable: true),
+      (field: 'linkedDiveId', parent: 'dives', nullable: true),
+    ],
+    'divePlanTanks': [(field: 'planId', parent: 'divePlans', nullable: false)],
+    'divePlanSegments': [
+      (field: 'planId', parent: 'divePlans', nullable: false),
+      (field: 'tankId', parent: 'divePlanTanks', nullable: false),
+    ],
     'certifications': [
       (field: 'courseId', parent: 'courses', nullable: true),
       (field: 'instructorId', parent: 'buddies', nullable: true),

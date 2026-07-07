@@ -197,6 +197,185 @@ class TripChecklistItems extends Table {
   // coverage:ignore-end
 }
 
+/// GPS surface tracks recorded by the phone during a dive day (spec
+/// 2026-07-06-gps-track-logging). One row per recording session; points
+/// live in a gzipped JSON blob because matching always reads whole tracks
+/// and blob-per-session keeps sync to one HLC row per boat day.
+@DataClassName('GpsTrackRow')
+class GpsTracks extends Table {
+  // coverage:ignore-start
+  TextColumn get id => text()();
+
+  /// Wall-clock-as-UTC epoch milliseconds (same convention as dives.entryTime)
+  IntColumn get startTime => integer()();
+  IntColumn get endTime => integer().nullable()();
+
+  /// Device UTC offset at recording start, to reconstruct true UTC later
+  IntColumn get tzOffsetMinutes => integer().withDefault(const Constant(0))();
+  TextColumn get deviceName => text().nullable()();
+  IntColumn get pointCount => integer().withDefault(const Constant(0))();
+
+  /// Gzipped JSON array of [wallClockEpochSeconds, lat, lon, accuracyMeters]
+  BlobColumn get points => blob().nullable()();
+  IntColumn get createdAt => integer()();
+  IntColumn get updatedAt => integer()();
+
+  /// Hybrid Logical Clock for cross-device conflict resolution
+  TextColumn get hlc => text().nullable()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+  // coverage:ignore-end
+}
+
+/// Local-only append buffer for the in-progress GPS recording session.
+/// Never synced (no hlc). Finalized into gps_tracks.points on stop or
+/// crash recovery.
+@DataClassName('GpsTrackPointRow')
+class GpsTrackPointsLocal extends Table {
+  // coverage:ignore-start
+  IntColumn get rowId => integer().autoIncrement()();
+  TextColumn get trackId => text()();
+
+  /// Wall-clock-as-UTC epoch seconds
+  IntColumn get timestamp => integer()();
+  RealColumn get latitude => real()();
+  RealColumn get longitude => real()();
+  RealColumn get accuracy => real().nullable()();
+  // coverage:ignore-end
+}
+
+/// Saved dive plans (dive planner redesign, Phase 2)
+class DivePlans extends Table {
+  // coverage:ignore-start
+  TextColumn get id => text()();
+  TextColumn get diverId => text().nullable().references(Divers, #id)();
+  TextColumn get name => text()();
+  TextColumn get notes => text().withDefault(const Constant(''))();
+
+  /// PlanMode enum name: 'oc' | 'ccr'.
+  TextColumn get mode => text().withDefault(const Constant('oc'))();
+  TextColumn get siteId => text().nullable().references(DiveSites, #id)();
+
+  /// Tissue-seeding source dive (repetitive planning, Phase 6).
+  TextColumn get sourceDiveId => text().nullable().references(Dives, #id)();
+
+  /// Executed dive this plan is linked to (plan-vs-actual, Phase 6).
+  TextColumn get linkedDiveId => text().nullable().references(Dives, #id)();
+  RealColumn get altitude => real().nullable()();
+
+  /// WaterType enum name; null = unspecified (EN13319 density).
+  TextColumn get waterType => text().nullable()();
+  IntColumn get gfLow => integer()();
+  IntColumn get gfHigh => integer()();
+  RealColumn get descentRate => real().withDefault(const Constant(18.0))();
+  RealColumn get ascentRate => real().withDefault(const Constant(9.0))();
+  RealColumn get lastStopDepth => real().withDefault(const Constant(3.0))();
+  IntColumn get gasSwitchStopSeconds =>
+      integer().withDefault(const Constant(0))();
+
+  /// Air-break policy; both null = no air breaks.
+  IntColumn get airBreakO2Seconds => integer().nullable()();
+  IntColumn get airBreakBreakSeconds => integer().nullable()();
+  RealColumn get sacBottom => real().withDefault(const Constant(15.0))();
+
+  /// Null = derive 0.8x / 2.5x of sacBottom.
+  RealColumn get sacDeco => real().nullable()();
+  RealColumn get sacStressed => real().nullable()();
+  RealColumn get reservePressure => real().withDefault(const Constant(50.0))();
+  IntColumn get surfaceIntervalSeconds => integer().nullable()();
+
+  /// CCR setpoints (Phase 4 UI; persisted now to avoid a later migration).
+  RealColumn get setpointLow => real().nullable()();
+  RealColumn get setpointHigh => real().nullable()();
+  RealColumn get setpointSwitchDepth => real().nullable()();
+
+  /// Contingency config (Phase 5 UI).
+  RealColumn get deviationDepthDelta =>
+      real().withDefault(const Constant(5.0))();
+  IntColumn get deviationTimeMinutes =>
+      integer().withDefault(const Constant(5))();
+
+  /// TurnPressureRule enum name; null = none.
+  TextColumn get turnPressureRule => text().nullable()();
+  RealColumn get turnPressureFraction => real().nullable()();
+
+  /// Denormalized list-display summary (no engine run per list row).
+  RealColumn get summaryMaxDepth => real().nullable()();
+  IntColumn get summaryRuntimeSeconds => integer().nullable()();
+  IntColumn get summaryTtsSeconds => integer().nullable()();
+  IntColumn get createdAt => integer()();
+  IntColumn get updatedAt => integer()();
+
+  /// Hybrid Logical Clock for cross-device conflict resolution
+  /// (nullable: rows written before HLC rollout fall back to updatedAt).
+  TextColumn get hlc => text().nullable()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+  // coverage:ignore-end
+}
+
+/// Tanks carried on a saved dive plan
+class DivePlanTanks extends Table {
+  // coverage:ignore-start
+  TextColumn get id => text()();
+  TextColumn get planId => text().references(DivePlans, #id)();
+  TextColumn get name => text().nullable()();
+  RealColumn get volume => real().nullable()();
+  RealColumn get workingPressure => real().nullable()();
+  RealColumn get startPressure => real().nullable()();
+  RealColumn get gasO2 => real().withDefault(const Constant(21.0))();
+  RealColumn get gasHe => real().withDefault(const Constant(0.0))();
+
+  /// TankRole enum name.
+  TextColumn get role => text().withDefault(const Constant('backGas'))();
+
+  /// TankMaterial enum name; null = unspecified.
+  TextColumn get material => text().nullable()();
+  TextColumn get presetName => text().nullable()();
+  IntColumn get sortOrder => integer().withDefault(const Constant(0))();
+  IntColumn get createdAt => integer()();
+  IntColumn get updatedAt => integer()();
+
+  /// Hybrid Logical Clock for cross-device conflict resolution
+  /// (nullable: rows written before HLC rollout fall back to updatedAt).
+  TextColumn get hlc => text().nullable()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+  // coverage:ignore-end
+}
+
+/// User-authored segments (the bottom portion) of a saved dive plan
+class DivePlanSegments extends Table {
+  // coverage:ignore-start
+  TextColumn get id => text()();
+  TextColumn get planId => text().references(DivePlans, #id)();
+
+  /// SegmentType enum name.
+  TextColumn get type => text()();
+  RealColumn get startDepth => real()();
+  RealColumn get endDepth => real()();
+  IntColumn get durationSeconds => integer()();
+  TextColumn get tankId => text().references(DivePlanTanks, #id)();
+  RealColumn get gasO2 => real()();
+  RealColumn get gasHe => real()();
+  RealColumn get rate => real().nullable()();
+  TextColumn get switchToTankId => text().nullable()();
+  IntColumn get sortOrder => integer().withDefault(const Constant(0))();
+  IntColumn get createdAt => integer()();
+  IntColumn get updatedAt => integer()();
+
+  /// Hybrid Logical Clock for cross-device conflict resolution
+  /// (nullable: rows written before HLC rollout fall back to updatedAt).
+  TextColumn get hlc => text().nullable()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+  // coverage:ignore-end
+}
+
 /// Dive log entries
 class Dives extends Table {
   TextColumn get id => text()();
@@ -1825,6 +2004,13 @@ class FieldPresets extends Table {
     ChecklistTemplates,
     ChecklistTemplateItems,
     TripChecklistItems,
+    // GPS surface track logging (discussion #289)
+    GpsTracks,
+    GpsTrackPointsLocal,
+    // Saved dive plans (planner redesign Phase 2)
+    DivePlans,
+    DivePlanTanks,
+    DivePlanSegments,
     // CSV import presets (local-only)
     CsvPresets,
     // Column view configuration
@@ -1844,7 +2030,7 @@ class AppDatabase extends _$AppDatabase {
 
   /// The current schema version as a static constant so that pre-open checks
   /// (e.g. version-mismatch guard) can reference it without an instance.
-  static const int currentSchemaVersion = 99;
+  static const int currentSchemaVersion = 102;
 
   /// Every schema version that has a migration block in onUpgrade.
   /// Used to calculate progress step counts. When adding a new migration,
@@ -1947,6 +2133,9 @@ class AppDatabase extends _$AppDatabase {
     97,
     98,
     99,
+    100,
+    101,
+    102,
   ];
 
   /// Tables that carry a per-row Hybrid Logical Clock for cross-device conflict
@@ -1993,6 +2182,117 @@ class AppDatabase extends _$AppDatabase {
 
   @override
   int get schemaVersion => currentSchemaVersion;
+
+  /// Test hook: run the v102 stranded-pressure repair on demand so tests can
+  /// assert it is idempotent (a second run over already-healed data is a
+  /// no-op). Not used in production; the migration invokes the private method.
+  Future<void> relinkStrandedTankPressuresForTest() =>
+      _relinkStrandedTankPressures();
+
+  /// Re-link tank pressure series stranded under a stale tank id (issue #510).
+  ///
+  /// A reparse, re-import, or multi-computer consolidation can regenerate a
+  /// dive's tanks with fresh UUIDs while its `tank_pressure_profiles` rows keep
+  /// the old tank id. The per-cylinder SAC calculation looked those up by exact
+  /// tank id and missed them, so SAC by cylinder went blank even though the
+  /// pressure data was present (the runtime fix now tolerates this at read
+  /// time; this migration heals the stored data once so the exact-id path works
+  /// for every future consumer too).
+  ///
+  /// Mirrors the runtime resolver (`GasAnalysisService`): exact id matches are
+  /// left alone; each orphaned series (keyed to an id that is no longer one of
+  /// the dive's tanks) is adopted by a still-unmatched current tank, in tank
+  /// order. Every reassignment targets a current tank of the same dive, so it
+  /// is foreign-key safe. Idempotent: a second run finds no orphans.
+  Future<void> _relinkStrandedTankPressures() async {
+    // Defensive: both tables predate v102 in any real database, but migration
+    // tests (and any partial DB) may reach this block without them. A missing
+    // table would make the query below throw and abort the whole upgrade.
+    Future<bool> tableExists(String name) async {
+      final rows = await customSelect(
+        "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = ?",
+        variables: [Variable<String>(name)],
+      ).get();
+      return rows.isNotEmpty;
+    }
+
+    if (!await tableExists('dive_tanks') ||
+        !await tableExists('tank_pressure_profiles')) {
+      return;
+    }
+
+    // Current tanks per dive (id + order for deterministic assignment).
+    final tankRows = await customSelect(
+      'SELECT dive_id, id, tank_order FROM dive_tanks',
+    ).get();
+    final tanksByDive = <String, List<({String id, int order})>>{};
+    for (final r in tankRows) {
+      (tanksByDive[r.read<String>('dive_id')] ??= []).add((
+        id: r.read<String>('id'),
+        order: r.read<int>('tank_order'),
+      ));
+    }
+    if (tanksByDive.isEmpty) return;
+
+    // One entry per (dive, pressure tank id), with the earliest sample time so
+    // orphans are ordered the same way the runtime resolver iterates them.
+    final pressureKeyRows = await customSelect(
+      'SELECT dive_id, tank_id, MIN(timestamp) AS first_ts '
+      'FROM tank_pressure_profiles GROUP BY dive_id, tank_id',
+    ).get();
+    final pressureKeysByDive = <String, List<({String tankId, int firstTs})>>{};
+    for (final r in pressureKeyRows) {
+      (pressureKeysByDive[r.read<String>('dive_id')] ??= []).add((
+        tankId: r.read<String>('tank_id'),
+        firstTs: r.read<int>('first_ts'),
+      ));
+    }
+
+    for (final entry in pressureKeysByDive.entries) {
+      final diveId = entry.key;
+      final tanks = tanksByDive[diveId];
+      if (tanks == null || tanks.isEmpty) continue;
+
+      final currentIds = {for (final t in tanks) t.id};
+      final matchedIds = {
+        for (final k in entry.value)
+          if (currentIds.contains(k.tankId)) k.tankId,
+      };
+
+      final orphans =
+          [
+            for (final k in entry.value)
+              if (!currentIds.contains(k.tankId)) k,
+          ]..sort((a, b) {
+            final byTime = a.firstTs.compareTo(b.firstTs);
+            return byTime != 0 ? byTime : a.tankId.compareTo(b.tankId);
+          });
+      if (orphans.isEmpty) continue;
+
+      final unmatchedTanks =
+          [
+            for (final t in tanks)
+              if (!matchedIds.contains(t.id)) t,
+          ]..sort((a, b) {
+            // id tie-break so tanks sharing the default order (0) pair
+            // deterministically -- Dart's sort is not stable.
+            final byOrder = a.order.compareTo(b.order);
+            return byOrder != 0 ? byOrder : a.id.compareTo(b.id);
+          });
+      if (unmatchedTanks.isEmpty) continue;
+
+      final count = orphans.length < unmatchedTanks.length
+          ? orphans.length
+          : unmatchedTanks.length;
+      for (var i = 0; i < count; i++) {
+        await customStatement(
+          'UPDATE tank_pressure_profiles SET tank_id = ? '
+          'WHERE dive_id = ? AND tank_id = ?',
+          [unmatchedTanks[i].id, diveId, orphans[i].tankId],
+        );
+      }
+    }
+  }
 
   @override
   MigrationStrategy get migration {
@@ -4622,6 +4922,63 @@ class AppDatabase extends _$AppDatabase {
           await m.createTable(buddyRoles);
         }
         if (from < 99) await reportProgress();
+        if (from < 100) {
+          // Saved dive plans (planner redesign Phase 2): three synced tables.
+          // createTable is IF NOT EXISTS and the indexes are guarded, so this
+          // block is idempotent; the beforeOpen backstop re-asserts the same
+          // objects against schema-version collisions.
+          await m.createTable(divePlans);
+          await m.createTable(divePlanTanks);
+          await m.createTable(divePlanSegments);
+          await customStatement('''
+            CREATE INDEX IF NOT EXISTS idx_dive_plan_tanks_plan_id
+            ON dive_plan_tanks(plan_id)
+          ''');
+          await customStatement('''
+            CREATE INDEX IF NOT EXISTS idx_dive_plan_segments_plan_id
+            ON dive_plan_segments(plan_id)
+          ''');
+        }
+        if (from < 100) await reportProgress();
+        if (from < 101) {
+          // GPS surface track logging (discussion #289). Raw idempotent DDL
+          // (v98 checklist idiom) so interrupted migrations and schema-version
+          // collisions are safe. gps_track_points_local is a device-local
+          // recording buffer and is never synced.
+          await customStatement('''
+            CREATE TABLE IF NOT EXISTS gps_tracks (
+              id TEXT NOT NULL PRIMARY KEY,
+              start_time INTEGER NOT NULL,
+              end_time INTEGER,
+              tz_offset_minutes INTEGER NOT NULL DEFAULT 0,
+              device_name TEXT,
+              point_count INTEGER NOT NULL DEFAULT 0,
+              points BLOB,
+              created_at INTEGER NOT NULL,
+              updated_at INTEGER NOT NULL,
+              hlc TEXT
+            )
+          ''');
+          await customStatement('''
+            CREATE TABLE IF NOT EXISTS gps_track_points_local (
+              row_id INTEGER PRIMARY KEY AUTOINCREMENT,
+              track_id TEXT NOT NULL,
+              timestamp INTEGER NOT NULL,
+              latitude REAL NOT NULL,
+              longitude REAL NOT NULL,
+              accuracy REAL
+            )
+          ''');
+          await customStatement('''
+            CREATE INDEX IF NOT EXISTS idx_gps_track_points_local_track_id
+            ON gps_track_points_local(track_id)
+          ''');
+        }
+        if (from < 101) await reportProgress();
+        if (from < 102) {
+          await _relinkStrandedTankPressures();
+        }
+        if (from < 102) await reportProgress();
       },
       beforeOpen: (details) async {
         // Enable foreign keys
@@ -4647,6 +5004,20 @@ class AppDatabase extends _$AppDatabase {
           );
         }
         await createMigrator().createTable(buddyRoles);
+
+        // v100 backstop: re-assert the dive plan tables and their indexes
+        // (same collision disease; all DDL idempotent).
+        await createMigrator().createTable(divePlans);
+        await createMigrator().createTable(divePlanTanks);
+        await createMigrator().createTable(divePlanSegments);
+        await customStatement('''
+          CREATE INDEX IF NOT EXISTS idx_dive_plan_tanks_plan_id
+          ON dive_plan_tanks(plan_id)
+        ''');
+        await customStatement('''
+          CREATE INDEX IF NOT EXISTS idx_dive_plan_segments_plan_id
+          ON dive_plan_segments(plan_id)
+        ''');
       },
     );
   }
