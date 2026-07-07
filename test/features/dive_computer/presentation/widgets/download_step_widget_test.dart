@@ -654,6 +654,49 @@ void main() {
       expect(find.text('Import 1 downloaded dives'), findsNothing);
     });
 
+    testWidgets('tapping Retry with no partial dives restarts the download', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _buildWidget(
+          initialState: const DownloadState(
+            phase: DownloadPhase.error,
+            errorMessage: 'Connection timed out',
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // No onImportPartial and no dives: Retry is the sole FilledButton.
+      await tester.tap(find.text('Retry'));
+      await tester.pump();
+
+      // The stubbed notifier makes the restart a no-op; the widget survives.
+      expect(find.byType(DownloadStepWidget), findsOneWidget);
+    });
+
+    testWidgets(
+      'tapping Retry alongside import-partial restarts the download',
+      (tester) async {
+        await tester.pumpWidget(
+          _buildWidget(
+            initialState: DownloadState(
+              phase: DownloadPhase.cancelled,
+              downloadedDives: [_makeDive(diveNumber: 1)],
+            ),
+            onImportPartial: () {},
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        // With partial dives, Retry is the secondary OutlinedButton.
+        await tester.tap(find.text('Retry'));
+        await tester.pump();
+
+        expect(find.byType(DownloadStepWidget), findsOneWidget);
+      },
+    );
+
     testWidgets('shows import-partial button in cancelled state with dives', (
       tester,
     ) async {
