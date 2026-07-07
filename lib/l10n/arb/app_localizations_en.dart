@@ -15817,6 +15817,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get diveComputer_downloadStep_retry => 'Retry';
 
   @override
+  String diveComputer_downloadStep_importPartialCount(int count) {
+    return 'Import $count downloaded dives';
+  }
+
+  @override
   String get diveComputer_download_cancel => 'Cancel';
 
   @override

@@ -15783,6 +15783,11 @@ class AppLocalizationsAr extends AppLocalizations {
   String get diveComputer_downloadStep_retry => 'إعادة المحاولة';
 
   @override
+  String diveComputer_downloadStep_importPartialCount(int count) {
+    return 'استيراد $count غطسة تم تنزيلها';
+  }
+
+  @override
   String get diveComputer_download_cancel => 'إلغاء';
 
   @override

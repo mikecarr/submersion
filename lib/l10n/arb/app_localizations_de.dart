@@ -16059,6 +16059,11 @@ class AppLocalizationsDe extends AppLocalizations {
   String get diveComputer_downloadStep_retry => 'Erneut versuchen';
 
   @override
+  String diveComputer_downloadStep_importPartialCount(int count) {
+    return '$count heruntergeladene Tauchgänge importieren';
+  }
+
+  @override
   String get diveComputer_download_cancel => 'Abbrechen';
 
   @override

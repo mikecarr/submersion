@@ -17,6 +17,13 @@ class DownloadStepWidget extends ConsumerStatefulWidget {
   final VoidCallback onComplete;
   final void Function(String error) onError;
 
+  /// Invoked when the user chooses to import the dives that were delivered
+  /// before an interrupted (errored or cancelled) download. Null disables the
+  /// action. Because dives arrive oldest-first, the retained set is a
+  /// contiguous prefix of the oldest dives, so importing it and advancing the
+  /// fingerprint yields a correct resume point for the next download.
+  final VoidCallback? onImportPartial;
+
   /// When true, `newDivesOnly` is set to false after the notifier reset,
   /// causing the download to bypass the stored fingerprint and fetch every
   /// dive on the device. Used by the "Re-import all dives" flow.
@@ -28,6 +35,7 @@ class DownloadStepWidget extends ConsumerStatefulWidget {
     this.computer,
     required this.onComplete,
     required this.onError,
+    this.onImportPartial,
     this.forceFullDownload = false,
   });
 
@@ -214,32 +222,70 @@ class _DownloadStepWidgetState extends ConsumerState<DownloadStepWidget> {
                 ),
               ),
               const SizedBox(height: 16),
-              FilledButton.icon(
-                onPressed: () {
-                  _hasStarted = false;
-                  _startDownload();
-                },
-                icon: const Icon(Icons.refresh),
-                label: Text(context.l10n.diveComputer_downloadStep_retry),
-              ),
+              ..._buildInterruptedActions(context, downloadState),
             ],
 
             // Cancelled state
             if (downloadState.isCancelled) ...[
               const SizedBox(height: 16),
-              FilledButton.icon(
-                onPressed: () {
-                  _hasStarted = false;
-                  _startDownload();
-                },
-                icon: const Icon(Icons.refresh),
-                label: Text(context.l10n.diveComputer_downloadStep_retry),
-              ),
+              ..._buildInterruptedActions(context, downloadState),
             ],
           ],
         ),
       ),
     );
+  }
+
+  /// Actions shown after an interrupted (errored or cancelled) download.
+  ///
+  /// When the download delivered some dives before stopping, offers to import
+  /// that partial set. Delivery is oldest-first, so the retained dives are a
+  /// contiguous prefix of the oldest dives; importing them advances the
+  /// fingerprint to a correct high-water mark and the next download resumes
+  /// with the newer dives. Retry is always available.
+  List<Widget> _buildInterruptedActions(
+    BuildContext context,
+    DownloadState state,
+  ) {
+    final retryButton = OutlinedButton.icon(
+      onPressed: () {
+        _hasStarted = false;
+        _startDownload();
+      },
+      icon: const Icon(Icons.refresh),
+      label: Text(context.l10n.diveComputer_downloadStep_retry),
+    );
+
+    final canImportPartial =
+        widget.onImportPartial != null && state.downloadedDives.isNotEmpty;
+    if (!canImportPartial) {
+      // No partial dives to keep: retry is the only, and therefore primary,
+      // action.
+      return [
+        FilledButton.icon(
+          onPressed: () {
+            _hasStarted = false;
+            _startDownload();
+          },
+          icon: const Icon(Icons.refresh),
+          label: Text(context.l10n.diveComputer_downloadStep_retry),
+        ),
+      ];
+    }
+
+    return [
+      FilledButton.icon(
+        onPressed: widget.onImportPartial,
+        icon: const Icon(Icons.download_done),
+        label: Text(
+          context.l10n.diveComputer_downloadStep_importPartialCount(
+            state.downloadedDives.length,
+          ),
+        ),
+      ),
+      const SizedBox(height: 8),
+      retryButton,
+    ];
   }
 
   Widget _buildProgressIndicator(DownloadState state, ColorScheme colorScheme) {

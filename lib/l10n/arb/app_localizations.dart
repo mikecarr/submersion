@@ -27116,6 +27116,12 @@ abstract class AppLocalizations {
   /// **'Retry'**
   String get diveComputer_downloadStep_retry;
 
+  /// No description provided for @diveComputer_downloadStep_importPartialCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Import {count} downloaded dives'**
+  String diveComputer_downloadStep_importPartialCount(int count);
+
   /// No description provided for @diveComputer_download_cancel.
   ///
   /// In en, this message translates to:

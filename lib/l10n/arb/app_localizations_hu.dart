@@ -16045,6 +16045,11 @@ class AppLocalizationsHu extends AppLocalizations {
   String get diveComputer_downloadStep_retry => 'Ujraproba';
 
   @override
+  String diveComputer_downloadStep_importPartialCount(int count) {
+    return '$count letöltött merülés importálása';
+  }
+
+  @override
   String get diveComputer_download_cancel => 'Megse';
 
   @override
