@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:submersion/core/providers/provider.dart';
 import 'package:submersion/features/buddies/presentation/providers/buddy_providers.dart';
 import 'package:submersion/features/certifications/presentation/providers/certification_providers.dart';
@@ -716,6 +717,14 @@ class UniversalImportNotifier extends StateNotifier<UniversalImportState> {
   /// Clear the external-load flag after the wizard has consumed it.
   void clearExternalLoadFlag() {
     state = state.copyWith(wasLoadedExternally: false);
+  }
+
+  @visibleForTesting
+  void debugSetFilesForTest(List<PickedImportFile> files) {
+    state = state.copyWith(
+      files: files,
+      currentStep: ImportWizardStep.sourceConfirmation,
+    );
   }
 
   void reset() {

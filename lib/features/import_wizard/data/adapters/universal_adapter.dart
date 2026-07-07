@@ -47,7 +47,7 @@ import 'package:submersion/features/universal_import/presentation/providers/impo
 import 'package:submersion/features/universal_import/presentation/providers/universal_import_providers.dart';
 import 'package:submersion/features/universal_import/presentation/widgets/field_mapping_step.dart';
 import 'package:submersion/features/universal_import/presentation/widgets/file_selection_step.dart';
-import 'package:submersion/features/universal_import/presentation/widgets/source_confirmation_step.dart';
+import 'package:submersion/features/universal_import/presentation/widgets/file_triage_step.dart';
 
 /// True once a file has been detected and the wizard moved past file selection.
 final universalAdapterFileSelectedProvider = Provider<bool>((ref) {
@@ -159,7 +159,7 @@ class UniversalAdapter implements ImportSourceAdapter {
     WizardStepDef(
       label: 'Confirm Source',
       icon: Icons.check_circle_outline,
-      builder: (context) => const SourceConfirmationStep(),
+      builder: (context) => const SourceConfirmationOrTriageStep(),
       canAdvance: universalAdapterSourceReadyProvider,
       onBeforeAdvance: () async {
         await _ref
