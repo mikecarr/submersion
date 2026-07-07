@@ -69,19 +69,22 @@ The guaranteed escape: a new `SyncService.repairLocalSyncState()` that clears
 clears, minus the reinstall.
 
 Clears:
-- `_syncRepository.resetSyncState(clearDeletionLog: false)` — sync records,
-  cursors, device identity (deletion log preserved so deletions don't resurrect,
-  consistent with today's Reset).
-- `_syncRepository.clearPendingRecords()`.
-- **`LibraryEpochStore`**: a new `clear()` that removes both
-  `sync_last_accepted_epoch_marker` and `sync_pending_replace_marker` — the
-  reinstall-only survivor and the crux of the wedge.
-- `PublishStateStore`: clear rows for **every** provider (not just the active
-  one) so Repair is a true reinstall-equivalent — add a `resetAll()` alongside
-  the existing per-provider `resetForProvider` (rows live in the main DB table
-  `local_publish_states`).
+- `_syncRepository.resetSyncState(clearDeletionLog: false)` — which already
+  clears sync records, **peer cursors, and all `local_publish_states` rows**
+  (verified: `sync_repository.dart` deletes `syncPeerCursors` and
+  `localPublishStates`), plus assigns a new device identity. The deletion log is
+  preserved so deletions don't resurrect, consistent with today's Reset.
+- **`LibraryEpochStore.clear()`** (new): removes both
+  `sync_last_accepted_epoch_marker` and `sync_pending_replace_marker`. This is
+  the **only** local sync state `resetSyncState` does not touch (it lives in
+  SharedPreferences, not the DB) — the reinstall-only survivor and the crux of
+  why today's "Reset Sync State" fails to clear a wedge.
 - Best-effort deletion of leftover base temp files (see Component 2's temp dir).
 - Clears the persisted/in-memory sync error so the banner goes away.
+
+In short: today's Reset already nukes the DB-side sync state; Repair adds the
+SharedPreferences epoch markers (and temp/error cleanup) to make it a true
+reinstall-equivalent.
 
 After repair the device is a fresh participant; the next sync runs the normal
 first-sync merge flow. Repair does **not** auto-trigger a sync — the user taps
@@ -142,9 +145,8 @@ scratch. Guarded by an extra/typed confirmation distinct from 3a.
 
 | State | Location | Cleared by Reset today? | Cleared by Repair (C1)? |
 |-------|----------|-------------------------|-------------------------|
-| Sync records, cursors, device id | main DB | yes | yes |
-| Pending records | main DB | no | yes |
-| `local_publish_states` | main DB | (per-provider) | yes (all providers) |
+| Sync records, peer cursors, device id | main DB | yes | yes |
+| `local_publish_states` (all providers) | main DB | yes | yes |
 | Last-accepted / pending-replace epoch markers | **SharedPreferences** | **no** | **yes** |
 | Deletion log | main DB | kept by design | kept by design |
 | Base temp files | temp dir | n/a | best-effort delete |
