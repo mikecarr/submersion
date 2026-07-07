@@ -18,11 +18,12 @@
 # Keeping the interfaces pins the method names on every implementation, the
 # same mechanism that already protected BleIoHandler implementers above; the
 # implements-wildcard is belt and braces for the concrete classes
-# (UsbSerialIoStream, BleIoStream, and any future handler). Class NAMES may
-# still be renamed harmlessly (JNI uses GetObjectClass, never FindClass), but
-# method names must survive verbatim. Guarded in CI by
-# scripts/check_proguard_serial_keep.py against the release mapping.txt.
-# DO NOT REMOVE.
+# (UsbSerialIoStream, BleIoStream, and any future handler) and also pins
+# their class names. Strictly only the METHOD names need to survive (JNI
+# resolves the class via GetObjectClass, never FindClass, so a renamed class
+# would be harmless) -- the CI guard in scripts/check_proguard_serial_keep.py
+# enforces exactly that minimal contract against the release mapping.txt,
+# while these rules are deliberately broader for safety. DO NOT REMOVE.
 -keep interface com.submersion.libdivecomputer.IoHandler { *; }
 -keep interface com.submersion.libdivecomputer.SerialIoHandler { *; }
 -keep class * implements com.submersion.libdivecomputer.IoHandler { *; }
