@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart' show visibleForTesting;
+import 'package:path/path.dart' as p;
 import 'package:submersion/core/providers/provider.dart';
 import 'package:submersion/features/buddies/presentation/providers/buddy_providers.dart';
 import 'package:submersion/features/certifications/presentation/providers/certification_providers.dart';
@@ -228,7 +229,7 @@ class UniversalImportNotifier extends StateNotifier<UniversalImportState> {
   Future<void> _loadBatchFromPaths(List<String> paths) async {
     final files = <PickedImportFile>[];
     for (final path in paths) {
-      final name = path.split(Platform.pathSeparator).last;
+      final name = p.basename(path);
       try {
         final bytes = await File(path).readAsBytes();
         final detection = await _detectFormat(bytes);
@@ -320,7 +321,7 @@ class UniversalImportNotifier extends StateNotifier<UniversalImportState> {
           isLoading: false,
           files: [
             PickedImportFile(
-              name: paths.first.split(Platform.pathSeparator).last,
+              name: p.basename(paths.first),
               path: paths.first,
               bytes: bytes,
               detection: detection,

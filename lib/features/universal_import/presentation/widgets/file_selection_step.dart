@@ -22,7 +22,7 @@ class FileSelectionStep extends ConsumerWidget {
     final state = ref.watch(universalImportNotifierProvider);
     final theme = Theme.of(context);
 
-    final hasFile = state.fileName != null;
+    final hasFile = state.files.isNotEmpty;
 
     return Padding(
       padding: const EdgeInsets.all(24),
@@ -85,7 +85,11 @@ class FileSelectionStep extends ConsumerWidget {
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
-                        state.fileName!,
+                        state.isBatch
+                            ? context.l10n.universalImport_label_filesSelected(
+                                state.selectedFileCount,
+                              )
+                            : state.fileName ?? '',
                         style: theme.textTheme.bodyMedium,
                         overflow: TextOverflow.ellipsis,
                       ),

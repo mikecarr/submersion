@@ -14759,6 +14759,11 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String universalImport_label_filesSelected(num count) {
+    return '已选择 $count 个文件';
+  }
+
+  @override
   String get universalImport_triage_excludedCsv => '单独导入（CSV）';
 
   @override

@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:go_router/go_router.dart';
+import 'package:path/path.dart' as p;
 
 import 'package:submersion/core/providers/provider.dart';
 import 'package:submersion/features/universal_import/data/services/batch_parse_service.dart';
@@ -115,7 +116,7 @@ class _GlobalDropTargetState extends ConsumerState<GlobalDropTarget> {
 
     final shouldNavigate = await handleIncomingFile(
       bytes: bytes,
-      fileName: paths.first.split(Platform.pathSeparator).last,
+      fileName: p.basename(paths.first),
       currentPath: currentPath,
       notifier: ref.read(universalImportNotifierProvider.notifier),
       messenger: ScaffoldMessenger.of(context),

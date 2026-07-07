@@ -526,23 +526,25 @@ class UniversalAdapter implements ImportSourceAdapter {
     final cleanedUpFailures = removedDiveIds.length - consolidated;
 
     // Per-file outcomes for the bulk summary. Imported dive counts are
-    // attributed through each payload dive's `_sourceFile` stamp.
+    // attributed through each payload dive's `_sourceFileId` stamp — the
+    // display name can collide when two folders hold same-named files, the
+    // id (`f<index>` from BatchParseService) cannot.
     final pickedFiles = notifierState.files;
     var fileOutcomes = const <ImportFileOutcome>[];
     if (pickedFiles.length > 1) {
       final dives = payload.entitiesOf(ui.ImportEntityType.dives);
-      final importedByFile = <String, int>{};
+      final importedByFileId = <String, int>{};
       result.diveIdByIndex.forEach((index, diveId) {
         if (removedDiveIds.contains(diveId)) return;
         if (index < 0 || index >= dives.length) return;
-        final source = dives[index]['_sourceFile'] as String?;
-        if (source != null) {
-          importedByFile[source] = (importedByFile[source] ?? 0) + 1;
+        final sourceId = dives[index]['_sourceFileId'] as String?;
+        if (sourceId != null) {
+          importedByFileId[sourceId] = (importedByFileId[sourceId] ?? 0) + 1;
         }
       });
 
       fileOutcomes = [
-        for (final f in pickedFiles)
+        for (final (i, f) in pickedFiles.indexed)
           ImportFileOutcome(
             fileName: f.name,
             formatName: f.detection.format.displayName,
@@ -555,7 +557,7 @@ class UniversalAdapter implements ImportSourceAdapter {
               ImportFileStatus.unsupported =>
                 ImportFileOutcomeStatus.unsupported,
             },
-            importedDives: importedByFile[f.name] ?? 0,
+            importedDives: importedByFileId['f$i'] ?? 0,
             error: f.error,
           ),
       ];

@@ -15396,6 +15396,17 @@ class AppLocalizationsNl extends AppLocalizations {
   }
 
   @override
+  String universalImport_label_filesSelected(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count bestanden geselecteerd',
+      one: '1 bestand geselecteerd',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get universalImport_triage_excludedCsv =>
       'Afzonderlijk importeren (CSV)';
 

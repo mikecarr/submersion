@@ -4671,6 +4671,7 @@
   "universalImport_action_chooseFolder": "Escolher pasta",
   "universalImport_triage_title": "Arquivos a importar",
   "universalImport_triage_readyCount": "{count, plural, =1{1 arquivo pronto para importar} other{{count} arquivos prontos para importar}}",
+  "universalImport_label_filesSelected": "{count, plural, =1{1 arquivo selecionado} other{{count} arquivos selecionados}}",
   "universalImport_triage_excludedCsv": "Importar individualmente (CSV)",
   "universalImport_triage_unsupported": "Formato não suportado",
   "universalImport_triage_parseFailed": "Não foi possível ler",

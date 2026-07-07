@@ -77,10 +77,13 @@ class UniversalImportState {
   /// per file from [PickedImportFile.path].
   Uint8List? get fileBytes => files.length == 1 ? files.first.bytes : null;
 
-  /// Display name: the file's name for a single pick, a count for a batch.
-  String? get fileName => files.isEmpty
-      ? null
-      : (files.length == 1 ? files.first.name : '${files.length} files');
+  /// The single selected file's name; null when nothing is selected or a
+  /// batch is active. Batch UIs render a localized count from
+  /// [selectedFileCount] instead of a hardcoded English label.
+  String? get fileName => files.length == 1 ? files.first.name : null;
+
+  /// Number of files currently selected.
+  int get selectedFileCount => files.length;
 
   /// True when more than one file was selected (batch import path).
   bool get isBatch => files.length > 1;

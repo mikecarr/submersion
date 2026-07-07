@@ -26221,6 +26221,12 @@ abstract class AppLocalizations {
   /// **'{count, plural, =1{1 file ready to import} other{{count} files ready to import}}'**
   String universalImport_triage_readyCount(num count);
 
+  /// Selected-files card label on the file selection step when a batch is active
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 file selected} other{{count} files selected}}'**
+  String universalImport_label_filesSelected(num count);
+
   /// Triage status for CSV files, which need the single-file mapping wizard
   ///
   /// In en, this message translates to:

@@ -198,6 +198,9 @@ void main() {
       final dives = merged.entitiesOf(ImportEntityType.dives);
       expect(dives[0]['_sourceFile'], 'a.fit');
       expect(dives[1]['_sourceFile'], 'b.fit');
+      // The id disambiguates same-named files from different folders.
+      expect(dives[0]['_sourceFileId'], 'f0');
+      expect(dives[1]['_sourceFileId'], 'f1');
       expect(merged.metadata['batchFileCount'], 2);
       expect(merged.metadata['sourceFiles'], ['a.fit', 'b.fit']);
     });

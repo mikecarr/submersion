@@ -4637,6 +4637,7 @@
   "universalImport_action_chooseFolder": "Choisir un dossier",
   "universalImport_triage_title": "Fichiers à importer",
   "universalImport_triage_readyCount": "{count, plural, =1{1 fichier prêt à importer} other{{count} fichiers prêts à importer}}",
+  "universalImport_label_filesSelected": "{count, plural, =1{1 fichier sélectionné} other{{count} fichiers sélectionnés}}",
   "universalImport_triage_excludedCsv": "Importer individuellement (CSV)",
   "universalImport_triage_unsupported": "Format non pris en charge",
   "universalImport_triage_parseFailed": "Lecture impossible",

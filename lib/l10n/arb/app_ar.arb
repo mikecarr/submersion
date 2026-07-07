@@ -4671,6 +4671,7 @@
   "universalImport_action_chooseFolder": "اختيار مجلد",
   "universalImport_triage_title": "الملفات المراد استيرادها",
   "universalImport_triage_readyCount": "{count, plural, =1{ملف واحد جاهز للاستيراد} other{{count} ملفات جاهزة للاستيراد}}",
+  "universalImport_label_filesSelected": "{count, plural, =1{تم تحديد ملف واحد} other{تم تحديد {count} ملفات}}",
   "universalImport_triage_excludedCsv": "استيراد فردي (CSV)",
   "universalImport_triage_unsupported": "تنسيق غير مدعوم",
   "universalImport_triage_parseFailed": "تعذرت القراءة",

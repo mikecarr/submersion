@@ -15484,6 +15484,17 @@ class AppLocalizationsHu extends AppLocalizations {
   }
 
   @override
+  String universalImport_label_filesSelected(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count fájl kiválasztva',
+      one: '1 fájl kiválasztva',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get universalImport_triage_excludedCsv =>
       'Egyenkénti importálás (CSV)';
 

@@ -64,6 +64,9 @@ class PayloadMerger {
         for (final original in items) {
           final item = _namespaced(original, input.fileId, type);
           item['_sourceFile'] = input.fileName;
+          // Display names can collide (same basename in different folders);
+          // the id is the collision-free key for per-file attribution.
+          item['_sourceFileId'] = input.fileId;
 
           if (type == ImportEntityType.dives) {
             (entities[type] ??= []).add(item);
@@ -84,7 +87,9 @@ class PayloadMerger {
           } else {
             // Enrich the survivor with fields it is missing.
             for (final entry in item.entries) {
-              if (entry.key == 'uddfId' || entry.key == '_sourceFile') {
+              if (entry.key == 'uddfId' ||
+                  entry.key == '_sourceFile' ||
+                  entry.key == '_sourceFileId') {
                 continue;
               }
               final existing = survivor[entry.key];

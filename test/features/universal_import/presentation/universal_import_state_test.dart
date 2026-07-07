@@ -25,14 +25,16 @@ void main() {
     expect(state.isBatch, isFalse);
   });
 
-  test('batch exposes a count label and null fileBytes', () {
+  test('batch exposes a count and null fileName/fileBytes', () {
     final state = UniversalImportState(
       files: [
         file('a.uddf', path: '/tmp/a'),
         file('b.fit', path: '/tmp/b'),
       ],
     );
-    expect(state.fileName, '2 files');
+    // No hardcoded English label: batch UIs localize from selectedFileCount.
+    expect(state.fileName, isNull);
+    expect(state.selectedFileCount, 2);
     expect(state.fileBytes, isNull);
     expect(state.isBatch, isTrue);
   });

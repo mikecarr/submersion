@@ -8609,6 +8609,7 @@
   "universalImport_action_chooseFolder": "Choose Folder",
   "universalImport_triage_title": "Files to Import",
   "universalImport_triage_readyCount": "{count, plural, =1{1 file ready to import} other{{count} files ready to import}}",
+  "universalImport_label_filesSelected": "{count, plural, =1{1 file selected} other{{count} files selected}}",
   "universalImport_triage_excludedCsv": "Import individually (CSV)",
   "universalImport_triage_unsupported": "Unsupported format",
   "universalImport_triage_parseFailed": "Could not be read",
@@ -8712,6 +8713,14 @@
               "type": "num"
           }
       }
+  },
+  "@universalImport_label_filesSelected": {
+    "description": "Selected-files card label on the file selection step when a batch is active",
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
   },
   "@universalImport_triage_excludedCsv":   {
       "description": "Triage status for CSV files, which need the single-file mapping wizard"
