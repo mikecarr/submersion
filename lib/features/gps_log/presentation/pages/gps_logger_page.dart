@@ -95,7 +95,24 @@ class _GpsLoggerPageState extends ConsumerState<GpsLoggerPage> {
     final l10n = context.l10n;
     final messenger = ScaffoldMessenger.of(context);
     final router = GoRouter.of(context);
-    final stamped = await ref.read(gpsTrackMatchServiceProvider).sweep();
+    final List<String> stamped;
+    try {
+      stamped = await ref.read(gpsTrackMatchServiceProvider).sweep();
+    } catch (e, stackTrace) {
+      // Matching is best-effort everywhere else; a button press must not
+      // surface an uncaught error either.
+      _log.error(
+        'Manual GPS match sweep failed',
+        error: e,
+        stackTrace: stackTrace,
+      );
+      if (mounted) {
+        messenger.showSnackBar(
+          SnackBar(content: Text(l10n.common_error_tryAgain)),
+        );
+      }
+      return;
+    }
     if (!mounted) return;
     messenger.clearSnackBars();
     messenger.showSnackBar(
@@ -144,19 +161,25 @@ class _GpsLoggerPageState extends ConsumerState<GpsLoggerPage> {
     }
   }
 
+  /// Compact duration, matching the app-wide dive_field_formatter style
+  /// ("Xh Ym" at an hour or more, "Xmin" below).
+  String _formatCompactDuration(Duration duration) {
+    if (duration.inHours < 1) return '${duration.inMinutes}min';
+    return '${duration.inHours}h ${duration.inMinutes % 60}m';
+  }
+
   String _formatAge(DateTime lastFixAt) {
     final age = DateTime.now().toUtc().difference(lastFixAt);
-    if (age.inMinutes < 1) return '<1 min';
-    if (age.inHours < 1) return '${age.inMinutes} min';
-    return '${age.inHours} h ${age.inMinutes % 60} min';
+    if (age.inMinutes < 1) return '<1min';
+    return _formatCompactDuration(age);
   }
 
   String _formatTrackDuration(GpsTrack track) {
     final end = track.endTime;
     if (end == null) return '--';
-    final duration = Duration(milliseconds: end - track.startTime);
-    if (duration.inHours < 1) return '${duration.inMinutes} min';
-    return '${duration.inHours} h ${duration.inMinutes % 60} min';
+    return _formatCompactDuration(
+      Duration(milliseconds: end - track.startTime),
+    );
   }
 
   @override

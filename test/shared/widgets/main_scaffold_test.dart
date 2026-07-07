@@ -53,6 +53,10 @@ Future<Widget> _buildTestApp({
             builder: (context, state) => const Text('Transfer'),
           ),
           GoRoute(
+            path: '/gps-log',
+            builder: (context, state) => const Text('GPS Log Page'),
+          ),
+          GoRoute(
             path: '/settings',
             builder: (context, state) => const Text('Settings'),
           ),
@@ -166,6 +170,30 @@ void main() {
 
       // "Dives" appears both in rail label and route content.
       expect(find.text('Dives'), findsWidgets);
+    });
+
+    testWidgets('desktop rail navigates to the GPS Log destination', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(1400, 900);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(await _buildTestApp());
+      await tester.pumpAndSettle();
+
+      // GPS Log is rail index 12 (after Transfer, before Settings).
+      final rail = tester.widget<NavigationRail>(find.byType(NavigationRail));
+      rail.onDestinationSelected!(12);
+      await tester.pumpAndSettle();
+
+      expect(find.text('GPS Log Page'), findsOneWidget);
+      // Re-reading recomputes the selected index from the /gps-log route.
+      final selected = tester
+          .widget<NavigationRail>(find.byType(NavigationRail))
+          .selectedIndex;
+      expect(selected, 12);
     });
 
     testWidgets('recording strip appears while a GPS session is active', (

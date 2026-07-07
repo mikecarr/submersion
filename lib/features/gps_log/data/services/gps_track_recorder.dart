@@ -1,6 +1,6 @@
 import 'dart:async';
-import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:geolocator/geolocator.dart';
 
 import 'package:submersion/core/services/logger_service.dart';
@@ -56,6 +56,12 @@ class GpsTrackRecorder {
   Timer? _checkpointTimer;
   Position? _lastPosition;
 
+  /// When the last REAL fix arrived from the position stream. The keepalive
+  /// guard must check this, not [GpsRecorderState.lastFixAt]: fabricated
+  /// keepalive points refresh lastFixAt, which would keep the guard from
+  /// ever tripping after provider loss.
+  DateTime? _lastRealFixAt;
+
   /// Serializes point writes so [stop] can await the tail of the queue
   /// before finalizing (a write racing finalize could land buffer rows
   /// after the finalize clears them).
@@ -97,18 +103,32 @@ class GpsTrackRecorder {
         startedAt: now.toUtc(),
       ),
     );
-    _subscription = _positionStreamFactory(
-      _buildSettings(notificationTitle, notificationText),
-    ).listen(_onPosition, onError: (Object _) {});
+    _subscription =
+        _positionStreamFactory(
+          buildSettings(notificationTitle, notificationText),
+        ).listen(
+          _onPosition,
+          onError: (Object e, StackTrace stackTrace) {
+            // Keep the session alive (fixes may resume), but leave a trail: a
+            // silent stream failure looks like a recorder that just stopped
+            // getting fixes. The UI surfaces the growing last-fix age.
+            _log.error(
+              'Position stream error',
+              error: e,
+              stackTrace: stackTrace,
+            );
+          },
+        );
     _keepaliveTimer = Timer.periodic(_keepaliveInterval, (_) {
       final last = _lastPosition;
-      final lastAt = _state.lastFixAt;
-      if (last == null || lastAt == null) return;
+      final lastRealAt = _lastRealFixAt;
+      if (last == null || lastRealAt == null) return;
       // Provider-loss guard: if no real fix has arrived in two keepalive
       // intervals, stop fabricating coverage from the stale position. The
       // UI surfaces the growing fix age; matching treats the hole via the
       // interior-gap rule in GpsTrackMatcher.
-      if (DateTime.now().toUtc().difference(lastAt) > _keepaliveInterval * 2) {
+      if (DateTime.now().toUtc().difference(lastRealAt) >
+          _keepaliveInterval * 2) {
         return;
       }
       // Re-record the last known position with a fresh timestamp so a
@@ -130,6 +150,7 @@ class GpsTrackRecorder {
     _keepaliveTimer = null;
     _checkpointTimer = null;
     _lastPosition = null;
+    _lastRealFixAt = null;
     // Let any in-flight point write land before finalizing so the last fix
     // makes it into the blob and cannot repopulate the buffer afterwards.
     await _lastRecord;
@@ -153,6 +174,7 @@ class GpsTrackRecorder {
   void _onPosition(Position position) {
     if (position.accuracy > maxAccuracyMeters) return;
     _lastPosition = position;
+    _lastRealFixAt = DateTime.now().toUtc();
     _enqueueRecord(position);
   }
 
@@ -198,31 +220,39 @@ class GpsTrackRecorder {
     );
   }
 
-  LocationSettings _buildSettings(String title, String text) {
-    if (Platform.isAndroid) {
-      return AndroidSettings(
-        accuracy: LocationAccuracy.high,
-        distanceFilter: distanceFilterMeters,
-        foregroundNotificationConfig: ForegroundNotificationConfig(
-          notificationTitle: title,
-          notificationText: text,
-          enableWakeLock: true,
-        ),
-      );
+  /// Per-platform stream settings. Uses [defaultTargetPlatform] (not
+  /// dart:io) so tests can exercise every branch via
+  /// [debugDefaultTargetPlatformOverride].
+  @visibleForTesting
+  LocationSettings buildSettings(String title, String text) {
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+        return AndroidSettings(
+          accuracy: LocationAccuracy.high,
+          distanceFilter: distanceFilterMeters,
+          foregroundNotificationConfig: ForegroundNotificationConfig(
+            notificationTitle: title,
+            notificationText: text,
+            enableWakeLock: true,
+          ),
+        );
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        return AppleSettings(
+          accuracy: LocationAccuracy.high,
+          distanceFilter: distanceFilterMeters,
+          allowBackgroundLocationUpdates: true,
+          showBackgroundLocationIndicator: true,
+          pauseLocationUpdatesAutomatically: false,
+        );
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        return const LocationSettings(
+          accuracy: LocationAccuracy.high,
+          distanceFilter: distanceFilterMeters,
+        );
     }
-    if (Platform.isIOS || Platform.isMacOS) {
-      return AppleSettings(
-        accuracy: LocationAccuracy.high,
-        distanceFilter: distanceFilterMeters,
-        allowBackgroundLocationUpdates: true,
-        showBackgroundLocationIndicator: true,
-        pauseLocationUpdatesAutomatically: false,
-      );
-    }
-    return const LocationSettings(
-      accuracy: LocationAccuracy.high,
-      distanceFilter: distanceFilterMeters,
-    );
   }
 
   void _setState(GpsRecorderState next) {
