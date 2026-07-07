@@ -119,11 +119,21 @@ class TroubleshootSyncPage extends ConsumerWidget {
     );
     if (ok != true) return;
     await ref.read(syncStateProvider.notifier).rebuildBackendFromThisDevice();
-    if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Rebuilt backend from this device')),
-      );
-    }
+    if (!context.mounted) return;
+    // The rebuild can fail (e.g. no epoch marker to rebuild from), in which case
+    // the notifier surfaces SyncStatus.error -- reflect that instead of always
+    // claiming success.
+    final state = ref.read(syncStateProvider);
+    final failed = state.status == SyncStatus.error;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          failed
+              ? (state.message ?? 'Rebuild failed')
+              : 'Rebuilt backend from this device',
+        ),
+      ),
+    );
   }
 
   Future<void> _confirmRemoveThisDevice(

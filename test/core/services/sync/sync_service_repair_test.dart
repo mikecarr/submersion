@@ -70,12 +70,16 @@ void main() {
       await epochStore.setPendingReplace(marker);
       final leftover = File('${fakeAppTemp.path}/ssv1_base_dev_0.abc.json');
       await leftover.writeAsString('stale');
+      // An unrelated temp file (the dir is shared) must be left untouched.
+      final unrelated = File('${fakeAppTemp.path}/user_photo.jpg');
+      await unrelated.writeAsString('keep');
 
       await buildService().repairLocalSyncState();
 
       expect(epochStore.lastAcceptedMarker, isNull);
       expect(epochStore.pendingReplace, isNull);
       expect(leftover.existsSync(), isFalse);
+      expect(unrelated.existsSync(), isTrue);
     },
   );
 

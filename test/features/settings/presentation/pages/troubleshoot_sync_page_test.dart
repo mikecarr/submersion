@@ -17,6 +17,10 @@ class _FakeSyncNotifier extends StateNotifier<SyncState>
   int wipeAllCalls = 0;
   int rebuildCalls = 0;
 
+  /// When set, [rebuildBackendFromThisDevice] models a failure by leaving the
+  /// state in [SyncStatus.error] with this message (mirrors the real notifier).
+  String? rebuildFailureMessage;
+
   @override
   Future<void> repairSync() async => repairSyncCalls++;
 
@@ -27,7 +31,13 @@ class _FakeSyncNotifier extends StateNotifier<SyncState>
   Future<void> wipeAllCloudSyncData() async => wipeAllCalls++;
 
   @override
-  Future<void> rebuildBackendFromThisDevice() async => rebuildCalls++;
+  Future<void> rebuildBackendFromThisDevice() async {
+    rebuildCalls++;
+    final msg = rebuildFailureMessage;
+    if (msg != null) {
+      state = SyncState(status: SyncStatus.error, message: msg);
+    }
+  }
 
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
@@ -153,6 +163,21 @@ void main() {
 
     expect(fake.rebuildCalls, 1);
     expect(find.text('Rebuilt backend from this device'), findsOneWidget);
+  });
+
+  testWidgets('Rebuild failure shows the error, not a success snackbar', (
+    tester,
+  ) async {
+    final fake = await _pump(tester);
+    fake.rebuildFailureMessage = 'No library replacement to rebuild from';
+
+    await tester.tap(find.text('Rebuild backend from this device'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(FilledButton, 'Rebuild'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('No library replacement to rebuild from'), findsOneWidget);
+    expect(find.text('Rebuilt backend from this device'), findsNothing);
   });
 
   testWidgets('Remove-this-device confirm calls the notifier', (tester) async {

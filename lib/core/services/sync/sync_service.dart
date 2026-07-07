@@ -2072,15 +2072,18 @@ class SyncService {
   }
 
   /// Best-effort sweep of leftover streaming-base temp files (base export
-  /// `ssv1_base_*` and assembled `*.base` parts) from the app temp dir. Failure
-  /// is logged and ignored -- a stale temp file is harmless.
+  /// base export `ssv1_base_*.json` and assembled `ssv1_*.base` / `ssv1_adopt_*`
+  /// parts) from the app temp dir. Every sync temp file is prefixed `ssv1_`, so
+  /// the sweep matches ONLY that prefix -- never an unrelated app temp file
+  /// (the dir is a shared, general-purpose temp location). Failure is logged
+  /// and ignored; a stale temp file is harmless.
   Future<void> deleteLeftoverBaseTempFiles() async {
     try {
       final dir = await resolveSyncTempDir();
       await for (final entity in dir.list(followLinks: false)) {
         if (entity is! File) continue;
         final name = entity.uri.pathSegments.last;
-        if (name.startsWith('ssv1_base_') || name.endsWith('.base')) {
+        if (name.startsWith('ssv1_')) {
           try {
             await entity.delete();
           } catch (_) {

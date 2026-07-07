@@ -25,7 +25,14 @@ Future<Directory> resolveSyncTempDir() async {
     return await getTemporaryDirectory();
   } on MissingPluginException {
     return Directory.systemTemp;
-  } on FlutterError {
-    return Directory.systemTemp;
+  } on FlutterError catch (e) {
+    // ONLY the "no test binding" case (a unit test that never called
+    // TestWidgetsFlutterBinding.ensureInitialized, so ServicesBinding.instance
+    // throws). Any other FlutterError is a real problem and must surface, not
+    // silently fall back to /tmp.
+    if (e.toString().contains('Binding has not yet been initialized')) {
+      return Directory.systemTemp;
+    }
+    rethrow;
   }
 }
