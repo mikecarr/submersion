@@ -2183,6 +2183,12 @@ class AppDatabase extends _$AppDatabase {
   @override
   int get schemaVersion => currentSchemaVersion;
 
+  /// Test hook: run the v102 stranded-pressure repair on demand so tests can
+  /// assert it is idempotent (a second run over already-healed data is a
+  /// no-op). Not used in production; the migration invokes the private method.
+  Future<void> relinkStrandedTankPressuresForTest() =>
+      _relinkStrandedTankPressures();
+
   /// Re-link tank pressure series stranded under a stale tank id (issue #510).
   ///
   /// A reparse, re-import, or multi-computer consolidation can regenerate a

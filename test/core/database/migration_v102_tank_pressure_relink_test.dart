@@ -132,22 +132,36 @@ void main() {
     },
   );
 
-  test('is idempotent when nothing is stranded', () async {
+  test('a second repair run over healed data is a no-op', () async {
+    // Seed an orphaned series so the migration re-links it on open, then run
+    // the repair AGAIN and confirm nothing else moves and no rows are lost.
     final db = AppDatabase(
       makeDb((rawDb) {
         rawDb.execute("INSERT INTO dives VALUES ('d4', 1, 1, 1)");
         rawDb.execute("INSERT INTO dive_tanks VALUES ('tank-x', 'd4', 0)");
         rawDb.execute(
           "INSERT INTO tank_pressure_profiles VALUES "
-          "('p1', 'd4', 'tank-x', 0, 200.0)",
+          "('p1', 'd4', 'tank-old', 0, 200.0), "
+          "('p2', 'd4', 'tank-old', 60, 150.0)",
         );
       }),
     );
     addTearDown(() => db.close());
 
-    // Run the repair a second time directly; it must be a no-op.
-    await db.customSelect('SELECT 1').get();
+    // First pass ran during the migration on open.
     expect(await pressureTankIds(db, 'd4'), ['tank-x']);
+    final countBefore = await db
+        .customSelect('SELECT COUNT(*) AS n FROM tank_pressure_profiles')
+        .getSingle();
+
+    // Explicit second pass must change nothing.
+    await db.relinkStrandedTankPressuresForTest();
+
+    expect(await pressureTankIds(db, 'd4'), ['tank-x']);
+    final countAfter = await db
+        .customSelect('SELECT COUNT(*) AS n FROM tank_pressure_profiles')
+        .getSingle();
+    expect(countAfter.read<int>('n'), countBefore.read<int>('n'));
   });
 
   test('v102 is registered in the migration ladder', () {
