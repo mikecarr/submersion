@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
 
 import 'package:submersion/core/services/sync/changeset_log/base_chunker.dart';
@@ -13,7 +14,7 @@ import 'package:submersion/core/services/sync/changeset_log/base_chunker.dart';
 /// partial file and returns null (transient -> the caller retries next sync).
 class BasePartFileSink {
   BasePartFileSink({Future<Directory> Function()? tempDirProvider})
-    : _tempDir = tempDirProvider ?? (() async => Directory.systemTemp);
+    : _tempDir = tempDirProvider ?? getTemporaryDirectory;
 
   final Future<Directory> Function() _tempDir;
   static const _uuid = Uuid();

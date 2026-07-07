@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:crypto/crypto.dart';
 import 'package:drift/drift.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
 
 import 'package:submersion/core/database/database.dart';
@@ -727,7 +728,7 @@ class SyncDataSerializer {
     DateTime Function() now = DateTime.now,
     Future<Directory> Function()? tempDir,
   }) async {
-    final dir = await (tempDir?.call() ?? Future.value(Directory.systemTemp));
+    final dir = await (tempDir?.call() ?? getTemporaryDirectory());
     final path =
         '${dir.path}/ssv1_base_${deviceId}_${seq ?? 0}.${_baseTempUuid.v4()}.json';
     final raf = await File(path).open(mode: FileMode.write);
