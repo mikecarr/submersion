@@ -20,6 +20,7 @@ import 'package:submersion/features/media/data/repositories/media_repository.dar
 import 'package:submersion/features/media/data/services/network_credentials_service.dart';
 import 'package:submersion/features/media/data/services/network_fetch_pipeline.dart';
 import 'package:submersion/features/media/data/services/photo_picker_service.dart';
+import 'package:submersion/features/media/domain/value_objects/media_source_metadata.dart';
 import 'package:submersion/features/media/presentation/pages/photo_picker_page.dart';
 import 'package:submersion/features/media/presentation/providers/media_resolver_providers.dart';
 import 'package:submersion/features/media/presentation/providers/photo_picker_providers.dart';
@@ -47,6 +48,8 @@ class _StubPhotoPickerService implements PhotoPickerService {
       PhotoPermissionStatus.denied;
   @override
   Future<String?> getFilePath(String assetId) async => null;
+  @override
+  Future<MediaSourceMetadata?> getAssetMetadata(String assetId) async => null;
 }
 
 /// `noSuchMethod`-based fake for [NetworkFetchPipeline]. The tab-shell

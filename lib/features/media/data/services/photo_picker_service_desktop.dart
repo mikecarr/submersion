@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:image_picker/image_picker.dart';
 
 import 'package:submersion/features/media/data/services/photo_picker_service.dart';
+import 'package:submersion/features/media/domain/value_objects/media_source_metadata.dart';
 
 /// Photo picker implementation for Windows and Linux using image_picker.
 ///
@@ -116,4 +117,7 @@ class PhotoPickerServiceDesktop implements PhotoPickerService {
 
     return path;
   }
+
+  @override
+  Future<MediaSourceMetadata?> getAssetMetadata(String assetId) async => null;
 }

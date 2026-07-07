@@ -1,5 +1,7 @@
 import 'dart:typed_data';
 
+import 'package:submersion/features/media/domain/value_objects/media_source_metadata.dart';
+
 /// Permission status for photo library access.
 enum PhotoPermissionStatus {
   /// User has granted access.
@@ -117,4 +119,10 @@ abstract class PhotoPickerService {
   /// This is needed for video playback, which requires a file path rather
   /// than raw bytes. Returns null if the asset no longer exists.
   Future<String?> getFilePath(String assetId);
+
+  /// Get original metadata for an asset without exporting the whole asset.
+  ///
+  /// Platform implementations may use native gallery APIs for this. Returns
+  /// null when the platform cannot provide metadata or the asset is missing.
+  Future<MediaSourceMetadata?> getAssetMetadata(String assetId);
 }

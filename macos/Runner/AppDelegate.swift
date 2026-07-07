@@ -8,6 +8,7 @@ class AppDelegate: FlutterAppDelegate {
   private var bookmarkHandler: SecurityScopedBookmarkHandler?
   private var icloudHandler: ICloudContainerHandler?
   private var metadataHandler: MetadataWriteHandler?
+  private var photoMetadataHandler: PhotoMetadataHandler?
   private var localMediaHandler: LocalMediaHandler?
   private var backupBookmarkHandler: BackupBookmarkHandler?
   private var updateChannel: FlutterMethodChannel?
@@ -37,6 +38,7 @@ class AppDelegate: FlutterAppDelegate {
       bookmarkHandler = SecurityScopedBookmarkHandler(messenger: messenger)
       icloudHandler = ICloudContainerHandler(messenger: messenger)
       metadataHandler = MetadataWriteHandler(messenger: messenger)
+      photoMetadataHandler = PhotoMetadataHandler(messenger: messenger)
       localMediaHandler = LocalMediaHandler(messenger: messenger)
       backupBookmarkHandler = BackupBookmarkHandler(messenger: messenger)
       updateChannel = FlutterMethodChannel(
