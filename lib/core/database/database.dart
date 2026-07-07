@@ -2263,10 +2263,16 @@ class AppDatabase extends _$AppDatabase {
           });
       if (orphans.isEmpty) continue;
 
-      final unmatchedTanks = [
-        for (final t in tanks)
-          if (!matchedIds.contains(t.id)) t,
-      ]..sort((a, b) => a.order.compareTo(b.order));
+      final unmatchedTanks =
+          [
+            for (final t in tanks)
+              if (!matchedIds.contains(t.id)) t,
+          ]..sort((a, b) {
+            // id tie-break so tanks sharing the default order (0) pair
+            // deterministically -- Dart's sort is not stable.
+            final byOrder = a.order.compareTo(b.order);
+            return byOrder != 0 ? byOrder : a.id.compareTo(b.id);
+          });
       if (unmatchedTanks.isEmpty) continue;
 
       final count = orphans.length < unmatchedTanks.length

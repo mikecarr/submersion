@@ -298,6 +298,63 @@ void main() {
       expect(results.first.hasValidSac, isTrue);
     });
 
+    test(
+      'orphan-to-tank pairing is deterministic when tanks share an order',
+      () {
+        // Two current tanks with the DEFAULT order (0) and two orphaned
+        // series. The pairing must be stable regardless of Dart's unstable
+        // sort: orphans by earliest sample then key, tanks by order then id.
+        // Expected: tank-a (id-first) <- early series, tank-b <- late series.
+        const tankA = DiveTank(
+          id: 'tank-a',
+          volume: 11.1,
+          gasMix: GasMix(o2: 21, he: 0),
+        );
+        const tankB = DiveTank(
+          id: 'tank-b',
+          volume: 11.1,
+          gasMix: GasMix(o2: 21, he: 0),
+        );
+        final dive = makeDive(
+          runtime: const Duration(minutes: 40),
+          avgDepth: 18.0,
+          tanks: const [tankB, tankA], // list order deliberately reversed
+          profile: makeProfile(40 * 60),
+        );
+
+        List<TankPressurePoint> series(String key, int firstTs, double drain) {
+          return [
+            for (var t = firstTs; t <= 40 * 60; t += 60)
+              TankPressurePoint(
+                id: '$key-$t',
+                tankId: key,
+                timestamp: t,
+                pressure: 200 - drain * (t - firstTs) / (40 * 60 - firstTs),
+              ),
+          ];
+        }
+
+        // Iteration order reversed vs. the expected time order to prove the
+        // sort (not map order) decides the pairing.
+        final pressures = <String, List<TankPressurePoint>>{
+          'z-late': series('z-late', 600, 20), // small drain -> low SAC
+          'y-early': series('y-early', 0, 150), // big drain -> high SAC
+        };
+
+        final results = service.calculateCylinderSac(
+          dive: dive,
+          profile: dive.profile,
+          tankPressures: pressures,
+        );
+
+        final byId = {for (final r in results) r.tankId: r};
+        expect(byId['tank-a']!.hasValidSac, isTrue);
+        expect(byId['tank-b']!.hasValidSac, isTrue);
+        // tank-a adopted the early, big-drain series -> higher SAC than tank-b.
+        expect(byId['tank-a']!.sacRate!, greaterThan(byId['tank-b']!.sacRate!));
+      },
+    );
+
     test('returns empty list for dive with no tanks', () {
       final dive = makeDive(
         runtime: const Duration(minutes: 42),
