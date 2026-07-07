@@ -540,9 +540,14 @@ class UniversalImportNotifier extends StateNotifier<UniversalImportState> {
     }
 
     if (result.parsed.isEmpty) {
+      // Clear the detection result so the Confirm Source / triage step's
+      // canAdvance gate (universalAdapterSourceReadyProvider, which only checks
+      // detectionResult.isFormatSupported) goes false -- there is no payload to
+      // review, so Next must not stay enabled.
       state = state.copyWith(
         isLoading: false,
         files: result.files,
+        clearDetectionResult: true,
         error: 'No data could be parsed from the selected files',
       );
       return;

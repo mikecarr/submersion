@@ -22,9 +22,11 @@ enum ImportFileStatus {
 
 /// One file selected for import (via picker, folder scan, or drop).
 ///
-/// For picker/drop files [path] is set and [bytes] is null: bytes were read
-/// once for format detection and discarded, then re-read lazily at parse
-/// time so a large folder pick never holds every raw buffer at once.
+/// Single-file imports keep [bytes] in memory (so a CSV can be re-parsed when
+/// the field mapping changes) and may also set [path]. Batch files -- folder
+/// scan or multi-select -- set [path] with [bytes] null: bytes are read once
+/// for format detection and discarded, then re-read lazily at parse time so a
+/// large folder pick never holds every raw buffer at once.
 class PickedImportFile {
   final String name;
   final String? path;

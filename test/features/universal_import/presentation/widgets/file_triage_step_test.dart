@@ -149,4 +149,35 @@ void main() {
     // No exception; the flag is internal, so just assert the button existed.
     expect(find.text('Cancel'), findsOneWidget);
   });
+
+  testWidgets('surfaces a parse error instead of the "all excluded" message', (
+    tester,
+  ) async {
+    final container = ProviderContainer();
+    addTearDown(container.dispose);
+    final notifier = container.read(universalImportNotifierProvider.notifier);
+    notifier.debugSetFilesForTest([
+      file('a.fit', ImportFormat.fit, ImportFileStatus.failed),
+    ]);
+    notifier.state = notifier.state.copyWith(
+      error: 'No data could be parsed from the selected files',
+    );
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: const MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Scaffold(body: FileTriageStep()),
+        ),
+      ),
+    );
+
+    expect(
+      find.text('No data could be parsed from the selected files'),
+      findsOneWidget,
+    );
+    expect(find.textContaining('None of the selected files'), findsNothing);
+  });
 }

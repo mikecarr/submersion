@@ -46,10 +46,16 @@ class FileTriageStep extends ConsumerWidget {
         Padding(
           padding: const EdgeInsets.fromLTRB(24, 16, 24, 8),
           child: Text(
-            readyCount > 0
-                ? l10n.universalImport_triage_readyCount(readyCount)
-                : l10n.universalImport_triage_allExcluded,
-            style: theme.textTheme.titleMedium,
+            // A parse failure (e.g. every file failed) sets state.error; show
+            // it instead of the generic "all excluded" message, which would
+            // misrepresent the cause.
+            state.error ??
+                (readyCount > 0
+                    ? l10n.universalImport_triage_readyCount(readyCount)
+                    : l10n.universalImport_triage_allExcluded),
+            style: theme.textTheme.titleMedium?.copyWith(
+              color: state.error != null ? theme.colorScheme.error : null,
+            ),
           ),
         ),
         if (state.isLoading)

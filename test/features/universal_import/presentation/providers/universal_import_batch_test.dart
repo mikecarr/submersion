@@ -83,6 +83,7 @@ void main() {
   late ProviderContainer container;
   late UniversalImportNotifier notifier;
   late _FakeFilePicker picker;
+  late FilePickerPlatform originalPicker;
   late Directory tmp;
 
   setUp(() async {
@@ -93,12 +94,14 @@ void main() {
       overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
     );
     notifier = container.read(universalImportNotifierProvider.notifier);
+    originalPicker = FilePickerPlatform.instance;
     picker = _FakeFilePicker();
     FilePickerPlatform.instance = picker;
     tmp = await Directory.systemTemp.createTemp('bulk_batch_test');
   });
 
   tearDown(() async {
+    FilePickerPlatform.instance = originalPicker;
     container.dispose();
     await tearDownTestDatabase();
     await tmp.delete(recursive: true);
@@ -172,6 +175,9 @@ void main() {
 
       expect(notifier.state.error, isNotNull);
       expect(notifier.state.currentStep, isNot(ImportWizardStep.review));
+      // Detection is cleared so the Confirm Source step's Next gate goes false
+      // -- there is no payload to advance to.
+      expect(notifier.state.detectionResult, isNull);
     });
   });
 

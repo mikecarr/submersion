@@ -101,7 +101,9 @@ void main() {
     tester,
   ) async {
     debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
+    final originalPicker = FilePickerPlatform.instance;
     FilePickerPlatform.instance = _CancellingPicker();
+    addTearDown(() => FilePickerPlatform.instance = originalPicker);
     await tester.pumpWidget(harness());
 
     // Both buttons run their onPressed closures; the picker cancels, so no
