@@ -52,17 +52,6 @@ class ToolsPage extends StatelessWidget {
             description: context.l10n.tools_weight_description,
             onTap: () => context.go('/tools/weight-calculator'),
           ),
-          const SizedBox(height: 12),
-
-          // GPS Logger Card
-          _ToolCard(
-            icon: Icons.gps_fixed,
-            iconColor: colorScheme.primary,
-            title: context.l10n.tools_gpsLogger_title,
-            subtitle: context.l10n.tools_gpsLogger_subtitle,
-            description: context.l10n.tools_gpsLogger_description,
-            onTap: () => context.go('/tools/gps-logger'),
-          ),
           const SizedBox(height: 24),
 
           // Info Card

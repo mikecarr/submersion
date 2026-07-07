@@ -88,14 +88,6 @@ class _PlanningSidebar extends StatelessWidget {
         isSelected: location.contains('/surface-interval'),
         route: '/planning/surface-interval',
       ),
-      _SidebarItem(
-        icon: Icons.gps_fixed,
-        iconColor: Colors.indigo,
-        title: context.l10n.tools_gpsLogger_title,
-        subtitle: context.l10n.tools_gpsLogger_subtitle,
-        isSelected: location.contains('/gps-logger'),
-        route: '/planning/gps-logger',
-      ),
     ];
 
     return Column(

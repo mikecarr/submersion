@@ -61,9 +61,6 @@ void main() {
     expect(find.text('TOOLS'), findsOneWidget);
     // The calculators remain as tools.
     expect(find.text('Deco Calculator'), findsOneWidget);
-    // GPS Logger is reachable from the hub, not only by deep link.
-    await tester.scrollUntilVisible(find.text('GPS Logger'), 200);
-    expect(find.text('GPS Logger'), findsOneWidget);
   });
 
   test('deco calculator environment defaults to legacy standard water', () {

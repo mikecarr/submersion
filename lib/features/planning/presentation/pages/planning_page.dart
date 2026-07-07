@@ -217,13 +217,6 @@ List<_PlanningTool> _planningToolsOf(BuildContext context) {
       subtitle: context.l10n.planning_card_surfaceInterval_subtitle,
       route: '/planning/surface-interval',
     ),
-    _PlanningTool(
-      icon: Icons.gps_fixed,
-      color: Colors.indigo,
-      title: context.l10n.tools_gpsLogger_title,
-      subtitle: context.l10n.tools_gpsLogger_subtitle,
-      route: '/planning/gps-logger',
-    ),
   ];
 }
 
