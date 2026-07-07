@@ -250,10 +250,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                     builder: (context, state) =>
                         const SurfaceIntervalToolPage(),
                   ),
+                  // GPS Logger moved to top-level /gps-log; keep old deep
+                  // links working.
                   GoRoute(
                     path: 'gps-logger',
-                    name: 'gpsLogger',
-                    builder: (context, state) => const GpsLoggerPage(),
+                    redirect: (context, state) => '/gps-log',
                   ),
                 ],
               ),
@@ -746,6 +747,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                     const _UniversalImportWizardRoute(),
               ),
             ],
+          ),
+
+          // GPS surface track logger
+          GoRoute(
+            path: '/gps-log',
+            name: 'gpsLog',
+            pageBuilder: (context, state) => NoTransitionPage(
+              key: state.pageKey,
+              child: const GpsLoggerPage(),
+            ),
           ),
 
           // Settings
