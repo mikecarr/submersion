@@ -333,61 +333,74 @@ class CloudSyncPage extends ConsumerWidget {
       liveRegion: syncState.status == SyncStatus.syncing,
       child: Card(
         margin: const EdgeInsets.all(16),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  ExcludeSemantics(child: _buildStatusIcon(syncState.status)),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          _getStatusTitle(syncState.status),
-                          style: theme.textTheme.titleMedium,
-                        ),
-                        if (syncState.message != null)
+        // On an error, the whole card is a shortcut into Troubleshoot Sync so a
+        // stuck user finds the way out where the error is shown (issue #509).
+        child: InkWell(
+          onTap: syncState.status == SyncStatus.error
+              ? () => Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => const TroubleshootSyncPage(),
+                  ),
+                )
+              : null,
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    ExcludeSemantics(child: _buildStatusIcon(syncState.status)),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
                           Text(
-                            syncState.message!,
-                            style: theme.textTheme.bodySmall,
+                            _getStatusTitle(syncState.status),
+                            style: theme.textTheme.titleMedium,
                           ),
-                      ],
+                          if (syncState.message != null)
+                            Text(
+                              syncState.message!,
+                              style: theme.textTheme.bodySmall,
+                            ),
+                        ],
+                      ),
+                    ),
+                    if (syncState.status == SyncStatus.error)
+                      const Icon(Icons.chevron_right),
+                  ],
+                ),
+                if (syncState.status == SyncStatus.syncing &&
+                    syncState.progress != null) ...[
+                  const SizedBox(height: 16),
+                  Semantics(
+                    label:
+                        'Sync progress: ${(syncState.progress! * 100).toStringAsFixed(0)} percent',
+                    child: LinearProgressIndicator(value: syncState.progress),
+                  ),
+                ],
+                if (syncState.lastSync != null) ...[
+                  const SizedBox(height: 12),
+                  Text(
+                    'Last synced: ${_formatDateTime(syncState.lastSync!)}',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
                     ),
                   ),
                 ],
-              ),
-              if (syncState.status == SyncStatus.syncing &&
-                  syncState.progress != null) ...[
-                const SizedBox(height: 16),
-                Semantics(
-                  label:
-                      'Sync progress: ${(syncState.progress! * 100).toStringAsFixed(0)} percent',
-                  child: LinearProgressIndicator(value: syncState.progress),
-                ),
-              ],
-              if (syncState.lastSync != null) ...[
-                const SizedBox(height: 12),
-                Text(
-                  'Last synced: ${_formatDateTime(syncState.lastSync!)}',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
+                if (syncState.pendingChanges > 0) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    '${syncState.pendingChanges} pending change${syncState.pendingChanges == 1 ? '' : 's'}',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.primary,
+                    ),
                   ),
-                ),
+                ],
               ],
-              if (syncState.pendingChanges > 0) ...[
-                const SizedBox(height: 4),
-                Text(
-                  '${syncState.pendingChanges} pending change${syncState.pendingChanges == 1 ? '' : 's'}',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.primary,
-                  ),
-                ),
-              ],
-            ],
+            ),
           ),
         ),
       ),

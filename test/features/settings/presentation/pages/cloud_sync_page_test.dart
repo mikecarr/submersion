@@ -1245,6 +1245,23 @@ void main() {
       // The Troubleshoot page's app bar title and its primary Repair action.
       expect(find.text('Repair Sync'), findsOneWidget);
     });
+
+    testWidgets('tapping the sync error banner opens Troubleshoot Sync', (
+      tester,
+    ) async {
+      await pumpPage(
+        tester,
+        syncState: const SyncState(
+          status: SyncStatus.error,
+          message: 'The replaced library is still uploading.',
+        ),
+      );
+
+      await tester.tap(find.text('Sync error'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Repair Sync'), findsOneWidget); // Troubleshoot page
+    });
   });
 
   group('CloudSyncPage - sign out dialog', () {
