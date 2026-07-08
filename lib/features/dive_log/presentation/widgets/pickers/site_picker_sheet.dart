@@ -81,38 +81,42 @@ class _SitePickerSheetState extends ConsumerState<SitePickerSheet> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    context.l10n.diveLog_sitePicker_title,
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  if (_anchor != null)
-                    Row(
-                      children: [
-                        Icon(
-                          widget.diveLocation != null
-                              ? Icons.place
-                              : Icons.my_location,
-                          size: 14,
-                          color: colorScheme.primary,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          widget.diveLocation != null
-                              ? context
-                                    .l10n
-                                    .diveLog_sitePicker_sortedByDiveDistance
-                              : context
-                                    .l10n
-                                    .diveLog_sitePicker_sortedByDistance,
-                          style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(color: colorScheme.primary),
-                        ),
-                      ],
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      context.l10n.diveLog_sitePicker_title,
+                      style: Theme.of(context).textTheme.titleLarge,
                     ),
-                ],
+                    if (_anchor != null)
+                      Row(
+                        children: [
+                          Icon(
+                            widget.diveLocation != null
+                                ? Icons.place
+                                : Icons.my_location,
+                            size: 14,
+                            color: colorScheme.primary,
+                          ),
+                          const SizedBox(width: 4),
+                          Flexible(
+                            child: Text(
+                              widget.diveLocation != null
+                                  ? context
+                                        .l10n
+                                        .diveLog_sitePicker_sortedByDiveDistance
+                                  : context
+                                        .l10n
+                                        .diveLog_sitePicker_sortedByDistance,
+                              style: Theme.of(context).textTheme.bodySmall
+                                  ?.copyWith(color: colorScheme.primary),
+                            ),
+                          ),
+                        ],
+                      ),
+                  ],
+                ),
               ),
               TextButton.icon(
                 onPressed: widget.onCreateNewSite,
