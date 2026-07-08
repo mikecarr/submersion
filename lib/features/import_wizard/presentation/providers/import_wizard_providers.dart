@@ -270,10 +270,11 @@ class ImportWizardNotifier extends StateNotifier<ImportWizardState> {
             final match = matchResults[index];
             if (match == null) continue;
 
-            if (match.matchedExistingSource) {
+            if (match.matchedExistingSource || match.inBatchIndex != null) {
               // Re-download of data the matched dive already carries as a
-              // source: default to skip and never auto-consolidate, no
-              // matter the score or matchedComputerId.
+              // source, OR a duplicate of another dive within this same
+              // import batch: default to skip and never auto-consolidate,
+              // no matter the score or matchedComputerId.
               duplicateActions.putIfAbsent(type, () => {})[index] =
                   DuplicateAction.skip;
               selections[type] = selections[type]!.difference({index});
@@ -506,10 +507,11 @@ class ImportWizardNotifier extends StateNotifier<ImportWizardState> {
         final match = matchResults[i];
         // A matchedExistingSource hit is a re-download of data the matched
         // dive already has -- never a valid consolidate target, no matter
-        // the score.
+        // the score. An in-batch match has no existing dive to fold into.
         return match != null &&
             match.score >= 0.7 &&
-            !match.matchedExistingSource;
+            !match.matchedExistingSource &&
+            match.inBatchIndex == null;
       }).toSet();
     } else {
       affected = pending;

@@ -81,6 +81,28 @@ void main() {
     expect(await repo.getBufferPoints(trackId), isEmpty);
   });
 
+  test('stop stamps endTime from the stop time, not the last fix', () async {
+    await recorder.start(notificationTitle: 't', notificationText: 'x');
+    // The last accepted fix arrived long before the diver stopped recording
+    // (a stationary phone stops emitting once the distance filter is unmet).
+    // endTime must reflect when recording stopped, so the session duration
+    // does not collapse toward zero.
+    controller.add(
+      fix(lat: 10, lon: 20, time: DateTime.utc(2020, 1, 1, 12, 0, 0)),
+    );
+    await pumpEventQueue();
+    final trackId = recorder.state.trackId!;
+    final startTime = (await repo.getTrack(trackId))!.startTime;
+    await recorder.stop();
+    final track = await repo.getTrack(trackId);
+    expect(track!.endTime, isNotNull);
+    expect(
+      track.endTime! >= startTime,
+      isTrue,
+      reason: 'endTime should be the stop time, not the stale last fix',
+    );
+  });
+
   test('stop invokes onTrackFinalized with the track id', () async {
     String? finalized;
     final r = GpsTrackRecorder(

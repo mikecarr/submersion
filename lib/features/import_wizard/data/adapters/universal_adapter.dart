@@ -23,6 +23,7 @@ import 'package:submersion/features/import_wizard/domain/models/duplicate_action
 import 'package:submersion/features/import_wizard/domain/models/import_cancellation_token.dart';
 import 'package:submersion/features/import_wizard/domain/models/import_phase.dart';
 import 'package:submersion/features/import_wizard/domain/models/entity_match_result.dart';
+import 'package:submersion/features/import_wizard/domain/models/import_file_outcome.dart';
 // Import wizard bundle types: hide ImportEntityType to avoid name clash with
 // universal_import's same-named enum. Access it via the ImportSourceAdapter
 // interface which already uses the wizard's ImportEntityType.
@@ -41,13 +42,14 @@ import 'package:submersion/features/trips/presentation/providers/trip_providers.
 import 'package:submersion/features/universal_import/data/models/import_enums.dart'
     as ui;
 import 'package:submersion/features/universal_import/data/models/import_payload.dart';
+import 'package:submersion/features/universal_import/data/models/picked_import_file.dart';
 import 'package:submersion/features/universal_import/data/services/import_duplicate_checker.dart';
 import 'package:submersion/features/universal_import/presentation/providers/import_consolidation_service.dart'
     show performConsolidations;
 import 'package:submersion/features/universal_import/presentation/providers/universal_import_providers.dart';
 import 'package:submersion/features/universal_import/presentation/widgets/field_mapping_step.dart';
 import 'package:submersion/features/universal_import/presentation/widgets/file_selection_step.dart';
-import 'package:submersion/features/universal_import/presentation/widgets/source_confirmation_step.dart';
+import 'package:submersion/features/universal_import/presentation/widgets/file_triage_step.dart';
 
 /// True once a file has been detected and the wizard moved past file selection.
 final universalAdapterFileSelectedProvider = Provider<bool>((ref) {
@@ -159,7 +161,7 @@ class UniversalAdapter implements ImportSourceAdapter {
     WizardStepDef(
       label: 'Confirm Source',
       icon: Icons.check_circle_outline,
-      builder: (context) => const SourceConfirmationStep(),
+      builder: (context) => const SourceConfirmationOrTriageStep(),
       canAdvance: universalAdapterSourceReadyProvider,
       onBeforeAdvance: () async {
         await _ref
@@ -317,6 +319,7 @@ class UniversalAdapter implements ImportSourceAdapter {
       existingTags: existingTags,
       existingDiveTypes: existingDiveTypes,
       existingSourceUuidByDiveId: existingSourceUuidByDiveId,
+      checkIntraBatch: (payload.metadata['batchFileCount'] as int? ?? 1) > 1,
     );
 
     final updatedGroups = Map<wizard.ImportEntityType, EntityGroup>.from(
@@ -522,11 +525,50 @@ class UniversalAdapter implements ImportSourceAdapter {
     // were cleaned up; report them as skipped (as the download adapter does).
     final cleanedUpFailures = removedDiveIds.length - consolidated;
 
+    // Per-file outcomes for the bulk summary. Imported dive counts are
+    // attributed through each payload dive's `_sourceFileId` stamp — the
+    // display name can collide when two folders hold same-named files, the
+    // id (`f<index>` from BatchParseService) cannot.
+    final pickedFiles = notifierState.files;
+    var fileOutcomes = const <ImportFileOutcome>[];
+    if (pickedFiles.length > 1) {
+      final dives = payload.entitiesOf(ui.ImportEntityType.dives);
+      final importedByFileId = <String, int>{};
+      result.diveIdByIndex.forEach((index, diveId) {
+        if (removedDiveIds.contains(diveId)) return;
+        if (index < 0 || index >= dives.length) return;
+        final sourceId = dives[index]['_sourceFileId'] as String?;
+        if (sourceId != null) {
+          importedByFileId[sourceId] = (importedByFileId[sourceId] ?? 0) + 1;
+        }
+      });
+
+      fileOutcomes = [
+        for (final (i, f) in pickedFiles.indexed)
+          ImportFileOutcome(
+            fileName: f.name,
+            formatName: f.detection.format.displayName,
+            status: switch (f.status) {
+              ImportFileStatus.parsed ||
+              ImportFileStatus.pending => ImportFileOutcomeStatus.imported,
+              ImportFileStatus.failed => ImportFileOutcomeStatus.parseFailed,
+              ImportFileStatus.excludedCsv =>
+                ImportFileOutcomeStatus.needsIndividualImport,
+              ImportFileStatus.unsupported =>
+                ImportFileOutcomeStatus.unsupported,
+            },
+            importedDives: importedByFileId['f$i'] ?? 0,
+            error: f.error,
+          ),
+      ];
+    }
+
     return UnifiedImportResult(
       importedCounts: counts,
       consolidatedCount: consolidated,
       skippedCount: skipped + cleanedUpFailures,
       importedDiveIds: netImportedDiveIds,
+      fileOutcomes: fileOutcomes,
     );
   }
 
@@ -576,6 +618,10 @@ class UniversalAdapter implements ImportSourceAdapter {
     if (effectiveDuration != null) {
       parts.add('${effectiveDuration.inMinutes} min');
     }
+    // Only merged batch payloads carry `_sourceFile`; single-file review
+    // subtitles are unchanged.
+    final sourceFile = data['_sourceFile'] as String?;
+    if (sourceFile != null && sourceFile.isNotEmpty) parts.add(sourceFile);
     final subtitle = parts.isEmpty ? '' : parts.join(' \u00b7 ');
 
     final diveData = IncomingDiveData.fromImportMap(data);
