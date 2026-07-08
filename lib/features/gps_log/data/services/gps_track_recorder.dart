@@ -155,7 +155,14 @@ class GpsTrackRecorder {
     // makes it into the blob and cannot repopulate the buffer afterwards.
     await _lastRecord;
     if (trackId != null) {
-      await _repository.finalizeTrack(trackId);
+      // Stamp the session end from the actual stop time, not the last fix.
+      // A mostly-stationary device stops emitting fixes once the distance
+      // filter is unmet, so the last point can lag the true stop by many
+      // minutes; deriving endTime from it collapses the displayed duration.
+      // (Orphan recovery keeps the last-point default: the true stop time is
+      // unknown there.)
+      final endTimeMs = toWallClockEpochSeconds(DateTime.now().toUtc()) * 1000;
+      await _repository.finalizeTrack(trackId, endTimeMs: endTimeMs);
       try {
         await _onTrackFinalized?.call(trackId);
       } catch (e, stackTrace) {
