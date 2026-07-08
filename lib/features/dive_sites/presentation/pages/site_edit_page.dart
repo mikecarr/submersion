@@ -35,6 +35,7 @@ class SiteEditPage extends ConsumerStatefulWidget {
   final bool embedded;
   final void Function(String savedId)? onSaved;
   final VoidCallback? onCancel;
+  final GeoPoint? initialLocation;
 
   const SiteEditPage({
     super.key,
@@ -43,9 +44,14 @@ class SiteEditPage extends ConsumerStatefulWidget {
     this.embedded = false,
     this.onSaved,
     this.onCancel,
+    this.initialLocation,
   }) : assert(
          siteId == null || mergeSiteIds == null,
          'siteId and mergeSiteIds are mutually exclusive',
+       ),
+       assert(
+         initialLocation == null || (siteId == null && mergeSiteIds == null),
+         'initialLocation is only valid when creating a new site',
        );
 
   bool get isEditing => siteId != null;
@@ -128,6 +134,38 @@ class _SiteEditPageState extends ConsumerState<SiteEditPage> {
     if (!_hasChanges && _isInitialized) {
       setState(() => _hasChanges = true);
     }
+  }
+
+  /// Seed a brand-new site form from [SiteEditPage.initialLocation]: fill the
+  /// coordinate fields immediately (as non-dirtying initial values), then
+  /// best-effort reverse-geocode country/region into the empty fields.
+  void _seedInitialLocation() {
+    final loc = widget.initialLocation;
+    if (loc == null) return;
+
+    _isApplyingInitialValues = true;
+    _latitudeController.text = loc.latitude.toStringAsFixed(6);
+    _longitudeController.text = loc.longitude.toStringAsFixed(6);
+    _isApplyingInitialValues = false;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) => _geocodeSeed(loc));
+  }
+
+  Future<void> _geocodeSeed(GeoPoint loc) async {
+    final result = await ref
+        .read(locationServiceProvider)
+        .reverseGeocode(loc.latitude, loc.longitude);
+    if (!mounted) return;
+    setState(() {
+      _isApplyingInitialValues = true;
+      if (_countryController.text.isEmpty && result.country != null) {
+        _countryController.text = result.country!;
+      }
+      if (_regionController.text.isEmpty && result.region != null) {
+        _regionController.text = result.region!;
+      }
+      _isApplyingInitialValues = false;
+    });
   }
 
   @override
@@ -510,6 +548,7 @@ class _SiteEditPageState extends ConsumerState<SiteEditPage> {
     // For new sites, mark as initialized immediately
     if (!_isInitialized) {
       _isInitialized = true;
+      _seedInitialLocation();
     }
 
     return _buildForm(context, units);
