@@ -307,6 +307,49 @@ void main() {
       );
     });
 
+    testWidgets(
+      'scrubbing over a flat (all-zero) tank pressure series does not throw',
+      (tester) async {
+        // Regression: a Shearwater logged a pressure channel with no
+        // transmitter paired, so every sample is 0.0. The pressure axis range
+        // collapses to zero width; mapping a constant value through it produced
+        // NaN FlSpot coordinates that crashed fl_chart's touch/tooltip painter
+        // with "Offset argument contained a NaN value" on hover (dive #835).
+        const tank = DiveTank(id: 't1', gasMix: GasMix(o2: 21), order: 0);
+        final profile = _makeProfile(points: 40);
+        final flatPressures = <TankPressurePoint>[
+          for (var i = 0; i < 40; i++)
+            TankPressurePoint(
+              id: 'p$i',
+              tankId: 't1',
+              timestamp: i * 30,
+              pressure: 0.0,
+            ),
+        ];
+
+        await tester.pumpWidget(
+          _buildChart(
+            profile: profile,
+            tanks: const [tank],
+            tankPressures: {'t1': flatPressures},
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        final rect = tester.getRect(find.byType(LineChart));
+        final y = rect.center.dy;
+        final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
+        await mouse.addPointer(location: Offset(rect.left + 2, y));
+        await tester.pump();
+        for (var i = 1; i <= 40; i++) {
+          await mouse.moveTo(Offset(rect.left + rect.width * (i / 40.0), y));
+          await tester.pump();
+          expect(tester.takeException(), isNull);
+        }
+        await mouse.removePointer();
+      },
+    );
+
     testWidgets('tooltip labels an estimated tank with the (est.) suffix', (
       tester,
     ) async {
