@@ -44,6 +44,7 @@ import 'package:submersion/features/dive_log/presentation/pages/profile_editor_p
 import 'package:submersion/features/dive_log/presentation/providers/profile_editor_provider.dart';
 import 'package:submersion/features/maps/presentation/pages/dive_activity_map_page.dart';
 import 'package:submersion/features/maps/presentation/pages/offline_maps_page.dart';
+import 'package:submersion/features/dive_sites/domain/entities/dive_site.dart';
 import 'package:submersion/features/dive_sites/presentation/pages/site_list_page.dart';
 import 'package:submersion/features/dive_sites/presentation/pages/site_detail_page.dart';
 import 'package:submersion/features/dive_sites/presentation/pages/site_edit_page.dart';
@@ -376,7 +377,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: 'new',
                 name: 'newSite',
-                builder: (context, state) => const SiteEditPage(),
+                builder: (context, state) => SiteEditPage(
+                  initialLocation: state.extra is GeoPoint
+                      ? state.extra as GeoPoint
+                      : null,
+                ),
               ),
               GoRoute(
                 path: 'merge',
