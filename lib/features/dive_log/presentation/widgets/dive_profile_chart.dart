@@ -3626,6 +3626,14 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
 
     // Add some padding to the pressure range
     final pressureRange = globalMaxPressure - globalMinPressure;
+
+    // A zero span means every sample across every tank is identical -- in
+    // practice a computer that logged a pressure channel with no transmitter
+    // paired (all zeros). There is no pressure information to plot, and mapping
+    // a constant value through a zero-width range yields NaN spot coordinates
+    // that crash fl_chart's touch/tooltip painter (Offset NaN). Skip it.
+    if (pressureRange <= 0) return [];
+
     final minPressure = globalMinPressure - (pressureRange * 0.05);
     final maxPressure = globalMaxPressure + (pressureRange * 0.05);
 
@@ -3804,7 +3812,13 @@ class _DiveProfileChartState extends ConsumerState<DiveProfileChart> {
     double minValue,
     double maxValue,
   ) {
-    final normalized = (value - minValue) / (maxValue - minValue);
+    // Guard a zero-width range: (value - min) / 0 is NaN, which propagates into
+    // FlSpot coordinates and crashes fl_chart's touch/tooltip painter with
+    // "Offset argument contained a NaN value". Collapse to the axis midpoint so
+    // a constant series renders as a finite flat line instead.
+    final span = maxValue - minValue;
+    if (span == 0) return maxDepth * 0.5;
+    final normalized = (value - minValue) / span;
     return maxDepth * (1 - normalized);
   }
 
