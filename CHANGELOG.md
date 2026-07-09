@@ -3,6 +3,253 @@
 All notable changes to Submersion are documented in this file.
 
 
+## 1.6.0 (2026-07-09)
+
+### Features
+
+- implement parseRawDiveData
+- implement parse_raw_dive_data
+- add nativeParseRawDive JNI binding
+- anchor site picker on dive GPS and seed New Dive Site coords
+- seed new-site form from initialLocation + geocode; wire /sites/new extra
+- anchor distance/sort on dive GPS, unit-aware readout
+- add auto-scaling unit-aware formatGeoDistance
+- rebuild backend from this device when a replace is stuck (offline uploader)
+- cloud-clear actions on Troubleshoot screen (3a remove, 3b typed-confirm wipe)
+- wipe all cloud sync data incl. epoch markers (Troubleshoot 3b)
+- remove this device's cloud sync files (Troubleshoot 3a)
+- tap the sync error banner to open Troubleshoot Sync
+- Troubleshoot Sync screen with Repair Sync action (replaces Reset tile)
+- comprehensive local Repair (reset + epoch markers + temp sweep)
+- add LibraryEpochStore.clear() for comprehensive local repair
+- v102 migration re-links stranded tank pressure series (#510)
+- let an interrupted download import the dives it already pulled
+- per-file attribution in review and summary
+- accept multi-file and folder drops
+- file triage step for multi-file batches
+- multi-select picker and desktop folder pick
+- batch parse pipeline with merge and cross-file dedup
+- add bulk import strings in all locales
+- detect duplicate dives across files within an import batch
+- add PayloadMerger for multi-file bulk import
+- tri-state bulk editing for tags, dive types, buddies
+- tri-state bulk gear editing; hide save-as-set in bulk
+- tri-state BulkMembershipEditor widget
+- tri-state membership delta logic for bulk edit
+- per-item membership count queries for bulk edit
+- scan entry point and localized strings
+- scan flow from photo to prefilled dive
+- platform engine provider
+- Linux Tesseract engine
+- Windows.Media.Ocr implementation
+- submersion_ocr plugin with Apple Vision engine
+- Android ML Kit engine
+- import a local image file as dive media
+- fuzzy site name resolver
+- DivePrefill support in DiveEditPage create mode
+- support manual Consolidate for file imports in UniversalAdapter
+- layout-aware logbook parser
+- page-level unit inference
+- flag exact source_uuid re-imports as existing-source so they default to skip
+- label table and geometric value binder
+- shorthand value normalizer
+- domain models and OcrEngine interface
+- show estimated tank pressure lines on all profile chart hosts (#197)
+- label estimated tanks in the profile legend
+- mark estimated tank pressure in chart tooltip and readout
+- render estimated tank pressure lines straight on the profile chart
+- add estimatedTankPressuresProvider composing real+estimated pressures
+- synthesize linear tank pressure series for manual dives
+- add buildActiveTankIntervals for per-tank gas windows
+- replace Tanks and SAC by Cylinder cards with CylindersCard
+- add unified CylindersCard widget
+- add Cylinders section strings, trim SAC-segments description
+- hub leads with the planner; deco calculator gains altitude/salinity
+- multi-plan compare with overlaid profiles and diff table
+- versioned .subplan share file with import
+- printable dive slate PDF export
+- range table section in the results sheet
+- range table service over deviated engine runs
+- plan-vs-actual overlay on the dive detail profile chart
+- persist convert-to-dive with plan back-link
+- follow-a-dive picker with tissue seeding and logged SAC auto-fill
+- seed plan outcome tissues from a followed dive
+- carry followed-dive and linked-dive context on plan state
+- contingency overlays and tables on the canvas
+- contingency config in the planner editing state
+- turn pressure and rock-bottom validation
+- contingency service for deviation and lost-gas plans
+- CCR canvas controls and bailout readouts
+- worst-case bailout solver
+- CCR mode and setpoints in the planner editing state
+- CCR loop deco schedules and consumption in PlanEngine
+- CCR loop as a depth-dependent ascent gas plan
+- localize the canvas UI in all locales
+- Live Profile Canvas page and route cutover
+- saved plans sheet with open, duplicate, and delete
+- status chips and results sheet on PlanOutcome
+- live canvas chart with ceiling, gas switches, and scrub
+- canvas data providers on PlanEngine
+- persist plans - save and load wired into the planner
+- PlanEngine consumption and severity-sorted plan issues
+- PlanEngine schedule generation on the DecoModel seam
+- DivePlanRepository with full sync participation
+- DivePlan domain aggregate
+- register dive plan tables across the sync pipeline
+- dive plan tables at schema v100
+
+### Bug Fixes
+
+- preserve built-in reference data across replace-adopt
+- set plugin targetSdk so DownloadIsolationTest can run
+- make DiveMarshalingTest compile
+- guard _geocodeSeed against ref use-after-dispose
+- keep header from overflowing with the longer dive-distance label
+- stamp track endTime from stop time, not last fix
+- prevent NaN crash on dives with a flat tank pressure series
+- address PR review round 2
+- address batch-cancel data loss and CSV-specific triage copy
+- address PR review — guard Troubleshoot during sync, narrow temp-dir fallback
+- use correct tank volume/pressure keys in MacDive DB mapper (#517)
+- Recent dives follows the dive list display settings (#506)
+- resilient sync temp dir default (app container, fallback to systemTemp when path_provider absent)
+- write base temp files to the app temp dir, not /tmp (#509)
+- address PR review round 2 (batch error handling, test hygiene)
+- make orphan-to-tank pairing deterministic (PR review)
+- show SAC by cylinder on re-keyed and profileless dives (#510)
+- route Android SAF pre-migration backup to the sandbox default
+- address PR review - separator-agnostic basenames, id-keyed file attribution, localized batch label
+- deliver dives oldest-first and preserve manifest records behind deleted dives (#480)
+- keep JNI-resolved serial handler methods from R8 stripping (#318)
+- sort bulk membership rows by label for stable order
+- tri-state no-op rows show no misleading subtitle
+- save-as-set stamps active diver so the set is visible
+- rewind Windows OCR stream, align spec with code
+- native Android ML Kit in submersion_ocr plugin
+- keep a stranded dive visible in the summary when consolidation fold and cleanup both fail
+- gate dive matcher on time so far-apart dives are not flagged as duplicates
+- clamp estimated pressure tail to endPressure (float drift)
+
+### Refactoring
+
+- hold picked files as a list in wizard state
+- extract shared MatchScorer for both dive matchers
+- remove orphaned file-import consolidation UI and state
+- remove dead standalone UDDF import path
+- remove inert fingerprint/depthTolerance params from matcher path
+
+### Performance
+
+- start estimated-pressure provider fetches concurrently
+
+### Documentation
+
+- plans
+- spec and plan for raw dive parsing on Android and Linux
+- add design spec + implementation plan
+- qualify oldest-first delivery as driver-dependent (PR review)
+- sync error recovery implementation plan + spec refinements (#509)
+- clarify the non-Apple backup-dir branch is not desktop-only (PR review)
+- sync error recovery design spec (#509)
+- add bulk file import implementation plan (#501)
+- add bulk file import design spec (#501)
+- add bulk file import implementation plan (#501)
+- correct keep-rule comment -- implements-wildcard pins class names too (#318)
+- add bulk file import design spec (#501)
+- bulk membership editing design + implementation plan
+- mark OCR logbook import spec implemented
+- spec and plan for dive matching time-gate and file-import consolidation
+- implementation plan for OCR paper logbook import
+- design spec for OCR paper logbook import
+- implementation plan for linear tank pressure line (#197)
+- implementation plan for linear tank pressure line (#197)
+- design spec for linear tank pressure line (#197)
+- trailing block shows gas used in the diver's volume unit
+- implementation plan for unified Cylinders card
+- add dive planner phase 7 (outputs + hub) plan
+- add dive planner phase 6 (log integration) plan
+- add Phase 5 contingencies implementation plan
+- add Phase 4 CCR + bailout implementation plan
+- add Phase 3 Live Profile Canvas implementation plan
+- add Phase 2 plan domain/persistence/PlanEngine implementation plan
+
+### Tests
+
+- distinguish dropped volumeLiters from a wrong value
+- separator-agnostic basename in fake picker; fix folder-scan doc
+- raise #509 patch coverage to ~97%
+- back GlobalDropTarget drop tests with real temp files
+- stub repairSync in SyncNotifier fakes; drop redundant imports
+- cover partial-import capture/advance and retry actions
+- make v102 idempotency test actually re-run the repair (PR review)
+- raise bulk-import patch coverage to ~95% (batch flow, widgets, merger arms)
+- end-to-end bulk import batch integration test
+- fail fast when the foreach test script overflows its buffers
+- cover bulk membership wiring; raise patch coverage to 90%
+- bulk apply handles add+remove for one collection with undo
+- lock in bulk equipment add-merges-not-wipes behavior
+- raise patch coverage to 98 percent
+- sample-page fixture suite for the parser
+- raise phase 7 outputs coverage; address review comments
+- cover preset chip and time-series pressure fallback
+- raise phase 6 log-integration coverage; address review comment
+- raise phase 5 contingency coverage; address review comments
+- raise phase 4 CCR patch coverage; address review comments
+- raise phase 3 canvas patch coverage; address review comments
+- raise phase 2 patch coverage; address review comments
+- expect repeated table headers with contingency sections
+
+### Chores
+
+- bump version to 1.6.0+114
+- regenerate Podfile.lock for submersion_ocr plugin
+- gitignore plugin android/.gradle build caches
+- remove dead cylinder SAC card code and obsolete l10n keys
+- translate phase 7 planner strings into all locales
+- translate phase 6 planner strings into all locales
+- analyzer cleanups in phase 2 tests
+
+### Other
+
+- Remove startup photo-enrichment backfill (undo #516)
+- Revert "Potential fix for pull request finding"
+- Potential fix for pull request finding
+- i18n(site-picker): add dive-distance header + distance-away strings
+- Split maintenance task run() (void) from backfill() count (PR review)
+- Backfill photo profile-marker enrichment via a startup maintenance runner (#511)
+- Populate dive name from Garmin FIT source filename (#507)
+- i18n(import): pluralize the import-partial download count string
+- Address PR review and raise GPS patch coverage above 90%
+- Remove stray Gradle cache files and ignore package android/.gradle
+- Fix CI schema pin and harden GPS recorder/matching paths (PR review)
+- Remove Planning and ToolsPage GPS Logger entry points
+- Add GPS Logger quick action to dashboard
+- Show app-wide recording strip while a GPS session is active
+- Add GPS Log destination to navigation model and desktop rail
+- Relocate GPS Logger route to top-level /gps-log with redirect
+- Add nav and recording-strip localization keys for GPS Log
+- Add GPS logger discoverability implementation plan
+- Add GPS logger discoverability design spec
+- Surface GPS Logger in planning hub and desktop sidebar
+- const bulk-edit requests; apply canonical format
+- i18n(dive-log): strings for tri-state bulk membership editor
+- Guard orphan track recovery and pluralize point counts (PR review)
+- Add GPS Logger page, tools card, route, and localized strings
+- Add background location permissions for GPS track logging
+- Add GpsTrackRecorder with accuracy gate, keepalive, checkpointing
+- Trigger GPS track matching after dive import and after sync merge
+- Add GPS track match sweep, dive GPS stamping, reparse GPS guard
+- Add pure GPS track position matcher with interpolation and tolerance
+- Sync gps_tracks table through changeset serializer and merge registries
+- Add GpsTrackRepository with buffer, checkpoint, recovery, tombstones
+- i18n(dive-log): add estimated-pressure suffix string in all locales
+- Add GPS track domain entities, blob codec, wall-clock conversion
+- Add gps_tracks and gps_track_points_local tables (schema v101)
+- Add GPS track logging implementation plan
+- Add GPS track logging design spec (discussion #289)
+- const-construct preset test fixture
+
+
 ## 1.5.9 (2026-07-05)
 
 ### Features
