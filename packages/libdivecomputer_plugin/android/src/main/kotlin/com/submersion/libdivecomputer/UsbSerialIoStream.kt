@@ -39,6 +39,7 @@ class UsbSerialIoStream(
 
     private var connection: UsbDeviceConnection? = null
     private var port: UsbSerialPort? = null
+    private var readBuffer: SerialReadBuffer? = null
 
     // Requests USB permission (if needed) and opens the first port on the
     // device. Blocks up to PERMISSION_TIMEOUT_SECONDS for the user's response.
@@ -81,7 +82,15 @@ class UsbSerialIoStream(
                 NativeTrace.d("opening port[$index]")
                 candidate.open(conn)
                 port = candidate
-                NativeTrace.d("opened port[$index]")
+                // Bulk reads must request at least one full USB packet or the
+                // kernel fails them with EOVERFLOW and drops the data (#318);
+                // SerialReadBuffer enforces that and buffers the surplus.
+                val maxPacketSize = candidate.readEndpoint?.maxPacketSize ?: 0
+                readBuffer = SerialReadBuffer(
+                    minChunkSize = if (maxPacketSize > 0) maxPacketSize else 64,
+                    trace = NativeTrace::d,
+                )
+                NativeTrace.d("opened port[$index] maxPacketSize=$maxPacketSize")
                 NativeLogger.i(TAG, "SER", "Opened USB serial port[$index] for ${device.deviceName}")
                 return true
             } catch (e: IOException) {
@@ -155,41 +164,24 @@ class UsbSerialIoStream(
 
     override fun read(size: Int, timeoutMs: Int): ByteArray? {
         val p = port ?: return null
+        val buffer = readBuffer ?: return null
         if (size <= 0) return ByteArray(0)
 
         NativeTrace.d("read enter size=$size timeoutMs=$timeoutMs")
         // libdivecomputer's read contract (see serial_posix.c dc_serial_read) is
-        // "return exactly `size` bytes or time out" -- every driver relies on it.
-        // A single UsbSerialPort.read() returns only the first ~64-byte USB bulk
-        // chunk, so a larger device response (e.g. the Mares Puck Pro 140-byte
-        // version block) came back truncated, desynced libdivecomputer's framing
-        // and failed every probe with rc=-8. Accumulate across chunks, re-reading
-        // on the remaining timeout, until the whole packet arrives (#334).
-        val result = ByteArray(size)
-        var received = 0
-        // Bound the TOTAL wait for a finite (positive) libdivecomputer timeout.
-        val deadlineNanos =
-            if (timeoutMs > 0) System.nanoTime() + timeoutMs.toLong() * 1_000_000L else 0L
-
-        while (received < size) {
-            val sliceTimeout: Int = when {
-                timeoutMs < 0 -> 0   // libdc infinite; usb-serial blocks on 0
-                timeoutMs == 0 -> 1  // libdc non-blocking; smallest real slice
-                else -> {
-                    val remainingNanos = deadlineNanos - System.nanoTime()
-                    if (remainingNanos <= 0) break
-                    ((remainingNanos + 999_999L) / 1_000_000L).toInt().coerceAtLeast(1)
-                }
-            }
-            val tmp = ByteArray(size - received)
-            // Written BEFORE the USB read: if the read crashes the process
-            // natively (no exception and no "<- n" follows), this is the last
-            // line on disk, naming the slice size + timeout that triggered it.
-            NativeTrace.d(
-                "usb read req=${tmp.size} sliceTimeout=$sliceTimeout received=$received"
-            )
-            val n = try {
-                p.read(tmp, sliceTimeout)
+        // "return exactly `size` bytes or time out" -- every driver relies on
+        // it. SerialReadBuffer reassembles that byte-stream contract from raw
+        // bulk chunk reads: accumulating chunks until the requested size or the
+        // deadline (#334), never requesting less than one USB packet, and
+        // keeping surplus bytes for the next read (#318). It returns exactly
+        // `size` bytes, or null so the JNI bridge reports LIBDC_STATUS_TIMEOUT
+        // and libdivecomputer retries, rather than accepting a truncated read.
+        return buffer.read(size, timeoutMs) { chunk, sliceTimeout ->
+            // The trace above is written BEFORE the USB read: if the read
+            // crashes the process natively (no exception and no "<- n"
+            // follows), the last line on disk names the slice that died.
+            try {
+                p.read(chunk, sliceTimeout)
             } catch (e: IOException) {
                 // A real I/O error (device unplugged, USB permission revoked) --
                 // not a timeout, which returns 0 rather than throwing. Propagate
@@ -204,17 +196,7 @@ class UsbSerialIoStream(
                 NativeTrace.e("usb read ${e.javaClass.simpleName}: ${e.message}")
                 throw e
             }
-            NativeTrace.d("usb read <- $n")
-            if (n <= 0) break // timeout / nothing available this slice
-            System.arraycopy(tmp, 0, result, received, n)
-            received += n
         }
-
-        // Exactly `size` -> success. A short read returns null so the JNI bridge
-        // reports LIBDC_STATUS_TIMEOUT and libdivecomputer retries, rather than
-        // accepting a truncated packet as a successful read.
-        NativeTrace.d("read exit received=$received/$size")
-        return if (received == size) result else null
     }
 
     override fun write(data: ByteArray, timeoutMs: Int): Int {
@@ -238,6 +220,11 @@ class UsbSerialIoStream(
         // libdivecomputer direction bits: 1 = input, 2 = output.
         val purgeRead = direction and 1 != 0
         val purgeWrite = direction and 2 != 0
+        if (purgeRead) {
+            // Stale surplus bytes must go with the hardware input buffer, or
+            // the next packet exchange starts mid-frame.
+            readBuffer?.clear()
+        }
         try {
             p.purgeHwBuffers(purgeWrite, purgeRead)
         } catch (e: Exception) {
@@ -248,6 +235,7 @@ class UsbSerialIoStream(
 
     override fun close() {
         NativeTrace.d("close")
+        readBuffer = null
         try {
             port?.close()
         } catch (e: Exception) {

@@ -69,6 +69,7 @@ android {
     sourceSets {
         main.java.srcDirs += "src/main/kotlin"
         androidTest.java.srcDirs += "src/androidTest/kotlin"
+        test.java.srcDirs += "src/test/kotlin"
     }
 
     externalNativeBuild {
@@ -84,6 +85,10 @@ dependencies {
     // sources (android/third_party/usb-serial-for-android). Annotations-only
     // artifact; no runtime footprint of consequence.
     implementation "androidx.annotation:annotation:1.9.1"
+
+    // JVM unit tests for pure-Kotlin logic (e.g. SerialReadBuffer chunk
+    // reassembly); run via :libdivecomputer_plugin:testDebugUnitTest.
+    testImplementation "junit:junit:4.13.2"
 
     // Instrumented tests for the :dc IPC (marshaling round-trip, crash isolation).
     androidTestImplementation "androidx.test.ext:junit:1.1.5"
