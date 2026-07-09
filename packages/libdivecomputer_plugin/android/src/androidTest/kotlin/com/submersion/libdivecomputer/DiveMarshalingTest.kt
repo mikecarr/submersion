@@ -3,6 +3,7 @@ package com.submersion.libdivecomputer
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -44,7 +45,12 @@ class DiveMarshalingTest {
         assertEquals(1, restored.samples.size)
         assertEquals(5.0, restored.samples[0].depthMeters, 0.0)
         assertEquals(1, restored.tanks.size)
-        assertEquals(12.0, restored.tanks[0].volumeLiters, 0.0)
+        // volumeLiters is nullable on the wire, so a dropped field and a wrong
+        // value are distinct regressions. Assert non-null first: otherwise a
+        // dropped field surfaces as an NPE that reads like a broken test.
+        val volumeLiters = restored.tanks[0].volumeLiters
+        assertNotNull("volumeLiters did not survive marshaling", volumeLiters)
+        assertEquals(12.0, volumeLiters!!, 0.0)
         assertEquals("gaschange", restored.events[0].type)
         assertArrayEquals(byteArrayOf(9, 8, 7), restored.rawData)
     }
