@@ -44,7 +44,7 @@ class DiveMarshalingTest {
         assertEquals(1, restored.samples.size)
         assertEquals(5.0, restored.samples[0].depthMeters, 0.0)
         assertEquals(1, restored.tanks.size)
-        assertEquals(12.0, restored.tanks[0].volumeLiters, 0.0)
+        assertEquals(12.0, restored.tanks[0].volumeLiters!!, 0.0)
         assertEquals("gaschange", restored.events[0].type)
         assertArrayEquals(byteArrayOf(9, 8, 7), restored.rawData)
     }
