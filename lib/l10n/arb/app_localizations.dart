@@ -30703,6 +30703,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No items on the selected dives yet'**
   String get diveLog_bulkEdit_membership_empty;
+
+  /// No description provided for @settings_mediaStorage_entry_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Media Storage'**
+  String get settings_mediaStorage_entry_title;
+
+  /// No description provided for @settings_mediaStorage_entry_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Store photo and video originals in your own cloud storage'**
+  String get settings_mediaStorage_entry_subtitle;
+
+  /// No description provided for @settings_mediaStorage_status_notConfigured.
+  ///
+  /// In en, this message translates to:
+  /// **'No media store connected on this device'**
+  String get settings_mediaStorage_status_notConfigured;
+
+  /// No description provided for @settings_mediaStorage_status_connected.
+  ///
+  /// In en, this message translates to:
+  /// **'Connected to {hint}'**
+  String settings_mediaStorage_status_connected(String hint);
+
+  /// No description provided for @settings_mediaStorage_test_success.
+  ///
+  /// In en, this message translates to:
+  /// **'Connection successful'**
+  String get settings_mediaStorage_test_success;
+
+  /// No description provided for @settings_mediaStorage_saved.
+  ///
+  /// In en, this message translates to:
+  /// **'Media store connected'**
+  String get settings_mediaStorage_saved;
+
+  /// No description provided for @settings_mediaStorage_action_disconnect.
+  ///
+  /// In en, this message translates to:
+  /// **'Disconnect'**
+  String get settings_mediaStorage_action_disconnect;
+
+  /// No description provided for @settings_mediaStorage_disconnect_confirm_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Disconnect media store?'**
+  String get settings_mediaStorage_disconnect_confirm_title;
+
+  /// No description provided for @settings_mediaStorage_disconnect_confirm_body.
+  ///
+  /// In en, this message translates to:
+  /// **'This device stops uploading and fetching media. Nothing in your bucket is deleted.'**
+  String get settings_mediaStorage_disconnect_confirm_body;
+
+  /// No description provided for @settings_mediaStorage_action_copyFromSync.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy settings from Sync'**
+  String get settings_mediaStorage_action_copyFromSync;
 }
 
 class _AppLocalizationsDelegate

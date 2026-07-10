@@ -18365,4 +18365,41 @@ class AppLocalizationsIt extends AppLocalizations {
   @override
   String get diveLog_bulkEdit_membership_empty =>
       'Ancora nessun elemento nelle immersioni selezionate';
+
+  @override
+  String get settings_mediaStorage_entry_title => 'Archiviazione media';
+
+  @override
+  String get settings_mediaStorage_entry_subtitle =>
+      'Conserva gli originali di foto e video nel tuo cloud personale';
+
+  @override
+  String get settings_mediaStorage_status_notConfigured =>
+      'Nessun archivio media collegato su questo dispositivo';
+
+  @override
+  String settings_mediaStorage_status_connected(String hint) {
+    return 'Collegato a $hint';
+  }
+
+  @override
+  String get settings_mediaStorage_test_success => 'Connessione riuscita';
+
+  @override
+  String get settings_mediaStorage_saved => 'Archivio media collegato';
+
+  @override
+  String get settings_mediaStorage_action_disconnect => 'Disconnetti';
+
+  @override
+  String get settings_mediaStorage_disconnect_confirm_title =>
+      'Disconnettere l\'archivio media?';
+
+  @override
+  String get settings_mediaStorage_disconnect_confirm_body =>
+      'Questo dispositivo smette di caricare e scaricare i media. Nulla viene eliminato dal tuo bucket.';
+
+  @override
+  String get settings_mediaStorage_action_copyFromSync =>
+      'Copia impostazioni da Sync';
 }

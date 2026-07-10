@@ -5173,5 +5173,15 @@
   "diveLog_bulkEdit_membership_onSome": "{count}/{total} merülésen",
   "diveLog_bulkEdit_membership_adding": "hozzáadás mind a {total} merüléshez",
   "diveLog_bulkEdit_membership_removing": "eltávolítás az összesből",
-  "diveLog_bulkEdit_membership_empty": "Még nincsenek elemek a kiválasztott merüléseken"
+  "diveLog_bulkEdit_membership_empty": "Még nincsenek elemek a kiválasztott merüléseken",
+  "settings_mediaStorage_entry_title": "Médiatárhely",
+  "settings_mediaStorage_entry_subtitle": "Fotó- és videóeredetik tárolása saját felhőtárhelyen",
+  "settings_mediaStorage_status_notConfigured": "Nincs médiatár csatlakoztatva ezen az eszközön",
+  "settings_mediaStorage_status_connected": "Csatlakoztatva: {hint}",
+  "settings_mediaStorage_test_success": "Sikeres kapcsolat",
+  "settings_mediaStorage_saved": "Médiatár csatlakoztatva",
+  "settings_mediaStorage_action_disconnect": "Leválasztás",
+  "settings_mediaStorage_disconnect_confirm_title": "Leválasztja a médiatárat?",
+  "settings_mediaStorage_disconnect_confirm_body": "Az eszköz nem tölt fel és nem tölt le több médiát. A bucketből semmi sem törlődik.",
+  "settings_mediaStorage_action_copyFromSync": "Beállítások átvétele a szinkronizálásból"
 }

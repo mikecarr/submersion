@@ -18316,4 +18316,41 @@ class AppLocalizationsHu extends AppLocalizations {
   @override
   String get diveLog_bulkEdit_membership_empty =>
       'Még nincsenek elemek a kiválasztott merüléseken';
+
+  @override
+  String get settings_mediaStorage_entry_title => 'Médiatárhely';
+
+  @override
+  String get settings_mediaStorage_entry_subtitle =>
+      'Fotó- és videóeredetik tárolása saját felhőtárhelyen';
+
+  @override
+  String get settings_mediaStorage_status_notConfigured =>
+      'Nincs médiatár csatlakoztatva ezen az eszközön';
+
+  @override
+  String settings_mediaStorage_status_connected(String hint) {
+    return 'Csatlakoztatva: $hint';
+  }
+
+  @override
+  String get settings_mediaStorage_test_success => 'Sikeres kapcsolat';
+
+  @override
+  String get settings_mediaStorage_saved => 'Médiatár csatlakoztatva';
+
+  @override
+  String get settings_mediaStorage_action_disconnect => 'Leválasztás';
+
+  @override
+  String get settings_mediaStorage_disconnect_confirm_title =>
+      'Leválasztja a médiatárat?';
+
+  @override
+  String get settings_mediaStorage_disconnect_confirm_body =>
+      'Az eszköz nem tölt fel és nem tölt le több médiát. A bucketből semmi sem törlődik.';
+
+  @override
+  String get settings_mediaStorage_action_copyFromSync =>
+      'Beállítások átvétele a szinkronizálásból';
 }

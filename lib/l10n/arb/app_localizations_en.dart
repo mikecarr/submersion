@@ -18059,4 +18059,41 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get diveLog_bulkEdit_membership_empty =>
       'No items on the selected dives yet';
+
+  @override
+  String get settings_mediaStorage_entry_title => 'Media Storage';
+
+  @override
+  String get settings_mediaStorage_entry_subtitle =>
+      'Store photo and video originals in your own cloud storage';
+
+  @override
+  String get settings_mediaStorage_status_notConfigured =>
+      'No media store connected on this device';
+
+  @override
+  String settings_mediaStorage_status_connected(String hint) {
+    return 'Connected to $hint';
+  }
+
+  @override
+  String get settings_mediaStorage_test_success => 'Connection successful';
+
+  @override
+  String get settings_mediaStorage_saved => 'Media store connected';
+
+  @override
+  String get settings_mediaStorage_action_disconnect => 'Disconnect';
+
+  @override
+  String get settings_mediaStorage_disconnect_confirm_title =>
+      'Disconnect media store?';
+
+  @override
+  String get settings_mediaStorage_disconnect_confirm_body =>
+      'This device stops uploading and fetching media. Nothing in your bucket is deleted.';
+
+  @override
+  String get settings_mediaStorage_action_copyFromSync =>
+      'Copy settings from Sync';
 }

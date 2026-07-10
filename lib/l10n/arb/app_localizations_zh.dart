@@ -17453,4 +17453,37 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get diveLog_bulkEdit_membership_empty => '所选潜水尚无项目';
+
+  @override
+  String get settings_mediaStorage_entry_title => '媒体存储';
+
+  @override
+  String get settings_mediaStorage_entry_subtitle => '将照片和视频原件存储在您自己的云存储中';
+
+  @override
+  String get settings_mediaStorage_status_notConfigured => '此设备未连接媒体存储';
+
+  @override
+  String settings_mediaStorage_status_connected(String hint) {
+    return '已连接到 $hint';
+  }
+
+  @override
+  String get settings_mediaStorage_test_success => '连接成功';
+
+  @override
+  String get settings_mediaStorage_saved => '媒体存储已连接';
+
+  @override
+  String get settings_mediaStorage_action_disconnect => '断开连接';
+
+  @override
+  String get settings_mediaStorage_disconnect_confirm_title => '断开媒体存储？';
+
+  @override
+  String get settings_mediaStorage_disconnect_confirm_body =>
+      '此设备将停止上传和获取媒体。您的存储桶中的内容不会被删除。';
+
+  @override
+  String get settings_mediaStorage_action_copyFromSync => '从同步复制设置';
 }

@@ -5173,5 +5173,15 @@
   "diveLog_bulkEdit_membership_onSome": "في {count} من {total}",
   "diveLog_bulkEdit_membership_adding": "إضافة إلى كل الـ {total}",
   "diveLog_bulkEdit_membership_removing": "إزالة من الكل",
-  "diveLog_bulkEdit_membership_empty": "لا توجد عناصر في الغطسات المحددة بعد"
+  "diveLog_bulkEdit_membership_empty": "لا توجد عناصر في الغطسات المحددة بعد",
+  "settings_mediaStorage_entry_title": "تخزين الوسائط",
+  "settings_mediaStorage_entry_subtitle": "خزّن النسخ الأصلية للصور والفيديو في التخزين السحابي الخاص بك",
+  "settings_mediaStorage_status_notConfigured": "لا يوجد مخزن وسائط متصل على هذا الجهاز",
+  "settings_mediaStorage_status_connected": "متصل بـ {hint}",
+  "settings_mediaStorage_test_success": "نجح الاتصال",
+  "settings_mediaStorage_saved": "تم توصيل مخزن الوسائط",
+  "settings_mediaStorage_action_disconnect": "قطع الاتصال",
+  "settings_mediaStorage_disconnect_confirm_title": "قطع اتصال مخزن الوسائط؟",
+  "settings_mediaStorage_disconnect_confirm_body": "يتوقف هذا الجهاز عن رفع الوسائط وجلبها. لن يُحذف أي شيء من الحاوية الخاصة بك.",
+  "settings_mediaStorage_action_copyFromSync": "نسخ الإعدادات من المزامنة"
 }

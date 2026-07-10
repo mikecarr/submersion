@@ -18219,4 +18219,41 @@ class AppLocalizationsNl extends AppLocalizations {
   @override
   String get diveLog_bulkEdit_membership_empty =>
       'Nog geen items bij de geselecteerde duiken';
+
+  @override
+  String get settings_mediaStorage_entry_title => 'Mediaopslag';
+
+  @override
+  String get settings_mediaStorage_entry_subtitle =>
+      'Bewaar originele foto\'s en video\'s in je eigen cloudopslag';
+
+  @override
+  String get settings_mediaStorage_status_notConfigured =>
+      'Geen mediaopslag verbonden op dit apparaat';
+
+  @override
+  String settings_mediaStorage_status_connected(String hint) {
+    return 'Verbonden met $hint';
+  }
+
+  @override
+  String get settings_mediaStorage_test_success => 'Verbinding geslaagd';
+
+  @override
+  String get settings_mediaStorage_saved => 'Mediaopslag verbonden';
+
+  @override
+  String get settings_mediaStorage_action_disconnect => 'Loskoppelen';
+
+  @override
+  String get settings_mediaStorage_disconnect_confirm_title =>
+      'Mediaopslag loskoppelen?';
+
+  @override
+  String get settings_mediaStorage_disconnect_confirm_body =>
+      'Dit apparaat stopt met het uploaden en ophalen van media. Er wordt niets uit je bucket verwijderd.';
+
+  @override
+  String get settings_mediaStorage_action_copyFromSync =>
+      'Instellingen van Sync kopiëren';
 }

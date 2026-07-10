@@ -18332,4 +18332,41 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get diveLog_bulkEdit_membership_empty =>
       'Noch keine Elemente bei den ausgewählten Tauchgängen';
+
+  @override
+  String get settings_mediaStorage_entry_title => 'Medienspeicher';
+
+  @override
+  String get settings_mediaStorage_entry_subtitle =>
+      'Foto- und Video-Originale im eigenen Cloud-Speicher ablegen';
+
+  @override
+  String get settings_mediaStorage_status_notConfigured =>
+      'Kein Medienspeicher mit diesem Gerät verbunden';
+
+  @override
+  String settings_mediaStorage_status_connected(String hint) {
+    return 'Verbunden mit $hint';
+  }
+
+  @override
+  String get settings_mediaStorage_test_success => 'Verbindung erfolgreich';
+
+  @override
+  String get settings_mediaStorage_saved => 'Medienspeicher verbunden';
+
+  @override
+  String get settings_mediaStorage_action_disconnect => 'Trennen';
+
+  @override
+  String get settings_mediaStorage_disconnect_confirm_title =>
+      'Medienspeicher trennen?';
+
+  @override
+  String get settings_mediaStorage_disconnect_confirm_body =>
+      'Dieses Gerät lädt keine Medien mehr hoch oder herunter. In Ihrem Bucket wird nichts gelöscht.';
+
+  @override
+  String get settings_mediaStorage_action_copyFromSync =>
+      'Einstellungen von Sync übernehmen';
 }

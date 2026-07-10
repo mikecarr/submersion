@@ -16,7 +16,9 @@ import 'package:submersion/features/media/data/resolvers/media_store_resolver.da
 import 'package:submersion/features/media/presentation/providers/media_providers.dart';
 import 'package:submersion/features/media/presentation/providers/media_resolver_providers.dart';
 import 'package:submersion/features/media_store/data/media_cache_store.dart';
+import 'package:submersion/features/media_store/data/media_store_service.dart';
 import 'package:submersion/features/media_store/data/media_store_worker.dart';
+import 'package:submersion/features/media_store/data/media_stores_repository.dart';
 import 'package:submersion/features/media_store/data/media_transfer_queue_repository.dart';
 import 'package:submersion/features/media_store/data/media_upload_pipeline.dart';
 
@@ -45,6 +47,19 @@ final mediaStoreCredentialsStoreProvider = Provider<MediaStoreCredentialsStore>(
 
 final mediaStoreAttachStateProvider = Provider<MediaStoreAttachState>(
   (ref) => MediaStoreAttachState(),
+);
+
+final mediaStoresRepositoryProvider = Provider<MediaStoresRepository>(
+  (ref) => MediaStoresRepository(),
+);
+
+/// Connect/test/disconnect flows for the Media Storage settings page.
+final mediaStoreServiceProvider = Provider<MediaStoreService>(
+  (ref) => MediaStoreService(
+    credentials: ref.watch(mediaStoreCredentialsStoreProvider),
+    attachState: ref.watch(mediaStoreAttachStateProvider),
+    storesRepository: ref.watch(mediaStoresRepositoryProvider),
+  ),
 );
 
 /// The configured media store runtime, or null when this device has no
@@ -104,6 +119,15 @@ final mediaStoreRuntimeProvider = FutureProvider<MediaStoreRuntime?>((
 /// runtime exists yet. Synchronous accessor over the async runtime.
 final mediaStoreResolverProvider = Provider<MediaStoreResolver?>((ref) {
   return ref.watch(mediaStoreRuntimeProvider).value?.resolver;
+});
+
+/// Display hint for the connected store ("bucket @ host"), or null when
+/// this device has no store attached.
+final mediaStoreStatusHintProvider = FutureProvider<String?>((ref) async {
+  final runtime = await ref.watch(mediaStoreRuntimeProvider.future);
+  if (runtime == null) return null;
+  final active = await ref.watch(mediaStoresRepositoryProvider).getActive();
+  return active?.displayHint ?? runtime.storeId;
 });
 
 /// Implementation behind mediaStoreEnqueueProvider: with a runtime

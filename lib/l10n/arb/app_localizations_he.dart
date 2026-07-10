@@ -17899,4 +17899,41 @@ class AppLocalizationsHe extends AppLocalizations {
   @override
   String get diveLog_bulkEdit_membership_empty =>
       'אין עדיין פריטים בצלילות שנבחרו';
+
+  @override
+  String get settings_mediaStorage_entry_title => 'אחסון מדיה';
+
+  @override
+  String get settings_mediaStorage_entry_subtitle =>
+      'שמור מקורות של תמונות ווידאו באחסון הענן שלך';
+
+  @override
+  String get settings_mediaStorage_status_notConfigured =>
+      'לא מחובר אחסון מדיה במכשיר זה';
+
+  @override
+  String settings_mediaStorage_status_connected(String hint) {
+    return 'מחובר אל $hint';
+  }
+
+  @override
+  String get settings_mediaStorage_test_success => 'החיבור הצליח';
+
+  @override
+  String get settings_mediaStorage_saved => 'אחסון המדיה חובר';
+
+  @override
+  String get settings_mediaStorage_action_disconnect => 'התנתק';
+
+  @override
+  String get settings_mediaStorage_disconnect_confirm_title =>
+      'לנתק את אחסון המדיה?';
+
+  @override
+  String get settings_mediaStorage_disconnect_confirm_body =>
+      'מכשיר זה יפסיק להעלות ולהוריד מדיה. שום דבר לא יימחק מהדלי שלך.';
+
+  @override
+  String get settings_mediaStorage_action_copyFromSync =>
+      'העתק הגדרות מהסנכרון';
 }

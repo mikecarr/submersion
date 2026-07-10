@@ -5173,5 +5173,15 @@
   "diveLog_bulkEdit_membership_onSome": "op {count} van {total}",
   "diveLog_bulkEdit_membership_adding": "toevoegen aan alle {total}",
   "diveLog_bulkEdit_membership_removing": "verwijderen van alle",
-  "diveLog_bulkEdit_membership_empty": "Nog geen items bij de geselecteerde duiken"
+  "diveLog_bulkEdit_membership_empty": "Nog geen items bij de geselecteerde duiken",
+  "settings_mediaStorage_entry_title": "Mediaopslag",
+  "settings_mediaStorage_entry_subtitle": "Bewaar originele foto's en video's in je eigen cloudopslag",
+  "settings_mediaStorage_status_notConfigured": "Geen mediaopslag verbonden op dit apparaat",
+  "settings_mediaStorage_status_connected": "Verbonden met {hint}",
+  "settings_mediaStorage_test_success": "Verbinding geslaagd",
+  "settings_mediaStorage_saved": "Mediaopslag verbonden",
+  "settings_mediaStorage_action_disconnect": "Loskoppelen",
+  "settings_mediaStorage_disconnect_confirm_title": "Mediaopslag loskoppelen?",
+  "settings_mediaStorage_disconnect_confirm_body": "Dit apparaat stopt met het uploaden en ophalen van media. Er wordt niets uit je bucket verwijderd.",
+  "settings_mediaStorage_action_copyFromSync": "Instellingen van Sync kopiëren"
 }

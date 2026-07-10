@@ -18029,4 +18029,41 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get diveLog_bulkEdit_membership_empty =>
       'لا توجد عناصر في الغطسات المحددة بعد';
+
+  @override
+  String get settings_mediaStorage_entry_title => 'تخزين الوسائط';
+
+  @override
+  String get settings_mediaStorage_entry_subtitle =>
+      'خزّن النسخ الأصلية للصور والفيديو في التخزين السحابي الخاص بك';
+
+  @override
+  String get settings_mediaStorage_status_notConfigured =>
+      'لا يوجد مخزن وسائط متصل على هذا الجهاز';
+
+  @override
+  String settings_mediaStorage_status_connected(String hint) {
+    return 'متصل بـ $hint';
+  }
+
+  @override
+  String get settings_mediaStorage_test_success => 'نجح الاتصال';
+
+  @override
+  String get settings_mediaStorage_saved => 'تم توصيل مخزن الوسائط';
+
+  @override
+  String get settings_mediaStorage_action_disconnect => 'قطع الاتصال';
+
+  @override
+  String get settings_mediaStorage_disconnect_confirm_title =>
+      'قطع اتصال مخزن الوسائط؟';
+
+  @override
+  String get settings_mediaStorage_disconnect_confirm_body =>
+      'يتوقف هذا الجهاز عن رفع الوسائط وجلبها. لن يُحذف أي شيء من الحاوية الخاصة بك.';
+
+  @override
+  String get settings_mediaStorage_action_copyFromSync =>
+      'نسخ الإعدادات من المزامنة';
 }

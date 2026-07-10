@@ -5173,5 +5173,15 @@
   "diveLog_bulkEdit_membership_onSome": "en {count} de {total}",
   "diveLog_bulkEdit_membership_adding": "añadiendo a todas ({total})",
   "diveLog_bulkEdit_membership_removing": "quitando de todas",
-  "diveLog_bulkEdit_membership_empty": "Aún no hay elementos en las inmersiones seleccionadas"
+  "diveLog_bulkEdit_membership_empty": "Aún no hay elementos en las inmersiones seleccionadas",
+  "settings_mediaStorage_entry_title": "Almacenamiento de medios",
+  "settings_mediaStorage_entry_subtitle": "Guarda los originales de fotos y videos en tu propio almacenamiento en la nube",
+  "settings_mediaStorage_status_notConfigured": "No hay un almacén de medios conectado en este dispositivo",
+  "settings_mediaStorage_status_connected": "Conectado a {hint}",
+  "settings_mediaStorage_test_success": "Conexión correcta",
+  "settings_mediaStorage_saved": "Almacén de medios conectado",
+  "settings_mediaStorage_action_disconnect": "Desconectar",
+  "settings_mediaStorage_disconnect_confirm_title": "¿Desconectar el almacén de medios?",
+  "settings_mediaStorage_disconnect_confirm_body": "Este dispositivo deja de subir y descargar medios. No se elimina nada de tu bucket.",
+  "settings_mediaStorage_action_copyFromSync": "Copiar ajustes de Sincronización"
 }

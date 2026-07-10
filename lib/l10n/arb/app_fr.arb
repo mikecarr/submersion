@@ -5173,5 +5173,15 @@
   "diveLog_bulkEdit_membership_onSome": "sur {count} sur {total}",
   "diveLog_bulkEdit_membership_adding": "ajout à toutes les {total}",
   "diveLog_bulkEdit_membership_removing": "retrait de toutes",
-  "diveLog_bulkEdit_membership_empty": "Aucun élément sur les plongées sélectionnées pour l'instant"
+  "diveLog_bulkEdit_membership_empty": "Aucun élément sur les plongées sélectionnées pour l'instant",
+  "settings_mediaStorage_entry_title": "Stockage des médias",
+  "settings_mediaStorage_entry_subtitle": "Stockez les originaux photo et vidéo dans votre propre espace cloud",
+  "settings_mediaStorage_status_notConfigured": "Aucun stockage de médias connecté sur cet appareil",
+  "settings_mediaStorage_status_connected": "Connecté à {hint}",
+  "settings_mediaStorage_test_success": "Connexion réussie",
+  "settings_mediaStorage_saved": "Stockage des médias connecté",
+  "settings_mediaStorage_action_disconnect": "Déconnecter",
+  "settings_mediaStorage_disconnect_confirm_title": "Déconnecter le stockage des médias ?",
+  "settings_mediaStorage_disconnect_confirm_body": "Cet appareil cesse d'envoyer et de récupérer des médias. Rien n'est supprimé de votre bucket.",
+  "settings_mediaStorage_action_copyFromSync": "Copier les réglages de Sync"
 }
