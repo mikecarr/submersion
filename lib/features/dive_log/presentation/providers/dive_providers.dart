@@ -1,3 +1,4 @@
+import 'package:submersion/core/constants/dive_search.dart';
 import 'package:submersion/core/constants/sort_options.dart';
 import 'package:submersion/core/models/sort_state.dart';
 import 'package:submersion/core/performance/perf_timer.dart';
@@ -236,19 +237,28 @@ final nextDiveNumberProvider = FutureProvider<int>((ref) async {
   return repository.getNextDiveNumber(diverId: currentDiverId);
 });
 
-/// Search results provider
-final diveSearchProvider = FutureProvider.family<List<domain.Dive>, String>((
+/// Search results provider.
+///
+/// Returns lightweight [DiveSummary] rows for display. Fetches one more than
+/// [kDiveSearchResultLimit] so the UI can distinguish a truncated result
+/// (more matches exist) from an exact one and render the "showing first N"
+/// notice only when results were actually cut.
+final diveSearchProvider = FutureProvider.family<List<DiveSummary>, String>((
   ref,
   query,
 ) async {
+  // Trim so a whitespace-only query short-circuits here instead of
+  // debouncing and hitting the repository on a hot UI path.
+  if (query.trim().isEmpty) return const [];
   final validatedDiverId = await ref.watch(
     validatedCurrentDiverIdProvider.future,
   );
-  if (query.isEmpty) {
-    return ref.watch(divesProvider).value ?? [];
-  }
   final repository = ref.watch(diveRepositoryProvider);
-  return repository.searchDives(query, diverId: validatedDiverId);
+  return repository.searchDiveSummaries(
+    query,
+    diverId: validatedDiverId,
+    limit: kDiveSearchResultLimit + 1,
+  );
 });
 
 /// Dive list notifier for mutations
