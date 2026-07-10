@@ -6,6 +6,7 @@ import 'package:submersion/features/media/domain/entities/media_item.dart';
 import 'package:submersion/features/media/domain/value_objects/media_source_data.dart';
 import 'package:submersion/features/media/presentation/providers/media_resolver_providers.dart';
 import 'package:submersion/features/media/presentation/widgets/unavailable_media_placeholder.dart';
+import 'package:submersion/features/media_store/presentation/providers/media_store_providers.dart';
 
 /// Universal display widget for any [MediaItem] regardless of its source
 /// type.
@@ -79,12 +80,26 @@ class _MediaItemViewState extends ConsumerState<MediaItemView> {
   Future<MediaSourceData> _resolve() async {
     final registry = ref.read(mediaSourceResolverRegistryProvider);
     final resolver = registry.resolverFor(widget.item.sourceType);
-    return widget.thumbnail && widget.targetSize != null
+    final native = widget.thumbnail && widget.targetSize != null
         ? await resolver.resolveThumbnail(
             widget.item,
             target: widget.targetSize!,
           )
         : await resolver.resolve(widget.item);
+    if (native is! UnavailableData) return native;
+    // Media store fallback (design spec section 10): only engages when the
+    // native source cannot produce bytes on this device and the row is
+    // confirmed uploaded. Any store failure keeps the native placeholder.
+    try {
+      final runtime = await ref.read(mediaStoreRuntimeProvider.future);
+      final remote = await runtime?.resolver.tryResolveRemote(
+        widget.item,
+        thumbnail: widget.thumbnail,
+      );
+      return remote ?? native;
+    } catch (_) {
+      return native;
+    }
   }
 
   @override
