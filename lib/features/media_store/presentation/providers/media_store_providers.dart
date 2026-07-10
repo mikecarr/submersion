@@ -24,6 +24,7 @@ import 'package:submersion/features/media_store/data/media_store_worker.dart';
 import 'package:submersion/features/media_store/data/media_stores_repository.dart';
 import 'package:submersion/features/media_store/data/media_transfer_queue_repository.dart';
 import 'package:submersion/features/media_store/data/media_upload_pipeline.dart';
+import 'package:submersion/features/media_store/presentation/widgets/media_store_badge.dart';
 
 /// Everything a configured media store needs at runtime. Built once per
 /// attach; disposed and rebuilt on connect/disconnect via provider
@@ -66,6 +67,33 @@ final mediaTransferEntriesProvider =
     StreamProvider<List<MediaTransferQueueEntry>>(
       (ref) => ref.watch(mediaTransferQueueRepositoryProvider).watchEntries(),
     );
+
+/// Per-tile transfer status. Watches the newest queue row for the item;
+/// quiet (none) for done, absent, or already-uploaded rows. Defensive
+/// against an uninitialized local cache database (widget tests): any
+/// construction error reads as none.
+final mediaBadgeStateProvider =
+    StreamProvider.family<MediaBadgeState, MediaItem>((ref, item) {
+      try {
+        return ref
+            .watch(mediaTransferQueueRepositoryProvider)
+            .watchLatestForMedia(item.id)
+            .map((row) {
+              switch (row?.state) {
+                case 'failed':
+                  return MediaBadgeState.failed;
+                case 'transferring':
+                  return MediaBadgeState.transferring;
+                case 'pending':
+                  return MediaBadgeState.queued;
+                default:
+                  return MediaBadgeState.none;
+              }
+            });
+      } on StateError {
+        return Stream.value(MediaBadgeState.none);
+      }
+    });
 
 final mediaStoresRepositoryProvider = Provider<MediaStoresRepository>(
   (ref) => MediaStoresRepository(),

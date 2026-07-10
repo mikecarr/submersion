@@ -12,6 +12,7 @@ import 'package:submersion/features/media/presentation/pages/photo_viewer_page.d
 import 'package:submersion/features/media/presentation/providers/media_providers.dart';
 import 'package:submersion/features/media/presentation/providers/media_resolver_providers.dart';
 import 'package:submersion/features/media/presentation/widgets/media_item_view.dart';
+import 'package:submersion/features/media_store/presentation/widgets/media_store_badge.dart';
 import 'package:submersion/features/settings/presentation/providers/settings_providers.dart';
 import 'package:submersion/l10n/l10n_extension.dart';
 import 'package:submersion/shared/widgets/drag_select_grid_view.dart';
@@ -552,6 +553,10 @@ class _MediaThumbnailContent extends StatelessWidget {
                   ),
                 ),
               ),
+
+            // Media store transfer badge (queued/uploading/failed only;
+            // top-left so it never collides with the selection checkmark).
+            Positioned(top: 4, left: 4, child: MediaStoreBadge(item: item)),
 
             // Video icon (top-right when no checkmark, hidden when checkmark)
             if (item.isVideo && !isSelected)
