@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -35,6 +37,9 @@ class _MediaStoragePageState extends ConsumerState<MediaStoragePage> {
   bool _secretVisible = false;
   bool _busy = false;
   bool _syncConfigAvailable = false;
+  // Null until loaded; the switches render only once values are known.
+  bool? _autoUpload;
+  bool? _photosOnCellular;
 
   @override
   void initState() {
@@ -43,6 +48,18 @@ class _MediaStoragePageState extends ConsumerState<MediaStoragePage> {
     _regionController.addListener(_onRegionChanged);
     _loadExisting();
     _checkSyncConfig();
+    _loadPolicies();
+  }
+
+  Future<void> _loadPolicies() async {
+    final policies = ref.read(mediaStorePoliciesProvider);
+    final autoUpload = await policies.autoUpload();
+    final photosOnCellular = await policies.photosOnCellular();
+    if (!mounted) return;
+    setState(() {
+      _autoUpload = autoUpload;
+      _photosOnCellular = photosOnCellular;
+    });
   }
 
   void _onRegionChanged() => setState(() {});
@@ -198,6 +215,20 @@ class _MediaStoragePageState extends ConsumerState<MediaStoragePage> {
         '${l10n.settings_s3Config_error_secureStorage}: $e',
         isError: true,
       );
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<void> _backfill() async {
+    final l10n = context.l10n;
+    setState(() => _busy = true);
+    try {
+      final count = await ref.read(mediaBackfillServiceProvider).enqueueAll();
+      if (!mounted) return;
+      _showSnack(l10n.settings_mediaStorage_backfill_enqueued(count));
+      final runtime = await ref.read(mediaStoreRuntimeProvider.future);
+      unawaited(runtime?.worker?.drain());
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -434,6 +465,54 @@ class _MediaStoragePageState extends ConsumerState<MediaStoragePage> {
             ),
             if (connected) ...[
               const SizedBox(height: 8),
+              if (_autoUpload != null)
+                SwitchListTile(
+                  key: const Key('media-s3-policy-auto-upload'),
+                  title: Text(l10n.settings_mediaStorage_policy_autoUpload),
+                  value: _autoUpload!,
+                  onChanged: (value) async {
+                    setState(() => _autoUpload = value);
+                    await ref
+                        .read(mediaStorePoliciesProvider)
+                        .setAutoUpload(value);
+                  },
+                ),
+              if (_photosOnCellular != null)
+                SwitchListTile(
+                  key: const Key('media-s3-policy-photos-cellular'),
+                  title: Text(
+                    l10n.settings_mediaStorage_policy_photosOnCellular,
+                  ),
+                  value: _photosOnCellular!,
+                  onChanged: (value) async {
+                    setState(() => _photosOnCellular = value);
+                    await ref
+                        .read(mediaStorePoliciesProvider)
+                        .setPhotosOnCellular(value);
+                  },
+                ),
+              FilledButton.tonal(
+                key: const Key('media-s3-backfill'),
+                onPressed: _busy ? null : _backfill,
+                child: Text(l10n.settings_mediaStorage_backfill_action),
+              ),
+              Consumer(
+                builder: (context, ref, _) {
+                  final active =
+                      ref.watch(mediaTransferActiveCountProvider).value ?? 0;
+                  if (active == 0) return const SizedBox.shrink();
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Row(
+                      children: [
+                        const Expanded(child: LinearProgressIndicator()),
+                        const SizedBox(width: 12),
+                        Text('$active'),
+                      ],
+                    ),
+                  );
+                },
+              ),
               ListTile(
                 key: const Key('media-s3-transfers'),
                 leading: const Icon(Icons.swap_vert),

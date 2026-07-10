@@ -18,6 +18,7 @@ import 'package:submersion/features/media/data/resolvers/media_store_resolver.da
 import 'package:submersion/features/media/domain/entities/media_item.dart';
 import 'package:submersion/features/media/presentation/providers/media_providers.dart';
 import 'package:submersion/features/media/presentation/providers/media_resolver_providers.dart';
+import 'package:submersion/features/media_store/data/media_backfill_service.dart';
 import 'package:submersion/features/media_store/data/media_cache_store.dart';
 import 'package:submersion/features/media_store/data/media_store_service.dart';
 import 'package:submersion/features/media_store/data/media_store_worker.dart';
@@ -61,6 +62,18 @@ final mediaTransferQueueRepositoryProvider =
     Provider<MediaTransferQueueRepository>(
       (ref) => MediaTransferQueueRepository(),
     );
+
+final mediaBackfillServiceProvider = Provider<MediaBackfillService>(
+  (ref) => MediaBackfillService(
+    mediaRepository: ref.watch(mediaRepositoryProvider),
+    queue: ref.watch(mediaTransferQueueRepositoryProvider),
+  ),
+);
+
+/// Pending + transferring count, for the backfill progress row.
+final mediaTransferActiveCountProvider = StreamProvider<int>(
+  (ref) => ref.watch(mediaTransferQueueRepositoryProvider).watchActiveCount(),
+);
 
 /// Transfers view feed.
 final mediaTransferEntriesProvider =
