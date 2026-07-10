@@ -6,6 +6,7 @@ import 'package:submersion/features/setup_wizard/domain/setup_wizard_models.dart
 import 'package:submersion/features/setup_wizard/presentation/providers/setup_wizard_providers.dart';
 import 'package:submersion/features/setup_wizard/presentation/widgets/steps/appearance_step.dart';
 import 'package:submersion/features/setup_wizard/presentation/widgets/steps/backup_sync_step.dart';
+import 'package:submersion/features/setup_wizard/presentation/widgets/steps/finish_step.dart';
 import 'package:submersion/features/setup_wizard/presentation/widgets/steps/placeholder_step.dart';
 import 'package:submersion/features/setup_wizard/presentation/widgets/steps/profile_step.dart';
 import 'package:submersion/features/setup_wizard/presentation/widgets/steps/units_step.dart';
@@ -141,7 +142,7 @@ class _SetupWizardPageState extends ConsumerState<SetupWizardPage> {
           label: _stepLabel(id),
           hideBottomBar: true,
           canAdvance: setupWizardProvider(mode).select((_) => true),
-          builder: (_) => const PlaceholderStep(title: "You're all set"),
+          builder: (_) => FinishStep(mode: mode),
         );
       case SetupStepId.existingChoice:
         return WizardStepDef(
