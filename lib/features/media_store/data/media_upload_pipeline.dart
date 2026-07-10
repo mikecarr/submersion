@@ -108,6 +108,9 @@ class MediaUploadPipeline {
   bool _isEligible(MediaItem item) {
     if (!_eligibleSources.contains(item.sourceType)) return false;
     if (item.mediaType == MediaType.instructorSignature) return false;
+    // Videos wait for Phase 3's multipart transfer; the Phase 1 single-shot
+    // path would read a whole video into memory.
+    if (item.mediaType == MediaType.video) return false;
     final resolver = _registry.resolverFor(item.sourceType);
     return resolver.canResolveOnThisDevice(item);
   }

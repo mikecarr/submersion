@@ -184,6 +184,17 @@ void main() {
     expect((await mediaRepository.getMediaById(id))!.remoteUploadedAt, isNull);
   });
 
+  test('video rows are ineligible until Phase 3', () async {
+    await enqueueLocalFileItem(
+      bytes: [3, 3],
+      name: 'clip.mp4',
+      mediaType: domain.MediaType.video,
+    );
+    final entry = (await queue.nextPending(DateTime.now()))!;
+    expect(await pipeline.process(entry), UploadOutcome.skippedIneligible);
+    expect(fakeStore.objects, isEmpty);
+  });
+
   test('signature rows are ineligible and complete without store '
       'writes', () async {
     await enqueueLocalFileItem(

@@ -10,6 +10,7 @@ import 'package:submersion/core/services/local_cache_database_service.dart';
 import 'package:submersion/core/services/media_store/media_object_store.dart';
 import 'package:submersion/core/services/media_store/media_store_attach_state.dart';
 import 'package:submersion/core/services/media_store/media_store_credentials_store.dart';
+import 'package:submersion/core/services/media_store/media_store_policies.dart';
 import 'package:submersion/core/services/media_store/s3_media_object_store.dart';
 import 'package:submersion/core/services/media_store/store_marker.dart';
 import 'package:submersion/features/media/data/resolvers/media_store_resolver.dart';
@@ -47,6 +48,10 @@ final mediaStoreCredentialsStoreProvider = Provider<MediaStoreCredentialsStore>(
 
 final mediaStoreAttachStateProvider = Provider<MediaStoreAttachState>(
   (ref) => MediaStoreAttachState(),
+);
+
+final mediaStorePoliciesProvider = Provider<MediaStorePolicies>(
+  (ref) => MediaStorePolicies(),
 );
 
 final mediaStoresRepositoryProvider = Provider<MediaStoresRepository>(
@@ -136,6 +141,7 @@ final mediaStoreStatusHintProvider = FutureProvider<String?>((ref) async {
 final mediaStoreEnqueueImplProvider = Provider<void Function(String)>((ref) {
   return (mediaId) {
     unawaited(() async {
+      if (!await ref.read(mediaStorePoliciesProvider).autoUpload()) return;
       final runtime = await ref.read(mediaStoreRuntimeProvider.future);
       await runtime?.worker?.enqueueAndKick(mediaId);
     }());
