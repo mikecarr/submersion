@@ -277,4 +277,77 @@ void main() {
       reason: 'grids never pull originals',
     );
   });
+
+  test('a video uploaded on device A plays from the store on device '
+      'B', () async {
+    // Device A: localFile video with a BytesData poster thumb.
+    final mediaRepositoryA = MediaRepository();
+    final cacheA = MediaCacheStore(database: cacheDbA, root: rootA);
+    final queueA = MediaTransferQueueRepository(database: cacheDbA);
+    final resolverA = FakeLocalFileResolver();
+    final workerA = MediaStoreWorker(
+      queue: queueA,
+      pipeline: MediaUploadPipeline(
+        mediaRepository: mediaRepositoryA,
+        queue: queueA,
+        store: bucket,
+        registry: MediaSourceResolverRegistry({
+          MediaSourceType.localFile: resolverA,
+        }),
+        cache: cacheA,
+      ),
+    );
+
+    final videoBytes = List<int>.generate(64 * 1024, (i) => (i * 11) % 251);
+    final video = File('${rootA.path}/dive.mp4')..writeAsBytesSync(videoBytes);
+    resolverA.data = FileData(file: video);
+    // Gallery posters are pre-compressed bytes the generator passes through
+    // untouched (photo_manager emits JPEG in production; the format of the
+    // fixture is irrelevant to the pipeline).
+    final posterBytes = base64Decode(
+      'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVR4nGNgAAIAAAUAAXpe'
+      'qz8AAAAASUVORK5CYII=',
+    );
+    resolverA.thumbnailData = BytesData(bytes: posterBytes);
+
+    final created = await mediaRepositoryA.createMedia(
+      domain.MediaItem(
+        id: '',
+        mediaType: domain.MediaType.video,
+        sourceType: MediaSourceType.localFile,
+        filePath: video.path,
+        localPath: video.path,
+        originalFilename: 'dive.mp4',
+        takenAt: DateTime(2026, 7, 1),
+        createdAt: DateTime(2026, 7, 1),
+        updatedAt: DateTime(2026, 7, 1),
+      ),
+    );
+    await queueA.enqueueUpload(mediaId: created.id);
+    await workerA.drain();
+
+    final uploaded = (await mediaRepositoryA.getMediaById(created.id))!;
+    expect(uploaded.remoteUploadedAt, isNotNull);
+    expect(uploaded.remoteThumbUploadedAt, isNotNull);
+    expect(bucket.objects, hasLength(2), reason: 'thumb + original');
+
+    // Device B: the full video resolves byte-identical; the grid thumb is
+    // a JPEG poster.
+    final onB = uploaded.copyWith(
+      platformAssetId: null,
+      localPath: '/nonexistent/on/device-b.mp4',
+    );
+    final cacheB = MediaCacheStore(database: cacheDbB, root: rootB);
+    final resolverB = MediaStoreResolver(store: bucket, cache: cacheB);
+
+    final full = await resolverB.tryResolveRemote(onB, thumbnail: false);
+    expect(full, isA<FileData>());
+    expect(await (full! as FileData).file.readAsBytes(), videoBytes);
+
+    final thumb = await resolverB.tryResolveRemote(onB, thumbnail: true);
+    expect(thumb, isA<FileData>());
+    final thumbBytes = await (thumb! as FileData).file.readAsBytes();
+    expect(thumbBytes, posterBytes, reason: 'poster round-trips exactly');
+    expect(thumbBytes, isNot(equals(videoBytes)));
+  });
 }
