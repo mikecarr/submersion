@@ -25,6 +25,8 @@ import 'package:submersion/core/services/sync/changeset_log/sync_manifest.dart';
 import 'package:submersion/core/services/sync/hlc.dart';
 import 'package:submersion/core/services/sync/library_epoch.dart';
 import 'package:submersion/core/services/sync/library_epoch_store.dart';
+import 'package:submersion/core/services/sync/crypto/crypto_errors.dart';
+import 'package:submersion/core/services/sync/crypto/sync_envelope.dart';
 import 'package:submersion/core/services/sync/library_moved.dart';
 import 'package:submersion/core/services/sync/sync_clock.dart';
 import 'package:submersion/core/services/sync/sync_data_serializer.dart';
@@ -39,6 +41,7 @@ enum SyncResultStatus {
   networkError,
   authError,
   awaitingAdoption,
+  awaitingPassphrase,
   error,
 }
 
@@ -528,6 +531,12 @@ class SyncService {
         status: SyncResultStatus.networkError,
         message: 'Sync timed out',
       );
+    } on SyncEncryptionRequired catch (e) {
+      _log.info('Sync halted: encrypted library requires a passphrase');
+      return SyncResult(
+        status: SyncResultStatus.awaitingPassphrase,
+        message: e.message,
+      );
     } on CloudStorageException catch (e) {
       return SyncResult(
         status: SyncResultStatus.networkError,
@@ -559,6 +568,10 @@ class SyncService {
     LibraryEpochMarker? marker;
     try {
       marker = await readLibraryEpochMarker(provider);
+    } on SyncEncryptionRequired {
+      // Not unreadable-corrupt: encrypted. Reaches performSync's handler,
+      // which halts with awaitingPassphrase instead of a generic error.
+      rethrow;
     } catch (e) {
       _log.warning('Library epoch marker unreadable; failing closed: $e');
       return const _EpochGate.halt(
@@ -2706,6 +2719,14 @@ class SyncService {
     final bytes = await provider
         .downloadFile(candidates.first.id)
         .timeout(const Duration(seconds: 30));
+    if (SyncEnvelope.hasMagic(bytes)) {
+      // Encrypted library and this device has no (matching) key: distinct
+      // from corruption so the caller can prompt for the passphrase.
+      throw SyncEncryptionRequired(
+        libraryKeyId: SyncEnvelope.libraryKeyIdOf(bytes),
+        message: 'The library epoch marker is encrypted',
+      );
+    }
     final decoded = jsonDecode(utf8.decode(bytes));
     if (decoded is! Map<String, dynamic>) {
       throw const FormatException('Library epoch marker is not a JSON object');
