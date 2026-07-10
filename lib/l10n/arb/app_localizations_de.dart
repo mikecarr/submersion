@@ -18111,6 +18111,13 @@ class AppLocalizationsDe extends AppLocalizations {
   String get universalImport_label_consolidated => 'Konsolidiert';
 
   @override
+  String get universalImport_label_photosAttached => 'Fotos angehängt';
+
+  @override
+  String get universalImport_label_photosUnmatched =>
+      'Fotos keinem Tauchgang zugeordnet';
+
+  @override
   String get common_label_shareWithAllProfiles =>
       'Mit allen Taucherprofilen teilen';
 
