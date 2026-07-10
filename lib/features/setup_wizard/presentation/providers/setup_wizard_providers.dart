@@ -1,0 +1,59 @@
+import 'package:submersion/core/providers/provider.dart';
+
+import 'package:submersion/core/data/repositories/sync_repository.dart';
+import 'package:submersion/features/backup/domain/entities/backup_settings.dart';
+import 'package:submersion/features/settings/presentation/providers/settings_providers.dart';
+import 'package:submersion/features/setup_wizard/domain/setup_wizard_models.dart';
+
+/// Locale code the wizard previews before settings are applied at Finish.
+/// Consulted by the app's locale resolution (see app.dart) so a language
+/// choice takes effect immediately while the wizard is open.
+final previewLocaleProvider = StateProvider<String?>((ref) => null);
+
+/// Draft state for one wizard session, keyed by mode.
+final setupWizardProvider = StateNotifierProvider.autoDispose
+    .family<SetupWizardNotifier, SetupWizardDraft, SetupWizardMode>(
+      (ref, mode) => SetupWizardNotifier(ref, mode),
+    );
+
+class SetupWizardNotifier extends StateNotifier<SetupWizardDraft> {
+  final Ref _ref;
+
+  SetupWizardNotifier(this._ref, SetupWizardMode mode)
+    : super(SetupWizardDraft(mode: mode)) {
+    if (mode == SetupWizardMode.settings) {
+      // Seed the draft from the live settings so re-entry edits start
+      // from what the diver already has.
+      state = state.copyWith(settings: _ref.read(settingsProvider));
+    }
+  }
+
+  void choosePath(SetupPath path) => state = state.copyWith(path: path);
+
+  void chooseSource(ExistingDataSource source) =>
+      state = state.copyWith(source: source);
+
+  void requestSkip() =>
+      state = state.copyWith(path: SetupPath.fresh, skipRequested: true);
+
+  void setName(String name) => state = state.copyWith(name: name.trim());
+
+  void applyUnitPreset(UnitPreset preset) =>
+      state = state.applyingUnitPreset(preset);
+
+  void updateSettings(AppSettings settings) =>
+      state = state.copyWith(settings: settings);
+
+  void setBackupEnabled(bool value) =>
+      state = state.copyWith(backupEnabled: value);
+
+  void setBackupFrequency(BackupFrequency value) =>
+      state = state.copyWith(backupFrequency: value);
+
+  void setCloudBackupEnabled(bool value) =>
+      state = state.copyWith(cloudBackupEnabled: value);
+
+  void setConnectedProvider(CloudProviderType? type) => state = type == null
+      ? state.copyWith(clearConnectedProvider: true)
+      : state.copyWith(connectedProvider: type);
+}

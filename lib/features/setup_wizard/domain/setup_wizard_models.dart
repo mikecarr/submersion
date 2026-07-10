@@ -62,6 +62,7 @@ class SetupWizardDraft {
     BackupFrequency? backupFrequency,
     bool? cloudBackupEnabled,
     CloudProviderType? connectedProvider,
+    bool clearConnectedProvider = false,
   }) {
     return SetupWizardDraft(
       mode: mode,
@@ -73,7 +74,9 @@ class SetupWizardDraft {
       backupEnabled: backupEnabled ?? this.backupEnabled,
       backupFrequency: backupFrequency ?? this.backupFrequency,
       cloudBackupEnabled: cloudBackupEnabled ?? this.cloudBackupEnabled,
-      connectedProvider: connectedProvider ?? this.connectedProvider,
+      connectedProvider: clearConnectedProvider
+          ? null
+          : (connectedProvider ?? this.connectedProvider),
     );
   }
 
