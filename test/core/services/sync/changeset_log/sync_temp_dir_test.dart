@@ -22,7 +22,7 @@ void main() {
 
     setUp(() async {
       parent = await Directory.systemTemp.createTemp('sync_temp_dir_test_');
-      // A path path_provider hands back but which has NOT been created -- the
+      // A path that path_provider hands back but has NOT created yet -- the
       // macOS Library/Caches situation.
       missing = Directory('${parent.path}/Library/Caches/app.submersion');
       expect(
