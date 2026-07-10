@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:submersion/features/dive_log/data/repositories/dive_repository_impl.dart';
+import 'package:submersion/core/constants/dive_search.dart';
 import 'package:submersion/features/dive_log/domain/entities/dive_summary.dart';
 import 'package:submersion/features/dive_log/presentation/pages/dive_list_page.dart';
 import 'package:submersion/features/dive_log/presentation/providers/dive_providers.dart';
@@ -41,6 +41,7 @@ Future<void> _openSearch(
         diveSearchProvider.overrideWith((ref, q) async => results),
       ].cast(),
       child: MaterialApp(
+        locale: const Locale('en'),
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
         home: Consumer(
@@ -76,11 +77,21 @@ void main() {
     expect(find.textContaining('Showing the first'), findsNothing);
   });
 
-  testWidgets('shows the limit notice when the result bound is hit', (
+  testWidgets('no notice when matches exactly fill the limit', (tester) async {
+    // The provider over-fetches by one; an exact-limit result (no extra row)
+    // is not truncated, so the notice must not appear.
+    final results = List.generate(kDiveSearchResultLimit, (i) => _summary(i));
+    await _openSearch(tester, results);
+
+    expect(find.textContaining('Showing the first'), findsNothing);
+  });
+
+  testWidgets('shows the limit notice when results are truncated', (
     tester,
   ) async {
+    // One more than the limit signals truncation (the provider's +1 probe).
     final results = List.generate(
-      DiveRepository.searchResultLimit,
+      kDiveSearchResultLimit + 1,
       (i) => _summary(i),
     );
     await _openSearch(tester, results);

@@ -86,6 +86,14 @@ void main() {
     expect(await repository.searchDiveSummaries('   '), isEmpty);
   });
 
+  test('surrounding whitespace is trimmed before matching', () async {
+    await repository.createDive(dive('d1', notes: 'giant manta'));
+
+    // Without trimming, "%manta %" would fail to match a trailing-word hit.
+    expect(await repository.searchDiveSummaries('manta '), hasLength(1));
+    expect(await repository.searchDiveSummaries('  manta  '), hasLength(1));
+  });
+
   test('summary fields are populated', () async {
     await repository.createDive(
       domain.Dive(

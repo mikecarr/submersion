@@ -33,6 +33,13 @@ void main() {
     expect(results, isEmpty);
   });
 
+  test('whitespace-only query short-circuits to empty', () async {
+    // The provider trims before doing any async work, so a blank-looking
+    // query never debounces into a repository call.
+    final results = await container.read(diveSearchProvider('   ').future);
+    expect(results, isEmpty);
+  });
+
   test('non-empty query returns bounded summary matches', () async {
     await repository.createDive(
       domain.Dive(

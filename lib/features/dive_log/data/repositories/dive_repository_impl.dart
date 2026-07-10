@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 import 'package:uuid/uuid.dart';
 
+import 'package:submersion/core/constants/dive_search.dart';
 import 'package:submersion/core/constants/enums.dart';
 import 'package:submersion/core/data/repositories/sync_repository.dart';
 import 'package:submersion/core/performance/perf_timer.dart';
@@ -1894,24 +1895,22 @@ class DiveRepository {
     return getNextDiveNumber(diverId: diverId);
   }
 
-  /// Maximum number of results returned by [searchDiveSummaries]; the UI
-  /// shows a "showing first N" notice when the bound is hit.
-  static const int searchResultLimit = 100;
-
   /// Search dives by name, notes, buddy, dive master, site name/country/
   /// region, dive center name, linked buddy names, tag names, or custom
   /// fields, returning lightweight [DiveSummary] rows.
   ///
   /// Exactly four SQL statements regardless of match count (match ids,
   /// summary rows, batched tags, batched dive types), bounded to the [limit]
-  /// most recent matches. Replaces the unbounded full-Dive-hydrating search
-  /// whose roughly-ten-queries-per-match N+1 dominated search cost on large
-  /// databases (docs/superpowers/specs/2026-07-10-large-db-performance-
-  /// findings.md).
+  /// most recent matches ([kDiveSearchResultLimit] by default). Callers that
+  /// need to detect truncation pass `limit + 1` and treat a full-length
+  /// result as "more matches exist". Replaces the unbounded full-Dive-
+  /// hydrating search whose roughly-ten-queries-per-match N+1 dominated
+  /// search cost on large databases (docs/superpowers/specs/2026-07-10-
+  /// large-db-performance-findings.md).
   Future<List<DiveSummary>> searchDiveSummaries(
     String query, {
     String? diverId,
-    int limit = searchResultLimit,
+    int limit = kDiveSearchResultLimit,
   }) async {
     try {
       return await PerfTimer.measure('searchDiveSummaries', () async {
@@ -1919,8 +1918,11 @@ class DiveRepository {
         // already treats them as "no search", so return nothing here too.
         // Guarding limit <= 0 also avoids SQLite's negative-LIMIT (unbounded)
         // case, which would defeat the bound this method exists to enforce.
-        if (query.trim().isEmpty || limit <= 0) return <DiveSummary>[];
-        final likeTerm = '%$query%';
+        final trimmed = query.trim();
+        if (trimmed.isEmpty || limit <= 0) return <DiveSummary>[];
+        // Match on the trimmed term so incidental leading/trailing whitespace
+        // (e.g. "manta ") does not silently exclude otherwise-matching dives.
+        final likeTerm = '%$trimmed%';
         final diverClause = diverId != null ? 'AND d.diver_id = ?' : '';
         final diverArgs = diverId != null
             ? [Variable<String>(diverId)]

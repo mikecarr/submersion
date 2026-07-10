@@ -16,7 +16,7 @@ import 'package:submersion/features/settings/presentation/providers/settings_pro
 import 'package:submersion/features/tags/domain/entities/tag.dart';
 import 'package:submersion/features/tags/presentation/widgets/tag_input_widget.dart';
 import 'package:submersion/core/constants/dive_field.dart';
-import 'package:submersion/features/dive_log/data/repositories/dive_repository_impl.dart';
+import 'package:submersion/core/constants/dive_search.dart';
 import 'package:submersion/features/dive_log/domain/entities/dive.dart';
 import 'package:submersion/features/dive_log/domain/entities/dive_summary.dart';
 import 'package:submersion/features/dive_log/presentation/providers/dive_providers.dart';
@@ -455,8 +455,17 @@ class DiveSearchDelegate extends SearchDelegate<String?> {
         ),
       ),
       dataBuilder: (context, dives) {
+        // The provider over-fetches by one, so more than the display limit
+        // means results were actually truncated (an exact-limit result is
+        // not). Render only the first [kDiveSearchResultLimit] and append the
+        // notice when cut.
+        final truncated = dives.length > kDiveSearchResultLimit;
+        final visible = truncated
+            ? dives.take(kDiveSearchResultLimit).toList(growable: false)
+            : dives;
+
         final colorAttribute = ref.read(settingsProvider).cardColorAttribute;
-        final colorValues = dives
+        final colorValues = visible
             .map((d) => getCardColorValue(d, colorAttribute))
             .whereType<double>();
         final minValue = colorValues.isNotEmpty
@@ -465,18 +474,16 @@ class DiveSearchDelegate extends SearchDelegate<String?> {
         final maxValue = colorValues.isNotEmpty
             ? colorValues.reduce((a, b) => a > b ? a : b)
             : null;
-        final showLimitNotice =
-            dives.length >= DiveRepository.searchResultLimit;
 
         return ListView.builder(
-          itemCount: dives.length + (showLimitNotice ? 1 : 0),
+          itemCount: visible.length + (truncated ? 1 : 0),
           itemBuilder: (context, index) {
-            if (index >= dives.length) {
+            if (index >= visible.length) {
               return Padding(
                 padding: const EdgeInsets.all(16),
                 child: Text(
                   context.l10n.diveLog_listPage_searchLimitNotice(
-                    DiveRepository.searchResultLimit,
+                    kDiveSearchResultLimit,
                   ),
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -485,7 +492,7 @@ class DiveSearchDelegate extends SearchDelegate<String?> {
                 ),
               );
             }
-            final dive = dives[index];
+            final dive = visible[index];
             return DiveListTile(
               diveId: dive.id,
               diveNumber: dive.diveNumber ?? index + 1,
