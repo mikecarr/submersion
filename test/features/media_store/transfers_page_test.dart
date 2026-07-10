@@ -87,4 +87,24 @@ void main() {
     final row = (await tester.runAsync(() => repo.allForTesting()))!.single;
     expect(row.state, 'pending');
   });
+
+  testWidgets('transferring entries render a determinate progress bar', (
+    tester,
+  ) async {
+    late List<MediaTransferQueueEntry> snapshot;
+    await tester.runAsync(() async {
+      final id = await repo.enqueueUpload(mediaId: 'm-v');
+      await repo.markTransferring(id);
+      await repo.updateProgress(id, transferredBytes: 25, totalBytes: 100);
+      snapshot = await repo.watchEntries().first;
+    });
+
+    await tester.pumpWidget(app(snapshot));
+    await tester.pump();
+
+    final bar = tester.widget<LinearProgressIndicator>(
+      find.byType(LinearProgressIndicator),
+    );
+    expect(bar.value, 0.25);
+  });
 }

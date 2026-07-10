@@ -74,9 +74,28 @@ class _TransferTile extends ConsumerWidget {
             : null,
       ),
       title: Text(label),
-      subtitle: entry.errorMessage != null
-          ? Text(entry.errorMessage!, maxLines: 2)
-          : Text(entry.mediaId, maxLines: 1),
+      subtitle: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (entry.errorMessage != null)
+            Text(entry.errorMessage!, maxLines: 2)
+          else
+            Text(entry.mediaId, maxLines: 1),
+          if (entry.state == 'transferring')
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: LinearProgressIndicator(
+                value:
+                    (entry.progressBytes != null &&
+                        entry.totalBytes != null &&
+                        entry.totalBytes! > 0)
+                    ? entry.progressBytes! / entry.totalBytes!
+                    : null,
+              ),
+            ),
+        ],
+      ),
       trailing: entry.state == 'failed'
           ? TextButton(
               onPressed: () async {
