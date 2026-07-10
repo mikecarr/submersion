@@ -2311,6 +2311,110 @@ class DiveRepository {
     );
   }
 
+  /// Number of dives strictly after [since] (dashboard month / year-to-date
+  /// counters): one COUNT statement instead of hydrating every dive.
+  Future<int> countDivesSince(DateTime since, {String? diverId}) async {
+    final diverFilter = diverId != null ? 'AND diver_id = ?' : '';
+    final row = await _db
+        .customSelect(
+          'SELECT COUNT(*) AS c FROM dives '
+          'WHERE dive_date_time > ? $diverFilter',
+          variables: [
+            Variable<int>(since.millisecondsSinceEpoch),
+            if (diverId != null) Variable<String>(diverId),
+          ],
+          readsFrom: {_db.dives},
+        )
+        .getSingle();
+    return row.read<int>('c');
+  }
+
+  /// SQL expression mirroring [domain.Dive.effectiveRuntime]'s resolution
+  /// order in seconds: runtime, exit - entry (when positive), profile span,
+  /// bottom time.
+  static const _effectiveRuntimeSql =
+      'COALESCE(d.runtime, '
+      'CASE WHEN d.exit_time IS NOT NULL AND d.entry_time IS NOT NULL '
+      'AND d.exit_time > d.entry_time '
+      'THEN (d.exit_time - d.entry_time) / 1000 END, '
+      '(SELECT MAX(p.timestamp) - MIN(p.timestamp) FROM dive_profiles p '
+      'WHERE p.dive_id = d.id), '
+      'd.bottom_time)';
+
+  /// Winner ids for the dashboard personal records (deepest / longest /
+  /// coldest / warmest) plus the most visited site: six small indexed
+  /// statements. Callers hydrate the handful of winner dives individually
+  /// instead of loading the whole table (WS4, large-DB performance).
+  Future<
+    ({
+      String? deepestId,
+      String? longestId,
+      String? coldestId,
+      String? warmestId,
+      String? mostVisitedSiteId,
+      String? mostVisitedSiteName,
+      int? mostVisitedSiteCount,
+    })
+  >
+  getPersonalRecordIds({String? diverId}) async {
+    final vars = diverId != null
+        ? [Variable<String>(diverId)]
+        : <Variable<Object>>[];
+    final diverFilter = diverId != null ? 'AND d.diver_id = ?' : '';
+
+    Future<String?> winner(String where, String orderBy) async {
+      final row = await _db
+          .customSelect(
+            'SELECT d.id FROM dives d WHERE $where $diverFilter '
+            'ORDER BY $orderBy LIMIT 1',
+            variables: vars,
+            readsFrom: {_db.dives, _db.diveProfiles},
+          )
+          .getSingleOrNull();
+      return row?.read<String>('id');
+    }
+
+    // The > 0 guards mirror the old in-memory loops' strict-greater seeding
+    // (a lone dive with zero depth/runtime produced no record).
+    final deepestId = await winner(
+      'd.max_depth IS NOT NULL AND d.max_depth > 0',
+      'd.max_depth DESC',
+    );
+    final longestId = await winner(
+      '$_effectiveRuntimeSql > 0',
+      '$_effectiveRuntimeSql DESC',
+    );
+    final coldestId = await winner(
+      'd.water_temp IS NOT NULL',
+      'd.water_temp ASC',
+    );
+    final warmestId = await winner(
+      'd.water_temp IS NOT NULL',
+      'd.water_temp DESC',
+    );
+
+    final siteRow = await _db
+        .customSelect(
+          'SELECT d.site_id AS site_id, s.name AS site_name, COUNT(*) AS c '
+          'FROM dives d JOIN dive_sites s ON d.site_id = s.id '
+          'WHERE d.site_id IS NOT NULL $diverFilter '
+          'GROUP BY d.site_id ORDER BY c DESC LIMIT 1',
+          variables: vars,
+          readsFrom: {_db.dives, _db.diveSites},
+        )
+        .getSingleOrNull();
+
+    return (
+      deepestId: deepestId,
+      longestId: longestId,
+      coldestId: coldestId,
+      warmestId: warmestId,
+      mostVisitedSiteId: siteRow?.readNullable<String>('site_id'),
+      mostVisitedSiteName: siteRow?.readNullable<String>('site_name'),
+      mostVisitedSiteCount: siteRow?.readNullable<int>('c'),
+    );
+  }
+
   // ============================================================================
   // Mapping Helpers
   // ============================================================================
