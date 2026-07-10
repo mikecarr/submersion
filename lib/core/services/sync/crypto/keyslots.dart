@@ -4,6 +4,8 @@ import 'dart:typed_data';
 
 import 'package:cryptography/cryptography.dart';
 
+import 'package:submersion/core/services/sync/crypto/recovery_code.dart';
+
 /// Argon2id parameters, stored per slot so they can be raised later by
 /// rewrapping. Package unit note: `m` is in 1-KiB blocks (65536 = 64 MiB).
 class KdfParams {
@@ -159,7 +161,7 @@ abstract final class Keyslots {
   }) async {
     for (final slot in file.slots) {
       final candidate = slot.type == 'recovery'
-          ? _normalizeRecovery(secret)
+          ? RecoveryCode.normalize(secret)
           : secret;
       final kek = await deriveKek(
         secret: candidate,
@@ -189,12 +191,6 @@ abstract final class Keyslots {
       info: utf8.encode('sbe:v1:data'),
     );
   }
-
-  // Replaced by RecoveryCode.normalize in the recovery-code task.
-  static String Function(String) _normalizeRecovery = (s) => s;
-
-  static set normalizeRecoveryForWiring(String Function(String) fn) =>
-      _normalizeRecovery = fn;
 
   static Uint8List _randomBytes(int n) {
     final r = Random.secure();
