@@ -14,6 +14,8 @@ import 'package:submersion/features/dive_log/domain/entities/dive.dart'
     as domain;
 import 'package:submersion/features/dive_log/domain/entities/dive_data_source.dart';
 import 'package:submersion/features/dive_log/domain/entities/dive_summary.dart';
+import 'package:submersion/features/dive_log/domain/entities/dive_times.dart'
+    as domain;
 import 'package:submersion/features/dive_log/domain/entities/dive_weight.dart'
     as domain;
 import 'package:submersion/features/dive_log/domain/entities/gas_switch.dart';
@@ -2955,32 +2957,7 @@ class DiveRepository {
           computerId: t.computerId,
         );
       }).toList(),
-      profile: profileRows
-          .map(
-            (p) => domain.DiveProfilePoint(
-              timestamp: p.timestamp,
-              depth: p.depth,
-              temperature: p.temperature,
-              heartRate: p.heartRate,
-              heartRateSource: p.heartRateSource,
-              setpoint: p.setpoint,
-              ppO2: p.ppO2,
-              o2Sensor1: p.o2Sensor1,
-              o2Sensor2: p.o2Sensor2,
-              o2Sensor3: p.o2Sensor3,
-              o2Sensor4: p.o2Sensor4,
-              o2Sensor5: p.o2Sensor5,
-              o2Sensor6: p.o2Sensor6,
-              cns: p.cns,
-              ndl: p.ndl,
-              ceiling: p.ceiling,
-              ascentRate: p.ascentRate,
-              rbt: p.rbt,
-              decoType: p.decoType,
-              tts: p.tts,
-            ),
-          )
-          .toList(),
+      profile: profileRows.map(_profilePointFromRow).toList(),
       equipment: equipmentItems,
       weights: weights,
       isFavorite: row.isFavorite,
@@ -3689,21 +3666,26 @@ class DiveRepository {
 
   /// Calculate surface interval between this dive and the previous dive
   /// Returns null if there is no previous dive
+  ///
+  /// Runs on the times-only projection ([getDiveTimes] /
+  /// [getPreviousDiveTimes]) rather than full hydration: the formula needs
+  /// only timestamps and effective runtime, and this method sits on the
+  /// residual-decompression lookback hot path (WS2, large-DB performance).
   Future<Duration?> getSurfaceInterval(String diveId) async {
     try {
-      final currentDive = await getDiveById(diveId);
-      if (currentDive == null) return null;
+      final current = await getDiveTimes(diveId);
+      if (current == null) return null;
 
-      final previousDive = await getPreviousDive(diveId);
-      if (previousDive == null) return null;
+      final previous = await getPreviousDiveTimes(diveId);
+      if (previous == null) return null;
 
       // Calculate interval: from previous dive exit to current dive entry
       final previousExitTime =
-          previousDive.exitTime ??
-          (previousDive.entryTime ?? previousDive.dateTime).add(
-            previousDive.effectiveRuntime ?? Duration.zero,
+          previous.exitTime ??
+          (previous.entryTime ?? previous.dateTime).add(
+            previous.effectiveRuntime ?? Duration.zero,
           );
-      final currentEntryTime = currentDive.entryTime ?? currentDive.dateTime;
+      final currentEntryTime = current.entryTime ?? current.dateTime;
 
       final interval = currentEntryTime.difference(previousExitTime);
       return interval.isNegative ? Duration.zero : interval;
@@ -3714,6 +3696,165 @@ class DiveRepository {
         stackTrace: stackTrace,
       );
       return null;
+    }
+  }
+
+  /// Shared SELECT for the times-only dive projection. The scalar subquery
+  /// carries the profile-derived runtime fallback so
+  /// [DiveTimes.effectiveRuntime] can mirror [domain.Dive.effectiveRuntime]
+  /// without loading profile rows.
+  static const _diveTimesSelect =
+      'SELECT d.id, d.dive_date_time, d.entry_time, d.exit_time, '
+      'd.runtime, d.bottom_time, '
+      '(SELECT MAX(p.timestamp) - MIN(p.timestamp) FROM dive_profiles p '
+      'WHERE p.dive_id = d.id) AS profile_span '
+      'FROM dives d';
+
+  domain.DiveTimes _mapDiveTimesRow(QueryRow row) {
+    final entry = row.readNullable<int>('entry_time');
+    final exit = row.readNullable<int>('exit_time');
+    final runtime = row.readNullable<int>('runtime');
+    final bottom = row.readNullable<int>('bottom_time');
+    final span = row.readNullable<int>('profile_span');
+    return domain.DiveTimes(
+      id: row.read<String>('id'),
+      dateTime: DateTime.fromMillisecondsSinceEpoch(
+        row.read<int>('dive_date_time'),
+        isUtc: true,
+      ),
+      entryTime: entry != null
+          ? DateTime.fromMillisecondsSinceEpoch(entry, isUtc: true)
+          : null,
+      exitTime: exit != null
+          ? DateTime.fromMillisecondsSinceEpoch(exit, isUtc: true)
+          : null,
+      runtime: runtime != null ? Duration(seconds: runtime) : null,
+      bottomTime: bottom != null ? Duration(seconds: bottom) : null,
+      // Matches Dive.calculateRuntimeFromProfile: null unless positive.
+      profileSpan: span != null && span > 0 ? Duration(seconds: span) : null,
+    );
+  }
+
+  /// Times-only projection of one dive: a single SQL statement.
+  Future<domain.DiveTimes?> getDiveTimes(String diveId) async {
+    final rows = await _db
+        .customSelect(
+          '$_diveTimesSelect WHERE d.id = ?',
+          variables: [Variable<String>(diveId)],
+          readsFrom: {_db.dives, _db.diveProfiles},
+        )
+        .get();
+    if (rows.isEmpty) return null;
+    return _mapDiveTimesRow(rows.first);
+  }
+
+  /// Times-only equivalent of [getPreviousDive] (identical predicate and
+  /// ordering), for lookback chains that need only id and timestamps.
+  Future<domain.DiveTimes?> getPreviousDiveTimes(String diveId) async {
+    final current = await getDiveTimes(diveId);
+    if (current == null) return null;
+
+    final cutoff =
+        (current.entryTime ?? current.dateTime).millisecondsSinceEpoch;
+    final rows = await _db
+        .customSelect(
+          '$_diveTimesSelect '
+          'WHERE d.id != ? AND (d.entry_time < ? OR '
+          '(d.entry_time IS NULL AND d.dive_date_time < ?)) '
+          'ORDER BY d.entry_time DESC, d.dive_date_time DESC LIMIT 1',
+          variables: [
+            Variable<String>(diveId),
+            Variable<int>(cutoff),
+            Variable<int>(cutoff),
+          ],
+          readsFrom: {_db.dives, _db.diveProfiles},
+        )
+        .get();
+    if (rows.isEmpty) return null;
+    return _mapDiveTimesRow(rows.first);
+  }
+
+  /// Times-only equivalent of [getDivesInRange] (identical WHERE and
+  /// ordering), for same-day and weekly exposure aggregation.
+  Future<List<domain.DiveTimes>> getDiveTimesInRange(
+    DateTime start,
+    DateTime end, {
+    String? diverId,
+  }) async {
+    final clauses = <String>['d.dive_date_time >= ?', 'd.dive_date_time <= ?'];
+    final args = <Variable<Object>>[
+      Variable<int>(start.millisecondsSinceEpoch),
+      Variable<int>(end.millisecondsSinceEpoch),
+    ];
+    if (diverId != null) {
+      clauses.add('d.diver_id = ?');
+      args.add(Variable<String>(diverId));
+    }
+    final rows = await _db
+        .customSelect(
+          '$_diveTimesSelect WHERE ${clauses.join(' AND ')} '
+          'ORDER BY COALESCE(d.entry_time, d.dive_date_time) DESC, '
+          'd.dive_number DESC',
+          variables: args,
+          readsFrom: {_db.dives, _db.diveProfiles},
+        )
+        .get();
+    return rows.map(_mapDiveTimesRow).toList();
+  }
+
+  /// All profile samples for [diveId] across every source, ordered by
+  /// timestamp (one SQL statement). Matches the shape of `Dive.profile`.
+  ///
+  /// Deliberately unfiltered, mirroring the `profileRows` query in
+  /// [getDiveById]: [getDiveForAnalysis] must feed the analysis pipeline the
+  /// exact same samples the pre-WS2 `diveProvider` -> `getDiveById` path did,
+  /// which the parity test locks in. This is intentionally NOT the
+  /// `isPrimary`-filtered view used by [getDiveProfile] /
+  /// [getProfilesByDataSource]: for an edited dive it still returns the demoted
+  /// originals alongside the edited rows, exactly as [getDiveById] does. Any
+  /// change to that merge semantics (e.g. dropping demoted originals) must be
+  /// made in both places together, and measured, rather than diverging here.
+  Future<List<domain.DiveProfilePoint>> getMergedProfile(String diveId) async {
+    final rows =
+        await (_db.select(_db.diveProfiles)
+              ..where((t) => t.diveId.equals(diveId))
+              ..orderBy([(t) => OrderingTerm.asc(t.timestamp)]))
+            .get();
+    return rows.map(_profilePointFromRow).toList();
+  }
+
+  /// Lean hydration for decompression/exposure analysis: the dive row's
+  /// scalars plus tanks and the merged profile (three SQL statements).
+  /// Joined display entities (site, center, trip, equipment, weights, tags,
+  /// dive types, custom fields) are left at their defaults -- the analysis
+  /// pipeline reads only row scalars, tanks, and profile (see the WS2
+  /// findings doc). Never use the result for display.
+  Future<domain.Dive?> getDiveForAnalysis(String diveId) async {
+    try {
+      final row = await (_db.select(
+        _db.dives,
+      )..where((t) => t.id.equals(diveId))).getSingleOrNull();
+      if (row == null) return null;
+
+      final tankRows =
+          await (_db.select(_db.diveTanks)
+                ..where((t) => t.diveId.equals(diveId))
+                ..orderBy([(t) => OrderingTerm.asc(t.tankOrder)]))
+              .get();
+      final profile = await getMergedProfile(diveId);
+
+      return _mapRowToDiveWithPreloadedData(
+        row,
+        tanks: tankRows,
+        equipment: const [],
+      ).copyWith(profile: profile);
+    } catch (e, stackTrace) {
+      _log.error(
+        'Failed to get dive for analysis: $diveId',
+        error: e,
+        stackTrace: stackTrace,
+      );
+      rethrow;
     }
   }
 

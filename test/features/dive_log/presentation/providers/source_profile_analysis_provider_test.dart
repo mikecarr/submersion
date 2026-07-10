@@ -120,7 +120,7 @@ void main() {
         sharedPreferencesProvider.overrideWithValue(_prefs),
         diverRepositoryProvider.overrideWithValue(_FakeDiverRepository()),
         settingsProvider.overrideWith((ref) => _SettingsNotifier(ref)),
-        diveProvider('dive-1').overrideWith((ref) async => dive),
+        analysisDiveProvider('dive-1').overrideWith((ref) async => dive),
         diveDataSourcesProvider('dive-1').overrideWith(
           (ref) async => [
             source('src-a', 'dc-a', true),
@@ -178,7 +178,7 @@ void main() {
         sharedPreferencesProvider.overrideWithValue(_prefs),
         diverRepositoryProvider.overrideWithValue(_FakeDiverRepository()),
         settingsProvider.overrideWith((ref) => _SettingsNotifier(ref)),
-        diveProvider('dive-1').overrideWith((ref) async => dive),
+        analysisDiveProvider('dive-1').overrideWith((ref) async => dive),
         diveDataSourcesProvider(
           'dive-1',
         ).overrideWith((ref) async => [source('src-a', 'dc-a', true)]),

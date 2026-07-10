@@ -635,6 +635,23 @@ ProfileAnalysis _runProfileAnalysis(_ProfileAnalysisInput input) {
   );
 }
 
+/// Lean dive hydration for the analysis pipeline: dive-row scalars, tanks,
+/// and the merged profile only -- no joined display entities (WS2, large-DB
+/// performance). keepAlive family, so a residual-chain walk over a
+/// repetitive dive week hydrates each prior dive once per session instead
+/// of fully re-hydrating on every detail open. Self-invalidates on the
+/// detail-table tick exactly like diveProvider, preserving the analysis
+/// refresh behavior that previously arrived transitively through
+/// diveProvider.
+final analysisDiveProvider = FutureProvider.family<Dive?, String>((
+  ref,
+  diveId,
+) async {
+  final repository = ref.watch(diveRepositoryProvider);
+  ref.invalidateSelfWhen(repository.watchDiveDetailChanges());
+  return repository.getDiveForAnalysis(diveId);
+});
+
 /// Provider for profile analysis of a specific dive.
 ///
 /// Recursively computes residual CNS from previous dives: looks up the
@@ -647,9 +664,9 @@ final profileAnalysisProvider = FutureProvider.family<ProfileAnalysis?, String>(
 ) async {
   try {
     // Await the dive itself (not just its current AsyncValue snapshot). Reading
-    // `diveProvider(id).future` suspends this provider until the dive resolves,
-    // rather than mapping a momentary loading state to a resolved null. The old
-    // `ref.watch(diveProvider(id)).when(loading: () => null)` form committed an
+    // `analysisDiveProvider(id).future` suspends this provider until the dive
+    // resolves, rather than mapping a momentary loading state to a resolved
+    // null. The old `.when(loading: () => null)` form committed an
     // AsyncData(null) whenever the analysis built while the dive was still
     // loading -- which a concurrent evaluator (residual-CNS/tissue/OTU lookback
     // from another dive, or stats aggregation) reliably triggers, especially
@@ -657,7 +674,7 @@ final profileAnalysisProvider = FutureProvider.family<ProfileAnalysis?, String>(
     // retained that null and never recomputed until a detail-table write or an
     // app restart, blanking every analysis-derived overlay and the deco/tissue
     // panels in the meantime. Errors surface to the outer catch below.
-    final dive = await ref.watch(diveProvider(diveId).future);
+    final dive = await ref.watch(analysisDiveProvider(diveId).future);
 
     if (dive == null || dive.profile.isEmpty) {
       _log.debug('No profile data for dive $diveId');
@@ -911,7 +928,7 @@ final sourceProfileAnalysisProvider =
             sources.where((s) => s.isPrimary).map((s) => s.id).firstOrNull ??
             sources.first.id;
         final effectiveSourceId = key.sourceId ?? primaryId;
-        final dive = await ref.watch(diveProvider(key.diveId).future);
+        final dive = await ref.watch(analysisDiveProvider(key.diveId).future);
         if (dive == null) return null;
         final profiles = await ref.watch(
           sourceProfilesProvider(key.diveId).future,
@@ -956,19 +973,23 @@ Future<double> _computeResidualCns(Ref ref, String diveId) async {
       return 0.0;
     }
 
-    final previousDive = await repository.getPreviousDive(diveId);
+    final previousDive = await repository.getPreviousDiveTimes(diveId);
     if (previousDive == null) return 0.0;
 
     // Short-circuit: if the legend's CNS source is set to computer and the
     // previous dive has computer CNS, use its last CNS sample directly
-    // instead of full analysis.
+    // instead of full analysis. The profile is fetched only when this
+    // branch is taken (times-only lookup otherwise).
     // Use select() to avoid invalidating on unrelated legend state changes.
     final cnsSource = ref.watch(
       profileLegendProvider.select((s) => s.cnsSource),
     );
     final useComputerCns = cnsSource == MetricDataSource.computer;
     if (useComputerCns) {
-      final prevComputerCns = extractComputerCns(previousDive.profile);
+      final previousProfile = await repository.getMergedProfile(
+        previousDive.id,
+      );
+      final prevComputerCns = extractComputerCns(previousProfile);
       if (prevComputerCns != null) {
         return CnsTable.cnsAfterSurfaceInterval(
           prevComputerCns.cnsEnd,
@@ -1020,7 +1041,7 @@ Future<List<TissueCompartment>?> _computeResidualTissueState(
       return null;
     }
 
-    final previousDive = await repository.getPreviousDive(diveId);
+    final previousDive = await repository.getPreviousDiveTimes(diveId);
     if (previousDive == null) {
       return null;
     }
@@ -1072,8 +1093,8 @@ Future<double> _computeResidualOtu(Ref ref, String diveId) async {
   try {
     final repository = ref.watch(diveRepositoryProvider);
 
-    // Get current dive's date
-    final currentDive = await repository.getDiveById(diveId);
+    // Get current dive's date (times-only projection; WS2)
+    final currentDive = await repository.getDiveTimes(diveId);
     if (currentDive == null) return 0.0;
 
     final diveDate = currentDive.entryTime ?? currentDive.dateTime;
@@ -1085,7 +1106,10 @@ Future<double> _computeResidualOtu(Ref ref, String diveId) async {
     final endOfDay = startOfDay.add(const Duration(days: 1));
 
     // Get all dives on the same day
-    final sameDayDives = await repository.getDivesInRange(startOfDay, endOfDay);
+    final sameDayDives = await repository.getDiveTimesInRange(
+      startOfDay,
+      endOfDay,
+    );
 
     // Sum OTU from dives that occurred BEFORE this one
     double totalOtu = 0.0;
@@ -1164,7 +1188,7 @@ final weeklyOtuProvider = FutureProvider.family<double, String>((
   try {
     final repository = ref.watch(diveRepositoryProvider);
 
-    final currentDive = await repository.getDiveById(diveId);
+    final currentDive = await repository.getDiveTimes(diveId);
     if (currentDive == null) return 0.0;
 
     final diveDate = currentDive.entryTime ?? currentDive.dateTime;
@@ -1175,7 +1199,10 @@ final weeklyOtuProvider = FutureProvider.family<double, String>((
     ).add(const Duration(days: 1));
     final sevenDaysAgo = endOfDay.subtract(const Duration(days: 7));
 
-    final weekDives = await repository.getDivesInRange(sevenDaysAgo, endOfDay);
+    final weekDives = await repository.getDiveTimesInRange(
+      sevenDaysAgo,
+      endOfDay,
+    );
 
     double totalOtu = 0.0;
     for (final dive in weekDives) {
