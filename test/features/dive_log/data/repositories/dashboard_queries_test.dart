@@ -127,6 +127,64 @@ void main() {
       expect(winners.mostVisitedSiteCount, 3);
     });
 
+    test('a tied record resolves to the most recent dive', () async {
+      // Two dives share the exact max depth. The old in-memory scan ran
+      // most-recent-first with a strict `>`, so the newer dive kept the
+      // record; the SQL tie-break must preserve that.
+      await repository.createDive(
+        domain.Dive(
+          id: 'older-tie',
+          dateTime: DateTime(2026, 1, 1),
+          maxDepth: 42,
+          waterTemp: 20,
+        ),
+      );
+      await repository.createDive(
+        domain.Dive(
+          id: 'newer-tie',
+          dateTime: DateTime(2026, 1, 2),
+          maxDepth: 42,
+          waterTemp: 20,
+        ),
+      );
+
+      final winners = await repository.getPersonalRecordIds();
+      expect(winners.deepestId, 'newer-tie');
+      // Equal temps tie the same way (coldest and warmest both land here).
+      expect(winners.coldestId, 'newer-tie');
+      expect(winners.warmestId, 'newer-tie');
+    });
+
+    test('a most-visited-site count tie resolves to the site with the most '
+        'recent dive', () async {
+      final siteRepo = SiteRepository();
+      final alpha = await siteRepo.createSite(
+        const DiveSite(id: '', name: 'Alpha'),
+      );
+      final bravo = await siteRepo.createSite(
+        const DiveSite(id: '', name: 'Bravo'),
+      );
+
+      // Both sites have two dives; Bravo owns the most recent dive.
+      await repository.createDive(
+        domain.Dive(id: 'a0', dateTime: DateTime(2026, 3, 1), site: alpha),
+      );
+      await repository.createDive(
+        domain.Dive(id: 'a1', dateTime: DateTime(2026, 3, 2), site: alpha),
+      );
+      await repository.createDive(
+        domain.Dive(id: 'b0', dateTime: DateTime(2026, 3, 3), site: bravo),
+      );
+      await repository.createDive(
+        domain.Dive(id: 'b1', dateTime: DateTime(2026, 3, 4), site: bravo),
+      );
+
+      final winners = await repository.getPersonalRecordIds();
+      expect(winners.mostVisitedSiteCount, 2);
+      expect(winners.mostVisitedSiteId, bravo.id);
+      expect(winners.mostVisitedSiteName, 'Bravo');
+    });
+
     test('empty database produces no winners', () async {
       final winners = await repository.getPersonalRecordIds();
       expect(winners.deepestId, isNull);

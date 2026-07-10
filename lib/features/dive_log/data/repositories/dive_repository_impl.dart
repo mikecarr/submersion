@@ -2341,6 +2341,14 @@ class DiveRepository {
       'WHERE p.dive_id = d.id), '
       'd.bottom_time)';
 
+  /// Deterministic tie-break for the personal-record winners, matching the
+  /// most-recent-first order [getAllDives] used before WS4: the old in-memory
+  /// loops scanned that order with a strict `>` (`<` for coldest), so ties
+  /// implicitly resolved to the most recent dive. Appending this keeps a tied
+  /// depth/runtime/temperature on the same visible winner.
+  static const _recencyTieBreak =
+      'COALESCE(d.entry_time, d.dive_date_time) DESC, d.dive_number DESC';
+
   /// Winner ids for the dashboard personal records (deepest / longest /
   /// coldest / warmest) plus the most visited site: six small indexed
   /// statements. Callers hydrate the handful of winner dives individually
@@ -2378,27 +2386,31 @@ class DiveRepository {
     // (a lone dive with zero depth/runtime produced no record).
     final deepestId = await winner(
       'd.max_depth IS NOT NULL AND d.max_depth > 0',
-      'd.max_depth DESC',
+      'd.max_depth DESC, $_recencyTieBreak',
     );
     final longestId = await winner(
       '$_effectiveRuntimeSql > 0',
-      '$_effectiveRuntimeSql DESC',
+      '$_effectiveRuntimeSql DESC, $_recencyTieBreak',
     );
     final coldestId = await winner(
       'd.water_temp IS NOT NULL',
-      'd.water_temp ASC',
+      'd.water_temp ASC, $_recencyTieBreak',
     );
     final warmestId = await winner(
       'd.water_temp IS NOT NULL',
-      'd.water_temp DESC',
+      'd.water_temp DESC, $_recencyTieBreak',
     );
 
+    // On a count tie, keep the site whose most recent dive is latest -- the
+    // old loop scanned most-recent-first and kept the first site to reach the
+    // max count, i.e. the one owning the newest dive among the tied sites.
     final siteRow = await _db
         .customSelect(
           'SELECT d.site_id AS site_id, s.name AS site_name, COUNT(*) AS c '
           'FROM dives d JOIN dive_sites s ON d.site_id = s.id '
           'WHERE d.site_id IS NOT NULL $diverFilter '
-          'GROUP BY d.site_id ORDER BY c DESC LIMIT 1',
+          'GROUP BY d.site_id ORDER BY c DESC, '
+          'MAX(COALESCE(d.entry_time, d.dive_date_time)) DESC LIMIT 1',
           variables: vars,
           readsFrom: {_db.dives, _db.diveSites},
         )
