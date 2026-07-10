@@ -3,6 +3,22 @@
 All notable changes to Submersion are documented in this file.
 
 
+## 1.6.1 (2026-07-10)
+
+### Bug Fixes
+
+- round Android USB serial bulk reads up to whole packets (#318)
+
+### Documentation
+
+- baseline + WS0 index-integrity implementation plan
+- large-database performance (phase 3) design spec
+
+### Chores
+
+- bump version to 1.6.1+116
+
+
 ## 1.6.1 (2026-07-09)
 
 ### Bug Fixes
