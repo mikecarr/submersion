@@ -130,6 +130,42 @@ void main() {
       expect(expansion.filePaths.first, plain);
     });
 
+    test('reports a real temp directory that the caller can delete', () async {
+      final zipPath = await writeZip('temp.zip', {'dive.zxu': _zxu()});
+      final expansion = await service.expandAll([zipPath]);
+
+      expect(expansion.tempDirPaths, hasLength(1));
+      final tempDir = Directory(expansion.tempDirPaths.single);
+      expect(tempDir.existsSync(), isTrue);
+      // Extracted files live inside the reported temp dir.
+      expect(p.isWithin(tempDir.path, expansion.filePaths.single), isTrue);
+      // Caller owns cleanup; deleting the reported dir removes the members.
+      await tempDir.delete(recursive: true);
+      expect(File(expansion.filePaths.single).existsSync(), isFalse);
+    });
+
+    test('a corrupt archive leaves no temp directory behind', () async {
+      final before = Directory.systemTemp
+          .listSync()
+          .whereType<Directory>()
+          .where((d) => p.basename(d.path).startsWith('submersion_zip_'))
+          .length;
+
+      final bad = p.join(tmp.path, 'corrupt.zip');
+      await File(bad).writeAsBytes([0x50, 0x4B, 0x03, 0x04, 0, 0, 0]);
+      await expectLater(
+        service.expandAll([bad]),
+        throwsA(isA<FormatException>()),
+      );
+
+      final after = Directory.systemTemp
+          .listSync()
+          .whereType<Directory>()
+          .where((d) => p.basename(d.path).startsWith('submersion_zip_'))
+          .length;
+      expect(after, before);
+    });
+
     test('throws FormatException for an unreadable archive', () async {
       final bad = p.join(tmp.path, 'corrupt.zip');
       await File(bad).writeAsBytes([0x50, 0x4B, 0x03, 0x04, 0, 0, 0]);

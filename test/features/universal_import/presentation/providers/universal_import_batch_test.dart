@@ -395,5 +395,59 @@ void main() {
       expect(detection.format, ImportFormat.unknown);
       expect(state.error, contains('No importable files'));
     });
+
+    test(
+      'a later non-zip pick clears photos and deletes the prior temp dir',
+      () async {
+        // First import: a DiveCloud zip populates photos + a temp dir.
+        final zipPath = '${tmp.path}/with_photos.zip';
+        await File(zipPath).writeAsBytes(
+          buildZip({
+            'a_1.zxu': zxuBytes('20240612093000'),
+            'a_1_photo.jpg': [1, 2, 3],
+          }),
+        );
+        await notifier.loadFilesFromPaths([zipPath]);
+        expect(notifier.state.photoPathsByBaseName, isNotEmpty);
+        expect(notifier.state.zipTempDirPaths, hasLength(1));
+        final tempDir = notifier.state.zipTempDirPaths.single;
+
+        // Second import: a plain (non-zip) file via the picker. pickFiles
+        // does not fully reset state, so without the fix the stale photo map
+        // would linger and could be misattached to the new dive.
+        final plain = await writeFile('plain.uddf', _uddfA);
+        picker.nextPickPaths = [plain];
+        await notifier.pickFiles();
+
+        expect(
+          notifier.state.photoPathsByBaseName,
+          isEmpty,
+          reason: 'the previous ZIP import\'s photos must not carry over',
+        );
+        expect(notifier.state.unmatchedPhotoCount, 0);
+        expect(notifier.state.zipTempDirPaths, isEmpty);
+
+        // The superseded temp dir is deleted (fire-and-forget). Allow the
+        // microtask/IO to settle before asserting.
+        await Future<void>.delayed(const Duration(milliseconds: 50));
+        expect(Directory(tempDir).existsSync(), isFalse);
+      },
+    );
+
+    test('reset() deletes tracked temp dirs', () async {
+      final zipPath = '${tmp.path}/for_reset.zip';
+      await File(
+        zipPath,
+      ).writeAsBytes(buildZip({'d_1.zxu': zxuBytes('20240612093000')}));
+      await notifier.loadFilesFromPaths([zipPath]);
+      final tempDir = notifier.state.zipTempDirPaths.single;
+      expect(Directory(tempDir).existsSync(), isTrue);
+
+      notifier.reset();
+
+      expect(notifier.state.zipTempDirPaths, isEmpty);
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+      expect(Directory(tempDir).existsSync(), isFalse);
+    });
   });
 }

@@ -20,11 +20,17 @@ class ArchiveExpansion {
   /// Archive entries skipped as junk (hidden files, unsupported types).
   final int skippedEntryCount;
 
+  /// Temp directories created to hold extracted members. Callers own their
+  /// lifetime and must delete them once the extracted files are no longer
+  /// needed (after import commit / wizard reset).
+  final List<String> tempDirPaths;
+
   const ArchiveExpansion({
     required this.filePaths,
     this.photoPathsByBaseName = const {},
     this.unmatchedPhotoPaths = const [],
     this.skippedEntryCount = 0,
+    this.tempDirPaths = const [],
   });
 }
 
@@ -53,6 +59,7 @@ class ZipExpansionService {
     final filePaths = <String>[];
     final photos = <String, List<String>>{};
     final unmatched = <String>[];
+    final tempDirs = <String>[];
     var skipped = 0;
 
     for (final path in paths) {
@@ -60,8 +67,12 @@ class ZipExpansionService {
       Uint8List header;
       try {
         final raf = await file.open();
-        header = await raf.read(4);
-        await raf.close();
+        // close in finally so a failed read never leaks the descriptor.
+        try {
+          header = await raf.read(4);
+        } finally {
+          await raf.close();
+        }
       } catch (_) {
         filePaths.add(path); // unreadable: let downstream report the error
         continue;
@@ -79,6 +90,7 @@ class ZipExpansionService {
         (key, value) => (photos[key] ??= []).addAll(value),
       );
       unmatched.addAll(expansion.unmatchedPhotoPaths);
+      tempDirs.addAll(expansion.tempDirPaths);
       skipped += expansion.skippedEntryCount;
     }
 
@@ -87,6 +99,7 @@ class ZipExpansionService {
       photoPathsByBaseName: photos,
       unmatchedPhotoPaths: unmatched,
       skippedEntryCount: skipped,
+      tempDirPaths: tempDirs,
     );
   }
 
@@ -121,6 +134,24 @@ class ZipExpansionService {
     }
 
     final tempDir = await Directory.systemTemp.createTemp('submersion_zip_');
+    try {
+      return await _extractInto(tempDir, archive);
+    } catch (_) {
+      // A mid-extraction failure (e.g. disk full) must not orphan the temp
+      // directory. Best-effort remove, then rethrow.
+      try {
+        if (tempDir.existsSync()) await tempDir.delete(recursive: true);
+      } catch (_) {
+        // ignore: nothing more we can do about a failed cleanup.
+      }
+      rethrow;
+    }
+  }
+
+  Future<ArchiveExpansion> _extractInto(
+    Directory tempDir,
+    Archive archive,
+  ) async {
     final diveFiles = <String, String>{}; // baseName -> extracted path
     final photoEntries = <({String entryName, String extractedPath})>[];
     var skipped = 0;
@@ -190,6 +221,7 @@ class ZipExpansionService {
       photoPathsByBaseName: photos,
       unmatchedPhotoPaths: unmatched,
       skippedEntryCount: skipped,
+      tempDirPaths: [tempDir.path],
     );
   }
 }

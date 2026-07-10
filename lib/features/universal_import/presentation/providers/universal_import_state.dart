@@ -39,6 +39,7 @@ class UniversalImportState {
     this.files = const [],
     this.photoPathsByBaseName = const {},
     this.unmatchedPhotoCount = 0,
+    this.zipTempDirPaths = const [],
     this.additionalFileBytes,
     this.additionalFileName,
     this.detectionResult,
@@ -78,6 +79,11 @@ class UniversalImportState {
   /// Photos in an imported ZIP that matched no dive file (surfaced as an
   /// import warning count).
   final int unmatchedPhotoCount;
+
+  /// Temp directories holding files extracted from imported ZIP archives.
+  /// The notifier deletes these on reset or when superseded by a new import,
+  /// so extracted dive data and photos do not accumulate on disk.
+  final List<String> zipTempDirPaths;
 
   /// Batch parse progress (files parsed so far / files pending).
   final int parseCurrent;
@@ -165,6 +171,7 @@ class UniversalImportState {
     bool clearFiles = false,
     Map<String, List<String>>? photoPathsByBaseName,
     int? unmatchedPhotoCount,
+    List<String>? zipTempDirPaths,
     int? parseCurrent,
     int? parseTotal,
     Uint8List? additionalFileBytes,
@@ -202,6 +209,7 @@ class UniversalImportState {
       files: clearFiles ? const [] : (files ?? this.files),
       photoPathsByBaseName: photoPathsByBaseName ?? this.photoPathsByBaseName,
       unmatchedPhotoCount: unmatchedPhotoCount ?? this.unmatchedPhotoCount,
+      zipTempDirPaths: zipTempDirPaths ?? this.zipTempDirPaths,
       parseCurrent: parseCurrent ?? this.parseCurrent,
       parseTotal: parseTotal ?? this.parseTotal,
       additionalFileBytes: clearAdditionalFileBytes

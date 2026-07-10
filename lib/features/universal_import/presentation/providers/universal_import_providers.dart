@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -111,16 +112,39 @@ class UniversalImportNotifier extends StateNotifier<UniversalImportState> {
     return detection;
   }
 
-  /// Stores photo/skip bookkeeping from a ZIP expansion into state.
+  /// Stores photo/temp-dir bookkeeping from a ZIP expansion into state.
+  ///
+  /// Always overwrites, even for a non-ZIP (empty) expansion: otherwise the
+  /// photo map from a previous ZIP import would linger through a subsequent
+  /// non-ZIP import (pickFiles/pickFolder do not fully reset state) and its
+  /// photos could be misattached to the new dives. Temp dirs superseded by
+  /// this expansion are deleted so extracted data does not accumulate.
   void _applyExpansionExtras(ArchiveExpansion expansion) {
-    if (expansion.photoPathsByBaseName.isEmpty &&
-        expansion.unmatchedPhotoPaths.isEmpty) {
-      return;
-    }
+    final superseded = [
+      for (final dir in state.zipTempDirPaths)
+        if (!expansion.tempDirPaths.contains(dir)) dir,
+    ];
     state = state.copyWith(
       photoPathsByBaseName: expansion.photoPathsByBaseName,
       unmatchedPhotoCount: expansion.unmatchedPhotoPaths.length,
+      zipTempDirPaths: expansion.tempDirPaths,
     );
+    _deleteTempDirs(superseded);
+  }
+
+  /// Best-effort, fire-and-forget deletion of extracted-ZIP temp directories.
+  void _deleteTempDirs(List<String> paths) {
+    if (paths.isEmpty) return;
+    unawaited(() async {
+      for (final path in paths) {
+        try {
+          final dir = Directory(path);
+          if (dir.existsSync()) await dir.delete(recursive: true);
+        } catch (_) {
+          // Temp cleanup is best-effort; the OS reclaims systemTemp anyway.
+        }
+      }
+    }());
   }
 
   /// Single-file load by path (used when a ZIP expands to exactly one
@@ -158,7 +182,9 @@ class UniversalImportNotifier extends StateNotifier<UniversalImportState> {
   ) async {
     // Reset to a clean slate so stale fileBytes/detectionResult from a
     // previous run don't leak through if detection fails or is unsupported.
+    final staleTempDirs = state.zipTempDirPaths;
     state = const UniversalImportState().copyWith(isLoading: true);
+    _deleteTempDirs(staleTempDirs);
 
     try {
       if (ZipExpansionService.isZipBytes(bytes)) {
@@ -338,7 +364,9 @@ class UniversalImportNotifier extends StateNotifier<UniversalImportState> {
   /// enters the triage step. Marks the load as external so the wizard does
   /// not reset it on init.
   Future<void> loadFilesFromPaths(List<String> paths) async {
+    final staleTempDirs = state.zipTempDirPaths;
     state = const UniversalImportState().copyWith(isLoading: true);
+    _deleteTempDirs(staleTempDirs);
     final expansion = await _zipExpansion.expandAll(paths);
     _applyExpansionExtras(expansion);
     if (expansion.filePaths.isEmpty) {
@@ -814,7 +842,9 @@ class UniversalImportNotifier extends StateNotifier<UniversalImportState> {
   }
 
   void reset() {
+    final staleTempDirs = state.zipTempDirPaths;
     state = const UniversalImportState();
+    _deleteTempDirs(staleTempDirs);
   }
 }
 
