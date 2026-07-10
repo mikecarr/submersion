@@ -47,6 +47,7 @@ class _RecordingBackupService extends BackupService {
   Future<void> restoreFromBackup(
     BackupRecord record, {
     RestoreMode mode = RestoreMode.merge,
+    String? encryptionSecret,
   }) async {
     calls.add('restoreFromBackup');
     lastMode = mode;
@@ -56,6 +57,7 @@ class _RecordingBackupService extends BackupService {
   Future<void> restoreFromFile(
     String filePath, {
     RestoreMode mode = RestoreMode.merge,
+    String? encryptionSecret,
   }) async {
     calls.add('restoreFromFile');
     lastMode = mode;
