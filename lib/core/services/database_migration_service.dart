@@ -670,8 +670,14 @@ class DatabaseMigrationService {
     String? backupPath,
   ) async {
     // Close any open connection. Best-effort (non-strict) on purpose: this
-    // is a recovery path, so we want to reopen the original no matter what
-    // rather than abort on a slow close.
+    // is a recovery path that must reopen the original no matter what. A
+    // strict close would defeat that twice over — it would throw on a stuck
+    // connection AND keep _database non-null, so the reinitializeAtPath
+    // below (which starts with its own strict close) would re-hit the same
+    // stuck connection and abort the rollback, leaving the app with no open
+    // database and config already reset. Non-strict nulls _database so the
+    // reopen can proceed; the abandoned connection's locks are on the failed
+    // path, not the original being reopened.
     await _dbService.close();
 
     // Reset configuration to default or previous

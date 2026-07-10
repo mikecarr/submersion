@@ -195,8 +195,6 @@ class DatabaseService {
     // file locks. A stuck close throws here rather than being abandoned.
     await close(strict: true);
 
-    _currentDatabasePath = newPath;
-
     // Ensure directory exists
     final dbDir = Directory(p.dirname(newPath));
     if (!await dbDir.exists()) {
@@ -228,6 +226,12 @@ class DatabaseService {
       } catch (_) {}
       rethrow;
     }
+
+    // Commit the new path ONLY after a verified open. Setting it earlier
+    // would leave the service pointing at newPath even when _openDatabase
+    // threw (version mismatch / corrupt file) and nothing is open there,
+    // confusing later recovery/rollback code that reads databasePath.
+    _currentDatabasePath = newPath;
   }
 
   /// Closes the active database connection.
