@@ -33,7 +33,7 @@ import 'package:submersion/features/import_wizard/domain/models/import_bundle.da
     as wizard
     show ImportEntityType;
 import 'package:submersion/features/import_wizard/domain/models/unified_import_result.dart';
-import 'package:submersion/features/import_wizard/domain/models/wizard_step_def.dart';
+import 'package:submersion/shared/widgets/wizard/wizard_step_def.dart';
 import 'package:submersion/features/settings/presentation/providers/settings_providers.dart';
 import 'package:submersion/features/tags/presentation/providers/tag_providers.dart';
 import 'package:submersion/features/tank_presets/domain/services/default_tank_preset_resolver.dart';
