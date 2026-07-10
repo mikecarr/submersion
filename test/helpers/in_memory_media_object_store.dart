@@ -10,6 +10,13 @@ class InMemoryMediaObjectStore implements MediaObjectStore {
   /// When set, the next operation throws it once and clears the field.
   Exception? failNextWith;
 
+  /// When set, putFile fires onResumeStateChanged with this JSON once per
+  /// call (pipeline wiring tests).
+  String? emitResumeState;
+
+  /// The resumeStateJson the last putFile call received.
+  String? lastResumeStateJsonIn;
+
   void _maybeFail() {
     final e = failNextWith;
     if (e != null) {
@@ -40,9 +47,12 @@ class InMemoryMediaObjectStore implements MediaObjectStore {
     void Function(String resumeStateJson)? onResumeStateChanged,
   }) async {
     _maybeFail();
+    lastResumeStateJsonIn = resumeStateJson;
     final bytes = await source.readAsBytes();
     objects[key] = bytes;
     modified[key] = DateTime.now();
+    final emit = emitResumeState;
+    if (emit != null) onResumeStateChanged?.call(emit);
     onProgress?.call(bytes.length, bytes.length);
   }
 

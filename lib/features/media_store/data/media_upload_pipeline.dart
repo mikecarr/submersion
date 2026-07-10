@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:submersion/core/services/logger_service.dart';
@@ -109,10 +110,23 @@ class MediaUploadPipeline {
       final key = StoreKeys.objectKey(digest.hash, extension: extension);
       final existing = await _store.head(key);
       if (existing == null) {
+        // Resume state survives failures on the queue row; content
+        // addressing makes replaying it against a re-materialized staging
+        // copy safe (identical bytes, identical part boundaries).
         await _store.putFile(
           key,
           staged,
           contentType: StoreKeys.contentTypeFor(extension),
+          resumeStateJson: entry.resumeStateJson,
+          onResumeStateChanged: (json) =>
+              unawaited(_queue.updateResumeState(entry.id, json)),
+          onProgress: (sent, total) => unawaited(
+            _queue.updateProgress(
+              entry.id,
+              transferredBytes: sent,
+              totalBytes: total ?? digest.sizeBytes,
+            ),
+          ),
         );
       }
 
@@ -139,9 +153,6 @@ class MediaUploadPipeline {
   bool _isEligible(MediaItem item) {
     if (!_eligibleSources.contains(item.sourceType)) return false;
     if (item.mediaType == MediaType.instructorSignature) return false;
-    // Videos wait for Phase 3's multipart transfer; the Phase 1 single-shot
-    // path would read a whole video into memory.
-    if (item.mediaType == MediaType.video) return false;
     final resolver = _registry.resolverFor(item.sourceType);
     return resolver.canResolveOnThisDevice(item);
   }
