@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:flutter/foundation.dart' show kReleaseMode;
+import 'package:flutter/foundation.dart' show kReleaseMode, visibleForTesting;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -39,6 +39,27 @@ typedef ServiceInitializer =
 /// to decide whether to show a migration progress bar before opening the DB.
 typedef SchemaVersionProbe =
     ({bool needsMigration, int totalSteps}) Function(String dbPath);
+
+/// Runs [step], measuring its wall time, and prints a
+/// `[startup] <name>: <ms>ms` attribution line in debug/profile builds.
+///
+/// Extracted to library scope so the timing-and-log logic is unit-testable
+/// on its own; at the real call sites in [StartupWrapper] it wraps platform
+/// singletons that only run during app launch. [log] defaults to
+/// `!kReleaseMode` and is injectable so tests can exercise both branches.
+@visibleForTesting
+Future<void> timeStartupStep(
+  String name,
+  Future<void> Function() step, {
+  bool log = !kReleaseMode,
+}) async {
+  final sw = Stopwatch()..start();
+  await step();
+  sw.stop();
+  if (log) {
+    debugPrint('[startup] $name: ${sw.elapsedMilliseconds}ms');
+  }
+}
 
 enum _StartupState {
   initializing,
@@ -122,9 +143,11 @@ class _StartupWrapperState extends State<StartupWrapper>
     super.initState();
     _splashFadeController.addStatusListener((status) {
       if (status == AnimationStatus.completed && mounted) {
+        // coverage:ignore-start
         if (!kReleaseMode) {
           debugPrint('[startup] splash fade complete');
         }
+        // coverage:ignore-end
         setState(() => _splashRemoved = true);
       }
     });
@@ -196,6 +219,7 @@ class _StartupWrapperState extends State<StartupWrapper>
       ]);
 
       if (mounted) {
+        // coverage:ignore-start
         final readyAt = Stopwatch()..start();
         if (!kReleaseMode) {
           debugPrint('[startup] ready; building app under splash');
@@ -206,6 +230,7 @@ class _StartupWrapperState extends State<StartupWrapper>
             );
           });
         }
+        // coverage:ignore-end
         setState(() => _state = _StartupState.ready);
         _splashFadeController.forward();
       }
@@ -303,18 +328,12 @@ class _StartupWrapperState extends State<StartupWrapper>
       return;
     }
 
-    // Per-step wall-time attribution for startup stalls (large-DB perf
-    // program). Prints in debug/profile only.
-    Future<void> timedStep(String name, Future<void> Function() step) async {
-      final sw = Stopwatch()..start();
-      await step();
-      sw.stop();
-      if (!kReleaseMode) {
-        debugPrint('[startup] $name: ${sw.elapsedMilliseconds}ms');
-      }
-    }
-
-    await timedStep(
+    // Real service bootstrap. Each step wraps a platform singleton or a real
+    // database, so this block runs during app launch rather than unit tests
+    // (cf. the coverage-ignored bootstrap in lib/main.dart). The wall-time
+    // attribution itself lives in the unit-tested [timeStartupStep].
+    // coverage:ignore-start
+    await timeStartupStep(
       'database',
       () => DatabaseService.instance.initialize(
         locationService: widget.locationService,
@@ -322,14 +341,17 @@ class _StartupWrapperState extends State<StartupWrapper>
       ),
     );
 
-    await timedStep(
+    await timeStartupStep(
       'localCache',
       LocalCacheDatabaseService.instance.initialize,
     );
-    await timedStep('notifications', NotificationService.instance.initialize);
-    await timedStep('backgroundService', initializeBackgroundService);
+    await timeStartupStep(
+      'notifications',
+      NotificationService.instance.initialize,
+    );
+    await timeStartupStep('backgroundService', initializeBackgroundService);
 
-    await timedStep('tileCache', () async {
+    await timeStartupStep('tileCache', () async {
       try {
         await TileCacheService.instance.initialize();
       } catch (e) {
@@ -337,10 +359,11 @@ class _StartupWrapperState extends State<StartupWrapper>
       }
     });
 
-    await timedStep('speciesSeed', () async {
+    await timeStartupStep('speciesSeed', () async {
       final speciesRepository = SpeciesRepository();
       await speciesRepository.seedBuiltInSpecies();
     });
+    // coverage:ignore-end
   }
 
   Future<void> _runPreMigrationBackup({
