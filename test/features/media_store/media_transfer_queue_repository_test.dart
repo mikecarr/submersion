@@ -98,4 +98,68 @@ void main() {
         .getSingle();
     expect(kept.data['media_id'], 'm1');
   });
+
+  test('watchEntries orders transferring, pending, failed, done', () async {
+    final a = await repo.enqueueUpload(mediaId: 'a');
+    final b = await repo.enqueueUpload(mediaId: 'b');
+    final c = await repo.enqueueUpload(mediaId: 'c');
+    final d = await repo.enqueueUpload(mediaId: 'd');
+    await repo.markTransferring(b);
+    await repo.markDone(c);
+    for (var i = 0; i < 5; i++) {
+      await repo.markFailed(d, 'x');
+    }
+
+    final entries = await repo.watchEntries().first;
+    expect(entries.map((e) => e.id).toList(), [b, a, d, c]);
+  });
+
+  test('watchLatestForMedia emits the newest row and null when '
+      'absent', () async {
+    expect(await repo.watchLatestForMedia('m9').first, isNull);
+    final id = await repo.enqueueUpload(mediaId: 'm9');
+    final row = await repo.watchLatestForMedia('m9').first;
+    expect(row!.id, id);
+  });
+
+  test('retry resets a terminally failed entry', () async {
+    final id = await repo.enqueueUpload(mediaId: 'm1');
+    for (var i = 0; i < 5; i++) {
+      await repo.markFailed(id, 'boom');
+    }
+    expect((await repo.allForTesting()).single.state, 'failed');
+
+    await repo.retry(id);
+    final row = (await repo.allForTesting()).single;
+    expect(row.state, 'pending');
+    expect(row.attempts, 0);
+    expect(row.nextAttemptAt, isNull);
+    expect(row.errorMessage, isNull);
+    expect(await repo.nextPending(DateTime.now()), isNotNull);
+  });
+
+  test('defer postpones without consuming an attempt', () async {
+    final id = await repo.enqueueUpload(mediaId: 'm1');
+    final until = DateTime.now().add(const Duration(minutes: 10));
+    await repo.defer(id, until);
+    expect(await repo.nextPending(DateTime.now()), isNull);
+    final row = (await repo.allForTesting()).single;
+    expect(row.attempts, 0);
+    expect(row.state, 'pending');
+    expect(
+      await repo.nextPending(until.add(const Duration(seconds: 1))),
+      isNotNull,
+    );
+  });
+
+  test('deleteDone removes only completed rows and watchActiveCount tracks '
+      'pending plus transferring', () async {
+    final a = await repo.enqueueUpload(mediaId: 'a');
+    final b = await repo.enqueueUpload(mediaId: 'b');
+    await repo.markDone(a);
+    await repo.markTransferring(b);
+    expect(await repo.watchActiveCount().first, 1);
+    expect(await repo.deleteDone(), 1);
+    expect((await repo.allForTesting()).length, 1);
+  });
 }
