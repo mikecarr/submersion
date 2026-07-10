@@ -20,9 +20,20 @@ import 'package:path_provider/path_provider.dart';
 /// a genuine runtime problem and propagates, rather than silently
 /// reintroducing the `/tmp` EPERM this fix exists to avoid. In production
 /// getTemporaryDirectory resolves normally, so no fallback runs.
+///
+/// The resolved directory is created if absent (issue #554). On macOS
+/// getTemporaryDirectory maps to the sandbox `Library/Caches/<bundleId>` dir,
+/// which the OS may purge and does not guarantee exists; path_provider returns
+/// the path without creating it. Opening a base-export temp file for write in a
+/// missing dir threw `PathNotFoundException: Cannot open file ... No such file
+/// or directory (errno = 2)`, crashing every macOS sync while iPhone/iPad --
+/// which reliably have the dir -- were unaffected. `create(recursive: true)` is
+/// idempotent and always permitted inside the app's own container.
 Future<Directory> resolveSyncTempDir() async {
   try {
-    return await getTemporaryDirectory();
+    final dir = await getTemporaryDirectory();
+    await dir.create(recursive: true);
+    return dir;
   } on MissingPluginException {
     return Directory.systemTemp;
   } on FlutterError catch (e) {
