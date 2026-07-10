@@ -86,8 +86,20 @@ search joins:   SEARCH db/dt/cf USING INDEX idx_dive_buddies/tags/custom_fields_
   shape (that dive has no transmitter data), and it makes the point well:
   unindexed, absence-of-data still cost a 785k-row scan.
 
-## In-app verification (filled in at Task 5)
+## In-app verification (Task 5, 2026-07-10)
 
-- Live DB healed on first open: pending
-- beforeOpen ensure cost on already-healed DB: pending
-- Post-WS0 UI re-baseline (runbook Layer 2): pending
+- Live DB healed on first open: 6 -> 40 user indexes (exactly the canonical
+  list; 34 created on this open) after a single `flutter run -d macos`
+  launch of the WS0 build. `EXPLAIN QUERY PLAN` on the live DB confirms
+  `SEARCH dive_profiles USING INDEX idx_dive_profiles_dive_id`;
+  sqlite_stat1 populated (48 rows), so ANALYZE ran.
+- Expected heal cost was 534 ms (fixture-measured, identical data); startup
+  showed no user-visible stall behind the splash.
+- Logging caveat: the heal message uses dart:developer `log`, which appears
+  in the DevTools logging view, NOT in `flutter run` stdout. Absence of a
+  console line is not evidence the heal did not run; check
+  sqlite_master.
+- beforeOpen steady-state cost on an already-healed DB: one sqlite_master
+  read + no DDL (idempotency unit-tested; created list empty).
+- Post-WS0 UI re-baseline (runbook Layer 2): pending -- decides WS1 vs WS2
+  ordering.
