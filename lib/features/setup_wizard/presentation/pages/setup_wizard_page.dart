@@ -6,6 +6,7 @@ import 'package:submersion/features/setup_wizard/domain/setup_wizard_models.dart
 import 'package:submersion/features/setup_wizard/presentation/providers/setup_wizard_providers.dart';
 import 'package:submersion/features/setup_wizard/presentation/widgets/steps/placeholder_step.dart';
 import 'package:submersion/features/setup_wizard/presentation/widgets/steps/profile_step.dart';
+import 'package:submersion/features/setup_wizard/presentation/widgets/steps/units_step.dart';
 import 'package:submersion/features/setup_wizard/presentation/widgets/steps/welcome_fork_step.dart';
 import 'package:submersion/l10n/l10n_extension.dart';
 import 'package:submersion/shared/widgets/wizard/wizard_step_def.dart';
@@ -119,7 +120,7 @@ class _SetupWizardPageState extends ConsumerState<SetupWizardPage> {
         return WizardStepDef(
           label: _stepLabel(id),
           canAdvance: setupWizardProvider(mode).select((_) => true),
-          builder: (_) => const PlaceholderStep(title: 'Units'),
+          builder: (_) => UnitsStep(mode: mode),
         );
       case SetupStepId.appearance:
         return WizardStepDef(
