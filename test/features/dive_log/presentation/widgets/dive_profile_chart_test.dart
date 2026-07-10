@@ -3448,6 +3448,189 @@ void main() {
         }
       },
     );
+
+    testWidgets('zooming a dense profile decimates analysis curves through the '
+        'viewport-clipped path', (tester) async {
+      // Exercises the _viewport.isZoomed branch of _decimatedCurveIndices:
+      // the visible window is clipped (binary search for the first/last
+      // in-range sample) before decimation, and kept indices are offset
+      // back by the window start.
+      const samples = 5000;
+      final profile = _makeProfile(points: samples);
+      final ceiling = List<double>.generate(
+        samples,
+        (i) => 3.0 + (i % 7) * 0.5,
+      );
+
+      await tester.pumpWidget(
+        _buildChart(profile: profile, ceilingCurve: ceiling),
+      );
+      await tester.pumpAndSettle();
+
+      final chart = find.byType(LineChart).first;
+      final fullWindow = tester.widget<LineChart>(chart).data;
+      final fullSpan = fullWindow.maxX - fullWindow.minX;
+
+      // Zoom in deeply (several wheel steps) so the visible window becomes a
+      // strict interior subset: > 2x zoom clips the decimation window off
+      // both ends, exercising the start offset and both binary searches.
+      final topLeft = tester.getTopLeft(chart);
+      final size = tester.getSize(chart);
+      final cursor = topLeft + Offset(size.width * 0.5, size.height * 0.5);
+      for (var step = 0; step < 14; step++) {
+        await tester.sendEventToBinding(
+          PointerScrollEvent(
+            position: cursor,
+            scrollDelta: const Offset(0, -100),
+          ),
+        );
+        await tester.pump();
+      }
+
+      final zoomed = tester.widget<LineChart>(chart).data;
+      expect(
+        zoomed.maxX - zoomed.minX,
+        lessThan(fullSpan / 2),
+        reason: 'the wheel steps must zoom past 2x',
+      );
+      expect(
+        zoomed.minX,
+        greaterThan(fullWindow.minX),
+        reason: 'the visible window no longer starts at the first sample',
+      );
+      expect(
+        zoomed.maxX,
+        lessThan(fullWindow.maxX),
+        reason: 'the visible window no longer ends at the last sample',
+      );
+
+      // The ceiling curve still decimates within the visible window.
+      final ceilingBars = zoomed.lineBarsData.where(
+        (b) =>
+            b.dashArray != null &&
+            b.dashArray!.length == 2 &&
+            b.dashArray!.first == 4 &&
+            b.dashArray!.last == 4 &&
+            b.spots.isNotEmpty,
+      );
+      expect(ceilingBars, isNotEmpty);
+      for (final bar in ceilingBars) {
+        expect(bar.spots.length, lessThanOrEqualTo(2008));
+      }
+    });
+
+    testWidgets(
+      'a dense source overlay decimates its depth, temperature, ceiling and '
+      'NDL series to the point budget',
+      (tester) async {
+        // Exercises _decimatedOverlayIndices' over-budget branch and all four
+        // overlay series builders (depth / temp / ceiling / NDL), whose
+        // envelope closures only execute when the overlay exceeds the budget.
+        const n = 5000;
+        final overlayPoints = List<DiveProfilePoint>.generate(
+          n,
+          (i) => DiveProfilePoint(
+            timestamp: i * 10,
+            depth: 10.0 + (i % 11) * 1.0,
+            temperature: 20.0 + (i % 5) * 0.5,
+            ceiling: 1.0 + (i % 7) * 0.5,
+            ndl: (i % 9) * 60,
+          ),
+        );
+        // Active source small; its temperature seeds the shared temp scale.
+        final active = List<DiveProfilePoint>.generate(
+          8,
+          (i) => DiveProfilePoint(
+            timestamp: i * 30,
+            depth: i * 2.0,
+            temperature: 21.0,
+          ),
+        );
+
+        await tester.pumpWidget(
+          _buildChart(
+            profile: active,
+            activeComputerId: 'comp-a',
+            overlays: [
+              ChartSourceOverlay(
+                sourceId: 'src-b',
+                name: 'Dense',
+                color: Colors.orange,
+                computerId: 'comp-b',
+                points: overlayPoints,
+              ),
+            ],
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        // NDL is off by default; enable it so the overlay NDL series builds.
+        final container = ProviderScope.containerOf(
+          tester.element(find.byType(DiveProfileChart)),
+        );
+        container.read(profileLegendProvider.notifier).toggleNdl();
+        await tester.pumpAndSettle();
+
+        final bars = tester
+            .widget<LineChart>(find.byType(LineChart).first)
+            .data
+            .lineBarsData;
+
+        // Depth, temperature and ceiling overlay series (NDL too) each derive
+        // from the 5,000-point overlay and must decimate toward the budget.
+        final denseBars = bars.where((b) => b.spots.length > 1000).toList();
+        expect(
+          denseBars.length,
+          greaterThanOrEqualTo(3),
+          reason: 'overlay depth/temp/ceiling/NDL each decimate to ~budget',
+        );
+        for (final b in bars) {
+          expect(
+            b.spots.length,
+            lessThanOrEqualTo(2008),
+            reason: 'no overlay series emits all 5,000 samples',
+          );
+        }
+      },
+    );
+
+    testWidgets('enabling MOD builds the decimated MOD line for a dense '
+        'profile', (tester) async {
+      // The MOD line is gated on the legend showMod toggle (default off), so
+      // _buildModLine and its inclusion in the analysis group are otherwise
+      // never reached.
+      const samples = 5000;
+      final profile = _makeProfile(points: samples);
+      final mod = List<double>.generate(samples, (i) => 30.0 + (i % 5));
+
+      await tester.pumpWidget(_buildChart(profile: profile, modCurve: mod));
+      await tester.pumpAndSettle();
+
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(DiveProfileChart)),
+      );
+      container.read(profileLegendProvider.notifier).toggleMod();
+      await tester.pumpAndSettle();
+
+      // MOD is the deepOrange [8, 4] dashed line.
+      final modBars = tester
+          .widget<LineChart>(find.byType(LineChart).first)
+          .data
+          .lineBarsData
+          .where(
+            (b) =>
+                b.color == Colors.deepOrange &&
+                b.dashArray != null &&
+                b.dashArray!.length == 2 &&
+                b.dashArray!.first == 8 &&
+                b.dashArray!.last == 4,
+          );
+      expect(modBars, isNotEmpty);
+      for (final b in modBars) {
+        expect(b.spots, isNotEmpty);
+        expect(b.spots.length, lessThanOrEqualTo(2008));
+      }
+    });
   });
 }
 
