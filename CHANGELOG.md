@@ -3,6 +3,28 @@
 All notable changes to Submersion are documented in this file.
 
 
+## 1.6.1 (2026-07-09)
+
+### Bug Fixes
+
+- buffer Android USB serial reads at bulk-packet granularity (#318)
+
+### Documentation
+
+- release notes
+
+### Chores
+
+- bump version to 1.6.1+115
+
+### Other
+
+- Fix trip scan analysis issues
+- Address trip scan timezone review
+- Address trip scan review comments
+- Fix trip gallery photo scan and spinner dismissal
+
+
 ## 1.6.0 (2026-07-09)
 
 ### Features
