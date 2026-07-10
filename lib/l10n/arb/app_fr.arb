@@ -5196,5 +5196,10 @@
   "settings_mediaStorage_backfill_action": "Envoyer la bibliothèque existante",
   "settings_mediaStorage_backfill_enqueued": "{count} envois en file",
   "settings_mediaStorage_policy_autoUpload": "Envoyer les photos automatiquement",
-  "settings_mediaStorage_policy_photosOnCellular": "Envoyer les photos en cellulaire"
+  "settings_mediaStorage_policy_photosOnCellular": "Envoyer les photos en cellulaire",
+  "settings_mediaStorage_provider_label": "Fournisseur",
+  "settings_mediaStorage_connect_dropbox_hint": "Utilise votre connexion Dropbox de la synchronisation cloud. Les médias sont stockés dans le dossier d'application Dropbox.",
+  "settings_mediaStorage_connect_gdrive_hint": "Connexion avec Google. Les médias sont stockés dans l'espace Drive privé de cette application.",
+  "settings_mediaStorage_connect_icloud_hint": "Les médias sont stockés dans le conteneur iCloud de cette application et se synchronisent via votre identifiant Apple.",
+  "settings_mediaStorage_connect_action": "Connecter {provider}"
 }

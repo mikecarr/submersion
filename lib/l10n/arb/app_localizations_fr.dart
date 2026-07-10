@@ -18513,4 +18513,24 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get settings_mediaStorage_policy_photosOnCellular =>
       'Envoyer les photos en cellulaire';
+
+  @override
+  String get settings_mediaStorage_provider_label => 'Fournisseur';
+
+  @override
+  String get settings_mediaStorage_connect_dropbox_hint =>
+      'Utilise votre connexion Dropbox de la synchronisation cloud. Les médias sont stockés dans le dossier d\'application Dropbox.';
+
+  @override
+  String get settings_mediaStorage_connect_gdrive_hint =>
+      'Connexion avec Google. Les médias sont stockés dans l\'espace Drive privé de cette application.';
+
+  @override
+  String get settings_mediaStorage_connect_icloud_hint =>
+      'Les médias sont stockés dans le conteneur iCloud de cette application et se synchronisent via votre identifiant Apple.';
+
+  @override
+  String settings_mediaStorage_connect_action(String provider) {
+    return 'Connecter $provider';
+  }
 }

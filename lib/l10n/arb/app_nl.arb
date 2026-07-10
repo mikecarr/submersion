@@ -5196,5 +5196,10 @@
   "settings_mediaStorage_backfill_action": "Bestaande bibliotheek uploaden",
   "settings_mediaStorage_backfill_enqueued": "{count} uploads in wachtrij",
   "settings_mediaStorage_policy_autoUpload": "Foto's automatisch uploaden",
-  "settings_mediaStorage_policy_photosOnCellular": "Foto's uploaden via mobiel"
+  "settings_mediaStorage_policy_photosOnCellular": "Foto's uploaden via mobiel",
+  "settings_mediaStorage_provider_label": "Provider",
+  "settings_mediaStorage_connect_dropbox_hint": "Gebruikt je Dropbox-koppeling uit Cloud Sync. Media wordt opgeslagen in je Dropbox-appmap.",
+  "settings_mediaStorage_connect_gdrive_hint": "Meldt aan met Google. Media wordt opgeslagen in de privé-Drive-ruimte van deze app.",
+  "settings_mediaStorage_connect_icloud_hint": "Media wordt opgeslagen in de iCloud-container van deze app en synchroniseert via je Apple ID.",
+  "settings_mediaStorage_connect_action": "{provider} verbinden"
 }

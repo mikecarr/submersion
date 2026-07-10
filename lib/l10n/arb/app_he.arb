@@ -5196,5 +5196,10 @@
   "settings_mediaStorage_backfill_action": "העלה ספריה קיימת",
   "settings_mediaStorage_backfill_enqueued": "{count} העלאות בתור",
   "settings_mediaStorage_policy_autoUpload": "העלה תמונות אוטומטית",
-  "settings_mediaStorage_policy_photosOnCellular": "העלה תמונות ברשת סלולרית"
+  "settings_mediaStorage_policy_photosOnCellular": "העלה תמונות ברשת סלולרית",
+  "settings_mediaStorage_provider_label": "ספק",
+  "settings_mediaStorage_connect_dropbox_hint": "משתמש בחיבור Dropbox מסנכרון הענן. המדיה נשמרת בתיקיית האפליקציה ב-Dropbox.",
+  "settings_mediaStorage_connect_gdrive_hint": "מתחבר עם Google. המדיה נשמרת בשטח ה-Drive הפרטי של האפליקציה.",
+  "settings_mediaStorage_connect_icloud_hint": "המדיה נשמרת במיכל ה-iCloud של האפליקציה ומסתנכרנת דרך ה-Apple ID שלך.",
+  "settings_mediaStorage_connect_action": "חבר את {provider}"
 }
