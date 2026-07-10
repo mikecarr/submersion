@@ -37,6 +37,8 @@ class UniversalImportState {
     this.isImporting = false,
     this.error,
     this.files = const [],
+    this.photoPathsByBaseName = const {},
+    this.unmatchedPhotoCount = 0,
     this.additionalFileBytes,
     this.additionalFileName,
     this.detectionResult,
@@ -67,6 +69,15 @@ class UniversalImportState {
   /// multiple for a bulk batch. Path-backed entries drop their bytes after
   /// detection and re-read them lazily at parse time.
   final List<PickedImportFile> files;
+
+  /// Photos extracted from an imported ZIP, keyed by the dive file's
+  /// basename (without extension) they belong to. Consumed post-commit by
+  /// the adapter to attach photos to the created dives.
+  final Map<String, List<String>> photoPathsByBaseName;
+
+  /// Photos in an imported ZIP that matched no dive file (surfaced as an
+  /// import warning count).
+  final int unmatchedPhotoCount;
 
   /// Batch parse progress (files parsed so far / files pending).
   final int parseCurrent;
@@ -152,6 +163,8 @@ class UniversalImportState {
     bool clearError = false,
     List<PickedImportFile>? files,
     bool clearFiles = false,
+    Map<String, List<String>>? photoPathsByBaseName,
+    int? unmatchedPhotoCount,
     int? parseCurrent,
     int? parseTotal,
     Uint8List? additionalFileBytes,
@@ -187,6 +200,8 @@ class UniversalImportState {
       isImporting: isImporting ?? this.isImporting,
       error: clearError ? null : (error ?? this.error),
       files: clearFiles ? const [] : (files ?? this.files),
+      photoPathsByBaseName: photoPathsByBaseName ?? this.photoPathsByBaseName,
+      unmatchedPhotoCount: unmatchedPhotoCount ?? this.unmatchedPhotoCount,
       parseCurrent: parseCurrent ?? this.parseCurrent,
       parseTotal: parseTotal ?? this.parseTotal,
       additionalFileBytes: clearAdditionalFileBytes
