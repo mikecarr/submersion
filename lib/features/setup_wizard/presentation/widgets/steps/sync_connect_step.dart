@@ -42,21 +42,33 @@ class _SyncConnectStepState extends ConsumerState<SyncConnectStep> {
       setState(() => _phase = _PullPhase.connect);
       return;
     }
-    final instance = cloudProviderInstanceFor(connected);
-    final peers = await ref
-        .read(syncInitializerProvider)
-        .peerSyncFiles(instance);
-    if (peers.isEmpty) {
-      if (mounted) setState(() => _phase = _PullPhase.empty);
-      return;
-    }
-    await ref.read(syncStateProvider.notifier).performSync();
-    await realignActiveDiverAfterDataReplace(
-      ref.read(sharedPreferencesProvider),
-    );
-    final hasDivers = await ref.read(hasAnyDiversProvider.future);
-    if (mounted) {
-      setState(() => _phase = hasDivers ? _PullPhase.done : _PullPhase.empty);
+    try {
+      final instance = cloudProviderInstanceFor(connected);
+      final peers = await ref
+          .read(syncInitializerProvider)
+          .peerSyncFiles(instance);
+      if (peers.isEmpty) {
+        if (mounted) setState(() => _phase = _PullPhase.empty);
+        return;
+      }
+      await ref.read(syncStateProvider.notifier).performSync();
+      await realignActiveDiverAfterDataReplace(
+        ref.read(sharedPreferencesProvider),
+      );
+      final hasDivers = await ref.read(hasAnyDiversProvider.future);
+      if (mounted) {
+        setState(() => _phase = hasDivers ? _PullPhase.done : _PullPhase.empty);
+      }
+    } catch (e) {
+      // Listing peers or syncing can fail (network/auth). Return to the
+      // connect UI with an error rather than crashing or hanging on the
+      // spinner.
+      if (mounted) {
+        setState(() => _phase = _PullPhase.connect);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(context.l10n.setup_sync_error(e))),
+        );
+      }
     }
   }
 

@@ -18,11 +18,15 @@ import '../../../../../helpers/test_database.dart';
 
 class _FakeSyncInit implements SyncInitializer {
   List<CloudFileInfo> peers = [];
+  bool throwOnPeers = false;
 
   @override
   Future<List<CloudFileInfo>> peerSyncFiles(
     CloudStorageProvider provider,
-  ) async => peers;
+  ) async {
+    if (throwOnPeers) throw Exception('network down');
+    return peers;
+  }
 
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
@@ -126,6 +130,39 @@ void main() {
     expect(find.text('No library found'), findsOneWidget);
     await tester.tap(find.widgetWithText(FilledButton, 'Start fresh'));
     expect(pivoted, 1);
+  });
+
+  testWidgets('a failing pull returns to the connect UI with an error', (
+    tester,
+  ) async {
+    syncInit.throwOnPeers = true;
+    late ProviderContainer container;
+    await tester.pumpWidget(
+      testApp(
+        overrides: await overrides(),
+        child: Builder(
+          builder: (context) {
+            container = ProviderScope.containerOf(context);
+            return SyncConnectStep(
+              mode: SetupWizardMode.firstRun,
+              onNoLibrary: () {},
+            );
+          },
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    container
+        .read(setupWizardProvider(SetupWizardMode.firstRun).notifier)
+        .setConnectedProvider(CloudProviderType.s3);
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.widgetWithText(FilledButton, 'Continue'));
+    await tester.pumpAndSettle();
+
+    // Error surfaced and the connect UI restored (Continue button present).
+    expect(find.textContaining('Could not connect'), findsOneWidget);
+    expect(find.widgetWithText(FilledButton, 'Continue'), findsOneWidget);
   });
 
   testWidgets('peer library pulls and shows the adopted screen', (
