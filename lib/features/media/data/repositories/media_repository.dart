@@ -892,9 +892,18 @@ class MediaRepository {
     final query = _db.selectOnly(_db.media)
       ..addColumns([id])
       ..where(
-        _db.media.remoteUploadedAt.isNull() &
-            _db.media.fileType.equals('photo') &
-            _db.media.sourceType.isIn(['platformGallery', 'localFile']),
+        (_db.media.remoteUploadedAt.isNull() &
+                _db.media.fileType.equals('photo') &
+                _db.media.sourceType.isIn([
+                  'platformGallery',
+                  'localFile',
+                  'serviceConnector',
+                ])) |
+            // Connector videos are thumb-only (no original in the store by
+            // design), so their backfill signal is the missing thumb stamp.
+            (_db.media.remoteThumbUploadedAt.isNull() &
+                _db.media.fileType.equals('video') &
+                _db.media.sourceType.equals('serviceConnector')),
       )
       ..orderBy([OrderingTerm.desc(_db.media.takenAt)]);
     final rows = await query.get();
