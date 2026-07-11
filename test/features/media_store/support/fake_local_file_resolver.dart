@@ -15,6 +15,10 @@ class FakeLocalFileResolver implements MediaSourceResolver {
 
   MediaSourceData data;
 
+  /// When set, resolveThumbnail serves this instead of [data] (models the
+  /// gallery resolver's pre-compressed poster bytes for videos).
+  MediaSourceData? thumbnailData;
+
   @override
   MediaSourceType get sourceType => MediaSourceType.localFile;
 
@@ -28,7 +32,7 @@ class FakeLocalFileResolver implements MediaSourceResolver {
   Future<MediaSourceData> resolveThumbnail(
     MediaItem item, {
     required Size target,
-  }) async => data;
+  }) async => thumbnailData ?? data;
 
   @override
   Future<MediaSourceMetadata?> extractMetadata(MediaItem item) async => null;

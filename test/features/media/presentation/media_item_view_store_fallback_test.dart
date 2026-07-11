@@ -139,6 +139,76 @@ void main() {
     expect(find.byType(UnavailableMediaPlaceholder), findsNothing);
   });
 
+  testWidgets('a thumbnail renders from the store when only the thumb '
+      'stamp is present', (tester) async {
+    await tester.runAsync(() async {
+      final bytes = base64Decode(_onePixelPngBase64);
+      final hash = 'a1${'9' * 62}';
+      store.objects[StoreKeys.thumbKey(hash)] = bytes;
+
+      final runtime = MediaStoreRuntime(
+        storeId: 'store-1',
+        store: store,
+        cache: cache,
+        resolver: MediaStoreResolver(store: store, cache: cache),
+      );
+
+      // Thumb uploaded, original still in flight on the other device.
+      // Built directly (not via galleryItem().copyWith) because copyWith
+      // cannot clear remoteUploadedAt back to null.
+      final earlyRow = MediaItem(
+        id: 'm-early',
+        mediaType: MediaType.photo,
+        sourceType: MediaSourceType.platformGallery,
+        platformAssetId: 'asset-from-other-device',
+        originalFilename: 'reef.png',
+        takenAt: DateTime(2026),
+        createdAt: DateTime(2026),
+        updatedAt: DateTime(2026),
+        contentHash: hash,
+        remoteThumbUploadedAt: DateTime(2026, 7, 1),
+      );
+      expect(earlyRow.remoteUploadedAt, isNull);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            mediaSourceResolverRegistryProvider.overrideWithValue(
+              MediaSourceResolverRegistry({
+                MediaSourceType.platformGallery:
+                    const _UnavailableGalleryResolver(),
+              }),
+            ),
+            mediaStoreRuntimeProvider.overrideWith((ref) async => runtime),
+          ],
+          child: MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: Scaffold(
+              body: SizedBox(
+                width: 100,
+                height: 100,
+                child: MediaItemView(
+                  item: earlyRow,
+                  thumbnail: true,
+                  targetSize: const Size(100, 100),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      for (var i = 0; i < 40; i++) {
+        await Future<void>.delayed(const Duration(milliseconds: 20));
+        await tester.pump();
+        if (find.byType(Image).evaluate().isNotEmpty) break;
+      }
+    });
+
+    expect(find.byType(Image), findsOneWidget);
+    expect(find.byType(UnavailableMediaPlaceholder), findsNothing);
+  });
+
   testWidgets('keeps the native placeholder when no store runtime '
       'exists', (tester) async {
     await tester.runAsync(() async {

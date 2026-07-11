@@ -11636,5 +11636,37 @@
   "settings_mediaStorage_action_disconnect": "Disconnect",
   "settings_mediaStorage_disconnect_confirm_title": "Disconnect media store?",
   "settings_mediaStorage_disconnect_confirm_body": "This device stops uploading and fetching media. Nothing in your bucket is deleted.",
-  "settings_mediaStorage_action_copyFromSync": "Copy settings from Sync"
+  "settings_mediaStorage_action_copyFromSync": "Copy settings from Sync",
+  "settings_mediaStorage_transfers_title": "Transfers",
+  "settings_mediaStorage_transfers_entry": "View transfers",
+  "settings_mediaStorage_transfers_empty": "No transfers",
+  "settings_mediaStorage_transfers_retry": "Retry",
+  "settings_mediaStorage_transfers_clearCompleted": "Clear completed",
+  "settings_mediaStorage_transfers_state_pending": "Waiting",
+  "settings_mediaStorage_transfers_state_transferring": "Uploading",
+  "settings_mediaStorage_transfers_state_done": "Done",
+  "settings_mediaStorage_transfers_state_failed": "Failed",
+  "settings_mediaStorage_backfill_action": "Upload existing library",
+  "settings_mediaStorage_backfill_enqueued": "{count} uploads queued",
+  "@settings_mediaStorage_backfill_enqueued": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "settings_mediaStorage_policy_autoUpload": "Upload photos automatically",
+  "settings_mediaStorage_policy_photosOnCellular": "Upload photos on cellular",
+  "settings_mediaStorage_provider_label": "Provider",
+  "settings_mediaStorage_connect_dropbox_hint": "Uses your Dropbox connection from Cloud Sync. Media is stored in your Dropbox app folder.",
+  "settings_mediaStorage_connect_gdrive_hint": "Signs in with Google. Media is stored in this app's private Drive space.",
+  "settings_mediaStorage_connect_icloud_hint": "Media is stored in this app's iCloud container and syncs through your Apple ID.",
+  "settings_mediaStorage_connect_action": "Connect {provider}",
+  "@settings_mediaStorage_connect_action": {
+    "placeholders": {
+      "provider": {
+        "type": "String"
+      }
+    }
+  }
 }

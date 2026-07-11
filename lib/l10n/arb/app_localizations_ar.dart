@@ -18066,4 +18066,66 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get settings_mediaStorage_action_copyFromSync =>
       'نسخ الإعدادات من المزامنة';
+
+  @override
+  String get settings_mediaStorage_transfers_title => 'عمليات النقل';
+
+  @override
+  String get settings_mediaStorage_transfers_entry => 'عرض عمليات النقل';
+
+  @override
+  String get settings_mediaStorage_transfers_empty => 'لا توجد عمليات نقل';
+
+  @override
+  String get settings_mediaStorage_transfers_retry => 'إعادة المحاولة';
+
+  @override
+  String get settings_mediaStorage_transfers_clearCompleted => 'مسح المكتملة';
+
+  @override
+  String get settings_mediaStorage_transfers_state_pending => 'في الانتظار';
+
+  @override
+  String get settings_mediaStorage_transfers_state_transferring => 'جارٍ الرفع';
+
+  @override
+  String get settings_mediaStorage_transfers_state_done => 'تم';
+
+  @override
+  String get settings_mediaStorage_transfers_state_failed => 'فشل';
+
+  @override
+  String get settings_mediaStorage_backfill_action => 'رفع المكتبة الحالية';
+
+  @override
+  String settings_mediaStorage_backfill_enqueued(int count) {
+    return '$count عمليات رفع في قائمة الانتظار';
+  }
+
+  @override
+  String get settings_mediaStorage_policy_autoUpload => 'رفع الصور تلقائيا';
+
+  @override
+  String get settings_mediaStorage_policy_photosOnCellular =>
+      'رفع الصور عبر شبكة الجوال';
+
+  @override
+  String get settings_mediaStorage_provider_label => 'المزود';
+
+  @override
+  String get settings_mediaStorage_connect_dropbox_hint =>
+      'يستخدم اتصال Dropbox من مزامنة السحابة. تُخزن الوسائط في مجلد التطبيق في Dropbox.';
+
+  @override
+  String get settings_mediaStorage_connect_gdrive_hint =>
+      'يسجل الدخول عبر Google. تُخزن الوسائط في مساحة Drive الخاصة بهذا التطبيق.';
+
+  @override
+  String get settings_mediaStorage_connect_icloud_hint =>
+      'تُخزن الوسائط في حاوية iCloud لهذا التطبيق وتتزامن عبر Apple ID الخاص بك.';
+
+  @override
+  String settings_mediaStorage_connect_action(String provider) {
+    return 'توصيل $provider';
+  }
 }

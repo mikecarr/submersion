@@ -30763,6 +30763,114 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Copy settings from Sync'**
   String get settings_mediaStorage_action_copyFromSync;
+
+  /// No description provided for @settings_mediaStorage_transfers_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Transfers'**
+  String get settings_mediaStorage_transfers_title;
+
+  /// No description provided for @settings_mediaStorage_transfers_entry.
+  ///
+  /// In en, this message translates to:
+  /// **'View transfers'**
+  String get settings_mediaStorage_transfers_entry;
+
+  /// No description provided for @settings_mediaStorage_transfers_empty.
+  ///
+  /// In en, this message translates to:
+  /// **'No transfers'**
+  String get settings_mediaStorage_transfers_empty;
+
+  /// No description provided for @settings_mediaStorage_transfers_retry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get settings_mediaStorage_transfers_retry;
+
+  /// No description provided for @settings_mediaStorage_transfers_clearCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear completed'**
+  String get settings_mediaStorage_transfers_clearCompleted;
+
+  /// No description provided for @settings_mediaStorage_transfers_state_pending.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting'**
+  String get settings_mediaStorage_transfers_state_pending;
+
+  /// No description provided for @settings_mediaStorage_transfers_state_transferring.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploading'**
+  String get settings_mediaStorage_transfers_state_transferring;
+
+  /// No description provided for @settings_mediaStorage_transfers_state_done.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get settings_mediaStorage_transfers_state_done;
+
+  /// No description provided for @settings_mediaStorage_transfers_state_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed'**
+  String get settings_mediaStorage_transfers_state_failed;
+
+  /// No description provided for @settings_mediaStorage_backfill_action.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload existing library'**
+  String get settings_mediaStorage_backfill_action;
+
+  /// No description provided for @settings_mediaStorage_backfill_enqueued.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} uploads queued'**
+  String settings_mediaStorage_backfill_enqueued(int count);
+
+  /// No description provided for @settings_mediaStorage_policy_autoUpload.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload photos automatically'**
+  String get settings_mediaStorage_policy_autoUpload;
+
+  /// No description provided for @settings_mediaStorage_policy_photosOnCellular.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload photos on cellular'**
+  String get settings_mediaStorage_policy_photosOnCellular;
+
+  /// No description provided for @settings_mediaStorage_provider_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Provider'**
+  String get settings_mediaStorage_provider_label;
+
+  /// No description provided for @settings_mediaStorage_connect_dropbox_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Uses your Dropbox connection from Cloud Sync. Media is stored in your Dropbox app folder.'**
+  String get settings_mediaStorage_connect_dropbox_hint;
+
+  /// No description provided for @settings_mediaStorage_connect_gdrive_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Signs in with Google. Media is stored in this app\'s private Drive space.'**
+  String get settings_mediaStorage_connect_gdrive_hint;
+
+  /// No description provided for @settings_mediaStorage_connect_icloud_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Media is stored in this app\'s iCloud container and syncs through your Apple ID.'**
+  String get settings_mediaStorage_connect_icloud_hint;
+
+  /// No description provided for @settings_mediaStorage_connect_action.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect {provider}'**
+  String settings_mediaStorage_connect_action(String provider);
 }
 
 class _AppLocalizationsDelegate

@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'dart:typed_data';
 import 'dart:io';
 import 'dart:ui' show Size;
 
@@ -17,6 +19,7 @@ import 'package:submersion/features/media/domain/value_objects/verify_result.dar
 import 'package:submersion/features/media_store/data/media_cache_store.dart';
 import 'package:submersion/features/media_store/data/media_transfer_queue_repository.dart';
 import 'package:submersion/features/media_store/data/media_upload_pipeline.dart';
+import 'package:submersion/features/media_store/data/thumbnail_generator.dart';
 
 import '../../helpers/in_memory_media_object_store.dart';
 import '../../helpers/test_database.dart';
@@ -25,6 +28,10 @@ class _FakeLocalFileResolver implements MediaSourceResolver {
   _FakeLocalFileResolver(this.data);
 
   MediaSourceData data;
+
+  /// When set, resolveThumbnail serves this instead of [data] (models the
+  /// gallery resolver's pre-compressed poster bytes for videos).
+  MediaSourceData? thumbnailData;
 
   @override
   MediaSourceType get sourceType => MediaSourceType.localFile;
@@ -39,7 +46,7 @@ class _FakeLocalFileResolver implements MediaSourceResolver {
   Future<MediaSourceData> resolveThumbnail(
     domain.MediaItem item, {
     required Size target,
-  }) async => data;
+  }) async => thumbnailData ?? data;
 
   @override
   Future<MediaSourceMetadata?> extractMetadata(domain.MediaItem item) async =>
@@ -71,14 +78,16 @@ void main() {
     resolver = _FakeLocalFileResolver(
       const UnavailableData(kind: UnavailableKind.notFound),
     );
+    final registry = MediaSourceResolverRegistry({
+      MediaSourceType.localFile: resolver,
+    });
     pipeline = MediaUploadPipeline(
       mediaRepository: mediaRepository,
       queue: queue,
       store: fakeStore,
-      registry: MediaSourceResolverRegistry({
-        MediaSourceType.localFile: resolver,
-      }),
+      registry: registry,
       cache: cache,
+      thumbnails: ThumbnailGenerator(registry: registry, cache: cache),
       now: () => DateTime(2026, 7, 10, 12),
     );
   });
@@ -88,6 +97,11 @@ void main() {
     await root.delete(recursive: true);
     await tearDownTestDatabase();
   });
+
+  List<int> pngBytes() => base64Decode(
+    'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVR4nGNgAAIAAAUAAXpe'
+    'qz8AAAAASUVORK5CYII=',
+  );
 
   Future<File> fixture(List<int> bytes, String name) async {
     final f = File('${root.path}/$name');
@@ -99,9 +113,11 @@ void main() {
     required List<int> bytes,
     required String name,
     domain.MediaType mediaType = domain.MediaType.photo,
+    MediaSourceData? thumbnailData,
   }) async {
     final file = await fixture(bytes, name);
     resolver.data = FileData(file: file);
+    resolver.thumbnailData = thumbnailData;
     final created = await mediaRepository.createMedia(
       domain.MediaItem(
         id: '',
@@ -182,6 +198,104 @@ void main() {
     expect(row.errorMessage, contains('unavailable'));
     expect(fakeStore.objects, isEmpty);
     expect((await mediaRepository.getMediaById(id))!.remoteUploadedAt, isNull);
+  });
+
+  test('thumb object uploads alongside the original and stamps '
+      'remoteThumbUploadedAt', () async {
+    final png = base64Decode(
+      'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVR4nGNgAAIAAAUAAXpe'
+      'qz8AAAAASUVORK5CYII=',
+    );
+    final id = await enqueueLocalFileItem(bytes: png, name: 'a.png');
+    final entry = (await queue.nextPending(DateTime.now()))!;
+    expect(await pipeline.process(entry), UploadOutcome.uploaded);
+
+    final item = (await mediaRepository.getMediaById(id))!;
+    expect(item.remoteThumbUploadedAt, isNotNull);
+    final thumbKey =
+        'smv1/thumbs/${item.contentHash!.substring(0, 2)}/'
+        '${item.contentHash}.jpg';
+    expect(fakeStore.objects.containsKey(thumbKey), isTrue);
+    expect(fakeStore.objects, hasLength(2));
+  });
+
+  test('thumb failure never blocks the original upload', () async {
+    // Undecodable bytes: the resize path fails while the original path
+    // still materializes and uploads.
+    final id = await enqueueLocalFileItem(bytes: [1, 2, 3], name: 'a.jpg');
+    final entry = (await queue.nextPending(DateTime.now()))!;
+    expect(await pipeline.process(entry), UploadOutcome.uploaded);
+
+    final item = (await mediaRepository.getMediaById(id))!;
+    expect(item.remoteUploadedAt, isNotNull);
+    expect(item.remoteThumbUploadedAt, isNull);
+    expect(fakeStore.objects, hasLength(1));
+  });
+
+  test('video rows upload with contentType video/mp4', () async {
+    final id = await enqueueLocalFileItem(
+      bytes: List<int>.generate(1024, (i) => i % 251),
+      name: 'clip.mp4',
+      mediaType: domain.MediaType.video,
+    );
+    final entry = (await queue.nextPending(DateTime.now()))!;
+    expect(await pipeline.process(entry), UploadOutcome.uploaded);
+    final item = (await mediaRepository.getMediaById(id))!;
+    expect(item.remoteUploadedAt, isNotNull);
+    final key =
+        'smv1/objects/${item.contentHash!.substring(0, 2)}/'
+        '${item.contentHash}.mp4';
+    expect(fakeStore.objects.containsKey(key), isTrue);
+  });
+
+  test('resume state and progress flow through the queue row', () async {
+    final id = await enqueueLocalFileItem(bytes: [1, 2, 3, 4], name: 'r.jpg');
+    final entry = (await queue.nextPending(DateTime.now()))!;
+    fakeStore.emitResumeState = '{"fake":1}';
+    expect(await pipeline.process(entry), UploadOutcome.uploaded);
+
+    expect(
+      fakeStore.lastResumeStateJsonIn,
+      isNull,
+      reason: 'first attempt starts with no resume state',
+    );
+    final row = (await queue.allForTesting()).single;
+    expect(row.state, 'done');
+    expect(row.resumeStateJson, isNull, reason: 'markDone clears it');
+
+    // A row carrying a pre-seeded resume state hands it to the store.
+    fakeStore.emitResumeState = null;
+    final id2 = await enqueueLocalFileItem(bytes: [9, 9], name: 'r2.jpg');
+    final entry2 = (await queue.nextPending(DateTime.now()))!;
+    await queue.updateResumeState(entry2.id, '{"seeded":true}');
+    final refreshed = (await queue.nextPending(DateTime.now()))!;
+    expect(await pipeline.process(refreshed), UploadOutcome.uploaded);
+    expect(fakeStore.lastResumeStateJsonIn, '{"seeded":true}');
+    expect(
+      (await mediaRepository.getMediaById(id2))!.remoteUploadedAt,
+      isNotNull,
+    );
+    expect(id, isNot(id2));
+  });
+
+  test('gallery-style video thumbs upload (BytesData poster)', () async {
+    final id = await enqueueLocalFileItem(
+      bytes: List<int>.generate(2048, (i) => i % 251),
+      name: 'dive.mp4',
+      mediaType: domain.MediaType.video,
+      thumbnailData: BytesData(bytes: Uint8List.fromList(pngBytes())),
+    );
+    final entry = (await queue.nextPending(DateTime.now()))!;
+    expect(await pipeline.process(entry), UploadOutcome.uploaded);
+    final item = (await mediaRepository.getMediaById(id))!;
+    expect(item.remoteThumbUploadedAt, isNotNull);
+    expect(
+      fakeStore.objects.containsKey(
+        'smv1/thumbs/${item.contentHash!.substring(0, 2)}/'
+        '${item.contentHash}.jpg',
+      ),
+      isTrue,
+    );
   });
 
   test('signature rows are ineligible and complete without store '

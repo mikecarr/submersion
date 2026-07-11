@@ -113,14 +113,18 @@ class DropboxApiClient {
     return DropboxFileMetadata.fromJson(_decodeMap(response));
   }
 
-  /// All files directly in [path] ('' is the app-folder root), following
-  /// pagination cursors to exhaustion. Folders are omitted.
-  Future<List<DropboxFileMetadata>> listFolder({String path = ''}) async {
+  /// All files in [path] ('' is the app-folder root), following
+  /// pagination cursors to exhaustion. Folders are omitted. [recursive]
+  /// includes nested files (media store listing).
+  Future<List<DropboxFileMetadata>> listFolder({
+    String path = '',
+    bool recursive = false,
+  }) async {
     final entries = <DropboxFileMetadata>[];
     var response = await _send(
       () => _rpcRequest('/2/files/list_folder', {
         'path': path,
-        'recursive': false,
+        'recursive': recursive,
       }),
     );
     while (true) {
@@ -162,6 +166,79 @@ class DropboxApiClient {
     );
   }
 
+  /// Byte-range read of [path]: [start]..[endInclusive]. [totalLength] is
+  /// parsed from Content-Range (null when the server answered with the
+  /// whole body).
+  Future<({Uint8List bytes, int? totalLength})> downloadRange(
+    String path, {
+    required int start,
+    required int endInclusive,
+  }) async {
+    final response = await _send(
+      () =>
+          _contentRequest('/2/files/download', arg: {'path': path})
+            ..headers['Range'] = 'bytes=$start-$endInclusive',
+      notFoundMessage: 'File not found in Dropbox: $path',
+    );
+    final contentRange = response!.headers['content-range'];
+    return (
+      bytes: response.bodyBytes,
+      totalLength: contentRange == null
+          ? null
+          : int.parse(contentRange.split('/').last),
+    );
+  }
+
+  /// Starts an upload session with the first chunk; returns the session id.
+  Future<String> uploadSessionStart(Uint8List firstChunk) async {
+    final response = await _send(
+      () => _contentRequest(
+        '/2/files/upload_session/start',
+        arg: {'close': false},
+        body: firstChunk,
+      ),
+    );
+    return _decodeMap(response!)['session_id'] as String;
+  }
+
+  /// Appends [chunk] at [offset] (the total bytes already in the session).
+  Future<void> uploadSessionAppend({
+    required String sessionId,
+    required int offset,
+    required Uint8List chunk,
+  }) async {
+    await _send(
+      () => _contentRequest(
+        '/2/files/upload_session/append_v2',
+        arg: {
+          'cursor': {'session_id': sessionId, 'offset': offset},
+          'close': false,
+        },
+        body: chunk,
+      ),
+    );
+  }
+
+  /// Commits the session to [path] with the final [lastChunk].
+  Future<DropboxFileMetadata> uploadSessionFinish({
+    required String sessionId,
+    required int offset,
+    required String path,
+    required Uint8List lastChunk,
+  }) async {
+    final response = await _send(
+      () => _contentRequest(
+        '/2/files/upload_session/finish',
+        arg: {
+          'cursor': {'session_id': sessionId, 'offset': offset},
+          'commit': {'path': path, 'mode': 'overwrite', 'mute': true},
+        },
+        body: lastChunk,
+      ),
+    );
+    return DropboxFileMetadata.fromJson(_decodeMap(response!));
+  }
+
   void close() => _http.close();
 
   Future<DropboxFileMetadata> _uploadChunked(
@@ -169,14 +246,7 @@ class DropboxApiClient {
     Uint8List data,
   ) async {
     final first = Uint8List.sublistView(data, 0, uploadChunkBytes);
-    final startResponse = await _send(
-      () => _contentRequest(
-        '/2/files/upload_session/start',
-        arg: {'close': false},
-        body: first,
-      ),
-    );
-    final sessionId = _decodeMap(startResponse!)['session_id'] as String;
+    final sessionId = await uploadSessionStart(first);
 
     var offset = first.length;
     // Append full chunks, leaving at least one byte for finish (Dropbox
@@ -188,33 +258,20 @@ class DropboxApiClient {
         offset,
         offset + uploadChunkBytes,
       );
-      final sendOffset = offset;
-      await _send(
-        () => _contentRequest(
-          '/2/files/upload_session/append_v2',
-          arg: {
-            'cursor': {'session_id': sessionId, 'offset': sendOffset},
-            'close': false,
-          },
-          body: chunk,
-        ),
+      await uploadSessionAppend(
+        sessionId: sessionId,
+        offset: offset,
+        chunk: chunk,
       );
       offset += chunk.length;
     }
 
-    final rest = Uint8List.sublistView(data, offset);
-    final finishOffset = offset;
-    final finishResponse = await _send(
-      () => _contentRequest(
-        '/2/files/upload_session/finish',
-        arg: {
-          'cursor': {'session_id': sessionId, 'offset': finishOffset},
-          'commit': {'path': path, 'mode': 'overwrite', 'mute': true},
-        },
-        body: rest,
-      ),
+    return uploadSessionFinish(
+      sessionId: sessionId,
+      offset: offset,
+      path: path,
+      lastChunk: Uint8List.sublistView(data, offset),
     );
-    return DropboxFileMetadata.fromJson(_decodeMap(finishResponse!));
   }
 
   http.Request _rpcRequest(String path, Map<String, Object?>? body) {

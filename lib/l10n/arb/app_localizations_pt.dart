@@ -18410,4 +18410,69 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get settings_mediaStorage_action_copyFromSync =>
       'Copiar configurações do Sync';
+
+  @override
+  String get settings_mediaStorage_transfers_title => 'Transferências';
+
+  @override
+  String get settings_mediaStorage_transfers_entry => 'Ver transferências';
+
+  @override
+  String get settings_mediaStorage_transfers_empty => 'Sem transferências';
+
+  @override
+  String get settings_mediaStorage_transfers_retry => 'Tentar novamente';
+
+  @override
+  String get settings_mediaStorage_transfers_clearCompleted =>
+      'Limpar concluídas';
+
+  @override
+  String get settings_mediaStorage_transfers_state_pending => 'Aguardando';
+
+  @override
+  String get settings_mediaStorage_transfers_state_transferring => 'Enviando';
+
+  @override
+  String get settings_mediaStorage_transfers_state_done => 'Concluído';
+
+  @override
+  String get settings_mediaStorage_transfers_state_failed => 'Falhou';
+
+  @override
+  String get settings_mediaStorage_backfill_action =>
+      'Enviar biblioteca existente';
+
+  @override
+  String settings_mediaStorage_backfill_enqueued(int count) {
+    return '$count envios na fila';
+  }
+
+  @override
+  String get settings_mediaStorage_policy_autoUpload =>
+      'Enviar fotos automaticamente';
+
+  @override
+  String get settings_mediaStorage_policy_photosOnCellular =>
+      'Enviar fotos pela rede móvel';
+
+  @override
+  String get settings_mediaStorage_provider_label => 'Provedor';
+
+  @override
+  String get settings_mediaStorage_connect_dropbox_hint =>
+      'Usa sua conexão do Dropbox da sincronização na nuvem. As mídias ficam na pasta do app no Dropbox.';
+
+  @override
+  String get settings_mediaStorage_connect_gdrive_hint =>
+      'Entra com o Google. As mídias ficam no espaço privado do Drive deste app.';
+
+  @override
+  String get settings_mediaStorage_connect_icloud_hint =>
+      'As mídias ficam no contêiner do iCloud deste app e sincronizam pelo seu ID Apple.';
+
+  @override
+  String settings_mediaStorage_connect_action(String provider) {
+    return 'Conectar $provider';
+  }
 }

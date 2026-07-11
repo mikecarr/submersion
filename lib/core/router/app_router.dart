@@ -77,6 +77,7 @@ import 'package:submersion/features/statistics/presentation/pages/statistics_pro
 import 'package:submersion/features/backup/presentation/pages/backup_settings_page.dart';
 import 'package:submersion/features/settings/presentation/pages/cloud_sync_page.dart';
 import 'package:submersion/features/media_store/presentation/pages/media_storage_page.dart';
+import 'package:submersion/features/media_store/presentation/pages/transfers_page.dart';
 import 'package:submersion/features/settings/presentation/pages/s3_config_page.dart';
 import 'package:submersion/features/settings/presentation/pages/fix_dive_times_page.dart';
 import 'package:submersion/features/settings/presentation/pages/settings_page.dart';
@@ -907,6 +908,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                 path: 'media-storage',
                 name: 'mediaStorage',
                 builder: (context, state) => const MediaStoragePage(),
+                routes: [
+                  GoRoute(
+                    path: 'transfers',
+                    name: 'mediaStorageTransfers',
+                    builder: (context, state) => const TransfersPage(),
+                  ),
+                ],
               ),
               GoRoute(
                 path: 'fix-dive-times',

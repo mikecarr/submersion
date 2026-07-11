@@ -777,6 +777,43 @@ class MediaRepository {
     SyncEventBus.notifyLocalChange();
   }
 
+  /// Backfill candidates (design spec section 9): device-resident photos
+  /// not yet confirmed in the media store, newest first so recent dives
+  /// gain protection soonest.
+  Future<List<String>> getBackfillCandidateIds() async {
+    final id = _db.media.id;
+    final query = _db.selectOnly(_db.media)
+      ..addColumns([id])
+      ..where(
+        _db.media.remoteUploadedAt.isNull() &
+            _db.media.fileType.equals('photo') &
+            _db.media.sourceType.isIn(['platformGallery', 'localFile']),
+      )
+      ..orderBy([OrderingTerm.desc(_db.media.takenAt)]);
+    final rows = await query.get();
+    return rows.map((r) => r.read(id)!).toList();
+  }
+
+  /// Confirms the thumbnail object exists in the media store.
+  Future<void> stampRemoteThumbUploaded(
+    String mediaId, {
+    required DateTime uploadedAt,
+  }) async {
+    final now = DateTime.now().millisecondsSinceEpoch;
+    await (_db.update(_db.media)..where((t) => t.id.equals(mediaId))).write(
+      MediaCompanion(
+        remoteThumbUploadedAt: Value(uploadedAt.millisecondsSinceEpoch),
+        updatedAt: Value(now),
+      ),
+    );
+    await _syncRepository.markRecordPending(
+      entityType: 'media',
+      recordId: mediaId,
+      localUpdatedAt: now,
+    );
+    SyncEventBus.notifyLocalChange();
+  }
+
   domain.MediaItem _mapRowToMediaItem(
     MediaData row, [
     MediaEnrichmentData? enrichmentRow,

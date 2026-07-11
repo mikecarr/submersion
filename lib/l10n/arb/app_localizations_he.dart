@@ -17936,4 +17936,66 @@ class AppLocalizationsHe extends AppLocalizations {
   @override
   String get settings_mediaStorage_action_copyFromSync =>
       'העתק הגדרות מהסנכרון';
+
+  @override
+  String get settings_mediaStorage_transfers_title => 'העברות';
+
+  @override
+  String get settings_mediaStorage_transfers_entry => 'הצג העברות';
+
+  @override
+  String get settings_mediaStorage_transfers_empty => 'אין העברות';
+
+  @override
+  String get settings_mediaStorage_transfers_retry => 'נסה שוב';
+
+  @override
+  String get settings_mediaStorage_transfers_clearCompleted => 'נקה שהושלמו';
+
+  @override
+  String get settings_mediaStorage_transfers_state_pending => 'ממתין';
+
+  @override
+  String get settings_mediaStorage_transfers_state_transferring => 'מעלה';
+
+  @override
+  String get settings_mediaStorage_transfers_state_done => 'הושלם';
+
+  @override
+  String get settings_mediaStorage_transfers_state_failed => 'נכשל';
+
+  @override
+  String get settings_mediaStorage_backfill_action => 'העלה ספריה קיימת';
+
+  @override
+  String settings_mediaStorage_backfill_enqueued(int count) {
+    return '$count העלאות בתור';
+  }
+
+  @override
+  String get settings_mediaStorage_policy_autoUpload => 'העלה תמונות אוטומטית';
+
+  @override
+  String get settings_mediaStorage_policy_photosOnCellular =>
+      'העלה תמונות ברשת סלולרית';
+
+  @override
+  String get settings_mediaStorage_provider_label => 'ספק';
+
+  @override
+  String get settings_mediaStorage_connect_dropbox_hint =>
+      'משתמש בחיבור Dropbox מסנכרון הענן. המדיה נשמרת בתיקיית האפליקציה ב-Dropbox.';
+
+  @override
+  String get settings_mediaStorage_connect_gdrive_hint =>
+      'מתחבר עם Google. המדיה נשמרת בשטח ה-Drive הפרטי של האפליקציה.';
+
+  @override
+  String get settings_mediaStorage_connect_icloud_hint =>
+      'המדיה נשמרת במיכל ה-iCloud של האפליקציה ומסתנכרנת דרך ה-Apple ID שלך.';
+
+  @override
+  String settings_mediaStorage_connect_action(String provider) {
+    return 'חבר את $provider';
+  }
 }

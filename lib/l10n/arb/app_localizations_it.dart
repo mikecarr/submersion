@@ -18402,4 +18402,70 @@ class AppLocalizationsIt extends AppLocalizations {
   @override
   String get settings_mediaStorage_action_copyFromSync =>
       'Copia impostazioni da Sync';
+
+  @override
+  String get settings_mediaStorage_transfers_title => 'Trasferimenti';
+
+  @override
+  String get settings_mediaStorage_transfers_entry => 'Vedi trasferimenti';
+
+  @override
+  String get settings_mediaStorage_transfers_empty => 'Nessun trasferimento';
+
+  @override
+  String get settings_mediaStorage_transfers_retry => 'Riprova';
+
+  @override
+  String get settings_mediaStorage_transfers_clearCompleted =>
+      'Rimuovi completati';
+
+  @override
+  String get settings_mediaStorage_transfers_state_pending => 'In attesa';
+
+  @override
+  String get settings_mediaStorage_transfers_state_transferring =>
+      'Caricamento';
+
+  @override
+  String get settings_mediaStorage_transfers_state_done => 'Completato';
+
+  @override
+  String get settings_mediaStorage_transfers_state_failed => 'Non riuscito';
+
+  @override
+  String get settings_mediaStorage_backfill_action =>
+      'Carica libreria esistente';
+
+  @override
+  String settings_mediaStorage_backfill_enqueued(int count) {
+    return '$count caricamenti in coda';
+  }
+
+  @override
+  String get settings_mediaStorage_policy_autoUpload =>
+      'Carica foto automaticamente';
+
+  @override
+  String get settings_mediaStorage_policy_photosOnCellular =>
+      'Carica foto su rete mobile';
+
+  @override
+  String get settings_mediaStorage_provider_label => 'Provider';
+
+  @override
+  String get settings_mediaStorage_connect_dropbox_hint =>
+      'Usa la tua connessione Dropbox della sincronizzazione cloud. I media sono archiviati nella cartella app di Dropbox.';
+
+  @override
+  String get settings_mediaStorage_connect_gdrive_hint =>
+      'Accede con Google. I media sono archiviati nello spazio Drive privato di questa app.';
+
+  @override
+  String get settings_mediaStorage_connect_icloud_hint =>
+      'I media sono archiviati nel contenitore iCloud di questa app e si sincronizzano tramite il tuo ID Apple.';
+
+  @override
+  String settings_mediaStorage_connect_action(String provider) {
+    return 'Collega $provider';
+  }
 }

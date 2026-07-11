@@ -18256,4 +18256,69 @@ class AppLocalizationsNl extends AppLocalizations {
   @override
   String get settings_mediaStorage_action_copyFromSync =>
       'Instellingen van Sync kopiëren';
+
+  @override
+  String get settings_mediaStorage_transfers_title => 'Overdrachten';
+
+  @override
+  String get settings_mediaStorage_transfers_entry => 'Overdrachten bekijken';
+
+  @override
+  String get settings_mediaStorage_transfers_empty => 'Geen overdrachten';
+
+  @override
+  String get settings_mediaStorage_transfers_retry => 'Opnieuw proberen';
+
+  @override
+  String get settings_mediaStorage_transfers_clearCompleted =>
+      'Voltooide wissen';
+
+  @override
+  String get settings_mediaStorage_transfers_state_pending => 'Wachten';
+
+  @override
+  String get settings_mediaStorage_transfers_state_transferring => 'Uploaden';
+
+  @override
+  String get settings_mediaStorage_transfers_state_done => 'Klaar';
+
+  @override
+  String get settings_mediaStorage_transfers_state_failed => 'Mislukt';
+
+  @override
+  String get settings_mediaStorage_backfill_action =>
+      'Bestaande bibliotheek uploaden';
+
+  @override
+  String settings_mediaStorage_backfill_enqueued(int count) {
+    return '$count uploads in wachtrij';
+  }
+
+  @override
+  String get settings_mediaStorage_policy_autoUpload =>
+      'Foto\'s automatisch uploaden';
+
+  @override
+  String get settings_mediaStorage_policy_photosOnCellular =>
+      'Foto\'s uploaden via mobiel';
+
+  @override
+  String get settings_mediaStorage_provider_label => 'Provider';
+
+  @override
+  String get settings_mediaStorage_connect_dropbox_hint =>
+      'Gebruikt je Dropbox-koppeling uit Cloud Sync. Media wordt opgeslagen in je Dropbox-appmap.';
+
+  @override
+  String get settings_mediaStorage_connect_gdrive_hint =>
+      'Meldt aan met Google. Media wordt opgeslagen in de privé-Drive-ruimte van deze app.';
+
+  @override
+  String get settings_mediaStorage_connect_icloud_hint =>
+      'Media wordt opgeslagen in de iCloud-container van deze app en synchroniseert via je Apple ID.';
+
+  @override
+  String settings_mediaStorage_connect_action(String provider) {
+    return '$provider verbinden';
+  }
 }
