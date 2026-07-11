@@ -104,6 +104,135 @@ class AppLocalizationsNl extends AppLocalizations {
       'Niet beschikbaar in deze build — gebruik S3 of de App Store-versie';
 
   @override
+  String get settings_cloudSync_encryption_title => 'End-to-end-versleuteling';
+
+  @override
+  String get settings_cloudSync_encryption_subtitleOff =>
+      'Versleutel alle synchronisatiegegevens en cloudback-ups vóór het uploaden';
+
+  @override
+  String get settings_cloudSync_encryption_subtitleNeedsProvider =>
+      'Selecteer eerst een cloudprovider';
+
+  @override
+  String get settings_cloudSync_encryption_statusOff =>
+      'Versleuteling staat uit';
+
+  @override
+  String get settings_cloudSync_encryption_statusOn =>
+      'Versleuteling staat aan';
+
+  @override
+  String get settings_cloudSync_encryption_statusOnSubtitle =>
+      'Synchronisatiegegevens en cloudback-ups worden vóór het uploaden versleuteld';
+
+  @override
+  String get settings_cloudSync_encryption_statusLocked =>
+      'Versleuteld — wachtwoordzin vereist';
+
+  @override
+  String get settings_cloudSync_encryption_statusLockedSubtitle =>
+      'Voer de wachtwoordzin in om op dit apparaat te synchroniseren';
+
+  @override
+  String get settings_cloudSync_encryption_enable =>
+      'Versleuteling inschakelen';
+
+  @override
+  String get settings_cloudSync_encryption_enterPassphrase =>
+      'Wachtwoordzin invoeren';
+
+  @override
+  String get settings_cloudSync_encryption_passphrase => 'Wachtwoordzin';
+
+  @override
+  String get settings_cloudSync_encryption_passphraseConfirm =>
+      'Wachtwoordzin bevestigen';
+
+  @override
+  String get settings_cloudSync_encryption_passphraseMismatch =>
+      'Wachtwoordzinnen komen niet overeen';
+
+  @override
+  String get settings_cloudSync_encryption_passphraseTooShort =>
+      'Gebruik minstens 8 tekens';
+
+  @override
+  String get settings_cloudSync_encryption_wrongPassphrase =>
+      'Onjuiste wachtwoordzin of herstelcode';
+
+  @override
+  String get settings_cloudSync_encryption_warnUpdateDevices =>
+      'Alle andere apparaten moeten naar de nieuwste appversie worden bijgewerkt en downloaden de bibliotheek opnieuw.';
+
+  @override
+  String get settings_cloudSync_encryption_warnLoss =>
+      'Als u zowel de wachtwoordzin als de herstelcode verliest, zijn de gegevens in de cloud niet te herstellen. De gegevens op uw apparaten lopen nooit gevaar.';
+
+  @override
+  String get settings_cloudSync_encryption_deletePlaintextBackups =>
+      'Bestaande onversleutelde cloudback-ups verwijderen';
+
+  @override
+  String get settings_cloudSync_encryption_recoveryTitle => 'Herstelcode';
+
+  @override
+  String get settings_cloudSync_encryption_recoveryExplain =>
+      'Noteer deze code en bewaar hem veilig. Het is de enige weg terug als u de wachtwoordzin vergeet.';
+
+  @override
+  String get settings_cloudSync_encryption_recoverySavedConfirm =>
+      'Ik heb mijn herstelcode opgeslagen';
+
+  @override
+  String get settings_cloudSync_encryption_changePassphrase =>
+      'Wachtwoordzin wijzigen';
+
+  @override
+  String get settings_cloudSync_encryption_currentPassphrase =>
+      'Huidige wachtwoordzin';
+
+  @override
+  String get settings_cloudSync_encryption_newPassphrase =>
+      'Nieuwe wachtwoordzin';
+
+  @override
+  String get settings_cloudSync_encryption_regenerateRecovery =>
+      'Nieuwe herstelcode genereren';
+
+  @override
+  String get settings_cloudSync_encryption_regenerateRecoveryWarn =>
+      'De oude herstelcode werkt direct niet meer.';
+
+  @override
+  String get settings_cloudSync_encryption_disable =>
+      'Versleuteling uitschakelen';
+
+  @override
+  String get settings_cloudSync_encryption_disableWarn =>
+      'De bibliotheek wordt onversleuteld opnieuw geüpload en andere apparaten downloaden hem opnieuw. Bestaande versleutelde back-ups blijven met de wachtwoordzin te herstellen.';
+
+  @override
+  String get settings_cloudSync_encryption_unlockTitle =>
+      'Voer uw versleutelings-wachtwoordzin in';
+
+  @override
+  String get settings_cloudSync_encryption_unlockHint =>
+      'Wachtwoordzin of herstelcode';
+
+  @override
+  String get settings_cloudSync_encryption_unlock => 'Ontgrendelen';
+
+  @override
+  String get settings_cloudSync_encryption_continue => 'Doorgaan';
+
+  @override
+  String get settings_cloudSync_encryption_done => 'Klaar';
+
+  @override
+  String get settings_cloudSync_encryption_cancel => 'Annuleren';
+
+  @override
   String settings_cloudSync_replace_globalBanner(String deviceName) {
     return 'Synchronisatie onderbroken — de bibliotheek is vervangen vanaf een back-up op \"$deviceName\".';
   }
@@ -18344,6 +18473,108 @@ class AppLocalizationsNl extends AppLocalizations {
   @override
   String get diveLog_bulkEdit_membership_empty =>
       'Nog geen items bij de geselecteerde duiken';
+
+  @override
+  String get settings_mediaStorage_entry_title => 'Mediaopslag';
+
+  @override
+  String get settings_mediaStorage_entry_subtitle =>
+      'Bewaar originele foto\'s en video\'s in je eigen cloudopslag';
+
+  @override
+  String get settings_mediaStorage_status_notConfigured =>
+      'Geen mediaopslag verbonden op dit apparaat';
+
+  @override
+  String settings_mediaStorage_status_connected(String hint) {
+    return 'Verbonden met $hint';
+  }
+
+  @override
+  String get settings_mediaStorage_test_success => 'Verbinding geslaagd';
+
+  @override
+  String get settings_mediaStorage_saved => 'Mediaopslag verbonden';
+
+  @override
+  String get settings_mediaStorage_action_disconnect => 'Loskoppelen';
+
+  @override
+  String get settings_mediaStorage_disconnect_confirm_title =>
+      'Mediaopslag loskoppelen?';
+
+  @override
+  String get settings_mediaStorage_disconnect_confirm_body =>
+      'Dit apparaat stopt met het uploaden en ophalen van media. Er wordt niets uit je bucket verwijderd.';
+
+  @override
+  String get settings_mediaStorage_action_copyFromSync =>
+      'Instellingen van Sync kopiëren';
+
+  @override
+  String get settings_mediaStorage_transfers_title => 'Overdrachten';
+
+  @override
+  String get settings_mediaStorage_transfers_entry => 'Overdrachten bekijken';
+
+  @override
+  String get settings_mediaStorage_transfers_empty => 'Geen overdrachten';
+
+  @override
+  String get settings_mediaStorage_transfers_retry => 'Opnieuw proberen';
+
+  @override
+  String get settings_mediaStorage_transfers_clearCompleted =>
+      'Voltooide wissen';
+
+  @override
+  String get settings_mediaStorage_transfers_state_pending => 'Wachten';
+
+  @override
+  String get settings_mediaStorage_transfers_state_transferring => 'Uploaden';
+
+  @override
+  String get settings_mediaStorage_transfers_state_done => 'Klaar';
+
+  @override
+  String get settings_mediaStorage_transfers_state_failed => 'Mislukt';
+
+  @override
+  String get settings_mediaStorage_backfill_action =>
+      'Bestaande bibliotheek uploaden';
+
+  @override
+  String settings_mediaStorage_backfill_enqueued(int count) {
+    return '$count uploads in wachtrij';
+  }
+
+  @override
+  String get settings_mediaStorage_policy_autoUpload =>
+      'Foto\'s automatisch uploaden';
+
+  @override
+  String get settings_mediaStorage_policy_photosOnCellular =>
+      'Foto\'s uploaden via mobiel';
+
+  @override
+  String get settings_mediaStorage_provider_label => 'Provider';
+
+  @override
+  String get settings_mediaStorage_connect_dropbox_hint =>
+      'Gebruikt je Dropbox-koppeling uit Cloud Sync. Media wordt opgeslagen in je Dropbox-appmap.';
+
+  @override
+  String get settings_mediaStorage_connect_gdrive_hint =>
+      'Meldt aan met Google. Media wordt opgeslagen in de privé-Drive-ruimte van deze app.';
+
+  @override
+  String get settings_mediaStorage_connect_icloud_hint =>
+      'Media wordt opgeslagen in de iCloud-container van deze app en synchroniseert via je Apple ID.';
+
+  @override
+  String settings_mediaStorage_connect_action(String provider) {
+    return '$provider verbinden';
+  }
 
   @override
   String get bodyWeight_addEntry => 'Meting toevoegen';

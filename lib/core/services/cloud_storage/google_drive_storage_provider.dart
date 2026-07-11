@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:extension_google_sign_in_as_googleapis_auth/extension_google_sign_in_as_googleapis_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:http/http.dart' as http;
 import 'package:googleapis/drive/v3.dart' as drive;
 import 'package:googleapis_auth/googleapis_auth.dart' as gapis_auth;
 
@@ -148,6 +149,15 @@ class GoogleDriveStorageProvider
       throw const CloudStorageException('Not authenticated with Google Drive');
     }
     return api;
+  }
+
+  /// Authenticated HTTP client for the media store's raw REST calls.
+  /// Enables silent auth (the media attach itself is the opt-in) and
+  /// returns null when no Google session can be established.
+  Future<http.Client?> mediaHttpClient() async {
+    _allowSilentAuth = true;
+    if (await isAuthenticated()) return _authClient;
+    return null;
   }
 
   @override

@@ -104,6 +104,130 @@ class AppLocalizationsEn extends AppLocalizations {
       'Not available in this build — use S3 or the App Store version';
 
   @override
+  String get settings_cloudSync_encryption_title => 'End-to-end encryption';
+
+  @override
+  String get settings_cloudSync_encryption_subtitleOff =>
+      'Encrypt all sync data and cloud backups before upload';
+
+  @override
+  String get settings_cloudSync_encryption_subtitleNeedsProvider =>
+      'Select a cloud provider first';
+
+  @override
+  String get settings_cloudSync_encryption_statusOff => 'Encryption is off';
+
+  @override
+  String get settings_cloudSync_encryption_statusOn => 'Encryption is on';
+
+  @override
+  String get settings_cloudSync_encryption_statusOnSubtitle =>
+      'Sync data and cloud backups are encrypted before upload';
+
+  @override
+  String get settings_cloudSync_encryption_statusLocked =>
+      'Encrypted — passphrase needed';
+
+  @override
+  String get settings_cloudSync_encryption_statusLockedSubtitle =>
+      'Enter the passphrase to sync on this device';
+
+  @override
+  String get settings_cloudSync_encryption_enable => 'Enable encryption';
+
+  @override
+  String get settings_cloudSync_encryption_enterPassphrase =>
+      'Enter passphrase';
+
+  @override
+  String get settings_cloudSync_encryption_passphrase => 'Passphrase';
+
+  @override
+  String get settings_cloudSync_encryption_passphraseConfirm =>
+      'Confirm passphrase';
+
+  @override
+  String get settings_cloudSync_encryption_passphraseMismatch =>
+      'Passphrases do not match';
+
+  @override
+  String get settings_cloudSync_encryption_passphraseTooShort =>
+      'Use at least 8 characters';
+
+  @override
+  String get settings_cloudSync_encryption_wrongPassphrase =>
+      'Incorrect passphrase or recovery code';
+
+  @override
+  String get settings_cloudSync_encryption_warnUpdateDevices =>
+      'All other devices must be updated to the latest app version and will re-download the library.';
+
+  @override
+  String get settings_cloudSync_encryption_warnLoss =>
+      'If you lose both the passphrase and the recovery code, data in the cloud cannot be recovered. Data on your devices is never at risk.';
+
+  @override
+  String get settings_cloudSync_encryption_deletePlaintextBackups =>
+      'Delete existing unencrypted cloud backups';
+
+  @override
+  String get settings_cloudSync_encryption_recoveryTitle => 'Recovery code';
+
+  @override
+  String get settings_cloudSync_encryption_recoveryExplain =>
+      'Write this code down and keep it somewhere safe. It is the only way back in if you forget your passphrase.';
+
+  @override
+  String get settings_cloudSync_encryption_recoverySavedConfirm =>
+      'I have saved my recovery code';
+
+  @override
+  String get settings_cloudSync_encryption_changePassphrase =>
+      'Change passphrase';
+
+  @override
+  String get settings_cloudSync_encryption_currentPassphrase =>
+      'Current passphrase';
+
+  @override
+  String get settings_cloudSync_encryption_newPassphrase => 'New passphrase';
+
+  @override
+  String get settings_cloudSync_encryption_regenerateRecovery =>
+      'Generate new recovery code';
+
+  @override
+  String get settings_cloudSync_encryption_regenerateRecoveryWarn =>
+      'The old recovery code stops working immediately.';
+
+  @override
+  String get settings_cloudSync_encryption_disable => 'Turn off encryption';
+
+  @override
+  String get settings_cloudSync_encryption_disableWarn =>
+      'The library will be re-uploaded unencrypted, and other devices will re-download it. Existing encrypted backups stay restorable with the passphrase.';
+
+  @override
+  String get settings_cloudSync_encryption_unlockTitle =>
+      'Enter your encryption passphrase';
+
+  @override
+  String get settings_cloudSync_encryption_unlockHint =>
+      'Passphrase or recovery code';
+
+  @override
+  String get settings_cloudSync_encryption_unlock => 'Unlock';
+
+  @override
+  String get settings_cloudSync_encryption_continue => 'Continue';
+
+  @override
+  String get settings_cloudSync_encryption_done => 'Done';
+
+  @override
+  String get settings_cloudSync_encryption_cancel => 'Cancel';
+
+  @override
   String settings_cloudSync_replace_globalBanner(String deviceName) {
     return 'Sync is paused — the library was replaced from a backup on \"$deviceName\".';
   }
@@ -18183,6 +18307,107 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get diveLog_bulkEdit_membership_empty =>
       'No items on the selected dives yet';
+
+  @override
+  String get settings_mediaStorage_entry_title => 'Media Storage';
+
+  @override
+  String get settings_mediaStorage_entry_subtitle =>
+      'Store photo and video originals in your own cloud storage';
+
+  @override
+  String get settings_mediaStorage_status_notConfigured =>
+      'No media store connected on this device';
+
+  @override
+  String settings_mediaStorage_status_connected(String hint) {
+    return 'Connected to $hint';
+  }
+
+  @override
+  String get settings_mediaStorage_test_success => 'Connection successful';
+
+  @override
+  String get settings_mediaStorage_saved => 'Media store connected';
+
+  @override
+  String get settings_mediaStorage_action_disconnect => 'Disconnect';
+
+  @override
+  String get settings_mediaStorage_disconnect_confirm_title =>
+      'Disconnect media store?';
+
+  @override
+  String get settings_mediaStorage_disconnect_confirm_body =>
+      'This device stops uploading and fetching media. Nothing in your bucket is deleted.';
+
+  @override
+  String get settings_mediaStorage_action_copyFromSync =>
+      'Copy settings from Sync';
+
+  @override
+  String get settings_mediaStorage_transfers_title => 'Transfers';
+
+  @override
+  String get settings_mediaStorage_transfers_entry => 'View transfers';
+
+  @override
+  String get settings_mediaStorage_transfers_empty => 'No transfers';
+
+  @override
+  String get settings_mediaStorage_transfers_retry => 'Retry';
+
+  @override
+  String get settings_mediaStorage_transfers_clearCompleted =>
+      'Clear completed';
+
+  @override
+  String get settings_mediaStorage_transfers_state_pending => 'Waiting';
+
+  @override
+  String get settings_mediaStorage_transfers_state_transferring => 'Uploading';
+
+  @override
+  String get settings_mediaStorage_transfers_state_done => 'Done';
+
+  @override
+  String get settings_mediaStorage_transfers_state_failed => 'Failed';
+
+  @override
+  String get settings_mediaStorage_backfill_action => 'Upload existing library';
+
+  @override
+  String settings_mediaStorage_backfill_enqueued(int count) {
+    return '$count uploads queued';
+  }
+
+  @override
+  String get settings_mediaStorage_policy_autoUpload =>
+      'Upload photos automatically';
+
+  @override
+  String get settings_mediaStorage_policy_photosOnCellular =>
+      'Upload photos on cellular';
+
+  @override
+  String get settings_mediaStorage_provider_label => 'Provider';
+
+  @override
+  String get settings_mediaStorage_connect_dropbox_hint =>
+      'Uses your Dropbox connection from Cloud Sync. Media is stored in your Dropbox app folder.';
+
+  @override
+  String get settings_mediaStorage_connect_gdrive_hint =>
+      'Signs in with Google. Media is stored in this app\'s private Drive space.';
+
+  @override
+  String get settings_mediaStorage_connect_icloud_hint =>
+      'Media is stored in this app\'s iCloud container and syncs through your Apple ID.';
+
+  @override
+  String settings_mediaStorage_connect_action(String provider) {
+    return 'Connect $provider';
+  }
 
   @override
   String get bodyWeight_addEntry => 'Add measurement';

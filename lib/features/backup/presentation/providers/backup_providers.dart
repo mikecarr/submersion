@@ -8,6 +8,9 @@ import 'package:submersion/core/services/sync/post_restore_sync_store.dart';
 import 'package:submersion/features/backup/data/repositories/backup_preferences.dart';
 import 'package:submersion/features/backup/data/services/backup_service.dart';
 import 'package:submersion/features/backup/domain/entities/backup_record.dart';
+import 'package:submersion/core/services/sync/crypto/sync_encryption_service.dart'
+    show WrongPassphraseException;
+import 'package:submersion/features/backup/domain/exceptions/backup_encrypted_exception.dart';
 import 'package:submersion/features/backup/domain/entities/backup_settings.dart';
 import 'package:submersion/features/backup/domain/entities/restore_mode.dart';
 import 'package:submersion/features/divers/presentation/providers/diver_providers.dart';
@@ -33,6 +36,8 @@ final backupServiceProvider = Provider<BackupService>((ref) {
     postRestoreSyncStore: PostRestoreSyncStore(
       ref.watch(sharedPreferencesProvider),
     ),
+    encryptionKeyStore: ref.watch(encryptionKeyStoreProvider),
+    syncPreferences: ref.watch(syncPreferencesProvider),
   );
 });
 
@@ -211,6 +216,7 @@ class BackupOperationNotifier extends StateNotifier<BackupOperationState> {
   Future<void> restoreFromBackup(
     BackupRecord record, {
     RestoreMode mode = RestoreMode.merge,
+    String? encryptionSecret,
   }) async {
     if (state.status == BackupOperationStatus.inProgress) return;
 
@@ -220,12 +226,26 @@ class BackupOperationNotifier extends StateNotifier<BackupOperationState> {
     );
 
     try {
-      await _service.restoreFromBackup(record, mode: mode);
+      await _service.restoreFromBackup(
+        record,
+        mode: mode,
+        encryptionSecret: encryptionSecret,
+      );
       await _syncActiveDiverAfterRestore();
       state = const BackupOperationState(
         status: BackupOperationStatus.restoreComplete,
       );
       _ref.invalidate(backupHistoryProvider);
+    } on BackupEncryptedException {
+      // The page prompts for the passphrase and retries with the secret.
+      state = const BackupOperationState(status: BackupOperationStatus.idle);
+      rethrow;
+    } on WrongPassphraseException {
+      // A wrong secret during the retry must reach the passphrase dialog so it
+      // can keep itself open and show the inline error; the generic catch below
+      // would swallow it into an error state and close the dialog on success.
+      state = const BackupOperationState(status: BackupOperationStatus.idle);
+      rethrow;
     } catch (e) {
       state = BackupOperationState(
         status: BackupOperationStatus.error,
@@ -313,6 +333,7 @@ class BackupOperationNotifier extends StateNotifier<BackupOperationState> {
   Future<void> restoreFromFilePath(
     String filePath, {
     RestoreMode mode = RestoreMode.merge,
+    String? encryptionSecret,
   }) async {
     if (state.status == BackupOperationStatus.inProgress) return;
 
@@ -337,12 +358,26 @@ class BackupOperationNotifier extends StateNotifier<BackupOperationState> {
         message: 'Restoring backup...',
       );
 
-      await _service.restoreFromFile(filePath, mode: mode);
+      await _service.restoreFromFile(
+        filePath,
+        mode: mode,
+        encryptionSecret: encryptionSecret,
+      );
       await _syncActiveDiverAfterRestore();
       state = const BackupOperationState(
         status: BackupOperationStatus.restoreComplete,
       );
       _ref.invalidate(backupHistoryProvider);
+    } on BackupEncryptedException {
+      // The page prompts for the passphrase and retries with the secret.
+      state = const BackupOperationState(status: BackupOperationStatus.idle);
+      rethrow;
+    } on WrongPassphraseException {
+      // A wrong secret during the retry must reach the passphrase dialog so it
+      // can keep itself open and show the inline error; the generic catch below
+      // would swallow it into an error state and close the dialog on success.
+      state = const BackupOperationState(status: BackupOperationStatus.idle);
+      rethrow;
     } catch (e) {
       state = BackupOperationState(
         status: BackupOperationStatus.error,

@@ -105,6 +105,134 @@ class AppLocalizationsPt extends AppLocalizations {
       'Indisponível nesta versão — use o S3 ou a versão da App Store';
 
   @override
+  String get settings_cloudSync_encryption_title =>
+      'Criptografia de ponta a ponta';
+
+  @override
+  String get settings_cloudSync_encryption_subtitleOff =>
+      'Criptografar todos os dados de sincronização e backups na nuvem antes do envio';
+
+  @override
+  String get settings_cloudSync_encryption_subtitleNeedsProvider =>
+      'Selecione primeiro um provedor de nuvem';
+
+  @override
+  String get settings_cloudSync_encryption_statusOff =>
+      'A criptografia está desativada';
+
+  @override
+  String get settings_cloudSync_encryption_statusOn =>
+      'A criptografia está ativada';
+
+  @override
+  String get settings_cloudSync_encryption_statusOnSubtitle =>
+      'Dados de sincronização e backups na nuvem são criptografados antes do envio';
+
+  @override
+  String get settings_cloudSync_encryption_statusLocked =>
+      'Criptografado — senha necessária';
+
+  @override
+  String get settings_cloudSync_encryption_statusLockedSubtitle =>
+      'Digite a frase-senha para sincronizar neste dispositivo';
+
+  @override
+  String get settings_cloudSync_encryption_enable => 'Ativar criptografia';
+
+  @override
+  String get settings_cloudSync_encryption_enterPassphrase =>
+      'Digitar frase-senha';
+
+  @override
+  String get settings_cloudSync_encryption_passphrase => 'Frase-senha';
+
+  @override
+  String get settings_cloudSync_encryption_passphraseConfirm =>
+      'Confirmar frase-senha';
+
+  @override
+  String get settings_cloudSync_encryption_passphraseMismatch =>
+      'As frases-senha não coincidem';
+
+  @override
+  String get settings_cloudSync_encryption_passphraseTooShort =>
+      'Use pelo menos 8 caracteres';
+
+  @override
+  String get settings_cloudSync_encryption_wrongPassphrase =>
+      'Frase-senha ou código de recuperação incorretos';
+
+  @override
+  String get settings_cloudSync_encryption_warnUpdateDevices =>
+      'Todos os outros dispositivos precisam ser atualizados para a versão mais recente do app e baixarão a biblioteca novamente.';
+
+  @override
+  String get settings_cloudSync_encryption_warnLoss =>
+      'Se você perder a frase-senha e o código de recuperação, os dados na nuvem não poderão ser recuperados. Os dados nos seus dispositivos nunca correm risco.';
+
+  @override
+  String get settings_cloudSync_encryption_deletePlaintextBackups =>
+      'Excluir backups na nuvem não criptografados existentes';
+
+  @override
+  String get settings_cloudSync_encryption_recoveryTitle =>
+      'Código de recuperação';
+
+  @override
+  String get settings_cloudSync_encryption_recoveryExplain =>
+      'Anote este código e guarde-o em local seguro. É a única forma de voltar a acessar se você esquecer a frase-senha.';
+
+  @override
+  String get settings_cloudSync_encryption_recoverySavedConfirm =>
+      'Salvei meu código de recuperação';
+
+  @override
+  String get settings_cloudSync_encryption_changePassphrase =>
+      'Alterar frase-senha';
+
+  @override
+  String get settings_cloudSync_encryption_currentPassphrase =>
+      'Frase-senha atual';
+
+  @override
+  String get settings_cloudSync_encryption_newPassphrase => 'Nova frase-senha';
+
+  @override
+  String get settings_cloudSync_encryption_regenerateRecovery =>
+      'Gerar novo código de recuperação';
+
+  @override
+  String get settings_cloudSync_encryption_regenerateRecoveryWarn =>
+      'O código de recuperação antigo deixa de funcionar imediatamente.';
+
+  @override
+  String get settings_cloudSync_encryption_disable => 'Desativar criptografia';
+
+  @override
+  String get settings_cloudSync_encryption_disableWarn =>
+      'A biblioteca será reenviada sem criptografia e os outros dispositivos a baixarão novamente. Os backups criptografados existentes continuam restauráveis com a frase-senha.';
+
+  @override
+  String get settings_cloudSync_encryption_unlockTitle =>
+      'Digite sua frase-senha de criptografia';
+
+  @override
+  String get settings_cloudSync_encryption_unlockHint =>
+      'Frase-senha ou código de recuperação';
+
+  @override
+  String get settings_cloudSync_encryption_unlock => 'Desbloquear';
+
+  @override
+  String get settings_cloudSync_encryption_continue => 'Continuar';
+
+  @override
+  String get settings_cloudSync_encryption_done => 'Concluído';
+
+  @override
+  String get settings_cloudSync_encryption_cancel => 'Cancelar';
+
+  @override
   String settings_cloudSync_replace_globalBanner(String deviceName) {
     return 'Sincronização em pausa — a biblioteca foi substituída a partir de uma cópia de segurança em \"$deviceName\".';
   }
@@ -18500,6 +18628,108 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get diveLog_bulkEdit_membership_empty =>
       'Ainda não há itens nos mergulhos selecionados';
+
+  @override
+  String get settings_mediaStorage_entry_title => 'Armazenamento de mídia';
+
+  @override
+  String get settings_mediaStorage_entry_subtitle =>
+      'Guarde os originais de fotos e vídeos no seu próprio armazenamento em nuvem';
+
+  @override
+  String get settings_mediaStorage_status_notConfigured =>
+      'Nenhum armazenamento de mídia conectado neste dispositivo';
+
+  @override
+  String settings_mediaStorage_status_connected(String hint) {
+    return 'Conectado a $hint';
+  }
+
+  @override
+  String get settings_mediaStorage_test_success => 'Conexão bem-sucedida';
+
+  @override
+  String get settings_mediaStorage_saved => 'Armazenamento de mídia conectado';
+
+  @override
+  String get settings_mediaStorage_action_disconnect => 'Desconectar';
+
+  @override
+  String get settings_mediaStorage_disconnect_confirm_title =>
+      'Desconectar o armazenamento de mídia?';
+
+  @override
+  String get settings_mediaStorage_disconnect_confirm_body =>
+      'Este dispositivo deixa de enviar e buscar mídia. Nada é excluído do seu bucket.';
+
+  @override
+  String get settings_mediaStorage_action_copyFromSync =>
+      'Copiar configurações do Sync';
+
+  @override
+  String get settings_mediaStorage_transfers_title => 'Transferências';
+
+  @override
+  String get settings_mediaStorage_transfers_entry => 'Ver transferências';
+
+  @override
+  String get settings_mediaStorage_transfers_empty => 'Sem transferências';
+
+  @override
+  String get settings_mediaStorage_transfers_retry => 'Tentar novamente';
+
+  @override
+  String get settings_mediaStorage_transfers_clearCompleted =>
+      'Limpar concluídas';
+
+  @override
+  String get settings_mediaStorage_transfers_state_pending => 'Aguardando';
+
+  @override
+  String get settings_mediaStorage_transfers_state_transferring => 'Enviando';
+
+  @override
+  String get settings_mediaStorage_transfers_state_done => 'Concluído';
+
+  @override
+  String get settings_mediaStorage_transfers_state_failed => 'Falhou';
+
+  @override
+  String get settings_mediaStorage_backfill_action =>
+      'Enviar biblioteca existente';
+
+  @override
+  String settings_mediaStorage_backfill_enqueued(int count) {
+    return '$count envios na fila';
+  }
+
+  @override
+  String get settings_mediaStorage_policy_autoUpload =>
+      'Enviar fotos automaticamente';
+
+  @override
+  String get settings_mediaStorage_policy_photosOnCellular =>
+      'Enviar fotos pela rede móvel';
+
+  @override
+  String get settings_mediaStorage_provider_label => 'Provedor';
+
+  @override
+  String get settings_mediaStorage_connect_dropbox_hint =>
+      'Usa sua conexão do Dropbox da sincronização na nuvem. As mídias ficam na pasta do app no Dropbox.';
+
+  @override
+  String get settings_mediaStorage_connect_gdrive_hint =>
+      'Entra com o Google. As mídias ficam no espaço privado do Drive deste app.';
+
+  @override
+  String get settings_mediaStorage_connect_icloud_hint =>
+      'As mídias ficam no contêiner do iCloud deste app e sincronizam pelo seu ID Apple.';
+
+  @override
+  String settings_mediaStorage_connect_action(String provider) {
+    return 'Conectar $provider';
+  }
 
   @override
   String get bodyWeight_addEntry => 'Adicionar medição';

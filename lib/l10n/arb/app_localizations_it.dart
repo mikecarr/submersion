@@ -104,6 +104,134 @@ class AppLocalizationsIt extends AppLocalizations {
       'Non disponibile in questa build: usa S3 o la versione dell\'App Store';
 
   @override
+  String get settings_cloudSync_encryption_title => 'Crittografia end-to-end';
+
+  @override
+  String get settings_cloudSync_encryption_subtitleOff =>
+      'Cripta tutti i dati di sincronizzazione e i backup cloud prima del caricamento';
+
+  @override
+  String get settings_cloudSync_encryption_subtitleNeedsProvider =>
+      'Seleziona prima un provider cloud';
+
+  @override
+  String get settings_cloudSync_encryption_statusOff =>
+      'La crittografia è disattivata';
+
+  @override
+  String get settings_cloudSync_encryption_statusOn =>
+      'La crittografia è attiva';
+
+  @override
+  String get settings_cloudSync_encryption_statusOnSubtitle =>
+      'I dati di sincronizzazione e i backup cloud vengono criptati prima del caricamento';
+
+  @override
+  String get settings_cloudSync_encryption_statusLocked =>
+      'Criptato — serve la passphrase';
+
+  @override
+  String get settings_cloudSync_encryption_statusLockedSubtitle =>
+      'Inserisci la passphrase per sincronizzare su questo dispositivo';
+
+  @override
+  String get settings_cloudSync_encryption_enable => 'Attiva la crittografia';
+
+  @override
+  String get settings_cloudSync_encryption_enterPassphrase =>
+      'Inserisci la passphrase';
+
+  @override
+  String get settings_cloudSync_encryption_passphrase => 'Passphrase';
+
+  @override
+  String get settings_cloudSync_encryption_passphraseConfirm =>
+      'Conferma la passphrase';
+
+  @override
+  String get settings_cloudSync_encryption_passphraseMismatch =>
+      'Le passphrase non coincidono';
+
+  @override
+  String get settings_cloudSync_encryption_passphraseTooShort =>
+      'Usa almeno 8 caratteri';
+
+  @override
+  String get settings_cloudSync_encryption_wrongPassphrase =>
+      'Passphrase o codice di recupero errati';
+
+  @override
+  String get settings_cloudSync_encryption_warnUpdateDevices =>
+      'Tutti gli altri dispositivi devono essere aggiornati all\'ultima versione dell\'app e scaricheranno di nuovo la libreria.';
+
+  @override
+  String get settings_cloudSync_encryption_warnLoss =>
+      'Se perdi sia la passphrase sia il codice di recupero, i dati nel cloud non potranno essere recuperati. I dati sui tuoi dispositivi non sono mai a rischio.';
+
+  @override
+  String get settings_cloudSync_encryption_deletePlaintextBackups =>
+      'Elimina i backup cloud non criptati esistenti';
+
+  @override
+  String get settings_cloudSync_encryption_recoveryTitle =>
+      'Codice di recupero';
+
+  @override
+  String get settings_cloudSync_encryption_recoveryExplain =>
+      'Annota questo codice e conservalo al sicuro. È l\'unico modo per rientrare se dimentichi la passphrase.';
+
+  @override
+  String get settings_cloudSync_encryption_recoverySavedConfirm =>
+      'Ho salvato il mio codice di recupero';
+
+  @override
+  String get settings_cloudSync_encryption_changePassphrase =>
+      'Cambia passphrase';
+
+  @override
+  String get settings_cloudSync_encryption_currentPassphrase =>
+      'Passphrase attuale';
+
+  @override
+  String get settings_cloudSync_encryption_newPassphrase => 'Nuova passphrase';
+
+  @override
+  String get settings_cloudSync_encryption_regenerateRecovery =>
+      'Genera un nuovo codice di recupero';
+
+  @override
+  String get settings_cloudSync_encryption_regenerateRecoveryWarn =>
+      'Il vecchio codice di recupero smette subito di funzionare.';
+
+  @override
+  String get settings_cloudSync_encryption_disable =>
+      'Disattiva la crittografia';
+
+  @override
+  String get settings_cloudSync_encryption_disableWarn =>
+      'La libreria verrà ricaricata non criptata e gli altri dispositivi la scaricheranno di nuovo. I backup criptati esistenti restano ripristinabili con la passphrase.';
+
+  @override
+  String get settings_cloudSync_encryption_unlockTitle =>
+      'Inserisci la passphrase di crittografia';
+
+  @override
+  String get settings_cloudSync_encryption_unlockHint =>
+      'Passphrase o codice di recupero';
+
+  @override
+  String get settings_cloudSync_encryption_unlock => 'Sblocca';
+
+  @override
+  String get settings_cloudSync_encryption_continue => 'Continua';
+
+  @override
+  String get settings_cloudSync_encryption_done => 'Fatto';
+
+  @override
+  String get settings_cloudSync_encryption_cancel => 'Annulla';
+
+  @override
   String settings_cloudSync_replace_globalBanner(String deviceName) {
     return 'Sincronizzazione in pausa: la libreria è stata sostituita da un backup su \"$deviceName\".';
   }
@@ -18491,6 +18619,109 @@ class AppLocalizationsIt extends AppLocalizations {
   @override
   String get diveLog_bulkEdit_membership_empty =>
       'Ancora nessun elemento nelle immersioni selezionate';
+
+  @override
+  String get settings_mediaStorage_entry_title => 'Archiviazione media';
+
+  @override
+  String get settings_mediaStorage_entry_subtitle =>
+      'Conserva gli originali di foto e video nel tuo cloud personale';
+
+  @override
+  String get settings_mediaStorage_status_notConfigured =>
+      'Nessun archivio media collegato su questo dispositivo';
+
+  @override
+  String settings_mediaStorage_status_connected(String hint) {
+    return 'Collegato a $hint';
+  }
+
+  @override
+  String get settings_mediaStorage_test_success => 'Connessione riuscita';
+
+  @override
+  String get settings_mediaStorage_saved => 'Archivio media collegato';
+
+  @override
+  String get settings_mediaStorage_action_disconnect => 'Disconnetti';
+
+  @override
+  String get settings_mediaStorage_disconnect_confirm_title =>
+      'Disconnettere l\'archivio media?';
+
+  @override
+  String get settings_mediaStorage_disconnect_confirm_body =>
+      'Questo dispositivo smette di caricare e scaricare i media. Nulla viene eliminato dal tuo bucket.';
+
+  @override
+  String get settings_mediaStorage_action_copyFromSync =>
+      'Copia impostazioni da Sync';
+
+  @override
+  String get settings_mediaStorage_transfers_title => 'Trasferimenti';
+
+  @override
+  String get settings_mediaStorage_transfers_entry => 'Vedi trasferimenti';
+
+  @override
+  String get settings_mediaStorage_transfers_empty => 'Nessun trasferimento';
+
+  @override
+  String get settings_mediaStorage_transfers_retry => 'Riprova';
+
+  @override
+  String get settings_mediaStorage_transfers_clearCompleted =>
+      'Rimuovi completati';
+
+  @override
+  String get settings_mediaStorage_transfers_state_pending => 'In attesa';
+
+  @override
+  String get settings_mediaStorage_transfers_state_transferring =>
+      'Caricamento';
+
+  @override
+  String get settings_mediaStorage_transfers_state_done => 'Completato';
+
+  @override
+  String get settings_mediaStorage_transfers_state_failed => 'Non riuscito';
+
+  @override
+  String get settings_mediaStorage_backfill_action =>
+      'Carica libreria esistente';
+
+  @override
+  String settings_mediaStorage_backfill_enqueued(int count) {
+    return '$count caricamenti in coda';
+  }
+
+  @override
+  String get settings_mediaStorage_policy_autoUpload =>
+      'Carica foto automaticamente';
+
+  @override
+  String get settings_mediaStorage_policy_photosOnCellular =>
+      'Carica foto su rete mobile';
+
+  @override
+  String get settings_mediaStorage_provider_label => 'Provider';
+
+  @override
+  String get settings_mediaStorage_connect_dropbox_hint =>
+      'Usa la tua connessione Dropbox della sincronizzazione cloud. I media sono archiviati nella cartella app di Dropbox.';
+
+  @override
+  String get settings_mediaStorage_connect_gdrive_hint =>
+      'Accede con Google. I media sono archiviati nello spazio Drive privato di questa app.';
+
+  @override
+  String get settings_mediaStorage_connect_icloud_hint =>
+      'I media sono archiviati nel contenitore iCloud di questa app e si sincronizzano tramite il tuo ID Apple.';
+
+  @override
+  String settings_mediaStorage_connect_action(String provider) {
+    return 'Collega $provider';
+  }
 
   @override
   String get bodyWeight_addEntry => 'Aggiungi misurazione';

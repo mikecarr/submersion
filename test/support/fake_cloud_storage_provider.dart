@@ -111,6 +111,16 @@ class FakeCloudStorageProvider implements CloudStorageProvider {
     return out;
   }
 
+  /// Raw stored bytes (as the provider sees them), for encryption
+  /// leak-invariant assertions. Names are the final path segment.
+  List<({String name, Uint8List bytes})> allStoredFiles() => [
+    for (final e in _files.entries)
+      (
+        name: e.key.substring(e.key.lastIndexOf('/') + 1),
+        bytes: Uint8List.fromList(e.value),
+      ),
+  ];
+
   @override
   Future<void> deleteFile(String fileId) async {
     _files.remove(fileId);

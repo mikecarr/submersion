@@ -104,6 +104,136 @@ class AppLocalizationsFr extends AppLocalizations {
       'Indisponible dans cette version — utilisez S3 ou la version de l\'App Store';
 
   @override
+  String get settings_cloudSync_encryption_title =>
+      'Chiffrement de bout en bout';
+
+  @override
+  String get settings_cloudSync_encryption_subtitleOff =>
+      'Chiffrer toutes les données de synchronisation et les sauvegardes cloud avant l\'envoi';
+
+  @override
+  String get settings_cloudSync_encryption_subtitleNeedsProvider =>
+      'Sélectionnez d\'abord un fournisseur cloud';
+
+  @override
+  String get settings_cloudSync_encryption_statusOff =>
+      'Le chiffrement est désactivé';
+
+  @override
+  String get settings_cloudSync_encryption_statusOn =>
+      'Le chiffrement est activé';
+
+  @override
+  String get settings_cloudSync_encryption_statusOnSubtitle =>
+      'Les données de synchronisation et les sauvegardes cloud sont chiffrées avant l\'envoi';
+
+  @override
+  String get settings_cloudSync_encryption_statusLocked =>
+      'Chiffré — phrase secrète requise';
+
+  @override
+  String get settings_cloudSync_encryption_statusLockedSubtitle =>
+      'Saisissez la phrase secrète pour synchroniser sur cet appareil';
+
+  @override
+  String get settings_cloudSync_encryption_enable => 'Activer le chiffrement';
+
+  @override
+  String get settings_cloudSync_encryption_enterPassphrase =>
+      'Saisir la phrase secrète';
+
+  @override
+  String get settings_cloudSync_encryption_passphrase => 'Phrase secrète';
+
+  @override
+  String get settings_cloudSync_encryption_passphraseConfirm =>
+      'Confirmer la phrase secrète';
+
+  @override
+  String get settings_cloudSync_encryption_passphraseMismatch =>
+      'Les phrases secrètes ne correspondent pas';
+
+  @override
+  String get settings_cloudSync_encryption_passphraseTooShort =>
+      'Utilisez au moins 8 caractères';
+
+  @override
+  String get settings_cloudSync_encryption_wrongPassphrase =>
+      'Phrase secrète ou code de récupération incorrect';
+
+  @override
+  String get settings_cloudSync_encryption_warnUpdateDevices =>
+      'Tous les autres appareils doivent être mis à jour vers la dernière version de l\'application et retélechargeront la bibliothèque.';
+
+  @override
+  String get settings_cloudSync_encryption_warnLoss =>
+      'Si vous perdez la phrase secrète et le code de récupération, les données dans le cloud seront irrécupérables. Les données sur vos appareils ne sont jamais menacées.';
+
+  @override
+  String get settings_cloudSync_encryption_deletePlaintextBackups =>
+      'Supprimer les sauvegardes cloud non chiffrées existantes';
+
+  @override
+  String get settings_cloudSync_encryption_recoveryTitle =>
+      'Code de récupération';
+
+  @override
+  String get settings_cloudSync_encryption_recoveryExplain =>
+      'Notez ce code et conservez-le en lieu sûr. C\'est le seul moyen de récupérer l\'accès si vous oubliez la phrase secrète.';
+
+  @override
+  String get settings_cloudSync_encryption_recoverySavedConfirm =>
+      'J\'ai enregistré mon code de récupération';
+
+  @override
+  String get settings_cloudSync_encryption_changePassphrase =>
+      'Changer la phrase secrète';
+
+  @override
+  String get settings_cloudSync_encryption_currentPassphrase =>
+      'Phrase secrète actuelle';
+
+  @override
+  String get settings_cloudSync_encryption_newPassphrase =>
+      'Nouvelle phrase secrète';
+
+  @override
+  String get settings_cloudSync_encryption_regenerateRecovery =>
+      'Générer un nouveau code de récupération';
+
+  @override
+  String get settings_cloudSync_encryption_regenerateRecoveryWarn =>
+      'L\'ancien code de récupération cesse immédiatement de fonctionner.';
+
+  @override
+  String get settings_cloudSync_encryption_disable =>
+      'Désactiver le chiffrement';
+
+  @override
+  String get settings_cloudSync_encryption_disableWarn =>
+      'La bibliothèque sera renvoyée non chiffrée et les autres appareils la retéléchargeront. Les sauvegardes chiffrées existantes restent restaurables avec la phrase secrète.';
+
+  @override
+  String get settings_cloudSync_encryption_unlockTitle =>
+      'Saisissez votre phrase secrète de chiffrement';
+
+  @override
+  String get settings_cloudSync_encryption_unlockHint =>
+      'Phrase secrète ou code de récupération';
+
+  @override
+  String get settings_cloudSync_encryption_unlock => 'Déverrouiller';
+
+  @override
+  String get settings_cloudSync_encryption_continue => 'Continuer';
+
+  @override
+  String get settings_cloudSync_encryption_done => 'Terminé';
+
+  @override
+  String get settings_cloudSync_encryption_cancel => 'Annuler';
+
+  @override
   String settings_cloudSync_replace_globalBanner(String deviceName) {
     return 'Synchronisation en pause — la bibliothèque a été remplacée depuis une sauvegarde sur \"$deviceName\".';
   }
@@ -18556,6 +18686,109 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get diveLog_bulkEdit_membership_empty =>
       'Aucun élément sur les plongées sélectionnées pour l\'instant';
+
+  @override
+  String get settings_mediaStorage_entry_title => 'Stockage des médias';
+
+  @override
+  String get settings_mediaStorage_entry_subtitle =>
+      'Stockez les originaux photo et vidéo dans votre propre espace cloud';
+
+  @override
+  String get settings_mediaStorage_status_notConfigured =>
+      'Aucun stockage de médias connecté sur cet appareil';
+
+  @override
+  String settings_mediaStorage_status_connected(String hint) {
+    return 'Connecté à $hint';
+  }
+
+  @override
+  String get settings_mediaStorage_test_success => 'Connexion réussie';
+
+  @override
+  String get settings_mediaStorage_saved => 'Stockage des médias connecté';
+
+  @override
+  String get settings_mediaStorage_action_disconnect => 'Déconnecter';
+
+  @override
+  String get settings_mediaStorage_disconnect_confirm_title =>
+      'Déconnecter le stockage des médias ?';
+
+  @override
+  String get settings_mediaStorage_disconnect_confirm_body =>
+      'Cet appareil cesse d\'envoyer et de récupérer des médias. Rien n\'est supprimé de votre bucket.';
+
+  @override
+  String get settings_mediaStorage_action_copyFromSync =>
+      'Copier les réglages de Sync';
+
+  @override
+  String get settings_mediaStorage_transfers_title => 'Transferts';
+
+  @override
+  String get settings_mediaStorage_transfers_entry => 'Voir les transferts';
+
+  @override
+  String get settings_mediaStorage_transfers_empty => 'Aucun transfert';
+
+  @override
+  String get settings_mediaStorage_transfers_retry => 'Réessayer';
+
+  @override
+  String get settings_mediaStorage_transfers_clearCompleted =>
+      'Effacer les terminés';
+
+  @override
+  String get settings_mediaStorage_transfers_state_pending => 'En attente';
+
+  @override
+  String get settings_mediaStorage_transfers_state_transferring =>
+      'Envoi en cours';
+
+  @override
+  String get settings_mediaStorage_transfers_state_done => 'Terminé';
+
+  @override
+  String get settings_mediaStorage_transfers_state_failed => 'Échec';
+
+  @override
+  String get settings_mediaStorage_backfill_action =>
+      'Envoyer la bibliothèque existante';
+
+  @override
+  String settings_mediaStorage_backfill_enqueued(int count) {
+    return '$count envois en file';
+  }
+
+  @override
+  String get settings_mediaStorage_policy_autoUpload =>
+      'Envoyer les photos automatiquement';
+
+  @override
+  String get settings_mediaStorage_policy_photosOnCellular =>
+      'Envoyer les photos en cellulaire';
+
+  @override
+  String get settings_mediaStorage_provider_label => 'Fournisseur';
+
+  @override
+  String get settings_mediaStorage_connect_dropbox_hint =>
+      'Utilise votre connexion Dropbox de la synchronisation cloud. Les médias sont stockés dans le dossier d\'application Dropbox.';
+
+  @override
+  String get settings_mediaStorage_connect_gdrive_hint =>
+      'Connexion avec Google. Les médias sont stockés dans l\'espace Drive privé de cette application.';
+
+  @override
+  String get settings_mediaStorage_connect_icloud_hint =>
+      'Les médias sont stockés dans le conteneur iCloud de cette application et se synchronisent via votre identifiant Apple.';
+
+  @override
+  String settings_mediaStorage_connect_action(String provider) {
+    return 'Connecter $provider';
+  }
 
   @override
   String get bodyWeight_addEntry => 'Ajouter une mesure';

@@ -91,6 +91,10 @@ class MediaItem extends Equatable {
   final String? connectorAccountId;
   final String? remoteAssetId;
   final String? originDeviceId;
+  final String? contentHash;
+  final int? contentSizeBytes;
+  final DateTime? remoteUploadedAt;
+  final DateTime? remoteThumbUploadedAt;
   final DateTime createdAt;
   final DateTime updatedAt;
   final MediaEnrichment? enrichment;
@@ -127,6 +131,10 @@ class MediaItem extends Equatable {
     this.connectorAccountId,
     this.remoteAssetId,
     this.originDeviceId,
+    this.contentHash,
+    this.contentSizeBytes,
+    this.remoteUploadedAt,
+    this.remoteThumbUploadedAt,
     required this.createdAt,
     required this.updatedAt,
     this.enrichment,
@@ -178,6 +186,10 @@ class MediaItem extends Equatable {
     Object? connectorAccountId = _undefined,
     Object? remoteAssetId = _undefined,
     Object? originDeviceId = _undefined,
+    Object? contentHash = _undefined,
+    Object? contentSizeBytes = _undefined,
+    Object? remoteUploadedAt = _undefined,
+    Object? remoteThumbUploadedAt = _undefined,
     DateTime? createdAt,
     DateTime? updatedAt,
     Object? enrichment = _undefined,
@@ -244,6 +256,18 @@ class MediaItem extends Equatable {
       originDeviceId: originDeviceId == _undefined
           ? this.originDeviceId
           : originDeviceId as String?,
+      contentHash: contentHash == _undefined
+          ? this.contentHash
+          : contentHash as String?,
+      contentSizeBytes: contentSizeBytes == _undefined
+          ? this.contentSizeBytes
+          : contentSizeBytes as int?,
+      remoteUploadedAt: remoteUploadedAt == _undefined
+          ? this.remoteUploadedAt
+          : remoteUploadedAt as DateTime?,
+      remoteThumbUploadedAt: remoteThumbUploadedAt == _undefined
+          ? this.remoteThumbUploadedAt
+          : remoteThumbUploadedAt as DateTime?,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       enrichment: enrichment == _undefined
@@ -285,6 +309,10 @@ class MediaItem extends Equatable {
     connectorAccountId,
     remoteAssetId,
     originDeviceId,
+    contentHash,
+    contentSizeBytes,
+    remoteUploadedAt,
+    remoteThumbUploadedAt,
     createdAt,
     updatedAt,
     enrichment,

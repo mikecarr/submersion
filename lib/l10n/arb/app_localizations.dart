@@ -284,6 +284,210 @@ abstract class AppLocalizations {
   /// **'Not available in this build — use S3 or the App Store version'**
   String get settings_cloudSync_provider_icloud_unsupportedSubtitle;
 
+  /// No description provided for @settings_cloudSync_encryption_title.
+  ///
+  /// In en, this message translates to:
+  /// **'End-to-end encryption'**
+  String get settings_cloudSync_encryption_title;
+
+  /// No description provided for @settings_cloudSync_encryption_subtitleOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Encrypt all sync data and cloud backups before upload'**
+  String get settings_cloudSync_encryption_subtitleOff;
+
+  /// No description provided for @settings_cloudSync_encryption_subtitleNeedsProvider.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a cloud provider first'**
+  String get settings_cloudSync_encryption_subtitleNeedsProvider;
+
+  /// No description provided for @settings_cloudSync_encryption_statusOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Encryption is off'**
+  String get settings_cloudSync_encryption_statusOff;
+
+  /// No description provided for @settings_cloudSync_encryption_statusOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Encryption is on'**
+  String get settings_cloudSync_encryption_statusOn;
+
+  /// No description provided for @settings_cloudSync_encryption_statusOnSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync data and cloud backups are encrypted before upload'**
+  String get settings_cloudSync_encryption_statusOnSubtitle;
+
+  /// No description provided for @settings_cloudSync_encryption_statusLocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Encrypted — passphrase needed'**
+  String get settings_cloudSync_encryption_statusLocked;
+
+  /// No description provided for @settings_cloudSync_encryption_statusLockedSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the passphrase to sync on this device'**
+  String get settings_cloudSync_encryption_statusLockedSubtitle;
+
+  /// No description provided for @settings_cloudSync_encryption_enable.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable encryption'**
+  String get settings_cloudSync_encryption_enable;
+
+  /// No description provided for @settings_cloudSync_encryption_enterPassphrase.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter passphrase'**
+  String get settings_cloudSync_encryption_enterPassphrase;
+
+  /// No description provided for @settings_cloudSync_encryption_passphrase.
+  ///
+  /// In en, this message translates to:
+  /// **'Passphrase'**
+  String get settings_cloudSync_encryption_passphrase;
+
+  /// No description provided for @settings_cloudSync_encryption_passphraseConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm passphrase'**
+  String get settings_cloudSync_encryption_passphraseConfirm;
+
+  /// No description provided for @settings_cloudSync_encryption_passphraseMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Passphrases do not match'**
+  String get settings_cloudSync_encryption_passphraseMismatch;
+
+  /// No description provided for @settings_cloudSync_encryption_passphraseTooShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Use at least 8 characters'**
+  String get settings_cloudSync_encryption_passphraseTooShort;
+
+  /// No description provided for @settings_cloudSync_encryption_wrongPassphrase.
+  ///
+  /// In en, this message translates to:
+  /// **'Incorrect passphrase or recovery code'**
+  String get settings_cloudSync_encryption_wrongPassphrase;
+
+  /// No description provided for @settings_cloudSync_encryption_warnUpdateDevices.
+  ///
+  /// In en, this message translates to:
+  /// **'All other devices must be updated to the latest app version and will re-download the library.'**
+  String get settings_cloudSync_encryption_warnUpdateDevices;
+
+  /// No description provided for @settings_cloudSync_encryption_warnLoss.
+  ///
+  /// In en, this message translates to:
+  /// **'If you lose both the passphrase and the recovery code, data in the cloud cannot be recovered. Data on your devices is never at risk.'**
+  String get settings_cloudSync_encryption_warnLoss;
+
+  /// No description provided for @settings_cloudSync_encryption_deletePlaintextBackups.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete existing unencrypted cloud backups'**
+  String get settings_cloudSync_encryption_deletePlaintextBackups;
+
+  /// No description provided for @settings_cloudSync_encryption_recoveryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Recovery code'**
+  String get settings_cloudSync_encryption_recoveryTitle;
+
+  /// No description provided for @settings_cloudSync_encryption_recoveryExplain.
+  ///
+  /// In en, this message translates to:
+  /// **'Write this code down and keep it somewhere safe. It is the only way back in if you forget your passphrase.'**
+  String get settings_cloudSync_encryption_recoveryExplain;
+
+  /// No description provided for @settings_cloudSync_encryption_recoverySavedConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'I have saved my recovery code'**
+  String get settings_cloudSync_encryption_recoverySavedConfirm;
+
+  /// No description provided for @settings_cloudSync_encryption_changePassphrase.
+  ///
+  /// In en, this message translates to:
+  /// **'Change passphrase'**
+  String get settings_cloudSync_encryption_changePassphrase;
+
+  /// No description provided for @settings_cloudSync_encryption_currentPassphrase.
+  ///
+  /// In en, this message translates to:
+  /// **'Current passphrase'**
+  String get settings_cloudSync_encryption_currentPassphrase;
+
+  /// No description provided for @settings_cloudSync_encryption_newPassphrase.
+  ///
+  /// In en, this message translates to:
+  /// **'New passphrase'**
+  String get settings_cloudSync_encryption_newPassphrase;
+
+  /// No description provided for @settings_cloudSync_encryption_regenerateRecovery.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate new recovery code'**
+  String get settings_cloudSync_encryption_regenerateRecovery;
+
+  /// No description provided for @settings_cloudSync_encryption_regenerateRecoveryWarn.
+  ///
+  /// In en, this message translates to:
+  /// **'The old recovery code stops working immediately.'**
+  String get settings_cloudSync_encryption_regenerateRecoveryWarn;
+
+  /// No description provided for @settings_cloudSync_encryption_disable.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn off encryption'**
+  String get settings_cloudSync_encryption_disable;
+
+  /// No description provided for @settings_cloudSync_encryption_disableWarn.
+  ///
+  /// In en, this message translates to:
+  /// **'The library will be re-uploaded unencrypted, and other devices will re-download it. Existing encrypted backups stay restorable with the passphrase.'**
+  String get settings_cloudSync_encryption_disableWarn;
+
+  /// No description provided for @settings_cloudSync_encryption_unlockTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your encryption passphrase'**
+  String get settings_cloudSync_encryption_unlockTitle;
+
+  /// No description provided for @settings_cloudSync_encryption_unlockHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Passphrase or recovery code'**
+  String get settings_cloudSync_encryption_unlockHint;
+
+  /// No description provided for @settings_cloudSync_encryption_unlock.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock'**
+  String get settings_cloudSync_encryption_unlock;
+
+  /// No description provided for @settings_cloudSync_encryption_continue.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get settings_cloudSync_encryption_continue;
+
+  /// No description provided for @settings_cloudSync_encryption_done.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get settings_cloudSync_encryption_done;
+
+  /// No description provided for @settings_cloudSync_encryption_cancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get settings_cloudSync_encryption_cancel;
+
   /// No description provided for @settings_cloudSync_replace_globalBanner.
   ///
   /// In en, this message translates to:
@@ -30925,6 +31129,174 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No items on the selected dives yet'**
   String get diveLog_bulkEdit_membership_empty;
+
+  /// No description provided for @settings_mediaStorage_entry_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Media Storage'**
+  String get settings_mediaStorage_entry_title;
+
+  /// No description provided for @settings_mediaStorage_entry_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Store photo and video originals in your own cloud storage'**
+  String get settings_mediaStorage_entry_subtitle;
+
+  /// No description provided for @settings_mediaStorage_status_notConfigured.
+  ///
+  /// In en, this message translates to:
+  /// **'No media store connected on this device'**
+  String get settings_mediaStorage_status_notConfigured;
+
+  /// No description provided for @settings_mediaStorage_status_connected.
+  ///
+  /// In en, this message translates to:
+  /// **'Connected to {hint}'**
+  String settings_mediaStorage_status_connected(String hint);
+
+  /// No description provided for @settings_mediaStorage_test_success.
+  ///
+  /// In en, this message translates to:
+  /// **'Connection successful'**
+  String get settings_mediaStorage_test_success;
+
+  /// No description provided for @settings_mediaStorage_saved.
+  ///
+  /// In en, this message translates to:
+  /// **'Media store connected'**
+  String get settings_mediaStorage_saved;
+
+  /// No description provided for @settings_mediaStorage_action_disconnect.
+  ///
+  /// In en, this message translates to:
+  /// **'Disconnect'**
+  String get settings_mediaStorage_action_disconnect;
+
+  /// No description provided for @settings_mediaStorage_disconnect_confirm_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Disconnect media store?'**
+  String get settings_mediaStorage_disconnect_confirm_title;
+
+  /// No description provided for @settings_mediaStorage_disconnect_confirm_body.
+  ///
+  /// In en, this message translates to:
+  /// **'This device stops uploading and fetching media. Nothing in your bucket is deleted.'**
+  String get settings_mediaStorage_disconnect_confirm_body;
+
+  /// No description provided for @settings_mediaStorage_action_copyFromSync.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy settings from Sync'**
+  String get settings_mediaStorage_action_copyFromSync;
+
+  /// No description provided for @settings_mediaStorage_transfers_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Transfers'**
+  String get settings_mediaStorage_transfers_title;
+
+  /// No description provided for @settings_mediaStorage_transfers_entry.
+  ///
+  /// In en, this message translates to:
+  /// **'View transfers'**
+  String get settings_mediaStorage_transfers_entry;
+
+  /// No description provided for @settings_mediaStorage_transfers_empty.
+  ///
+  /// In en, this message translates to:
+  /// **'No transfers'**
+  String get settings_mediaStorage_transfers_empty;
+
+  /// No description provided for @settings_mediaStorage_transfers_retry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get settings_mediaStorage_transfers_retry;
+
+  /// No description provided for @settings_mediaStorage_transfers_clearCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear completed'**
+  String get settings_mediaStorage_transfers_clearCompleted;
+
+  /// No description provided for @settings_mediaStorage_transfers_state_pending.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting'**
+  String get settings_mediaStorage_transfers_state_pending;
+
+  /// No description provided for @settings_mediaStorage_transfers_state_transferring.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploading'**
+  String get settings_mediaStorage_transfers_state_transferring;
+
+  /// No description provided for @settings_mediaStorage_transfers_state_done.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get settings_mediaStorage_transfers_state_done;
+
+  /// No description provided for @settings_mediaStorage_transfers_state_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed'**
+  String get settings_mediaStorage_transfers_state_failed;
+
+  /// No description provided for @settings_mediaStorage_backfill_action.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload existing library'**
+  String get settings_mediaStorage_backfill_action;
+
+  /// No description provided for @settings_mediaStorage_backfill_enqueued.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} uploads queued'**
+  String settings_mediaStorage_backfill_enqueued(int count);
+
+  /// No description provided for @settings_mediaStorage_policy_autoUpload.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload photos automatically'**
+  String get settings_mediaStorage_policy_autoUpload;
+
+  /// No description provided for @settings_mediaStorage_policy_photosOnCellular.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload photos on cellular'**
+  String get settings_mediaStorage_policy_photosOnCellular;
+
+  /// No description provided for @settings_mediaStorage_provider_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Provider'**
+  String get settings_mediaStorage_provider_label;
+
+  /// No description provided for @settings_mediaStorage_connect_dropbox_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Uses your Dropbox connection from Cloud Sync. Media is stored in your Dropbox app folder.'**
+  String get settings_mediaStorage_connect_dropbox_hint;
+
+  /// No description provided for @settings_mediaStorage_connect_gdrive_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Signs in with Google. Media is stored in this app\'s private Drive space.'**
+  String get settings_mediaStorage_connect_gdrive_hint;
+
+  /// No description provided for @settings_mediaStorage_connect_icloud_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Media is stored in this app\'s iCloud container and syncs through your Apple ID.'**
+  String get settings_mediaStorage_connect_icloud_hint;
+
+  /// No description provided for @settings_mediaStorage_connect_action.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect {provider}'**
+  String settings_mediaStorage_connect_action(String provider);
 
   /// No description provided for @bodyWeight_addEntry.
   ///

@@ -100,6 +100,116 @@ class AppLocalizationsZh extends AppLocalizations {
       '此版本不可用 — 请使用 S3 或 App Store 版本';
 
   @override
+  String get settings_cloudSync_encryption_title => '端到端加密';
+
+  @override
+  String get settings_cloudSync_encryption_subtitleOff => '上传前加密所有同步数据和云备份';
+
+  @override
+  String get settings_cloudSync_encryption_subtitleNeedsProvider => '请先选择云服务商';
+
+  @override
+  String get settings_cloudSync_encryption_statusOff => '加密已关闭';
+
+  @override
+  String get settings_cloudSync_encryption_statusOn => '加密已开启';
+
+  @override
+  String get settings_cloudSync_encryption_statusOnSubtitle =>
+      '同步数据和云备份在上传前会被加密';
+
+  @override
+  String get settings_cloudSync_encryption_statusLocked => '已加密 — 需要口令';
+
+  @override
+  String get settings_cloudSync_encryption_statusLockedSubtitle =>
+      '输入口令以在此设备上同步';
+
+  @override
+  String get settings_cloudSync_encryption_enable => '开启加密';
+
+  @override
+  String get settings_cloudSync_encryption_enterPassphrase => '输入口令';
+
+  @override
+  String get settings_cloudSync_encryption_passphrase => '口令';
+
+  @override
+  String get settings_cloudSync_encryption_passphraseConfirm => '确认口令';
+
+  @override
+  String get settings_cloudSync_encryption_passphraseMismatch => '两次输入的口令不一致';
+
+  @override
+  String get settings_cloudSync_encryption_passphraseTooShort => '请至少使用 8 个字符';
+
+  @override
+  String get settings_cloudSync_encryption_wrongPassphrase => '口令或恢复码不正确';
+
+  @override
+  String get settings_cloudSync_encryption_warnUpdateDevices =>
+      '所有其他设备都必须更新到最新版应用，并将重新下载资料库。';
+
+  @override
+  String get settings_cloudSync_encryption_warnLoss =>
+      '如果口令和恢复码都丢失，云端数据将无法恢复。设备上的数据永远不会有风险。';
+
+  @override
+  String get settings_cloudSync_encryption_deletePlaintextBackups =>
+      '删除现有的未加密云备份';
+
+  @override
+  String get settings_cloudSync_encryption_recoveryTitle => '恢复码';
+
+  @override
+  String get settings_cloudSync_encryption_recoveryExplain =>
+      '请抄写此恢复码并妥善保管。如果忘记口令，这是唯一的恢复途径。';
+
+  @override
+  String get settings_cloudSync_encryption_recoverySavedConfirm => '我已保存恢复码';
+
+  @override
+  String get settings_cloudSync_encryption_changePassphrase => '更改口令';
+
+  @override
+  String get settings_cloudSync_encryption_currentPassphrase => '当前口令';
+
+  @override
+  String get settings_cloudSync_encryption_newPassphrase => '新口令';
+
+  @override
+  String get settings_cloudSync_encryption_regenerateRecovery => '生成新的恢复码';
+
+  @override
+  String get settings_cloudSync_encryption_regenerateRecoveryWarn =>
+      '旧的恢复码将立即失效。';
+
+  @override
+  String get settings_cloudSync_encryption_disable => '关闭加密';
+
+  @override
+  String get settings_cloudSync_encryption_disableWarn =>
+      '资料库将以未加密方式重新上传，其他设备将重新下载。现有的加密备份仍可用口令恢复。';
+
+  @override
+  String get settings_cloudSync_encryption_unlockTitle => '输入您的加密口令';
+
+  @override
+  String get settings_cloudSync_encryption_unlockHint => '口令或恢复码';
+
+  @override
+  String get settings_cloudSync_encryption_unlock => '解锁';
+
+  @override
+  String get settings_cloudSync_encryption_continue => '继续';
+
+  @override
+  String get settings_cloudSync_encryption_done => '完成';
+
+  @override
+  String get settings_cloudSync_encryption_cancel => '取消';
+
+  @override
   String settings_cloudSync_replace_globalBanner(String deviceName) {
     return '同步已暂停 — 资料库已从 \"$deviceName\" 上的备份替换。';
   }
@@ -17576,6 +17686,100 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get diveLog_bulkEdit_membership_empty => '所选潜水尚无项目';
+
+  @override
+  String get settings_mediaStorage_entry_title => '媒体存储';
+
+  @override
+  String get settings_mediaStorage_entry_subtitle => '将照片和视频原件存储在您自己的云存储中';
+
+  @override
+  String get settings_mediaStorage_status_notConfigured => '此设备未连接媒体存储';
+
+  @override
+  String settings_mediaStorage_status_connected(String hint) {
+    return '已连接到 $hint';
+  }
+
+  @override
+  String get settings_mediaStorage_test_success => '连接成功';
+
+  @override
+  String get settings_mediaStorage_saved => '媒体存储已连接';
+
+  @override
+  String get settings_mediaStorage_action_disconnect => '断开连接';
+
+  @override
+  String get settings_mediaStorage_disconnect_confirm_title => '断开媒体存储？';
+
+  @override
+  String get settings_mediaStorage_disconnect_confirm_body =>
+      '此设备将停止上传和获取媒体。您的存储桶中的内容不会被删除。';
+
+  @override
+  String get settings_mediaStorage_action_copyFromSync => '从同步复制设置';
+
+  @override
+  String get settings_mediaStorage_transfers_title => '传输';
+
+  @override
+  String get settings_mediaStorage_transfers_entry => '查看传输';
+
+  @override
+  String get settings_mediaStorage_transfers_empty => '暂无传输';
+
+  @override
+  String get settings_mediaStorage_transfers_retry => '重试';
+
+  @override
+  String get settings_mediaStorage_transfers_clearCompleted => '清除已完成';
+
+  @override
+  String get settings_mediaStorage_transfers_state_pending => '等待中';
+
+  @override
+  String get settings_mediaStorage_transfers_state_transferring => '上传中';
+
+  @override
+  String get settings_mediaStorage_transfers_state_done => '已完成';
+
+  @override
+  String get settings_mediaStorage_transfers_state_failed => '失败';
+
+  @override
+  String get settings_mediaStorage_backfill_action => '上传现有媒体库';
+
+  @override
+  String settings_mediaStorage_backfill_enqueued(int count) {
+    return '已排队 $count 个上传';
+  }
+
+  @override
+  String get settings_mediaStorage_policy_autoUpload => '自动上传照片';
+
+  @override
+  String get settings_mediaStorage_policy_photosOnCellular => '使用蜂窝数据上传照片';
+
+  @override
+  String get settings_mediaStorage_provider_label => '服务商';
+
+  @override
+  String get settings_mediaStorage_connect_dropbox_hint =>
+      '使用云同步中的 Dropbox 连接。媒体存储在您的 Dropbox 应用文件夹中。';
+
+  @override
+  String get settings_mediaStorage_connect_gdrive_hint =>
+      '使用 Google 登录。媒体存储在此应用的私有云端硬盘空间中。';
+
+  @override
+  String get settings_mediaStorage_connect_icloud_hint =>
+      '媒体存储在此应用的 iCloud 容器中，并通过您的 Apple ID 同步。';
+
+  @override
+  String settings_mediaStorage_connect_action(String provider) {
+    return '连接 $provider';
+  }
 
   @override
   String get bodyWeight_addEntry => '添加测量';

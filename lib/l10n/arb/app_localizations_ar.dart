@@ -105,6 +105,131 @@ class AppLocalizationsAr extends AppLocalizations {
       'غير متوفر في هذا الإصدار — استخدم S3 أو نسخة App Store';
 
   @override
+  String get settings_cloudSync_encryption_title => 'التشفير من طرف إلى طرف';
+
+  @override
+  String get settings_cloudSync_encryption_subtitleOff =>
+      'تشفير جميع بيانات المزامنة والنسخ الاحتياطية السحابية قبل الرفع';
+
+  @override
+  String get settings_cloudSync_encryption_subtitleNeedsProvider =>
+      'اختر مزود التخزين السحابي أولاً';
+
+  @override
+  String get settings_cloudSync_encryption_statusOff => 'التشفير معطّل';
+
+  @override
+  String get settings_cloudSync_encryption_statusOn => 'التشفير مفعّل';
+
+  @override
+  String get settings_cloudSync_encryption_statusOnSubtitle =>
+      'يتم تشفير بيانات المزامنة والنسخ الاحتياطية السحابية قبل الرفع';
+
+  @override
+  String get settings_cloudSync_encryption_statusLocked =>
+      'مشفّر — مطلوب عبارة المرور';
+
+  @override
+  String get settings_cloudSync_encryption_statusLockedSubtitle =>
+      'أدخل عبارة المرور للمزامنة على هذا الجهاز';
+
+  @override
+  String get settings_cloudSync_encryption_enable => 'تفعيل التشفير';
+
+  @override
+  String get settings_cloudSync_encryption_enterPassphrase =>
+      'إدخال عبارة المرور';
+
+  @override
+  String get settings_cloudSync_encryption_passphrase => 'عبارة المرور';
+
+  @override
+  String get settings_cloudSync_encryption_passphraseConfirm =>
+      'تأكيد عبارة المرور';
+
+  @override
+  String get settings_cloudSync_encryption_passphraseMismatch =>
+      'عبارتا المرور غير متطابقتين';
+
+  @override
+  String get settings_cloudSync_encryption_passphraseTooShort =>
+      'استخدم 8 أحرف على الأقل';
+
+  @override
+  String get settings_cloudSync_encryption_wrongPassphrase =>
+      'عبارة مرور أو رمز استرداد غير صحيح';
+
+  @override
+  String get settings_cloudSync_encryption_warnUpdateDevices =>
+      'يجب تحديث جميع الأجهزة الأخرى إلى أحدث إصدار من التطبيق وستعيد تنزيل المكتبة.';
+
+  @override
+  String get settings_cloudSync_encryption_warnLoss =>
+      'إذا فقدت عبارة المرور ورمز الاسترداد معًا، فلا يمكن استرداد البيانات في السحابة. بيانات أجهزتك ليست في خطر أبدًا.';
+
+  @override
+  String get settings_cloudSync_encryption_deletePlaintextBackups =>
+      'حذف النسخ الاحتياطية السحابية غير المشفرة الموجودة';
+
+  @override
+  String get settings_cloudSync_encryption_recoveryTitle => 'رمز الاسترداد';
+
+  @override
+  String get settings_cloudSync_encryption_recoveryExplain =>
+      'دوّن هذا الرمز واحفظه في مكان آمن. إنه الطريقة الوحيدة للعودة إذا نسيت عبارة المرور.';
+
+  @override
+  String get settings_cloudSync_encryption_recoverySavedConfirm =>
+      'لقد حفظت رمز الاسترداد الخاص بي';
+
+  @override
+  String get settings_cloudSync_encryption_changePassphrase =>
+      'تغيير عبارة المرور';
+
+  @override
+  String get settings_cloudSync_encryption_currentPassphrase =>
+      'عبارة المرور الحالية';
+
+  @override
+  String get settings_cloudSync_encryption_newPassphrase =>
+      'عبارة المرور الجديدة';
+
+  @override
+  String get settings_cloudSync_encryption_regenerateRecovery =>
+      'إنشاء رمز استرداد جديد';
+
+  @override
+  String get settings_cloudSync_encryption_regenerateRecoveryWarn =>
+      'يتوقف رمز الاسترداد القديم عن العمل فورًا.';
+
+  @override
+  String get settings_cloudSync_encryption_disable => 'إيقاف التشفير';
+
+  @override
+  String get settings_cloudSync_encryption_disableWarn =>
+      'سيُعاد رفع المكتبة دون تشفير وستعيد الأجهزة الأخرى تنزيلها. تظل النسخ الاحتياطية المشفرة الموجودة قابلة للاستعادة بعبارة المرور.';
+
+  @override
+  String get settings_cloudSync_encryption_unlockTitle =>
+      'أدخل عبارة مرور التشفير';
+
+  @override
+  String get settings_cloudSync_encryption_unlockHint =>
+      'عبارة المرور أو رمز الاسترداد';
+
+  @override
+  String get settings_cloudSync_encryption_unlock => 'فتح';
+
+  @override
+  String get settings_cloudSync_encryption_continue => 'متابعة';
+
+  @override
+  String get settings_cloudSync_encryption_done => 'تم';
+
+  @override
+  String get settings_cloudSync_encryption_cancel => 'إلغاء';
+
+  @override
   String settings_cloudSync_replace_globalBanner(String deviceName) {
     return 'المزامنة متوقفة مؤقتًا — تم استبدال المكتبة من نسخة احتياطية على \"$deviceName\".';
   }
@@ -18152,6 +18277,105 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get diveLog_bulkEdit_membership_empty =>
       'لا توجد عناصر في الغطسات المحددة بعد';
+
+  @override
+  String get settings_mediaStorage_entry_title => 'تخزين الوسائط';
+
+  @override
+  String get settings_mediaStorage_entry_subtitle =>
+      'خزّن النسخ الأصلية للصور والفيديو في التخزين السحابي الخاص بك';
+
+  @override
+  String get settings_mediaStorage_status_notConfigured =>
+      'لا يوجد مخزن وسائط متصل على هذا الجهاز';
+
+  @override
+  String settings_mediaStorage_status_connected(String hint) {
+    return 'متصل بـ $hint';
+  }
+
+  @override
+  String get settings_mediaStorage_test_success => 'نجح الاتصال';
+
+  @override
+  String get settings_mediaStorage_saved => 'تم توصيل مخزن الوسائط';
+
+  @override
+  String get settings_mediaStorage_action_disconnect => 'قطع الاتصال';
+
+  @override
+  String get settings_mediaStorage_disconnect_confirm_title =>
+      'قطع اتصال مخزن الوسائط؟';
+
+  @override
+  String get settings_mediaStorage_disconnect_confirm_body =>
+      'يتوقف هذا الجهاز عن رفع الوسائط وجلبها. لن يُحذف أي شيء من الحاوية الخاصة بك.';
+
+  @override
+  String get settings_mediaStorage_action_copyFromSync =>
+      'نسخ الإعدادات من المزامنة';
+
+  @override
+  String get settings_mediaStorage_transfers_title => 'عمليات النقل';
+
+  @override
+  String get settings_mediaStorage_transfers_entry => 'عرض عمليات النقل';
+
+  @override
+  String get settings_mediaStorage_transfers_empty => 'لا توجد عمليات نقل';
+
+  @override
+  String get settings_mediaStorage_transfers_retry => 'إعادة المحاولة';
+
+  @override
+  String get settings_mediaStorage_transfers_clearCompleted => 'مسح المكتملة';
+
+  @override
+  String get settings_mediaStorage_transfers_state_pending => 'في الانتظار';
+
+  @override
+  String get settings_mediaStorage_transfers_state_transferring => 'جارٍ الرفع';
+
+  @override
+  String get settings_mediaStorage_transfers_state_done => 'تم';
+
+  @override
+  String get settings_mediaStorage_transfers_state_failed => 'فشل';
+
+  @override
+  String get settings_mediaStorage_backfill_action => 'رفع المكتبة الحالية';
+
+  @override
+  String settings_mediaStorage_backfill_enqueued(int count) {
+    return '$count عمليات رفع في قائمة الانتظار';
+  }
+
+  @override
+  String get settings_mediaStorage_policy_autoUpload => 'رفع الصور تلقائيا';
+
+  @override
+  String get settings_mediaStorage_policy_photosOnCellular =>
+      'رفع الصور عبر شبكة الجوال';
+
+  @override
+  String get settings_mediaStorage_provider_label => 'المزود';
+
+  @override
+  String get settings_mediaStorage_connect_dropbox_hint =>
+      'يستخدم اتصال Dropbox من مزامنة السحابة. تُخزن الوسائط في مجلد التطبيق في Dropbox.';
+
+  @override
+  String get settings_mediaStorage_connect_gdrive_hint =>
+      'يسجل الدخول عبر Google. تُخزن الوسائط في مساحة Drive الخاصة بهذا التطبيق.';
+
+  @override
+  String get settings_mediaStorage_connect_icloud_hint =>
+      'تُخزن الوسائط في حاوية iCloud لهذا التطبيق وتتزامن عبر Apple ID الخاص بك.';
+
+  @override
+  String settings_mediaStorage_connect_action(String provider) {
+    return 'توصيل $provider';
+  }
 
   @override
   String get bodyWeight_addEntry => 'إضافة قياس';

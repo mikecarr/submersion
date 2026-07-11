@@ -54,6 +54,9 @@ dependencies:
 
   # Networking
   http: ^1.2.2
+  # Network-type detection for media store transfer policies (Wi-Fi vs
+  # cellular vs offline).
+  connectivity_plus: ^6.1.0
   # FFI for reading the Windows certificate store (TLS trust on Windows).
   ffi: ^2.1.0
 
@@ -84,6 +87,8 @@ dependencies:
   geocoding: ^4.0.0
   photo_manager: ^3.6.0
   native_exif: ^0.8.0
+  # Pure-Dart decode/resize/JPEG-encode for media store thumbnails.
+  image: ^4.3.0
   health: ^13.3.0  # Cross-platform health data (HealthKit, Health Connect)
 
   # Storage
@@ -119,6 +124,8 @@ dependencies:
   timezone: ^0.11.0
   google_fonts: ^8.0.2
   linked_scroll_controller: ^0.2.0
+  cryptography: ^2.9.0
+  cryptography_flutter: ^2.3.4
 
 dev_dependencies:
   flutter_test:

@@ -1,9 +1,26 @@
+import 'package:cryptography/cryptography.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:submersion/core/providers/provider.dart' show StateNotifier;
+import 'package:submersion/core/services/sync/crypto/encryption_key_store.dart';
+import 'package:submersion/l10n/arb/app_localizations.dart';
 import 'package:submersion/features/settings/presentation/pages/troubleshoot_sync_page.dart';
+import 'package:submersion/features/settings/presentation/providers/settings_providers.dart';
 import 'package:submersion/features/settings/presentation/providers/sync_providers.dart';
+
+/// A key notifier pre-seeded with an unlocked session, so the page renders the
+/// "Encryption is on" state without running real crypto.
+class _SeededKeyNotifier extends EncryptionKeyNotifier {
+  _SeededKeyNotifier(
+    super.keyStore,
+    super.preferences,
+    EncryptionSessionState seeded,
+  ) {
+    state = seeded;
+  }
+}
 
 /// Records the recovery calls the Troubleshoot page routes to the notifier so
 /// the tap-through tests can assert each confirm flow fires exactly once. All
@@ -44,35 +61,147 @@ class _FakeSyncNotifier extends StateNotifier<SyncState>
 }
 
 /// Pumps the page with [fake] backing syncStateProvider. Returns the fake.
+/// SharedPreferences backs the encryption-status row (preference flag read).
 Future<_FakeSyncNotifier> _pump(WidgetTester tester) async {
   final fake = _FakeSyncNotifier();
+  SharedPreferences.setMockInitialValues({});
+  final prefs = await SharedPreferences.getInstance();
   await tester.pumpWidget(
     ProviderScope(
-      overrides: [syncStateProvider.overrideWith((ref) => fake)],
-      child: const MaterialApp(home: TroubleshootSyncPage()),
+      overrides: [
+        syncStateProvider.overrideWith((ref) => fake),
+        sharedPreferencesProvider.overrideWithValue(prefs),
+      ],
+      child: const MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: TroubleshootSyncPage(),
+      ),
     ),
   );
   await tester.pumpAndSettle();
   return fake;
 }
 
+/// Pump without a fake notifier, for display-only assertions. Preferences
+/// still need backing (the encryption-status row reads the flag).
+Future<void> _pumpBare(WidgetTester tester) async {
+  SharedPreferences.setMockInitialValues({});
+  final prefs = await SharedPreferences.getInstance();
+  await tester.pumpWidget(
+    ProviderScope(
+      overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
+      child: const MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: TroubleshootSyncPage(),
+      ),
+    ),
+  );
+  await tester.pumpAndSettle();
+}
+
 void main() {
   testWidgets('shows Repair Sync action with an explanation', (tester) async {
-    await tester.pumpWidget(
-      const ProviderScope(child: MaterialApp(home: TroubleshootSyncPage())),
-    );
-    await tester.pumpAndSettle();
+    await _pumpBare(tester);
 
     expect(find.text('Repair Sync'), findsOneWidget);
     // The explanation must reassure the user their dive data is safe.
     expect(find.textContaining('dive data'), findsWidgets);
   });
 
-  testWidgets('shows both cloud-clear actions', (tester) async {
+  testWidgets('encryption status row shows Off by default', (tester) async {
+    await _pumpBare(tester);
+    expect(find.text('End-to-end encryption'), findsOneWidget);
+    expect(find.text('Encryption is off'), findsOneWidget);
+  });
+
+  testWidgets('encryption status row shows the locked state when enabled '
+      'without a session', (tester) async {
+    SharedPreferences.setMockInitialValues({'sync_encryption_enabled': true});
+    final prefs = await SharedPreferences.getInstance();
     await tester.pumpWidget(
-      const ProviderScope(child: MaterialApp(home: TroubleshootSyncPage())),
+      ProviderScope(
+        overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
+        child: const MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: TroubleshootSyncPage(),
+        ),
+      ),
     );
     await tester.pumpAndSettle();
+    expect(
+      find.text('Enter the passphrase to sync on this device'),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('encryption status row shows On when enabled and unlocked', (
+    tester,
+  ) async {
+    SharedPreferences.setMockInitialValues({'sync_encryption_enabled': true});
+    final prefs = await SharedPreferences.getInstance();
+    final session = EncryptionSessionState(
+      key: UnlockedKey(
+        libraryKeyId: 'k',
+        mlk: SecretKey(List<int>.filled(32, 1)),
+      ),
+      dataKey: SecretKey(List<int>.filled(32, 2)),
+    );
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          sharedPreferencesProvider.overrideWithValue(prefs),
+          encryptionKeyNotifierProvider.overrideWith(
+            (ref) => _SeededKeyNotifier(
+              ref.watch(encryptionKeyStoreProvider),
+              ref.watch(syncPreferencesProvider),
+              session,
+            ),
+          ),
+        ],
+        child: const MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: TroubleshootSyncPage(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Encryption is on'), findsOneWidget);
+  });
+
+  testWidgets('tapping the locked encryption row runs the unlock flow', (
+    tester,
+  ) async {
+    SharedPreferences.setMockInitialValues({'sync_encryption_enabled': true});
+    final prefs = await SharedPreferences.getInstance();
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          sharedPreferencesProvider.overrideWithValue(prefs),
+          // No provider configured: the unlock flow bails without a dialog,
+          // but the row's onTap closure still executes.
+          cloudStorageProviderProvider.overrideWithValue(null),
+        ],
+        child: const MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: TroubleshootSyncPage(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('End-to-end encryption'));
+    await tester.pumpAndSettle();
+    // With no cloud provider the unlock flow returns without opening a dialog.
+    expect(find.widgetWithText(FilledButton, 'Unlock'), findsNothing);
+  });
+
+  testWidgets('shows both cloud-clear actions', (tester) async {
+    await _pumpBare(tester);
 
     expect(find.text('Remove this device’s cloud files'), findsOneWidget);
     expect(find.text('Wipe all sync data on this backend'), findsOneWidget);
@@ -81,10 +210,7 @@ void main() {
   testWidgets('shows the rebuild-from-this-device action and confirm dialog', (
     tester,
   ) async {
-    await tester.pumpWidget(
-      const ProviderScope(child: MaterialApp(home: TroubleshootSyncPage())),
-    );
-    await tester.pumpAndSettle();
+    await _pumpBare(tester);
 
     expect(find.text('Rebuild backend from this device'), findsOneWidget);
 
@@ -97,10 +223,7 @@ void main() {
   });
 
   testWidgets('wipe-all requires typed confirmation', (tester) async {
-    await tester.pumpWidget(
-      const ProviderScope(child: MaterialApp(home: TroubleshootSyncPage())),
-    );
-    await tester.pumpAndSettle();
+    await _pumpBare(tester);
 
     await tester.tap(find.text('Wipe all sync data on this backend'));
     await tester.pumpAndSettle();

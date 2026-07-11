@@ -103,6 +103,129 @@ class AppLocalizationsHe extends AppLocalizations {
       'לא זמין בגרסה זו — השתמש ב-S3 או בגרסת App Store';
 
   @override
+  String get settings_cloudSync_encryption_title => 'הצפנה מקצה לקצה';
+
+  @override
+  String get settings_cloudSync_encryption_subtitleOff =>
+      'הצפנת כל נתוני הסנכרון והגיבויים בענן לפני ההעלאה';
+
+  @override
+  String get settings_cloudSync_encryption_subtitleNeedsProvider =>
+      'בחרו קודם ספק ענן';
+
+  @override
+  String get settings_cloudSync_encryption_statusOff => 'ההצפנה כבויה';
+
+  @override
+  String get settings_cloudSync_encryption_statusOn => 'ההצפנה פועלת';
+
+  @override
+  String get settings_cloudSync_encryption_statusOnSubtitle =>
+      'נתוני סנכרון וגיבויים בענן מוצפנים לפני ההעלאה';
+
+  @override
+  String get settings_cloudSync_encryption_statusLocked =>
+      'מוצפן — נדרש משפט סיסמה';
+
+  @override
+  String get settings_cloudSync_encryption_statusLockedSubtitle =>
+      'הזינו את משפט הסיסמה כדי לסנכרן במכשיר זה';
+
+  @override
+  String get settings_cloudSync_encryption_enable => 'הפעלת הצפנה';
+
+  @override
+  String get settings_cloudSync_encryption_enterPassphrase => 'הזנת משפט סיסמה';
+
+  @override
+  String get settings_cloudSync_encryption_passphrase => 'משפט סיסמה';
+
+  @override
+  String get settings_cloudSync_encryption_passphraseConfirm =>
+      'אישור משפט הסיסמה';
+
+  @override
+  String get settings_cloudSync_encryption_passphraseMismatch =>
+      'משפטי הסיסמה אינם תואמים';
+
+  @override
+  String get settings_cloudSync_encryption_passphraseTooShort =>
+      'השתמשו ב-8 תווים לפחות';
+
+  @override
+  String get settings_cloudSync_encryption_wrongPassphrase =>
+      'משפט סיסמה או קוד שחזור שגויים';
+
+  @override
+  String get settings_cloudSync_encryption_warnUpdateDevices =>
+      'יש לעדכן את כל שאר המכשירים לגרסת האפליקציה האחרונה והם יורידו מחדש את הספרייה.';
+
+  @override
+  String get settings_cloudSync_encryption_warnLoss =>
+      'אם תאבדו גם את משפט הסיסמה וגם את קוד השחזור, לא ניתן יהיה לשחזר את הנתונים בענן. הנתונים במכשירים שלכם לעולם אינם בסיכון.';
+
+  @override
+  String get settings_cloudSync_encryption_deletePlaintextBackups =>
+      'מחיקת גיבויי ענן לא מוצפנים קיימים';
+
+  @override
+  String get settings_cloudSync_encryption_recoveryTitle => 'קוד שחזור';
+
+  @override
+  String get settings_cloudSync_encryption_recoveryExplain =>
+      'רשמו את הקוד הזה ושמרו אותו במקום בטוח. זו הדרך היחידה לחזור אם תשכחו את משפט הסיסמה.';
+
+  @override
+  String get settings_cloudSync_encryption_recoverySavedConfirm =>
+      'שמרתי את קוד השחזור שלי';
+
+  @override
+  String get settings_cloudSync_encryption_changePassphrase =>
+      'שינוי משפט סיסמה';
+
+  @override
+  String get settings_cloudSync_encryption_currentPassphrase =>
+      'משפט הסיסמה הנוכחי';
+
+  @override
+  String get settings_cloudSync_encryption_newPassphrase => 'משפט סיסמה חדש';
+
+  @override
+  String get settings_cloudSync_encryption_regenerateRecovery =>
+      'יצירת קוד שחזור חדש';
+
+  @override
+  String get settings_cloudSync_encryption_regenerateRecoveryWarn =>
+      'קוד השחזור הישן מפסיק לפעול מיד.';
+
+  @override
+  String get settings_cloudSync_encryption_disable => 'כיבוי ההצפנה';
+
+  @override
+  String get settings_cloudSync_encryption_disableWarn =>
+      'הספרייה תועלה מחדש ללא הצפנה ושאר המכשירים יורידו אותה שוב. גיבויים מוצפנים קיימים יישארו ניתנים לשחזור עם משפט הסיסמה.';
+
+  @override
+  String get settings_cloudSync_encryption_unlockTitle =>
+      'הזינו את משפט הסיסמה של ההצפנה';
+
+  @override
+  String get settings_cloudSync_encryption_unlockHint =>
+      'משפט סיסמה או קוד שחזור';
+
+  @override
+  String get settings_cloudSync_encryption_unlock => 'ביטול נעילה';
+
+  @override
+  String get settings_cloudSync_encryption_continue => 'המשך';
+
+  @override
+  String get settings_cloudSync_encryption_done => 'סיום';
+
+  @override
+  String get settings_cloudSync_encryption_cancel => 'ביטול';
+
+  @override
   String settings_cloudSync_replace_globalBanner(String deviceName) {
     return 'הסנכרון מושהה — הספרייה הוחלפה מגיבוי במכשיר \"$deviceName\".';
   }
@@ -18023,6 +18146,105 @@ class AppLocalizationsHe extends AppLocalizations {
   @override
   String get diveLog_bulkEdit_membership_empty =>
       'אין עדיין פריטים בצלילות שנבחרו';
+
+  @override
+  String get settings_mediaStorage_entry_title => 'אחסון מדיה';
+
+  @override
+  String get settings_mediaStorage_entry_subtitle =>
+      'שמור מקורות של תמונות ווידאו באחסון הענן שלך';
+
+  @override
+  String get settings_mediaStorage_status_notConfigured =>
+      'לא מחובר אחסון מדיה במכשיר זה';
+
+  @override
+  String settings_mediaStorage_status_connected(String hint) {
+    return 'מחובר אל $hint';
+  }
+
+  @override
+  String get settings_mediaStorage_test_success => 'החיבור הצליח';
+
+  @override
+  String get settings_mediaStorage_saved => 'אחסון המדיה חובר';
+
+  @override
+  String get settings_mediaStorage_action_disconnect => 'התנתק';
+
+  @override
+  String get settings_mediaStorage_disconnect_confirm_title =>
+      'לנתק את אחסון המדיה?';
+
+  @override
+  String get settings_mediaStorage_disconnect_confirm_body =>
+      'מכשיר זה יפסיק להעלות ולהוריד מדיה. שום דבר לא יימחק מהדלי שלך.';
+
+  @override
+  String get settings_mediaStorage_action_copyFromSync =>
+      'העתק הגדרות מהסנכרון';
+
+  @override
+  String get settings_mediaStorage_transfers_title => 'העברות';
+
+  @override
+  String get settings_mediaStorage_transfers_entry => 'הצג העברות';
+
+  @override
+  String get settings_mediaStorage_transfers_empty => 'אין העברות';
+
+  @override
+  String get settings_mediaStorage_transfers_retry => 'נסה שוב';
+
+  @override
+  String get settings_mediaStorage_transfers_clearCompleted => 'נקה שהושלמו';
+
+  @override
+  String get settings_mediaStorage_transfers_state_pending => 'ממתין';
+
+  @override
+  String get settings_mediaStorage_transfers_state_transferring => 'מעלה';
+
+  @override
+  String get settings_mediaStorage_transfers_state_done => 'הושלם';
+
+  @override
+  String get settings_mediaStorage_transfers_state_failed => 'נכשל';
+
+  @override
+  String get settings_mediaStorage_backfill_action => 'העלה ספריה קיימת';
+
+  @override
+  String settings_mediaStorage_backfill_enqueued(int count) {
+    return '$count העלאות בתור';
+  }
+
+  @override
+  String get settings_mediaStorage_policy_autoUpload => 'העלה תמונות אוטומטית';
+
+  @override
+  String get settings_mediaStorage_policy_photosOnCellular =>
+      'העלה תמונות ברשת סלולרית';
+
+  @override
+  String get settings_mediaStorage_provider_label => 'ספק';
+
+  @override
+  String get settings_mediaStorage_connect_dropbox_hint =>
+      'משתמש בחיבור Dropbox מסנכרון הענן. המדיה נשמרת בתיקיית האפליקציה ב-Dropbox.';
+
+  @override
+  String get settings_mediaStorage_connect_gdrive_hint =>
+      'מתחבר עם Google. המדיה נשמרת בשטח ה-Drive הפרטי של האפליקציה.';
+
+  @override
+  String get settings_mediaStorage_connect_icloud_hint =>
+      'המדיה נשמרת במיכל ה-iCloud של האפליקציה ומסתנכרנת דרך ה-Apple ID שלך.';
+
+  @override
+  String settings_mediaStorage_connect_action(String provider) {
+    return 'חבר את $provider';
+  }
 
   @override
   String get bodyWeight_addEntry => 'הוסף מדידה';
