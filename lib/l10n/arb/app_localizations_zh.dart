@@ -4715,6 +4715,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get setup_syncPull_title => '连接并拉取';
 
   @override
+  String get setup_sync_changeProvider => '更换服务商';
+
+  @override
   String setup_sync_connectedTo(String provider) {
     return '已连接到 $provider';
   }

@@ -4925,6 +4925,9 @@ class AppLocalizationsNl extends AppLocalizations {
   String get setup_syncPull_title => 'Verbinden en ophalen';
 
   @override
+  String get setup_sync_changeProvider => 'Provider wijzigen';
+
+  @override
   String setup_sync_connectedTo(String provider) {
     return 'Verbonden met $provider';
   }

@@ -4960,6 +4960,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get setup_syncPull_title => 'Verbinden und laden';
 
   @override
+  String get setup_sync_changeProvider => 'Anbieter wechseln';
+
+  @override
   String setup_sync_connectedTo(String provider) {
     return 'Verbunden mit $provider';
   }

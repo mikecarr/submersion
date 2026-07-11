@@ -71,6 +71,17 @@ class _BackupSyncStepState extends ConsumerState<BackupSyncStep> {
     }
   }
 
+  void _disconnect() {
+    // Drop the in-wizard selection so the provider cards return; don't
+    // persist a backend the user is abandoning.
+    ref.read(selectedCloudProviderTypeProvider.notifier).state = null;
+    ref.read(syncInitializerProvider).saveProvider(null);
+    ref.read(syncStateProvider.notifier).refreshState();
+    ref
+        .read(setupWizardProvider(widget.mode).notifier)
+        .setConnectedProvider(null);
+  }
+
   Future<void> _openS3Config() async {
     // Push on the ROOT navigator, not go_router: during first run the wizard
     // has zero divers, so the router's onboarding redirect bounces any
@@ -186,6 +197,17 @@ class _BackupSyncStepState extends ConsumerState<BackupSyncStep> {
                 child: TextButton(
                   onPressed: () => context.push('/settings/cloud-sync'),
                   child: Text(l10n.setup_sync_manageInSettings),
+                ),
+              )
+            else
+              // First run: let the user disconnect and pick a different
+              // backend (e.g. after a failed pull), instead of being locked
+              // into the connected provider with no way to change it.
+              Align(
+                alignment: AlignmentDirectional.centerStart,
+                child: TextButton(
+                  onPressed: _connecting ? null : _disconnect,
+                  child: Text(l10n.setup_sync_changeProvider),
                 ),
               ),
           ] else ...[

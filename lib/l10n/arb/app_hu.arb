@@ -88,6 +88,7 @@
   "setup_syncPull_success": "Könyvtár átvéve",
   "setup_syncPull_syncing": "Könyvtár letöltése...",
   "setup_syncPull_title": "Csatlakozás és letöltés",
+  "setup_sync_changeProvider": "Szolgáltató módosítása",
   "setup_sync_connectedTo": "Csatlakoztatva: {provider}",
   "setup_sync_error": "Nem sikerült csatlakozni: {error}",
   "setup_sync_header": "Felhőszinkronizálás",

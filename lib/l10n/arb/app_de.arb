@@ -88,6 +88,7 @@
   "setup_syncPull_success": "Bibliothek übernommen",
   "setup_syncPull_syncing": "Bibliothek wird geladen...",
   "setup_syncPull_title": "Verbinden und laden",
+  "setup_sync_changeProvider": "Anbieter wechseln",
   "setup_sync_connectedTo": "Verbunden mit {provider}",
   "setup_sync_error": "Verbindung fehlgeschlagen: {error}",
   "setup_sync_header": "Cloud-Synchronisierung",

@@ -2556,6 +2556,7 @@
   "setup_syncPull_success": "Library adopted",
   "setup_syncPull_syncing": "Pulling your library...",
   "setup_syncPull_title": "Connect and pull",
+  "setup_sync_changeProvider": "Change provider",
   "setup_sync_connectedTo": "Connected to {provider}",
   "@setup_sync_connectedTo": {
     "placeholders": {

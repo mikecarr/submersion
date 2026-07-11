@@ -4965,6 +4965,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get setup_syncPull_title => 'Conectar e baixar';
 
   @override
+  String get setup_sync_changeProvider => 'Alterar provedor';
+
+  @override
   String setup_sync_connectedTo(String provider) {
     return 'Conectado a $provider';
   }

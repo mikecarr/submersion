@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:submersion/core/data/repositories/sync_repository.dart';
+import 'package:submersion/core/data/repositories/sync_repository.dart'
+    show CloudProviderType;
 import 'package:submersion/core/services/cloud_storage/icloud_native_service.dart';
+import 'package:submersion/core/services/sync/sync_initializer.dart';
 import 'package:submersion/features/backup/domain/entities/backup_settings.dart';
 import 'package:submersion/features/settings/presentation/pages/s3_config_page.dart';
 import 'package:submersion/features/settings/presentation/providers/sync_providers.dart';
@@ -12,6 +15,25 @@ import 'package:submersion/features/setup_wizard/presentation/widgets/steps/back
 
 import '../../../../../helpers/mock_providers.dart';
 import '../../../../../helpers/test_app.dart';
+
+class _FakeSyncInit implements SyncInitializer {
+  @override
+  Future<void> saveProvider(CloudProviderType? provider) async {}
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+class _FakeSyncNotifier extends StateNotifier<SyncState>
+    implements SyncNotifier {
+  _FakeSyncNotifier() : super(const SyncState());
+
+  @override
+  Future<void> refreshState() async {}
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
 
 void main() {
   testWidgets('backup toggle reveals frequency and updates draft', (
@@ -139,6 +161,52 @@ void main() {
       await tester.pumpAndSettle();
     });
   }
+
+  testWidgets('first run can disconnect and return to the provider cards', (
+    tester,
+  ) async {
+    late ProviderContainer container;
+    final overrides = await getBaseOverrides();
+    await tester.pumpWidget(
+      testApp(
+        overrides: [
+          ...overrides,
+          isApplePlatformProvider.overrideWithValue(false),
+          dropboxConfiguredProvider.overrideWithValue(false),
+          syncInitializerProvider.overrideWithValue(_FakeSyncInit()),
+          syncStateProvider.overrideWith((ref) => _FakeSyncNotifier()),
+        ],
+        child: Builder(
+          builder: (context) {
+            container = ProviderScope.containerOf(context);
+            return const BackupSyncStep(mode: SetupWizardMode.firstRun);
+          },
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Simulate a connected provider (e.g. iCloud connected, then a failed
+    // pull left the user here). The cards are hidden.
+    container
+        .read(setupWizardProvider(SetupWizardMode.firstRun).notifier)
+        .setConnectedProvider(CloudProviderType.icloud);
+    await tester.pumpAndSettle();
+    expect(find.text('Connected to iCloud'), findsOneWidget);
+    expect(find.text('S3'), findsNothing);
+
+    // Change provider clears the connection and restores the cards.
+    await tester.tap(find.text('Change provider'));
+    await tester.pumpAndSettle();
+    expect(find.text('Connected to iCloud'), findsNothing);
+    expect(find.text('S3'), findsOneWidget);
+    expect(
+      container
+          .read(setupWizardProvider(SetupWizardMode.firstRun))
+          .connectedProvider,
+      isNull,
+    );
+  });
 
   testWidgets('iCloud card renders when the platform supports it', (
     tester,

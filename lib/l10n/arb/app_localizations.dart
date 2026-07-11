@@ -8384,6 +8384,12 @@ abstract class AppLocalizations {
   /// **'Connect and pull'**
   String get setup_syncPull_title;
 
+  /// No description provided for @setup_sync_changeProvider.
+  ///
+  /// In en, this message translates to:
+  /// **'Change provider'**
+  String get setup_sync_changeProvider;
+
   /// No description provided for @setup_sync_connectedTo.
   ///
   /// In en, this message translates to:

@@ -4986,6 +4986,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get setup_syncPull_title => 'Connecter et récupérer';
 
   @override
+  String get setup_sync_changeProvider => 'Changer de fournisseur';
+
+  @override
   String setup_sync_connectedTo(String provider) {
     return 'Connecté à $provider';
   }

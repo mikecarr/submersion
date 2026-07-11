@@ -4850,6 +4850,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get setup_syncPull_title => 'الاتصال والسحب';
 
   @override
+  String get setup_sync_changeProvider => 'تغيير المزوّد';
+
+  @override
   String setup_sync_connectedTo(String provider) {
     return 'متصل بـ $provider';
   }

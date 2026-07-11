@@ -4827,6 +4827,9 @@ class AppLocalizationsHe extends AppLocalizations {
   String get setup_syncPull_title => 'חיבור ומשיכה';
 
   @override
+  String get setup_sync_changeProvider => 'החלפת ספק';
+
+  @override
   String setup_sync_connectedTo(String provider) {
     return 'מחובר אל $provider';
   }

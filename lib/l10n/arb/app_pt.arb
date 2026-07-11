@@ -88,6 +88,7 @@
   "setup_syncPull_success": "Biblioteca adotada",
   "setup_syncPull_syncing": "Baixando sua biblioteca...",
   "setup_syncPull_title": "Conectar e baixar",
+  "setup_sync_changeProvider": "Alterar provedor",
   "setup_sync_connectedTo": "Conectado a {provider}",
   "setup_sync_error": "Não foi possível conectar: {error}",
   "setup_sync_header": "Sincronização na nuvem",

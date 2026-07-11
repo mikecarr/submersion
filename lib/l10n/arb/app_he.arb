@@ -88,6 +88,7 @@
   "setup_syncPull_success": "הספרייה אומצה",
   "setup_syncPull_syncing": "מושך את הספרייה...",
   "setup_syncPull_title": "חיבור ומשיכה",
+  "setup_sync_changeProvider": "החלפת ספק",
   "setup_sync_connectedTo": "מחובר אל {provider}",
   "setup_sync_error": "החיבור נכשל: {error}",
   "setup_sync_header": "סנכרון ענן",

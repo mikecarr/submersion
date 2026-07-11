@@ -88,6 +88,7 @@
   "setup_syncPull_success": "Bibliotheek overgenomen",
   "setup_syncPull_syncing": "Bibliotheek ophalen...",
   "setup_syncPull_title": "Verbinden en ophalen",
+  "setup_sync_changeProvider": "Provider wijzigen",
   "setup_sync_connectedTo": "Verbonden met {provider}",
   "setup_sync_error": "Kon geen verbinding maken: {error}",
   "setup_sync_header": "Cloudsynchronisatie",

@@ -4947,6 +4947,9 @@ class AppLocalizationsHu extends AppLocalizations {
   String get setup_syncPull_title => 'Csatlakozás és letöltés';
 
   @override
+  String get setup_sync_changeProvider => 'Szolgáltató módosítása';
+
+  @override
   String setup_sync_connectedTo(String provider) {
     return 'Csatlakoztatva: $provider';
   }
