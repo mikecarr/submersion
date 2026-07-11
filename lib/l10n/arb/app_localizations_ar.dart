@@ -105,6 +105,131 @@ class AppLocalizationsAr extends AppLocalizations {
       'غير متوفر في هذا الإصدار — استخدم S3 أو نسخة App Store';
 
   @override
+  String get settings_cloudSync_encryption_title => 'التشفير من طرف إلى طرف';
+
+  @override
+  String get settings_cloudSync_encryption_subtitleOff =>
+      'تشفير جميع بيانات المزامنة والنسخ الاحتياطية السحابية قبل الرفع';
+
+  @override
+  String get settings_cloudSync_encryption_subtitleNeedsProvider =>
+      'اختر مزود التخزين السحابي أولاً';
+
+  @override
+  String get settings_cloudSync_encryption_statusOff => 'التشفير معطّل';
+
+  @override
+  String get settings_cloudSync_encryption_statusOn => 'التشفير مفعّل';
+
+  @override
+  String get settings_cloudSync_encryption_statusOnSubtitle =>
+      'يتم تشفير بيانات المزامنة والنسخ الاحتياطية السحابية قبل الرفع';
+
+  @override
+  String get settings_cloudSync_encryption_statusLocked =>
+      'مشفّر — مطلوب عبارة المرور';
+
+  @override
+  String get settings_cloudSync_encryption_statusLockedSubtitle =>
+      'أدخل عبارة المرور للمزامنة على هذا الجهاز';
+
+  @override
+  String get settings_cloudSync_encryption_enable => 'تفعيل التشفير';
+
+  @override
+  String get settings_cloudSync_encryption_enterPassphrase =>
+      'إدخال عبارة المرور';
+
+  @override
+  String get settings_cloudSync_encryption_passphrase => 'عبارة المرور';
+
+  @override
+  String get settings_cloudSync_encryption_passphraseConfirm =>
+      'تأكيد عبارة المرور';
+
+  @override
+  String get settings_cloudSync_encryption_passphraseMismatch =>
+      'عبارتا المرور غير متطابقتين';
+
+  @override
+  String get settings_cloudSync_encryption_passphraseTooShort =>
+      'استخدم 8 أحرف على الأقل';
+
+  @override
+  String get settings_cloudSync_encryption_wrongPassphrase =>
+      'عبارة مرور أو رمز استرداد غير صحيح';
+
+  @override
+  String get settings_cloudSync_encryption_warnUpdateDevices =>
+      'يجب تحديث جميع الأجهزة الأخرى إلى أحدث إصدار من التطبيق وستعيد تنزيل المكتبة.';
+
+  @override
+  String get settings_cloudSync_encryption_warnLoss =>
+      'إذا فقدت عبارة المرور ورمز الاسترداد معًا، فلا يمكن استرداد البيانات في السحابة. بيانات أجهزتك ليست في خطر أبدًا.';
+
+  @override
+  String get settings_cloudSync_encryption_deletePlaintextBackups =>
+      'حذف النسخ الاحتياطية السحابية غير المشفرة الموجودة';
+
+  @override
+  String get settings_cloudSync_encryption_recoveryTitle => 'رمز الاسترداد';
+
+  @override
+  String get settings_cloudSync_encryption_recoveryExplain =>
+      'دوّن هذا الرمز واحفظه في مكان آمن. إنه الطريقة الوحيدة للعودة إذا نسيت عبارة المرور.';
+
+  @override
+  String get settings_cloudSync_encryption_recoverySavedConfirm =>
+      'لقد حفظت رمز الاسترداد الخاص بي';
+
+  @override
+  String get settings_cloudSync_encryption_changePassphrase =>
+      'تغيير عبارة المرور';
+
+  @override
+  String get settings_cloudSync_encryption_currentPassphrase =>
+      'عبارة المرور الحالية';
+
+  @override
+  String get settings_cloudSync_encryption_newPassphrase =>
+      'عبارة المرور الجديدة';
+
+  @override
+  String get settings_cloudSync_encryption_regenerateRecovery =>
+      'إنشاء رمز استرداد جديد';
+
+  @override
+  String get settings_cloudSync_encryption_regenerateRecoveryWarn =>
+      'يتوقف رمز الاسترداد القديم عن العمل فورًا.';
+
+  @override
+  String get settings_cloudSync_encryption_disable => 'إيقاف التشفير';
+
+  @override
+  String get settings_cloudSync_encryption_disableWarn =>
+      'سيُعاد رفع المكتبة دون تشفير وستعيد الأجهزة الأخرى تنزيلها. تظل النسخ الاحتياطية المشفرة الموجودة قابلة للاستعادة بعبارة المرور.';
+
+  @override
+  String get settings_cloudSync_encryption_unlockTitle =>
+      'أدخل عبارة مرور التشفير';
+
+  @override
+  String get settings_cloudSync_encryption_unlockHint =>
+      'عبارة المرور أو رمز الاسترداد';
+
+  @override
+  String get settings_cloudSync_encryption_unlock => 'فتح';
+
+  @override
+  String get settings_cloudSync_encryption_continue => 'متابعة';
+
+  @override
+  String get settings_cloudSync_encryption_done => 'تم';
+
+  @override
+  String get settings_cloudSync_encryption_cancel => 'إلغاء';
+
+  @override
   String settings_cloudSync_replace_globalBanner(String deviceName) {
     return 'المزامنة متوقفة مؤقتًا — تم استبدال المكتبة من نسخة احتياطية على \"$deviceName\".';
   }

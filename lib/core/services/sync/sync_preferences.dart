@@ -5,6 +5,7 @@ class SyncPreferences {
   static const String _autoSyncKey = 'sync_auto_enabled';
   static const String _syncOnLaunchKey = 'sync_on_launch';
   static const String _syncOnResumeKey = 'sync_on_resume';
+  static const String _encryptionEnabledKey = 'sync_encryption_enabled';
 
   final SharedPreferences _prefs;
 
@@ -24,5 +25,12 @@ class SyncPreferences {
 
   Future<void> setSyncOnResume(bool value) async {
     await _prefs.setBool(_syncOnResumeKey, value);
+  }
+
+  bool get syncEncryptionEnabled =>
+      _prefs.getBool(_encryptionEnabledKey) ?? false;
+
+  Future<void> setSyncEncryptionEnabled(bool value) async {
+    await _prefs.setBool(_encryptionEnabledKey, value);
   }
 }

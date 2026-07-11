@@ -104,6 +104,135 @@ class AppLocalizationsNl extends AppLocalizations {
       'Niet beschikbaar in deze build — gebruik S3 of de App Store-versie';
 
   @override
+  String get settings_cloudSync_encryption_title => 'End-to-end-versleuteling';
+
+  @override
+  String get settings_cloudSync_encryption_subtitleOff =>
+      'Versleutel alle synchronisatiegegevens en cloudback-ups vóór het uploaden';
+
+  @override
+  String get settings_cloudSync_encryption_subtitleNeedsProvider =>
+      'Selecteer eerst een cloudprovider';
+
+  @override
+  String get settings_cloudSync_encryption_statusOff =>
+      'Versleuteling staat uit';
+
+  @override
+  String get settings_cloudSync_encryption_statusOn =>
+      'Versleuteling staat aan';
+
+  @override
+  String get settings_cloudSync_encryption_statusOnSubtitle =>
+      'Synchronisatiegegevens en cloudback-ups worden vóór het uploaden versleuteld';
+
+  @override
+  String get settings_cloudSync_encryption_statusLocked =>
+      'Versleuteld — wachtwoordzin vereist';
+
+  @override
+  String get settings_cloudSync_encryption_statusLockedSubtitle =>
+      'Voer de wachtwoordzin in om op dit apparaat te synchroniseren';
+
+  @override
+  String get settings_cloudSync_encryption_enable =>
+      'Versleuteling inschakelen';
+
+  @override
+  String get settings_cloudSync_encryption_enterPassphrase =>
+      'Wachtwoordzin invoeren';
+
+  @override
+  String get settings_cloudSync_encryption_passphrase => 'Wachtwoordzin';
+
+  @override
+  String get settings_cloudSync_encryption_passphraseConfirm =>
+      'Wachtwoordzin bevestigen';
+
+  @override
+  String get settings_cloudSync_encryption_passphraseMismatch =>
+      'Wachtwoordzinnen komen niet overeen';
+
+  @override
+  String get settings_cloudSync_encryption_passphraseTooShort =>
+      'Gebruik minstens 8 tekens';
+
+  @override
+  String get settings_cloudSync_encryption_wrongPassphrase =>
+      'Onjuiste wachtwoordzin of herstelcode';
+
+  @override
+  String get settings_cloudSync_encryption_warnUpdateDevices =>
+      'Alle andere apparaten moeten naar de nieuwste appversie worden bijgewerkt en downloaden de bibliotheek opnieuw.';
+
+  @override
+  String get settings_cloudSync_encryption_warnLoss =>
+      'Als u zowel de wachtwoordzin als de herstelcode verliest, zijn de gegevens in de cloud niet te herstellen. De gegevens op uw apparaten lopen nooit gevaar.';
+
+  @override
+  String get settings_cloudSync_encryption_deletePlaintextBackups =>
+      'Bestaande onversleutelde cloudback-ups verwijderen';
+
+  @override
+  String get settings_cloudSync_encryption_recoveryTitle => 'Herstelcode';
+
+  @override
+  String get settings_cloudSync_encryption_recoveryExplain =>
+      'Noteer deze code en bewaar hem veilig. Het is de enige weg terug als u de wachtwoordzin vergeet.';
+
+  @override
+  String get settings_cloudSync_encryption_recoverySavedConfirm =>
+      'Ik heb mijn herstelcode opgeslagen';
+
+  @override
+  String get settings_cloudSync_encryption_changePassphrase =>
+      'Wachtwoordzin wijzigen';
+
+  @override
+  String get settings_cloudSync_encryption_currentPassphrase =>
+      'Huidige wachtwoordzin';
+
+  @override
+  String get settings_cloudSync_encryption_newPassphrase =>
+      'Nieuwe wachtwoordzin';
+
+  @override
+  String get settings_cloudSync_encryption_regenerateRecovery =>
+      'Nieuwe herstelcode genereren';
+
+  @override
+  String get settings_cloudSync_encryption_regenerateRecoveryWarn =>
+      'De oude herstelcode werkt direct niet meer.';
+
+  @override
+  String get settings_cloudSync_encryption_disable =>
+      'Versleuteling uitschakelen';
+
+  @override
+  String get settings_cloudSync_encryption_disableWarn =>
+      'De bibliotheek wordt onversleuteld opnieuw geüpload en andere apparaten downloaden hem opnieuw. Bestaande versleutelde back-ups blijven met de wachtwoordzin te herstellen.';
+
+  @override
+  String get settings_cloudSync_encryption_unlockTitle =>
+      'Voer uw versleutelings-wachtwoordzin in';
+
+  @override
+  String get settings_cloudSync_encryption_unlockHint =>
+      'Wachtwoordzin of herstelcode';
+
+  @override
+  String get settings_cloudSync_encryption_unlock => 'Ontgrendelen';
+
+  @override
+  String get settings_cloudSync_encryption_continue => 'Doorgaan';
+
+  @override
+  String get settings_cloudSync_encryption_done => 'Klaar';
+
+  @override
+  String get settings_cloudSync_encryption_cancel => 'Annuleren';
+
+  @override
   String settings_cloudSync_replace_globalBanner(String deviceName) {
     return 'Synchronisatie onderbroken — de bibliotheek is vervangen vanaf een back-up op \"$deviceName\".';
   }

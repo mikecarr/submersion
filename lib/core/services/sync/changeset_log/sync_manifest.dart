@@ -1,6 +1,9 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:submersion/core/services/sync/crypto/crypto_errors.dart';
+import 'package:submersion/core/services/sync/crypto/sync_envelope.dart';
+
 /// The per-device manifest: the small, rewritten-each-publish "commit point"
 /// that names the current base and changeset range. The only mutable file in
 /// a device's namespace.
@@ -70,7 +73,17 @@ class SyncManifest {
 
   Uint8List toBytes() => Uint8List.fromList(utf8.encode(jsonEncode(toJson())));
 
-  factory SyncManifest.fromBytes(Uint8List bytes) => SyncManifest.fromJson(
-    jsonDecode(utf8.decode(bytes)) as Map<String, dynamic>,
-  );
+  factory SyncManifest.fromBytes(Uint8List bytes) {
+    // Defense in depth for encrypted libraries: never let an SBE1 envelope
+    // masquerade as a corrupt manifest (spec section 4.3).
+    if (SyncEnvelope.hasMagic(bytes)) {
+      throw SyncEncryptionRequired(
+        libraryKeyId: SyncEnvelope.libraryKeyIdOf(bytes),
+        message: 'Sync manifest is encrypted',
+      );
+    }
+    return SyncManifest.fromJson(
+      jsonDecode(utf8.decode(bytes)) as Map<String, dynamic>,
+    );
+  }
 }

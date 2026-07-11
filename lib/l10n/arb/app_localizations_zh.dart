@@ -100,6 +100,116 @@ class AppLocalizationsZh extends AppLocalizations {
       '此版本不可用 — 请使用 S3 或 App Store 版本';
 
   @override
+  String get settings_cloudSync_encryption_title => '端到端加密';
+
+  @override
+  String get settings_cloudSync_encryption_subtitleOff => '上传前加密所有同步数据和云备份';
+
+  @override
+  String get settings_cloudSync_encryption_subtitleNeedsProvider => '请先选择云服务商';
+
+  @override
+  String get settings_cloudSync_encryption_statusOff => '加密已关闭';
+
+  @override
+  String get settings_cloudSync_encryption_statusOn => '加密已开启';
+
+  @override
+  String get settings_cloudSync_encryption_statusOnSubtitle =>
+      '同步数据和云备份在上传前会被加密';
+
+  @override
+  String get settings_cloudSync_encryption_statusLocked => '已加密 — 需要口令';
+
+  @override
+  String get settings_cloudSync_encryption_statusLockedSubtitle =>
+      '输入口令以在此设备上同步';
+
+  @override
+  String get settings_cloudSync_encryption_enable => '开启加密';
+
+  @override
+  String get settings_cloudSync_encryption_enterPassphrase => '输入口令';
+
+  @override
+  String get settings_cloudSync_encryption_passphrase => '口令';
+
+  @override
+  String get settings_cloudSync_encryption_passphraseConfirm => '确认口令';
+
+  @override
+  String get settings_cloudSync_encryption_passphraseMismatch => '两次输入的口令不一致';
+
+  @override
+  String get settings_cloudSync_encryption_passphraseTooShort => '请至少使用 8 个字符';
+
+  @override
+  String get settings_cloudSync_encryption_wrongPassphrase => '口令或恢复码不正确';
+
+  @override
+  String get settings_cloudSync_encryption_warnUpdateDevices =>
+      '所有其他设备都必须更新到最新版应用，并将重新下载资料库。';
+
+  @override
+  String get settings_cloudSync_encryption_warnLoss =>
+      '如果口令和恢复码都丢失，云端数据将无法恢复。设备上的数据永远不会有风险。';
+
+  @override
+  String get settings_cloudSync_encryption_deletePlaintextBackups =>
+      '删除现有的未加密云备份';
+
+  @override
+  String get settings_cloudSync_encryption_recoveryTitle => '恢复码';
+
+  @override
+  String get settings_cloudSync_encryption_recoveryExplain =>
+      '请抄写此恢复码并妥善保管。如果忘记口令，这是唯一的恢复途径。';
+
+  @override
+  String get settings_cloudSync_encryption_recoverySavedConfirm => '我已保存恢复码';
+
+  @override
+  String get settings_cloudSync_encryption_changePassphrase => '更改口令';
+
+  @override
+  String get settings_cloudSync_encryption_currentPassphrase => '当前口令';
+
+  @override
+  String get settings_cloudSync_encryption_newPassphrase => '新口令';
+
+  @override
+  String get settings_cloudSync_encryption_regenerateRecovery => '生成新的恢复码';
+
+  @override
+  String get settings_cloudSync_encryption_regenerateRecoveryWarn =>
+      '旧的恢复码将立即失效。';
+
+  @override
+  String get settings_cloudSync_encryption_disable => '关闭加密';
+
+  @override
+  String get settings_cloudSync_encryption_disableWarn =>
+      '资料库将以未加密方式重新上传，其他设备将重新下载。现有的加密备份仍可用口令恢复。';
+
+  @override
+  String get settings_cloudSync_encryption_unlockTitle => '输入您的加密口令';
+
+  @override
+  String get settings_cloudSync_encryption_unlockHint => '口令或恢复码';
+
+  @override
+  String get settings_cloudSync_encryption_unlock => '解锁';
+
+  @override
+  String get settings_cloudSync_encryption_continue => '继续';
+
+  @override
+  String get settings_cloudSync_encryption_done => '完成';
+
+  @override
+  String get settings_cloudSync_encryption_cancel => '取消';
+
+  @override
   String settings_cloudSync_replace_globalBanner(String deviceName) {
     return '同步已暂停 — 资料库已从 \"$deviceName\" 上的备份替换。';
   }
