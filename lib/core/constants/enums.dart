@@ -274,6 +274,19 @@ enum WeightType {
   const WeightType(this.displayName);
 }
 
+/// Post-dive weighting feedback: was the carried weight right? (v104)
+///
+/// Turns raw weight history into corrected training data for the weight
+/// prediction engine.
+enum WeightingFeedback {
+  correct('Felt right'),
+  overweighted('Overweighted'),
+  underweighted('Underweighted');
+
+  final String displayName;
+  const WeightingFeedback(this.displayName);
+}
+
 /// Tank role/purpose during a dive
 enum TankRole {
   backGas('Back Gas'),

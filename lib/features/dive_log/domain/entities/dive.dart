@@ -80,6 +80,9 @@ class Dive extends Equatable {
   final WeightType? weightType;
   // Multiple weight entries per dive (v1.0)
   final List<DiveWeight> weights;
+  // Post-dive weighting feedback (v104); magnitude in kg, direction implied.
+  final WeightingFeedback? weightingFeedback;
+  final double? weightingFeedbackKg;
   // Favorites and tags (v1.1/v1.5)
   final bool isFavorite;
   final List<Tag> tags;
@@ -186,6 +189,8 @@ class Dive extends Equatable {
     this.weightAmount,
     this.weightType,
     this.weights = const [],
+    this.weightingFeedback,
+    this.weightingFeedbackKg,
     this.isFavorite = false,
     this.tags = const [],
     // CCR/SCR fields (v1.5)
@@ -553,6 +558,8 @@ class Dive extends Equatable {
     double? weightAmount,
     WeightType? weightType,
     List<DiveWeight>? weights,
+    WeightingFeedback? weightingFeedback,
+    double? weightingFeedbackKg,
     bool? isFavorite,
     List<Tag>? tags,
     // CCR/SCR fields
@@ -642,6 +649,8 @@ class Dive extends Equatable {
       weightAmount: weightAmount ?? this.weightAmount,
       weightType: weightType ?? this.weightType,
       weights: weights ?? this.weights,
+      weightingFeedback: weightingFeedback ?? this.weightingFeedback,
+      weightingFeedbackKg: weightingFeedbackKg ?? this.weightingFeedbackKg,
       isFavorite: isFavorite ?? this.isFavorite,
       tags: tags ?? this.tags,
       // CCR/SCR fields
@@ -734,6 +743,8 @@ class Dive extends Equatable {
     weightAmount,
     weightType,
     weights,
+    weightingFeedback,
+    weightingFeedbackKg,
     isFavorite,
     tags,
     // CCR/SCR fields
