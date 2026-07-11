@@ -14,6 +14,7 @@ import 'package:submersion/features/media/domain/entities/media_source_type.dart
 import 'package:submersion/features/media/presentation/pages/photo_viewer_page.dart';
 import 'package:submersion/features/media/presentation/providers/media_providers.dart';
 import 'package:submersion/features/media/presentation/providers/media_resolver_providers.dart';
+import 'package:submersion/features/media/presentation/widgets/lightroom_suggestions_row.dart';
 import 'package:submersion/features/media/presentation/widgets/media_item_view.dart';
 import 'package:submersion/features/media_store/presentation/widgets/media_store_badge.dart';
 import 'package:submersion/features/settings/presentation/providers/settings_providers.dart';
@@ -401,6 +402,7 @@ class _DiveMediaSectionState extends ConsumerState<DiveMediaSection> {
                 style: textTheme.bodyMedium?.copyWith(color: colorScheme.error),
               ),
             ),
+            LightroomSuggestionsRow(diveId: widget.diveId),
           ],
         ),
       ),
