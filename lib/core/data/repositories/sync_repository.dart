@@ -46,6 +46,7 @@ class SyncRepository {
     'equipmentSets': (table: 'equipment_sets', pk: 'id'),
     'diveTypes': (table: 'dive_types', pk: 'id'),
     'diveRoles': (table: 'dive_roles', pk: 'id'),
+    'diverWeightEntries': (table: 'diver_weight_entries', pk: 'id'),
     'tankPresets': (table: 'tank_presets', pk: 'id'),
     'diveComputers': (table: 'dive_computers', pk: 'id'),
     'tags': (table: 'tags', pk: 'id'),
