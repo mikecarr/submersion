@@ -89,11 +89,15 @@ class _MediaItemViewState extends ConsumerState<MediaItemView> {
     if (native is! UnavailableData) return native;
     // Media store fallback (design spec section 10): only engages when the
     // native source cannot produce bytes on this device and the row is
-    // confirmed uploaded. Rows without a confirmed upload skip the runtime
-    // entirely (no keychain read, no store construction). Any store failure
-    // keeps the native placeholder.
-    if (widget.item.contentHash == null ||
-        widget.item.remoteUploadedAt == null) {
+    // confirmed uploaded - for thumbnail requests the thumb stamp alone
+    // suffices, since thumbs upload before originals. Rows without any
+    // confirmed upload skip the runtime entirely (no keychain read, no
+    // store construction). Any store failure keeps the native placeholder.
+    final storeConfirmed =
+        widget.item.contentHash != null &&
+        (widget.item.remoteUploadedAt != null ||
+            (widget.thumbnail && widget.item.remoteThumbUploadedAt != null));
+    if (!storeConfirmed) {
       return native;
     }
     try {

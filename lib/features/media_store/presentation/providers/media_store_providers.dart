@@ -80,10 +80,13 @@ final mediaTransferEntriesProvider =
       (ref) => ref.watch(mediaTransferQueueRepositoryProvider).watchEntries(),
     );
 
-/// Per-tile transfer status. Watches the newest queue row for the item;
-/// quiet (none) for done, absent, or already-uploaded rows. Defensive
-/// against an uninitialized local cache database (widget tests): any
-/// construction error reads as none.
+/// Per-tile transfer status, mapped purely from the newest queue row for
+/// the item: failed/transferring/pending rows badge, done or absent rows
+/// read as none. Already-uploaded media never badges because its queue row
+/// is marked done on completion (and later purged by deleteDone) - the
+/// item's own upload stamps are never consulted. Defensive against an
+/// uninitialized local cache database (widget tests): any construction
+/// error reads as none.
 final mediaBadgeStateProvider =
     StreamProvider.family<MediaBadgeState, MediaItem>((ref, item) {
       try {

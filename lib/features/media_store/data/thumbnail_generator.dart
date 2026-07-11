@@ -7,14 +7,16 @@ import 'package:image/image.dart' as img;
 import 'package:submersion/core/services/logger_service.dart';
 import 'package:submersion/features/media/data/services/media_source_resolver_registry.dart';
 import 'package:submersion/features/media/domain/entities/media_item.dart';
+import 'package:submersion/features/media/domain/entities/media_source_type.dart';
 import 'package:submersion/features/media/domain/value_objects/media_source_data.dart';
 import 'package:submersion/features/media_store/data/media_cache_store.dart';
 
 /// Best-effort thumbnail production for the upload pipeline (design spec
-/// section 9 step 4). Gallery sources hand back pre-compressed thumbnail
-/// bytes; file sources are decoded and resized here. Re-encoding drops
-/// EXIF (including GPS) from the thumb. Failure never blocks the
-/// original's upload: every error path returns null.
+/// section 9 step 4). Only the gallery source hands back genuinely
+/// pre-compressed thumbnail bytes; everything else (including bookmark
+/// reads, which return full originals as bytes) is decoded and resized
+/// here. Re-encoding drops EXIF (including GPS) from the thumb. Failure
+/// never blocks the original's upload: every error path returns null.
 class ThumbnailGenerator {
   ThumbnailGenerator({
     required MediaSourceResolverRegistry registry,
@@ -37,10 +39,17 @@ class ThumbnailGenerator {
         target: Size(maxDimension.toDouble(), maxDimension.toDouble()),
       );
       switch (data) {
-        case BytesData(bytes: final b):
+        case BytesData(bytes: final b)
+            when item.sourceType == MediaSourceType.platformGallery:
+          // photo_manager thumbnails are already sized and compressed.
           final staged = await _cache.stagingFile();
           await staged.writeAsBytes(b, flush: true);
           return staged;
+        case BytesData(bytes: final b):
+          // Non-gallery BytesData is the original (e.g. a bookmark read on
+          // iOS/macOS): resize and re-encode so full-size bytes and their
+          // EXIF/GPS never masquerade as a thumb.
+          return _resizeToJpeg(b, item.originalFilename);
         case FileData(file: final f):
           return _resizeToJpeg(await f.readAsBytes(), item.originalFilename);
         case NetworkData():

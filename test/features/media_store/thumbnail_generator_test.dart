@@ -33,6 +33,7 @@ void main() {
     generator = ThumbnailGenerator(
       registry: MediaSourceResolverRegistry({
         MediaSourceType.localFile: resolver,
+        MediaSourceType.platformGallery: resolver,
       }),
       cache: cache,
     );
@@ -43,23 +44,42 @@ void main() {
     await root.delete(recursive: true);
   });
 
-  MediaItem item() => MediaItem(
-    id: 'm1',
-    mediaType: MediaType.photo,
-    sourceType: MediaSourceType.localFile,
-    originalFilename: 'reef.png',
-    takenAt: DateTime(2026),
-    createdAt: DateTime(2026),
-    updatedAt: DateTime(2026),
-  );
+  MediaItem item({MediaSourceType sourceType = MediaSourceType.localFile}) =>
+      MediaItem(
+        id: 'm1',
+        mediaType: MediaType.photo,
+        sourceType: sourceType,
+        originalFilename: 'reef.png',
+        takenAt: DateTime(2026),
+        createdAt: DateTime(2026),
+        updatedAt: DateTime(2026),
+      );
 
-  test('BytesData passes through untouched (gallery thumbnails are already '
-      'compressed)', () async {
+  test('gallery BytesData passes through untouched (photo_manager thumbnails '
+      'are already compressed)', () async {
     final bytes = base64Decode(_onePixelPngBase64);
     resolver.data = BytesData(bytes: bytes);
-    final file = await generator.generateFor(item());
+    final file = await generator.generateFor(
+      item(sourceType: MediaSourceType.platformGallery),
+    );
     expect(file, isNotNull);
     expect(await file!.readAsBytes(), bytes);
+  });
+
+  test('non-gallery BytesData is resized and re-encoded (bookmark reads '
+      'return full originals with EXIF)', () async {
+    final large = img.Image(width: 800, height: 600);
+    img.fill(large, color: img.ColorRgb8(200, 60, 10));
+    final original = img.encodePng(large);
+    resolver.data = BytesData(bytes: original);
+
+    final file = await generator.generateFor(item());
+    expect(file, isNotNull);
+    final produced = await file!.readAsBytes();
+    expect(produced, isNot(equals(original)));
+    expect(produced.take(2).toList(), [0xFF, 0xD8], reason: 'JPEG re-encode');
+    final decoded = img.decodeImage(produced)!;
+    expect(decoded.width, 512);
   });
 
   test('FileData full-size photos are resized to <=512 and re-encoded as '

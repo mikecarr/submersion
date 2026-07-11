@@ -14,6 +14,11 @@ class InMemoryMediaObjectStore implements MediaObjectStore {
   /// call (pipeline wiring tests).
   String? emitResumeState;
 
+  /// When set, the next getFile writes these bytes to the destination and
+  /// then throws (models a chunked download dying mid-transfer, which
+  /// leaves a partial file behind).
+  List<int>? partialGetThenFail;
+
   /// The resumeStateJson the last putFile call received.
   String? lastResumeStateJsonIn;
 
@@ -63,6 +68,15 @@ class InMemoryMediaObjectStore implements MediaObjectStore {
     TransferProgressCallback? onProgress,
   }) async {
     _maybeFail();
+    final partial = partialGetThenFail;
+    if (partial != null) {
+      partialGetThenFail = null;
+      await destination.writeAsBytes(partial, flush: true);
+      throw const MediaStoreException(
+        'connection lost mid-download',
+        kind: MediaStoreErrorKind.transient,
+      );
+    }
     final bytes = objects[key];
     if (bytes == null) {
       throw MediaStoreException(

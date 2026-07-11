@@ -283,7 +283,11 @@ void main() {
 
   test('a video uploaded on device A plays from the store on device '
       'B', () async {
-    // Device A: localFile video with a BytesData poster thumb.
+    // Device A: gallery-sourced video with a BytesData poster thumb. The
+    // gallery source matters: only platformGallery thumbnail bytes pass
+    // through the generator untouched (file-sourced BytesData gets
+    // re-encoded, and raw video bytes cannot be, so localFile videos get
+    // no thumb until Phase 5).
     final mediaRepositoryA = MediaRepository();
     final cacheA = MediaCacheStore(database: cacheDbA, root: rootA);
     final queueA = MediaTransferQueueRepository(database: cacheDbA);
@@ -295,7 +299,7 @@ void main() {
         queue: queueA,
         store: bucket,
         registry: MediaSourceResolverRegistry({
-          MediaSourceType.localFile: resolverA,
+          MediaSourceType.platformGallery: resolverA,
         }),
         cache: cacheA,
       ),
@@ -317,7 +321,8 @@ void main() {
       domain.MediaItem(
         id: '',
         mediaType: domain.MediaType.video,
-        sourceType: MediaSourceType.localFile,
+        sourceType: MediaSourceType.platformGallery,
+        platformAssetId: 'gallery-video-1',
         filePath: video.path,
         localPath: video.path,
         originalFilename: 'dive.mp4',
@@ -381,7 +386,7 @@ void main() {
         queue: queueA,
         store: storeFor(),
         registry: MediaSourceResolverRegistry({
-          MediaSourceType.localFile: resolverA,
+          MediaSourceType.platformGallery: resolverA,
         }),
         cache: cacheA,
       ),
@@ -400,7 +405,8 @@ void main() {
       domain.MediaItem(
         id: '',
         mediaType: domain.MediaType.video,
-        sourceType: MediaSourceType.localFile,
+        sourceType: MediaSourceType.platformGallery,
+        platformAssetId: 'gallery-video-2',
         filePath: video.path,
         localPath: video.path,
         originalFilename: 'drift.mp4',
