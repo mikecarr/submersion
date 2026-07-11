@@ -1,5 +1,17 @@
 import 'package:submersion/core/deco/constants/buhlmann_coefficients.dart';
 import 'package:submersion/core/deco/entities/dive_environment.dart';
+import 'package:submersion/features/dive_log/domain/entities/dive.dart';
+
+/// A derived repetitive-dive chain: the dives (earliest first) and the
+/// surface interval (seconds) between each consecutive pair.
+class TissueDiveChain {
+  final List<Dive> dives;
+  final List<int> surfaceIntervals;
+
+  const TissueDiveChain({required this.dives, required this.surfaceIntervals});
+
+  bool get hasMultipleDives => dives.length > 1;
+}
 
 /// A breathing gas active from [startSeconds] onward within one dive.
 class GasLeg {
