@@ -567,6 +567,9 @@ class DiveProfiles extends Table {
   RealColumn get pressure => real().nullable()();
   RealColumn get temperature => real().nullable()();
   IntColumn get heartRate => integer().nullable()();
+  // Compass heading in degrees (0-359) from DC_SAMPLE_BEARING; null when the
+  // computer does not report bearing samples.
+  RealColumn get heading => real().nullable()();
   // Computed decompression data (optional, can be calculated on-the-fly)
   RealColumn get ascentRate => real().nullable()(); // m/min
   RealColumn get ceiling => real().nullable()(); // deco ceiling in meters
@@ -2150,7 +2153,7 @@ class AppDatabase extends _$AppDatabase {
 
   /// The current schema version as a static constant so that pre-open checks
   /// (e.g. version-mismatch guard) can reference it without an instance.
-  static const int currentSchemaVersion = 104;
+  static const int currentSchemaVersion = 105;
 
   /// Every schema version that has a migration block in onUpgrade.
   /// Used to calculate progress step counts. When adding a new migration,
@@ -2258,6 +2261,7 @@ class AppDatabase extends _$AppDatabase {
     102,
     103,
     104,
+    105,
   ];
 
   /// Idempotent DDL for the v103 media store objects. Called from the v103
@@ -5216,6 +5220,24 @@ class AppDatabase extends _$AppDatabase {
           );
         }
         if (from < 104) await reportProgress();
+        if (from < 105) {
+          // v105: per-sample compass heading (DC_SAMPLE_BEARING) on
+          // dive_profiles. PRAGMA-guarded so a healthy database no-ops.
+          final profileCols = await customSelect(
+            "PRAGMA table_info('dive_profiles')",
+          ).get();
+          if (profileCols.isNotEmpty) {
+            final hasHeading = profileCols.any(
+              (c) => c.read<String>('name') == 'heading',
+            );
+            if (!hasHeading) {
+              await customStatement(
+                'ALTER TABLE dive_profiles ADD COLUMN heading REAL',
+              );
+            }
+          }
+        }
+        if (from < 105) await reportProgress();
       },
       beforeOpen: (details) async {
         // Enable foreign keys
@@ -5322,6 +5344,19 @@ class AppDatabase extends _$AppDatabase {
           'planned_weight_placement',
           'TEXT',
         );
+
+        // v105 backstop: heading column on dive_profiles.
+        final profilesCols = await customSelect(
+          "PRAGMA table_info('dive_profiles')",
+        ).get();
+        final hasHeadingCol = profilesCols.any(
+          (c) => c.read<String>('name') == 'heading',
+        );
+        if (profilesCols.isNotEmpty && !hasHeadingCol) {
+          await customStatement(
+            'ALTER TABLE dive_profiles ADD COLUMN heading REAL',
+          );
+        }
 
         // Performance indexes historically existed only in onUpgrade blocks,
         // so a database created fresh at a recent schema version -- or

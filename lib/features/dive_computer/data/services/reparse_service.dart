@@ -435,6 +435,7 @@ class ReparseService {
             depth: Value(s.depthMeters),
             temperature: Value(s.temperatureCelsius),
             heartRate: Value(s.heartRate),
+            heading: Value(s.heading),
             setpoint: Value(s.setpoint),
             ppO2: Value(s.ppo2),
             cns: Value(s.cns),

@@ -182,6 +182,7 @@ static void sample_callback(dc_sample_type_t type,
         // Carry the active gas forward across samples, not just the switch sample.
         state->current_sample.gasmix = state->current_gasmix;
         state->current_sample.heartbeat = UINT32_MAX;
+        state->current_sample.heading = UINT32_MAX;
         state->current_sample.setpoint = NAN;
         state->current_sample.ppo2 = NAN;
         for (int cell = 0; cell < 6; cell++) {
@@ -211,6 +212,9 @@ static void sample_callback(dc_sample_type_t type,
         break;
     case DC_SAMPLE_HEARTBEAT:
         state->current_sample.heartbeat = value->heartbeat;
+        break;
+    case DC_SAMPLE_BEARING:
+        state->current_sample.heading = value->bearing;
         break;
     case DC_SAMPLE_SETPOINT:
         state->current_sample.setpoint = value->setpoint;

@@ -946,10 +946,10 @@ Java_com_submersion_libdivecomputer_LibdcWrapper_nativeGetDiveSample(
     if (index < 0 || static_cast<unsigned int>(index) >= dive->sample_count) return nullptr;
 
     const libdc_sample_t *s = &dive->samples[index];
-    // All 21 fields (14 base + 6 O2 cells + gas mix). Integer sentinels
+    // All 22 fields (14 base + 6 O2 cells + gas mix + heading). Integer sentinels
     // (UINT32_MAX) are cast to double; NAN doubles pass through and become null
     // on the Kotlin side.
-    jdouble values[21] = {
+    jdouble values[22] = {
         static_cast<jdouble>(s->time_ms),
         s->depth,
         s->temperature,
@@ -970,10 +970,11 @@ Java_com_submersion_libdivecomputer_LibdcWrapper_nativeGetDiveSample(
         s->o2_sensor[3],
         s->o2_sensor[4],
         s->o2_sensor[5],
-        static_cast<jdouble>(s->gasmix)
+        static_cast<jdouble>(s->gasmix),
+        static_cast<jdouble>(s->heading)
     };
-    jdoubleArray result = env->NewDoubleArray(21);
-    env->SetDoubleArrayRegion(result, 0, 21, values);
+    jdoubleArray result = env->NewDoubleArray(22);
+    env->SetDoubleArrayRegion(result, 0, 22, values);
     return result;
 }
 

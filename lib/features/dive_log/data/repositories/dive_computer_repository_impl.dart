@@ -1017,6 +1017,7 @@ class DiveComputerRepository {
               pressure: const Value(null),
               temperature: Value(point.temperature),
               heartRate: Value(point.heartRate),
+              heading: Value(point.heading),
               isPrimary: Value(isPrimary),
               // Decompression and rebreather data
               setpoint: Value(point.setpoint),
@@ -1613,6 +1614,9 @@ class ProfilePointData {
   final double? temperature;
   final int? heartRate;
 
+  /// Compass heading in degrees (0-359); null when not reported.
+  final double? heading;
+
   /// Tank index for pressure (0-based), used for multi-tank pressure tracking
   final int? tankIndex;
 
@@ -1663,6 +1667,7 @@ class ProfilePointData {
     this.pressure,
     this.temperature,
     this.heartRate,
+    this.heading,
     this.tankIndex,
     this.setpoint,
     this.ppO2,

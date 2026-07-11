@@ -589,6 +589,7 @@ class DiveComputerHostApiImpl: DiveComputerHostApi {
                     pressureBar: s.pressure.isNaN ? nil : s.pressure,
                     tankIndex: s.tank == UInt32.max ? nil : Int64(s.tank),
                     heartRate: s.heartbeat == UInt32.max ? nil : Int64(s.heartbeat),
+                    heading: s.heading == UInt32.max ? nil : Double(s.heading),
                     setpoint: s.setpoint.isNaN ? nil : s.setpoint,
                     ppo2: s.ppo2.isNaN ? nil : s.ppo2,
                     cns: s.cns.isNaN ? nil : s.cns,

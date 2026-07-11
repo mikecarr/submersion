@@ -198,6 +198,9 @@ class ProfileSample {
   /// Heart rate in bpm (if available)
   final int? heartRate;
 
+  /// Compass heading in degrees (0-359); null when not reported.
+  final double? heading;
+
   /// CCR setpoint in bar (if available)
   final double? setpoint;
 
@@ -247,6 +250,7 @@ class ProfileSample {
     this.pressure,
     this.tankIndex,
     this.heartRate,
+    this.heading,
     this.setpoint,
     this.ppo2,
     this.cns,

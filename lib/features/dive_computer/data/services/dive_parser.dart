@@ -27,6 +27,7 @@ class DiveParser {
           pressure: sample.pressure,
           temperature: sample.temperature,
           heartRate: sample.heartRate,
+          heading: sample.heading,
           // Preserve tank index for multi-tank pressure tracking
           tankIndex: sample.tankIndex,
           // Decompression and rebreather data

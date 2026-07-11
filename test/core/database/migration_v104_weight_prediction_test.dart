@@ -96,7 +96,9 @@ void main() {
   });
 
   test('version ladder includes 104', () {
-    expect(AppDatabase.currentSchemaVersion, 104);
+    // Exact-latest tripwire moved to the newest version's migration test
+    // (v105) when the heading migration landed on top of this one.
+    expect(AppDatabase.currentSchemaVersion, greaterThanOrEqualTo(104));
     expect(AppDatabase.migrationVersions, contains(104));
   });
 }

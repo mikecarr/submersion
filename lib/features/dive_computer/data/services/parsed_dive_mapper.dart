@@ -54,6 +54,7 @@ DownloadedDive parsedDiveToDownloaded(pigeon.ParsedDive parsed) {
             pressure: s.pressureBar,
             tankIndex: s.tankIndex,
             heartRate: s.heartRate,
+            heading: s.heading,
             setpoint: s.setpoint,
             ppo2: s.ppo2,
             cns: s.cns,

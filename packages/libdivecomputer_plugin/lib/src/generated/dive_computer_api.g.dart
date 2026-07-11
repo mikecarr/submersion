@@ -109,6 +109,7 @@ class ProfileSample {
     this.pressureBar,
     this.tankIndex,
     this.heartRate,
+    this.heading,
     this.setpoint,
     this.ppo2,
     this.cns,
@@ -137,6 +138,10 @@ class ProfileSample {
   int? tankIndex;
 
   int? heartRate;
+
+  /// Compass heading in degrees (0-359) from DC_SAMPLE_BEARING; null when the
+  /// computer does not report bearing samples.
+  double? heading;
 
   double? setpoint;
 
@@ -181,6 +186,7 @@ class ProfileSample {
       pressureBar,
       tankIndex,
       heartRate,
+      heading,
       setpoint,
       ppo2,
       cns,
@@ -208,21 +214,22 @@ class ProfileSample {
       pressureBar: result[3] as double?,
       tankIndex: result[4] as int?,
       heartRate: result[5] as int?,
-      setpoint: result[6] as double?,
-      ppo2: result[7] as double?,
-      cns: result[8] as double?,
-      rbt: result[9] as int?,
-      decoType: result[10] as int?,
-      decoTime: result[11] as int?,
-      decoDepth: result[12] as double?,
-      tts: result[13] as int?,
-      o2Sensor1: result[14] as double?,
-      o2Sensor2: result[15] as double?,
-      o2Sensor3: result[16] as double?,
-      o2Sensor4: result[17] as double?,
-      o2Sensor5: result[18] as double?,
-      o2Sensor6: result[19] as double?,
-      gasMixIndex: result[20] as int?,
+      heading: result[6] as double?,
+      setpoint: result[7] as double?,
+      ppo2: result[8] as double?,
+      cns: result[9] as double?,
+      rbt: result[10] as int?,
+      decoType: result[11] as int?,
+      decoTime: result[12] as int?,
+      decoDepth: result[13] as double?,
+      tts: result[14] as int?,
+      o2Sensor1: result[15] as double?,
+      o2Sensor2: result[16] as double?,
+      o2Sensor3: result[17] as double?,
+      o2Sensor4: result[18] as double?,
+      o2Sensor5: result[19] as double?,
+      o2Sensor6: result[20] as double?,
+      gasMixIndex: result[21] as int?,
     );
   }
 }
