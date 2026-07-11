@@ -27,6 +27,14 @@ android {
         jvmTarget = JavaVersion.VERSION_21.toString()
     }
 
+    packaging {
+        jniLibs {
+            // flutter_angle and libdivecomputer_plugin both bundle the NDK
+            // C++ runtime; the copies are identical, keep one.
+            pickFirsts += "lib/**/libc++_shared.so"
+        }
+    }
+
     defaultConfig {
         applicationId = "app.submersion"
         minSdk = 26
