@@ -4,17 +4,18 @@
 
 **Goal:** Reconstruct the dive's real-world 3D path from GPS anchors + heading + surface tracks, and render it as a spatial flythrough scene (follow-cam, orbit, presets, stat lanes, ceiling sheet) built on the dive_3d feature from PR #565.
 
-**Architecture:** A pure `DivePathReconstructor` (dive_log domain) turns anchors/heading/surface-fixes/profile into a `ReconstructedPath` in local meters with a `PathFidelity` tag. A new spatial geometry layer inside `lib/features/dive_3d/` (path frames + path-ribbon/lane/ceiling builders) emits the same `MeshData`/`Dive3dGeometry` shapes #565's renderers already consume, so `SceneViewport` (GL), `SceneProjector`/`Dive3dPreviewPainter` (software fallback), and `ThreeAdapter` are reused unchanged except for an added follow-cam mode. The flythrough page follows `Dive3dPage`'s local-`ValueNotifier` scrub pattern.
+**Architecture:** A pure `DivePathReconstructor` (dive_log domain) turns anchors/heading/surface-fixes/profile into a `ReconstructedPath` in local meters with a `PathFidelity` tag. A new spatial geometry layer inside `lib/features/dive_3d/` (path frames + path-ribbon/lane/ceiling builders) emits the same `MeshData`/`Dive3dGeometry` shapes #565's renderers consume. Rendering is the interactive CustomPainter viewport (#565's software `SceneProjector`/`Dive3dPreviewPainter` lineage, post its de-three_js rework) extended with a follow-cam mode. The flythrough page follows `Dive3dPage`'s local-`ValueNotifier` scrub pattern.
 
-**Tech Stack:** three_js_core/three_js_math/three_js_angle_renderer (via the submersion-app/flutter_angle fork override, already wired by #565), Riverpod, existing Buhlmann analysis pipeline.
+**Tech Stack:** Pure-Dart CustomPainter rendering (NO three_js - engine reversal 2026-07-11, see spec), Riverpod, existing Buhlmann analysis pipeline.
 
 **Spec:** `docs/superpowers/specs/2026-07-11-3d-flythrough-design.md` (see the PR-2 addendum section added 2026-07-11).
 
 ## Global Constraints
 
-- HARD GATE: this plan executes only after PR #563 (heading pipeline, v105) AND PR #565 (dive_3d + flutter_angle fork override) are merged to main. Task 0 verifies both.
+- HARD GATE: this plan executes only after PR #563 (heading pipeline, v105) AND PR #565 (dive_3d) INCLUDING #565's de-three_js rework (interactive CustomPainter viewport, three_js deps and flutter_angle override removed) are merged to main. Task 0 verifies all of it.
+- three_js is BANNED (engine reversal 2026-07-11): no `three_js_*` import or dependency may appear anywhere in this PR. If Task 0 finds three_js still in main's pubspec, STOP and report.
 - Do NOT modify `SceneBounds`, `RibbonBuilder`, `CeilingBuilder`, `GridBuilder`, `StrataBuilder`, or `MarkerLayout` time-axis behavior - the analytical scene keeps working exactly as #565 shipped it. Spatial geometry lives in NEW files.
-- Engine imports (`three_js_*`) are allowed ONLY in `three_adapter.dart` and `scene_viewport.dart` (both exist). New geometry code must be pure Dart emitting `MeshData`.
+- New geometry code must be pure Dart emitting `MeshData`; rendering goes exclusively through the CustomPainter viewport.
 - Timestamp conventions (from gps_log): track POINTS are wall-clock-as-UTC epoch SECONDS; track startTime/endTime are epoch MILLISECONDS; dive times are wall-clock-as-UTC. Use `toWallClockEpochSeconds` from `track_point_codec.dart`; never mix units.
 - Dive-level GPS anchors are `Dive.entryLocation` / `Dive.exitLocation` (`GeoPoint?`), per-source values are `DiveDataSource.entryLatitude` (`double?`) etc., site fallback is `dive.site?.location`.
 - TTS series comes from `profileAnalysisProvider(diveId)` -> `analysis.decoStatuses[i].ttsSeconds`; NDL from `dive_profiles.ndl` with `analysis.ndlCurve` fallback. No new deco code.
@@ -51,7 +52,7 @@ flutter pub get
 dart run build_runner build --delete-conflicting-outputs
 ```
 
-Expected: all succeed. `grep -n "flutter_angle" pubspec.yaml` shows the git-fork dependency_overrides stanza (came in with #565).
+Expected: all succeed. Verify the engine reversal landed: `grep -c "three_js\|flutter_angle" pubspec.yaml` must print 0, and `lib/features/dive_3d/` must contain an interactive CustomPainter viewport (locate the widget that replaced `scene_viewport.dart` in #565's rework - read it fully; Tasks 4-5 wire into it and MUST be reconciled with its actual API before writing code).
 
 ---
 
@@ -499,11 +500,11 @@ Normalization: horizontal scene coords = `east/north * (sceneSpan / max(horizont
 
 ---
 
-### Task 4: Follow-cam in `SceneViewport` (pure logic + thin wiring)
+### Task 4: Follow-cam for the CustomPainter viewport (pure logic + thin wiring)
 
 **Files:**
 - Create: `lib/features/dive_3d/presentation/renderer/follow_camera.dart`
-- Modify: `lib/features/dive_3d/presentation/widgets/scene_viewport.dart` (#565 file - additive only)
+- Modify: the interactive CustomPainter viewport widget from #565's rework (exact filename discovered in Task 0 - additive, defaults preserve existing behavior)
 - Test: `test/features/dive_3d/presentation/renderer/follow_camera_test.dart`
 
 **Interfaces:**
@@ -512,24 +513,27 @@ Normalization: horizontal scene coords = `east/north * (sceneSpan / max(horizont
 ```dart
 enum CameraPreset { overview, topDown, sideProfile }
 
-/// Pure spring-follow camera state; testable without GL.
+/// Pure spring-follow camera state for the orthographic software renderer;
+/// fully testable, no rendering imports.
 class FollowCamera {
-  FollowCamera({double stiffness = 4.0, double trailDistance = 2.5, double heightOffset = 1.2});
-  /// Advance toward the target derived from the path position/tangent.
-  /// Returns (eye, lookAt) in scene units.
-  ({({double x, double y, double z}) eye, ({double x, double y, double z}) target})
+  FollowCamera({double stiffness = 4.0, double zoom = 2.2});
+  /// Advance toward the goal derived from the path position/tangent.
+  /// center = scene point the projector should look at; yawDegrees = view
+  /// yaw aligned to the path tangent's horizontal bearing; zoom = scale
+  /// multiplier over the fit-to-scene baseline.
+  ({({double x, double y, double z}) center, double yawDegrees, double zoom})
       update({required PathFrames frames, required double scrub01, required double dtSeconds});
 }
 ```
 
-- `SceneViewport` gains OPTIONAL parameters (defaults preserve #565 behavior exactly):
-  `final PathFrames? followFrames;` `final ValueListenable<bool>? followMode;` `final void Function()? onUserOrbit;`
-  In the existing `addAnimationEvent` callback: if `followMode?.value == true && followFrames != null`, call `_followCamera.update(...)` and set `camera.position`/`lookAt` from it (bypassing `_applyCamera`). In `onPanUpdate`, when follow is active call `onUserOrbit?.call()` first (the page flips follow off) before applying orbit deltas. Preset support: a public method is NOT possible on the private state, so add `final ValueListenable<CameraPreset?>? presetRequest;` - viewport listens and animates `_yaw/_pitch/_radius` to preset values (overview: 0.55/0.35/14; topDown: yaw unchanged/pitch 1.35/radius 18; sideProfile: yaw 0/pitch 0.05/radius 14), clearing follow.
+- The interactive viewport (reworked #565 widget - it owns yaw/pitch/zoom gesture state driving `SceneProjector`) gains OPTIONAL parameters:
+  `final PathFrames? followFrames;` `final ValueListenable<bool>? followMode;` `final void Function()? onUserOrbit;` `final ValueListenable<CameraPreset?>? presetRequest;`
+  Wiring: while `followMode?.value == true && followFrames != null`, an internal ticker advances `FollowCamera.update` each frame and feeds (center, yaw, zoom) into the projector state (SceneProjector is cheap to reconstruct per frame - #565's painter already rebuilds on repaint). Pitch stays at a fixed follow pitch (18 degrees). Any pan gesture first calls `onUserOrbit?.call()` (the page flips follow off), then applies normal orbit deltas. `presetRequest` animates yaw/pitch/zoom to: overview (-32/22/fit), topDown (current yaw/85/fit), sideProfile (0/4/fit), clearing follow. RECONCILE all names against the actual reworked widget in Task 0 before coding; if the rework already added camera hooks, use them instead of duplicating.
 
-- [ ] **Step 1: Failing test for FollowCamera** - straight east path, scrub 0.5, several `update` calls with dt=0.016: eye converges behind the current position (eye.x < target.x for eastward travel), y above path, target ahead of position (look-ahead), spring converges monotonically (distance to steady-state strictly decreases across iterations).
-- [ ] **Step 2: Verify failure**, then **Step 3: implement `follow_camera.dart`** (exponential spring: `pos += (goal - pos) * (1 - exp(-stiffness*dt))`; goal eye = position - tangent*trailDistance + (0, heightOffset, 0); goal target = position + tangent*lookAhead where lookAhead=1.0).
-- [ ] **Step 4: Wire `scene_viewport.dart`** per the interface above. Guard every addition behind null checks so `Dive3dPage`'s existing usage compiles UNCHANGED (no call-site edits in dive_3d_page.dart).
-- [ ] **Step 5: Green + regression** - `flutter test test/features/dive_3d/` (existing viewport-adjacent tests must still pass; the GL widget itself stays coverage-excluded).
+- [ ] **Step 1: Failing test for FollowCamera** - straight east path, scrub 0.5, repeated `update` calls with dt=0.016: center converges onto `frames.positionAt(0.5 * duration)` (distance to it strictly decreases), `yawDegrees` converges to the eastward bearing (90), zoom converges to the configured value.
+- [ ] **Step 2: Verify failure**, then **Step 3: implement `follow_camera.dart`** (exponential spring on center/yaw/zoom: `v += (goal - v) * (1 - exp(-stiffness*dt))`; yaw interpolated over the shortest angular arc; goal center = `positionAt(scrub01 * duration)`; goal yaw = horizontal bearing of the tangent at that point).
+- [ ] **Step 4: Wire the viewport widget** per the interface above, additively - existing `Dive3dPage` call sites compile UNCHANGED.
+- [ ] **Step 5: Green + regression** - `flutter test test/features/dive_3d/` (all pre-existing viewport/painter tests must still pass).
 - [ ] **Step 6: Commit** - `git commit -m "feat(flythrough): follow camera with orbit handoff and presets"`
 
 ---
@@ -555,7 +559,7 @@ final flythroughGeometryProvider = FutureProvider.family<FlythroughGeometry?, Fl
 
 `flythroughPathProvider` composes: `diveProvider(diveId)` (anchors: `dive.entryLocation` -> per-source `DiveDataSource` doubles via `sourceProfilesProvider` -> `dive.site?.location`), `diveProfileProvider(diveId)` (profile with heading), and surface fixes: `gpsTrackRepository.getCompletedTracks(includePoints: true)` -> `GpsTrackMatcher.trackCovering(tracks, diveWallClockMs)` -> sample fixes at 60 s intervals inside the dive window via `positionAt` (convert with `toWallClockEpochSeconds`; REMEMBER: points are epoch seconds, track times are ms). Then `DivePathReconstructor().reconstruct(...)`. `flythroughGeometryProvider` mirrors `dive3dGeometryProvider`'s pattern including the <2000-samples synchronous rule and `compute()` offload above it, and pulls the TTS series from `profileAnalysisProvider(diveId)` (`decoStatuses[i].ttsSeconds`, resampled onto profile timestamps with `ProfileLookup`).
 
-Page (`DiveFlythroughPage`): clone `Dive3dPage`'s structure - local `ValueNotifier<double> _position`, `AnimationController` player, `TimeScrubBar` reuse, `SceneReadoutPanel` reuse - plus: `ValueNotifier<bool> _followMode` (default true), camera preset buttons, lane FilterChips (`FlythroughLane` set, persisted via `SharedPreferences` key `flythrough_lanes` - device-local UI pref per the settings convention), and the fidelity badge: a small `Chip` whose label is the l10n string for `path.fidelity` with an info tooltip; add `lowConfidence` suffix when set. GL-failure fallback: reuse `Dive3dPreviewPainter` on `FlythroughGeometry.base` exactly like `Dive3dPage` does.
+Page (`DiveFlythroughPage`): clone `Dive3dPage`'s structure - local `ValueNotifier<double> _position`, `AnimationController` player, `TimeScrubBar` reuse, `SceneReadoutPanel` reuse - plus: `ValueNotifier<bool> _followMode` (default true), camera preset buttons, lane FilterChips (`FlythroughLane` set, persisted via `SharedPreferences` key `flythrough_lanes` - device-local UI pref per the settings convention), and the fidelity badge: a small `Chip` whose label is the l10n string for `path.fidelity` with an info tooltip; add `lowConfidence` suffix when set. No GL-failure path exists anymore - the CustomPainter viewport renders everywhere unconditionally.
 
 Entry point: in `dive_3d_page.dart`'s AppBar, add an action visible only when `ref.watch(flythroughPathProvider(diveId)).valueOrNull != null`:
 
@@ -576,7 +580,7 @@ l10n keys (add to `app_en.arb`, translate into all 10 locales, run `flutter gen-
 
 - [ ] **Step 1: Failing provider test** - with a fake dive (entry+exit anchors) and profile, `flythroughPathProvider` yields an anchored path; with no GPS anywhere it yields null. Model the harness on #565's `test/features/dive_3d/application/providers_test.dart` (read it first - it shows how upstream providers are overridden).
 - [ ] **Step 2: Implement providers**, run until green.
-- [ ] **Step 3: Failing page test** - `DiveFlythroughPage` renders scrub bar + fidelity chip with overridden providers; use BOUNDED pumps (never `pumpAndSettle` - the ThreeJS frame loop never settles) and expect the GL viewport to fail-fallback under flutter_test (the `onInitFailure` path), asserting the software-preview fallback appears. Wrap post-pump async in `tester.runAsync` where drift is touched.
+- [ ] **Step 3: Failing page test** - `DiveFlythroughPage` renders scrub bar + fidelity chip + the CustomPaint viewport with overridden providers; use BOUNDED pumps while playback/follow tickers run (never `pumpAndSettle` against an active ticker). Wrap post-pump async in `tester.runAsync` where drift is touched.
 - [ ] **Step 4: Implement page + AppBar action + l10n keys** (en first, then the 10 locales, then `flutter gen-l10n`), run until green.
 - [ ] **Step 5: Full dive_3d + dive_log test dirs** - `flutter test test/features/dive_3d/ test/features/dive_log/`. PASS.
 - [ ] **Step 6: Commit** - `git commit -m "feat(flythrough): flythrough page, providers, lanes, and fidelity badge"`
@@ -589,7 +593,7 @@ l10n keys (add to `app_en.arb`, translate into all 10 locales, run `flutter gen-
 - [ ] **Step 2:** `flutter test test/features/dive_3d/ test/features/dive_log/ test/core/deco/` - all PASS.
 - [ ] **Step 3:** `flutter build macos --debug` and check the REAL exit code (`echo $?` - do not pipe the build through tail/grep). Expected 0.
 - [ ] **Step 4:** Manual macOS pass: open a dive with GPS (or site pin), open 3D page -> flythrough action -> verify follow-cam plays, drag breaks to orbit, presets animate, lanes toggle, fidelity chip correct; re-enter twice (dispose safety).
-- [ ] **Step 5:** Push (`git push --no-verify -u origin worktree-flythrough-pr2`) and open the PR: title "Add GPS dive path reconstruction and 3D flythrough". Body: reconstruction tiers + fidelity, what is reused from #565 vs new, l10n, pending device smoke. No attribution, no session URL. Watch ALL CI jobs including Build Linux and Build Android (flutter_angle fork must keep them green).
+- [ ] **Step 5:** Push (`git push --no-verify -u origin worktree-flythrough-pr2`) and open the PR: title "Add GPS dive path reconstruction and 3D flythrough". Body: reconstruction tiers + fidelity, what is reused from #565 vs new, l10n, pending device smoke. No attribution, no session URL. Watch ALL CI jobs; with three_js gone there is no renderer-specific platform risk, but Build Windows remains the strictest compile gate.
 
 ---
 

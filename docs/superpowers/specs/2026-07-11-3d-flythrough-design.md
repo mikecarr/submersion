@@ -204,6 +204,23 @@ TDD throughout; unit coverage targets the pure layers:
 - The GL viewport gets a thin smoke test only; real rendering verification is
   the platform spike plus a manual pass per platform.
 
+## Engine reversal (2026-07-11, supersedes all three_js references)
+
+Eric dropped three_js entirely after PR 1's spike and the flutter_angle
+fork exercise. Final engine decision: **interactive CustomPainter** - the
+software renderer #565 already ships (`SceneProjector` +
+`Dive3dPreviewPainter`) promoted to the primary viewport with orbit/zoom/
+follow-cam gestures driving repaints. Consequences:
+
+- No `three_js_*` dependencies anywhere; the submersion-app/flutter_angle
+  fork is no longer needed.
+- #565 is expected to rework its viewport accordingly (remove
+  `scene_viewport.dart`/`three_adapter.dart`, the three_js deps, and the
+  dependency override) before PR 2 executes.
+- The engine-agnostic geometry layer (`MeshData`, builders, bounds) and
+  everything in this spec about scene content, lanes, camera modes, and
+  reconstruction is unchanged - only the rasterization backend moved.
+
 ## PR-2 addendum (2026-07-11, after PR 1 and PR #565)
 
 Findings from PR 1 (#563) and the parallel dive-3d-view feature (#565) revise
