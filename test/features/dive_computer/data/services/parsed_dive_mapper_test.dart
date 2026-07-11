@@ -204,6 +204,25 @@ void main() {
       expect(p.o2Sensor6, isNull);
     });
 
+    test('carries heading into domain ProfileSample', () {
+      final parsed = makeParsedDive(
+        fingerprint: 'heading-test',
+        samples: [
+          pigeon.ProfileSample(
+            timeSeconds: 60,
+            depthMeters: 10.0,
+            heading: 275.0,
+          ),
+          pigeon.ProfileSample(timeSeconds: 120, depthMeters: 12.0),
+        ],
+      );
+
+      final downloaded = parsedDiveToDownloaded(parsed);
+
+      expect(downloaded.profile[0].heading, 275.0);
+      expect(downloaded.profile[1].heading, isNull);
+    });
+
     // --- Tanks and gas mixes ---
 
     test('maps tanks with gas mixes correctly', () {
