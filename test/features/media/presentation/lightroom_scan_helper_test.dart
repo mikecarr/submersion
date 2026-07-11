@@ -3,6 +3,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:submersion/core/services/cloud_storage/cloud_storage_provider.dart';
 import 'package:submersion/core/services/lightroom/adobe_ims_auth_manager.dart';
 import 'package:submersion/core/services/lightroom/lightroom_api_client.dart';
 import 'package:submersion/features/dive_log/data/repositories/dive_repository_impl.dart';
@@ -27,6 +28,7 @@ class _FakeScanService extends LightroomScanService {
       );
 
   int scanCalls = 0;
+  Object? throwOnScan;
 
   @override
   Future<LightroomScanSummary> scanDives({
@@ -35,6 +37,7 @@ class _FakeScanService extends LightroomScanService {
     required LightroomConnectorState state,
   }) async {
     scanCalls++;
+    if (throwOnScan != null) throw throwOnScan!;
     return LightroomScanSummary()
       ..attached = 3
       ..suggested = 1
@@ -109,5 +112,22 @@ void main() {
 
     expect(service.scanCalls, 0);
     expect(find.byType(SnackBar), findsNothing);
+  });
+
+  testWidgets('a failed scan shows the error and records it as the '
+      'connector last-error', (tester) async {
+    final (service, _) = await pump(tester, withAccount: account);
+    service.throwOnScan = const CloudStorageException('Adobe said no');
+
+    await tester.tap(find.text('scan'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Adobe said no'), findsOneWidget);
+    final prefs = await SharedPreferences.getInstance();
+    final lastError = await LightroomConnectorState(
+      prefs: prefs,
+      accountId: account.id,
+    ).lastError();
+    expect(lastError, 'Adobe said no');
   });
 }

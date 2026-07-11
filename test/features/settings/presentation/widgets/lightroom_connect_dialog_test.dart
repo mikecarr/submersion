@@ -123,4 +123,129 @@ void main() {
       findsOneWidget,
     );
   });
+
+  testWidgets('a failed browser open shows the browser-failed message and '
+      'Reopen browser retries with the same URL', (tester) async {
+    final opened = <Uri>[];
+    var openResult = false;
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: Scaffold(
+          body: Builder(
+            builder: (context) => ElevatedButton(
+              onPressed: () => showDialog<bool>(
+                context: context,
+                builder: (_) => LightroomConnectDialog(
+                  authManager: manager(happyMock()),
+                  clientId: 'cid',
+                  openUri: (uri) async {
+                    opened.add(uri);
+                    return openResult;
+                  },
+                ),
+              ),
+              child: const Text('open'),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('open'));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text('Could not open your browser. Try the Reopen browser button.'),
+      findsOneWidget,
+    );
+
+    openResult = true;
+    await tester.tap(find.text('Reopen browser'));
+    await tester.pumpAndSettle();
+
+    expect(opened, hasLength(2));
+    expect(opened[0], opened[1], reason: 'same verifier, same URL');
+    expect(
+      find.text('Could not open your browser. Try the Reopen browser button.'),
+      findsNothing,
+    );
+  });
+
+  testWidgets('an empty client id surfaces the auth error inline', (
+    tester,
+  ) async {
+    final opened = <Uri>[];
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: Scaffold(
+          body: Builder(
+            builder: (context) => ElevatedButton(
+              onPressed: () => showDialog<bool>(
+                context: context,
+                builder: (_) => LightroomConnectDialog(
+                  authManager: manager(happyMock()),
+                  clientId: '',
+                  openUri: (uri) async {
+                    opened.add(uri);
+                    return true;
+                  },
+                ),
+              ),
+              child: const Text('open'),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('open'));
+    await tester.pumpAndSettle();
+
+    expect(opened, isEmpty);
+    expect(
+      find.text('Enter your Adobe client ID before connecting.'),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('a raw exception during the exchange is caught and shown', (
+    tester,
+  ) async {
+    await pumpDialog(tester, _ThrowingAuthManager());
+    await tester.enterText(find.byType(TextField), 'code');
+    await tester.tap(find.text('Connect'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(LightroomConnectDialog), findsOneWidget);
+    expect(find.textContaining('keychain exploded'), findsOneWidget);
+  });
+}
+
+/// Models the raw (non-CloudStorageException) failure path: the final
+/// store save can throw a keychain PlatformException.
+class _ThrowingAuthManager extends AdobeImsAuthManager {
+  _ThrowingAuthManager()
+    : super(
+        store: LightroomAuthStore(storage: InMemoryKeychain()),
+        verifierGenerator: () => 'a' * 43,
+      );
+
+  @override
+  Future<LightroomAuthData> completeAuthorization(
+    String codeOrRedirectUrl,
+  ) async {
+    throw StateError('keychain exploded');
+  }
 }

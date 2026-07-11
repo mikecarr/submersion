@@ -22,6 +22,7 @@ class _CountingScanService extends LightroomScanService {
       );
 
   int pollCalls = 0;
+  Object? throwOnPoll;
 
   @override
   Future<LightroomScanSummary> poll({
@@ -29,6 +30,7 @@ class _CountingScanService extends LightroomScanService {
     required LightroomConnectorState state,
   }) async {
     pollCalls++;
+    if (throwOnPoll != null) throw throwOnPoll!;
     await state.setLastPollAt(DateTime.now());
     return LightroomScanSummary();
   }
@@ -105,5 +107,18 @@ void main() {
     final c = container();
     await c.read(lightroomAutoPollProvider.future);
     expect(service.pollCalls, 0);
+  });
+
+  test('a failed poll is swallowed and recorded as the last error', () async {
+    service.throwOnPoll = Exception('network down');
+    final c = container(withAccount: account);
+    await c.read(lightroomAutoPollProvider.future);
+
+    expect(service.pollCalls, 1);
+    final lastError = await LightroomConnectorState(
+      prefs: prefs,
+      accountId: account.id,
+    ).lastError();
+    expect(lastError, contains('network down'));
   });
 }

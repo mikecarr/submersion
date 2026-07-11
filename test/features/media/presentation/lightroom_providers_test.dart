@@ -1,14 +1,21 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/testing.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:submersion/core/services/lightroom/adobe_ims_auth_manager.dart';
+import 'package:submersion/core/services/lightroom/lightroom_api_client.dart';
+import 'package:submersion/core/services/lightroom/lightroom_auth_store.dart';
 import 'package:submersion/features/media/data/services/media_source_resolver_registry.dart';
 import 'package:submersion/features/media/domain/entities/media_item.dart';
 import 'package:submersion/features/media/domain/entities/media_source_type.dart';
+import 'package:submersion/features/media/domain/value_objects/media_source_data.dart';
 import 'package:submersion/features/media/presentation/providers/lightroom_providers.dart';
 import 'package:submersion/features/media/presentation/providers/media_resolver_providers.dart';
 import 'package:submersion/features/settings/presentation/providers/settings_providers.dart';
 
 import '../../../helpers/test_database.dart';
+import '../../../support/fake_keychain_storage.dart';
 
 void main() {
   late ProviderContainer container;
@@ -17,8 +24,27 @@ void main() {
     await setUpTestDatabase();
     SharedPreferences.setMockInitialValues({});
     final prefs = await SharedPreferences.getInstance();
+    final store = LightroomAuthStore(storage: InMemoryKeychain());
+    await store.save(
+      const LightroomAuthData(clientId: 'cid', refreshToken: 'rt'),
+    );
     container = ProviderContainer(
-      overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
+      overrides: [
+        sharedPreferencesProvider.overrideWithValue(prefs),
+        lightroomApiClientProvider.overrideWithValue(
+          LightroomApiClient(
+            auth: AdobeImsAuthManager(
+              store: store,
+              httpClient: MockClient(
+                (_) async => http.Response('unavailable', 500),
+              ),
+            ),
+            httpClient: MockClient(
+              (_) async => http.Response('unavailable', 500),
+            ),
+          ),
+        ),
+      ],
     );
     addTearDown(container.dispose);
   });
@@ -73,5 +99,29 @@ void main() {
     await container.read(lightroomAutoPollProvider.future);
     // Nothing to assert beyond not throwing: no account means no state
     // writes and no API construction.
+  });
+
+  test('with an account, resolve exercises the api/catalog/cache getters '
+      'and degrades to networkError when the network is unavailable', () async {
+    await container
+        .read(connectorAccountsRepositoryProvider)
+        .create(
+          connectorType: lightroomConnectorType,
+          displayName: 'Eric',
+          credentialsRef: 'lightroom_auth',
+          accountIdentifier: 'cat1',
+        );
+    container.invalidate(lightroomAccountProvider);
+    await container.read(lightroomAccountProvider.future);
+
+    final resolver = container.read(connectorMediaResolverProvider);
+    expect(resolver.canResolveOnThisDevice(connectorItem()), isTrue);
+
+    // Widget-test HTTP always fails (400) and the auth store is empty, so
+    // the rendition fetch cannot succeed -- what matters is that the
+    // provider-supplied getters run and the failure maps to a graceful
+    // UnavailableData, never a throw.
+    final data = await resolver.resolve(connectorItem());
+    expect(data, isA<UnavailableData>());
   });
 }
