@@ -1,7 +1,6 @@
 import 'package:submersion/features/dive_log/domain/entities/dive.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/profile_decimator.dart';
 import 'package:submersion/features/dive_3d/domain/entities/dive_3d_scene_data.dart';
-import 'package:submersion/features/dive_3d/domain/entities/mesh_data.dart';
 import 'package:submersion/features/dive_3d/domain/geometry/ceiling_builder.dart';
 import 'package:submersion/features/dive_3d/domain/geometry/grid_builder.dart';
 import 'package:submersion/features/dive_3d/domain/geometry/marker_layout.dart';
@@ -9,37 +8,19 @@ import 'package:submersion/features/dive_3d/domain/geometry/ribbon_builder.dart'
 import 'package:submersion/features/dive_3d/domain/geometry/scene_bounds.dart';
 import 'package:submersion/features/dive_3d/domain/geometry/strata_builder.dart';
 import 'package:submersion/features/dive_3d/domain/metric_palette.dart';
+import 'package:submersion/features/dive_3d/domain/scene_3d.dart';
+import 'package:submersion/features/dive_3d/presentation/scene_overlay.dart';
 
-/// The complete renderable output for one dive + metric. Renderer-neutral.
-class Dive3dGeometry {
-  final MeshData ribbon;
-  final MeshData curtain;
-  final MeshData? strata;
-  final MeshData? ceilingSurface;
-  final MeshData? grid;
-  final List<SceneMarker> markers;
-  final SceneBounds bounds;
-
-  const Dive3dGeometry({
-    required this.ribbon,
-    required this.curtain,
-    required this.strata,
-    required this.ceilingSurface,
-    required this.grid,
-    required this.markers,
-    required this.bounds,
-  });
-}
-
-/// Pure, synchronous geometry assembly. Isolate-friendly: callers wrap it
-/// in compute() (repo convention: the pure worker is the tested unit, the
-/// isolate hop is not).
+/// Pure, synchronous assembly of the single-dive scene. Isolate-friendly:
+/// callers wrap it in compute() (repo convention: the pure worker is the
+/// tested unit, the isolate hop is not). Produces the renderer-neutral
+/// [Scene3d] every dive_3d scene shares.
 class SceneGeometryService {
   static const int targetPoints = 2000;
 
   const SceneGeometryService();
 
-  Dive3dGeometry build(
+  Scene3d build(
     Dive3dSceneData data,
     SceneMetric metric, {
     double gridStepMeters = 10.0,
@@ -61,34 +42,49 @@ class SceneGeometryService {
     final metricValues = _metricSeries(data, metric, indices);
     final sampleColors = MetricPalette.colorsFor(metric, metricValues);
 
-    return Dive3dGeometry(
-      ribbon: RibbonBuilder.build(
-        times: times,
-        depths: depths,
-        sampleColors: sampleColors,
-        bounds: bounds,
+    final strata = StrataBuilder.build(
+      bands: StrataBuilder.bin(
+        depths: data.depths,
+        temperatures: data.temperatures,
       ),
-      curtain: RibbonBuilder.curtain(
-        times: times,
-        depths: depths,
-        bounds: bounds,
+      bounds: bounds,
+    );
+    final ceiling = CeilingBuilder.build(
+      times: times,
+      depths: depths,
+      ceilings: pickN(data.ceilings),
+      bounds: bounds,
+    );
+    final grid = GridBuilder.build(bounds: bounds, stepMeters: gridStepMeters);
+
+    final layers = <SceneLayer>[
+      if (grid != null) SceneLayer(grid),
+      if (strata != null) SceneLayer(strata, overlay: SceneOverlay.strata),
+      SceneLayer(
+        RibbonBuilder.curtain(times: times, depths: depths, bounds: bounds),
+        overlay: SceneOverlay.curtain,
       ),
-      strata: StrataBuilder.build(
-        bands: StrataBuilder.bin(
-          depths: data.depths,
-          temperatures: data.temperatures,
+      if (ceiling != null) SceneLayer(ceiling, overlay: SceneOverlay.ceiling),
+      SceneLayer(
+        RibbonBuilder.build(
+          times: times,
+          depths: depths,
+          sampleColors: sampleColors,
+          bounds: bounds,
         ),
-        bounds: bounds,
       ),
-      ceilingSurface: CeilingBuilder.build(
-        times: times,
-        depths: depths,
-        ceilings: pickN(data.ceilings),
-        bounds: bounds,
-      ),
-      grid: GridBuilder.build(bounds: bounds, stepMeters: gridStepMeters),
+    ];
+
+    final duration = data.durationSeconds <= 0 ? 1.0 : data.durationSeconds;
+    return Scene3d(
+      layers: layers,
       markers: MarkerLayout.layout(data: data, bounds: bounds),
       bounds: bounds,
+      scrubPath: ScrubPath(
+        normalizedTimes: [for (final t in times) t / duration],
+        xs: [for (final t in times) bounds.xOf(t)],
+        ys: [for (final d in depths) bounds.yOf(d)],
+      ),
     );
   }
 

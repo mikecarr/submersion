@@ -5,59 +5,56 @@ import 'package:flutter/material.dart';
 
 import 'package:submersion/features/dive_3d/domain/entities/mesh_data.dart';
 import 'package:submersion/features/dive_3d/domain/geometry/marker_layout.dart';
-import 'package:submersion/features/dive_3d/domain/scene_geometry_service.dart';
+import 'package:submersion/features/dive_3d/domain/scene_3d.dart';
 import 'package:submersion/features/dive_3d/presentation/renderer/scene_projector.dart';
 import 'package:submersion/features/dive_3d/presentation/scene_overlay.dart';
 
-/// Paints a Dive3dGeometry through SceneProjector with drawVertices.
-/// Meshes paint back-to-front by role (grid, strata, curtain, ceiling,
-/// ribbon) and triangles within each mesh are depth-sorted, which is
-/// sufficient painter's-algorithm ordering for this scene's layered
-/// translucency. This is the app's one 3D rasterizer: the preview card
-/// paints it with the default camera, the interactive viewport drives the
-/// camera parameters from gestures.
-class Dive3dPreviewPainter extends CustomPainter {
-  final Dive3dGeometry geometry;
+/// Paints a Scene3d through SceneProjector with drawVertices. Layers paint
+/// back-to-front in list order and triangles within each mesh are
+/// depth-sorted, which is sufficient painter's-algorithm ordering for the
+/// scene's layered translucency. This is the app's one 3D rasterizer: the
+/// preview card paints it with the default camera, the interactive
+/// viewport drives the camera parameters from gestures. Layers whose
+/// overlay is toggled off (and markers when the markers overlay is off)
+/// are skipped.
+class Dive3dScenePainter extends CustomPainter {
+  final Scene3d scene;
   final double yawDegrees;
   final double pitchDegrees;
   final double zoom;
   final Set<SceneOverlay>? visibleOverlays;
 
-  const Dive3dPreviewPainter({
-    required this.geometry,
+  const Dive3dScenePainter({
+    required this.scene,
     this.yawDegrees = -32,
     this.pitchDegrees = 22,
     this.zoom = 1.0,
     this.visibleOverlays,
   });
 
-  bool _visible(SceneOverlay overlay) =>
-      visibleOverlays == null || visibleOverlays!.contains(overlay);
+  bool _visible(SceneOverlay? overlay) =>
+      overlay == null ||
+      visibleOverlays == null ||
+      visibleOverlays!.contains(overlay);
 
   @override
   void paint(Canvas canvas, Size size) {
     final projector = SceneProjector(
       size: size,
-      bounds: geometry.bounds,
+      bounds: scene.bounds,
       yawDegrees: yawDegrees,
       pitchDegrees: pitchDegrees,
       zoom: zoom,
     );
-    final meshes = <MeshData?>[
-      geometry.grid,
-      if (_visible(SceneOverlay.strata)) geometry.strata,
-      if (_visible(SceneOverlay.curtain)) geometry.curtain,
-      if (_visible(SceneOverlay.ceiling)) geometry.ceilingSurface,
-      geometry.ribbon,
-    ];
-    for (final mesh in meshes) {
-      if (mesh != null) _paintMesh(canvas, projector, mesh);
+    for (final layer in scene.layers) {
+      if (_visible(layer.overlay)) _paintMesh(canvas, projector, layer.mesh);
     }
     if (_visible(SceneOverlay.markers)) _paintMarkers(canvas, projector);
   }
 
   void _paintMesh(Canvas canvas, SceneProjector projector, MeshData mesh) {
     final n = mesh.vertexCount;
+    if (n == 0) return;
     final screen = Float32List(n * 2);
     final colors = Int32List(n);
     final alpha = (mesh.opacity * 255).round() << 24;
@@ -116,7 +113,7 @@ class Dive3dPreviewPainter extends CustomPainter {
 
   void _paintMarkers(Canvas canvas, SceneProjector projector) {
     final paint = Paint()..style = PaintingStyle.fill;
-    for (final marker in geometry.markers) {
+    for (final marker in scene.markers) {
       paint.color = switch (marker.kind) {
         SceneMarkerKind.gasSwitch => const Color(0xFF22C55E),
         SceneMarkerKind.bookmark => const Color(0xFFF59E0B),
@@ -127,8 +124,8 @@ class Dive3dPreviewPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant Dive3dPreviewPainter oldDelegate) =>
-      !identical(oldDelegate.geometry, geometry) ||
+  bool shouldRepaint(covariant Dive3dScenePainter oldDelegate) =>
+      !identical(oldDelegate.scene, scene) ||
       oldDelegate.yawDegrees != yawDegrees ||
       oldDelegate.pitchDegrees != pitchDegrees ||
       oldDelegate.zoom != zoom ||

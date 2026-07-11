@@ -3,27 +3,26 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 import 'package:submersion/features/dive_3d/domain/geometry/marker_layout.dart';
-import 'package:submersion/features/dive_3d/domain/profile_lookup.dart';
-import 'package:submersion/features/dive_3d/domain/scene_geometry_service.dart';
+import 'package:submersion/features/dive_3d/domain/scene_3d.dart';
 import 'package:submersion/features/dive_3d/presentation/renderer/preview_painter.dart';
 import 'package:submersion/features/dive_3d/presentation/renderer/scene_projector.dart';
 import 'package:submersion/features/dive_3d/presentation/scene_overlay.dart';
 
 /// Interactive 3D viewport rendered entirely with CustomPaint: the scene
-/// paints via [Dive3dPreviewPainter] (Canvas.drawVertices, GPU-rasterized
-/// by Flutter itself) and gestures drive the orthographic camera. No
-/// external 3D engine. The scrub cursor lives in a foregroundPainter that
-/// listens to the frame-rate ValueListenable, so playback repaints only
-/// the cursor layer, never re-sorts the scene.
+/// paints via [Dive3dScenePainter] (Canvas.drawVertices, GPU-rasterized by
+/// Flutter itself) and gestures drive the orthographic camera. No external
+/// 3D engine. The scrub cursor lives in a foregroundPainter that follows
+/// the scene's ScrubPath and listens to the frame-rate ValueListenable, so
+/// playback repaints only the cursor layer, never re-sorts the scene.
 class Dive3dInteractiveViewport extends StatefulWidget {
-  final Dive3dGeometry geometry;
+  final Scene3d scene;
   final ValueListenable<double> scrubPosition;
   final Set<SceneOverlay> visibleOverlays;
   final void Function(SceneMarker marker)? onMarkerTap;
 
   const Dive3dInteractiveViewport({
     super.key,
-    required this.geometry,
+    required this.scene,
     required this.scrubPosition,
     required this.visibleOverlays,
     this.onMarkerTap,
@@ -64,7 +63,7 @@ class _Dive3dInteractiveViewportState extends State<Dive3dInteractiveViewport> {
 
   SceneProjector _projectorFor(Size size) => SceneProjector(
     size: size,
-    bounds: widget.geometry.bounds,
+    bounds: widget.scene.bounds,
     yawDegrees: _yaw,
     pitchDegrees: _pitch,
     zoom: _zoom,
@@ -79,7 +78,7 @@ class _Dive3dInteractiveViewportState extends State<Dive3dInteractiveViewport> {
     final projector = _projectorFor(size);
     SceneMarker? best;
     var bestDistance = 24.0;
-    for (final marker in widget.geometry.markers) {
+    for (final marker in widget.scene.markers) {
       final d =
           (projector.project(marker.x, marker.y, 0) - details.localPosition)
               .distance;
@@ -107,15 +106,15 @@ class _Dive3dInteractiveViewportState extends State<Dive3dInteractiveViewport> {
             onDoubleTap: _resetCamera,
             onTapUp: (details) => _handleTapUp(size, details),
             child: CustomPaint(
-              painter: Dive3dPreviewPainter(
-                geometry: widget.geometry,
+              painter: Dive3dScenePainter(
+                scene: widget.scene,
                 yawDegrees: _yaw,
                 pitchDegrees: _pitch,
                 zoom: _zoom,
                 visibleOverlays: widget.visibleOverlays,
               ),
               foregroundPainter: _ScrubCursorPainter(
-                geometry: widget.geometry,
+                scene: widget.scene,
                 yawDegrees: _yaw,
                 pitchDegrees: _pitch,
                 zoom: _zoom,
@@ -130,18 +129,18 @@ class _Dive3dInteractiveViewportState extends State<Dive3dInteractiveViewport> {
   }
 }
 
-/// Foreground layer: only the diver cursor. Repaints on every scrub tick
+/// Foreground layer: only the scrub cursor. Repaints on every scrub tick
 /// (via [scrubPosition] as the repaint listenable) without touching the
-/// depth-sorted scene beneath it.
+/// depth-sorted scene beneath it. Placed via the scene's ScrubPath.
 class _ScrubCursorPainter extends CustomPainter {
-  final Dive3dGeometry geometry;
+  final Scene3d scene;
   final double yawDegrees;
   final double pitchDegrees;
   final double zoom;
   final ValueListenable<double> scrubPosition;
 
   _ScrubCursorPainter({
-    required this.geometry,
+    required this.scene,
     required this.yawDegrees,
     required this.pitchDegrees,
     required this.zoom,
@@ -150,28 +149,18 @@ class _ScrubCursorPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final ribbon = geometry.ribbon;
-    if (ribbon.vertexCount < 4) return;
+    final path = scene.scrubPath;
+    if (path == null) return;
+    final scenePoint = path.positionAt(scrubPosition.value);
+    if (scenePoint == null) return;
     final projector = SceneProjector(
       size: size,
-      bounds: geometry.bounds,
+      bounds: scene.bounds,
       yawDegrees: yawDegrees,
       pitchDegrees: pitchDegrees,
       zoom: zoom,
     );
-    // Ribbon x is monotonic in time: interpolate ribbon y over x along the
-    // pair-leading vertices to place the cursor exactly on the ribbon.
-    final t = scrubPosition.value * geometry.bounds.durationSeconds;
-    final xs = <double>[
-      for (var i = 0; i < ribbon.vertexCount; i += 2) ribbon.positions[i * 3],
-    ];
-    final ys = <double?>[
-      for (var i = 0; i < ribbon.vertexCount; i += 2)
-        ribbon.positions[i * 3 + 1],
-    ];
-    final x = geometry.bounds.xOf(t);
-    final y = ProfileLookup(xs).interpolate(ys, x) ?? 0;
-    final center = projector.project(x, y, 0);
+    final center = projector.project(scenePoint.dx, scenePoint.dy, 0);
     canvas.drawCircle(
       center,
       7,
@@ -191,7 +180,7 @@ class _ScrubCursorPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _ScrubCursorPainter oldDelegate) =>
-      !identical(oldDelegate.geometry, geometry) ||
+      !identical(oldDelegate.scene, scene) ||
       oldDelegate.yawDegrees != yawDegrees ||
       oldDelegate.pitchDegrees != pitchDegrees ||
       oldDelegate.zoom != zoom;

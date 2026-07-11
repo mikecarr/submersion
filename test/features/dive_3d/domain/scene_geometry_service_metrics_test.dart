@@ -1,8 +1,19 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:submersion/features/dive_3d/domain/entities/dive_3d_scene_data.dart';
+import 'package:submersion/features/dive_3d/domain/entities/mesh_data.dart';
 import 'package:submersion/features/dive_3d/domain/metric_palette.dart';
+import 'package:submersion/features/dive_3d/domain/scene_3d.dart';
 import 'package:submersion/features/dive_3d/domain/scene_geometry_service.dart';
+import 'package:submersion/features/dive_3d/presentation/scene_overlay.dart';
 import 'package:submersion/features/dive_log/domain/entities/dive.dart';
+
+// The ribbon is the last structural layer; the grid is the first.
+MeshData ribbonMesh(Scene3d s) =>
+    s.layers.lastWhere((l) => l.overlay == null).mesh;
+MeshData gridMesh(Scene3d s) =>
+    s.layers.firstWhere((l) => l.overlay == null).mesh;
+MeshData? meshFor(Scene3d s, SceneOverlay o) =>
+    s.layers.where((l) => l.overlay == o).firstOrNull?.mesh;
 
 Dive3dSceneData richSceneData({
   Map<String, List<TankPressurePoint>> tankPressures = const {},
@@ -48,10 +59,10 @@ void main() {
       },
     );
     for (final metric in SceneMetric.values) {
-      final geometry = service.build(withTank, metric);
-      expect(geometry.ribbon.colors.length, geometry.ribbon.vertexCount * 3);
+      final ribbon = ribbonMesh(service.build(withTank, metric));
+      expect(ribbon.colors.length, ribbon.vertexCount * 3);
       expect(
-        geometry.ribbon.colors.every((c) => c.isFinite),
+        ribbon.colors.every((c) => c.isFinite),
         isTrue,
         reason: 'metric $metric produced non-finite colors',
       );
@@ -59,8 +70,8 @@ void main() {
   });
 
   test('ceiling surface is built when ceilings exist', () {
-    final geometry = service.build(richSceneData(), SceneMetric.depth);
-    expect(geometry.ceilingSurface, isNotNull);
+    final scene = service.build(richSceneData(), SceneMetric.depth);
+    expect(meshFor(scene, SceneOverlay.ceiling), isNotNull);
   });
 
   test('tank pressure metric interpolates between pressure samples', () {
@@ -89,9 +100,9 @@ void main() {
   });
 
   test('tank pressure metric with no tanks yields null-colored ribbon', () {
-    final geometry = service.build(richSceneData(), SceneMetric.tankPressure);
+    final scene = service.build(richSceneData(), SceneMetric.tankPressure);
     // All-null pressures map to the neutral gray (0.62-ish channels).
-    expect(geometry.ribbon.colors[0], closeTo(0.62, 0.01));
+    expect(ribbonMesh(scene).colors[0], closeTo(0.62, 0.01));
   });
 
   test('grid step parameter controls line count', () {
@@ -105,6 +116,9 @@ void main() {
       SceneMetric.depth,
       gridStepMeters: 5,
     );
-    expect(fine.grid!.triangleCount, greaterThan(coarse.grid!.triangleCount));
+    expect(
+      gridMesh(fine).triangleCount,
+      greaterThan(gridMesh(coarse).triangleCount),
+    );
   });
 }

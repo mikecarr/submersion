@@ -17,11 +17,12 @@ class Dive3dPreviewCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final geometry = ref.watch(
-      dive3dGeometryProvider((diveId: diveId, metric: SceneMetric.depth)),
-    );
-    final value = geometry.value;
-    if (value == null) return const SizedBox.shrink();
+    final scene = ref
+        .watch(
+          dive3dGeometryProvider((diveId: diveId, metric: SceneMetric.depth)),
+        )
+        .value;
+    if (scene == null) return const SizedBox.shrink();
     return Card(
       child: InkWell(
         onTap: () => Navigator.of(context).push(
@@ -46,7 +47,7 @@ class Dive3dPreviewCard extends ConsumerWidget {
               AspectRatio(
                 aspectRatio: 16 / 9,
                 child: CustomPaint(
-                  painter: Dive3dPreviewPainter(geometry: value),
+                  painter: Dive3dScenePainter(scene: scene),
                   child: const SizedBox.expand(),
                 ),
               ),

@@ -98,11 +98,17 @@ void main() {
         ),
       },
     );
-    final geometry = await container.read(
+    final scene = await container.read(
       dive3dGeometryProvider((diveId: 'd1', metric: SceneMetric.depth)).future,
     );
-    expect(geometry, isNotNull);
-    expect(geometry!.ribbon.vertexCount, 6);
-    expect(geometry.grid, isNotNull); // 10m dive, metric 10m grid step
+    expect(scene, isNotNull);
+    // Ribbon (last structural layer): 3 samples x 2 vertices.
+    expect(
+      scene!.layers.lastWhere((l) => l.overlay == null).mesh.vertexCount,
+      6,
+    );
+    // Grid (first structural layer) present for a 10m dive at 10m steps.
+    expect(scene.layers.first.overlay, isNull);
+    expect(scene.scrubPath, isNotNull);
   });
 }

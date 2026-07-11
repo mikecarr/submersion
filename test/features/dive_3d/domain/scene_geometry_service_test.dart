@@ -1,7 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:submersion/features/dive_3d/domain/entities/dive_3d_scene_data.dart';
 import 'package:submersion/features/dive_3d/domain/metric_palette.dart';
+import 'package:submersion/features/dive_3d/domain/scene_3d.dart';
 import 'package:submersion/features/dive_3d/domain/scene_geometry_service.dart';
+import 'package:submersion/features/dive_3d/presentation/scene_overlay.dart';
 
 Dive3dSceneData sceneData({int samples = 100}) {
   final times = [for (var i = 0; i < samples; i++) i.toDouble()];
@@ -26,22 +28,30 @@ Dive3dSceneData sceneData({int samples = 100}) {
   );
 }
 
+SceneLayer? layerFor(Scene3d scene, SceneOverlay overlay) =>
+    scene.layers.where((l) => l.overlay == overlay).firstOrNull;
+
+// The ribbon is the last structural (null-overlay) layer.
+SceneLayer ribbonLayer(Scene3d scene) =>
+    scene.layers.lastWhere((l) => l.overlay == null);
+
 void main() {
   const service = SceneGeometryService();
 
-  test('builds ribbon, curtain and strata; skips absent overlays', () {
-    final geometry = service.build(sceneData(), SceneMetric.depth);
-    expect(geometry.ribbon.vertexCount, 200);
-    expect(geometry.curtain.vertexCount, 200);
-    expect(geometry.strata, isNotNull);
-    expect(geometry.grid, isNotNull);
-    expect(geometry.ceilingSurface, isNull);
-    expect(geometry.markers, isEmpty);
+  test('builds ribbon, curtain and strata layers; skips absent overlays', () {
+    final scene = service.build(sceneData(), SceneMetric.depth);
+    expect(ribbonLayer(scene).mesh.vertexCount, 200);
+    expect(layerFor(scene, SceneOverlay.curtain)!.mesh.vertexCount, 200);
+    expect(layerFor(scene, SceneOverlay.strata), isNotNull);
+    expect(layerFor(scene, SceneOverlay.ceiling), isNull);
+    expect(scene.markers, isEmpty);
+    expect(scene.scrubPath, isNotNull);
   });
 
   test('decimates geometry above 2000 samples', () {
-    final geometry = service.build(sceneData(samples: 6000), SceneMetric.depth);
-    expect(geometry.ribbon.vertexCount, lessThanOrEqualTo(2 * 2000));
-    expect(geometry.ribbon.vertexCount, greaterThan(2 * 1000));
+    final scene = service.build(sceneData(samples: 6000), SceneMetric.depth);
+    final ribbon = ribbonLayer(scene).mesh;
+    expect(ribbon.vertexCount, lessThanOrEqualTo(2 * 2000));
+    expect(ribbon.vertexCount, greaterThan(2 * 1000));
   });
 }

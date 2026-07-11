@@ -62,12 +62,12 @@ class _Dive3dPageState extends ConsumerState<Dive3dPage>
   @override
   Widget build(BuildContext context) {
     final sceneData = ref.watch(dive3dSceneDataProvider(widget.diveId)).value;
-    final geometry = ref
+    final scene = ref
         .watch(dive3dGeometryProvider((diveId: widget.diveId, metric: _metric)))
         .value;
     return Scaffold(
       appBar: AppBar(title: Text(context.l10n.dive3d_previewTitle)),
-      body: sceneData == null || geometry == null
+      body: sceneData == null || scene == null
           ? const Center(child: CircularProgressIndicator())
           : Column(
               children: [
@@ -76,7 +76,7 @@ class _Dive3dPageState extends ConsumerState<Dive3dPage>
                     children: [
                       Positioned.fill(
                         child: Dive3dInteractiveViewport(
-                          geometry: geometry,
+                          scene: scene,
                           scrubPosition: _position,
                           visibleOverlays: _overlays,
                           onMarkerTap: (marker) =>

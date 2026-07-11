@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:submersion/features/dive_3d/domain/entities/dive_3d_scene_data.dart';
 import 'package:submersion/features/dive_3d/domain/geometry/marker_layout.dart';
 import 'package:submersion/features/dive_3d/domain/metric_palette.dart';
+import 'package:submersion/features/dive_3d/domain/scene_3d.dart';
 import 'package:submersion/features/dive_3d/domain/scene_geometry_service.dart';
 import 'package:submersion/features/dive_3d/presentation/renderer/preview_painter.dart';
 import 'package:submersion/features/dive_3d/presentation/renderer/scene_projector.dart';
@@ -11,7 +12,7 @@ import 'package:submersion/features/dive_3d/presentation/scene_overlay.dart';
 import 'package:submersion/features/dive_3d/presentation/widgets/dive_3d_interactive_viewport.dart';
 import 'package:submersion/features/dive_log/domain/entities/gas_switch.dart';
 
-Dive3dGeometry buildGeometry() {
+Scene3d buildScene() {
   final data = Dive3dSceneData(
     diveId: 'd1',
     times: const [0, 60, 120],
@@ -46,20 +47,20 @@ Dive3dGeometry buildGeometry() {
   return const SceneGeometryService().build(data, SceneMetric.depth);
 }
 
-Dive3dPreviewPainter scenePainterOf(WidgetTester tester) {
+Dive3dScenePainter scenePainterOf(WidgetTester tester) {
   final paints = tester.widgetList<CustomPaint>(
     find.descendant(
       of: find.byType(Dive3dInteractiveViewport),
       matching: find.byType(CustomPaint),
     ),
   );
-  return paints.map((p) => p.painter).whereType<Dive3dPreviewPainter>().single;
+  return paints.map((p) => p.painter).whereType<Dive3dScenePainter>().single;
 }
 
 void main() {
   Future<void> pumpViewport(
     WidgetTester tester, {
-    required Dive3dGeometry geometry,
+    required Scene3d scene,
     ValueListenable<double>? scrub,
     void Function(SceneMarker)? onMarkerTap,
   }) async {
@@ -67,7 +68,7 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: Dive3dInteractiveViewport(
-            geometry: geometry,
+            scene: scene,
             scrubPosition: scrub ?? ValueNotifier(0.0),
             visibleOverlays: SceneOverlay.values.toSet(),
             onMarkerTap: onMarkerTap,
@@ -81,7 +82,7 @@ void main() {
   testWidgets('renders the scene painter with the default camera', (
     tester,
   ) async {
-    await pumpViewport(tester, geometry: buildGeometry());
+    await pumpViewport(tester, scene: buildScene());
     final painter = scenePainterOf(tester);
     expect(painter.yawDegrees, -32);
     expect(painter.pitchDegrees, 22);
@@ -91,7 +92,7 @@ void main() {
   testWidgets('drag orbits the camera and double tap resets it', (
     tester,
   ) async {
-    await pumpViewport(tester, geometry: buildGeometry());
+    await pumpViewport(tester, scene: buildScene());
     await tester.drag(
       find.byType(Dive3dInteractiveViewport),
       const Offset(50, -25),
@@ -101,7 +102,6 @@ void main() {
     expect(orbited.yawDegrees, lessThan(-32)); // dragged right -> yaw down
     expect(orbited.pitchDegrees, lessThan(22));
 
-    // Double tap resets. Two separate taps with the double-tap timing.
     await tester.tap(find.byType(Dive3dInteractiveViewport));
     await tester.pump(const Duration(milliseconds: 80));
     await tester.tap(find.byType(Dive3dInteractiveViewport));
@@ -112,18 +112,13 @@ void main() {
   });
 
   testWidgets('tapping a marker position fires onMarkerTap', (tester) async {
-    final geometry = buildGeometry();
+    final scene = buildScene();
     SceneMarker? tapped;
-    await pumpViewport(
-      tester,
-      geometry: geometry,
-      onMarkerTap: (m) => tapped = m,
-    );
+    await pumpViewport(tester, scene: scene, onMarkerTap: (m) => tapped = m);
 
-    // Project the marker with the same camera the viewport uses.
     final size = tester.getSize(find.byType(Dive3dInteractiveViewport));
-    final projector = SceneProjector(size: size, bounds: geometry.bounds);
-    final marker = geometry.markers.single;
+    final projector = SceneProjector(size: size, bounds: scene.bounds);
+    final marker = scene.markers.single;
     final screen = projector.project(marker.x, marker.y, 0);
     final origin = tester.getTopLeft(find.byType(Dive3dInteractiveViewport));
 
@@ -137,10 +132,9 @@ void main() {
     tester,
   ) async {
     final scrub = ValueNotifier<double>(0.0);
-    await pumpViewport(tester, geometry: buildGeometry(), scrub: scrub);
+    await pumpViewport(tester, scene: buildScene(), scrub: scrub);
     scrub.value = 0.5;
     await tester.pump();
-    // No exception and the foreground painter exists.
     final paints = tester.widgetList<CustomPaint>(
       find.descendant(
         of: find.byType(Dive3dInteractiveViewport),
