@@ -3945,7 +3945,7 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
                 label: Text(context.l10n.diveLog_edit_weightFeedback_under),
               ),
             ],
-            selected: {if (_weightingFeedback != null) _weightingFeedback!},
+            selected: {?_weightingFeedback},
             onSelectionChanged: (selection) => setState(() {
               _weightingFeedback = selection.isEmpty ? null : selection.first;
               _markDirty();

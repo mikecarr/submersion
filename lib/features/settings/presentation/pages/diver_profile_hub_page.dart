@@ -3,8 +3,11 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:submersion/core/providers/provider.dart';
 
+import 'package:submersion/core/utils/unit_formatter.dart';
 import 'package:submersion/features/divers/domain/entities/diver.dart';
 import 'package:submersion/features/divers/presentation/providers/diver_providers.dart';
+import 'package:submersion/features/divers/presentation/providers/diver_weight_entry_providers.dart';
+import 'package:submersion/features/settings/presentation/providers/settings_providers.dart';
 import 'package:submersion/features/divers/presentation/widgets/delete_diver_dialog.dart';
 import 'package:submersion/features/divers/presentation/widgets/diver_switcher_sheet.dart';
 import 'package:submersion/l10n/l10n_extension.dart';
@@ -199,6 +202,22 @@ class DiverProfileHubPage extends ConsumerWidget {
               title: context.l10n.divers_edit_priorExperienceSection,
               subtitle: _priorExperienceSubtitle(context, diver),
               route: '/settings/diver-profile/prior',
+            ),
+            const Divider(height: 1),
+            Consumer(
+              builder: (context, ref, _) {
+                final latest = ref.watch(latestDiverWeightProvider).valueOrNull;
+                final units = UnitFormatter(ref.watch(settingsProvider));
+                return _buildSectionTile(
+                  context,
+                  icon: Icons.monitor_weight,
+                  title: context.l10n.diverProfile_bodyWeight_title,
+                  subtitle: latest != null
+                      ? units.formatWeight(latest.weightKg)
+                      : context.l10n.diverProfile_bodyWeight_empty,
+                  route: '/settings/diver-profile/body-weight',
+                );
+              },
             ),
             const Divider(height: 1),
             _buildSectionTile(
