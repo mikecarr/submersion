@@ -114,6 +114,8 @@ class TissueReplayService {
       hasHelium: hasHelium,
       maxLoadingBar: maxLoading,
       totalClockSeconds: times.isEmpty ? 0 : times.last,
+      diveDurations: [for (final d in chain.dives) d.durationSeconds.round()],
+      surfaceIntervals: List<int>.from(chain.surfaceIntervalSeconds),
     );
   }
 

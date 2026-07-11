@@ -7,11 +7,7 @@ class GasLeg {
   final double fN2;
   final double fHe;
 
-  const GasLeg({
-    required this.startSeconds,
-    required this.fN2,
-    this.fHe = 0.0,
-  });
+  const GasLeg({required this.startSeconds, required this.fN2, this.fHe = 0.0});
 
   static const GasLeg air = GasLeg(startSeconds: 0, fN2: airN2Fraction);
 }

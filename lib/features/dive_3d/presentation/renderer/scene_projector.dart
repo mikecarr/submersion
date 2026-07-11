@@ -27,7 +27,7 @@ class SceneProjector {
     var minX = double.infinity, maxX = double.negativeInfinity;
     var minY = double.infinity, maxY = double.negativeInfinity;
     for (final x in const [0.0, SceneBounds.xSpan]) {
-      for (final y in const [0.0, -SceneBounds.ySpan]) {
+      for (final y in [bounds.sceneMinY, bounds.sceneMaxY]) {
         for (final z in const [
           -SceneBounds.zSlabHalfWidth,
           SceneBounds.zSlabHalfWidth,

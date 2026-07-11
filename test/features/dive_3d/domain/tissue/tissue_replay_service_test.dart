@@ -85,9 +85,7 @@ void main() {
 
   test('helium gas produces helium loading', () {
     final result = _service.replay(
-      chain([
-        squareDive(depth: 40, minutes: 15, fN2: 0.45, fHe: 0.35),
-      ]),
+      chain([squareDive(depth: 40, minutes: 15, fN2: 0.45, fHe: 0.35)]),
     );
     expect(result.hasHelium, isTrue);
     final last = result.columnCount - 1;
@@ -95,10 +93,10 @@ void main() {
   });
 
   test('deeper dive loads tissues more than a shallow one', () {
-    final deep = _service
-        .replay(chain([squareDive(depth: 40, minutes: 20)]));
-    final shallow = _service
-        .replay(chain([squareDive(depth: 10, minutes: 20)]));
+    final deep = _service.replay(chain([squareDive(depth: 40, minutes: 20)]));
+    final shallow = _service.replay(
+      chain([squareDive(depth: 10, minutes: 20)]),
+    );
     final deepLast = deep.columnCount - 1;
     final shallowLast = shallow.columnCount - 1;
     expect(

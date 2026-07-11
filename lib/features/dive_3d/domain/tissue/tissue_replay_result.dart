@@ -32,6 +32,11 @@ class TissueReplayResult {
   final double maxLoadingBar;
   final double totalClockSeconds;
 
+  /// Per-dive durations (s) and inter-dive surface intervals (s) - enough
+  /// to rebuild the seam-compressed [ChainTimeAxis] without the input.
+  final List<int> diveDurations;
+  final List<int> surfaceIntervals;
+
   const TissueReplayResult({
     required this.times,
     required this.depths,
@@ -44,6 +49,8 @@ class TissueReplayResult {
     required this.hasHelium,
     required this.maxLoadingBar,
     required this.totalClockSeconds,
+    required this.diveDurations,
+    required this.surfaceIntervals,
   });
 
   int get columnCount => times.length;
