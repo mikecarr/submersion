@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import 'package:submersion/l10n/l10n_extension.dart';
+import 'package:submersion/core/constants/certification_levels.dart';
 import 'package:submersion/core/constants/enums.dart';
 import 'package:submersion/features/buddies/presentation/widgets/instructor_picker_field.dart';
 import 'package:submersion/features/divers/presentation/providers/diver_providers.dart';
@@ -346,6 +347,14 @@ class _CertificationEditPageState extends ConsumerState<CertificationEditPage> {
                       if (value != null) {
                         setState(() {
                           _agency = value;
+                          // A level from another agency's catalog is reset -
+                          // a visible consequence of the user's own switch.
+                          if (_level != null &&
+                              !CertificationLevelCatalog.levelsFor(
+                                value,
+                              ).contains(_level)) {
+                            _level = null;
+                          }
                           _hasChanges = true;
                         });
                       }
@@ -353,8 +362,13 @@ class _CertificationEditPageState extends ConsumerState<CertificationEditPage> {
                   ),
                   const SizedBox(height: 16),
 
-                  // Level dropdown
+                  // Level dropdown (options depend on the selected agency)
                   DropdownButtonFormField<CertificationLevel>(
+                    // DropdownButtonFormField keeps its selection in its own
+                    // FormFieldState; the key forces a remount when the
+                    // agency changes or the level is reset externally, so
+                    // initialValue is re-read.
+                    key: ValueKey('level-${_agency.name}-${_level?.name}'),
                     initialValue: _level,
                     decoration: InputDecoration(
                       labelText: context.l10n.certifications_edit_label_level,
@@ -367,7 +381,10 @@ class _CertificationEditPageState extends ConsumerState<CertificationEditPage> {
                           context.l10n.certifications_edit_level_notSpecified,
                         ),
                       ),
-                      ...CertificationLevel.values.map((level) {
+                      ...CertificationLevelCatalog.levelsFor(
+                        _agency,
+                        ensure: _level,
+                      ).map((level) {
                         return DropdownMenuItem(
                           value: level,
                           child: Text(level.displayName),
