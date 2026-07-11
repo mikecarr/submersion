@@ -165,6 +165,7 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
   List<EquipmentItem> _selectedEquipment = [];
   List<BuddyWithRole> _selectedBuddies = [];
   Set<String> _originalBuddyIds = {};
+  String? _diverRoleId;
 
   // Conditions fields
   CurrentDirection? _currentDirection;
@@ -509,6 +510,7 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
 
         setState(() {
           _existingDive = dive;
+          _diverRoleId = dive.diverRoleId;
           _diveNumberController.text = dive.diveNumber?.toString() ?? '';
           // Use entryTime if available, otherwise fall back to dateTime
           final entryDateTime = dive.entryTime ?? dive.dateTime;
@@ -3989,12 +3991,17 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
       expanded: _isExpanded('buddies', defaultValue: false),
       onToggle: () => _toggleSection('buddies', defaultValue: false),
       summary: _buddiesSummary(),
-      isEmpty: _selectedBuddies.isEmpty,
+      isEmpty: _selectedBuddies.isEmpty && _diverRoleId == null,
       buddyPicker: Padding(
         padding: const EdgeInsets.fromLTRB(14, 10, 14, 12),
         child: BuddyPicker(
           diveId: widget.diveId,
           selectedBuddies: _selectedBuddies,
+          diverRoleId: _diverRoleId,
+          onDiverRoleChanged: (roleId) {
+            _markDirty();
+            setState(() => _diverRoleId = roleId);
+          },
           onChanged: (buddies) {
             _markDirty();
             setState(() => _selectedBuddies = buddies);
@@ -4461,6 +4468,7 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
         // Preserve legacy buddy/divemaster text fields
         buddy: _existingDive?.buddy,
         diveMaster: _existingDive?.diveMaster,
+        diverRoleId: _diverRoleId,
         // CCR/SCR rebreather settings
         diveMode: _diveMode,
         setpointLow: _diveMode == DiveMode.ccr ? _setpointLow : null,
