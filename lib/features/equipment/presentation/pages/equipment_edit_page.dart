@@ -3,6 +3,8 @@ import 'package:submersion/core/providers/provider.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:submersion/core/constants/enums.dart';
+import 'package:submersion/core/utils/unit_formatter.dart';
+import 'package:submersion/features/settings/presentation/providers/settings_providers.dart';
 import 'package:submersion/l10n/l10n_extension.dart';
 import 'package:submersion/features/divers/presentation/providers/diver_providers.dart';
 import 'package:submersion/features/equipment/domain/entities/equipment_item.dart';
@@ -39,6 +41,8 @@ class _EquipmentEditPageState extends ConsumerState<EquipmentEditPage> {
   final _purchaseCurrencyController = TextEditingController(text: 'USD');
   final _serviceIntervalController = TextEditingController();
   final _notesController = TextEditingController();
+  final _buoyancyController = TextEditingController();
+  final _dryWeightController = TextEditingController();
 
   EquipmentType _selectedType = EquipmentType.regulator;
   EquipmentStatus _selectedStatus = EquipmentStatus.active;
@@ -62,6 +66,8 @@ class _EquipmentEditPageState extends ConsumerState<EquipmentEditPage> {
     _purchaseCurrencyController.addListener(_onFieldChanged);
     _serviceIntervalController.addListener(_onFieldChanged);
     _notesController.addListener(_onFieldChanged);
+    _buoyancyController.addListener(_onFieldChanged);
+    _dryWeightController.addListener(_onFieldChanged);
   }
 
   void _onFieldChanged() {
@@ -81,6 +87,8 @@ class _EquipmentEditPageState extends ConsumerState<EquipmentEditPage> {
     _purchaseCurrencyController.dispose();
     _serviceIntervalController.dispose();
     _notesController.dispose();
+    _buoyancyController.dispose();
+    _dryWeightController.dispose();
     super.dispose();
   }
 
@@ -104,6 +112,19 @@ class _EquipmentEditPageState extends ConsumerState<EquipmentEditPage> {
     _lastServiceDate = equipment.lastServiceDate;
     _customReminderEnabled = equipment.customReminderEnabled;
     _customReminderDays = equipment.customReminderDays ?? const [7, 14, 30];
+    final units = UnitFormatter(ref.read(settingsProvider));
+    _buoyancyController.text = equipment.buoyancyKg != null
+        ? units.convertWeight(equipment.buoyancyKg!).toStringAsFixed(1)
+        : '';
+    _dryWeightController.text = equipment.weightKg != null
+        ? units.convertWeight(equipment.weightKg!).toStringAsFixed(1)
+        : '';
+  }
+
+  double? _parseWeightToKg(String text) {
+    final parsed = double.tryParse(text);
+    if (parsed == null) return null;
+    return UnitFormatter(ref.read(settingsProvider)).weightToKg(parsed);
   }
 
   void _handleCancel() {
@@ -317,6 +338,10 @@ class _EquipmentEditPageState extends ConsumerState<EquipmentEditPage> {
             ),
             maxLines: 3,
           ),
+          const SizedBox(height: 24),
+
+          // Advanced (buoyancy metadata for weight prediction)
+          _buildAdvancedSection(context),
           const SizedBox(height: 24),
 
           // Notification Overrides
@@ -645,6 +670,70 @@ class _EquipmentEditPageState extends ConsumerState<EquipmentEditPage> {
     );
   }
 
+  String _buoyancyHint(BuildContext context) {
+    switch (_selectedType) {
+      case EquipmentType.wetsuit:
+      case EquipmentType.drysuit:
+        return context.l10n.equipment_edit_buoyancyHint_exposure;
+      case EquipmentType.tank:
+        return context.l10n.equipment_edit_buoyancyHint_tank;
+      default:
+        return context.l10n.equipment_edit_buoyancyHint_generic;
+    }
+  }
+
+  Widget _buildAdvancedSection(BuildContext context) {
+    final units = UnitFormatter(ref.watch(settingsProvider));
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.tune, color: Theme.of(context).colorScheme.primary),
+                const SizedBox(width: 8),
+                Text(
+                  context.l10n.equipment_edit_advanced_title,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _buoyancyController,
+              decoration: InputDecoration(
+                labelText: context.l10n.equipment_edit_buoyancyLabel(
+                  units.weightSymbol,
+                ),
+                prefixIcon: const Icon(Icons.water),
+                hintText: _buoyancyHint(context),
+              ),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+                signed: true,
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _dryWeightController,
+              decoration: InputDecoration(
+                labelText: context.l10n.equipment_edit_dryWeightLabel(
+                  units.weightSymbol,
+                ),
+                prefixIcon: const Icon(Icons.scale),
+              ),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildNotificationSection(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
@@ -811,6 +900,12 @@ class _EquipmentEditPageState extends ConsumerState<EquipmentEditPage> {
             : null,
         notes: _notesController.text.trim(),
         isActive: existingEquipment?.isActive ?? true,
+        buoyancyKg: _buoyancyController.text.isNotEmpty
+            ? _parseWeightToKg(_buoyancyController.text)
+            : null,
+        weightKg: _dryWeightController.text.isNotEmpty
+            ? _parseWeightToKg(_dryWeightController.text)
+            : null,
         customReminderEnabled: _customReminderEnabled,
         customReminderDays: _customReminderEnabled == true
             ? _customReminderDays
