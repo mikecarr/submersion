@@ -729,6 +729,12 @@ jobs:
     needs: codegen
     runs-on: windows-latest
     steps:
+      # The flutter_angle git dependency (Linux embedder fix fork) contains
+      # xcframework paths that exceed Windows' 260-char MAX_PATH during
+      # `flutter pub get`'s clone.
+      - name: Enable git long paths
+        run: git config --system core.longpaths true
+
       - uses: actions/checkout@v7
         with:
           submodules: true
