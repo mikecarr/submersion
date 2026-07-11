@@ -12032,5 +12032,13 @@
   "dive3d_tissue_controlling": "Controlling",
   "@dive3d_tissue_controlling": {},
   "dive3d_tissue_surfaceInterval": "Surface interval",
-  "@dive3d_tissue_surfaceInterval": {}
+  "@dive3d_tissue_surfaceInterval": {},
+  "dive3d_career_title": "3D History",
+  "@dive3d_career_title": {},
+  "dive3d_career_colorRecency": "Recency",
+  "@dive3d_career_colorRecency": {},
+  "dive3d_career_colorDepth": "Depth",
+  "@dive3d_career_colorDepth": {},
+  "dive3d_career_empty": "No dives with profiles to show",
+  "@dive3d_career_empty": {}
 }

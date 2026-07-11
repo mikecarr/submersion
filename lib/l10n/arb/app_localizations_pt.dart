@@ -19221,4 +19221,16 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get dive3d_tissue_surfaceInterval => 'Intervalo de superfície';
+
+  @override
+  String get dive3d_career_title => 'Histórico 3D';
+
+  @override
+  String get dive3d_career_colorRecency => 'Recência';
+
+  @override
+  String get dive3d_career_colorDepth => 'Profundidade';
+
+  @override
+  String get dive3d_career_empty => 'Nenhum mergulho com perfis';
 }

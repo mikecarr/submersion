@@ -18894,4 +18894,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get dive3d_tissue_surfaceInterval => 'Surface interval';
+
+  @override
+  String get dive3d_career_title => '3D History';
+
+  @override
+  String get dive3d_career_colorRecency => 'Recency';
+
+  @override
+  String get dive3d_career_colorDepth => 'Depth';
+
+  @override
+  String get dive3d_career_empty => 'No dives with profiles to show';
 }

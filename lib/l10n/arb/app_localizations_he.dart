@@ -18727,4 +18727,16 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get dive3d_tissue_surfaceInterval => 'מרווח פני השטח';
+
+  @override
+  String get dive3d_career_title => 'היסטוריה תלת־ממד';
+
+  @override
+  String get dive3d_career_colorRecency => 'עדכניות';
+
+  @override
+  String get dive3d_career_colorDepth => 'עומק';
+
+  @override
+  String get dive3d_career_empty => 'אין צלילות עם פרופילים';
 }

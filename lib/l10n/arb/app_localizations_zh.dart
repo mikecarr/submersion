@@ -18248,4 +18248,16 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get dive3d_tissue_surfaceInterval => '水面间隔';
+
+  @override
+  String get dive3d_career_title => '3D历史';
+
+  @override
+  String get dive3d_career_colorRecency => '时间';
+
+  @override
+  String get dive3d_career_colorDepth => '深度';
+
+  @override
+  String get dive3d_career_empty => '没有可显示的剖面潜水';
 }

@@ -19163,4 +19163,16 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get dive3d_tissue_surfaceInterval => 'Felszíni szünet';
+
+  @override
+  String get dive3d_career_title => '3D előzmények';
+
+  @override
+  String get dive3d_career_colorRecency => 'Frissesség';
+
+  @override
+  String get dive3d_career_colorDepth => 'Mélység';
+
+  @override
+  String get dive3d_career_empty => 'Nincs profillal rendelkező merülés';
 }

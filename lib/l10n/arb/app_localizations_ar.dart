@@ -18860,4 +18860,16 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get dive3d_tissue_surfaceInterval => 'فترة السطح';
+
+  @override
+  String get dive3d_career_title => 'السجل ثلاثي الأبعاد';
+
+  @override
+  String get dive3d_career_colorRecency => 'الحداثة';
+
+  @override
+  String get dive3d_career_colorDepth => 'العمق';
+
+  @override
+  String get dive3d_career_empty => 'لا توجد غطسات بمخططات';
 }

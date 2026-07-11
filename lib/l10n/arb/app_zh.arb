@@ -5482,5 +5482,13 @@
   "dive3d_tissue_controlling": "主导",
   "@dive3d_tissue_controlling": {},
   "dive3d_tissue_surfaceInterval": "水面间隔",
-  "@dive3d_tissue_surfaceInterval": {}
+  "@dive3d_tissue_surfaceInterval": {},
+  "dive3d_career_title": "3D历史",
+  "@dive3d_career_title": {},
+  "dive3d_career_colorRecency": "时间",
+  "@dive3d_career_colorRecency": {},
+  "dive3d_career_colorDepth": "深度",
+  "@dive3d_career_colorDepth": {},
+  "dive3d_career_empty": "没有可显示的剖面潜水",
+  "@dive3d_career_empty": {}
 }

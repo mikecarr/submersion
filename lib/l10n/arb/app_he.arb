@@ -5482,5 +5482,13 @@
   "dive3d_tissue_controlling": "מוביל",
   "@dive3d_tissue_controlling": {},
   "dive3d_tissue_surfaceInterval": "מרווח פני השטח",
-  "@dive3d_tissue_surfaceInterval": {}
+  "@dive3d_tissue_surfaceInterval": {},
+  "dive3d_career_title": "היסטוריה תלת־ממד",
+  "@dive3d_career_title": {},
+  "dive3d_career_colorRecency": "עדכניות",
+  "@dive3d_career_colorRecency": {},
+  "dive3d_career_colorDepth": "עומק",
+  "@dive3d_career_colorDepth": {},
+  "dive3d_career_empty": "אין צלילות עם פרופילים",
+  "@dive3d_career_empty": {}
 }

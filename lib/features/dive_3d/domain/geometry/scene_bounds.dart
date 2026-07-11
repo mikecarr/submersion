@@ -10,6 +10,8 @@ class SceneBounds {
   final double maxDepthMeters;
   final double sceneMinY;
   final double sceneMaxY;
+  final double sceneMinZ;
+  final double sceneMaxZ;
 
   static const double xSpan = 10.0;
   static const double ySpan = 6.0;
@@ -21,6 +23,8 @@ class SceneBounds {
     required this.maxDepthMeters,
     this.sceneMinY = -ySpan,
     this.sceneMaxY = 0,
+    this.sceneMinZ = -zSlabHalfWidth,
+    this.sceneMaxZ = zSlabHalfWidth,
   });
 
   double xOf(num seconds) =>

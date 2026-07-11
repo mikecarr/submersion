@@ -5482,5 +5482,13 @@
   "dive3d_tissue_controlling": "Controllo",
   "@dive3d_tissue_controlling": {},
   "dive3d_tissue_surfaceInterval": "Intervallo di superficie",
-  "@dive3d_tissue_surfaceInterval": {}
+  "@dive3d_tissue_surfaceInterval": {},
+  "dive3d_career_title": "Cronologia 3D",
+  "@dive3d_career_title": {},
+  "dive3d_career_colorRecency": "Recenza",
+  "@dive3d_career_colorRecency": {},
+  "dive3d_career_colorDepth": "Profondità",
+  "@dive3d_career_colorDepth": {},
+  "dive3d_career_empty": "Nessuna immersione con profilo",
+  "@dive3d_career_empty": {}
 }

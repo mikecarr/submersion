@@ -5482,5 +5482,13 @@
   "dive3d_tissue_controlling": "Vezérlő",
   "@dive3d_tissue_controlling": {},
   "dive3d_tissue_surfaceInterval": "Felszíni szünet",
-  "@dive3d_tissue_surfaceInterval": {}
+  "@dive3d_tissue_surfaceInterval": {},
+  "dive3d_career_title": "3D előzmények",
+  "@dive3d_career_title": {},
+  "dive3d_career_colorRecency": "Frissesség",
+  "@dive3d_career_colorRecency": {},
+  "dive3d_career_colorDepth": "Mélység",
+  "@dive3d_career_colorDepth": {},
+  "dive3d_career_empty": "Nincs profillal rendelkező merülés",
+  "@dive3d_career_empty": {}
 }

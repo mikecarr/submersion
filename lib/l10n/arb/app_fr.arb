@@ -5482,5 +5482,13 @@
   "dive3d_tissue_controlling": "Directeur",
   "@dive3d_tissue_controlling": {},
   "dive3d_tissue_surfaceInterval": "Intervalle de surface",
-  "@dive3d_tissue_surfaceInterval": {}
+  "@dive3d_tissue_surfaceInterval": {},
+  "dive3d_career_title": "Historique 3D",
+  "@dive3d_career_title": {},
+  "dive3d_career_colorRecency": "Récence",
+  "@dive3d_career_colorRecency": {},
+  "dive3d_career_colorDepth": "Profondeur",
+  "@dive3d_career_colorDepth": {},
+  "dive3d_career_empty": "Aucune plongée avec profil",
+  "@dive3d_career_empty": {}
 }

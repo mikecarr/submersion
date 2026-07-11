@@ -17,6 +17,7 @@ class RibbonBuilder {
     required List<double> depths,
     required Float32List sampleColors,
     required SceneBounds bounds,
+    double zCenter = 0,
   }) {
     final n = times.length;
     final positions = Float32List(n * 6);
@@ -27,10 +28,10 @@ class RibbonBuilder {
       final p = i * 6;
       positions[p] = x;
       positions[p + 1] = y;
-      positions[p + 2] = -SceneBounds.zHalfWidth;
+      positions[p + 2] = zCenter - SceneBounds.zHalfWidth;
       positions[p + 3] = x;
       positions[p + 4] = y;
-      positions[p + 5] = SceneBounds.zHalfWidth;
+      positions[p + 5] = zCenter + SceneBounds.zHalfWidth;
       final c = i * 3;
       for (var k = 0; k < 3; k++) {
         colors[p + k] = sampleColors[c + k];

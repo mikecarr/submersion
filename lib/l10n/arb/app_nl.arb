@@ -5482,5 +5482,13 @@
   "dive3d_tissue_controlling": "Leidend",
   "@dive3d_tissue_controlling": {},
   "dive3d_tissue_surfaceInterval": "Oppervlakte-interval",
-  "@dive3d_tissue_surfaceInterval": {}
+  "@dive3d_tissue_surfaceInterval": {},
+  "dive3d_career_title": "3D-geschiedenis",
+  "@dive3d_career_title": {},
+  "dive3d_career_colorRecency": "Recentheid",
+  "@dive3d_career_colorRecency": {},
+  "dive3d_career_colorDepth": "Diepte",
+  "@dive3d_career_colorDepth": {},
+  "dive3d_career_empty": "Geen duiken met profielen",
+  "@dive3d_career_empty": {}
 }

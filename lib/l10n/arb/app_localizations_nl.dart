@@ -19063,4 +19063,16 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get dive3d_tissue_surfaceInterval => 'Oppervlakte-interval';
+
+  @override
+  String get dive3d_career_title => '3D-geschiedenis';
+
+  @override
+  String get dive3d_career_colorRecency => 'Recentheid';
+
+  @override
+  String get dive3d_career_colorDepth => 'Diepte';
+
+  @override
+  String get dive3d_career_empty => 'Geen duiken met profielen';
 }

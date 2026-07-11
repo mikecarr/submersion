@@ -19186,4 +19186,16 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get dive3d_tissue_surfaceInterval => 'Oberflächenpause';
+
+  @override
+  String get dive3d_career_title => '3D-Verlauf';
+
+  @override
+  String get dive3d_career_colorRecency => 'Aktualität';
+
+  @override
+  String get dive3d_career_colorDepth => 'Tiefe';
+
+  @override
+  String get dive3d_career_empty => 'Keine Tauchgänge mit Profilen';
 }

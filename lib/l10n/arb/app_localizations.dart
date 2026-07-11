@@ -32191,6 +32191,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Surface interval'**
   String get dive3d_tissue_surfaceInterval;
+
+  /// No description provided for @dive3d_career_title.
+  ///
+  /// In en, this message translates to:
+  /// **'3D History'**
+  String get dive3d_career_title;
+
+  /// No description provided for @dive3d_career_colorRecency.
+  ///
+  /// In en, this message translates to:
+  /// **'Recency'**
+  String get dive3d_career_colorRecency;
+
+  /// No description provided for @dive3d_career_colorDepth.
+  ///
+  /// In en, this message translates to:
+  /// **'Depth'**
+  String get dive3d_career_colorDepth;
+
+  /// No description provided for @dive3d_career_empty.
+  ///
+  /// In en, this message translates to:
+  /// **'No dives with profiles to show'**
+  String get dive3d_career_empty;
 }
 
 class _AppLocalizationsDelegate
