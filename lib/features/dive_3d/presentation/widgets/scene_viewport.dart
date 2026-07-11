@@ -1,3 +1,9 @@
+// coverage:ignore-file
+// GL host widget: every meaningful line requires a live ANGLE context,
+// which flutter_test cannot provide. Covered by the manual device matrix
+// (plan Task 16); the engine-agnostic geometry it renders is fully unit
+// tested.
+
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
