@@ -7,6 +7,7 @@ environment:
   sdk: ^3.10.0
 
 dependencies:
+  three_js_core: ^0.3.0
   flutter:
     sdk: flutter
   flutter_localizations:
@@ -126,6 +127,8 @@ dependencies:
   linked_scroll_controller: ^0.2.0
   cryptography: ^2.9.0
   cryptography_flutter: ^2.3.4
+  three_js_angle_renderer: ^0.0.1
+  three_js_math: ^0.3.0
 
 dev_dependencies:
   flutter_test:
