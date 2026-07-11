@@ -17978,4 +17978,24 @@ class AppLocalizationsHe extends AppLocalizations {
   @override
   String get settings_mediaStorage_policy_photosOnCellular =>
       'העלה תמונות ברשת סלולרית';
+
+  @override
+  String get settings_mediaStorage_provider_label => 'ספק';
+
+  @override
+  String get settings_mediaStorage_connect_dropbox_hint =>
+      'משתמש בחיבור Dropbox מסנכרון הענן. המדיה נשמרת בתיקיית האפליקציה ב-Dropbox.';
+
+  @override
+  String get settings_mediaStorage_connect_gdrive_hint =>
+      'מתחבר עם Google. המדיה נשמרת בשטח ה-Drive הפרטי של האפליקציה.';
+
+  @override
+  String get settings_mediaStorage_connect_icloud_hint =>
+      'המדיה נשמרת במיכל ה-iCloud של האפליקציה ומסתנכרנת דרך ה-Apple ID שלך.';
+
+  @override
+  String settings_mediaStorage_connect_action(String provider) {
+    return 'חבר את $provider';
+  }
 }

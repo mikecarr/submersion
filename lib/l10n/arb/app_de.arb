@@ -5196,5 +5196,10 @@
   "settings_mediaStorage_backfill_action": "Vorhandene Bibliothek hochladen",
   "settings_mediaStorage_backfill_enqueued": "{count} Uploads eingereiht",
   "settings_mediaStorage_policy_autoUpload": "Fotos automatisch hochladen",
-  "settings_mediaStorage_policy_photosOnCellular": "Fotos über Mobilfunk hochladen"
+  "settings_mediaStorage_policy_photosOnCellular": "Fotos über Mobilfunk hochladen",
+  "settings_mediaStorage_provider_label": "Anbieter",
+  "settings_mediaStorage_connect_dropbox_hint": "Verwendet Ihre Dropbox-Verbindung aus der Cloud-Synchronisierung. Medien werden im Dropbox-App-Ordner gespeichert.",
+  "settings_mediaStorage_connect_gdrive_hint": "Meldet sich mit Google an. Medien werden im privaten Drive-Bereich dieser App gespeichert.",
+  "settings_mediaStorage_connect_icloud_hint": "Medien werden im iCloud-Container dieser App gespeichert und über Ihre Apple-ID synchronisiert.",
+  "settings_mediaStorage_connect_action": "{provider} verbinden"
 }

@@ -5196,5 +5196,10 @@
   "settings_mediaStorage_backfill_action": "رفع المكتبة الحالية",
   "settings_mediaStorage_backfill_enqueued": "{count} عمليات رفع في قائمة الانتظار",
   "settings_mediaStorage_policy_autoUpload": "رفع الصور تلقائيا",
-  "settings_mediaStorage_policy_photosOnCellular": "رفع الصور عبر شبكة الجوال"
+  "settings_mediaStorage_policy_photosOnCellular": "رفع الصور عبر شبكة الجوال",
+  "settings_mediaStorage_provider_label": "المزود",
+  "settings_mediaStorage_connect_dropbox_hint": "يستخدم اتصال Dropbox من مزامنة السحابة. تُخزن الوسائط في مجلد التطبيق في Dropbox.",
+  "settings_mediaStorage_connect_gdrive_hint": "يسجل الدخول عبر Google. تُخزن الوسائط في مساحة Drive الخاصة بهذا التطبيق.",
+  "settings_mediaStorage_connect_icloud_hint": "تُخزن الوسائط في حاوية iCloud لهذا التطبيق وتتزامن عبر Apple ID الخاص بك.",
+  "settings_mediaStorage_connect_action": "توصيل {provider}"
 }

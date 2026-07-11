@@ -18398,4 +18398,24 @@ class AppLocalizationsHu extends AppLocalizations {
   @override
   String get settings_mediaStorage_policy_photosOnCellular =>
       'Fotók feltöltése mobilhálózaton';
+
+  @override
+  String get settings_mediaStorage_provider_label => 'Szolgáltató';
+
+  @override
+  String get settings_mediaStorage_connect_dropbox_hint =>
+      'A felhőszinkronizálás Dropbox-kapcsolatát használja. A média a Dropbox alkalmazásmappájában tárolódik.';
+
+  @override
+  String get settings_mediaStorage_connect_gdrive_hint =>
+      'Google-fiókkal jelentkezik be. A média az alkalmazás privát Drive-területén tárolódik.';
+
+  @override
+  String get settings_mediaStorage_connect_icloud_hint =>
+      'A média az alkalmazás iCloud-tárolójában tárolódik, és az Apple ID-n keresztül szinkronizálódik.';
+
+  @override
+  String settings_mediaStorage_connect_action(String provider) {
+    return '$provider csatlakoztatása';
+  }
 }

@@ -5196,5 +5196,10 @@
   "settings_mediaStorage_backfill_action": "Meglévő könyvtár feltöltése",
   "settings_mediaStorage_backfill_enqueued": "{count} feltöltés sorban",
   "settings_mediaStorage_policy_autoUpload": "Fotók automatikus feltöltése",
-  "settings_mediaStorage_policy_photosOnCellular": "Fotók feltöltése mobilhálózaton"
+  "settings_mediaStorage_policy_photosOnCellular": "Fotók feltöltése mobilhálózaton",
+  "settings_mediaStorage_provider_label": "Szolgáltató",
+  "settings_mediaStorage_connect_dropbox_hint": "A felhőszinkronizálás Dropbox-kapcsolatát használja. A média a Dropbox alkalmazásmappájában tárolódik.",
+  "settings_mediaStorage_connect_gdrive_hint": "Google-fiókkal jelentkezik be. A média az alkalmazás privát Drive-területén tárolódik.",
+  "settings_mediaStorage_connect_icloud_hint": "A média az alkalmazás iCloud-tárolójában tárolódik, és az Apple ID-n keresztül szinkronizálódik.",
+  "settings_mediaStorage_connect_action": "{provider} csatlakoztatása"
 }

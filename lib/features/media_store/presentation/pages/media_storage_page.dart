@@ -3,12 +3,16 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:submersion/core/data/repositories/sync_repository.dart';
 import 'package:submersion/core/providers/provider.dart';
 import 'package:submersion/core/services/cloud_storage/s3/s3_config.dart';
 import 'package:submersion/core/services/cloud_storage/s3/s3_credentials_store.dart';
 import 'package:submersion/core/services/cloud_storage/s3/s3_region.dart';
 import 'package:submersion/core/services/media_store/media_object_store.dart';
+import 'package:submersion/features/media_store/data/media_store_service.dart';
 import 'package:submersion/features/media_store/presentation/providers/media_store_providers.dart';
+import 'package:submersion/features/settings/presentation/providers/sync_providers.dart';
+import 'package:submersion/l10n/arb/app_localizations.dart';
 import 'package:submersion/l10n/l10n_extension.dart';
 
 /// Configuration page for the media store's S3 backend (design spec
@@ -37,6 +41,7 @@ class _MediaStoragePageState extends ConsumerState<MediaStoragePage> {
   bool _secretVisible = false;
   bool _busy = false;
   bool _syncConfigAvailable = false;
+  CloudProviderType _selectedProvider = CloudProviderType.s3;
   // Null until loaded; the switches render only once values are known.
   bool? _autoUpload;
   bool? _photosOnCellular;
@@ -234,6 +239,56 @@ class _MediaStoragePageState extends ConsumerState<MediaStoragePage> {
     }
   }
 
+  List<Widget> _managedConnectPanel(AppLocalizations l10n) {
+    final (hint, label, key, call) = switch (_selectedProvider) {
+      CloudProviderType.dropbox => (
+        l10n.settings_mediaStorage_connect_dropbox_hint,
+        'Dropbox',
+        const Key('media-dropbox-connect'),
+        () => ref.read(mediaStoreServiceProvider).connectDropbox(),
+      ),
+      CloudProviderType.googledrive => (
+        l10n.settings_mediaStorage_connect_gdrive_hint,
+        'Google Drive',
+        const Key('media-gdrive-connect'),
+        () => ref.read(mediaStoreServiceProvider).connectGoogleDrive(),
+      ),
+      _ => (
+        l10n.settings_mediaStorage_connect_icloud_hint,
+        'iCloud',
+        const Key('media-icloud-connect'),
+        () => ref.read(mediaStoreServiceProvider).connectICloud(),
+      ),
+    };
+    return [
+      Text(hint),
+      const SizedBox(height: 16),
+      FilledButton(
+        key: key,
+        onPressed: _busy ? null : () => _connectManagedFlow(call),
+        child: Text(l10n.settings_mediaStorage_connect_action(label)),
+      ),
+    ];
+  }
+
+  Future<void> _connectManagedFlow(
+    Future<MediaStoreConnectResult> Function() call,
+  ) async {
+    final l10n = context.l10n;
+    setState(() => _busy = true);
+    try {
+      await call();
+      ref.invalidate(mediaStoreRuntimeProvider);
+      if (!mounted) return;
+      _showSnack(l10n.settings_mediaStorage_saved);
+      await Navigator.maybePop(context);
+    } on MediaStoreException catch (e) {
+      _showSnack(e.message, isError: true);
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
   Future<void> _disconnect() async {
     final l10n = context.l10n;
     final confirmed = await showDialog<bool>(
@@ -295,174 +350,211 @@ class _MediaStoragePageState extends ConsumerState<MediaStoragePage> {
               ),
             ),
             const SizedBox(height: 12),
-            if (_isInsecureEndpoint)
-              Card(
-                key: const Key('media-s3-http-warning'),
-                color: Theme.of(context).colorScheme.errorContainer,
-                child: Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.lock_open,
-                        color: Theme.of(context).colorScheme.onErrorContainer,
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(l10n.settings_s3Config_warning_http),
-                      ),
-                    ],
-                  ),
-                ),
+            if (!connected) ...[
+              Text(
+                l10n.settings_mediaStorage_provider_label,
+                style: Theme.of(context).textTheme.labelLarge,
               ),
-            if (_syncConfigAvailable)
-              Align(
-                alignment: Alignment.centerLeft,
-                child: TextButton.icon(
-                  key: const Key('media-s3-copy-from-sync'),
-                  onPressed: _busy ? null : _copyFromSync,
-                  icon: const Icon(Icons.copy_all),
-                  label: Text(l10n.settings_mediaStorage_action_copyFromSync),
-                ),
+              const SizedBox(height: 8),
+              SegmentedButton<CloudProviderType>(
+                key: const Key('media-provider-chooser'),
+                segments: [
+                  const ButtonSegment(
+                    value: CloudProviderType.s3,
+                    label: Text('S3'),
+                  ),
+                  const ButtonSegment(
+                    value: CloudProviderType.dropbox,
+                    label: Text('Dropbox'),
+                  ),
+                  const ButtonSegment(
+                    value: CloudProviderType.googledrive,
+                    label: Text('Google Drive'),
+                  ),
+                  if (ref.watch(isApplePlatformProvider))
+                    const ButtonSegment(
+                      value: CloudProviderType.icloud,
+                      label: Text('iCloud'),
+                    ),
+                ],
+                selected: {_selectedProvider},
+                onSelectionChanged: (selection) =>
+                    setState(() => _selectedProvider = selection.single),
               ),
-            TextFormField(
-              key: const Key('media-s3-endpoint'),
-              controller: _endpointController,
-              decoration: InputDecoration(
-                labelText: l10n.settings_s3Config_field_endpoint_label,
-                hintText: l10n.settings_s3Config_field_endpoint_helper,
+              const SizedBox(height: 16),
+              if (_selectedProvider != CloudProviderType.s3)
+                ..._managedConnectPanel(l10n),
+            ],
+            if (!connected && _selectedProvider == CloudProviderType.s3) ...[
+              if (_isInsecureEndpoint)
+                Card(
+                  key: const Key('media-s3-http-warning'),
+                  color: Theme.of(context).colorScheme.errorContainer,
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.lock_open,
+                          color: Theme.of(context).colorScheme.onErrorContainer,
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(l10n.settings_s3Config_warning_http),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              if (_syncConfigAvailable)
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: TextButton.icon(
+                    key: const Key('media-s3-copy-from-sync'),
+                    onPressed: _busy ? null : _copyFromSync,
+                    icon: const Icon(Icons.copy_all),
+                    label: Text(l10n.settings_mediaStorage_action_copyFromSync),
+                  ),
+                ),
+              TextFormField(
+                key: const Key('media-s3-endpoint'),
+                controller: _endpointController,
+                decoration: InputDecoration(
+                  labelText: l10n.settings_s3Config_field_endpoint_label,
+                  hintText: l10n.settings_s3Config_field_endpoint_helper,
+                ),
+                keyboardType: TextInputType.url,
+                autocorrect: false,
+                validator: (value) {
+                  final trimmed = (value ?? '').trim();
+                  if (trimmed.isEmpty) {
+                    return l10n.settings_s3Config_validation_required;
+                  }
+                  final uri = Uri.tryParse(trimmed);
+                  final valid =
+                      uri != null &&
+                      (uri.scheme == 'http' || uri.scheme == 'https') &&
+                      uri.host.isNotEmpty;
+                  if (!valid) {
+                    return l10n.settings_s3Config_validation_endpointInvalid;
+                  }
+                  if (uri.path.isNotEmpty && uri.path != '/') {
+                    return l10n.settings_s3Config_validation_endpointPath;
+                  }
+                  return null;
+                },
               ),
-              keyboardType: TextInputType.url,
-              autocorrect: false,
-              validator: (value) {
-                final trimmed = (value ?? '').trim();
-                if (trimmed.isEmpty) {
-                  return l10n.settings_s3Config_validation_required;
-                }
-                final uri = Uri.tryParse(trimmed);
-                final valid =
-                    uri != null &&
-                    (uri.scheme == 'http' || uri.scheme == 'https') &&
-                    uri.host.isNotEmpty;
-                if (!valid) {
-                  return l10n.settings_s3Config_validation_endpointInvalid;
-                }
-                if (uri.path.isNotEmpty && uri.path != '/') {
-                  return l10n.settings_s3Config_validation_endpointPath;
-                }
-                return null;
-              },
-            ),
-            const SizedBox(height: 12),
-            TextFormField(
-              key: const Key('media-s3-bucket'),
-              controller: _bucketController,
-              decoration: InputDecoration(
-                labelText: l10n.settings_s3Config_field_bucket_label,
+              const SizedBox(height: 12),
+              TextFormField(
+                key: const Key('media-s3-bucket'),
+                controller: _bucketController,
+                decoration: InputDecoration(
+                  labelText: l10n.settings_s3Config_field_bucket_label,
+                ),
+                autocorrect: false,
+                validator: (value) => (value ?? '').trim().isEmpty
+                    ? l10n.settings_s3Config_validation_required
+                    : null,
               ),
-              autocorrect: false,
-              validator: (value) => (value ?? '').trim().isEmpty
-                  ? l10n.settings_s3Config_validation_required
-                  : null,
-            ),
-            const SizedBox(height: 12),
-            TextFormField(
-              key: const Key('media-s3-access-key'),
-              controller: _accessKeyController,
-              decoration: InputDecoration(
-                labelText: l10n.settings_s3Config_field_accessKeyId_label,
+              const SizedBox(height: 12),
+              TextFormField(
+                key: const Key('media-s3-access-key'),
+                controller: _accessKeyController,
+                decoration: InputDecoration(
+                  labelText: l10n.settings_s3Config_field_accessKeyId_label,
+                ),
+                autocorrect: false,
+                enableSuggestions: false,
+                validator: (value) => (value ?? '').trim().isEmpty
+                    ? l10n.settings_s3Config_validation_required
+                    : null,
               ),
-              autocorrect: false,
-              enableSuggestions: false,
-              validator: (value) => (value ?? '').trim().isEmpty
-                  ? l10n.settings_s3Config_validation_required
-                  : null,
-            ),
-            const SizedBox(height: 12),
-            TextFormField(
-              key: const Key('media-s3-secret-key'),
-              controller: _secretKeyController,
-              decoration: InputDecoration(
-                labelText: l10n.settings_s3Config_field_secretAccessKey_label,
-                suffixIcon: IconButton(
-                  icon: Icon(
-                    _secretVisible ? Icons.visibility_off : Icons.visibility,
+              const SizedBox(height: 12),
+              TextFormField(
+                key: const Key('media-s3-secret-key'),
+                controller: _secretKeyController,
+                decoration: InputDecoration(
+                  labelText: l10n.settings_s3Config_field_secretAccessKey_label,
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _secretVisible ? Icons.visibility_off : Icons.visibility,
+                    ),
+                    onPressed: () =>
+                        setState(() => _secretVisible = !_secretVisible),
                   ),
-                  onPressed: () =>
-                      setState(() => _secretVisible = !_secretVisible),
                 ),
+                obscureText: !_secretVisible,
+                autocorrect: false,
+                enableSuggestions: false,
+                validator: (value) => (value ?? '').trim().isEmpty
+                    ? l10n.settings_s3Config_validation_required
+                    : null,
               ),
-              obscureText: !_secretVisible,
-              autocorrect: false,
-              enableSuggestions: false,
-              validator: (value) => (value ?? '').trim().isEmpty
-                  ? l10n.settings_s3Config_validation_required
-                  : null,
-            ),
-            ExpansionTile(
-              key: const Key('media-s3-advanced'),
-              title: Text(l10n.settings_s3Config_advanced_title),
-              tilePadding: EdgeInsets.zero,
-              childrenPadding: const EdgeInsets.only(top: 12, bottom: 8),
-              shape: const Border(),
-              collapsedShape: const Border(),
-              children: [
-                TextFormField(
-                  key: const Key('media-s3-region'),
-                  controller: _regionController,
-                  decoration: InputDecoration(
-                    labelText: l10n.settings_s3Config_field_region_label,
-                    helperText: _regionController.text.trim().isEmpty
-                        ? l10n.settings_s3Config_field_region_helperAuto(
-                            deriveRegion(_endpointController.text),
-                          )
-                        : null,
+              ExpansionTile(
+                key: const Key('media-s3-advanced'),
+                title: Text(l10n.settings_s3Config_advanced_title),
+                tilePadding: EdgeInsets.zero,
+                childrenPadding: const EdgeInsets.only(top: 12, bottom: 8),
+                shape: const Border(),
+                collapsedShape: const Border(),
+                children: [
+                  TextFormField(
+                    key: const Key('media-s3-region'),
+                    controller: _regionController,
+                    decoration: InputDecoration(
+                      labelText: l10n.settings_s3Config_field_region_label,
+                      helperText: _regionController.text.trim().isEmpty
+                          ? l10n.settings_s3Config_field_region_helperAuto(
+                              deriveRegion(_endpointController.text),
+                            )
+                          : null,
+                    ),
+                    autocorrect: false,
                   ),
-                  autocorrect: false,
-                ),
-                const SizedBox(height: 12),
-                TextFormField(
-                  key: const Key('media-s3-prefix'),
-                  controller: _prefixController,
-                  decoration: InputDecoration(
-                    labelText: l10n.settings_s3Config_field_prefix_label,
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    key: const Key('media-s3-prefix'),
+                    controller: _prefixController,
+                    decoration: InputDecoration(
+                      labelText: l10n.settings_s3Config_field_prefix_label,
+                    ),
+                    autocorrect: false,
                   ),
-                  autocorrect: false,
-                ),
-                SwitchListTile(
-                  key: const Key('media-s3-path-style'),
-                  title: Text(l10n.settings_s3Config_field_pathStyle_label),
-                  subtitle: Text(
-                    l10n.settings_s3Config_field_pathStyle_subtitle,
+                  SwitchListTile(
+                    key: const Key('media-s3-path-style'),
+                    title: Text(l10n.settings_s3Config_field_pathStyle_label),
+                    subtitle: Text(
+                      l10n.settings_s3Config_field_pathStyle_subtitle,
+                    ),
+                    value: _pathStyle,
+                    onChanged: (value) => setState(() {
+                      _pathStyle = value;
+                      _pathStyleTouched = true;
+                    }),
                   ),
-                  value: _pathStyle,
-                  onChanged: (value) => setState(() {
-                    _pathStyle = value;
-                    _pathStyleTouched = true;
-                  }),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    key: const Key('media-s3-test'),
-                    onPressed: _busy ? null : _testConnection,
-                    child: Text(l10n.settings_s3Config_action_testConnection),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      key: const Key('media-s3-test'),
+                      onPressed: _busy ? null : _testConnection,
+                      child: Text(l10n.settings_s3Config_action_testConnection),
+                    ),
                   ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: FilledButton(
-                    key: const Key('media-s3-connect'),
-                    onPressed: _busy ? null : _connect,
-                    child: Text(l10n.common_action_save),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: FilledButton(
+                      key: const Key('media-s3-connect'),
+                      onPressed: _busy ? null : _connect,
+                      child: Text(l10n.common_action_save),
+                    ),
                   ),
-                ),
-              ],
-            ),
+                ],
+              ),
+            ],
             if (connected) ...[
               const SizedBox(height: 8),
               if (_autoUpload != null)

@@ -5196,5 +5196,10 @@
   "settings_mediaStorage_backfill_action": "Enviar biblioteca existente",
   "settings_mediaStorage_backfill_enqueued": "{count} envios na fila",
   "settings_mediaStorage_policy_autoUpload": "Enviar fotos automaticamente",
-  "settings_mediaStorage_policy_photosOnCellular": "Enviar fotos pela rede móvel"
+  "settings_mediaStorage_policy_photosOnCellular": "Enviar fotos pela rede móvel",
+  "settings_mediaStorage_provider_label": "Provedor",
+  "settings_mediaStorage_connect_dropbox_hint": "Usa sua conexão do Dropbox da sincronização na nuvem. As mídias ficam na pasta do app no Dropbox.",
+  "settings_mediaStorage_connect_gdrive_hint": "Entra com o Google. As mídias ficam no espaço privado do Drive deste app.",
+  "settings_mediaStorage_connect_icloud_hint": "As mídias ficam no contêiner do iCloud deste app e sincronizam pelo seu ID Apple.",
+  "settings_mediaStorage_connect_action": "Conectar {provider}"
 }

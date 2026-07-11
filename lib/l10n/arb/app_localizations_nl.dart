@@ -18301,4 +18301,24 @@ class AppLocalizationsNl extends AppLocalizations {
   @override
   String get settings_mediaStorage_policy_photosOnCellular =>
       'Foto\'s uploaden via mobiel';
+
+  @override
+  String get settings_mediaStorage_provider_label => 'Provider';
+
+  @override
+  String get settings_mediaStorage_connect_dropbox_hint =>
+      'Gebruikt je Dropbox-koppeling uit Cloud Sync. Media wordt opgeslagen in je Dropbox-appmap.';
+
+  @override
+  String get settings_mediaStorage_connect_gdrive_hint =>
+      'Meldt aan met Google. Media wordt opgeslagen in de privé-Drive-ruimte van deze app.';
+
+  @override
+  String get settings_mediaStorage_connect_icloud_hint =>
+      'Media wordt opgeslagen in de iCloud-container van deze app en synchroniseert via je Apple ID.';
+
+  @override
+  String settings_mediaStorage_connect_action(String provider) {
+    return '$provider verbinden';
+  }
 }
