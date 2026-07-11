@@ -28,7 +28,7 @@
 
 **Files:** none (environment only)
 
-- [ ] **Step 1: Create worktree and branch**
+- [x] **Step 1: Create worktree and branch**
 
 ```bash
 git -C /Users/ericgriffin/repos/submersion-app/submersion worktree add \
@@ -36,7 +36,7 @@ git -C /Users/ericgriffin/repos/submersion-app/submersion worktree add \
 cd /Users/ericgriffin/repos/submersion-app/submersion/.claude/worktrees/flythrough-pr1
 ```
 
-- [ ] **Step 2: Initialize (worktrees do not inherit submodules or build dirs)**
+- [x] **Step 2: Initialize (worktrees do not inherit submodules or build dirs)**
 
 ```bash
 git submodule update --init --recursive
@@ -59,7 +59,7 @@ All paths in later tasks are relative to this worktree root. Use worktree-absolu
 **Interfaces:**
 - Produces: `DiveProfiles.heading` (`RealColumn`, nullable) => generated `DiveProfile.heading double?`, `DiveProfilesCompanion(heading: Value<double?>)`. Consumed by Tasks 2 and 5.
 
-- [ ] **Step 1: Write the failing migration test**
+- [x] **Step 1: Write the failing migration test**
 
 Create `test/core/database/migration_v105_profile_heading_test.dart`:
 
@@ -189,12 +189,12 @@ void main() {
 }
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `flutter test test/core/database/migration_v105_profile_heading_test.dart`
 Expected: FAIL (`heading` not in table_info; ladder does not contain 105).
 
-- [ ] **Step 3: Add the column to the table class**
+- [x] **Step 3: Add the column to the table class**
 
 In `lib/core/database/database.dart`, `class DiveProfiles` (line ~546), directly after `IntColumn get heartRate => integer().nullable()();` (line ~560):
 
@@ -204,7 +204,7 @@ In `lib/core/database/database.dart`, `class DiveProfiles` (line ~546), directly
   RealColumn get heading => real().nullable()();
 ```
 
-- [ ] **Step 4: Bump version and ladder**
+- [x] **Step 4: Bump version and ladder**
 
 At line ~2086 change `static const int currentSchemaVersion = 103;` to `= 105;`.
 At the end of `migrationVersions` (line ~2192, after `103,`) append:
@@ -214,7 +214,7 @@ At the end of `migrationVersions` (line ~2192, after `103,`) append:
     105,
 ```
 
-- [ ] **Step 5: Add the onUpgrade block**
+- [x] **Step 5: Add the onUpgrade block**
 
 In `onUpgrade`, after the `if (from < 103) await reportProgress();` line (~5067), add (copies the v89/v103 PRAGMA-guarded pattern):
 
@@ -240,7 +240,7 @@ In `onUpgrade`, after the `if (from < 103) await reportProgress();` line (~5067)
         if (from < 105) await reportProgress();
 ```
 
-- [ ] **Step 6: Add the beforeOpen backstop**
+- [x] **Step 6: Add the beforeOpen backstop**
 
 In `beforeOpen`, after the v103 `diver_role` re-assert (~line 5140) and BEFORE `ensurePerformanceIndexes(this)`:
 
@@ -259,22 +259,22 @@ In `beforeOpen`, after the v103 `diver_role` re-assert (~line 5140) and BEFORE `
         }
 ```
 
-- [ ] **Step 7: Regenerate Drift code**
+- [x] **Step 7: Regenerate Drift code**
 
 Run: `dart run build_runner build --delete-conflicting-outputs`
 Expected: succeeds; `database.g.dart` now contains `heading` on `DiveProfile`, `DiveProfilesCompanion`, `fromJson`/`toJson`.
 
-- [ ] **Step 8: Run test to verify it passes**
+- [x] **Step 8: Run test to verify it passes**
 
 Run: `flutter test test/core/database/migration_v105_profile_heading_test.dart`
 Expected: 4 tests PASS.
 
-- [ ] **Step 9: Run neighboring schema tests (regression)**
+- [x] **Step 9: Run neighboring schema tests (regression)**
 
 Run: `flutter test test/core/database/`
 Expected: PASS (run this directory only; whole-suite timeouts are a known trap).
 
-- [ ] **Step 10: Commit**
+- [x] **Step 10: Commit**
 
 ```bash
 dart format .
@@ -296,7 +296,7 @@ git commit -m "feat(db): add dive_profiles.heading column (schema v105)"
 - Consumes: `DiveProfilesCompanion.heading` from Task 1.
 - Produces: `DiveProfilePoint.heading double?` (field + ctor param + copyWith param + props member). Consumed by PR 2's reconstructor and Task 5.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create `test/features/dive_log/domain/entities/dive_profile_point_heading_test.dart`:
 
@@ -325,12 +325,12 @@ void main() {
 }
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `flutter test test/features/dive_log/domain/entities/dive_profile_point_heading_test.dart`
 Expected: FAIL - `heading` is not a defined named parameter.
 
-- [ ] **Step 3: Add the field to the entity (all four spots)**
+- [x] **Step 3: Add the field to the entity (all four spots)**
 
 In `lib/features/dive_log/domain/entities/dive.dart` `class DiveProfilePoint`:
 - Fields block (~778-801), after `final int? heartRate;`:
@@ -344,12 +344,12 @@ In `lib/features/dive_log/domain/entities/dive.dart` `class DiveProfilePoint`:
 - `copyWith` (~826-870): add parameter `double? heading,` and body line `heading: heading ?? this.heading,`.
 - `props` (~872-894): add `heading,`.
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `flutter test test/features/dive_log/domain/entities/dive_profile_point_heading_test.dart`
 Expected: PASS.
 
-- [ ] **Step 5: Wire the four repository mapping sites**
+- [x] **Step 5: Wire the four repository mapping sites**
 
 In `lib/features/dive_log/data/repositories/dive_repository_impl.dart`:
 
@@ -377,7 +377,7 @@ Write site ~1024 (createDive insert companion): add
           heading: Value(point.heading),
 ```
 
-- [ ] **Step 6: Wire the merge service**
+- [x] **Step 6: Wire the merge service**
 
 In `lib/features/dive_log/data/services/dive_merge_service.dart` (~229), the full-row `DiveProfilesCompanion` build (consolidation must not drop heading): add alongside `heartRate`:
 
@@ -387,14 +387,14 @@ In `lib/features/dive_log/data/services/dive_merge_service.dart` (~229), the ful
 
 (If this site maps from a Drift row rather than the entity, use the matching accessor, e.g. `Value(row.heading)` - mirror exactly how `heartRate` is sourced on the neighboring line.)
 
-- [ ] **Step 7: Analyze and run dive_log tests**
+- [x] **Step 7: Analyze and run dive_log tests**
 
 Run: `flutter analyze`
 Expected: No issues found.
 Run: `flutter test test/features/dive_log/`
 Expected: PASS.
 
-- [ ] **Step 8: Commit**
+- [x] **Step 8: Commit**
 
 ```bash
 dart format .
@@ -415,7 +415,7 @@ git commit -m "feat(dives): carry heading through DiveProfilePoint and repositor
 **Interfaces:**
 - Produces: Pigeon `ProfileSample.heading double?` (regenerated on every platform); `libdc_sample_t.heading unsigned int` with `UINT32_MAX` = absent. Consumed by Task 4 serializers and Task 5 Dart mappers.
 
-- [ ] **Step 1: Add heading to the Pigeon message**
+- [x] **Step 1: Add heading to the Pigeon message**
 
 In `packages/libdivecomputer_plugin/pigeons/dive_computer_api.dart`, `class ProfileSample`: add constructor arg `this.heading,` (near `this.heartRate,` ~line 60) and field (near `final int? heartRate;` ~line 82):
 
@@ -424,7 +424,7 @@ In `packages/libdivecomputer_plugin/pigeons/dive_computer_api.dart`, `class Prof
   final double? heading;
 ```
 
-- [ ] **Step 2: Regenerate Pigeon outputs**
+- [x] **Step 2: Regenerate Pigeon outputs**
 
 ```bash
 cd packages/libdivecomputer_plugin
@@ -434,7 +434,7 @@ cd ../..
 
 Expected: regenerates `lib/src/generated/dive_computer_api.g.dart`, `ios/Classes/DiveComputerApi.g.swift`, `android/.../DiveComputerApi.g.kt`, `linux/dive_computer_api.g.h/.cc`, `windows/dive_computer_api.g.h/.cc`. `git status` shows all five touched.
 
-- [ ] **Step 3: Add the struct field (BOTH copies)**
+- [x] **Step 3: Add the struct field (BOTH copies)**
 
 In `packages/libdivecomputer_plugin/macos/Classes/libdc_wrapper.h` `libdc_sample_t` (~136-155), after `unsigned int heartbeat;`:
 
@@ -444,7 +444,7 @@ In `packages/libdivecomputer_plugin/macos/Classes/libdc_wrapper.h` `libdc_sample
 
 Apply the identical edit to `packages/libdivecomputer_plugin/ios/Classes/libdc_wrapper.h`.
 
-- [ ] **Step 4: Capture DC_SAMPLE_BEARING (BOTH copies)**
+- [x] **Step 4: Capture DC_SAMPLE_BEARING (BOTH copies)**
 
 In `packages/libdivecomputer_plugin/macos/Classes/libdc_download.c`:
 
@@ -464,7 +464,7 @@ In the sample-type switch (next to `case DC_SAMPLE_HEARTBEAT:` ~212):
 
 Apply identical edits to `packages/libdivecomputer_plugin/ios/Classes/libdc_download.c`.
 
-- [ ] **Step 5: Verify the copies are still identical**
+- [x] **Step 5: Verify the copies are still identical**
 
 ```bash
 diff packages/libdivecomputer_plugin/macos/Classes/libdc_download.c \
@@ -475,12 +475,12 @@ diff packages/libdivecomputer_plugin/macos/Classes/libdc_wrapper.h \
 
 Expected: no output from either diff.
 
-- [ ] **Step 6: Compile check via macOS build**
+- [x] **Step 6: Compile check via macOS build**
 
 Run: `flutter build macos --debug`
 Expected: builds successfully (compiles the wrapper + Swift serializer; Task 4 Step 2 has not happened yet, which is fine - Swift `ProfileSample` gained an optional field with a default and existing call sites still compile. If the generated Swift ctor makes `heading` required, do Task 4 Step 2 first, then rerun this build.)
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 dart format .
@@ -504,7 +504,7 @@ git commit -m "feat(libdc): capture DC_SAMPLE_BEARING and expose heading via Pig
 - Consumes: `libdc_sample_t.heading` (Task 3), Pigeon `ProfileSample.heading` (Task 3).
 - Produces: heading populated in the Pigeon `ProfileSample` on every platform. Android JNI array grows 21 -> 22 doubles; heading is index 21.
 
-- [ ] **Step 1: Android JNI array (3 edits in libdc_jni.cpp)**
+- [x] **Step 1: Android JNI array (3 edits in libdc_jni.cpp)**
 
 In `packages/libdivecomputer_plugin/android/src/main/cpp/libdc_jni.cpp` (~942-980): append to the values array after the `gasmix` entry (index 20):
 
@@ -523,7 +523,7 @@ env->SetDoubleArrayRegion(result, 0, 22, values);
 
 (Add a comma after the previous last element.)
 
-- [ ] **Step 2: Kotlin decoders (2 sites)**
+- [x] **Step 2: Kotlin decoders (2 sites)**
 
 In `DiveComputerHostApiImpl.kt` (~544-550), inside the `ProfileSample(...)` construction, mirroring the `heartRate` sentinel line:
 
@@ -539,7 +539,7 @@ In `SerialDownloadRunner.kt` (~166-172):
 
 (The array elements are already `Double`; pass through without conversion. Match the exact sentinel constant name used in each file.)
 
-- [ ] **Step 3: Swift serializer**
+- [x] **Step 3: Swift serializer**
 
 In `packages/libdivecomputer_plugin/darwin/Sources/LibDCDarwin/DiveComputerHostApiImpl.swift` (~585-608), inside `ProfileSample(...)`, next to the `heartRate:` line:
 
@@ -547,7 +547,7 @@ In `packages/libdivecomputer_plugin/darwin/Sources/LibDCDarwin/DiveComputerHostA
     heading: s.heading == UInt32.max ? nil : Double(s.heading),
 ```
 
-- [ ] **Step 4: Linux serializer**
+- [x] **Step 4: Linux serializer**
 
 In `packages/libdivecomputer_plugin/linux/dive_converter.c` (~99-141), mirroring the heartbeat pattern:
 
@@ -558,7 +558,7 @@ In `packages/libdivecomputer_plugin/linux/dive_converter.c` (~99-141), mirroring
 
 and pass `heading_ptr` into the `libdivecomputer_plugin_profile_sample_new(...)` call in the position the regenerated signature expects (the Pigeon regen in Task 3 changed this generated function; the compiler enforces the position). Match the exact local-variable style of the surrounding heartbeat code.
 
-- [ ] **Step 5: Windows serializer**
+- [x] **Step 5: Windows serializer**
 
 In `packages/libdivecomputer_plugin/windows/dive_converter.cc` (~113-140), add the constructor argument in the position the regenerated `ProfileSample` ctor expects:
 
@@ -570,13 +570,13 @@ In `packages/libdivecomputer_plugin/windows/dive_converter.cc` (~113-140), add t
 
 Match the surrounding heartbeat expression style exactly (e.g. if it uses `EncodableValue()` for null, mirror that).
 
-- [ ] **Step 6: Build what is buildable locally**
+- [x] **Step 6: Build what is buildable locally**
 
 Run: `flutter build macos --debug`
 Expected: SUCCESS (validates Swift + shared C).
 If an Android toolchain is available: `flutter build apk --debug` (validates JNI + Kotlin). Otherwise Windows/Linux/Android compile errors will surface in CI - watch the `Build Windows`, `Build Linux`, and Android jobs on the PR (Windows CI is the strictest: /WX).
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 dart format .
@@ -600,7 +600,7 @@ git commit -m "feat(libdc): serialize heading across all four platform channels"
 - Consumes: Pigeon `ProfileSample.heading` (Task 3), `DiveProfilesCompanion.heading` (Task 1).
 - Produces: domain `ProfileSample.heading double?`; `ProfilePointData.heading double?`; heading persisted on download AND reparse.
 
-- [ ] **Step 1: Write the failing mapper test**
+- [x] **Step 1: Write the failing mapper test**
 
 The mapper is a top-level function: `DownloadedDive parsedDiveToDownloaded(pigeon.ParsedDive parsed)` (`parsed_dive_mapper.dart:6`); it maps each Pigeon sample into the domain `ProfileSample` at lines ~52-73 (`heartRate: s.heartRate,` etc.).
 
@@ -616,12 +616,12 @@ Open `test/features/dive_computer/data/services/parsed_dive_mapper_test.dart`, c
   });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `flutter test test/features/dive_computer/data/services/parsed_dive_mapper_test.dart`
 Expected: FAIL - compile error: `heading` is not a parameter of `pigeon.ProfileSample` (Task 3 adds it) or of domain `ProfileSample` (Step 3 adds it). If Task 3 is already merged in this branch, only the domain side fails.
 
-- [ ] **Step 3: Add heading to the domain entity and DTO**
+- [x] **Step 3: Add heading to the domain entity and DTO**
 
 `lib/features/dive_computer/domain/entities/downloaded_dive.dart`, `class ProfileSample` (~181): add field + ctor param next to `heartRate`:
 
@@ -636,7 +636,7 @@ Expected: FAIL - compile error: `heading` is not a parameter of `pigeon.ProfileS
   final double? heading;
 ```
 
-- [ ] **Step 4: Wire the two mappers and two persistence sites**
+- [x] **Step 4: Wire the two mappers and two persistence sites**
 
 - `parsed_dive_mapper.dart` ~56 (next to `heartRate: s.heartRate,`):
 
@@ -662,19 +662,19 @@ Expected: FAIL - compile error: `heading` is not a parameter of `pigeon.ProfileS
         heading: Value(s.heading),
 ```
 
-- [ ] **Step 5: Run test to verify it passes**
+- [x] **Step 5: Run test to verify it passes**
 
 Run: `flutter test test/features/dive_computer/data/services/parsed_dive_mapper_heading_test.dart`
 Expected: PASS.
 
-- [ ] **Step 6: Analyze + dive_computer test dir**
+- [x] **Step 6: Analyze + dive_computer test dir**
 
 Run: `flutter analyze`
 Expected: No issues found. (This also catches any remaining `ProfileSample`/`ProfilePointData` construction site that enumerates all fields as a missing-parameter error - fix any it reports by passing `heading: null` equivalent source data.)
 Run: `flutter test test/features/dive_computer/`
 Expected: PASS.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 dart format .
@@ -696,7 +696,7 @@ git commit -m "feat(download): persist heading in download and reparse pipelines
 - Consumes: `debugModeNotifierProvider` gating (existing), route name `flythroughSpike`.
 - Produces: proof that three_js renders + orbits on each platform; go/no-go input for PR 2.
 
-- [ ] **Step 1: Add the dependency**
+- [x] **Step 1: Add the dependency**
 
 In `pubspec.yaml` under the UI Components group (~44-58), alphabetically within the group:
 
@@ -707,7 +707,7 @@ In `pubspec.yaml` under the UI Components group (~44-58), alphabetically within 
 Run: `flutter pub get`
 Expected: resolves against Flutter 3.44.4 / Dart ^3.10.0. If resolution fails or the resolved version pulls a flutter_angle that will not build, STOP and report - this is the spike's first go/no-go gate.
 
-- [ ] **Step 2: Create the spike page**
+- [x] **Step 2: Create the spike page**
 
 Create `lib/features/settings/presentation/pages/flythrough_spike_page.dart`:
 
@@ -799,7 +799,7 @@ class _FlythroughSpikePageState extends State<FlythroughSpikePage> {
 
 Add `import 'dart:math' as math;` at the top. NOTE: this code targets the three_js 0.3.x API as documented; the spike's purpose is to validate that API. If a symbol differs (e.g. `OrbitControls` living in `package:three_js_controls`, or `Color.fromHex32` naming), consult https://pub.dev/documentation/three_js/latest/ and the package examples at https://github.com/Knightro63/three_js/tree/main/examples, adapt, and record every deviation in the task summary - those deviations are the spike's primary deliverable for PR 2 planning. If `OrbitControls` requires a separate dependency, add `three_js_controls` to pubspec in the same group.
 
-- [ ] **Step 3: Register the route**
+- [x] **Step 3: Register the route**
 
 In `lib/core/router/app_router.dart`: add the import near the debug-logs import (~line 97):
 
@@ -817,7 +817,7 @@ and inside the `/settings` route children (next to the `debug-logs` route ~911-9
         ),
 ```
 
-- [ ] **Step 4: Add the debug entry point**
+- [x] **Step 4: Add the debug entry point**
 
 In `lib/features/settings/presentation/pages/debug_log_viewer_page.dart`, add an AppBar action (find the existing `AppBar(` and its `actions:` list; create the list if absent):
 
@@ -839,12 +839,12 @@ flutter run -d macos
 
 Manual check: Settings -> tap version 5 times to enable debug mode -> Debug -> 3D spike icon. Expected: dark blue scene, light-blue helix, grid at surface level, drag orbits, scroll/pinch zooms. Navigate back, re-enter twice - no crash, no black screen (validates dispose). Record frame smoothness impression.
 
-- [ ] **Step 6: Analyze + widget smoke test**
+- [x] **Step 6: Analyze + widget smoke test**
 
 Run: `flutter analyze`
 Expected: No issues found. (No widget test for the GL page - it cannot render in the test harness; the route registration is exercised by existing router tests if any assert route tables.)
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 dart format .
@@ -858,7 +858,7 @@ git commit -m "feat(debug): add three_js flythrough spike page behind debug menu
 
 **Files:** none new
 
-- [ ] **Step 1: Format and analyze the whole project**
+- [x] **Step 1: Format and analyze the whole project**
 
 ```bash
 dart format .
@@ -867,7 +867,7 @@ flutter analyze
 
 Expected: format changes nothing (or commit what it fixes); analyze reports No issues found (never pipe through tail/head).
 
-- [ ] **Step 2: Run the affected test directories**
+- [x] **Step 2: Run the affected test directories**
 
 ```bash
 flutter test test/core/database/ test/features/dive_log/ test/features/dive_computer/
@@ -875,7 +875,7 @@ flutter test test/core/database/ test/features/dive_log/ test/features/dive_comp
 
 Expected: all PASS. (Do not run the whole suite in one command - known timeout trap; shard if broader coverage is wanted.)
 
-- [ ] **Step 3: Push and open the PR**
+- [x] **Step 3: Push and open the PR**
 
 ```bash
 git push --no-verify -u origin worktree-flythrough-pr1-heading
