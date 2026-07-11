@@ -7,7 +7,6 @@ import 'package:http/testing.dart';
 import 'package:submersion/core/services/lightroom/adobe_ims_auth_manager.dart';
 import 'package:submersion/core/services/lightroom/lightroom_api_client.dart';
 import 'package:submersion/core/services/lightroom/lightroom_auth_store.dart';
-import 'package:submersion/core/services/lightroom/lightroom_models.dart';
 
 import '../../../support/fake_keychain_storage.dart';
 
