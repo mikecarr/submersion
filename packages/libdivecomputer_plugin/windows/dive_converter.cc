@@ -114,6 +114,11 @@ ParsedDive ConvertParsedDive(const libdc_parsed_dive_t& dive) {
                     ? std::nullopt
                     : std::optional<int64_t>(
                           static_cast<int64_t>(s.heartbeat));
+            std::optional<double> heading =
+                (s.heading == UINT32_MAX)
+                    ? std::nullopt
+                    : std::optional<double>(
+                          static_cast<double>(s.heading));
             std::optional<int64_t> rbt =
                 (s.rbt == UINT32_MAX)
                     ? std::nullopt
@@ -142,6 +147,7 @@ ParsedDive ConvertParsedDive(const libdc_parsed_dive_t& dive) {
                     pressure ? &*pressure : nullptr,
                     tank_index ? &*tank_index : nullptr,
                     heart_rate ? &*heart_rate : nullptr,
+                    heading ? &*heading : nullptr,
                     setpoint ? &*setpoint : nullptr,
                     ppo2 ? &*ppo2 : nullptr,
                     cns ? &*cns : nullptr,

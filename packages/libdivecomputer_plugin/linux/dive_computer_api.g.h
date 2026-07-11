@@ -180,6 +180,7 @@ G_DECLARE_FINAL_TYPE(LibdivecomputerPluginProfileSample, libdivecomputer_plugin_
  * pressure_bar: field in this object.
  * tank_index: field in this object.
  * heart_rate: field in this object.
+ * heading: field in this object.
  * setpoint: field in this object.
  * ppo2: field in this object.
  * cns: field in this object.
@@ -200,7 +201,7 @@ G_DECLARE_FINAL_TYPE(LibdivecomputerPluginProfileSample, libdivecomputer_plugin_
  *
  * Returns: a new #LibdivecomputerPluginProfileSample
  */
-LibdivecomputerPluginProfileSample* libdivecomputer_plugin_profile_sample_new(int64_t time_seconds, double depth_meters, double* temperature_celsius, double* pressure_bar, int64_t* tank_index, int64_t* heart_rate, double* setpoint, double* ppo2, double* cns, int64_t* rbt, int64_t* deco_type, int64_t* deco_time, double* deco_depth, int64_t* tts, double* o2_sensor1, double* o2_sensor2, double* o2_sensor3, double* o2_sensor4, double* o2_sensor5, double* o2_sensor6, int64_t* gas_mix_index);
+LibdivecomputerPluginProfileSample* libdivecomputer_plugin_profile_sample_new(int64_t time_seconds, double depth_meters, double* temperature_celsius, double* pressure_bar, int64_t* tank_index, int64_t* heart_rate, double* heading, double* setpoint, double* ppo2, double* cns, int64_t* rbt, int64_t* deco_type, int64_t* deco_time, double* deco_depth, int64_t* tts, double* o2_sensor1, double* o2_sensor2, double* o2_sensor3, double* o2_sensor4, double* o2_sensor5, double* o2_sensor6, int64_t* gas_mix_index);
 
 /**
  * libdivecomputer_plugin_profile_sample_get_time_seconds
@@ -261,6 +262,17 @@ int64_t* libdivecomputer_plugin_profile_sample_get_tank_index(LibdivecomputerPlu
  * Returns: the field value.
  */
 int64_t* libdivecomputer_plugin_profile_sample_get_heart_rate(LibdivecomputerPluginProfileSample* object);
+
+/**
+ * libdivecomputer_plugin_profile_sample_get_heading
+ * @object: a #LibdivecomputerPluginProfileSample.
+ *
+ * Compass heading in degrees (0-359) from DC_SAMPLE_BEARING; null when the
+ * computer does not report bearing samples.
+ *
+ * Returns: the field value.
+ */
+double* libdivecomputer_plugin_profile_sample_get_heading(LibdivecomputerPluginProfileSample* object);
 
 /**
  * libdivecomputer_plugin_profile_sample_get_setpoint

@@ -170,6 +170,7 @@ class SerialDownloadRunner(private val context: Context) {
                 pressureBar = if (s[3].isNaN()) null else s[3],
                 tankIndex = if (s[4].toLong() == RUNNER_UINT32_SENTINEL) null else s[4].toLong(),
                 heartRate = if (s[5].toLong() == RUNNER_UINT32_SENTINEL) null else s[5].toLong(),
+                heading = if (s.size < 22 || s[21].toLong() == RUNNER_UINT32_SENTINEL) null else s[21],
                 setpoint = if (s[6].isNaN()) null else s[6],
                 ppo2 = if (s[7].isNaN()) null else s[7],
                 cns = if (s[8].isNaN()) null else s[8],

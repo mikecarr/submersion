@@ -174,6 +174,7 @@ class ProfileSample {
     const double* pressure_bar,
     const int64_t* tank_index,
     const int64_t* heart_rate,
+    const double* heading,
     const double* setpoint,
     const double* ppo2,
     const double* cns,
@@ -211,6 +212,12 @@ class ProfileSample {
   const int64_t* heart_rate() const;
   void set_heart_rate(const int64_t* value_arg);
   void set_heart_rate(int64_t value_arg);
+
+  // Compass heading in degrees (0-359) from DC_SAMPLE_BEARING; null when the
+  // computer does not report bearing samples.
+  const double* heading() const;
+  void set_heading(const double* value_arg);
+  void set_heading(double value_arg);
 
   const double* setpoint() const;
   void set_setpoint(const double* value_arg);
@@ -290,6 +297,7 @@ class ProfileSample {
   std::optional<double> pressure_bar_;
   std::optional<int64_t> tank_index_;
   std::optional<int64_t> heart_rate_;
+  std::optional<double> heading_;
   std::optional<double> setpoint_;
   std::optional<double> ppo2_;
   std::optional<double> cns_;

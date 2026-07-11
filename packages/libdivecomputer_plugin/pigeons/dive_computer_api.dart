@@ -58,6 +58,7 @@ class ProfileSample {
     this.pressureBar,
     this.tankIndex,
     this.heartRate,
+    this.heading,
     this.setpoint,
     this.ppo2,
     this.cns,
@@ -80,6 +81,10 @@ class ProfileSample {
   final double? pressureBar;
   final int? tankIndex;
   final int? heartRate;
+
+  /// Compass heading in degrees (0-359) from DC_SAMPLE_BEARING; null when the
+  /// computer does not report bearing samples.
+  final double? heading;
   final double? setpoint;
   final double? ppo2;
   final double? cns;

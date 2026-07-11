@@ -155,6 +155,9 @@ struct ProfileSample {
   var pressureBar: Double? = nil
   var tankIndex: Int64? = nil
   var heartRate: Int64? = nil
+  /// Compass heading in degrees (0-359) from DC_SAMPLE_BEARING; null when the
+  /// computer does not report bearing samples.
+  var heading: Double? = nil
   var setpoint: Double? = nil
   var ppo2: Double? = nil
   var cns: Double? = nil
@@ -185,21 +188,22 @@ struct ProfileSample {
     let pressureBar: Double? = nilOrValue(pigeonVar_list[3])
     let tankIndex: Int64? = nilOrValue(pigeonVar_list[4])
     let heartRate: Int64? = nilOrValue(pigeonVar_list[5])
-    let setpoint: Double? = nilOrValue(pigeonVar_list[6])
-    let ppo2: Double? = nilOrValue(pigeonVar_list[7])
-    let cns: Double? = nilOrValue(pigeonVar_list[8])
-    let rbt: Int64? = nilOrValue(pigeonVar_list[9])
-    let decoType: Int64? = nilOrValue(pigeonVar_list[10])
-    let decoTime: Int64? = nilOrValue(pigeonVar_list[11])
-    let decoDepth: Double? = nilOrValue(pigeonVar_list[12])
-    let tts: Int64? = nilOrValue(pigeonVar_list[13])
-    let o2Sensor1: Double? = nilOrValue(pigeonVar_list[14])
-    let o2Sensor2: Double? = nilOrValue(pigeonVar_list[15])
-    let o2Sensor3: Double? = nilOrValue(pigeonVar_list[16])
-    let o2Sensor4: Double? = nilOrValue(pigeonVar_list[17])
-    let o2Sensor5: Double? = nilOrValue(pigeonVar_list[18])
-    let o2Sensor6: Double? = nilOrValue(pigeonVar_list[19])
-    let gasMixIndex: Int64? = nilOrValue(pigeonVar_list[20])
+    let heading: Double? = nilOrValue(pigeonVar_list[6])
+    let setpoint: Double? = nilOrValue(pigeonVar_list[7])
+    let ppo2: Double? = nilOrValue(pigeonVar_list[8])
+    let cns: Double? = nilOrValue(pigeonVar_list[9])
+    let rbt: Int64? = nilOrValue(pigeonVar_list[10])
+    let decoType: Int64? = nilOrValue(pigeonVar_list[11])
+    let decoTime: Int64? = nilOrValue(pigeonVar_list[12])
+    let decoDepth: Double? = nilOrValue(pigeonVar_list[13])
+    let tts: Int64? = nilOrValue(pigeonVar_list[14])
+    let o2Sensor1: Double? = nilOrValue(pigeonVar_list[15])
+    let o2Sensor2: Double? = nilOrValue(pigeonVar_list[16])
+    let o2Sensor3: Double? = nilOrValue(pigeonVar_list[17])
+    let o2Sensor4: Double? = nilOrValue(pigeonVar_list[18])
+    let o2Sensor5: Double? = nilOrValue(pigeonVar_list[19])
+    let o2Sensor6: Double? = nilOrValue(pigeonVar_list[20])
+    let gasMixIndex: Int64? = nilOrValue(pigeonVar_list[21])
 
     return ProfileSample(
       timeSeconds: timeSeconds,
@@ -208,6 +212,7 @@ struct ProfileSample {
       pressureBar: pressureBar,
       tankIndex: tankIndex,
       heartRate: heartRate,
+      heading: heading,
       setpoint: setpoint,
       ppo2: ppo2,
       cns: cns,
@@ -233,6 +238,7 @@ struct ProfileSample {
       pressureBar,
       tankIndex,
       heartRate,
+      heading,
       setpoint,
       ppo2,
       cns,

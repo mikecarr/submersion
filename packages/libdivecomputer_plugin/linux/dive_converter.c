@@ -100,6 +100,10 @@ LibdivecomputerPluginParsedDive* convert_parsed_dive(
             int64_t* heart_rate =
                 (s->heartbeat == UINT32_MAX) ? NULL : &hr_val;
 
+            double heading_val = (double)s->heading;
+            double* heading =
+                (s->heading == UINT32_MAX) ? NULL : &heading_val;
+
             int64_t rbt_val = (int64_t)s->rbt;
             int64_t* rbt = (s->rbt == UINT32_MAX) ? NULL : &rbt_val;
 
@@ -130,7 +134,7 @@ LibdivecomputerPluginParsedDive* convert_parsed_dive(
             LibdivecomputerPluginProfileSample* sample =
                 libdivecomputer_plugin_profile_sample_new(
                     time_seconds, s->depth, temp_c, pressure, tank_index,
-                    heart_rate, setpoint, ppo2, cns, rbt, deco_type,
+                    heart_rate, heading, setpoint, ppo2, cns, rbt, deco_type,
                     deco_time, deco_depth, tts, o2_sensor[0], o2_sensor[1],
                     o2_sensor[2], o2_sensor[3], o2_sensor[4], o2_sensor[5],
                     gas_mix_index);
