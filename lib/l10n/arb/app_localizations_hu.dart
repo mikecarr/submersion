@@ -18569,4 +18569,106 @@ class AppLocalizationsHu extends AppLocalizations {
   @override
   String get diveLog_bulkEdit_membership_empty =>
       'Még nincsenek elemek a kiválasztott merüléseken';
+
+  @override
+  String get settings_mediaStorage_entry_title => 'Médiatárhely';
+
+  @override
+  String get settings_mediaStorage_entry_subtitle =>
+      'Fotó- és videóeredetik tárolása saját felhőtárhelyen';
+
+  @override
+  String get settings_mediaStorage_status_notConfigured =>
+      'Nincs médiatár csatlakoztatva ezen az eszközön';
+
+  @override
+  String settings_mediaStorage_status_connected(String hint) {
+    return 'Csatlakoztatva: $hint';
+  }
+
+  @override
+  String get settings_mediaStorage_test_success => 'Sikeres kapcsolat';
+
+  @override
+  String get settings_mediaStorage_saved => 'Médiatár csatlakoztatva';
+
+  @override
+  String get settings_mediaStorage_action_disconnect => 'Leválasztás';
+
+  @override
+  String get settings_mediaStorage_disconnect_confirm_title =>
+      'Leválasztja a médiatárat?';
+
+  @override
+  String get settings_mediaStorage_disconnect_confirm_body =>
+      'Az eszköz nem tölt fel és nem tölt le több médiát. A bucketből semmi sem törlődik.';
+
+  @override
+  String get settings_mediaStorage_action_copyFromSync =>
+      'Beállítások átvétele a szinkronizálásból';
+
+  @override
+  String get settings_mediaStorage_transfers_title => 'Átvitelek';
+
+  @override
+  String get settings_mediaStorage_transfers_entry => 'Átvitelek megtekintése';
+
+  @override
+  String get settings_mediaStorage_transfers_empty => 'Nincs átvitel';
+
+  @override
+  String get settings_mediaStorage_transfers_retry => 'Újra';
+
+  @override
+  String get settings_mediaStorage_transfers_clearCompleted =>
+      'Befejezettek törlése';
+
+  @override
+  String get settings_mediaStorage_transfers_state_pending => 'Várakozik';
+
+  @override
+  String get settings_mediaStorage_transfers_state_transferring => 'Feltöltés';
+
+  @override
+  String get settings_mediaStorage_transfers_state_done => 'Kész';
+
+  @override
+  String get settings_mediaStorage_transfers_state_failed => 'Sikertelen';
+
+  @override
+  String get settings_mediaStorage_backfill_action =>
+      'Meglévő könyvtár feltöltése';
+
+  @override
+  String settings_mediaStorage_backfill_enqueued(int count) {
+    return '$count feltöltés sorban';
+  }
+
+  @override
+  String get settings_mediaStorage_policy_autoUpload =>
+      'Fotók automatikus feltöltése';
+
+  @override
+  String get settings_mediaStorage_policy_photosOnCellular =>
+      'Fotók feltöltése mobilhálózaton';
+
+  @override
+  String get settings_mediaStorage_provider_label => 'Szolgáltató';
+
+  @override
+  String get settings_mediaStorage_connect_dropbox_hint =>
+      'A felhőszinkronizálás Dropbox-kapcsolatát használja. A média a Dropbox alkalmazásmappájában tárolódik.';
+
+  @override
+  String get settings_mediaStorage_connect_gdrive_hint =>
+      'Google-fiókkal jelentkezik be. A média az alkalmazás privát Drive-területén tárolódik.';
+
+  @override
+  String get settings_mediaStorage_connect_icloud_hint =>
+      'A média az alkalmazás iCloud-tárolójában tárolódik, és az Apple ID-n keresztül szinkronizálódik.';
+
+  @override
+  String settings_mediaStorage_connect_action(String provider) {
+    return '$provider csatlakoztatása';
+  }
 }

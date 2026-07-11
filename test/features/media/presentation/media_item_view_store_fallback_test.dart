@@ -1,0 +1,228 @@
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:drift/native.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:submersion/core/database/local_cache_database.dart';
+import 'package:submersion/core/services/media_store/store_keys.dart';
+import 'package:submersion/l10n/arb/app_localizations.dart';
+import 'package:submersion/features/media/data/resolvers/media_store_resolver.dart';
+import 'package:submersion/features/media/data/services/media_source_resolver_registry.dart';
+import 'package:submersion/features/media/domain/entities/media_item.dart';
+import 'package:submersion/features/media/domain/entities/media_source_type.dart';
+import 'package:submersion/features/media/domain/services/media_source_resolver.dart';
+import 'package:submersion/features/media/domain/value_objects/media_source_data.dart';
+import 'package:submersion/features/media/domain/value_objects/media_source_metadata.dart';
+import 'package:submersion/features/media/domain/value_objects/verify_result.dart';
+import 'package:submersion/features/media/presentation/providers/media_resolver_providers.dart';
+import 'package:submersion/features/media/presentation/widgets/media_item_view.dart';
+import 'package:submersion/features/media/presentation/widgets/unavailable_media_placeholder.dart';
+import 'package:submersion/features/media_store/data/media_cache_store.dart';
+import 'package:submersion/features/media_store/presentation/providers/media_store_providers.dart';
+
+import '../../../helpers/in_memory_media_object_store.dart';
+
+/// Valid 1x1 transparent PNG, generated with python3 (struct + zlib).
+const _onePixelPngBase64 =
+    'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVR4nGNgAAIAAAUAAXpe'
+    'qz8AAAAASUVORK5CYII=';
+
+class _UnavailableGalleryResolver implements MediaSourceResolver {
+  const _UnavailableGalleryResolver();
+
+  @override
+  MediaSourceType get sourceType => MediaSourceType.platformGallery;
+
+  @override
+  bool canResolveOnThisDevice(MediaItem item) => false;
+
+  @override
+  Future<MediaSourceData> resolve(MediaItem item) async =>
+      const UnavailableData(kind: UnavailableKind.fromOtherDevice);
+
+  @override
+  Future<MediaSourceData> resolveThumbnail(
+    MediaItem item, {
+    required Size target,
+  }) async => const UnavailableData(kind: UnavailableKind.fromOtherDevice);
+
+  @override
+  Future<MediaSourceMetadata?> extractMetadata(MediaItem item) async => null;
+
+  @override
+  Future<VerifyResult> verify(MediaItem item) async =>
+      VerifyResult.fromOtherDevice;
+}
+
+void main() {
+  late LocalCacheDatabase db;
+  late Directory root;
+  late InMemoryMediaObjectStore store;
+  late MediaCacheStore cache;
+
+  setUp(() async {
+    db = LocalCacheDatabase(NativeDatabase.memory());
+    root = await Directory.systemTemp.createTemp('miv_fallback_test');
+    store = InMemoryMediaObjectStore();
+    cache = MediaCacheStore(database: db, root: root);
+  });
+
+  tearDown(() async {
+    await db.close();
+    await root.delete(recursive: true);
+  });
+
+  Widget app(MediaItem item, {MediaStoreRuntime? runtime}) => ProviderScope(
+    overrides: [
+      mediaSourceResolverRegistryProvider.overrideWithValue(
+        MediaSourceResolverRegistry({
+          MediaSourceType.platformGallery: const _UnavailableGalleryResolver(),
+        }),
+      ),
+      mediaStoreRuntimeProvider.overrideWith((ref) async => runtime),
+    ],
+    child: MaterialApp(
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      home: Scaffold(
+        body: SizedBox(
+          width: 100,
+          height: 100,
+          child: MediaItemView(item: item),
+        ),
+      ),
+    ),
+  );
+
+  MediaItem galleryItem({required String hash}) => MediaItem(
+    id: 'm1',
+    mediaType: MediaType.photo,
+    sourceType: MediaSourceType.platformGallery,
+    platformAssetId: 'asset-from-other-device',
+    originalFilename: 'reef.png',
+    takenAt: DateTime(2026),
+    createdAt: DateTime(2026),
+    updatedAt: DateTime(2026),
+    contentHash: hash,
+    remoteUploadedAt: DateTime(2026, 7, 1),
+  );
+
+  testWidgets('renders the store bytes when native resolution is '
+      'unavailable', (tester) async {
+    await tester.runAsync(() async {
+      final bytes = base64Decode(_onePixelPngBase64);
+      final seed = File('${root.path}/seed.png');
+      await seed.writeAsBytes(bytes, flush: true);
+      final digest = await sha256OfFile(seed);
+      store.objects[StoreKeys.objectKey(digest.hash, extension: 'png')] = bytes;
+
+      final runtime = MediaStoreRuntime(
+        storeId: 'store-1',
+        store: store,
+        cache: cache,
+        resolver: MediaStoreResolver(store: store, cache: cache),
+      );
+
+      await tester.pumpWidget(
+        app(galleryItem(hash: digest.hash), runtime: runtime),
+      );
+      for (var i = 0; i < 40; i++) {
+        await Future<void>.delayed(const Duration(milliseconds: 20));
+        await tester.pump();
+        if (find.byType(Image).evaluate().isNotEmpty) break;
+      }
+    });
+
+    expect(find.byType(Image), findsOneWidget);
+    expect(find.byType(UnavailableMediaPlaceholder), findsNothing);
+  });
+
+  testWidgets('a thumbnail renders from the store when only the thumb '
+      'stamp is present', (tester) async {
+    await tester.runAsync(() async {
+      final bytes = base64Decode(_onePixelPngBase64);
+      final hash = 'a1${'9' * 62}';
+      store.objects[StoreKeys.thumbKey(hash)] = bytes;
+
+      final runtime = MediaStoreRuntime(
+        storeId: 'store-1',
+        store: store,
+        cache: cache,
+        resolver: MediaStoreResolver(store: store, cache: cache),
+      );
+
+      // Thumb uploaded, original still in flight on the other device.
+      // Built directly (not via galleryItem().copyWith) because copyWith
+      // cannot clear remoteUploadedAt back to null.
+      final earlyRow = MediaItem(
+        id: 'm-early',
+        mediaType: MediaType.photo,
+        sourceType: MediaSourceType.platformGallery,
+        platformAssetId: 'asset-from-other-device',
+        originalFilename: 'reef.png',
+        takenAt: DateTime(2026),
+        createdAt: DateTime(2026),
+        updatedAt: DateTime(2026),
+        contentHash: hash,
+        remoteThumbUploadedAt: DateTime(2026, 7, 1),
+      );
+      expect(earlyRow.remoteUploadedAt, isNull);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            mediaSourceResolverRegistryProvider.overrideWithValue(
+              MediaSourceResolverRegistry({
+                MediaSourceType.platformGallery:
+                    const _UnavailableGalleryResolver(),
+              }),
+            ),
+            mediaStoreRuntimeProvider.overrideWith((ref) async => runtime),
+          ],
+          child: MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: Scaffold(
+              body: SizedBox(
+                width: 100,
+                height: 100,
+                child: MediaItemView(
+                  item: earlyRow,
+                  thumbnail: true,
+                  targetSize: const Size(100, 100),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      for (var i = 0; i < 40; i++) {
+        await Future<void>.delayed(const Duration(milliseconds: 20));
+        await tester.pump();
+        if (find.byType(Image).evaluate().isNotEmpty) break;
+      }
+    });
+
+    expect(find.byType(Image), findsOneWidget);
+    expect(find.byType(UnavailableMediaPlaceholder), findsNothing);
+  });
+
+  testWidgets('keeps the native placeholder when no store runtime '
+      'exists', (tester) async {
+    await tester.runAsync(() async {
+      await tester.pumpWidget(app(galleryItem(hash: 'a' * 64)));
+      for (var i = 0; i < 10; i++) {
+        await Future<void>.delayed(const Duration(milliseconds: 20));
+        await tester.pump();
+        if (find.byType(UnavailableMediaPlaceholder).evaluate().isNotEmpty) {
+          break;
+        }
+      }
+    });
+
+    expect(find.byType(UnavailableMediaPlaceholder), findsOneWidget);
+    expect(find.byType(Image), findsNothing);
+  });
+}

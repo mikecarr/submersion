@@ -18686,4 +18686,107 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get diveLog_bulkEdit_membership_empty =>
       'Aucun élément sur les plongées sélectionnées pour l\'instant';
+
+  @override
+  String get settings_mediaStorage_entry_title => 'Stockage des médias';
+
+  @override
+  String get settings_mediaStorage_entry_subtitle =>
+      'Stockez les originaux photo et vidéo dans votre propre espace cloud';
+
+  @override
+  String get settings_mediaStorage_status_notConfigured =>
+      'Aucun stockage de médias connecté sur cet appareil';
+
+  @override
+  String settings_mediaStorage_status_connected(String hint) {
+    return 'Connecté à $hint';
+  }
+
+  @override
+  String get settings_mediaStorage_test_success => 'Connexion réussie';
+
+  @override
+  String get settings_mediaStorage_saved => 'Stockage des médias connecté';
+
+  @override
+  String get settings_mediaStorage_action_disconnect => 'Déconnecter';
+
+  @override
+  String get settings_mediaStorage_disconnect_confirm_title =>
+      'Déconnecter le stockage des médias ?';
+
+  @override
+  String get settings_mediaStorage_disconnect_confirm_body =>
+      'Cet appareil cesse d\'envoyer et de récupérer des médias. Rien n\'est supprimé de votre bucket.';
+
+  @override
+  String get settings_mediaStorage_action_copyFromSync =>
+      'Copier les réglages de Sync';
+
+  @override
+  String get settings_mediaStorage_transfers_title => 'Transferts';
+
+  @override
+  String get settings_mediaStorage_transfers_entry => 'Voir les transferts';
+
+  @override
+  String get settings_mediaStorage_transfers_empty => 'Aucun transfert';
+
+  @override
+  String get settings_mediaStorage_transfers_retry => 'Réessayer';
+
+  @override
+  String get settings_mediaStorage_transfers_clearCompleted =>
+      'Effacer les terminés';
+
+  @override
+  String get settings_mediaStorage_transfers_state_pending => 'En attente';
+
+  @override
+  String get settings_mediaStorage_transfers_state_transferring =>
+      'Envoi en cours';
+
+  @override
+  String get settings_mediaStorage_transfers_state_done => 'Terminé';
+
+  @override
+  String get settings_mediaStorage_transfers_state_failed => 'Échec';
+
+  @override
+  String get settings_mediaStorage_backfill_action =>
+      'Envoyer la bibliothèque existante';
+
+  @override
+  String settings_mediaStorage_backfill_enqueued(int count) {
+    return '$count envois en file';
+  }
+
+  @override
+  String get settings_mediaStorage_policy_autoUpload =>
+      'Envoyer les photos automatiquement';
+
+  @override
+  String get settings_mediaStorage_policy_photosOnCellular =>
+      'Envoyer les photos en cellulaire';
+
+  @override
+  String get settings_mediaStorage_provider_label => 'Fournisseur';
+
+  @override
+  String get settings_mediaStorage_connect_dropbox_hint =>
+      'Utilise votre connexion Dropbox de la synchronisation cloud. Les médias sont stockés dans le dossier d\'application Dropbox.';
+
+  @override
+  String get settings_mediaStorage_connect_gdrive_hint =>
+      'Connexion avec Google. Les médias sont stockés dans l\'espace Drive privé de cette application.';
+
+  @override
+  String get settings_mediaStorage_connect_icloud_hint =>
+      'Les médias sont stockés dans le conteneur iCloud de cette application et se synchronisent via votre identifiant Apple.';
+
+  @override
+  String settings_mediaStorage_connect_action(String provider) {
+    return 'Connecter $provider';
+  }
 }

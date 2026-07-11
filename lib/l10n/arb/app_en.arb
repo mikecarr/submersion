@@ -3439,7 +3439,10 @@
   "@diveLog_sitePicker_distanceAway": {
     "description": "A site's distance from the reference point; {distance} already includes the unit, e.g. '1.2 km' or '800 ft'",
     "placeholders": {
-      "distance": { "type": "String", "example": "1.2 km" }
+      "distance": {
+        "type": "String",
+        "example": "1.2 km"
+      }
     }
   },
   "@diveLog_sitePicker_sortedByDiveDistance": {
@@ -9130,22 +9133,22 @@
   "@universalImport_action_selectFile": {
     "description": "Button label for the file picker button"
   },
-  "@universalImport_action_selectFiles":   {
-      "description": "Button label for the multi-select file picker button"
+  "@universalImport_action_selectFiles": {
+    "description": "Button label for the multi-select file picker button"
   },
-  "@universalImport_action_chooseFolder":   {
-      "description": "Desktop-only button that picks a folder and scans it for importable dive files"
+  "@universalImport_action_chooseFolder": {
+    "description": "Desktop-only button that picks a folder and scans it for importable dive files"
   },
-  "@universalImport_triage_title":   {
-      "description": "Header for the batch file triage list"
+  "@universalImport_triage_title": {
+    "description": "Header for the batch file triage list"
   },
-  "@universalImport_triage_readyCount":   {
-      "description": "How many selected files will join the import batch",
-      "placeholders": {
-          "count": {
-              "type": "num"
-          }
+  "@universalImport_triage_readyCount": {
+    "description": "How many selected files will join the import batch",
+    "placeholders": {
+      "count": {
+        "type": "num"
       }
+    }
   },
   "@universalImport_label_filesSelected": {
     "description": "Selected-files card label on the file selection step when a batch is active",
@@ -9155,57 +9158,57 @@
       }
     }
   },
-  "@universalImport_triage_excludedCsv":   {
-      "description": "Triage status for CSV files, which need the single-file mapping wizard"
+  "@universalImport_triage_excludedCsv": {
+    "description": "Triage status for CSV files, which need the single-file mapping wizard"
   },
-  "@universalImport_triage_unsupported":   {
-      "description": "Triage status for files whose format has no parser"
+  "@universalImport_triage_unsupported": {
+    "description": "Triage status for files whose format has no parser"
   },
-  "@universalImport_triage_parseFailed":   {
-      "description": "Triage status for files that failed to parse"
+  "@universalImport_triage_parseFailed": {
+    "description": "Triage status for files that failed to parse"
   },
-  "@universalImport_triage_parsing":   {
-      "description": "Progress label while parsing a batch of files",
-      "placeholders": {
-          "current": {
-              "type": "int"
-          },
-          "total": {
-              "type": "int"
-          }
+  "@universalImport_triage_parsing": {
+    "description": "Progress label while parsing a batch of files",
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
       }
+    }
   },
-  "@universalImport_triage_cancelParsing":   {
-      "description": "Button that cancels a running batch parse at the next file boundary"
+  "@universalImport_triage_cancelParsing": {
+    "description": "Button that cancels a running batch parse at the next file boundary"
   },
-  "@universalImport_triage_allExcluded":   {
-      "description": "Shown when every selected file was excluded from the batch"
+  "@universalImport_triage_allExcluded": {
+    "description": "Shown when every selected file was excluded from the batch"
   },
-  "@universalImport_triage_noneImportable":   {
-      "description": "Shown when no selected file can be imported and none were excluded specifically because they are CSV (format-neutral variant of universalImport_triage_allExcluded)"
+  "@universalImport_triage_noneImportable": {
+    "description": "Shown when no selected file can be imported and none were excluded specifically because they are CSV (format-neutral variant of universalImport_triage_allExcluded)"
   },
-  "@universalImport_review_inBatchDuplicate":   {
-      "description": "Expanded duplicate card body when the match is another dive in the same import batch"
+  "@universalImport_review_inBatchDuplicate": {
+    "description": "Expanded duplicate card body when the match is another dive in the same import batch"
   },
-  "@universalImport_summary_filesTitle":   {
-      "description": "Section header for the per-file outcome list on the bulk import summary"
+  "@universalImport_summary_filesTitle": {
+    "description": "Section header for the per-file outcome list on the bulk import summary"
   },
-  "@universalImport_summary_fileImported":   {
-      "description": "Per-file summary line for a successfully imported file",
-      "placeholders": {
-          "count": {
-              "type": "num"
-          }
+  "@universalImport_summary_fileImported": {
+    "description": "Per-file summary line for a successfully imported file",
+    "placeholders": {
+      "count": {
+        "type": "num"
       }
+    }
   },
-  "@universalImport_summary_fileNeedsIndividualImport":   {
-      "description": "Per-file summary line for CSV files excluded from the batch"
+  "@universalImport_summary_fileNeedsIndividualImport": {
+    "description": "Per-file summary line for CSV files excluded from the batch"
   },
-  "@universalImport_summary_fileUnsupported":   {
-      "description": "Per-file summary line for unsupported files"
+  "@universalImport_summary_fileUnsupported": {
+    "description": "Per-file summary line for unsupported files"
   },
-  "@universalImport_summary_fileParseFailed":   {
-      "description": "Per-file summary line for files that failed to parse"
+  "@universalImport_summary_fileParseFailed": {
+    "description": "Per-file summary line for files that failed to parse"
   },
   "@universalImport_bulk_consolidateMatched": {
     "description": "Bulk action button that consolidates all matched pending duplicate dives",
@@ -11706,13 +11709,83 @@
   "db_location_sd_card": "SD card",
   "db_location_external_note": "Files here are removed if you uninstall the app.",
   "diveLog_bulkEdit_membership_onAll": "on all {count}",
-  "@diveLog_bulkEdit_membership_onAll": { "placeholders": { "count": { "type": "int" } } },
+  "@diveLog_bulkEdit_membership_onAll": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "diveLog_bulkEdit_membership_onSome": "on {count} of {total}",
-  "@diveLog_bulkEdit_membership_onSome": { "placeholders": { "count": { "type": "int" }, "total": { "type": "int" } } },
+  "@diveLog_bulkEdit_membership_onSome": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "diveLog_bulkEdit_membership_adding": "adding to all {total}",
-  "@diveLog_bulkEdit_membership_adding": { "placeholders": { "total": { "type": "int" } } },
+  "@diveLog_bulkEdit_membership_adding": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "diveLog_bulkEdit_membership_removing": "removing from all",
   "@diveLog_bulkEdit_membership_removing": {},
   "diveLog_bulkEdit_membership_empty": "No items on the selected dives yet",
-  "@diveLog_bulkEdit_membership_empty": {}
+  "@diveLog_bulkEdit_membership_empty": {},
+  "settings_mediaStorage_entry_title": "Media Storage",
+  "settings_mediaStorage_entry_subtitle": "Store photo and video originals in your own cloud storage",
+  "settings_mediaStorage_status_notConfigured": "No media store connected on this device",
+  "settings_mediaStorage_status_connected": "Connected to {hint}",
+  "@settings_mediaStorage_status_connected": {
+    "placeholders": {
+      "hint": {
+        "type": "String"
+      }
+    }
+  },
+  "settings_mediaStorage_test_success": "Connection successful",
+  "settings_mediaStorage_saved": "Media store connected",
+  "settings_mediaStorage_action_disconnect": "Disconnect",
+  "settings_mediaStorage_disconnect_confirm_title": "Disconnect media store?",
+  "settings_mediaStorage_disconnect_confirm_body": "This device stops uploading and fetching media. Nothing in your bucket is deleted.",
+  "settings_mediaStorage_action_copyFromSync": "Copy settings from Sync",
+  "settings_mediaStorage_transfers_title": "Transfers",
+  "settings_mediaStorage_transfers_entry": "View transfers",
+  "settings_mediaStorage_transfers_empty": "No transfers",
+  "settings_mediaStorage_transfers_retry": "Retry",
+  "settings_mediaStorage_transfers_clearCompleted": "Clear completed",
+  "settings_mediaStorage_transfers_state_pending": "Waiting",
+  "settings_mediaStorage_transfers_state_transferring": "Uploading",
+  "settings_mediaStorage_transfers_state_done": "Done",
+  "settings_mediaStorage_transfers_state_failed": "Failed",
+  "settings_mediaStorage_backfill_action": "Upload existing library",
+  "settings_mediaStorage_backfill_enqueued": "{count} uploads queued",
+  "@settings_mediaStorage_backfill_enqueued": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "settings_mediaStorage_policy_autoUpload": "Upload photos automatically",
+  "settings_mediaStorage_policy_photosOnCellular": "Upload photos on cellular",
+  "settings_mediaStorage_provider_label": "Provider",
+  "settings_mediaStorage_connect_dropbox_hint": "Uses your Dropbox connection from Cloud Sync. Media is stored in your Dropbox app folder.",
+  "settings_mediaStorage_connect_gdrive_hint": "Signs in with Google. Media is stored in this app's private Drive space.",
+  "settings_mediaStorage_connect_icloud_hint": "Media is stored in this app's iCloud container and syncs through your Apple ID.",
+  "settings_mediaStorage_connect_action": "Connect {provider}",
+  "@settings_mediaStorage_connect_action": {
+    "placeholders": {
+      "provider": {
+        "type": "String"
+      }
+    }
+  }
 }

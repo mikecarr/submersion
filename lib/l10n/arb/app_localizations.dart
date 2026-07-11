@@ -31129,6 +31129,174 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No items on the selected dives yet'**
   String get diveLog_bulkEdit_membership_empty;
+
+  /// No description provided for @settings_mediaStorage_entry_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Media Storage'**
+  String get settings_mediaStorage_entry_title;
+
+  /// No description provided for @settings_mediaStorage_entry_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Store photo and video originals in your own cloud storage'**
+  String get settings_mediaStorage_entry_subtitle;
+
+  /// No description provided for @settings_mediaStorage_status_notConfigured.
+  ///
+  /// In en, this message translates to:
+  /// **'No media store connected on this device'**
+  String get settings_mediaStorage_status_notConfigured;
+
+  /// No description provided for @settings_mediaStorage_status_connected.
+  ///
+  /// In en, this message translates to:
+  /// **'Connected to {hint}'**
+  String settings_mediaStorage_status_connected(String hint);
+
+  /// No description provided for @settings_mediaStorage_test_success.
+  ///
+  /// In en, this message translates to:
+  /// **'Connection successful'**
+  String get settings_mediaStorage_test_success;
+
+  /// No description provided for @settings_mediaStorage_saved.
+  ///
+  /// In en, this message translates to:
+  /// **'Media store connected'**
+  String get settings_mediaStorage_saved;
+
+  /// No description provided for @settings_mediaStorage_action_disconnect.
+  ///
+  /// In en, this message translates to:
+  /// **'Disconnect'**
+  String get settings_mediaStorage_action_disconnect;
+
+  /// No description provided for @settings_mediaStorage_disconnect_confirm_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Disconnect media store?'**
+  String get settings_mediaStorage_disconnect_confirm_title;
+
+  /// No description provided for @settings_mediaStorage_disconnect_confirm_body.
+  ///
+  /// In en, this message translates to:
+  /// **'This device stops uploading and fetching media. Nothing in your bucket is deleted.'**
+  String get settings_mediaStorage_disconnect_confirm_body;
+
+  /// No description provided for @settings_mediaStorage_action_copyFromSync.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy settings from Sync'**
+  String get settings_mediaStorage_action_copyFromSync;
+
+  /// No description provided for @settings_mediaStorage_transfers_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Transfers'**
+  String get settings_mediaStorage_transfers_title;
+
+  /// No description provided for @settings_mediaStorage_transfers_entry.
+  ///
+  /// In en, this message translates to:
+  /// **'View transfers'**
+  String get settings_mediaStorage_transfers_entry;
+
+  /// No description provided for @settings_mediaStorage_transfers_empty.
+  ///
+  /// In en, this message translates to:
+  /// **'No transfers'**
+  String get settings_mediaStorage_transfers_empty;
+
+  /// No description provided for @settings_mediaStorage_transfers_retry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get settings_mediaStorage_transfers_retry;
+
+  /// No description provided for @settings_mediaStorage_transfers_clearCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear completed'**
+  String get settings_mediaStorage_transfers_clearCompleted;
+
+  /// No description provided for @settings_mediaStorage_transfers_state_pending.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting'**
+  String get settings_mediaStorage_transfers_state_pending;
+
+  /// No description provided for @settings_mediaStorage_transfers_state_transferring.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploading'**
+  String get settings_mediaStorage_transfers_state_transferring;
+
+  /// No description provided for @settings_mediaStorage_transfers_state_done.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get settings_mediaStorage_transfers_state_done;
+
+  /// No description provided for @settings_mediaStorage_transfers_state_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed'**
+  String get settings_mediaStorage_transfers_state_failed;
+
+  /// No description provided for @settings_mediaStorage_backfill_action.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload existing library'**
+  String get settings_mediaStorage_backfill_action;
+
+  /// No description provided for @settings_mediaStorage_backfill_enqueued.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} uploads queued'**
+  String settings_mediaStorage_backfill_enqueued(int count);
+
+  /// No description provided for @settings_mediaStorage_policy_autoUpload.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload photos automatically'**
+  String get settings_mediaStorage_policy_autoUpload;
+
+  /// No description provided for @settings_mediaStorage_policy_photosOnCellular.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload photos on cellular'**
+  String get settings_mediaStorage_policy_photosOnCellular;
+
+  /// No description provided for @settings_mediaStorage_provider_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Provider'**
+  String get settings_mediaStorage_provider_label;
+
+  /// No description provided for @settings_mediaStorage_connect_dropbox_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Uses your Dropbox connection from Cloud Sync. Media is stored in your Dropbox app folder.'**
+  String get settings_mediaStorage_connect_dropbox_hint;
+
+  /// No description provided for @settings_mediaStorage_connect_gdrive_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Signs in with Google. Media is stored in this app\'s private Drive space.'**
+  String get settings_mediaStorage_connect_gdrive_hint;
+
+  /// No description provided for @settings_mediaStorage_connect_icloud_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Media is stored in this app\'s iCloud container and syncs through your Apple ID.'**
+  String get settings_mediaStorage_connect_icloud_hint;
+
+  /// No description provided for @settings_mediaStorage_connect_action.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect {provider}'**
+  String settings_mediaStorage_connect_action(String provider);
 }
 
 class _AppLocalizationsDelegate

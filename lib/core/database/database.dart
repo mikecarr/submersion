@@ -845,6 +845,13 @@ class Media extends Table {
   TextColumn get connectorAccountId => text().nullable()();
   TextColumn get remoteAssetId => text().nullable()();
   TextColumn get originDeviceId => text().nullable()();
+  // Media store (v103) - content identity + upload confirmation stamps.
+  // Nullable adds; a row with remote_uploaded_at set has its original bytes
+  // confirmed present in the library's media store at the content-hash key.
+  TextColumn get contentHash => text().nullable()();
+  IntColumn get contentSizeBytes => integer().nullable()();
+  IntColumn get remoteUploadedAt => integer().nullable()();
+  IntColumn get remoteThumbUploadedAt => integer().nullable()();
   // coverage:ignore-end
   IntColumn get createdAt => integer()();
   IntColumn get updatedAt => integer()();
@@ -1003,6 +1010,21 @@ class MediaFetchDiagnostics extends Table {
 
   @override
   Set<Column> get primaryKey => {mediaItemId};
+}
+
+/// The library's media store descriptor (secret-free). Synced so other
+/// devices learn a store exists and can prompt to connect. Exactly one
+/// active row is expected; credentials never live here (keychain only).
+class MediaStores extends Table {
+  TextColumn get id => text()(); // storeId UUID, matches smv1/store.json
+  TextColumn get providerType => text()(); // 's3' (Phase 4 adds others)
+  TextColumn get displayHint => text()(); // e.g. 'dive-media @ minio.host'
+  IntColumn get createdAt => integer()();
+  IntColumn get updatedAt => integer()();
+  TextColumn get hlc => text().nullable()();
+
+  @override
+  Set<Column> get primaryKey => {id};
 }
 // coverage:ignore-end
 
@@ -2074,6 +2096,7 @@ class FieldPresets extends Table {
     ConnectorAccounts,
     NetworkCredentialHosts,
     MediaFetchDiagnostics,
+    MediaStores,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -2191,6 +2214,38 @@ class AppDatabase extends _$AppDatabase {
     102,
     103,
   ];
+
+  /// Idempotent DDL for the v103 media store objects. Called from the v103
+  /// onUpgrade block and from the beforeOpen backstop so a parallel-branch
+  /// schema-version collision cannot strand a database without them.
+  Future<void> _assertMediaStoreSchema() async {
+    // An empty PRAGMA result means the media table itself is absent (only
+    // possible in minimal test fixtures); skip the ALTERs rather than fail.
+    final cols = await customSelect("PRAGMA table_info('media')").get();
+    if (cols.isNotEmpty) {
+      final names = cols.map((c) => c.read<String>('name')).toSet();
+      Future<void> add(String name, String type) async {
+        if (!names.contains(name)) {
+          await customStatement('ALTER TABLE media ADD COLUMN $name $type');
+        }
+      }
+
+      await add('content_hash', 'TEXT');
+      await add('content_size_bytes', 'INTEGER');
+      await add('remote_uploaded_at', 'INTEGER');
+      await add('remote_thumb_uploaded_at', 'INTEGER');
+    }
+    await customStatement('''
+      CREATE TABLE IF NOT EXISTS media_stores (
+        id TEXT NOT NULL PRIMARY KEY,
+        provider_type TEXT NOT NULL,
+        display_hint TEXT NOT NULL,
+        created_at INTEGER NOT NULL,
+        updated_at INTEGER NOT NULL,
+        hlc TEXT
+      )
+    ''');
+  }
 
   /// Tables that carry a per-row Hybrid Logical Clock for cross-device conflict
   /// resolution (plus sync_metadata for the device clock). Shared between the
@@ -5039,12 +5094,22 @@ class AppDatabase extends _$AppDatabase {
         }
         if (from < 102) await reportProgress();
         if (from < 103) {
+          // Two features independently claimed v103 on parallel branches
+          // (media store spec 2026-07-10; dive roles #551/#547). Both
+          // blocks are idempotent and touch disjoint tables, so the merge
+          // keeps both and beforeOpen re-asserts each against the
+          // schema-version collision this very overlap illustrates.
+
+          // Media store Phase 1: content identity + upload stamps on media,
+          // plus the secret-free store descriptor. Guarded ALTERs and
+          // IF NOT EXISTS keep this idempotent.
+          await _assertMediaStoreSchema();
+
           // Dive roles vocabulary (#551) + the diver's own role (#547).
           // createTable is IF NOT EXISTS and the seed is INSERT OR IGNORE,
-          // so this block is idempotent; beforeOpen re-asserts the same
-          // objects against schema-version collisions. The existence guards
-          // (divers for the seed's FK parent, dives for the ALTER) only
-          // matter for minimal test-fixture databases.
+          // so this block is idempotent. The existence guards (divers for
+          // the seed's FK parent, dives for the ALTER) only matter for
+          // minimal test-fixture databases.
           await m.createTable(diveRoles);
           final diversTable = await customSelect(
             "SELECT name FROM sqlite_master "
@@ -5070,6 +5135,10 @@ class AppDatabase extends _$AppDatabase {
       beforeOpen: (details) async {
         // Enable foreign keys
         await customStatement('PRAGMA foreign_keys = ON');
+
+        // v103 backstop: re-assert media store schema (the helper is
+        // self-guarding when the media table is absent).
+        await _assertMediaStoreSchema();
 
         // Built-in dive types are reference data: identical on every device and
         // undeletable through DiveTypeRepository. Nothing else restores them --

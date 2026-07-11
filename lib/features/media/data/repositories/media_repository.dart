@@ -138,6 +138,14 @@ class MediaRepository {
               connectorAccountId: Value(item.connectorAccountId),
               remoteAssetId: Value(item.remoteAssetId),
               originDeviceId: Value(effectiveDeviceId),
+              contentHash: Value(item.contentHash),
+              contentSizeBytes: Value(item.contentSizeBytes),
+              remoteUploadedAt: Value(
+                item.remoteUploadedAt?.millisecondsSinceEpoch,
+              ),
+              remoteThumbUploadedAt: Value(
+                item.remoteThumbUploadedAt?.millisecondsSinceEpoch,
+              ),
               createdAt: Value(now.millisecondsSinceEpoch),
               updatedAt: Value(now.millisecondsSinceEpoch),
             ),
@@ -206,6 +214,14 @@ class MediaRepository {
           connectorAccountId: Value(item.connectorAccountId),
           remoteAssetId: Value(item.remoteAssetId),
           originDeviceId: Value(item.originDeviceId),
+          contentHash: Value(item.contentHash),
+          contentSizeBytes: Value(item.contentSizeBytes),
+          remoteUploadedAt: Value(
+            item.remoteUploadedAt?.millisecondsSinceEpoch,
+          ),
+          remoteThumbUploadedAt: Value(
+            item.remoteThumbUploadedAt?.millisecondsSinceEpoch,
+          ),
           updatedAt: Value(now),
         ),
       );
@@ -717,6 +733,87 @@ class MediaRepository {
     }
   }
 
+  /// Stamps the content identity computed by the upload pipeline. A synced
+  /// row update: peers learn the hash even before upload confirmation.
+  Future<void> stampContentIdentity(
+    String mediaId, {
+    required String contentHash,
+    required int sizeBytes,
+  }) async {
+    final now = DateTime.now().millisecondsSinceEpoch;
+    await (_db.update(_db.media)..where((t) => t.id.equals(mediaId))).write(
+      MediaCompanion(
+        contentHash: Value(contentHash),
+        contentSizeBytes: Value(sizeBytes),
+        updatedAt: Value(now),
+      ),
+    );
+    await _syncRepository.markRecordPending(
+      entityType: 'media',
+      recordId: mediaId,
+      localUpdatedAt: now,
+    );
+    SyncEventBus.notifyLocalChange();
+  }
+
+  /// Confirms the original object exists in the media store. Once this
+  /// syncs, every device knows the bytes are fetchable.
+  Future<void> stampRemoteUploaded(
+    String mediaId, {
+    required DateTime uploadedAt,
+  }) async {
+    final now = DateTime.now().millisecondsSinceEpoch;
+    await (_db.update(_db.media)..where((t) => t.id.equals(mediaId))).write(
+      MediaCompanion(
+        remoteUploadedAt: Value(uploadedAt.millisecondsSinceEpoch),
+        updatedAt: Value(now),
+      ),
+    );
+    await _syncRepository.markRecordPending(
+      entityType: 'media',
+      recordId: mediaId,
+      localUpdatedAt: now,
+    );
+    SyncEventBus.notifyLocalChange();
+  }
+
+  /// Backfill candidates (design spec section 9): device-resident photos
+  /// not yet confirmed in the media store, newest first so recent dives
+  /// gain protection soonest.
+  Future<List<String>> getBackfillCandidateIds() async {
+    final id = _db.media.id;
+    final query = _db.selectOnly(_db.media)
+      ..addColumns([id])
+      ..where(
+        _db.media.remoteUploadedAt.isNull() &
+            _db.media.fileType.equals('photo') &
+            _db.media.sourceType.isIn(['platformGallery', 'localFile']),
+      )
+      ..orderBy([OrderingTerm.desc(_db.media.takenAt)]);
+    final rows = await query.get();
+    return rows.map((r) => r.read(id)!).toList();
+  }
+
+  /// Confirms the thumbnail object exists in the media store.
+  Future<void> stampRemoteThumbUploaded(
+    String mediaId, {
+    required DateTime uploadedAt,
+  }) async {
+    final now = DateTime.now().millisecondsSinceEpoch;
+    await (_db.update(_db.media)..where((t) => t.id.equals(mediaId))).write(
+      MediaCompanion(
+        remoteThumbUploadedAt: Value(uploadedAt.millisecondsSinceEpoch),
+        updatedAt: Value(now),
+      ),
+    );
+    await _syncRepository.markRecordPending(
+      entityType: 'media',
+      recordId: mediaId,
+      localUpdatedAt: now,
+    );
+    SyncEventBus.notifyLocalChange();
+  }
+
   domain.MediaItem _mapRowToMediaItem(
     MediaData row, [
     MediaEnrichmentData? enrichmentRow,
@@ -761,6 +858,14 @@ class MediaRepository {
       connectorAccountId: row.connectorAccountId,
       remoteAssetId: row.remoteAssetId,
       originDeviceId: row.originDeviceId,
+      contentHash: row.contentHash,
+      contentSizeBytes: row.contentSizeBytes,
+      remoteUploadedAt: row.remoteUploadedAt != null
+          ? DateTime.fromMillisecondsSinceEpoch(row.remoteUploadedAt!)
+          : null,
+      remoteThumbUploadedAt: row.remoteThumbUploadedAt != null
+          ? DateTime.fromMillisecondsSinceEpoch(row.remoteThumbUploadedAt!)
+          : null,
       createdAt: DateTime.fromMillisecondsSinceEpoch(row.createdAt),
       updatedAt: DateTime.fromMillisecondsSinceEpoch(row.updatedAt),
       enrichment: enrichmentRow != null

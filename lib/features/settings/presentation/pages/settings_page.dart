@@ -1968,6 +1968,16 @@ class _DataSectionContent extends ConsumerWidget {
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => context.push('/settings/cloud-sync'),
                 ),
+                const Divider(height: 1),
+                ListTile(
+                  leading: const Icon(Icons.perm_media_outlined),
+                  title: Text(context.l10n.settings_mediaStorage_entry_title),
+                  subtitle: Text(
+                    context.l10n.settings_mediaStorage_entry_subtitle,
+                  ),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push('/settings/media-storage'),
+                ),
               ],
             ),
           ),

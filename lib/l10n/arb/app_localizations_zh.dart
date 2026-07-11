@@ -17686,4 +17686,98 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get diveLog_bulkEdit_membership_empty => '所选潜水尚无项目';
+
+  @override
+  String get settings_mediaStorage_entry_title => '媒体存储';
+
+  @override
+  String get settings_mediaStorage_entry_subtitle => '将照片和视频原件存储在您自己的云存储中';
+
+  @override
+  String get settings_mediaStorage_status_notConfigured => '此设备未连接媒体存储';
+
+  @override
+  String settings_mediaStorage_status_connected(String hint) {
+    return '已连接到 $hint';
+  }
+
+  @override
+  String get settings_mediaStorage_test_success => '连接成功';
+
+  @override
+  String get settings_mediaStorage_saved => '媒体存储已连接';
+
+  @override
+  String get settings_mediaStorage_action_disconnect => '断开连接';
+
+  @override
+  String get settings_mediaStorage_disconnect_confirm_title => '断开媒体存储？';
+
+  @override
+  String get settings_mediaStorage_disconnect_confirm_body =>
+      '此设备将停止上传和获取媒体。您的存储桶中的内容不会被删除。';
+
+  @override
+  String get settings_mediaStorage_action_copyFromSync => '从同步复制设置';
+
+  @override
+  String get settings_mediaStorage_transfers_title => '传输';
+
+  @override
+  String get settings_mediaStorage_transfers_entry => '查看传输';
+
+  @override
+  String get settings_mediaStorage_transfers_empty => '暂无传输';
+
+  @override
+  String get settings_mediaStorage_transfers_retry => '重试';
+
+  @override
+  String get settings_mediaStorage_transfers_clearCompleted => '清除已完成';
+
+  @override
+  String get settings_mediaStorage_transfers_state_pending => '等待中';
+
+  @override
+  String get settings_mediaStorage_transfers_state_transferring => '上传中';
+
+  @override
+  String get settings_mediaStorage_transfers_state_done => '已完成';
+
+  @override
+  String get settings_mediaStorage_transfers_state_failed => '失败';
+
+  @override
+  String get settings_mediaStorage_backfill_action => '上传现有媒体库';
+
+  @override
+  String settings_mediaStorage_backfill_enqueued(int count) {
+    return '已排队 $count 个上传';
+  }
+
+  @override
+  String get settings_mediaStorage_policy_autoUpload => '自动上传照片';
+
+  @override
+  String get settings_mediaStorage_policy_photosOnCellular => '使用蜂窝数据上传照片';
+
+  @override
+  String get settings_mediaStorage_provider_label => '服务商';
+
+  @override
+  String get settings_mediaStorage_connect_dropbox_hint =>
+      '使用云同步中的 Dropbox 连接。媒体存储在您的 Dropbox 应用文件夹中。';
+
+  @override
+  String get settings_mediaStorage_connect_gdrive_hint =>
+      '使用 Google 登录。媒体存储在此应用的私有云端硬盘空间中。';
+
+  @override
+  String get settings_mediaStorage_connect_icloud_hint =>
+      '媒体存储在此应用的 iCloud 容器中，并通过您的 Apple ID 同步。';
+
+  @override
+  String settings_mediaStorage_connect_action(String provider) {
+    return '连接 $provider';
+  }
 }

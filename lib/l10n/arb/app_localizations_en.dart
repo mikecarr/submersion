@@ -18307,4 +18307,105 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get diveLog_bulkEdit_membership_empty =>
       'No items on the selected dives yet';
+
+  @override
+  String get settings_mediaStorage_entry_title => 'Media Storage';
+
+  @override
+  String get settings_mediaStorage_entry_subtitle =>
+      'Store photo and video originals in your own cloud storage';
+
+  @override
+  String get settings_mediaStorage_status_notConfigured =>
+      'No media store connected on this device';
+
+  @override
+  String settings_mediaStorage_status_connected(String hint) {
+    return 'Connected to $hint';
+  }
+
+  @override
+  String get settings_mediaStorage_test_success => 'Connection successful';
+
+  @override
+  String get settings_mediaStorage_saved => 'Media store connected';
+
+  @override
+  String get settings_mediaStorage_action_disconnect => 'Disconnect';
+
+  @override
+  String get settings_mediaStorage_disconnect_confirm_title =>
+      'Disconnect media store?';
+
+  @override
+  String get settings_mediaStorage_disconnect_confirm_body =>
+      'This device stops uploading and fetching media. Nothing in your bucket is deleted.';
+
+  @override
+  String get settings_mediaStorage_action_copyFromSync =>
+      'Copy settings from Sync';
+
+  @override
+  String get settings_mediaStorage_transfers_title => 'Transfers';
+
+  @override
+  String get settings_mediaStorage_transfers_entry => 'View transfers';
+
+  @override
+  String get settings_mediaStorage_transfers_empty => 'No transfers';
+
+  @override
+  String get settings_mediaStorage_transfers_retry => 'Retry';
+
+  @override
+  String get settings_mediaStorage_transfers_clearCompleted =>
+      'Clear completed';
+
+  @override
+  String get settings_mediaStorage_transfers_state_pending => 'Waiting';
+
+  @override
+  String get settings_mediaStorage_transfers_state_transferring => 'Uploading';
+
+  @override
+  String get settings_mediaStorage_transfers_state_done => 'Done';
+
+  @override
+  String get settings_mediaStorage_transfers_state_failed => 'Failed';
+
+  @override
+  String get settings_mediaStorage_backfill_action => 'Upload existing library';
+
+  @override
+  String settings_mediaStorage_backfill_enqueued(int count) {
+    return '$count uploads queued';
+  }
+
+  @override
+  String get settings_mediaStorage_policy_autoUpload =>
+      'Upload photos automatically';
+
+  @override
+  String get settings_mediaStorage_policy_photosOnCellular =>
+      'Upload photos on cellular';
+
+  @override
+  String get settings_mediaStorage_provider_label => 'Provider';
+
+  @override
+  String get settings_mediaStorage_connect_dropbox_hint =>
+      'Uses your Dropbox connection from Cloud Sync. Media is stored in your Dropbox app folder.';
+
+  @override
+  String get settings_mediaStorage_connect_gdrive_hint =>
+      'Signs in with Google. Media is stored in this app\'s private Drive space.';
+
+  @override
+  String get settings_mediaStorage_connect_icloud_hint =>
+      'Media is stored in this app\'s iCloud container and syncs through your Apple ID.';
+
+  @override
+  String settings_mediaStorage_connect_action(String provider) {
+    return 'Connect $provider';
+  }
 }
