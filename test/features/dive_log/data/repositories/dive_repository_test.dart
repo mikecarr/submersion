@@ -91,6 +91,25 @@ void main() {
         },
       );
 
+      test(
+        'diverRoleId round-trips through create, read, and update',
+        () async {
+          final dive = createTestDive(
+            diveNumber: 42,
+          ).copyWith(diverRoleId: 'rearGuard');
+
+          final created = await repository.createDive(dive);
+          var loaded = await repository.getDiveById(created.id);
+          expect(loaded!.diverRoleId, 'rearGuard');
+
+          await repository.updateDive(
+            loaded.copyWith(diverRoleId: 'instructor'),
+          );
+          loaded = await repository.getDiveById(created.id);
+          expect(loaded!.diverRoleId, 'instructor');
+        },
+      );
+
       test('should create a dive with provided ID', () async {
         final dive = createTestDive(id: 'custom-dive-id');
 
