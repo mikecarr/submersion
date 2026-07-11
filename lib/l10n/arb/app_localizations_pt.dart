@@ -19143,4 +19143,38 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get tools_weight_waterTerm => 'Tipo de água';
+
+  @override
+  String get dive3d_previewTitle => 'Visualização 3D';
+
+  @override
+  String get dive3d_previewHint => 'Toque para explorar em 3D';
+
+  @override
+  String get dive3d_unavailable =>
+      'O 3D interativo não está disponível neste dispositivo';
+
+  @override
+  String get dive3d_resetView => 'Redefinir visualização';
+
+  @override
+  String get dive3d_play => 'Reproduzir';
+
+  @override
+  String get dive3d_pause => 'Pausar';
+
+  @override
+  String get dive3d_overlays => 'Sobreposições';
+
+  @override
+  String get dive3d_overlay_strata => 'Camadas de temperatura';
+
+  @override
+  String get dive3d_overlay_ceiling => 'Teto de deco';
+
+  @override
+  String get dive3d_overlay_curtain => 'Cortina de profundidade';
+
+  @override
+  String get dive3d_overlay_markers => 'Marcadores';
 }

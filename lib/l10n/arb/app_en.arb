@@ -11885,9 +11885,21 @@
   "bodyWeight_deleteTooltip": "Delete entry",
   "bodyWeight_heightLabel": "Height (cm)",
   "bodyWeight_weightLabel": "Weight ({unit})",
-  "@bodyWeight_weightLabel": {"placeholders": {"unit": {"type": "String"}}},
+  "@bodyWeight_weightLabel": {
+    "placeholders": {
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
   "diveLog_edit_weightFeedback_amount": "By about how much ({unit})",
-  "@diveLog_edit_weightFeedback_amount": {"placeholders": {"unit": {"type": "String"}}},
+  "@diveLog_edit_weightFeedback_amount": {
+    "placeholders": {
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
   "diveLog_edit_weightFeedback_correct": "Felt right",
   "diveLog_edit_weightFeedback_label": "How was your weighting?",
   "diveLog_edit_weightFeedback_over": "Overweighted",
@@ -11899,28 +11911,64 @@
   "equipment_edit_buoyancyHint_generic": "Negative if it sinks",
   "equipment_edit_buoyancyHint_tank": "Leave empty - tanks use their own specifications",
   "equipment_edit_buoyancyLabel": "Buoyancy ({unit})",
-  "@equipment_edit_buoyancyLabel": {"placeholders": {"unit": {"type": "String"}}},
+  "@equipment_edit_buoyancyLabel": {
+    "placeholders": {
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
   "equipment_edit_dryWeightLabel": "Dry weight ({unit})",
-  "@equipment_edit_dryWeightLabel": {"placeholders": {"unit": {"type": "String"}}},
+  "@equipment_edit_dryWeightLabel": {
+    "placeholders": {
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
   "planner_gearWeights_accept": "Use as planned weight",
   "planner_gearWeights_addGear": "Add gear",
   "planner_gearWeights_empty": "Add gear to predict your weighting",
   "planner_gearWeights_planned": "Planned: {weight}",
-  "@planner_gearWeights_planned": {"placeholders": {"weight": {"type": "String"}}},
+  "@planner_gearWeights_planned": {
+    "placeholders": {
+      "weight": {
+        "type": "String"
+      }
+    }
+  },
   "planner_gearWeights_predicted": "Predicted: {weight}",
-  "@planner_gearWeights_predicted": {"placeholders": {"weight": {"type": "String"}}},
+  "@planner_gearWeights_predicted": {
+    "placeholders": {
+      "weight": {
+        "type": "String"
+      }
+    }
+  },
   "planner_gearWeights_title": "Gear & Weights",
   "planner_gearWeights_useSet": "Use set",
   "tools_weight_addGear": "Add gear",
   "tools_weight_addTank": "Add tank",
   "tools_weight_basedOnDives": "Based on {count} logged dives",
-  "@tools_weight_basedOnDives": {"placeholders": {"count": {"type": "int"}}},
+  "@tools_weight_basedOnDives": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "tools_weight_breakdownTitle": "How this was calculated",
   "tools_weight_confidence_high": "High confidence",
   "tools_weight_confidence_low": "Low confidence - estimate",
   "tools_weight_confidence_medium": "Medium confidence",
   "tools_weight_deltaVsPrevious": "{delta} vs previous rig",
-  "@tools_weight_deltaVsPrevious": {"placeholders": {"delta": {"type": "String"}}},
+  "@tools_weight_deltaVsPrevious": {
+    "placeholders": {
+      "delta": {
+        "type": "String"
+      }
+    }
+  },
   "tools_weight_noGear": "Add the gear you plan to dive to personalize the prediction.",
   "tools_weight_personalTerm": "Personal baseline",
   "tools_weight_placementTitle": "Suggested placement",
@@ -11932,5 +11980,27 @@
   "tools_weight_source_userSpec": "from your gear specs",
   "tools_weight_tanks": "Tanks",
   "tools_weight_useSet": "Use set",
-  "tools_weight_waterTerm": "Water type"
+  "tools_weight_waterTerm": "Water type",
+  "dive3d_previewTitle": "3D View",
+  "@dive3d_previewTitle": {},
+  "dive3d_previewHint": "Tap to explore in 3D",
+  "@dive3d_previewHint": {},
+  "dive3d_unavailable": "Interactive 3D is unavailable on this device",
+  "@dive3d_unavailable": {},
+  "dive3d_resetView": "Reset view",
+  "@dive3d_resetView": {},
+  "dive3d_play": "Play",
+  "@dive3d_play": {},
+  "dive3d_pause": "Pause",
+  "@dive3d_pause": {},
+  "dive3d_overlays": "Overlays",
+  "@dive3d_overlays": {},
+  "dive3d_overlay_strata": "Temperature layers",
+  "@dive3d_overlay_strata": {},
+  "dive3d_overlay_ceiling": "Deco ceiling",
+  "@dive3d_overlay_ceiling": {},
+  "dive3d_overlay_curtain": "Depth curtain",
+  "@dive3d_overlay_curtain": {},
+  "dive3d_overlay_markers": "Markers",
+  "@dive3d_overlay_markers": {}
 }

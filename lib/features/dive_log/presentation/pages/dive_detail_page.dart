@@ -27,6 +27,7 @@ import 'package:submersion/features/dive_log/data/services/gas_usage_segments_se
 import 'package:submersion/features/dive_log/data/services/profile_analysis_service.dart';
 import 'package:submersion/features/dive_log/data/services/profile_markers_service.dart';
 import 'package:submersion/features/dive_log/domain/entities/dive_data_source.dart';
+import 'package:submersion/features/dive_3d/presentation/widgets/dive_3d_preview_card.dart';
 import 'package:submersion/features/dive_log/domain/entities/dive.dart';
 import 'package:submersion/features/dive_log/domain/entities/dive_computer.dart';
 import 'package:submersion/features/dive_log/presentation/providers/dive_computer_providers.dart';
@@ -482,6 +483,8 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
             // Fixed: Dive Profile Chart
             if (dive.profile.isNotEmpty) ...[
               _buildProfileSection(context, ref, dive),
+              const SizedBox(height: 16),
+              Dive3dPreviewCard(diveId: dive.id),
             ],
             // Configurable sections in user-defined order
             for (final section in settings.diveDetailSections)

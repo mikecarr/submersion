@@ -18782,4 +18782,38 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get tools_weight_waterTerm => 'نوع الماء';
+
+  @override
+  String get dive3d_previewTitle => 'عرض ثلاثي الأبعاد';
+
+  @override
+  String get dive3d_previewHint => 'انقر للاستكشاف بشكل ثلاثي الأبعاد';
+
+  @override
+  String get dive3d_unavailable =>
+      'العرض التفاعلي ثلاثي الأبعاد غير متاح على هذا الجهاز';
+
+  @override
+  String get dive3d_resetView => 'إعادة تعيين العرض';
+
+  @override
+  String get dive3d_play => 'تشغيل';
+
+  @override
+  String get dive3d_pause => 'إيقاف مؤقت';
+
+  @override
+  String get dive3d_overlays => 'الطبقات';
+
+  @override
+  String get dive3d_overlay_strata => 'طبقات الحرارة';
+
+  @override
+  String get dive3d_overlay_ceiling => 'سقف تخفيف الضغط';
+
+  @override
+  String get dive3d_overlay_curtain => 'ستارة العمق';
+
+  @override
+  String get dive3d_overlay_markers => 'علامات';
 }

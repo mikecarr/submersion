@@ -32035,6 +32035,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Water type'**
   String get tools_weight_waterTerm;
+
+  /// No description provided for @dive3d_previewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'3D View'**
+  String get dive3d_previewTitle;
+
+  /// No description provided for @dive3d_previewHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to explore in 3D'**
+  String get dive3d_previewHint;
+
+  /// No description provided for @dive3d_unavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Interactive 3D is unavailable on this device'**
+  String get dive3d_unavailable;
+
+  /// No description provided for @dive3d_resetView.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset view'**
+  String get dive3d_resetView;
+
+  /// No description provided for @dive3d_play.
+  ///
+  /// In en, this message translates to:
+  /// **'Play'**
+  String get dive3d_play;
+
+  /// No description provided for @dive3d_pause.
+  ///
+  /// In en, this message translates to:
+  /// **'Pause'**
+  String get dive3d_pause;
+
+  /// No description provided for @dive3d_overlays.
+  ///
+  /// In en, this message translates to:
+  /// **'Overlays'**
+  String get dive3d_overlays;
+
+  /// No description provided for @dive3d_overlay_strata.
+  ///
+  /// In en, this message translates to:
+  /// **'Temperature layers'**
+  String get dive3d_overlay_strata;
+
+  /// No description provided for @dive3d_overlay_ceiling.
+  ///
+  /// In en, this message translates to:
+  /// **'Deco ceiling'**
+  String get dive3d_overlay_ceiling;
+
+  /// No description provided for @dive3d_overlay_curtain.
+  ///
+  /// In en, this message translates to:
+  /// **'Depth curtain'**
+  String get dive3d_overlay_curtain;
+
+  /// No description provided for @dive3d_overlay_markers.
+  ///
+  /// In en, this message translates to:
+  /// **'Markers'**
+  String get dive3d_overlay_markers;
 }
 
 class _AppLocalizationsDelegate

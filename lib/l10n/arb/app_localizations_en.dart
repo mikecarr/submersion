@@ -18816,4 +18816,38 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get tools_weight_waterTerm => 'Water type';
+
+  @override
+  String get dive3d_previewTitle => '3D View';
+
+  @override
+  String get dive3d_previewHint => 'Tap to explore in 3D';
+
+  @override
+  String get dive3d_unavailable =>
+      'Interactive 3D is unavailable on this device';
+
+  @override
+  String get dive3d_resetView => 'Reset view';
+
+  @override
+  String get dive3d_play => 'Play';
+
+  @override
+  String get dive3d_pause => 'Pause';
+
+  @override
+  String get dive3d_overlays => 'Overlays';
+
+  @override
+  String get dive3d_overlay_strata => 'Temperature layers';
+
+  @override
+  String get dive3d_overlay_ceiling => 'Deco ceiling';
+
+  @override
+  String get dive3d_overlay_curtain => 'Depth curtain';
+
+  @override
+  String get dive3d_overlay_markers => 'Markers';
 }

@@ -19085,4 +19085,38 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get tools_weight_waterTerm => 'Víztípus';
+
+  @override
+  String get dive3d_previewTitle => '3D nézet';
+
+  @override
+  String get dive3d_previewHint => 'Koppints a 3D felfedezéshez';
+
+  @override
+  String get dive3d_unavailable =>
+      'Az interaktív 3D nem érhető el ezen az eszközön';
+
+  @override
+  String get dive3d_resetView => 'Nézet visszaállítása';
+
+  @override
+  String get dive3d_play => 'Lejátszás';
+
+  @override
+  String get dive3d_pause => 'Szünet';
+
+  @override
+  String get dive3d_overlays => 'Rétegek';
+
+  @override
+  String get dive3d_overlay_strata => 'Hőmérsékleti rétegek';
+
+  @override
+  String get dive3d_overlay_ceiling => 'Dekó plafon';
+
+  @override
+  String get dive3d_overlay_curtain => 'Mélységi függöny';
+
+  @override
+  String get dive3d_overlay_markers => 'Jelölők';
 }

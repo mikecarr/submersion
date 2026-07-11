@@ -18649,4 +18649,37 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get tools_weight_waterTerm => 'סוג מים';
+
+  @override
+  String get dive3d_previewTitle => 'תצוגת תלת־ממד';
+
+  @override
+  String get dive3d_previewHint => 'הקש כדי לחקור בתלת־ממד';
+
+  @override
+  String get dive3d_unavailable => 'תלת־ממד אינטראקטיבי אינו זמין במכשיר זה';
+
+  @override
+  String get dive3d_resetView => 'איפוס תצוגה';
+
+  @override
+  String get dive3d_play => 'הפעלה';
+
+  @override
+  String get dive3d_pause => 'השהיה';
+
+  @override
+  String get dive3d_overlays => 'שכבות';
+
+  @override
+  String get dive3d_overlay_strata => 'שכבות טמפרטורה';
+
+  @override
+  String get dive3d_overlay_ceiling => 'תקרת דקומפרסיה';
+
+  @override
+  String get dive3d_overlay_curtain => 'וילון עומק';
+
+  @override
+  String get dive3d_overlay_markers => 'סמנים';
 }

@@ -51,11 +51,18 @@ typedef Dive3dGeometryKey = ({String diveId, SceneMetric metric});
 Dive3dGeometry _buildGeometry((Dive3dSceneData, SceneMetric) input) =>
     const SceneGeometryService().build(input.$1, input.$2);
 
+/// Profiles below this sample count build geometry synchronously; the
+/// isolate hop only pays for itself on large tech-dive profiles.
+const int _computeThreshold = 2000;
+
 /// Geometry per (dive, metric). Family caching makes metric switch-back
 /// instant; compute() keeps large builds off the UI thread.
 final dive3dGeometryProvider =
     FutureProvider.family<Dive3dGeometry?, Dive3dGeometryKey>((ref, key) async {
       final data = await ref.watch(dive3dSceneDataProvider(key.diveId).future);
       if (data == null) return null;
+      if (data.times.length < _computeThreshold) {
+        return _buildGeometry((data, key.metric));
+      }
       return compute(_buildGeometry, (data, key.metric));
     });

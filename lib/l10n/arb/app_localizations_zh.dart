@@ -18170,4 +18170,37 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get tools_weight_waterTerm => '水域类型';
+
+  @override
+  String get dive3d_previewTitle => '3D视图';
+
+  @override
+  String get dive3d_previewHint => '点按以进行3D探索';
+
+  @override
+  String get dive3d_unavailable => '此设备不支持交互式3D';
+
+  @override
+  String get dive3d_resetView => '重置视图';
+
+  @override
+  String get dive3d_play => '播放';
+
+  @override
+  String get dive3d_pause => '暂停';
+
+  @override
+  String get dive3d_overlays => '叠加层';
+
+  @override
+  String get dive3d_overlay_strata => '温度分层';
+
+  @override
+  String get dive3d_overlay_ceiling => '减压天花板';
+
+  @override
+  String get dive3d_overlay_curtain => '深度幕布';
+
+  @override
+  String get dive3d_overlay_markers => '标记';
 }
