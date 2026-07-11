@@ -30,15 +30,12 @@ void main() {
       expect(colors[6], greaterThan(colors[7])); // r > g for dangerous
     });
 
-    test(
-      'ppO2 uses fixed 0.2-1.6 domain (identical inputs, identical colors '
-      'regardless of dive range)',
-      () {
-        final a = MetricPalette.colorsFor(SceneMetric.ppO2, [1.0, 1.2]);
-        final b = MetricPalette.colorsFor(SceneMetric.ppO2, [1.0, 1.6]);
-        expect(a.sublist(0, 3), b.sublist(0, 3));
-      },
-    );
+    test('ppO2 uses fixed 0.2-1.6 domain (identical inputs, identical colors '
+        'regardless of dive range)', () {
+      final a = MetricPalette.colorsFor(SceneMetric.ppO2, [1.0, 1.2]);
+      final b = MetricPalette.colorsFor(SceneMetric.ppO2, [1.0, 1.6]);
+      expect(a.sublist(0, 3), b.sublist(0, 3));
+    });
 
     test('flat series does not divide by zero', () {
       final colors = MetricPalette.colorsFor(SceneMetric.heartRate, [

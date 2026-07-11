@@ -39,10 +39,7 @@ void main() {
   });
 
   test('decimates geometry above 2000 samples', () {
-    final geometry = service.build(
-      sceneData(samples: 6000),
-      SceneMetric.depth,
-    );
+    final geometry = service.build(sceneData(samples: 6000), SceneMetric.depth);
     expect(geometry.ribbon.vertexCount, lessThanOrEqualTo(2 * 2000));
     expect(geometry.ribbon.vertexCount, greaterThan(2 * 1000));
   });

@@ -49,10 +49,7 @@ void main() {
       expect(data.availableMetrics, contains(SceneMetric.ppO2));
       expect(data.availableMetrics, contains(SceneMetric.depth));
       expect(data.availableMetrics, isNot(contains(SceneMetric.temperature)));
-      expect(
-        data.availableMetrics,
-        isNot(contains(SceneMetric.tankPressure)),
-      );
+      expect(data.availableMetrics, isNot(contains(SceneMetric.tankPressure)));
     });
   });
 }
