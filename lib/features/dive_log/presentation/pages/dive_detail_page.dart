@@ -29,6 +29,7 @@ import 'package:submersion/features/dive_log/data/services/profile_markers_servi
 import 'package:submersion/features/dive_log/domain/entities/dive_data_source.dart';
 import 'package:submersion/features/dive_log/domain/entities/dive.dart';
 import 'package:submersion/features/dive_log/domain/entities/dive_computer.dart';
+import 'package:submersion/features/dive_log/presentation/formatters/dive_mode_label.dart';
 import 'package:submersion/features/dive_log/presentation/providers/dive_computer_providers.dart';
 import 'package:submersion/features/dive_log/presentation/providers/dive_detail_ui_providers.dart';
 import 'package:submersion/features/dive_log/presentation/providers/dive_providers.dart';
@@ -2494,6 +2495,11 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
               context,
               context.l10n.diveLog_detail_label_diveType,
               dive.diveTypeNames.join(', '),
+            ),
+            _buildDetailRow(
+              context,
+              context.l10n.diveLog_diveMode_title,
+              diveModeLabel(context.l10n, dive.diveMode),
             ),
             if (dive.trip != null) _buildTripRow(context, dive),
             if (dive.diveCenter != null) _buildDiveCenterRow(context, dive),
