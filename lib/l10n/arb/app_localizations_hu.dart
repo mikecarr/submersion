@@ -19208,4 +19208,37 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get dive3d_tissue_offGassing => 'Leürülés';
+
+  @override
+  String get dive3d_compare_computers_title => 'Számítógépek összehasonlítása';
+
+  @override
+  String get dive3d_compare_dives_title => 'Merülések összehasonlítása';
+
+  @override
+  String get dive3d_scene_computers => 'Számítógépek';
+
+  @override
+  String get dive3d_compare_layout_sideBySide => 'Egymás mellett';
+
+  @override
+  String get dive3d_compare_layout_overlay => 'Egymásra helyezve';
+
+  @override
+  String get dive3d_compare_empty =>
+      'Az összehasonlításhoz legalább 2, mélységadatokkal rendelkező profil szükséges';
+
+  @override
+  String dive3d_compare_showing(Object shown, Object total) {
+    return 'Megjelenítve: $shown / $total';
+  }
+
+  @override
+  String get dive3d_compare_setReference => 'Beállítás referenciaként';
+
+  @override
+  String get diveLog_selection_tooltip_compare3d => 'Összehasonlítás 3D-ben';
+
+  @override
+  String get diveLog_sources_compareIn3d => 'Összehasonlítás 3D-ben';
 }

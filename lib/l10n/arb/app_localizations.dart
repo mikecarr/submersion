@@ -32275,6 +32275,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Off-gassing'**
   String get dive3d_tissue_offGassing;
+
+  /// No description provided for @dive3d_compare_computers_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Compare computers'**
+  String get dive3d_compare_computers_title;
+
+  /// No description provided for @dive3d_compare_dives_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Compare dives'**
+  String get dive3d_compare_dives_title;
+
+  /// No description provided for @dive3d_scene_computers.
+  ///
+  /// In en, this message translates to:
+  /// **'Computers'**
+  String get dive3d_scene_computers;
+
+  /// No description provided for @dive3d_compare_layout_sideBySide.
+  ///
+  /// In en, this message translates to:
+  /// **'Side by side'**
+  String get dive3d_compare_layout_sideBySide;
+
+  /// No description provided for @dive3d_compare_layout_overlay.
+  ///
+  /// In en, this message translates to:
+  /// **'Overlay'**
+  String get dive3d_compare_layout_overlay;
+
+  /// No description provided for @dive3d_compare_empty.
+  ///
+  /// In en, this message translates to:
+  /// **'Need at least 2 profiles with depth data to compare'**
+  String get dive3d_compare_empty;
+
+  /// No description provided for @dive3d_compare_showing.
+  ///
+  /// In en, this message translates to:
+  /// **'Showing {shown} of {total}'**
+  String dive3d_compare_showing(Object shown, Object total);
+
+  /// No description provided for @dive3d_compare_setReference.
+  ///
+  /// In en, this message translates to:
+  /// **'Set as reference'**
+  String get dive3d_compare_setReference;
+
+  /// No description provided for @diveLog_selection_tooltip_compare3d.
+  ///
+  /// In en, this message translates to:
+  /// **'Compare in 3D'**
+  String get diveLog_selection_tooltip_compare3d;
+
+  /// No description provided for @diveLog_sources_compareIn3d.
+  ///
+  /// In en, this message translates to:
+  /// **'Compare in 3D'**
+  String get diveLog_sources_compareIn3d;
 }
 
 class _AppLocalizationsDelegate

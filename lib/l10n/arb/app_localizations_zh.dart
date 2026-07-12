@@ -18290,4 +18290,36 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get dive3d_tissue_offGassing => '释放';
+
+  @override
+  String get dive3d_compare_computers_title => '比较潜水电脑';
+
+  @override
+  String get dive3d_compare_dives_title => '比较潜水';
+
+  @override
+  String get dive3d_scene_computers => '潜水电脑';
+
+  @override
+  String get dive3d_compare_layout_sideBySide => '并排';
+
+  @override
+  String get dive3d_compare_layout_overlay => '叠加';
+
+  @override
+  String get dive3d_compare_empty => '至少需要 2 个包含深度数据的剖面才能比较';
+
+  @override
+  String dive3d_compare_showing(Object shown, Object total) {
+    return '显示 $shown / $total';
+  }
+
+  @override
+  String get dive3d_compare_setReference => '设为参考';
+
+  @override
+  String get diveLog_selection_tooltip_compare3d => '3D 比较';
+
+  @override
+  String get diveLog_sources_compareIn3d => '3D 比较';
 }

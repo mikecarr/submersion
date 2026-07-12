@@ -19271,4 +19271,37 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get dive3d_tissue_offGassing => 'Liberación';
+
+  @override
+  String get dive3d_compare_computers_title => 'Comparar ordenadores';
+
+  @override
+  String get dive3d_compare_dives_title => 'Comparar inmersiones';
+
+  @override
+  String get dive3d_scene_computers => 'Ordenadores';
+
+  @override
+  String get dive3d_compare_layout_sideBySide => 'Lado a lado';
+
+  @override
+  String get dive3d_compare_layout_overlay => 'Superponer';
+
+  @override
+  String get dive3d_compare_empty =>
+      'Se necesitan al menos 2 perfiles con datos de profundidad para comparar';
+
+  @override
+  String dive3d_compare_showing(Object shown, Object total) {
+    return 'Mostrando $shown de $total';
+  }
+
+  @override
+  String get dive3d_compare_setReference => 'Establecer como referencia';
+
+  @override
+  String get diveLog_selection_tooltip_compare3d => 'Comparar en 3D';
+
+  @override
+  String get diveLog_sources_compareIn3d => 'Comparar en 3D';
 }

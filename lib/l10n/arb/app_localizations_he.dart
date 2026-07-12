@@ -18770,4 +18770,37 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get dive3d_tissue_offGassing => 'שחרור';
+
+  @override
+  String get dive3d_compare_computers_title => 'השוואת מחשבי צלילה';
+
+  @override
+  String get dive3d_compare_dives_title => 'השוואת צלילות';
+
+  @override
+  String get dive3d_scene_computers => 'מחשבי צלילה';
+
+  @override
+  String get dive3d_compare_layout_sideBySide => 'זה לצד זה';
+
+  @override
+  String get dive3d_compare_layout_overlay => 'חופף';
+
+  @override
+  String get dive3d_compare_empty =>
+      'נדרשים לפחות 2 פרופילים עם נתוני עומק להשוואה';
+
+  @override
+  String dive3d_compare_showing(Object shown, Object total) {
+    return 'מוצג $shown מתוך $total';
+  }
+
+  @override
+  String get dive3d_compare_setReference => 'הגדר כעוגן';
+
+  @override
+  String get diveLog_selection_tooltip_compare3d => 'השוואה בתלת-ממד';
+
+  @override
+  String get diveLog_sources_compareIn3d => 'השוואה בתלת-ממד';
 }

@@ -18,6 +18,7 @@ class RibbonBuilder {
     required Float32List sampleColors,
     required SceneBounds bounds,
     double zCenter = 0,
+    double opacity = 1.0,
   }) {
     final n = times.length;
     final positions = Float32List(n * 6);
@@ -42,6 +43,7 @@ class RibbonBuilder {
       positions: positions,
       indices: _stripIndices(n),
       colors: colors,
+      opacity: opacity,
     );
   }
 

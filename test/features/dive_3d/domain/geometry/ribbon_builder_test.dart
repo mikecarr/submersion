@@ -51,6 +51,17 @@ void main() {
       expect(mesh.colors[3], 1.0); // sample 0 red
       expect(mesh.colors[10], 1.0); // sample 1 green
     });
+
+    test('applies the opacity argument to the mesh', () {
+      final mesh = RibbonBuilder.build(
+        times: const [0.0, 60.0],
+        depths: const [0.0, 10.0],
+        sampleColors: Float32List.fromList(const [1, 0, 0, 1, 0, 0]),
+        bounds: const SceneBounds(durationSeconds: 60, maxDepthMeters: 10),
+        opacity: 0.55,
+      );
+      expect(mesh.opacity, closeTo(0.55, 1e-9));
+    });
   });
 
   group('RibbonBuilder.curtain', () {

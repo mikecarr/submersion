@@ -18903,4 +18903,37 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get dive3d_tissue_offGassing => 'إطلاق';
+
+  @override
+  String get dive3d_compare_computers_title => 'مقارنة أجهزة الغوص';
+
+  @override
+  String get dive3d_compare_dives_title => 'مقارنة الغطسات';
+
+  @override
+  String get dive3d_scene_computers => 'أجهزة الغوص';
+
+  @override
+  String get dive3d_compare_layout_sideBySide => 'جنبًا إلى جنب';
+
+  @override
+  String get dive3d_compare_layout_overlay => 'متراكب';
+
+  @override
+  String get dive3d_compare_empty =>
+      'يلزم وجود ملفَّي غوص على الأقل يحتويان على بيانات العمق للمقارنة';
+
+  @override
+  String dive3d_compare_showing(Object shown, Object total) {
+    return 'عرض $shown من $total';
+  }
+
+  @override
+  String get dive3d_compare_setReference => 'تعيين كمرجع';
+
+  @override
+  String get diveLog_selection_tooltip_compare3d => 'مقارنة ثلاثية الأبعاد';
+
+  @override
+  String get diveLog_sources_compareIn3d => 'مقارنة ثلاثية الأبعاد';
 }
