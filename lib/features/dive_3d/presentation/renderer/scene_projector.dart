@@ -59,10 +59,17 @@ class SceneProjector {
     return (rx, ry, rz2);
   }
 
-  Offset project(double x, double y, double z) {
-    final v = _view(x, y, z);
-    return Offset(v.$1 * _scale, -v.$2 * _scale) + _offset;
-  }
+  Offset project(double x, double y, double z) => projectView(_view(x, y, z));
+
+  /// Full rotated view-space position (x right, y up, z toward camera).
+  /// The renderer uses it for flat-shading face normals and depth sorting
+  /// without paying for the rotation twice per vertex.
+  (double, double, double) viewOf(double x, double y, double z) =>
+      _view(x, y, z);
+
+  /// Projects an already-rotated view-space position onto the canvas.
+  Offset projectView((double, double, double) v) =>
+      Offset(v.$1 * _scale, -v.$2 * _scale) + _offset;
 
   /// Larger = nearer to camera. Used for back-to-front triangle sorting.
   double viewDepth(double x, double y, double z) => _view(x, y, z).$3;

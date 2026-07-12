@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'dart:typed_data';
 import 'dart:ui';
 
@@ -32,6 +33,20 @@ class Dive3dScenePainter extends CustomPainter {
     this.visibleOverlays,
   });
 
+  // Studio lighting for flat shading. Ambient is the floor every surface
+  // keeps (so all hues stay readable); the diffuse term adds the
+  // shape-revealing gradient that plain vertex colors lacked. The light
+  // sits up / slightly left / toward the viewer, in view space.
+  static const double _ambient = 0.45;
+  static const double _diffuse = 0.55;
+  static final List<double> _lightDir = _normalize(-0.35, 0.78, 0.52);
+
+  static List<double> _normalize(double x, double y, double z) {
+    final len = math.sqrt(x * x + y * y + z * z);
+    if (len < 1e-12) return const [0, 0, 1];
+    return [x / len, y / len, z / len];
+  }
+
   bool _visible(SceneOverlay? overlay) =>
       overlay == null ||
       visibleOverlays == null ||
@@ -53,59 +68,97 @@ class Dive3dScenePainter extends CustomPainter {
   }
 
   void _paintMesh(Canvas canvas, SceneProjector projector, MeshData mesh) {
-    final n = mesh.vertexCount;
-    if (n == 0) return;
-    final screen = Float32List(n * 2);
-    final colors = Int32List(n);
-    final alpha = (mesh.opacity * 255).round() << 24;
-    for (var i = 0; i < n; i++) {
-      final p = projector.project(
+    final vn = mesh.vertexCount;
+    final triCount = mesh.triangleCount;
+    if (vn == 0 || triCount == 0) return;
+
+    // Rotate every vertex into view space once: (vx,vy,vz) drive both the
+    // face normals and the depth sort, (sx,sy) are the canvas points.
+    final vx = Float32List(vn);
+    final vy = Float32List(vn);
+    final vz = Float32List(vn);
+    final sx = Float32List(vn);
+    final sy = Float32List(vn);
+    for (var i = 0; i < vn; i++) {
+      final v = projector.viewOf(
         mesh.positions[i * 3],
         mesh.positions[i * 3 + 1],
         mesh.positions[i * 3 + 2],
       );
-      screen[i * 2] = p.dx;
-      screen[i * 2 + 1] = p.dy;
-      colors[i] =
-          alpha |
-          ((mesh.colors[i * 3] * 255).round() << 16) |
-          ((mesh.colors[i * 3 + 1] * 255).round() << 8) |
-          (mesh.colors[i * 3 + 2] * 255).round();
+      vx[i] = v.$1;
+      vy[i] = v.$2;
+      vz[i] = v.$3;
+      final o = projector.projectView(v);
+      sx[i] = o.dx;
+      sy[i] = o.dy;
     }
 
     // Depth-sort triangles back-to-front by mean view depth.
-    final triCount = mesh.triangleCount;
     final order = List<int>.generate(triCount, (i) => i);
     final depths = Float32List(triCount);
     for (var t = 0; t < triCount; t++) {
-      var d = 0.0;
-      for (var k = 0; k < 3; k++) {
-        final v = mesh.indices[t * 3 + k];
-        d += projector.viewDepth(
-          mesh.positions[v * 3],
-          mesh.positions[v * 3 + 1],
-          mesh.positions[v * 3 + 2],
-        );
-      }
-      depths[t] = d / 3;
+      final i0 = mesh.indices[t * 3];
+      final i1 = mesh.indices[t * 3 + 1];
+      final i2 = mesh.indices[t * 3 + 2];
+      depths[t] = (vz[i0] + vz[i1] + vz[i2]) / 3;
     }
     order.sort((a, b) => depths[a].compareTo(depths[b]));
 
-    final sorted = Uint16List(triCount * 3);
+    // De-index into flat-shaded triangles: each triangle owns its 3 vertices
+    // so it can carry its own face-normal brightness. drawVertices only
+    // interpolates colors, so shading has to be baked into those colors here.
+    final alpha = (mesh.opacity * 255).round() << 24;
+    final screen = Float32List(triCount * 3 * 2);
+    final colors = Int32List(triCount * 3);
+
+    void emit(int slot, int vi, double shade) {
+      screen[slot * 2] = sx[vi];
+      screen[slot * 2 + 1] = sy[vi];
+      final r = ((mesh.colors[vi * 3] * shade).clamp(0.0, 1.0) * 255).round();
+      final g = ((mesh.colors[vi * 3 + 1] * shade).clamp(0.0, 1.0) * 255)
+          .round();
+      final b = ((mesh.colors[vi * 3 + 2] * shade).clamp(0.0, 1.0) * 255)
+          .round();
+      colors[slot] = alpha | (r << 16) | (g << 8) | b;
+    }
+
     for (var t = 0; t < triCount; t++) {
-      final src = order[t] * 3;
-      sorted[t * 3] = mesh.indices[src];
-      sorted[t * 3 + 1] = mesh.indices[src + 1];
-      sorted[t * 3 + 2] = mesh.indices[src + 2];
+      final tri = order[t];
+      final i0 = mesh.indices[tri * 3];
+      final i1 = mesh.indices[tri * 3 + 1];
+      final i2 = mesh.indices[tri * 3 + 2];
+
+      // Face normal from two edges (cross product) in view space.
+      final ax = vx[i1] - vx[i0], ay = vy[i1] - vy[i0], az = vz[i1] - vz[i0];
+      final bx = vx[i2] - vx[i0], by = vy[i2] - vy[i0], bz = vz[i2] - vz[i0];
+      var nx = ay * bz - az * by;
+      var ny = az * bx - ax * bz;
+      var nz = ax * by - ay * bx;
+      var shade = _ambient;
+      final len = math.sqrt(nx * nx + ny * ny + nz * nz);
+      if (len > 1e-9) {
+        nx /= len;
+        ny /= len;
+        nz /= len;
+        // Light whichever face is toward the camera (+z) so orbiting below
+        // the waterline never drops a surface into full shadow.
+        if (nz < 0) {
+          nx = -nx;
+          ny = -ny;
+          nz = -nz;
+        }
+        final d = nx * _lightDir[0] + ny * _lightDir[1] + nz * _lightDir[2];
+        shade = _ambient + _diffuse * (d > 0 ? d : 0.0);
+      }
+
+      final tv = t * 3;
+      emit(tv, i0, shade);
+      emit(tv + 1, i1, shade);
+      emit(tv + 2, i2, shade);
     }
 
     canvas.drawVertices(
-      Vertices.raw(
-        VertexMode.triangles,
-        screen,
-        colors: colors,
-        indices: sorted,
-      ),
+      Vertices.raw(VertexMode.triangles, screen, colors: colors),
       BlendMode.dst,
       Paint(),
     );

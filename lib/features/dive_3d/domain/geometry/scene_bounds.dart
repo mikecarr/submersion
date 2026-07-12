@@ -15,7 +15,7 @@ class SceneBounds {
 
   static const double xSpan = 10.0;
   static const double ySpan = 6.0;
-  static const double zHalfWidth = 0.18;
+  static const double zHalfWidth = 0.09;
   static const double zSlabHalfWidth = 1.0;
 
   const SceneBounds({

@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:submersion/features/dive_3d/domain/career/career_geometry_service.dart';
 import 'package:submersion/features/dive_3d/domain/career/career_scene_data.dart';
+import 'package:submersion/features/dive_3d/domain/geometry/scene_bounds.dart';
 
 CareerDiveInput dive(int index, {double maxDepth = 20, int minutes = 30}) {
   final times = [for (var m = 0; m <= minutes; m++) (m * 60).toDouble()];
@@ -71,6 +72,9 @@ void main() {
 
   test('single dive centers at z=0 without a widened range', () {
     final scene = service.build(CareerSceneData(dives: [dive(0)]));
-    expect(scene.layers.single.mesh.positions[2], closeTo(-0.18, 1e-6));
+    expect(
+      scene.layers.single.mesh.positions[2],
+      closeTo(-SceneBounds.zHalfWidth, 1e-6),
+    );
   });
 }
