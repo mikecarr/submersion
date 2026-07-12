@@ -3726,6 +3726,10 @@ class AppLocalizationsHe extends AppLocalizations {
       'ריברידר מעגל סגור עם ppO₂ קבוע';
 
   @override
+  String get diveLog_diveMode_gaugeDescription =>
+      'עומק וזמן בלבד; ללא מעקב גז או דקומפרסיה';
+
+  @override
   String get diveLog_diveMode_ocDescription =>
       'סקובה מעגל פתוח סטנדרטי עם בלונים';
 
@@ -8075,6 +8079,9 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get enum_diveMode_ccr => 'ריברידר מעגל סגור';
+
+  @override
+  String get enum_diveMode_gauge => 'מד עומק';
 
   @override
   String get enum_diveMode_oc => 'מעגל פתוח';

@@ -3808,6 +3808,10 @@ class AppLocalizationsNl extends AppLocalizations {
       'Gesloten circuit rebreather met constante ppO₂';
 
   @override
+  String get diveLog_diveMode_gaugeDescription =>
+      'Alleen diepte en tijd; geen gas- of decompressietracking';
+
+  @override
   String get diveLog_diveMode_ocDescription =>
       'Standaard open circuit duiken met flessen';
 
@@ -8219,6 +8223,9 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get enum_diveMode_ccr => 'Gesloten Circuit Rebreather';
+
+  @override
+  String get enum_diveMode_gauge => 'Gauge';
 
   @override
   String get enum_diveMode_oc => 'Open Circuit';

@@ -3816,6 +3816,10 @@ class AppLocalizationsHu extends AppLocalizations {
       'Zart koru visszalelegezteto allando ppO₂-vel';
 
   @override
+  String get diveLog_diveMode_gaugeDescription =>
+      'Csak mélység és idő; nincs gáz- vagy dekompressziókövetés';
+
+  @override
   String get diveLog_diveMode_ocDescription =>
       'Standard nyilt koru buvarmerules palackokkal';
 
@@ -8266,6 +8270,9 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get enum_diveMode_ccr => 'Zart koru visszalelegezteto';
+
+  @override
+  String get enum_diveMode_gauge => 'Gauge';
 
   @override
   String get enum_diveMode_oc => 'Nyilt koru';
