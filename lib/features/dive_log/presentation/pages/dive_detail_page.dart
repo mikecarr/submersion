@@ -206,7 +206,7 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
             body: Center(child: Text(context.l10n.diveLog_detail_notFound)),
           );
         }
-        return _buildContent(context, ref, dive);
+        return _wrapWithDiveShortcuts(dive, _buildContent(context, ref, dive));
       },
       loading: () => Scaffold(
         appBar: AppBar(title: Text(context.l10n.diveLog_detail_appBar)),
@@ -529,95 +529,89 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
 
     // Embedded mode: Return content with a compact header bar (no Scaffold)
     if (widget.embedded) {
-      return _wrapWithDiveShortcuts(
-        dive,
-        Column(
-          children: [
-            _buildEmbeddedHeader(context, ref, dive, hasRawData: hasRawData),
-            Expanded(child: body),
-          ],
-        ),
+      return Column(
+        children: [
+          _buildEmbeddedHeader(context, ref, dive, hasRawData: hasRawData),
+          Expanded(child: body),
+        ],
       );
     }
 
     // Standalone mode: Full Scaffold with AppBar
-    return _wrapWithDiveShortcuts(
-      dive,
-      Scaffold(
-        appBar: AppBar(
-          title: Text(context.l10n.diveLog_detail_appBar),
-          actions: [
-            DiveNavButtons(diveId: diveId, onNavigate: _navigateToDive),
-            IconButton(
-              icon: Icon(
-                dive.isFavorite ? Icons.favorite : Icons.favorite_border,
-                color: dive.isFavorite ? Colors.red : null,
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(context.l10n.diveLog_detail_appBar),
+        actions: [
+          DiveNavButtons(diveId: diveId, onNavigate: _navigateToDive),
+          IconButton(
+            icon: Icon(
+              dive.isFavorite ? Icons.favorite : Icons.favorite_border,
+              color: dive.isFavorite ? Colors.red : null,
+            ),
+            tooltip: dive.isFavorite
+                ? context.l10n.diveLog_detail_tooltip_removeFromFavorites
+                : context.l10n.diveLog_detail_tooltip_addToFavorites,
+            onPressed: () {
+              ref
+                  .read(paginatedDiveListProvider.notifier)
+                  .toggleFavorite(diveId);
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.edit),
+            tooltip: context.l10n.diveLog_detail_tooltip_editDive,
+            onPressed: () => context.push('/dives/$diveId/edit'),
+          ),
+          PopupMenuButton<String>(
+            onSelected: (value) {
+              switch (value) {
+                case 'export':
+                  _showExportOptions(context, ref, dive);
+                  break;
+                case 'reparse':
+                  _reparseDive(context, ref, dive);
+                  break;
+                case 'delete':
+                  _showDeleteConfirmation(context, ref);
+                  break;
+              }
+            },
+            itemBuilder: (context) => [
+              PopupMenuItem(
+                value: 'export',
+                child: ListTile(
+                  leading: const Icon(Icons.download),
+                  title: Text(context.l10n.diveLog_detail_menu_export),
+                  contentPadding: EdgeInsets.zero,
+                ),
               ),
-              tooltip: dive.isFavorite
-                  ? context.l10n.diveLog_detail_tooltip_removeFromFavorites
-                  : context.l10n.diveLog_detail_tooltip_addToFavorites,
-              onPressed: () {
-                ref
-                    .read(paginatedDiveListProvider.notifier)
-                    .toggleFavorite(diveId);
-              },
-            ),
-            IconButton(
-              icon: const Icon(Icons.edit),
-              tooltip: context.l10n.diveLog_detail_tooltip_editDive,
-              onPressed: () => context.push('/dives/$diveId/edit'),
-            ),
-            PopupMenuButton<String>(
-              onSelected: (value) {
-                switch (value) {
-                  case 'export':
-                    _showExportOptions(context, ref, dive);
-                    break;
-                  case 'reparse':
-                    _reparseDive(context, ref, dive);
-                    break;
-                  case 'delete':
-                    _showDeleteConfirmation(context, ref);
-                    break;
-                }
-              },
-              itemBuilder: (context) => [
+              if (hasRawData)
                 PopupMenuItem(
-                  value: 'export',
+                  value: 'reparse',
                   child: ListTile(
-                    leading: const Icon(Icons.download),
-                    title: Text(context.l10n.diveLog_detail_menu_export),
-                    contentPadding: EdgeInsets.zero,
-                  ),
-                ),
-                if (hasRawData)
-                  PopupMenuItem(
-                    value: 'reparse',
-                    child: ListTile(
-                      leading: const Icon(Icons.refresh),
-                      title: Text(
-                        context.l10n.diveLog_detail_menu_reparseRawData,
-                      ),
-                      contentPadding: EdgeInsets.zero,
-                    ),
-                  ),
-                PopupMenuItem(
-                  value: 'delete',
-                  child: ListTile(
-                    leading: const Icon(Icons.delete, color: Colors.red),
+                    leading: const Icon(Icons.refresh),
                     title: Text(
-                      context.l10n.diveLog_detail_menu_delete,
-                      style: const TextStyle(color: Colors.red),
+                      context.l10n.diveLog_detail_menu_reparseRawData,
                     ),
                     contentPadding: EdgeInsets.zero,
                   ),
                 ),
-              ],
-            ),
-          ],
-        ),
-        body: body,
+              PopupMenuItem(
+                value: 'delete',
+                child: ListTile(
+                  leading: const Icon(Icons.delete, color: Colors.red),
+                  title: Text(
+                    context.l10n.diveLog_detail_menu_delete,
+                    style: const TextStyle(color: Colors.red),
+                  ),
+                  contentPadding: EdgeInsets.zero,
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
+      body: body,
     );
   }
 
