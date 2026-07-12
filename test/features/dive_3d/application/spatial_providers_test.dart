@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:submersion/features/dive_3d/application/spatial_providers.dart';
 import 'package:submersion/features/dive_log/domain/entities/dive.dart';
 import 'package:submersion/features/dive_log/domain/entities/source_profile.dart';
+import 'package:submersion/features/dive_log/presentation/providers/active_source_provider.dart';
 import 'package:submersion/features/dive_log/presentation/providers/dive_providers.dart';
 import 'package:submersion/features/dive_sites/domain/entities/dive_site.dart';
 
@@ -85,6 +86,39 @@ void main() {
     final container = await makeContainer(dive: diveWithHeadings());
     final scene = await container.read(spatialGeometryProvider('d1').future);
     expect(scene, isNull);
+  });
+
+  test('respects the diver-selected active (non-primary) source', () async {
+    final base = await getBaseOverrides();
+    // Primary 'src' has 31 points; the active secondary 'src2' has 3 -> the
+    // reckoned path length tells us which source's profile was used.
+    const secondary = SourceProfile(
+      sourceId: 'src2',
+      computerId: null,
+      isEdited: false,
+      points: [
+        DiveProfilePoint(timestamp: 0, depth: 0),
+        DiveProfilePoint(timestamp: 600, depth: 20),
+        DiveProfilePoint(timestamp: 1200, depth: 0),
+      ],
+    );
+    final container = ProviderContainer(
+      overrides: [
+        ...base,
+        diveProvider(
+          'd1',
+        ).overrideWith((ref) async => diveWithHeadings(withGps: false)),
+        sourceProfilesProvider('d1').overrideWith(
+          (ref) async => {'src': headingProfile(), 'src2': secondary},
+        ),
+        activeDiveSourceProvider('d1').overrideWith((ref) => 'src2'),
+      ],
+    );
+    addTearDown(container.dispose);
+
+    final path = await container.read(spatialReckonedPathProvider('d1').future);
+    expect(path, isNotNull);
+    expect(path!.points.length, 3); // used src2 (3 pts), not primary (31)
   });
 
   test('works without GPS via the straight-line fallback', () async {

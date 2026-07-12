@@ -62,8 +62,10 @@ class DeadReckoningService {
         _rubberBand(east, north, times, exitOffset);
       }
     } else {
-      // Straight line entry -> exit over time (or a short eastward drift
-      // when no exit fix is available).
+      // Straight line entry -> exit over time. With no exit fix the target is
+      // the origin, so the path has no horizontal component (a vertical
+      // descent/ascent): heading data was insufficient to infer a direction,
+      // and the "estimated path" caption flags this uncertainty to the diver.
       final target = exitOffset ?? (east: 0.0, north: 0.0);
       final total = times.last - times.first;
       for (var i = 0; i < n; i++) {

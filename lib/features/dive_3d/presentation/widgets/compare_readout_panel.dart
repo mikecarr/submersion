@@ -35,8 +35,9 @@ class CompareReadoutPanel extends ConsumerWidget {
         final refDepth = profiles.isEmpty
             ? 0.0
             : ProfileResampler.depthAt(profiles[referenceIndex], t);
-        final minutes = t ~/ 60;
-        final seconds = (t % 60).round().toString().padLeft(2, '0');
+        final totalSeconds = t.round();
+        final minutes = totalSeconds ~/ 60;
+        final seconds = (totalSeconds % 60).toString().padLeft(2, '0');
         return DecoratedBox(
           decoration: BoxDecoration(
             color: theme.colorScheme.surface.withValues(alpha: 0.85),

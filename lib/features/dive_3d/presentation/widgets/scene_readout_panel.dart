@@ -39,12 +39,13 @@ class SceneReadoutPanel extends ConsumerWidget {
           if (depth != null) units.formatDepth(depth),
           if (temp != null) units.formatTemperature(temp),
           if (ascent != null)
-            '${ascent.toStringAsFixed(1)} ${units.depthSymbol}/min',
+            '${units.convertDepth(ascent).toStringAsFixed(1)} ${units.depthSymbol}/min',
           if (ppO2 != null) 'ppO2 ${ppO2.toStringAsFixed(2)}',
           if (cns != null) 'CNS ${cns.toStringAsFixed(0)}%',
         ];
-        final minutes = t ~/ 60;
-        final seconds = (t % 60).round().toString().padLeft(2, '0');
+        final totalSeconds = t.round();
+        final minutes = totalSeconds ~/ 60;
+        final seconds = (totalSeconds % 60).toString().padLeft(2, '0');
         return DecoratedBox(
           decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.8),

@@ -55,10 +55,6 @@ class _SpatialSitePageState extends ConsumerState<SpatialSitePage>
   @override
   Widget build(BuildContext context) {
     final sceneAsync = ref.watch(spatialGeometryProvider(widget.diveId));
-    final reconstructed = ref
-        .watch(spatialReckonedPathProvider(widget.diveId))
-        .value
-        ?.reconstructed;
     return Scaffold(
       appBar: AppBar(title: Text(context.l10n.dive3d_spatial_title)),
       body: sceneAsync.when(
@@ -81,12 +77,7 @@ class _SpatialSitePageState extends ConsumerState<SpatialSitePage>
                         visibleOverlays: const {SceneOverlay.markers},
                       ),
                     ),
-                    Positioned(
-                      top: 8,
-                      left: 8,
-                      right: 8,
-                      child: _captions(reconstructed ?? false),
-                    ),
+                    Positioned(top: 8, left: 8, right: 8, child: _captions()),
                   ],
                 ),
               ),
@@ -105,7 +96,7 @@ class _SpatialSitePageState extends ConsumerState<SpatialSitePage>
     );
   }
 
-  Widget _captions(bool reconstructed) {
+  Widget _captions() {
     Widget chip(String text) => Container(
       margin: const EdgeInsets.only(right: 6, bottom: 6),
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -124,7 +115,10 @@ class _SpatialSitePageState extends ConsumerState<SpatialSitePage>
     );
     return Wrap(
       children: [
-        if (reconstructed) chip(context.l10n.dive3d_spatial_estimatedPath),
+        // Both captions are always-true honesty labels: the swim path is
+        // always an estimate (dead reckoning or straight-line fallback) and
+        // the seafloor is always synthesized.
+        chip(context.l10n.dive3d_spatial_estimatedPath),
         chip(context.l10n.dive3d_spatial_synthesizedSeafloor),
       ],
     );

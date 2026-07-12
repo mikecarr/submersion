@@ -8,6 +8,7 @@ import 'package:submersion/features/dive_3d/domain/scene_3d.dart';
 import 'package:submersion/features/dive_3d/domain/spatial/dead_reckoning_service.dart';
 import 'package:submersion/features/dive_3d/domain/spatial/reckoned_path.dart';
 import 'package:submersion/features/dive_3d/domain/spatial/spatial_geometry_service.dart';
+import 'package:submersion/features/dive_log/presentation/providers/active_source_provider.dart';
 import 'package:submersion/features/dive_log/presentation/providers/dive_providers.dart';
 
 /// The reconstructed swim path for a dive (dead reckoning), or null when the
@@ -17,7 +18,13 @@ final spatialReckonedPathProvider =
       final dive = await ref.watch(diveProvider(diveId).future);
       if (dive == null) return null;
       final sources = await ref.watch(sourceProfilesProvider(diveId).future);
-      final points = sources.values.firstOrNull?.points ?? const [];
+      // Respect the source the diver has selected on the detail page; fall
+      // back to the primary source when none is active.
+      final activeSourceId = ref.watch(activeDiveSourceProvider(diveId));
+      final selected = activeSourceId != null
+          ? sources[activeSourceId] ?? sources.values.firstOrNull
+          : sources.values.firstOrNull;
+      final points = selected?.points ?? const [];
       if (points.length < 2) return null;
 
       final sorted = [...points]..sort((a, b) => a.timestamp - b.timestamp);
