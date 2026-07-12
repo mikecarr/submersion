@@ -8,11 +8,17 @@ class TimeScrubBar extends StatelessWidget {
   final bool playing;
   final VoidCallback onPlayPause;
 
+  /// Called when the user begins dragging the slider, so the owner can pause
+  /// playback -- otherwise the AnimationController keeps overwriting
+  /// [position] and fights the drag.
+  final VoidCallback? onScrubStart;
+
   const TimeScrubBar({
     super.key,
     required this.position,
     required this.playing,
     required this.onPlayPause,
+    this.onScrubStart,
   });
 
   @override
@@ -28,6 +34,9 @@ class TimeScrubBar extends StatelessWidget {
             valueListenable: position,
             builder: (context, value, _) => Slider(
               value: value.clamp(0.0, 1.0),
+              onChangeStart: onScrubStart == null
+                  ? null
+                  : (_) => onScrubStart!(),
               onChanged: (v) => position.value = v,
             ),
           ),

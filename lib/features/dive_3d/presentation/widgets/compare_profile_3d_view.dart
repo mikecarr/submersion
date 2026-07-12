@@ -172,6 +172,9 @@ class _CompareProfile3dViewState extends ConsumerState<CompareProfile3dView>
             position: _position,
             playing: _player.isAnimating,
             onPlayPause: _togglePlay,
+            onScrubStart: () {
+              if (_player.isAnimating) setState(() => _player.stop());
+            },
           ),
         ),
       ],

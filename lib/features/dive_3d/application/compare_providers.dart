@@ -102,7 +102,11 @@ final diveComparisonProfilesProvider =
         out.add(
           ComparisonProfile(
             id: diveId,
-            label: dive?.site?.name ?? 'Dive',
+            // Site name when known, else the language-neutral dive number
+            // (avoids embedding an English label in a provider).
+            label:
+                dive?.site?.name ??
+                (dive?.diveNumber != null ? '#${dive!.diveNumber}' : diveId),
             color: sourceColorAt(out.length),
             times: times,
             depths: depths,

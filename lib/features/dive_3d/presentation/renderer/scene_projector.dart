@@ -9,6 +9,10 @@ import 'package:submersion/features/dive_3d/domain/geometry/scene_bounds.dart';
 /// No GL involved.
 class SceneProjector {
   final double _cy, _sy, _cp, _sp;
+  // The scene's actual vertical center, so scenes that override the Y range
+  // (e.g. the tissue surface with sceneMinY: 0) orbit around the right pivot
+  // instead of the default depth midpoint.
+  final double _yCenter;
   late final double _scale;
   late final Offset _offset;
 
@@ -21,7 +25,8 @@ class SceneProjector {
   }) : _cy = math.cos(yawDegrees * math.pi / 180),
        _sy = math.sin(yawDegrees * math.pi / 180),
        _cp = math.cos(pitchDegrees * math.pi / 180),
-       _sp = math.sin(pitchDegrees * math.pi / 180) {
+       _sp = math.sin(pitchDegrees * math.pi / 180),
+       _yCenter = (bounds.sceneMinY + bounds.sceneMaxY) / 2 {
     // Fit: project the scene box corners at unit scale, then scale and
     // center the bounding box into the canvas with a margin.
     var minX = double.infinity, maxX = double.negativeInfinity;
@@ -51,7 +56,7 @@ class SceneProjector {
   /// Rotated view-space coordinates (x right, y up, z toward camera).
   (double, double, double) _view(double x, double y, double z) {
     final cx = x - SceneBounds.xSpan / 2;
-    final cyy = y + SceneBounds.ySpan / 2;
+    final cyy = y - _yCenter;
     final rx = cx * _cy + z * _sy;
     final rz = -cx * _sy + z * _cy;
     final ry = cyy * _cp - rz * _sp;

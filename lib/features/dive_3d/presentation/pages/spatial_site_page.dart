@@ -87,6 +87,9 @@ class _SpatialSitePageState extends ConsumerState<SpatialSitePage>
                   position: _position,
                   playing: _player.isAnimating,
                   onPlayPause: _togglePlay,
+                  onScrubStart: () {
+                    if (_player.isAnimating) setState(() => _player.stop());
+                  },
                 ),
               ),
             ],
