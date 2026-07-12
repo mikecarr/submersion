@@ -56,3 +56,56 @@ final computerComparisonProfilesProvider =
           ? out.sublist(0, kMaxComparisonProfiles)
           : out;
     });
+
+/// Equatable key for a fixed, ordered set of dive ids, so the multi-dive
+/// comparison provider can be a proper `family`.
+class DiveIdSet {
+  final List<String> ids;
+  const DiveIdSet(this.ids);
+
+  @override
+  bool operator ==(Object other) =>
+      other is DiveIdSet &&
+      other.ids.length == ids.length &&
+      _eq(other.ids, ids);
+
+  @override
+  int get hashCode => Object.hashAll(ids);
+
+  static bool _eq(List<String> a, List<String> b) {
+    for (var i = 0; i < a.length; i++) {
+      if (a[i] != b[i]) return false;
+    }
+    return true;
+  }
+}
+
+/// Several dives' primary profiles, as comparison profiles in selection order.
+/// The first dive is the reference (index 0); dives without a usable profile
+/// (manual logs) are skipped; the list is capped for legibility.
+final diveComparisonProfilesProvider =
+    FutureProvider.family<List<ComparisonProfile>, DiveIdSet>((ref, key) async {
+      final out = <ComparisonProfile>[];
+      for (final diveId in key.ids) {
+        if (out.length >= kMaxComparisonProfiles) break;
+        final profilesBySource = await ref.watch(
+          sourceProfilesProvider(diveId).future,
+        );
+        final sp = profilesBySource.values.firstOrNull; // primary is first
+        if (sp == null || sp.points.length < 2) continue;
+        final dive = await ref.watch(diveProvider(diveId).future);
+        final times = [for (final p in sp.points) p.timestamp.toDouble()];
+        final depths = [for (final p in sp.points) p.depth];
+        out.add(
+          ComparisonProfile(
+            id: diveId,
+            label: dive?.site?.name ?? 'Dive',
+            color: sourceColorAt(out.length),
+            times: times,
+            depths: depths,
+            maxDepthMeters: depths.fold(0.0, (a, b) => b > a ? b : a),
+          ),
+        );
+      }
+      return out;
+    });

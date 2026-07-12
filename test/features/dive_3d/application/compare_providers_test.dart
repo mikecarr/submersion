@@ -93,4 +93,49 @@ void main() {
     expect(profiles, hasLength(1));
     expect(profiles.single.id, 'srcPrimary');
   });
+
+  test('DiveIdSet equality is by ordered contents', () {
+    expect(const DiveIdSet(['a', 'b']), const DiveIdSet(['a', 'b']));
+    expect(
+      const DiveIdSet(['a', 'b']).hashCode,
+      const DiveIdSet(['a', 'b']).hashCode,
+    );
+    expect(const DiveIdSet(['a', 'b']) == const DiveIdSet(['b', 'a']), isFalse);
+  });
+
+  test(
+    'dives adapter: first dive is reference; no-profile dives skipped',
+    () async {
+      final container = ProviderContainer(
+        overrides: [
+          sourceProfilesProvider('a').overrideWith(
+            (ref) async => {
+              's1': sp('s1', [pt(0, 0), pt(60, 20), pt(120, 0)]),
+            },
+          ),
+          sourceProfilesProvider('b').overrideWith(
+            (ref) async => {
+              's2': sp('s2', [pt(0, 0), pt(60, 25), pt(120, 0)]),
+            },
+          ),
+          sourceProfilesProvider('c').overrideWith(
+            (ref) async => {
+              's3': sp('s3', [pt(0, 0)]),
+            }, // < 2 -> skipped
+          ),
+          diveProvider('a').overrideWith((ref) async => null),
+          diveProvider('b').overrideWith((ref) async => null),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      final profiles = await container.read(
+        diveComparisonProfilesProvider(const DiveIdSet(['a', 'b', 'c'])).future,
+      );
+      expect(profiles, hasLength(2));
+      expect(profiles.first.id, 'a'); // reference index 0
+      expect(profiles[1].id, 'b');
+      expect(profiles.first.color, sourceColorAt(0));
+    },
+  );
 }
