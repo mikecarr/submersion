@@ -29,6 +29,7 @@ void main() {
   testWidgets('shows interpolated depth at the scrub position', (tester) async {
     final overrides = await getBaseOverrides();
     final position = ValueNotifier<double>(0.5); // t=50 -> depth 10m
+    addTearDown(position.dispose);
     await tester.pumpWidget(
       testApp(
         overrides: overrides,

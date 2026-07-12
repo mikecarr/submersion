@@ -27,9 +27,14 @@ final computerComparisonProfilesProvider =
         sourceProfilesProvider(diveId).future,
       );
 
-      // Primary first (reference index 0), then the rest in source order.
-      final ordered = [...sources]
-        ..sort((a, b) => (b.isPrimary ? 1 : 0) - (a.isPrimary ? 1 : 0));
+      // Primary first (reference index 0), then the rest in their original
+      // order. An explicit partition keeps ordering -- and thus per-source
+      // color assignment -- deterministic; List.sort is not stable when the
+      // comparator returns 0 for two non-primary sources.
+      final ordered = [
+        ...sources.where((s) => s.isPrimary),
+        ...sources.where((s) => !s.isPrimary),
+      ];
 
       final out = <ComparisonProfile>[];
       for (final source in ordered) {
