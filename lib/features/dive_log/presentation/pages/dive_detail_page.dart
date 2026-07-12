@@ -38,6 +38,7 @@ import 'package:submersion/features/dive_log/presentation/providers/profile_anal
 import 'package:submersion/features/dive_log/presentation/pages/fullscreen_profile_page.dart';
 import 'package:submersion/features/dive_log/presentation/utils/sac_normalization.dart';
 import 'package:submersion/features/planner/presentation/providers/plan_overlay_provider.dart';
+import 'package:submersion/shared/widgets/master_detail/detail_scroll_retainer.dart';
 import 'package:submersion/shared/widgets/master_detail/responsive_breakpoints.dart';
 import 'package:submersion/features/dive_log/presentation/providers/profile_playback_provider.dart';
 import 'package:submersion/features/dive_log/presentation/providers/profile_tracking_provider.dart';
@@ -447,7 +448,7 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
     );
 
     final body = SingleChildScrollView(
-      key: const PageStorageKey('diveDetailScroll'),
+      controller: DetailScrollController.maybeOf(context),
       padding: const EdgeInsets.all(16),
       child: RepaintBoundary(
         key: _pageExportKey,

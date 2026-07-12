@@ -159,7 +159,6 @@ class _TripDetailContent extends ConsumerWidget {
                 _buildPhotosTab(context, ref, trip),
                 _buildDivesTab(context, ref, trip),
                 SingleChildScrollView(
-                  key: const PageStorageKey('tripChecklistScroll'),
                   padding: const EdgeInsets.all(16),
                   child: TripChecklistSection(trip: tripWithStats.trip),
                 ),
@@ -217,7 +216,6 @@ class _TripDetailContent extends ConsumerWidget {
   /// Standalone photos tab for the liveaboard tabbed layout.
   Widget _buildPhotosTab(BuildContext context, WidgetRef ref, Trip trip) {
     return SingleChildScrollView(
-      key: const PageStorageKey('tripPhotosScroll'),
       padding: const EdgeInsets.all(16),
       child: TripPhotoSection(tripId: trip.id),
     );
@@ -240,7 +238,6 @@ class _TripDetailContent extends ConsumerWidget {
         final sortedDives = List.of(dives)
           ..sort((a, b) => a.dateTime.compareTo(b.dateTime));
         return ListView.builder(
-          key: const PageStorageKey('tripDivesScroll'),
           padding: const EdgeInsets.all(16),
           itemCount: sortedDives.length,
           itemBuilder: (context, index) {

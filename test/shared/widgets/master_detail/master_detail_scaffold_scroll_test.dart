@@ -3,19 +3,42 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:submersion/l10n/arb/app_localizations.dart';
+import 'package:submersion/shared/widgets/master_detail/detail_scroll_retainer.dart';
 import 'package:submersion/shared/widgets/master_detail/master_detail_scaffold.dart';
 
-/// Builds a [MasterDetailScaffold] inside a router at desktop width (>=800) so
-/// the split layout renders. The master pane exposes two buttons that call
-/// [onItemSelected] to drive selection changes via query params.
-///
-/// [detailHeight] returns the content height for a given item id, so tests can
-/// make item 2 shorter than item 1 to exercise clamping. When [tagKey] is
-/// false the detail scroll view carries no [PageStorageKey] (opt-out case).
-Widget _app({
-  required double Function(String id) detailHeight,
-  bool tagKey = true,
-}) {
+/// A detail whose content starts short and grows to [finalHeight] one microtask
+/// after mount — mimicking the real detail pages, whose sections (profile
+/// chart, photos, marine life) fill in height asynchronously. Its scroll view
+/// opts into retention via [DetailScrollController.maybeOf].
+class _GrowingDetail extends StatefulWidget {
+  const _GrowingDetail(this.id, this.finalHeight);
+  final String id;
+  final double finalHeight;
+  @override
+  State<_GrowingDetail> createState() => _GrowingDetailState();
+}
+
+class _GrowingDetailState extends State<_GrowingDetail> {
+  double _height = 150;
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(() {
+      if (mounted) setState(() => _height = widget.finalHeight);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      controller: DetailScrollController.maybeOf(context),
+      child: SizedBox(height: _height, child: Text('Detail ${widget.id}')),
+    );
+  }
+}
+
+/// Builds a [MasterDetailScaffold] at desktop width with five selectable items.
+Widget _app({required double Function(String id) finalHeight}) {
   final router = GoRouter(
     initialLocation: '/test?selected=1',
     routes: [
@@ -27,23 +50,14 @@ Widget _app({
             sectionId: 'test',
             masterBuilder: (context, onSelect, selectedId) => Column(
               children: [
-                TextButton(
-                  onPressed: () => onSelect('1'),
-                  child: const Text('select-1'),
-                ),
-                TextButton(
-                  onPressed: () => onSelect('2'),
-                  child: const Text('select-2'),
-                ),
+                for (final id in ['1', '2', '3', '4', '5'])
+                  TextButton(
+                    onPressed: () => onSelect(id),
+                    child: Text('select-$id'),
+                  ),
               ],
             ),
-            detailBuilder: (_, id) => SingleChildScrollView(
-              key: tagKey ? const PageStorageKey('testDetailScroll') : null,
-              child: SizedBox(
-                height: detailHeight(id),
-                child: Text('Detail $id'),
-              ),
-            ),
+            detailBuilder: (_, id) => _GrowingDetail(id, finalHeight(id)),
             summaryBuilder: (_) => const Text('Summary'),
           ),
         ),
@@ -60,7 +74,6 @@ Widget _app({
   );
 }
 
-/// The (single, post-settle) detail scroll view's scroll state.
 ScrollableState _detailScrollable(WidgetTester tester) {
   return tester.state<ScrollableState>(
     find.descendant(
@@ -72,30 +85,38 @@ ScrollableState _detailScrollable(WidgetTester tester) {
 
 void main() {
   group('MasterDetailScaffold detail scroll retention', () {
-    testWidgets('retains offset when switching to another item', (
+    testWidgets('retains offset across many selections despite content growing', (
       tester,
     ) async {
-      await tester.pumpWidget(_app(detailHeight: (_) => 3000));
+      await tester.pumpWidget(_app(finalHeight: (_) => 3000));
       await tester.pumpAndSettle();
 
+      // A user scroll on item 1 (fires notifications -> captured into the pane).
       _detailScrollable(tester).position.jumpTo(800);
       await tester.pump();
       expect(_detailScrollable(tester).position.pixels, 800);
 
-      await tester.tap(find.text('select-2'));
-      await tester.pumpAndSettle();
-
-      expect(find.text('Detail 2'), findsOneWidget);
-      expect(_detailScrollable(tester).position.pixels, 800);
+      // Switching through several items must not degrade the offset — this is
+      // the regression: the old PageStorage approach ratcheted to 0 here
+      // because restore clamped against still-loading content and saved that.
+      for (final id in ['2', '3', '4', '5']) {
+        await tester.tap(find.text('select-$id'));
+        await tester.pumpAndSettle();
+        expect(find.text('Detail $id'), findsOneWidget);
+        expect(
+          _detailScrollable(tester).position.pixels,
+          800,
+          reason: 'offset lost after selecting item $id',
+        );
+      }
     });
 
-    testWidgets('clamps retained offset to the new item extent', (
+    testWidgets('clamps retained offset to a shorter item extent', (
       tester,
     ) async {
-      // Item 1 is tall (scrollable); item 2 is only slightly taller than the
-      // ~800px viewport, so its maxScrollExtent is small and 800 must clamp.
+      // Item 2 is only slightly taller than the ~800px viewport.
       await tester.pumpWidget(
-        _app(detailHeight: (id) => id == '2' ? 900 : 3000),
+        _app(finalHeight: (id) => id == '2' ? 900 : 3000),
       );
       await tester.pumpAndSettle();
 
@@ -110,10 +131,49 @@ void main() {
       expect(position.pixels, lessThan(800));
     });
 
-    testWidgets('without a PageStorageKey the offset resets to top', (
+    testWidgets('a detail that does not opt in starts at the top', (
       tester,
     ) async {
-      await tester.pumpWidget(_app(detailHeight: (_) => 3000, tagKey: false));
+      // Detail with no DetailScrollController wiring: no retention.
+      final router = GoRouter(
+        initialLocation: '/test?selected=1',
+        routes: [
+          GoRoute(
+            path: '/test',
+            builder: (context, state) => MediaQuery(
+              data: const MediaQueryData(size: Size(1200, 800)),
+              child: MasterDetailScaffold(
+                sectionId: 'test',
+                masterBuilder: (context, onSelect, selectedId) => Column(
+                  children: [
+                    TextButton(
+                      onPressed: () => onSelect('1'),
+                      child: const Text('select-1'),
+                    ),
+                    TextButton(
+                      onPressed: () => onSelect('2'),
+                      child: const Text('select-2'),
+                    ),
+                  ],
+                ),
+                detailBuilder: (_, id) => SingleChildScrollView(
+                  child: SizedBox(height: 3000, child: Text('Detail $id')),
+                ),
+                summaryBuilder: (_) => const Text('Summary'),
+              ),
+            ),
+          ),
+        ],
+      );
+      await tester.pumpWidget(
+        ProviderScope(
+          child: MaterialApp.router(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            routerConfig: router,
+          ),
+        ),
+      );
       await tester.pumpAndSettle();
 
       _detailScrollable(tester).position.jumpTo(800);

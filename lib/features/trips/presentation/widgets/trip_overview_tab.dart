@@ -61,7 +61,6 @@ class _TripOverviewTabState extends ConsumerState<TripOverviewTab> {
     final dateFormat = DateFormat.yMMMd();
 
     return SingleChildScrollView(
-      key: const PageStorageKey('tripOverviewScroll'),
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
