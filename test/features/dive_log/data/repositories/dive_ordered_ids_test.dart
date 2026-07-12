@@ -4,6 +4,7 @@ import 'package:submersion/core/constants/sort_options.dart';
 import 'package:submersion/core/database/database.dart';
 import 'package:submersion/core/models/sort_state.dart';
 import 'package:submersion/features/dive_log/data/repositories/dive_repository_impl.dart';
+import 'package:submersion/features/dive_log/domain/models/dive_filter_state.dart';
 
 import '../../../../helpers/test_database.dart';
 
@@ -19,7 +20,12 @@ void main() {
     await tearDownTestDatabase();
   });
 
-  Future<String> insertDive(String id, int dateTimeMs, {int? number}) async {
+  Future<String> insertDive(
+    String id,
+    int dateTimeMs, {
+    int? number,
+    String? diverId,
+  }) async {
     final now = DateTime.now().millisecondsSinceEpoch;
     await db
         .into(db.dives)
@@ -28,6 +34,7 @@ void main() {
             id: Value(id),
             diveDateTime: Value(dateTimeMs),
             diveNumber: Value(number),
+            diverId: Value(diverId),
             createdAt: Value(now),
             updatedAt: Value(now),
           ),
@@ -70,5 +77,28 @@ void main() {
       ),
     );
     expect(ids, ['a', 'c', 'b']);
+  });
+
+  test('applies filter where-clause', () async {
+    await insertDive('a', 2000);
+    await insertDive('c', 500); // before the filter window
+
+    final ids = await repository.getOrderedDiveIds(
+      filter: DiveFilterState(
+        startDate: DateTime.fromMillisecondsSinceEpoch(1000),
+      ),
+    );
+
+    expect(ids, ['a']);
+  });
+
+  test('scopes to diverId (diver_id where-clause)', () async {
+    await insertDive('a', 2000);
+
+    // No diver matches, so the diver_id predicate returns nothing -- this
+    // exercises the diverId branch without needing a seeded divers row.
+    final ids = await repository.getOrderedDiveIds(diverId: 'nobody');
+
+    expect(ids, isEmpty);
   });
 }
