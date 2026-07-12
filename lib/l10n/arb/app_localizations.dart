@@ -32263,6 +32263,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Blue curve: your depth'**
   String get dive3d_tissue_legendDepth;
+
+  /// No description provided for @dive3d_tissue_onGassing.
+  ///
+  /// In en, this message translates to:
+  /// **'On-gassing'**
+  String get dive3d_tissue_onGassing;
+
+  /// No description provided for @dive3d_tissue_offGassing.
+  ///
+  /// In en, this message translates to:
+  /// **'Off-gassing'**
+  String get dive3d_tissue_offGassing;
 }
 
 class _AppLocalizationsDelegate

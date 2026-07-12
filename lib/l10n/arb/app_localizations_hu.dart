@@ -19202,4 +19202,10 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get dive3d_tissue_legendDepth => 'Kék görbe: a mélységed';
+
+  @override
+  String get dive3d_tissue_onGassing => 'Feltöltődés';
+
+  @override
+  String get dive3d_tissue_offGassing => 'Leürülés';
 }

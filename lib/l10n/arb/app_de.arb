@@ -5506,5 +5506,9 @@
   "dive3d_tissue_legendAxes": "Links→rechts: Zeit · Vorn→hinten: schnelle→langsame Gewebe",
   "@dive3d_tissue_legendAxes": {},
   "dive3d_tissue_legendDepth": "Blaue Kurve: deine Tiefe",
-  "@dive3d_tissue_legendDepth": {}
+  "@dive3d_tissue_legendDepth": {},
+  "dive3d_tissue_onGassing": "Aufsättigung",
+  "@dive3d_tissue_onGassing": {},
+  "dive3d_tissue_offGassing": "Entsättigung",
+  "@dive3d_tissue_offGassing": {}
 }

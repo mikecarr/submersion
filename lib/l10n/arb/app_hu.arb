@@ -5506,5 +5506,9 @@
   "dive3d_tissue_legendAxes": "Balra→jobbra: idő · Elöl→hátul: gyors→lassú szövetek",
   "@dive3d_tissue_legendAxes": {},
   "dive3d_tissue_legendDepth": "Kék görbe: a mélységed",
-  "@dive3d_tissue_legendDepth": {}
+  "@dive3d_tissue_legendDepth": {},
+  "dive3d_tissue_onGassing": "Feltöltődés",
+  "@dive3d_tissue_onGassing": {},
+  "dive3d_tissue_offGassing": "Leürülés",
+  "@dive3d_tissue_offGassing": {}
 }

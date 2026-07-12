@@ -5506,5 +5506,9 @@
   "dive3d_tissue_legendAxes": "שמאל→ימין: זמן · קדימה→אחורה: רקמות מהירות→איטיות",
   "@dive3d_tissue_legendAxes": {},
   "dive3d_tissue_legendDepth": "עקומה כחולה: העומק שלך",
-  "@dive3d_tissue_legendDepth": {}
+  "@dive3d_tissue_legendDepth": {},
+  "dive3d_tissue_onGassing": "ספיגה",
+  "@dive3d_tissue_onGassing": {},
+  "dive3d_tissue_offGassing": "שחרור",
+  "@dive3d_tissue_offGassing": {}
 }

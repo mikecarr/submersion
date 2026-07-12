@@ -18764,4 +18764,10 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get dive3d_tissue_legendDepth => 'עקומה כחולה: העומק שלך';
+
+  @override
+  String get dive3d_tissue_onGassing => 'ספיגה';
+
+  @override
+  String get dive3d_tissue_offGassing => 'שחרור';
 }

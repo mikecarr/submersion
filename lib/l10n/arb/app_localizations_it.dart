@@ -19255,4 +19255,10 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get dive3d_tissue_legendDepth => 'Curva blu: la tua profondità';
+
+  @override
+  String get dive3d_tissue_onGassing => 'Assorbimento';
+
+  @override
+  String get dive3d_tissue_offGassing => 'Rilascio';
 }

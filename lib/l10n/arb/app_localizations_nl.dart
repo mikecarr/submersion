@@ -19102,4 +19102,10 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get dive3d_tissue_legendDepth => 'Blauwe curve: je diepte';
+
+  @override
+  String get dive3d_tissue_onGassing => 'Opzadeling';
+
+  @override
+  String get dive3d_tissue_offGassing => 'Ontzadeling';
 }

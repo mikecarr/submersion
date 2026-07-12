@@ -5506,5 +5506,9 @@
   "dive3d_tissue_legendAxes": "يسار→يمين: الوقت · أمام→خلف: أنسجة سريعة→بطيئة",
   "@dive3d_tissue_legendAxes": {},
   "dive3d_tissue_legendDepth": "المنحنى الأزرق: عمقك",
-  "@dive3d_tissue_legendDepth": {}
+  "@dive3d_tissue_legendDepth": {},
+  "dive3d_tissue_onGassing": "امتصاص",
+  "@dive3d_tissue_onGassing": {},
+  "dive3d_tissue_offGassing": "إطلاق",
+  "@dive3d_tissue_offGassing": {}
 }

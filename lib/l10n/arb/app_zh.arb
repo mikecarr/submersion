@@ -5506,5 +5506,9 @@
   "dive3d_tissue_legendAxes": "左→右：时间 · 前→后：快→慢组织",
   "@dive3d_tissue_legendAxes": {},
   "dive3d_tissue_legendDepth": "蓝色曲线：你的深度",
-  "@dive3d_tissue_legendDepth": {}
+  "@dive3d_tissue_legendDepth": {},
+  "dive3d_tissue_onGassing": "吸收",
+  "@dive3d_tissue_onGassing": {},
+  "dive3d_tissue_offGassing": "释放",
+  "@dive3d_tissue_offGassing": {}
 }

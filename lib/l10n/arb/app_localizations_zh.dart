@@ -18284,4 +18284,10 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get dive3d_tissue_legendDepth => '蓝色曲线：你的深度';
+
+  @override
+  String get dive3d_tissue_onGassing => '吸收';
+
+  @override
+  String get dive3d_tissue_offGassing => '释放';
 }

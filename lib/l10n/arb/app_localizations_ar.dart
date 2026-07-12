@@ -18897,4 +18897,10 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get dive3d_tissue_legendDepth => 'المنحنى الأزرق: عمقك';
+
+  @override
+  String get dive3d_tissue_onGassing => 'امتصاص';
+
+  @override
+  String get dive3d_tissue_offGassing => 'إطلاق';
 }

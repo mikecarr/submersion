@@ -5506,5 +5506,9 @@
   "dive3d_tissue_legendAxes": "Gauche→droite : temps · Avant→arrière : tissus rapides→lents",
   "@dive3d_tissue_legendAxes": {},
   "dive3d_tissue_legendDepth": "Courbe bleue : votre profondeur",
-  "@dive3d_tissue_legendDepth": {}
+  "@dive3d_tissue_legendDepth": {},
+  "dive3d_tissue_onGassing": "Absorption",
+  "@dive3d_tissue_onGassing": {},
+  "dive3d_tissue_offGassing": "Élimination",
+  "@dive3d_tissue_offGassing": {}
 }

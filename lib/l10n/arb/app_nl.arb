@@ -5506,5 +5506,9 @@
   "dive3d_tissue_legendAxes": "Links→rechts: tijd · Voor→achter: snelle→trage weefsels",
   "@dive3d_tissue_legendAxes": {},
   "dive3d_tissue_legendDepth": "Blauwe curve: je diepte",
-  "@dive3d_tissue_legendDepth": {}
+  "@dive3d_tissue_legendDepth": {},
+  "dive3d_tissue_onGassing": "Opzadeling",
+  "@dive3d_tissue_onGassing": {},
+  "dive3d_tissue_offGassing": "Ontzadeling",
+  "@dive3d_tissue_offGassing": {}
 }

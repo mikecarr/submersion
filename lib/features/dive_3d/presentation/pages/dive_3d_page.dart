@@ -7,13 +7,13 @@ import 'package:submersion/features/dive_3d/domain/entities/dive_3d_scene_data.d
 import 'package:submersion/features/dive_3d/domain/geometry/marker_layout.dart';
 import 'package:submersion/features/dive_3d/domain/metric_palette.dart';
 import 'package:submersion/features/dive_3d/domain/scene_3d.dart';
-import 'package:submersion/features/dive_3d/domain/tissue/tissue_surface_builder.dart';
 import 'package:submersion/features/dive_3d/presentation/scene_overlay.dart';
 import 'package:submersion/features/dive_3d/presentation/widgets/dive_3d_interactive_viewport.dart';
 import 'package:submersion/features/dive_3d/presentation/widgets/scene_readout_panel.dart';
 import 'package:submersion/features/dive_3d/presentation/widgets/time_scrub_bar.dart';
 import 'package:submersion/features/dive_3d/presentation/widgets/tissue_legend.dart';
 import 'package:submersion/features/dive_3d/presentation/widgets/tissue_readout_panel.dart';
+import 'package:submersion/features/dive_log/presentation/widgets/tissue_color_schemes.dart';
 import 'package:submersion/l10n/l10n_extension.dart';
 
 /// Which scene the 3D page is showing.
@@ -40,8 +40,6 @@ class _Dive3dPageState extends ConsumerState<Dive3dPage>
   SceneKind _sceneKind = SceneKind.dive;
   SceneMetric _metric = SceneMetric.depth;
   Set<SceneOverlay> _overlays = SceneOverlay.values.toSet();
-  TissueColorMode _colorMode = TissueColorMode.mValue;
-  bool _splitHelium = false;
 
   @override
   void initState() {
@@ -97,30 +95,18 @@ class _Dive3dPageState extends ConsumerState<Dive3dPage>
   }
 
   Widget _buildTissueBody() {
-    final result = ref.watch(tissueReplayProvider(widget.diveId)).value;
-    final scene = ref
-        .watch(
-          tissueGeometryProvider((
-            diveId: widget.diveId,
-            gas: TissueGas.combined,
-            colorMode: _colorMode,
-            splitHelium: _splitHelium,
-          )),
-        )
-        .value;
-    if (result == null || scene == null) {
+    final scene = ref.watch(tissue3dSceneProvider(widget.diveId)).value;
+    final statuses = ref.watch(tissueDecoStatusesProvider(widget.diveId)).value;
+    if (scene == null || statuses == null || statuses.isEmpty) {
       return const Center(child: CircularProgressIndicator());
     }
+    final colorFn = colorFnForScheme(ref.watch(tissueColorSchemeProvider));
     return _sceneScaffold(
       scene: scene,
-      readout: TissueReadoutPanel(
-        result: result,
-        position: _position,
-        splitHelium: _splitHelium && result.hasHelium,
-      ),
-      controls: _buildTissueControls(result.hasHelium),
+      readout: TissueReadoutPanel(statuses: statuses, position: _position),
+      controls: _buildTissueControls(),
       onMarkerTap: null,
-      cornerOverlay: TissueLegend(colorMode: _colorMode),
+      cornerOverlay: TissueLegend(colorFn: colorFn),
     );
   }
 
@@ -219,36 +205,14 @@ class _Dive3dPageState extends ConsumerState<Dive3dPage>
     );
   }
 
-  Widget _buildTissueControls(bool hasHelium) {
+  Widget _buildTissueControls() {
+    // The color scale follows the diver's tissue heat-map scheme setting,
+    // so the 3D and 2D graphs always match. Only the scene switcher here.
     return Wrap(
       spacing: 6,
       runSpacing: 6,
       crossAxisAlignment: WrapCrossAlignment.center,
-      children: [
-        _sceneSwitcher(),
-        SegmentedButton<TissueColorMode>(
-          style: const ButtonStyle(visualDensity: VisualDensity.compact),
-          segments: [
-            ButtonSegment(
-              value: TissueColorMode.mValue,
-              label: Text(context.l10n.dive3d_tissue_colorMValue),
-            ),
-            ButtonSegment(
-              value: TissueColorMode.absolute,
-              label: Text(context.l10n.dive3d_tissue_colorAbsolute),
-            ),
-          ],
-          selected: {_colorMode},
-          onSelectionChanged: (s) => setState(() => _colorMode = s.first),
-          showSelectedIcon: false,
-        ),
-        if (hasHelium)
-          FilterChip(
-            label: Text(context.l10n.dive3d_tissue_gasHe),
-            selected: _splitHelium,
-            onSelected: (v) => setState(() => _splitHelium = v),
-          ),
-      ],
+      children: [_sceneSwitcher()],
     );
   }
 

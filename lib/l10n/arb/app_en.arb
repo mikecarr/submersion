@@ -12056,5 +12056,9 @@
   "dive3d_tissue_legendAxes": "Left→right: time · Front→back: fast→slow tissues",
   "@dive3d_tissue_legendAxes": {},
   "dive3d_tissue_legendDepth": "Blue curve: your depth",
-  "@dive3d_tissue_legendDepth": {}
+  "@dive3d_tissue_legendDepth": {},
+  "dive3d_tissue_onGassing": "On-gassing",
+  "@dive3d_tissue_onGassing": {},
+  "dive3d_tissue_offGassing": "Off-gassing",
+  "@dive3d_tissue_offGassing": {}
 }
