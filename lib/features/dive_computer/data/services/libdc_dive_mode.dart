@@ -12,6 +12,11 @@ String mapLibdcDiveModeCode(String? mode) {
       return 'scr';
     case 'gauge':
       return 'gauge';
+    // Freedive is a distinct libdivecomputer mode, intentionally deferred to
+    // 'oc' for now (a separate axis; there is already a diveType.freedive).
+    // Explicit so the intent survives any change to the default branch.
+    case 'freedive':
+      return 'oc';
     default:
       return 'oc';
   }

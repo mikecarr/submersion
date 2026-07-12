@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:submersion/core/constants/enums.dart';
+import 'package:submersion/features/dive_log/data/services/profile_analysis_service.dart';
 import 'package:submersion/features/dive_log/domain/entities/dive.dart';
 import 'package:submersion/features/dive_log/presentation/providers/profile_analysis_provider.dart';
 
@@ -30,7 +31,16 @@ void main() {
         profile: profile,
       );
 
-      final container = ProviderContainer();
+      final container = ProviderContainer(
+        overrides: [
+          // Inject a default analysis service so the bare container skips the
+          // DB-backed settings chain. In production the gauge branch uses the
+          // user-configured service (ascent-rate thresholds).
+          profileAnalysisServiceProvider.overrideWithValue(
+            ProfileAnalysisService(),
+          ),
+        ],
+      );
       addTearDown(container.dispose);
 
       final analysis = container.read(diveProfileAnalysisProvider(dive));
