@@ -9,6 +9,7 @@ import 'package:submersion/features/dive_3d/domain/tissue/tissue_replay_service.
 import 'package:submersion/features/dive_3d/presentation/pages/dive_3d_page.dart';
 import 'package:submersion/features/dive_3d/presentation/scene_overlay.dart';
 import 'package:submersion/features/dive_3d/presentation/widgets/time_scrub_bar.dart';
+import 'package:submersion/features/dive_3d/presentation/widgets/tissue_legend.dart';
 import 'package:submersion/features/dive_3d/presentation/widgets/tissue_readout_panel.dart';
 
 import '../../../../helpers/mock_providers.dart';
@@ -143,6 +144,8 @@ void main() {
     expect(find.byType(TissueReadoutPanel), findsOneWidget);
     // Tissue color-mode control is present.
     expect(find.text('% M-value'), findsOneWidget);
+    // The legend that explains how to read the scene is shown.
+    expect(find.byType(TissueLegend), findsOneWidget);
 
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pump(const Duration(seconds: 1));

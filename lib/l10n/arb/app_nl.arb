@@ -5498,5 +5498,13 @@
   "dive3d_spatial_synthesizedSeafloor": "Gesynthetiseerde zeebodem",
   "@dive3d_spatial_synthesizedSeafloor": {},
   "dive3d_spatial_noPath": "Onvoldoende gegevens om het pad te reconstrueren",
-  "@dive3d_spatial_noPath": {}
+  "@dive3d_spatial_noPath": {},
+  "dive3d_tissue_legendHeight": "Hoogte & kleur: % van de M-waardelimiet",
+  "@dive3d_tissue_legendHeight": {},
+  "dive3d_tissue_legendLimit": "Rood vlak = decolimiet",
+  "@dive3d_tissue_legendLimit": {},
+  "dive3d_tissue_legendAxes": "Links→rechts: tijd · Voor→achter: snelle→trage weefsels",
+  "@dive3d_tissue_legendAxes": {},
+  "dive3d_tissue_legendDepth": "Blauwe curve: je diepte",
+  "@dive3d_tissue_legendDepth": {}
 }

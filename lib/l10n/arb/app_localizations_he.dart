@@ -18751,4 +18751,17 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get dive3d_spatial_noPath => 'אין מספיק נתונים לשחזור הנתיב';
+
+  @override
+  String get dive3d_tissue_legendHeight => 'גובה וצבע: ٪ מגבול ערך M';
+
+  @override
+  String get dive3d_tissue_legendLimit => 'מישור אדום = גבול דקו';
+
+  @override
+  String get dive3d_tissue_legendAxes =>
+      'שמאל→ימין: זמן · קדימה→אחורה: רקמות מהירות→איטיות';
+
+  @override
+  String get dive3d_tissue_legendDepth => 'עקומה כחולה: העומק שלך';
 }

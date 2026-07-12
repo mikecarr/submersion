@@ -19088,4 +19088,18 @@ class AppLocalizationsNl extends AppLocalizations {
   @override
   String get dive3d_spatial_noPath =>
       'Onvoldoende gegevens om het pad te reconstrueren';
+
+  @override
+  String get dive3d_tissue_legendHeight =>
+      'Hoogte & kleur: % van de M-waardelimiet';
+
+  @override
+  String get dive3d_tissue_legendLimit => 'Rood vlak = decolimiet';
+
+  @override
+  String get dive3d_tissue_legendAxes =>
+      'Links→rechts: tijd · Voor→achter: snelle→trage weefsels';
+
+  @override
+  String get dive3d_tissue_legendDepth => 'Blauwe curve: je diepte';
 }

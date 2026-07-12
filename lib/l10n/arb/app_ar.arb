@@ -5498,5 +5498,13 @@
   "dive3d_spatial_synthesizedSeafloor": "قاع بحر مُركّب",
   "@dive3d_spatial_synthesizedSeafloor": {},
   "dive3d_spatial_noPath": "بيانات غير كافية لإعادة بناء المسار",
-  "@dive3d_spatial_noPath": {}
+  "@dive3d_spatial_noPath": {},
+  "dive3d_tissue_legendHeight": "الارتفاع واللون: ٪ من حد قيمة M",
+  "@dive3d_tissue_legendHeight": {},
+  "dive3d_tissue_legendLimit": "المستوى الأحمر = حد تخفيف الضغط",
+  "@dive3d_tissue_legendLimit": {},
+  "dive3d_tissue_legendAxes": "يسار→يمين: الوقت · أمام→خلف: أنسجة سريعة→بطيئة",
+  "@dive3d_tissue_legendAxes": {},
+  "dive3d_tissue_legendDepth": "المنحنى الأزرق: عمقك",
+  "@dive3d_tissue_legendDepth": {}
 }

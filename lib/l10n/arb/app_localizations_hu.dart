@@ -19188,4 +19188,18 @@ class AppLocalizationsHu extends AppLocalizations {
   @override
   String get dive3d_spatial_noPath =>
       'Nincs elég adat az útvonal rekonstruálásához';
+
+  @override
+  String get dive3d_tissue_legendHeight =>
+      'Magasság és szín: az M-érték határának %-a';
+
+  @override
+  String get dive3d_tissue_legendLimit => 'Piros sík = dekó határ';
+
+  @override
+  String get dive3d_tissue_legendAxes =>
+      'Balra→jobbra: idő · Elöl→hátul: gyors→lassú szövetek';
+
+  @override
+  String get dive3d_tissue_legendDepth => 'Kék görbe: a mélységed';
 }

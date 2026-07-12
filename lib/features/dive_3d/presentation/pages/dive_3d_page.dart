@@ -12,6 +12,7 @@ import 'package:submersion/features/dive_3d/presentation/scene_overlay.dart';
 import 'package:submersion/features/dive_3d/presentation/widgets/dive_3d_interactive_viewport.dart';
 import 'package:submersion/features/dive_3d/presentation/widgets/scene_readout_panel.dart';
 import 'package:submersion/features/dive_3d/presentation/widgets/time_scrub_bar.dart';
+import 'package:submersion/features/dive_3d/presentation/widgets/tissue_legend.dart';
 import 'package:submersion/features/dive_3d/presentation/widgets/tissue_readout_panel.dart';
 import 'package:submersion/l10n/l10n_extension.dart';
 
@@ -119,6 +120,7 @@ class _Dive3dPageState extends ConsumerState<Dive3dPage>
       ),
       controls: _buildTissueControls(result.hasHelium),
       onMarkerTap: null,
+      cornerOverlay: TissueLegend(colorMode: _colorMode),
     );
   }
 
@@ -127,6 +129,7 @@ class _Dive3dPageState extends ConsumerState<Dive3dPage>
     required Widget readout,
     required Widget controls,
     required void Function(SceneMarker)? onMarkerTap,
+    Widget? cornerOverlay,
   }) {
     return Column(
       children: [
@@ -141,6 +144,8 @@ class _Dive3dPageState extends ConsumerState<Dive3dPage>
                   onMarkerTap: onMarkerTap,
                 ),
               ),
+              if (cornerOverlay != null)
+                Positioned(top: 56, left: 8, child: cornerOverlay),
               Positioned(left: 12, right: 12, bottom: 12, child: readout),
               Positioned(top: 8, left: 8, right: 8, child: controls),
             ],

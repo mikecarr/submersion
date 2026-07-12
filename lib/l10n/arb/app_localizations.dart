@@ -32239,6 +32239,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Not enough data to reconstruct the dive path'**
   String get dive3d_spatial_noPath;
+
+  /// No description provided for @dive3d_tissue_legendHeight.
+  ///
+  /// In en, this message translates to:
+  /// **'Height & color: % of the M-value limit'**
+  String get dive3d_tissue_legendHeight;
+
+  /// No description provided for @dive3d_tissue_legendLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'Red plane = deco limit'**
+  String get dive3d_tissue_legendLimit;
+
+  /// No description provided for @dive3d_tissue_legendAxes.
+  ///
+  /// In en, this message translates to:
+  /// **'Left→right: time · Front→back: fast→slow tissues'**
+  String get dive3d_tissue_legendAxes;
+
+  /// No description provided for @dive3d_tissue_legendDepth.
+  ///
+  /// In en, this message translates to:
+  /// **'Blue curve: your depth'**
+  String get dive3d_tissue_legendDepth;
 }
 
 class _AppLocalizationsDelegate

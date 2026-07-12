@@ -5498,5 +5498,13 @@
   "dive3d_spatial_synthesizedSeafloor": "Fundo do mar sintetizado",
   "@dive3d_spatial_synthesizedSeafloor": {},
   "dive3d_spatial_noPath": "Dados insuficientes para reconstruir o trajeto",
-  "@dive3d_spatial_noPath": {}
+  "@dive3d_spatial_noPath": {},
+  "dive3d_tissue_legendHeight": "Altura e cor: % do limite do valor M",
+  "@dive3d_tissue_legendHeight": {},
+  "dive3d_tissue_legendLimit": "Plano vermelho = limite de deco",
+  "@dive3d_tissue_legendLimit": {},
+  "dive3d_tissue_legendAxes": "Esq→dir: tempo · Frente→trás: tecidos rápidos→lentos",
+  "@dive3d_tissue_legendAxes": {},
+  "dive3d_tissue_legendDepth": "Curva azul: sua profundidade",
+  "@dive3d_tissue_legendDepth": {}
 }

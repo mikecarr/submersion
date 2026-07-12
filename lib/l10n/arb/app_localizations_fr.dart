@@ -19313,4 +19313,18 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get dive3d_spatial_noPath =>
       'Données insuffisantes pour reconstruire le trajet';
+
+  @override
+  String get dive3d_tissue_legendHeight =>
+      'Hauteur et couleur : % de la limite de valeur M';
+
+  @override
+  String get dive3d_tissue_legendLimit => 'Plan rouge = limite déco';
+
+  @override
+  String get dive3d_tissue_legendAxes =>
+      'Gauche→droite : temps · Avant→arrière : tissus rapides→lents';
+
+  @override
+  String get dive3d_tissue_legendDepth => 'Courbe bleue : votre profondeur';
 }

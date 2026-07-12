@@ -5498,5 +5498,13 @@
   "dive3d_spatial_synthesizedSeafloor": "合成海底",
   "@dive3d_spatial_synthesizedSeafloor": {},
   "dive3d_spatial_noPath": "数据不足，无法重建潜水路径",
-  "@dive3d_spatial_noPath": {}
+  "@dive3d_spatial_noPath": {},
+  "dive3d_tissue_legendHeight": "高度和颜色：M值上限的百分比",
+  "@dive3d_tissue_legendHeight": {},
+  "dive3d_tissue_legendLimit": "红色平面 = 减压极限",
+  "@dive3d_tissue_legendLimit": {},
+  "dive3d_tissue_legendAxes": "左→右：时间 · 前→后：快→慢组织",
+  "@dive3d_tissue_legendAxes": {},
+  "dive3d_tissue_legendDepth": "蓝色曲线：你的深度",
+  "@dive3d_tissue_legendDepth": {}
 }

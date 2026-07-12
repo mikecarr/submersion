@@ -61,13 +61,66 @@ void main() {
     expect(lastY, greaterThan(firstY));
   });
 
-  test('controlling ridge has a quad per column gap', () {
-    final result = replayOneDive();
-    final ridge = TissueSurfaceBuilder.buildControllingRidge(
+  test('%M height is bounded and positive where tissues load', () {
+    // A dive that ascends to the surface so supersaturation (%M) develops.
+    final times = [for (var m = 0; m <= 30; m++) (m * 60).toDouble()];
+    final depths = [
+      for (var m = 0; m <= 30; m++)
+        m < 5
+            ? m *
+                  6.0 // descent to 30 m
+            : m < 25
+            ? 30.0 // bottom
+            : 30.0 * (30 - m) / 5, // ascent to surface
+    ];
+    final result = const TissueReplayService().replay(
+      TissueChainInput(
+        dives: [TissueDiveInput(times: times, depths: depths, gasLegs: [])],
+        surfaceIntervalSeconds: [],
+        gfLow: 0.30,
+        gfHigh: 0.70,
+        environment: DiveEnvironment.standard,
+      ),
+    );
+    final mesh = TissueSurfaceBuilder.buildSurface(
       result: result,
       axis: axisFor(result),
-    )!;
-    expect(ridge.triangleCount, (result.columnCount - 1) * 2);
+      gas: TissueGas.combined,
+      colorMode: TissueColorMode.mValue,
+    );
+    const cap =
+        TissueSurfaceBuilder.referenceHeight *
+        TissueSurfaceBuilder.maxDisplayFraction;
+    var maxY = 0.0;
+    for (var i = 0; i < mesh.vertexCount; i++) {
+      final y = mesh.positions[i * 3 + 1];
+      expect(y, greaterThanOrEqualTo(0));
+      expect(y, lessThanOrEqualTo(cap + 1e-6));
+      if (y > maxY) maxY = y;
+    }
+    // Some tissue is supersaturated after ascent, so height rises above 0.
+    expect(maxY, greaterThan(0));
+  });
+
+  test('danger plane sits at the M-value reference height', () {
+    final plane = TissueSurfaceBuilder.dangerPlane(
+      axis: axisFor(replayOneDive()),
+    );
+    for (var i = 0; i < plane.vertexCount; i++) {
+      expect(plane.positions[i * 3 + 1], TissueSurfaceBuilder.referenceHeight);
+    }
+    expect(plane.opacity, lessThan(0.5));
+  });
+
+  test('depth context ribbon dips below the baseline at depth', () {
+    final result = replayOneDive();
+    final ribbon = TissueSurfaceBuilder.depthContext(
+      result: result,
+      axis: axisFor(result),
+    );
+    // Mid-dive is at 30 m -> negative Y (below baseline).
+    final midCol = result.columnCount ~/ 2;
+    expect(ribbon.positions[midCol * 6 + 1], lessThan(0));
   });
 
   test('scrub path spans normalized time', () {
@@ -75,6 +128,8 @@ void main() {
     final path = TissueSurfaceBuilder.scrubPath(
       result: result,
       axis: axisFor(result),
+      gas: TissueGas.combined,
+      colorMode: TissueColorMode.mValue,
     );
     expect(path.normalizedTimes.first, closeTo(0, 1e-9));
     expect(path.normalizedTimes.last, closeTo(1, 1e-9));

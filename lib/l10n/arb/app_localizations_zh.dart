@@ -18272,4 +18272,16 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get dive3d_spatial_noPath => '数据不足，无法重建潜水路径';
+
+  @override
+  String get dive3d_tissue_legendHeight => '高度和颜色：M值上限的百分比';
+
+  @override
+  String get dive3d_tissue_legendLimit => '红色平面 = 减压极限';
+
+  @override
+  String get dive3d_tissue_legendAxes => '左→右：时间 · 前→后：快→慢组织';
+
+  @override
+  String get dive3d_tissue_legendDepth => '蓝色曲线：你的深度';
 }

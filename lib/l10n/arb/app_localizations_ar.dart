@@ -18884,4 +18884,17 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get dive3d_spatial_noPath => 'بيانات غير كافية لإعادة بناء المسار';
+
+  @override
+  String get dive3d_tissue_legendHeight => 'الارتفاع واللون: ٪ من حد قيمة M';
+
+  @override
+  String get dive3d_tissue_legendLimit => 'المستوى الأحمر = حد تخفيف الضغط';
+
+  @override
+  String get dive3d_tissue_legendAxes =>
+      'يسار→يمين: الوقت · أمام→خلف: أنسجة سريعة→بطيئة';
+
+  @override
+  String get dive3d_tissue_legendDepth => 'المنحنى الأزرق: عمقك';
 }

@@ -18919,4 +18919,18 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get dive3d_spatial_noPath =>
       'Not enough data to reconstruct the dive path';
+
+  @override
+  String get dive3d_tissue_legendHeight =>
+      'Height & color: % of the M-value limit';
+
+  @override
+  String get dive3d_tissue_legendLimit => 'Red plane = deco limit';
+
+  @override
+  String get dive3d_tissue_legendAxes =>
+      'Left→right: time · Front→back: fast→slow tissues';
+
+  @override
+  String get dive3d_tissue_legendDepth => 'Blue curve: your depth';
 }

@@ -5498,5 +5498,13 @@
   "dive3d_spatial_synthesizedSeafloor": "קרקעית ים מסונתזת",
   "@dive3d_spatial_synthesizedSeafloor": {},
   "dive3d_spatial_noPath": "אין מספיק נתונים לשחזור הנתיב",
-  "@dive3d_spatial_noPath": {}
+  "@dive3d_spatial_noPath": {},
+  "dive3d_tissue_legendHeight": "גובה וצבע: ٪ מגבול ערך M",
+  "@dive3d_tissue_legendHeight": {},
+  "dive3d_tissue_legendLimit": "מישור אדום = גבול דקו",
+  "@dive3d_tissue_legendLimit": {},
+  "dive3d_tissue_legendAxes": "שמאל→ימין: זמן · קדימה→אחורה: רקמות מהירות→איטיות",
+  "@dive3d_tissue_legendAxes": {},
+  "dive3d_tissue_legendDepth": "עקומה כחולה: העומק שלך",
+  "@dive3d_tissue_legendDepth": {}
 }

@@ -5,7 +5,10 @@ import 'package:submersion/features/dive_3d/domain/tissue/tissue_replay_result.d
 import 'package:submersion/features/dive_3d/domain/tissue/tissue_surface_builder.dart';
 
 /// Assembles the tissue-landscape [Scene3d] from a replay result. Pure and
-/// isolate-friendly; reuses the shared renderer via Scene3d.
+/// isolate-friendly; reuses the shared renderer via Scene3d. In %M-value
+/// mode it includes a red danger plane at the M-value limit and the dive's
+/// depth profile for context, so the surface is readable as "how close each
+/// tissue got to its deco limit, and when".
 class TissueGeometryService {
   static const double _heliumOverlayOpacity = 0.55;
 
@@ -24,11 +27,17 @@ class TissueGeometryService {
     final bounds = SceneBounds(
       durationSeconds: result.totalClockSeconds,
       maxDepthMeters: 1,
-      sceneMinY: 0,
-      sceneMaxY: TissueSurfaceBuilder.tissueHeight,
+      sceneMinY: -TissueSurfaceBuilder.depthContextHeight,
+      sceneMaxY: TissueSurfaceBuilder.referenceHeight * 1.35,
     );
 
     final layers = <SceneLayer>[];
+
+    // Depth profile of the dive, for spatial context under the surface.
+    layers.add(
+      SceneLayer(TissueSurfaceBuilder.depthContext(result: result, axis: axis)),
+    );
+
     if (splitHelium && result.hasHelium) {
       layers.add(
         SceneLayer(
@@ -64,17 +73,21 @@ class TissueGeometryService {
       );
     }
 
-    final ridge = TissueSurfaceBuilder.buildControllingRidge(
-      result: result,
-      axis: axis,
-    );
-    if (ridge != null) layers.add(SceneLayer(ridge));
+    // The M-value limit plane (only meaningful when height encodes %M).
+    if (colorMode == TissueColorMode.mValue) {
+      layers.add(SceneLayer(TissueSurfaceBuilder.dangerPlane(axis: axis)));
+    }
 
     return Scene3d(
       layers: layers,
       markers: const [],
       bounds: bounds,
-      scrubPath: TissueSurfaceBuilder.scrubPath(result: result, axis: axis),
+      scrubPath: TissueSurfaceBuilder.scrubPath(
+        result: result,
+        axis: axis,
+        gas: gas,
+        colorMode: colorMode,
+      ),
     );
   }
 }

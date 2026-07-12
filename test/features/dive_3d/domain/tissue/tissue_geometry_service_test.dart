@@ -29,18 +29,32 @@ TissueReplayResult replay({double fHe = 0.0}) {
 void main() {
   const service = TissueGeometryService();
 
-  test('single surface + ridge layers, scene Y range covers the surface', () {
+  test('%M mode: depth context + surface + danger plane', () {
     final scene = service.build(
       replay(),
       gas: TissueGas.combined,
       colorMode: TissueColorMode.mValue,
     );
-    // surface + controlling ridge.
-    expect(scene.layers.length, 2);
-    expect(scene.bounds.sceneMinY, 0);
-    expect(scene.bounds.sceneMaxY, TissueSurfaceBuilder.tissueHeight);
+    // depthContext + surface + dangerPlane.
+    expect(scene.layers.length, 3);
+    // Scene Y spans below (depth context) and above (danger plane).
+    expect(scene.bounds.sceneMinY, lessThan(0));
+    expect(
+      scene.bounds.sceneMaxY,
+      greaterThan(TissueSurfaceBuilder.referenceHeight),
+    );
     expect(scene.scrubPath, isNotNull);
     expect(scene.markers, isEmpty);
+  });
+
+  test('absolute mode omits the M-value danger plane', () {
+    final scene = service.build(
+      replay(),
+      gas: TissueGas.combined,
+      colorMode: TissueColorMode.absolute,
+    );
+    // depthContext + surface (no danger plane in absolute mode).
+    expect(scene.layers.length, 2);
   });
 
   test('helium split adds a second (translucent) surface only with He', () {
@@ -50,9 +64,9 @@ void main() {
       colorMode: TissueColorMode.mValue,
       splitHelium: true,
     );
-    // n2 surface + he surface + ridge.
-    expect(withHe.layers.length, 3);
-    expect(withHe.layers[1].mesh.opacity, lessThan(1.0));
+    // depthContext + n2 surface + he surface + dangerPlane.
+    expect(withHe.layers.length, 4);
+    expect(withHe.layers[2].mesh.opacity, lessThan(1.0));
 
     final airSplit = service.build(
       replay(),
@@ -60,7 +74,7 @@ void main() {
       colorMode: TissueColorMode.mValue,
       splitHelium: true,
     );
-    // No helium in an air dive -> falls back to the single surface.
-    expect(airSplit.layers.length, 2);
+    // No helium -> single surface: depthContext + surface + dangerPlane.
+    expect(airSplit.layers.length, 3);
   });
 }
