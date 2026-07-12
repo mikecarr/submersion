@@ -5530,5 +5530,9 @@
   "diveLog_selection_tooltip_compare3d": "Összehasonlítás 3D-ben",
   "@diveLog_selection_tooltip_compare3d": {},
   "diveLog_sources_compareIn3d": "Összehasonlítás 3D-ben",
-  "@diveLog_sources_compareIn3d": {}
+  "@diveLog_sources_compareIn3d": {},
+  "dive3d_play": "Lejátszás",
+  "@dive3d_play": {},
+  "dive3d_pause": "Szünet",
+  "@dive3d_pause": {}
 }

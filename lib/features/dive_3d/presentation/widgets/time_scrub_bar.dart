@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'package:submersion/l10n/l10n_extension.dart';
+
 /// Scrubber + play/pause. Owns no state: the page owns the ValueNotifier
 /// and the AnimationController so viewport, readout, and bar all observe
 /// the same normalized position.
@@ -27,6 +29,9 @@ class TimeScrubBar extends StatelessWidget {
       children: [
         IconButton(
           icon: Icon(playing ? Icons.pause : Icons.play_arrow),
+          tooltip: playing
+              ? context.l10n.dive3d_pause
+              : context.l10n.dive3d_play,
           onPressed: onPlayPause,
         ),
         Expanded(

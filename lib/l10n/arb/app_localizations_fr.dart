@@ -19220,7 +19220,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get dive3d_resetView => 'Réinitialiser la vue';
 
   @override
-  String get dive3d_play => 'Lecture';
+  String get dive3d_play => 'Lire';
 
   @override
   String get dive3d_pause => 'Pause';

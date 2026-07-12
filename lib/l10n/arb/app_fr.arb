@@ -5530,5 +5530,9 @@
   "diveLog_selection_tooltip_compare3d": "Comparer en 3D",
   "@diveLog_selection_tooltip_compare3d": {},
   "diveLog_sources_compareIn3d": "Comparer en 3D",
-  "@diveLog_sources_compareIn3d": {}
+  "@diveLog_sources_compareIn3d": {},
+  "dive3d_play": "Lire",
+  "@dive3d_play": {},
+  "dive3d_pause": "Pause",
+  "@dive3d_pause": {}
 }

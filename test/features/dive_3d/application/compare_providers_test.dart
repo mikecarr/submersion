@@ -95,12 +95,9 @@ void main() {
   });
 
   test('DiveIdSet equality is by ordered contents', () {
-    expect(const DiveIdSet(['a', 'b']), const DiveIdSet(['a', 'b']));
-    expect(
-      const DiveIdSet(['a', 'b']).hashCode,
-      const DiveIdSet(['a', 'b']).hashCode,
-    );
-    expect(const DiveIdSet(['a', 'b']) == const DiveIdSet(['b', 'a']), isFalse);
+    expect(DiveIdSet(['a', 'b']), DiveIdSet(['a', 'b']));
+    expect(DiveIdSet(['a', 'b']).hashCode, DiveIdSet(['a', 'b']).hashCode);
+    expect(DiveIdSet(['a', 'b']) == DiveIdSet(['b', 'a']), isFalse);
   });
 
   test(
@@ -130,7 +127,7 @@ void main() {
       addTearDown(container.dispose);
 
       final profiles = await container.read(
-        diveComparisonProfilesProvider(const DiveIdSet(['a', 'b', 'c'])).future,
+        diveComparisonProfilesProvider(DiveIdSet(['a', 'b', 'c'])).future,
       );
       expect(profiles, hasLength(2));
       expect(profiles.first.id, 'a'); // reference index 0

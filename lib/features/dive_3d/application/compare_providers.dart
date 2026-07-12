@@ -64,7 +64,12 @@ final computerComparisonProfilesProvider =
 /// comparison provider can be a proper `family`.
 class DiveIdSet {
   final List<String> ids;
-  const DiveIdSet(this.ids);
+
+  // Defensive copy to an unmodifiable list: this is a Provider family key, so
+  // it must stay immutable even if the caller later mutates the list it passed
+  // (e.g. reused/modified route extras), which would otherwise change
+  // ==/hashCode and silently break provider caching.
+  DiveIdSet(List<String> ids) : ids = List.unmodifiable(ids);
 
   @override
   bool operator ==(Object other) =>

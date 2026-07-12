@@ -19119,7 +19119,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get dive3d_resetView => 'Ansicht zurücksetzen';
 
   @override
-  String get dive3d_play => 'Abspielen';
+  String get dive3d_play => 'Wiedergabe';
 
   @override
   String get dive3d_pause => 'Pause';

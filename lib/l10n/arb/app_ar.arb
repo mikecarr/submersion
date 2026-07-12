@@ -5530,5 +5530,9 @@
   "diveLog_selection_tooltip_compare3d": "مقارنة ثلاثية الأبعاد",
   "@diveLog_selection_tooltip_compare3d": {},
   "diveLog_sources_compareIn3d": "مقارنة ثلاثية الأبعاد",
-  "@diveLog_sources_compareIn3d": {}
+  "@diveLog_sources_compareIn3d": {},
+  "dive3d_play": "تشغيل",
+  "@dive3d_play": {},
+  "dive3d_pause": "إيقاف مؤقت",
+  "@dive3d_pause": {}
 }

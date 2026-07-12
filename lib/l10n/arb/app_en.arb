@@ -12085,5 +12085,9 @@
   "diveLog_selection_tooltip_compare3d": "Compare in 3D",
   "@diveLog_selection_tooltip_compare3d": {},
   "diveLog_sources_compareIn3d": "Compare in 3D",
-  "@diveLog_sources_compareIn3d": {}
+  "@diveLog_sources_compareIn3d": {},
+  "dive3d_play": "Play",
+  "@dive3d_play": {},
+  "dive3d_pause": "Pause",
+  "@dive3d_pause": {}
 }

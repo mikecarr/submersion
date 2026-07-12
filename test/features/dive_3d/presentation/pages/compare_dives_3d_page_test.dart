@@ -26,9 +26,7 @@ void main() {
       testApp(
         overrides: [
           ...overrides,
-          diveComparisonProfilesProvider(
-            const DiveIdSet(['a', 'b']),
-          ).overrideWith(
+          diveComparisonProfilesProvider(DiveIdSet(['a', 'b'])).overrideWith(
             (ref) async => [
               prof('a', const Color(0xFF00D4FF)),
               prof('b', const Color(0xFFFF9500)),
