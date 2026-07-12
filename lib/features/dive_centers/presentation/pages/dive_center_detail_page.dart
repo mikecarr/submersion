@@ -92,6 +92,7 @@ class _DiveCenterDetailPageState extends ConsumerState<DiveCenterDetailPage> {
         }
 
         final body = SingleChildScrollView(
+          key: const PageStorageKey('diveCenterDetailScroll'),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

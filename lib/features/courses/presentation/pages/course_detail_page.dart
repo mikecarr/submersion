@@ -51,6 +51,7 @@ class CourseDetailPage extends ConsumerWidget {
     final formatter = UnitFormatter(ref.watch(settingsProvider));
 
     final body = SingleChildScrollView(
+      key: const PageStorageKey('courseDetailScroll'),
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

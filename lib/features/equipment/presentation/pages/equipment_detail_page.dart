@@ -127,6 +127,7 @@ class _EquipmentDetailContent extends ConsumerWidget {
     final units = UnitFormatter(settings);
 
     final body = SingleChildScrollView(
+      key: const PageStorageKey('equipmentDetailScroll'),
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

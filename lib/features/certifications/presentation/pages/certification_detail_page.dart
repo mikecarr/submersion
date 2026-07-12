@@ -118,6 +118,7 @@ class _CertificationDetailContent extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final body = SingleChildScrollView(
+      key: const PageStorageKey('certificationDetailScroll'),
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

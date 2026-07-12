@@ -117,6 +117,7 @@ class _BuddyDetailContent extends ConsumerWidget {
     final statsAsync = ref.watch(buddyStatsProvider(buddy.id));
 
     final body = SingleChildScrollView(
+      key: const PageStorageKey('buddyDetailScroll'),
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

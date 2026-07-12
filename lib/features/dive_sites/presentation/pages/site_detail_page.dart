@@ -143,6 +143,7 @@ class _SiteDetailContentState extends ConsumerState<_SiteDetailContent> {
     final siteId = widget.siteId;
     final embedded = widget.embedded;
     final body = SingleChildScrollView(
+      key: const PageStorageKey('siteDetailScroll'),
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

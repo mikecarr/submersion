@@ -447,6 +447,7 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
     );
 
     final body = SingleChildScrollView(
+      key: const PageStorageKey('diveDetailScroll'),
       padding: const EdgeInsets.all(16),
       child: RepaintBoundary(
         key: _pageExportKey,
