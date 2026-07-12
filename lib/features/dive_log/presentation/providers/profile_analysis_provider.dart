@@ -220,6 +220,93 @@ List<ProfileGasSegment> buildProfileGasSegments(
   return segments;
 }
 
+/// Diluent mix for a CCR dive: the TankRole.diluent tank's mix, else the
+/// dive-level diluentGas, else the first tank that is not the O2 supply or a
+/// bailout, else air. The FIRST tank must not be assumed to be the diluent --
+/// on imported CCR dives it is often the O2-richer loop/bailout mix
+/// (issue #455: dive 003's first tank is EAN40, the diluent is air).
+@visibleForTesting
+GasMix resolveCcrDiluentMix(Dive dive) {
+  final diluentTank = dive.diluentTank;
+  if (diluentTank != null) return diluentTank.gasMix;
+  final diluentGas = dive.diluentGas;
+  if (diluentGas != null) return diluentGas;
+  for (final tank in dive.tanks) {
+    if (tank.role == TankRole.oxygenSupply || tank.role == TankRole.bailout) {
+      continue;
+    }
+    return tank.gasMix;
+  }
+  return const GasMix();
+}
+
+/// Builds the CCR gas schedule for decompression analysis: the diluent's
+/// inert fractions with the loop ppO2 as each segment's setpoint, so the
+/// engine loads tissues at constant ppO2 (inspired inert = ambient - loop
+/// ppO2, split by the diluent's He:N2 ratio) and holds the setpoint through
+/// the TTS ascent.
+///
+/// [loopPpO2Curve] is the per-sample resolved loop ppO2
+/// ([resolveRebreatherPpO2]: measured cells / dc-supplied ppO2, falling back
+/// to recorded setpoint samples), aligned with [timestamps]. A new segment
+/// starts when the value moves more than [setpointTolerance] bar from the
+/// active segment's setpoint -- tracking real setpoint switches without
+/// emitting a segment per noisy cell sample. [fallbackSetpoint] (the
+/// dive-level setpoint) is used as a constant when no curve exists. Returns
+/// null when neither exists: with no loop ppO2 information the loop cannot
+/// be modeled and callers keep the legacy path.
+@visibleForTesting
+List<ProfileGasSegment>? buildCcrProfileGasSegments({
+  required List<int> timestamps,
+  required List<double>? loopPpO2Curve,
+  required GasMix diluentMix,
+  double? fallbackSetpoint,
+  double setpointTolerance = 0.05,
+}) {
+  final fN2 = diluentMix.isAir
+      ? airN2Fraction
+      : (100.0 - diluentMix.o2 - diluentMix.he) / 100.0;
+  final fHe = diluentMix.he / 100.0;
+
+  final curve =
+      loopPpO2Curve != null && loopPpO2Curve.length == timestamps.length
+      ? loopPpO2Curve
+      : null;
+  if (curve == null) {
+    if (fallbackSetpoint == null) return null;
+    return [
+      ProfileGasSegment(
+        startTimestamp: 0,
+        fN2: fN2,
+        fHe: fHe,
+        setpoint: fallbackSetpoint,
+      ),
+    ];
+  }
+
+  final segments = <ProfileGasSegment>[
+    ProfileGasSegment(
+      startTimestamp: 0,
+      fN2: fN2,
+      fHe: fHe,
+      setpoint: curve[0],
+    ),
+  ];
+  for (int i = 1; i < timestamps.length; i++) {
+    if ((curve[i] - segments.last.setpoint!).abs() > setpointTolerance) {
+      segments.add(
+        ProfileGasSegment(
+          startTimestamp: timestamps[i],
+          fN2: fN2,
+          fHe: fHe,
+          setpoint: curve[i],
+        ),
+      );
+    }
+  }
+  return segments;
+}
+
 /// Maps the dive's recorded cylinders to the gas set the ideal ascent may use.
 ///
 /// [maxPpO2] is the diver's ppO2MaxDeco ceiling; each gas's MOD is derived from

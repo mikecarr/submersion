@@ -89,10 +89,126 @@ List<DiveProfilePoint> _generateSquareProfile({
   return points;
 }
 
+Dive makeDive({
+  String id = 'test-dive',
+  DateTime? dateTime,
+  List<DiveTank> tanks = const [],
+  GasMix? diluentGas,
+}) {
+  return Dive(
+    id: id,
+    dateTime: dateTime ?? DateTime.utc(2026, 7, 12),
+    tanks: tanks,
+    diluentGas: diluentGas,
+  );
+}
+
 void main() {
   setUpAll(() async {
     SharedPreferences.setMockInitialValues({});
     _prefs = await SharedPreferences.getInstance();
+  });
+
+  group('resolveCcrDiluentMix', () {
+    DiveTank tank(GasMix mix, TankRole role) =>
+        DiveTank(id: role.name, gasMix: mix, role: role);
+
+    test('prefers the diluent-role tank over the first tank', () {
+      final dive = makeDive(
+        tanks: [
+          tank(const GasMix(o2: 40), TankRole.backGas),
+          tank(const GasMix(), TankRole.diluent), // air
+        ],
+      );
+      expect(resolveCcrDiluentMix(dive).o2, 21);
+    });
+
+    test('falls back to dive.diluentGas when no diluent tank', () {
+      final dive = makeDive(
+        tanks: [tank(const GasMix(o2: 40), TankRole.backGas)],
+        diluentGas: const GasMix(o2: 18, he: 45),
+      );
+      expect(resolveCcrDiluentMix(dive).he, 45);
+    });
+
+    test('skips O2-supply and bailout tanks in the positional fallback', () {
+      final dive = makeDive(
+        tanks: [
+          tank(const GasMix(o2: 100), TankRole.oxygenSupply),
+          tank(const GasMix(o2: 50), TankRole.bailout),
+          tank(const GasMix(o2: 18, he: 45), TankRole.backGas),
+        ],
+      );
+      expect(resolveCcrDiluentMix(dive).o2, 18);
+    });
+
+    test('defaults to air with no usable tanks', () {
+      final dive = makeDive(tanks: []);
+      expect(resolveCcrDiluentMix(dive).isAir, isTrue);
+    });
+  });
+
+  group('buildCcrProfileGasSegments', () {
+    const times = [0, 60, 120, 180, 240];
+    const air = GasMix(); // 21/0
+
+    test(
+      'flat curve yields one segment with diluent fractions and setpoint',
+      () {
+        final segments = buildCcrProfileGasSegments(
+          timestamps: times,
+          loopPpO2Curve: const [1.3, 1.3, 1.3, 1.3, 1.3],
+          diluentMix: const GasMix(o2: 18, he: 45),
+        );
+        expect(segments, hasLength(1));
+        expect(segments!.first.setpoint, 1.3);
+        expect(segments.first.fHe, closeTo(0.45, 1e-9));
+        expect(segments.first.fN2, closeTo(0.37, 1e-9));
+      },
+    );
+
+    test('a setpoint switch beyond the tolerance starts a new segment', () {
+      final segments = buildCcrProfileGasSegments(
+        timestamps: times,
+        loopPpO2Curve: const [0.7, 0.7, 1.3, 1.3, 1.3],
+        diluentMix: air,
+      )!;
+      expect(segments, hasLength(2));
+      expect(segments[0].setpoint, 0.7);
+      expect(segments[1].startTimestamp, 120);
+      expect(segments[1].setpoint, 1.3);
+    });
+
+    test('measured noise within the tolerance stays one segment', () {
+      final segments = buildCcrProfileGasSegments(
+        timestamps: times,
+        loopPpO2Curve: const [1.30, 1.28, 1.32, 1.27, 1.31],
+        diluentMix: air,
+      );
+      expect(segments, hasLength(1));
+    });
+
+    test('no curve falls back to a constant fallback setpoint', () {
+      final segments = buildCcrProfileGasSegments(
+        timestamps: times,
+        loopPpO2Curve: null,
+        diluentMix: air,
+        fallbackSetpoint: 1.2,
+      );
+      expect(segments, hasLength(1));
+      expect(segments!.first.setpoint, 1.2);
+    });
+
+    test('no loop ppO2 information at all returns null (legacy path)', () {
+      expect(
+        buildCcrProfileGasSegments(
+          timestamps: times,
+          loopPpO2Curve: null,
+          diluentMix: air,
+        ),
+        isNull,
+      );
+    });
   });
 
   group('buildProfileGasSegments', () {
