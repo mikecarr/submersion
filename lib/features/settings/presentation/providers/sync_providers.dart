@@ -357,13 +357,23 @@ final cloudStorageProviderProvider = Provider<CloudStorageProvider?>((ref) {
 
   // Account-first resolution: build the raw provider from the selected
   // account's adapter, which reads per-account credentials (kept current by
-  // selectedSyncAccountProvider's legacy mirror). While the account is still
-  // deriving (its future not yet resolved on the first frame), fall back to
-  // the legacy singleton — legacy keys are still written by the connect UIs,
-  // so that fallback is always valid and sync can never resolve to nothing.
+  // selectedSyncAccountProvider's legacy mirror). Fall back to the legacy
+  // singleton — always keyed by the current providerType, and valid because
+  // the connect UIs still write the legacy keys — when the account is not
+  // usable yet, so sync can never resolve to nothing.
+  //
+  // The kind guard matters: `.value` can return the PREVIOUS account while
+  // selectedSyncAccountProvider is recomputing right after providerType
+  // changes (e.g. S3 -> Dropbox). Using a stale account of the wrong kind
+  // would resolve to the wrong backend, so we only trust the account once
+  // its kind matches the selected type; otherwise the type-keyed legacy
+  // singleton is the correct interim provider.
   final account = ref.watch(selectedSyncAccountProvider).value;
+  final matchesType =
+      account != null &&
+      account.kind == AccountKind.fromCloudProviderType(providerType);
   CloudStorageProvider raw;
-  if (account != null) {
+  if (matchesType) {
     final capable = ref
         .watch(accountProviderRegistryProvider)
         .capabilityFor<SyncCapable>(account.kind);
