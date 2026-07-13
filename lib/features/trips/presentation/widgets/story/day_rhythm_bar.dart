@@ -65,10 +65,17 @@ class _RhythmPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    // Reserve scaled label height so ticks aren't clipped at larger text sizes.
+    // Reserve scaled label height so ticks aren't clipped at larger text sizes,
+    // but clamp it so labels never consume the whole bar (which would make
+    // trackHeight negative and produce invalid paint rects at large text scales
+    // or small heights).
     final fontSize = tickTextStyle?.fontSize ?? 11.0;
-    final labelHeight = textScaler.scale(fontSize) + 2;
+    final labelHeight = (textScaler.scale(fontSize) + 2).clamp(
+      0.0,
+      size.height,
+    );
     final trackHeight = size.height - labelHeight;
+    final blockHeight = (trackHeight - 4).clamp(0.0, double.infinity);
     final trackRect = RRect.fromRectAndRadius(
       Rect.fromLTWH(0, 0, size.width, trackHeight),
       const Radius.circular(4),
@@ -81,7 +88,7 @@ class _RhythmPainter extends CustomPainter {
           block.startFraction * size.width,
           2,
           block.widthFraction * size.width,
-          trackHeight - 4,
+          blockHeight,
         ),
         const Radius.circular(3),
       );

@@ -20,4 +20,29 @@ void main() {
     );
     expect(find.bySemanticsLabel('Dive times during this day'), findsOneWidget);
   });
+
+  testWidgets('paints without error at a large text scale and small height', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        locale: const Locale('en'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: MediaQuery(
+          // A huge text scale would make the reserved label height exceed the
+          // bar height; the painter must clamp instead of drawing invalid rects.
+          data: const MediaQueryData(textScaler: TextScaler.linear(6)),
+          child: Scaffold(
+            body: DayRhythmBar(
+              dives: [Dive(id: 'd1', dateTime: DateTime(2026, 3, 8, 9))],
+              height: 10,
+            ),
+          ),
+        ),
+      ),
+    );
+    // No exception during layout/paint.
+    expect(tester.takeException(), isNull);
+  });
 }
