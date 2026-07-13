@@ -14,6 +14,24 @@ import 'package:submersion/features/trips/presentation/providers/trip_providers.
 import 'package:submersion/features/trips/presentation/widgets/dive_assignment_dialog.dart';
 import 'package:submersion/l10n/l10n_extension.dart';
 
+/// Dismisses a non-dismissible loading dialog exactly once, via a navigator
+/// captured before the first await. This survives the initiating widget being
+/// disposed mid-scan (when `context.mounted` is false), which would otherwise
+/// leave the modal progress overlay stuck on the root navigator.
+class _LoadingDialog {
+  final NavigatorState _navigator;
+  bool _open = true;
+
+  _LoadingDialog(this._navigator);
+
+  void dismiss() {
+    if (_open && _navigator.canPop()) {
+      _navigator.pop();
+      _open = false;
+    }
+  }
+}
+
 /// Scan the device gallery for photos taken during the trip and link them to
 /// the trip's dives.
 Future<void> scanGalleryForTripPhotos(
@@ -22,6 +40,7 @@ Future<void> scanGalleryForTripPhotos(
   String tripId,
   Trip trip,
 ) async {
+  final loading = _LoadingDialog(Navigator.of(context, rootNavigator: true));
   showDialog(
     context: context,
     barrierDismissible: false,
@@ -32,7 +51,7 @@ Future<void> scanGalleryForTripPhotos(
     final dives = await ref.read(divesForTripProvider(tripId).future);
 
     if (dives.isEmpty) {
-      if (context.mounted) Navigator.of(context, rootNavigator: true).pop();
+      loading.dismiss();
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(context.l10n.trips_detail_scan_addDivesFirst)),
@@ -60,27 +79,28 @@ Future<void> scanGalleryForTripPhotos(
       photoPickerService: photoPickerService,
     );
 
-    if (!context.mounted) return;
-    Navigator.of(context, rootNavigator: true).pop(); // Dismiss loading
+    loading.dismiss(); // Dismiss loading before any further UI.
 
     if (result == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.l10n.trips_detail_scan_accessDenied)),
-      );
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(context.l10n.trips_detail_scan_accessDenied)),
+        );
+      }
       return;
     }
 
+    if (!context.mounted) return;
     final dialogResult = await showScanResultsDialog(
       context: context,
       scanResult: result,
     );
 
-    if (dialogResult.confirmed != true) return;
-    if (!context.mounted) return;
+    if (dialogResult.confirmed != true || !context.mounted) return;
 
     await _importPhotos(context, ref, tripId, dialogResult.selectedPhotos);
   } catch (e) {
-    if (context.mounted) Navigator.of(context, rootNavigator: true).pop();
+    loading.dismiss();
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -97,6 +117,7 @@ Future<void> _importPhotos(
   String tripId,
   Map<Dive, List<AssetInfo>> photosByDive,
 ) async {
+  final loading = _LoadingDialog(Navigator.of(context, rootNavigator: true));
   showDialog(
     context: context,
     barrierDismissible: false,
@@ -134,18 +155,19 @@ Future<void> _importPhotos(
     ref.invalidate(mediaCountForTripProvider(tripId));
     ref.invalidate(flatMediaListForTripProvider(tripId));
 
-    if (!context.mounted) return;
-    Navigator.of(context, rootNavigator: true).pop(); // Dismiss progress
+    loading.dismiss(); // Dismiss progress.
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          context.l10n.trips_detail_scan_linkedPhotos(totalImported),
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            context.l10n.trips_detail_scan_linkedPhotos(totalImported),
+          ),
         ),
-      ),
-    );
+      );
+    }
   } catch (e) {
-    if (context.mounted) Navigator.of(context, rootNavigator: true).pop();
+    loading.dismiss();
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -181,6 +203,7 @@ Future<void> scanForTripDives(
 ) async {
   if (trip.diverId == null) return;
 
+  final loading = _LoadingDialog(Navigator.of(context, rootNavigator: true));
   showDialog(
     context: context,
     barrierDismissible: false,
@@ -197,16 +220,18 @@ Future<void> scanForTripDives(
           diverId: trip.diverId!,
         );
 
-    if (!context.mounted) return;
-    Navigator.of(context, rootNavigator: true).pop(); // Dismiss loading
+    loading.dismiss(); // Dismiss loading before any further UI.
 
     if (candidates.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.l10n.trips_diveScan_noMatches)),
-      );
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(context.l10n.trips_diveScan_noMatches)),
+        );
+      }
       return;
     }
 
+    if (!context.mounted) return;
     final selectedIds = await showDiveAssignmentDialog(
       context: context,
       candidates: candidates,
@@ -233,7 +258,7 @@ Future<void> scanForTripDives(
       );
     }
   } catch (e) {
-    if (context.mounted) Navigator.of(context, rootNavigator: true).pop();
+    loading.dismiss();
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(context.l10n.trips_diveScan_error('$e'))),
