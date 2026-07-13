@@ -26,6 +26,7 @@ import 'package:submersion/features/settings/presentation/providers/storage_prov
 import 'package:submersion/features/settings/presentation/pages/diver_profile_hub_page.dart';
 import 'package:submersion/features/settings/presentation/pages/language_settings_page.dart';
 import 'package:submersion/core/theme/app_theme_registry.dart';
+import 'package:submersion/features/settings/presentation/widgets/pending_setup_card.dart';
 import 'package:submersion/features/settings/presentation/widgets/settings_list_content.dart';
 import 'package:submersion/features/settings/presentation/widgets/settings_summary_widget.dart';
 import 'package:submersion/features/trips/presentation/providers/trip_providers.dart';
@@ -172,14 +173,18 @@ class SettingsMobileContent extends ConsumerWidget {
       );
     }
 
+    // The setup card rides inside the list (row 0) so it scrolls away and
+    // can never overflow the viewport when it carries many items.
     return Scaffold(
       appBar: AppBar(title: Text(context.l10n.settings_appBar_title)),
       body: ListView.separated(
         padding: const EdgeInsets.symmetric(vertical: 8),
-        itemCount: sections.length,
-        separatorBuilder: (context, index) => const Divider(height: 1),
+        itemCount: sections.length + 1,
+        separatorBuilder: (context, index) =>
+            index == 0 ? const SizedBox.shrink() : const Divider(height: 1),
         itemBuilder: (context, index) {
-          final section = sections[index];
+          if (index == 0) return const PendingSetupCard();
+          final section = sections[index - 1];
           return _MobileSettingsTile(section: section);
         },
       ),
@@ -1981,20 +1986,10 @@ class _DataSectionContent extends ConsumerWidget {
                 const Divider(height: 1),
                 ListTile(
                   leading: const Icon(Icons.perm_media_outlined),
-                  title: Text(context.l10n.settings_mediaStorage_entry_title),
-                  subtitle: Text(
-                    context.l10n.settings_mediaStorage_entry_subtitle,
-                  ),
+                  title: Text(context.l10n.settings_photosMedia_title),
+                  subtitle: Text(context.l10n.settings_photosMedia_subtitle),
                   trailing: const Icon(Icons.chevron_right),
-                  onTap: () => context.push('/settings/media-storage'),
-                ),
-                const Divider(height: 1),
-                ListTile(
-                  leading: const Icon(Icons.photo_library_outlined),
-                  title: Text(context.l10n.settings_lightroom_title),
-                  subtitle: Text(context.l10n.settings_lightroom_subtitle),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () => context.push('/settings/lightroom'),
+                  onTap: () => context.push('/settings/photos-media'),
                 ),
               ],
             ),
@@ -2044,22 +2039,6 @@ class _DataSectionContent extends ConsumerWidget {
                   subtitle: const Text('Adjust times for imported dives'),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => context.push('/settings/fix-dive-times'),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 16),
-          _buildSectionHeader(context, 'Media'),
-          const SizedBox(height: 8),
-          Card(
-            child: Column(
-              children: [
-                ListTile(
-                  leading: const Icon(Icons.photo_library_outlined),
-                  title: const Text('Media Sources'),
-                  subtitle: const Text('Photo library, files, URLs, services'),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () => context.push('/settings/media-sources'),
                 ),
               ],
             ),

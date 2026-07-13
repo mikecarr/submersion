@@ -994,6 +994,10 @@ class MediaSubscriptions extends Table {
   IntColumn get createdAt => integer()();
   IntColumn get updatedAt => integer()();
 
+  /// Hybrid Logical Clock for cross-device conflict resolution (v108;
+  /// nullable: rows written before the rollout fall back to updatedAt).
+  TextColumn get hlc => text().nullable()();
+
   @override
   Set<Column> get primaryKey => {id};
 }
@@ -1011,22 +1015,6 @@ class MediaSubscriptionState extends Table {
 
   @override
   Set<Column> get primaryKey => {subscriptionId};
-}
-
-/// Configured service-connector accounts (Immich, Dropbox, etc.). Not synced —
-/// each device signs in independently.
-class ConnectorAccounts extends Table {
-  TextColumn get id => text()();
-  TextColumn get connectorType => text()();
-  TextColumn get displayName => text()();
-  TextColumn get baseUrl => text().nullable()();
-  TextColumn get accountIdentifier => text().nullable()();
-  TextColumn get credentialsRef => text()();
-  IntColumn get addedAt => integer()();
-  IntColumn get lastUsedAt => integer().nullable()();
-
-  @override
-  Set<Column> get primaryKey => {id};
 }
 
 /// Per-host credentials for ad-hoc HTTP(S) media URLs. Not synced.
@@ -1070,6 +1058,23 @@ class MediaStores extends Table {
   TextColumn get id => text()(); // storeId UUID, matches smv1/store.json
   TextColumn get providerType => text()(); // 's3' (Phase 4 adds others)
   TextColumn get displayHint => text()(); // e.g. 'dive-media @ minio.host'
+  IntColumn get createdAt => integer()();
+  IntColumn get updatedAt => integer()();
+  TextColumn get hlc => text().nullable()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+/// Linked credentialed endpoints (secret-free). Synced roster: other
+/// devices see which accounts exist and prompt for sign-in (program spec
+/// section 5). Credentials live in the keychain under
+/// `account_<id>_credentials`, never here.
+class ConnectedAccounts extends Table {
+  TextColumn get id => text()();
+  TextColumn get kind => text()(); // AccountKind.name
+  TextColumn get label => text()();
+  TextColumn get accountIdentifier => text().nullable()();
   IntColumn get createdAt => integer()();
   IntColumn get updatedAt => integer()();
   TextColumn get hlc => text().nullable()();
@@ -1836,6 +1841,10 @@ class SyncMetadata extends Table {
   TextColumn get deviceId => text()(); // This device's unique UUID
   TextColumn get syncProvider =>
       text().nullable()(); // 'icloud', 'googledrive', or 's3'
+
+  /// The connected account driving sync, or null pre-account-migration.
+  /// syncProvider stays populated (kind name) for backward compatibility.
+  TextColumn get syncAccountId => text().nullable()();
   TextColumn get remoteFileId =>
       text().nullable()(); // Provider-specific file reference
   IntColumn get syncVersion =>
@@ -2146,10 +2155,10 @@ class FieldPresets extends Table {
     FieldPresets,
     MediaSubscriptions,
     MediaSubscriptionState,
-    ConnectorAccounts,
     NetworkCredentialHosts,
     MediaFetchDiagnostics,
     MediaStores,
+    ConnectedAccounts,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -2159,7 +2168,7 @@ class AppDatabase extends _$AppDatabase {
 
   /// The current schema version as a static constant so that pre-open checks
   /// (e.g. version-mismatch guard) can reference it without an instance.
-  static const int currentSchemaVersion = 106;
+  static const int currentSchemaVersion = 108;
 
   /// Every schema version that has a migration block in onUpgrade.
   /// Used to calculate progress step counts. When adding a new migration,
@@ -2269,6 +2278,8 @@ class AppDatabase extends _$AppDatabase {
     104,
     105,
     106,
+    107,
+    108,
   ];
 
   /// Idempotent DDL for the v106 connector-suggestion columns (Lightroom
@@ -2293,6 +2304,46 @@ class AppDatabase extends _$AppDatabase {
       await customStatement(
         'ALTER TABLE pending_photo_suggestions '
         'ADD COLUMN remote_asset_id TEXT',
+      );
+    }
+  }
+
+  /// v107: connected accounts roster + sync account selection. Idempotent;
+  /// also run from beforeOpen as a parallel-branch collision backstop.
+  Future<void> _assertConnectedAccountsSchema() async {
+    await customStatement(
+      'CREATE TABLE IF NOT EXISTS connected_accounts ('
+      'id TEXT NOT NULL PRIMARY KEY, '
+      'kind TEXT NOT NULL, '
+      'label TEXT NOT NULL, '
+      'account_identifier TEXT, '
+      'created_at INTEGER NOT NULL, '
+      'updated_at INTEGER NOT NULL, '
+      'hlc TEXT)',
+    );
+    final metaCols = await customSelect(
+      "PRAGMA table_info('sync_metadata')",
+    ).get();
+    if (metaCols.isNotEmpty &&
+        !metaCols.any((c) => c.read<String>('name') == 'sync_account_id')) {
+      await customStatement(
+        'ALTER TABLE sync_metadata ADD COLUMN sync_account_id TEXT',
+      );
+    }
+  }
+
+  /// v108: HLC on media_subscriptions so the table can sync. Idempotent;
+  /// also run from beforeOpen as a parallel-branch collision backstop.
+  Future<void> _assertMediaSubscriptionsHlc() async {
+    final cols = await customSelect(
+      "PRAGMA table_info('media_subscriptions')",
+    ).get();
+    // An empty PRAGMA result means the table itself is absent (only
+    // possible in minimal test fixtures); skip the ALTER rather than fail.
+    if (cols.isEmpty) return;
+    if (!cols.any((c) => c.read<String>('name') == 'hlc')) {
+      await customStatement(
+        'ALTER TABLE media_subscriptions ADD COLUMN hlc TEXT',
       );
     }
   }
@@ -5281,6 +5332,34 @@ class AppDatabase extends _$AppDatabase {
           await _assertConnectorSuggestionColumns();
         }
         if (from < 106) await reportProgress();
+        if (from < 107) {
+          // Connected accounts (program spec section 5). Idempotent DDL;
+          // beforeOpen re-asserts against parallel-branch version collisions.
+          await _assertConnectedAccountsSchema();
+          // Adopt Lightroom connector accounts (ids preserved: scan state
+          // and suggestion rows key on them), then retire the table. Guarded
+          // on table existence for fresh installs and minimal test fixtures.
+          final connectorTable = await customSelect(
+            "SELECT name FROM sqlite_master WHERE type='table' "
+            "AND name='connector_accounts'",
+          ).get();
+          if (connectorTable.isNotEmpty) {
+            await customStatement(
+              "INSERT OR IGNORE INTO connected_accounts "
+              "(id, kind, label, account_identifier, created_at, updated_at) "
+              "SELECT id, 'adobeLightroom', display_name, account_identifier, "
+              "added_at, added_at FROM connector_accounts "
+              "WHERE connector_type = 'lightroom'",
+            );
+            await customStatement('DROP TABLE IF EXISTS connector_accounts');
+          }
+        }
+        if (from < 107) await reportProgress();
+        if (from < 108) {
+          // Manifest subscriptions become synced (program spec section 6).
+          await _assertMediaSubscriptionsHlc();
+        }
+        if (from < 108) await reportProgress();
       },
       beforeOpen: (details) async {
         // Enable foreign keys
@@ -5293,6 +5372,12 @@ class AppDatabase extends _$AppDatabase {
         // v106 backstop: re-assert connector-suggestion columns (the helper
         // is self-guarding when the suggestions table is absent).
         await _assertConnectorSuggestionColumns();
+
+        // v107 backstop: re-assert connected accounts schema.
+        await _assertConnectedAccountsSchema();
+
+        // v108 backstop: re-assert media_subscriptions.hlc.
+        await _assertMediaSubscriptionsHlc();
 
         // Built-in dive types are reference data: identical on every device and
         // undeletable through DiveTypeRepository. Nothing else restores them --

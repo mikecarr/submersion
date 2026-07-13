@@ -4,6 +4,7 @@ import 'dart:ui' show Size;
 import 'package:submersion/features/media/data/services/exif_extractor.dart';
 import 'package:submersion/features/media/data/services/local_bookmark_storage.dart';
 import 'package:submersion/features/media/data/services/local_media_platform.dart';
+import 'package:submersion/features/media/data/services/volume_status.dart';
 import 'package:submersion/features/media/domain/entities/media_item.dart';
 import 'package:submersion/features/media/domain/entities/media_source_type.dart';
 import 'package:submersion/features/media/domain/services/media_source_resolver.dart';
@@ -38,9 +39,13 @@ class LocalFileResolver implements MediaSourceResolver {
     required LocalBookmarkStorage bookmarkStorage,
     required LocalMediaPlatform platform,
     required ExifExtractor exifExtractor,
+    VolumeStatus? volumeStatus,
   }) : _bookmarkStorage = bookmarkStorage,
        _platform = platform,
-       _exifExtractor = exifExtractor;
+       _exifExtractor = exifExtractor,
+       _volumeStatus = volumeStatus ?? VolumeStatus();
+
+  final VolumeStatus _volumeStatus;
 
   @override
   MediaSourceType get sourceType => MediaSourceType.localFile;
@@ -59,6 +64,12 @@ class LocalFileResolver implements MediaSourceResolver {
       try {
         final f = File(localPath);
         if (await f.exists()) return FileData(file: f);
+        // Missing file on an unmounted volume (network share, external
+        // disk) is a temporary condition, not a dead pointer: report it
+        // as such so nothing orphans the row while the share is offline.
+        if (!await _volumeStatus.isVolumeOnline(localPath)) {
+          return const UnavailableData(kind: UnavailableKind.volumeOffline);
+        }
       }
       // coverage:ignore-start
       // FileSystemException from File.exists() requires a permission /
@@ -66,7 +77,13 @@ class LocalFileResolver implements MediaSourceResolver {
       // produce. Fallback path to bookmark / Unavailable is exercised by
       // tests above.
       on FileSystemException {
-        // Fall through to bookmark path or unavailable.
+        // Offline network mounts commonly THROW here rather than return
+        // false; an offline volume must still read volumeOffline, not
+        // fall through to a hard notFound (which cleanup could orphan).
+        if (!await _volumeStatus.isVolumeOnline(localPath)) {
+          return const UnavailableData(kind: UnavailableKind.volumeOffline);
+        }
+        // Otherwise fall through to bookmark path or unavailable.
       }
       // coverage:ignore-end
     }
@@ -150,8 +167,9 @@ class LocalFileResolver implements MediaSourceResolver {
   @override
   Future<VerifyResult> verify(MediaItem item) async {
     final data = await resolve(item);
-    return data is UnavailableData
-        ? VerifyResult.notFound
-        : VerifyResult.available;
+    if (data is! UnavailableData) return VerifyResult.available;
+    return data.kind == UnavailableKind.volumeOffline
+        ? VerifyResult.volumeOffline
+        : VerifyResult.notFound;
   }
 }

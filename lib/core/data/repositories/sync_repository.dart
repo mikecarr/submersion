@@ -5,6 +5,7 @@ import 'package:submersion/core/database/database.dart';
 import 'package:submersion/core/services/database_service.dart';
 import 'package:submersion/core/services/logger_service.dart';
 import 'package:submersion/core/services/sync/hlc.dart';
+import 'package:submersion/core/services/sync/sync_event_bus.dart';
 import 'package:submersion/core/services/sync/sync_clock.dart';
 
 /// Sync status for individual records
@@ -32,6 +33,8 @@ class SyncRepository {
     'buddies': (table: 'buddies', pk: 'id'),
     'buddyRoles': (table: 'buddy_roles', pk: 'id'),
     'mediaStores': (table: 'media_stores', pk: 'id'),
+    'connectedAccounts': (table: 'connected_accounts', pk: 'id'),
+    'mediaSubscriptions': (table: 'media_subscriptions', pk: 'id'),
     'diveCenters': (table: 'dive_centers', pk: 'id'),
     'trips': (table: 'trips', pk: 'id'),
     'liveaboardDetails': (table: 'liveaboard_detail_records', pk: 'id'),
@@ -277,7 +280,9 @@ class SyncRepository {
     );
   }
 
-  /// Set the cloud provider
+  /// Set the cloud provider. Clearing it (null) also clears the sync
+  /// account selection; setting a bare type leaves any account id in place
+  /// (the account-aware writer is [setSyncAccount]).
   Future<void> setCloudProvider(CloudProviderType? provider) async {
     try {
       final now = DateTime.now().millisecondsSinceEpoch;
@@ -287,11 +292,17 @@ class SyncRepository {
       )..where((t) => t.id.equals(_globalMetadataId))).write(
         SyncMetadataCompanion(
           syncProvider: Value(provider?.name),
+          syncAccountId: provider == null
+              ? const Value(null)
+              : const Value.absent(),
           updatedAt: Value(now),
         ),
       );
 
       _log.info('Set cloud provider to: ${provider?.name}');
+      // Selection changed: let account-derived UI (pending-setup routes)
+      // recompute while Settings stays mounted.
+      SyncEventBus.notifyLocalChange();
     } catch (e, stackTrace) {
       _log.error(
         'Failed to set cloud provider',
@@ -300,6 +311,32 @@ class SyncRepository {
       );
       rethrow;
     }
+  }
+
+  /// Selects the connected account driving sync. Writes the provider name
+  /// too so pre-account readers (and a rollback build) keep working.
+  Future<void> setSyncAccount({
+    required String accountId,
+    required CloudProviderType providerType,
+  }) async {
+    final now = DateTime.now().millisecondsSinceEpoch;
+    await (_db.update(
+      _db.syncMetadata,
+    )..where((t) => t.id.equals(_globalMetadataId))).write(
+      SyncMetadataCompanion(
+        syncProvider: Value(providerType.name),
+        syncAccountId: Value(accountId),
+        updatedAt: Value(now),
+      ),
+    );
+    SyncEventBus.notifyLocalChange();
+  }
+
+  /// The connected account driving sync, or null pre-account-migration or
+  /// when no provider is selected.
+  Future<String?> getSyncAccountId() async {
+    final metadata = await getOrCreateMetadata();
+    return metadata.syncAccountId;
   }
 
   /// Get the current cloud provider

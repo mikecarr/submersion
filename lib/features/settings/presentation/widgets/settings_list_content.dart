@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:submersion/core/providers/provider.dart';
 import 'package:submersion/features/divers/presentation/providers/diver_providers.dart';
+import 'package:submersion/features/settings/presentation/widgets/pending_setup_card.dart';
 import 'package:submersion/features/settings/presentation/providers/debug_mode_provider.dart';
 import 'package:submersion/l10n/l10n_extension.dart';
 
@@ -137,12 +138,16 @@ class SettingsListContent extends ConsumerWidget {
       );
     }
 
+    // The setup card is row 0 of the list itself: it scrolls with the
+    // sections and cannot overflow the viewport in either variant.
     final listContent = ListView.separated(
       padding: const EdgeInsets.symmetric(vertical: 8),
-      itemCount: sections.length,
-      separatorBuilder: (context, index) => const Divider(height: 1),
+      itemCount: sections.length + 1,
+      separatorBuilder: (context, index) =>
+          index == 0 ? const SizedBox.shrink() : const Divider(height: 1),
       itemBuilder: (context, index) {
-        final section = sections[index];
+        if (index == 0) return const PendingSetupCard();
+        final section = sections[index - 1];
         final isSelected = selectedId == section.id;
 
         return _SettingsSectionTile(
