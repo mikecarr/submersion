@@ -8,8 +8,10 @@ import 'package:submersion/core/utils/unit_formatter.dart';
 import 'package:submersion/features/checklists/presentation/widgets/trip_checklist_section.dart';
 import 'package:submersion/features/dive_log/presentation/providers/dive_providers.dart';
 import 'package:submersion/features/divers/presentation/providers/diver_providers.dart';
+import 'package:submersion/features/media/presentation/providers/lightroom_providers.dart';
 import 'package:submersion/features/settings/presentation/providers/settings_providers.dart';
 import 'package:submersion/features/trips/domain/entities/trip.dart';
+import 'package:submersion/features/trips/presentation/helpers/trip_scan_actions.dart';
 import 'package:submersion/features/trips/presentation/providers/trip_providers.dart';
 import 'package:submersion/features/trips/presentation/widgets/trip_itinerary_tab.dart';
 import 'package:submersion/features/trips/presentation/widgets/trip_overview_tab.dart';
@@ -424,9 +426,46 @@ class _TripDetailContent extends ConsumerWidget {
           }
         } else if (value == 'export') {
           _showExportOptions(context, ref);
+        } else if (value == 'scan-dives') {
+          await scanForTripDives(context, ref, trip);
+        } else if (value == 'scan-photos') {
+          await scanGalleryForTripPhotos(context, ref, trip.id, trip);
+        } else if (value == 'scan-lightroom') {
+          await scanLightroomForTrip(context, ref, trip.id);
         }
       },
       itemBuilder: (context) => [
+        PopupMenuItem(
+          value: 'scan-dives',
+          child: Row(
+            children: [
+              const Icon(Icons.playlist_add),
+              const SizedBox(width: 8),
+              Flexible(child: Text(context.l10n.trips_diveScan_findButton)),
+            ],
+          ),
+        ),
+        PopupMenuItem(
+          value: 'scan-photos',
+          child: Row(
+            children: [
+              const Icon(Icons.photo_library_outlined),
+              const SizedBox(width: 8),
+              Flexible(child: Text(context.l10n.trips_photos_tooltip_scan)),
+            ],
+          ),
+        ),
+        if (ref.watch(lightroomAccountProvider).value != null)
+          PopupMenuItem(
+            value: 'scan-lightroom',
+            child: Row(
+              children: [
+                const Icon(Icons.cloud_outlined),
+                const SizedBox(width: 8),
+                Flexible(child: Text(context.l10n.settings_lightroom_scanNow)),
+              ],
+            ),
+          ),
         PopupMenuItem(
           value: 'export',
           child: Row(

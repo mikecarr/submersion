@@ -21,8 +21,8 @@ Dive _dive({
 
 void main() {
   final date = DateTime(2026, 3, 8);
-  final siteA = DiveSite(id: 'site-a', name: 'Blue Corner');
-  final siteB = DiveSite(id: 'site-b', name: 'Jetty');
+  const siteA = DiveSite(id: 'site-a', name: 'Blue Corner');
+  const siteB = DiveSite(id: 'site-b', name: 'Jetty');
 
   group('TripStoryDay derived getters', () {
     test('aggregates dive count, bottom time, and max depth', () {

@@ -171,10 +171,10 @@ void main() {
 
   group('buildTripStory map geometry', () {
     test('collects unique day site points and itinerary ports in order', () {
-      final site = DiveSite(
+      const site = DiveSite(
         id: 'site-a',
         name: 'Blue Corner',
-        location: const GeoPoint(12.1, -68.2),
+        location: GeoPoint(12.1, -68.2),
       );
       final story = buildTripStory(
         trip: _trip(),
