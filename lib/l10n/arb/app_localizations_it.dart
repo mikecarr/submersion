@@ -9,6 +9,80 @@ class AppLocalizationsIt extends AppLocalizations {
   AppLocalizationsIt([String locale = 'it']) : super(locale);
 
   @override
+  String trips_story_dayLabel(int number) {
+    return 'Giorno $number';
+  }
+
+  @override
+  String get trips_story_surfaceDay => 'Giorno di superficie';
+
+  @override
+  String get trips_story_today => 'Oggi';
+
+  @override
+  String trips_story_dayOfTrip(int current, int total) {
+    return 'Giorno $current di $total';
+  }
+
+  @override
+  String trips_story_daysUntil(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days giorni alla partenza',
+      one: '1 giorno alla partenza',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String trips_story_checklistProgress(int done, int total) {
+    return '$done di $total completati';
+  }
+
+  @override
+  String get trips_story_generateItinerary => 'Genera itinerario';
+
+  @override
+  String get trips_story_planned => 'Pianificato';
+
+  @override
+  String get trips_story_empty_title => 'Nessuna immersione o itinerario';
+
+  @override
+  String get trips_story_empty_subtitle =>
+      'Aggiungi immersioni o pianifica i giorni per vedere la storia.';
+
+  @override
+  String trips_story_history_dives(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count immersioni passate qui',
+      one: '1 immersione passata qui',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String trips_story_history_avgTemp(String value) {
+    return 'media $value';
+  }
+
+  @override
+  String trips_story_history_avgDepth(String value) {
+    return 'prof. media $value';
+  }
+
+  @override
+  String get trips_story_rhythm_semantics =>
+      'Orari delle immersioni del giorno';
+
+  @override
+  String get trips_story_map_semantics =>
+      'Mappa del viaggio. I siti del giorno visibile sono evidenziati.';
+
+  @override
   String get diveLog_bulkEdit_groupRebreather => 'Modalità e rebreather';
 
   @override

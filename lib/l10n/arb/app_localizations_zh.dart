@@ -9,6 +9,75 @@ class AppLocalizationsZh extends AppLocalizations {
   AppLocalizationsZh([String locale = 'zh']) : super(locale);
 
   @override
+  String trips_story_dayLabel(int number) {
+    return '第 $number 天';
+  }
+
+  @override
+  String get trips_story_surfaceDay => '水面日';
+
+  @override
+  String get trips_story_today => '今天';
+
+  @override
+  String trips_story_dayOfTrip(int current, int total) {
+    return '第 $current 天，共 $total 天';
+  }
+
+  @override
+  String trips_story_daysUntil(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '距出发还有 $days 天',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String trips_story_checklistProgress(int done, int total) {
+    return '已完成 $done/$total';
+  }
+
+  @override
+  String get trips_story_generateItinerary => '生成行程';
+
+  @override
+  String get trips_story_planned => '已计划';
+
+  @override
+  String get trips_story_empty_title => '还没有潜水或行程';
+
+  @override
+  String get trips_story_empty_subtitle => '为此旅行添加潜水或规划行程以查看故事。';
+
+  @override
+  String trips_story_history_dives(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '此处有 $count 次过往潜水',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String trips_story_history_avgTemp(String value) {
+    return '平均 $value';
+  }
+
+  @override
+  String trips_story_history_avgDepth(String value) {
+    return '平均深度 $value';
+  }
+
+  @override
+  String get trips_story_rhythm_semantics => '当天的潜水时间';
+
+  @override
+  String get trips_story_map_semantics => '旅行地图。当前日期的潜点已高亮。';
+
+  @override
   String get diveLog_bulkEdit_groupRebreather => '潜水模式与循环呼吸器';
 
   @override

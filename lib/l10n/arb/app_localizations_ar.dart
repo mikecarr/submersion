@@ -9,6 +9,79 @@ class AppLocalizationsAr extends AppLocalizations {
   AppLocalizationsAr([String locale = 'ar']) : super(locale);
 
   @override
+  String trips_story_dayLabel(int number) {
+    return 'اليوم $number';
+  }
+
+  @override
+  String get trips_story_surfaceDay => 'يوم سطح';
+
+  @override
+  String get trips_story_today => 'اليوم';
+
+  @override
+  String trips_story_dayOfTrip(int current, int total) {
+    return 'اليوم $current من $total';
+  }
+
+  @override
+  String trips_story_daysUntil(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days أيام حتى المغادرة',
+      one: 'يوم واحد حتى المغادرة',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String trips_story_checklistProgress(int done, int total) {
+    return 'اكتمل $done من $total';
+  }
+
+  @override
+  String get trips_story_generateItinerary => 'إنشاء خط سير';
+
+  @override
+  String get trips_story_planned => 'مخطط';
+
+  @override
+  String get trips_story_empty_title => 'لا توجد غطسات أو خط سير بعد';
+
+  @override
+  String get trips_story_empty_subtitle =>
+      'أضف غطسات إلى هذه الرحلة أو خطط أيامها لرؤية القصة.';
+
+  @override
+  String trips_story_history_dives(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count غطسات سابقة هنا',
+      one: 'غطسة سابقة واحدة هنا',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String trips_story_history_avgTemp(String value) {
+    return 'متوسط $value';
+  }
+
+  @override
+  String trips_story_history_avgDepth(String value) {
+    return 'متوسط العمق $value';
+  }
+
+  @override
+  String get trips_story_rhythm_semantics => 'أوقات الغطس في هذا اليوم';
+
+  @override
+  String get trips_story_map_semantics =>
+      'خريطة الرحلة. مواقع اليوم المعروض مميزة.';
+
+  @override
   String get diveLog_bulkEdit_groupRebreather => 'وضع الغوص وجهاز التنفس';
 
   @override

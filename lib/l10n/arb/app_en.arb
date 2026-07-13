@@ -1,4 +1,74 @@
 {
+  "trips_story_dayLabel": "Day {number}",
+  "@trips_story_dayLabel": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "trips_story_surfaceDay": "Surface day",
+  "trips_story_today": "Today",
+  "trips_story_dayOfTrip": "Day {current} of {total}",
+  "@trips_story_dayOfTrip": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "trips_story_daysUntil": "{days, plural, =1{1 day until departure} other{{days} days until departure}}",
+  "@trips_story_daysUntil": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "trips_story_checklistProgress": "{done} of {total} done",
+  "@trips_story_checklistProgress": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "trips_story_generateItinerary": "Generate itinerary",
+  "trips_story_planned": "Planned",
+  "trips_story_empty_title": "No dives or itinerary yet",
+  "trips_story_empty_subtitle": "Add dives to this trip or plan its days to see the story.",
+  "trips_story_history_dives": "{count, plural, =1{1 past dive here} other{{count} past dives here}}",
+  "@trips_story_history_dives": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "trips_story_history_avgTemp": "avg {value}",
+  "@trips_story_history_avgTemp": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "trips_story_history_avgDepth": "avg depth {value}",
+  "@trips_story_history_avgDepth": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "trips_story_rhythm_semantics": "Dive times during this day",
+  "trips_story_map_semantics": "Trip map. Sites for the day in view are highlighted.",
   "diveLog_bulkEdit_groupRebreather": "Dive Mode & Rebreather",
   "diveLog_bulkEdit_fieldSetpointLow": "Setpoint low",
   "diveLog_bulkEdit_fieldSetpointHigh": "Setpoint high",

@@ -9,6 +9,79 @@ class AppLocalizationsPt extends AppLocalizations {
   AppLocalizationsPt([String locale = 'pt']) : super(locale);
 
   @override
+  String trips_story_dayLabel(int number) {
+    return 'Dia $number';
+  }
+
+  @override
+  String get trips_story_surfaceDay => 'Dia de superfície';
+
+  @override
+  String get trips_story_today => 'Hoje';
+
+  @override
+  String trips_story_dayOfTrip(int current, int total) {
+    return 'Dia $current de $total';
+  }
+
+  @override
+  String trips_story_daysUntil(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days dias até a partida',
+      one: '1 dia até a partida',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String trips_story_checklistProgress(int done, int total) {
+    return '$done de $total concluído';
+  }
+
+  @override
+  String get trips_story_generateItinerary => 'Gerar itinerário';
+
+  @override
+  String get trips_story_planned => 'Planejado';
+
+  @override
+  String get trips_story_empty_title => 'Ainda sem mergulhos ou itinerário';
+
+  @override
+  String get trips_story_empty_subtitle =>
+      'Adicione mergulhos ou planeje os dias para ver a história.';
+
+  @override
+  String trips_story_history_dives(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count mergulhos anteriores aqui',
+      one: '1 mergulho anterior aqui',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String trips_story_history_avgTemp(String value) {
+    return 'média $value';
+  }
+
+  @override
+  String trips_story_history_avgDepth(String value) {
+    return 'prof. média $value';
+  }
+
+  @override
+  String get trips_story_rhythm_semantics => 'Horários de mergulho deste dia';
+
+  @override
+  String get trips_story_map_semantics =>
+      'Mapa da viagem. Os pontos do dia visível estão destacados.';
+
+  @override
   String get diveLog_bulkEdit_groupRebreather =>
       'Modo de mergulho e rebreather';
 
