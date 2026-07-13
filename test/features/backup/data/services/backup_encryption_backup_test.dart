@@ -11,6 +11,7 @@ import 'package:submersion/features/backup/data/repositories/backup_preferences.
 import 'package:submersion/features/backup/data/services/backup_encryption_key_store.dart';
 import 'package:submersion/features/backup/data/services/backup_encryption_service.dart';
 import 'package:submersion/features/backup/data/services/backup_service.dart';
+import 'package:submersion/features/backup/domain/exceptions/backup_encrypted_exception.dart';
 
 import '../../../../support/fake_cloud_storage_provider.dart';
 import '../../../../support/fake_keychain_storage.dart';
@@ -146,6 +147,56 @@ void main() {
       expect(
         SyncEnvelope.hasMagic(await File(record.localPath!).readAsBytes()),
         isTrue,
+      );
+    },
+  );
+
+  test(
+    'restore: silent with the stored backup key; via passphrase after clear',
+    () async {
+      await enableBackupEncryption();
+      final file = await buildService().exportBackupToTemp(); // encrypted .sbe
+      final picked = File(
+        '${Directory.systemTemp.path}/pick_${DateTime.now().microsecondsSinceEpoch}.sbe',
+      );
+      await picked.writeAsBytes(await file.readAsBytes());
+      addTearDown(() async {
+        if (await picked.exists()) await picked.delete();
+      });
+
+      // Stored backup key present -> silent restore, no secret needed.
+      await buildService().restoreFromFile(picked.path);
+
+      // Simulate a fresh device: no key, encryption never enabled locally.
+      await backupKeyStore.clearKey();
+      await preferences.setBackupEncryptionEnabled(false);
+      await buildService().restoreFromFile(
+        picked.path,
+        encryptionSecret: 'backuppass1',
+      );
+    },
+  );
+
+  test(
+    'restore: encrypted, no key, no secret -> BackupEncryptedException',
+    () async {
+      await enableBackupEncryption();
+      final file = await buildService().exportBackupToTemp();
+      final picked = File(
+        '${Directory.systemTemp.path}/pick2_${DateTime.now().microsecondsSinceEpoch}.sbe',
+      );
+      await picked.writeAsBytes(await file.readAsBytes());
+      addTearDown(() async {
+        if (await picked.exists()) await picked.delete();
+      });
+
+      // Fresh device: no key, encryption not enabled locally.
+      await backupKeyStore.clearKey();
+      await preferences.setBackupEncryptionEnabled(false);
+
+      await expectLater(
+        buildService().restoreFromFile(picked.path),
+        throwsA(isA<BackupEncryptedException>()),
       );
     },
   );

@@ -1080,14 +1080,22 @@ class BackupService {
     }
     final tempDir = await getTemporaryDirectory();
     final decrypted = p.join(tempDir.path, 'restore_${_uuid.v4()}.db');
-    final key = await _encryptionKeyStore?.loadKey();
+    final syncKey = await _encryptionKeyStore?.loadKey();
+    final backupKey = await _backupEncryptionKeyStore?.loadKey();
     final artifactKeyId = await BackupCrypto.libraryKeyIdOf(sourcePath);
-    if (key != null && key.libraryKeyId == artifactKeyId) {
+    if (syncKey != null && syncKey.libraryKeyId == artifactKeyId) {
       await BackupCrypto.decryptFileWithKey(
         inPath: sourcePath,
         outPath: decrypted,
-        mlk: key.mlk,
-        expectedLibraryKeyId: key.libraryKeyId,
+        mlk: syncKey.mlk,
+        expectedLibraryKeyId: syncKey.libraryKeyId,
+      );
+    } else if (backupKey != null && backupKey.libraryKeyId == artifactKeyId) {
+      await BackupCrypto.decryptFileWithKey(
+        inPath: sourcePath,
+        outPath: decrypted,
+        mlk: backupKey.mlk,
+        expectedLibraryKeyId: backupKey.libraryKeyId,
       );
     } else if (encryptionSecret != null) {
       await BackupCrypto.decryptFile(
