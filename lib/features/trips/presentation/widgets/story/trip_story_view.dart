@@ -80,6 +80,11 @@ class _TripStoryViewState extends ConsumerState<TripStoryView>
     );
   }
 
+  // A named method (not an inline closure) so the delegate's onDaySelected has
+  // a stable identity across builds; otherwise shouldRebuild always sees a new
+  // closure and rebuilds the pinned FlutterMap on every parent rebuild.
+  void _onPinSelected(int index) => _selectDay(index, animateMap: false);
+
   bool _onScroll(ScrollUpdateNotification notification) {
     final now = DateTime.now();
     if (now.difference(_lastResolve) < _scrollThrottle) return false;
@@ -156,7 +161,7 @@ class _TripStoryViewState extends ConsumerState<TripStoryView>
       stats: widget.stats,
       activeDayIndex: _activeDayIndex,
       mapController: _mapController,
-      onDaySelected: (i) => _selectDay(i, animateMap: false),
+      onDaySelected: _onPinSelected,
       maxExtentValue: _mapHeaderMaxExtent,
     );
   }

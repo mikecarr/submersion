@@ -165,4 +165,30 @@ void main() {
     // animator and controller.
     expect(find.byType(FlutterMap), findsOneWidget);
   });
+
+  test(
+    'shouldRebuild is false for equal inputs, true when a field changes',
+    () {
+      final controller = MapController();
+      addTearDown(controller.dispose);
+      void onDay(int _) {}
+      const geometry = TripStoryMapGeometry(points: []);
+      final stats = TripWithStats(trip: _trip(), diveCount: 3);
+
+      TripStoryMapHeaderDelegate make({int activeDayIndex = 0}) =>
+          TripStoryMapHeaderDelegate(
+            geometry: geometry,
+            stats: stats,
+            activeDayIndex: activeDayIndex,
+            mapController: controller,
+            onDaySelected: onDay, // same callback identity across instances
+            maxExtentValue: 260,
+          );
+
+      // Same inputs (including the shared callback) => no rebuild.
+      expect(make().shouldRebuild(make()), isFalse);
+      // A changed input => rebuild.
+      expect(make(activeDayIndex: 1).shouldRebuild(make()), isTrue);
+    },
+  );
 }
