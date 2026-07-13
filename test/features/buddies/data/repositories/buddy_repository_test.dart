@@ -70,8 +70,6 @@ void main() {
           name: 'Complete Diver',
           email: 'diver@example.com',
           phone: '+1-555-1234',
-          certificationLevel: CertificationLevel.advancedOpenWater,
-          certificationAgency: CertificationAgency.padi,
           notes: 'Great dive buddy',
         );
 
@@ -82,15 +80,11 @@ void main() {
         expect(fetchedBuddy!.name, equals('Complete Diver'));
         expect(fetchedBuddy.email, equals('diver@example.com'));
         expect(fetchedBuddy.phone, equals('+1-555-1234'));
-        expect(
-          fetchedBuddy.certificationLevel,
-          equals(CertificationLevel.advancedOpenWater),
-        );
-        expect(
-          fetchedBuddy.certificationAgency,
-          equals(CertificationAgency.padi),
-        );
         expect(fetchedBuddy.notes, equals('Great dive buddy'));
+        // Certifications are no longer stored on the buddy (issue #553); they
+        // live in the certifications table and are derived on read.
+        expect(fetchedBuddy.certificationLevel, isNull);
+        expect(fetchedBuddy.certificationAgency, isNull);
       });
     });
 
@@ -155,21 +149,23 @@ void main() {
         expect(result.phone, equals('+1-555-9999'));
       });
 
-      test('should update certification info', () async {
+      test('updateBuddy does not persist certification fields (they are '
+          'derived from the certifications table, issue #553)', () async {
         final buddy = await repository.createBuddy(
           createTestBuddy(name: 'Cert Buddy'),
         );
 
+        // Setting cert fields on the entity is now ignored by updateBuddy;
+        // buddy certs are managed through CertificationRepository.
         final updatedBuddy = buddy.copyWith(
           certificationLevel: CertificationLevel.rescue,
           certificationAgency: CertificationAgency.ssi,
         );
-
         await repository.updateBuddy(updatedBuddy);
         final result = await repository.getBuddyById(buddy.id);
 
-        expect(result!.certificationLevel, equals(CertificationLevel.rescue));
-        expect(result.certificationAgency, equals(CertificationAgency.ssi));
+        expect(result!.certificationLevel, isNull);
+        expect(result.certificationAgency, isNull);
       });
     });
 

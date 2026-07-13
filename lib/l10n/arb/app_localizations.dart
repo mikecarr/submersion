@@ -1202,6 +1202,12 @@ abstract class AppLocalizations {
   /// **'Add Buddy'**
   String get buddies_action_add;
 
+  /// No description provided for @buddies_action_addCertification.
+  ///
+  /// In en, this message translates to:
+  /// **'Add certification'**
+  String get buddies_action_addCertification;
+
   /// No description provided for @buddies_action_addFirst.
   ///
   /// In en, this message translates to:
@@ -1639,6 +1645,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Certification'**
   String get buddies_section_certification;
+
+  /// No description provided for @buddies_section_certifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Certifications'**
+  String get buddies_section_certifications;
+
+  /// No description provided for @buddies_certifications_empty.
+  ///
+  /// In en, this message translates to:
+  /// **'No certifications'**
+  String get buddies_certifications_empty;
 
   /// No description provided for @buddies_section_contact.
   ///

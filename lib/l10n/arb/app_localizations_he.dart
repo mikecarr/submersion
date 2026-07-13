@@ -627,6 +627,9 @@ class AppLocalizationsHe extends AppLocalizations {
   String get buddies_action_add => 'הוסף חבר צוללים';
 
   @override
+  String get buddies_action_addCertification => 'הוסף הסמכה';
+
+  @override
   String get buddies_action_addFirst => 'הוסף את חבר הצוללים הראשון שלך';
 
   @override
@@ -877,6 +880,12 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get buddies_section_certification => 'הסמכה';
+
+  @override
+  String get buddies_section_certifications => 'הסמכות';
+
+  @override
+  String get buddies_certifications_empty => 'אין הסמכות';
 
   @override
   String get buddies_section_contact => 'יצירת קשר';

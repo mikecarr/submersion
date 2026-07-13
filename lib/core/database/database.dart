@@ -4,6 +4,7 @@ import 'dart:developer' as developer;
 import 'package:drift/drift.dart';
 
 import 'package:submersion/core/database/performance_indexes.dart';
+import 'package:submersion/core/constants/enums.dart';
 
 part 'database.g.dart';
 
@@ -1308,8 +1309,6 @@ class Buddies extends Table {
   TextColumn get name => text()();
   TextColumn get email => text().nullable()();
   TextColumn get phone => text().nullable()();
-  TextColumn get certificationLevel => text().nullable()();
-  TextColumn get certificationAgency => text().nullable()();
   TextColumn get photoPath => text().nullable()();
   TextColumn get notes => text().withDefault(const Constant(''))();
   IntColumn get createdAt => integer()();
@@ -1376,6 +1375,13 @@ class Certifications extends Table {
   // the historical snapshot and survive buddy deletion.
   TextColumn get instructorId =>
       text().nullable().references(Buddies, #id, onDelete: KeyAction.setNull)();
+  // Owner when this certification belongs to a buddy instead of the diver
+  // (issue #553). At most one of {diverId, buddyId} is set (ownerless rows are
+  // allowed -- legacy + no-validated-diver). Cascade so a buddy delete removes
+  // their certs (deletion tombstones are written explicitly in the repository
+  // -- cascade alone does not tombstone).
+  TextColumn get buddyId =>
+      text().nullable().references(Buddies, #id, onDelete: KeyAction.cascade)();
   TextColumn get photoFrontPath => text()
       .nullable()(); // Front of cert card (deprecated, kept for migration)
   TextColumn get photoBackPath =>
@@ -2168,7 +2174,7 @@ class AppDatabase extends _$AppDatabase {
 
   /// The current schema version as a static constant so that pre-open checks
   /// (e.g. version-mismatch guard) can reference it without an instance.
-  static const int currentSchemaVersion = 108;
+  static const int currentSchemaVersion = 110;
 
   /// Every schema version that has a migration block in onUpgrade.
   /// Used to calculate progress step counts. When adding a new migration,
@@ -2280,6 +2286,8 @@ class AppDatabase extends _$AppDatabase {
     106,
     107,
     108,
+    109,
+    110,
   ];
 
   /// Idempotent DDL for the v106 connector-suggestion columns (Lightroom
@@ -2346,6 +2354,78 @@ class AppDatabase extends _$AppDatabase {
         'ALTER TABLE media_subscriptions ADD COLUMN hlc TEXT',
       );
     }
+  }
+
+  /// Idempotent DDL for the issue #553 buddy-owner column on certifications.
+  /// Called from the v109 onUpgrade block and the beforeOpen backstop.
+  Future<void> _assertCertificationBuddyOwnerColumn() async {
+    final cols = await customSelect(
+      "PRAGMA table_info('certifications')",
+    ).get();
+    if (cols.isEmpty) return;
+    final has = cols.any((c) => c.read<String>('name') == 'buddy_id');
+    if (!has) {
+      await customStatement(
+        'ALTER TABLE certifications ADD COLUMN buddy_id TEXT '
+        'REFERENCES buddies (id) ON DELETE CASCADE',
+      );
+    }
+  }
+
+  /// Copy each buddy's inline certification into a certifications row owned by
+  /// that buddy (issue #553). Invoked from the onUpgrade blocks only (v109
+  /// expand + the v110 contract safety-net), NEVER the beforeOpen backstop --
+  /// the inline columns survive until v110, and re-running the copy on every
+  /// open would resurrect a user-deleted buddy cert. The id is deterministic
+  /// (`buddycert-<buddyId>`) and the insert upserts, so independent per-device
+  /// migrations converge to one row under sync instead of duplicating.
+  Future<void> _migrateBuddyInlineCertifications() async {
+    final buddyCols = await customSelect("PRAGMA table_info('buddies')").get();
+    final names = buddyCols.map((c) => c.read<String>('name')).toSet();
+    if (!names.contains('certification_level') &&
+        !names.contains('certification_agency')) {
+      return;
+    }
+    final rows = await customSelect(
+      'SELECT id, certification_level, certification_agency FROM buddies '
+      'WHERE certification_level IS NOT NULL '
+      'OR certification_agency IS NOT NULL',
+    ).get();
+    for (final r in rows) {
+      final buddyId = r.read<String>('id');
+      final level = r.read<String?>('certification_level');
+      final agency = r.read<String?>('certification_agency') ?? 'other';
+      final certId = 'buddycert-$buddyId';
+      final name = _displayNameForMigratedCert(level, agency);
+      final now = DateTime.now().millisecondsSinceEpoch;
+      await customStatement(
+        'INSERT INTO certifications '
+        '(id, buddy_id, diver_id, name, agency, level, notes, '
+        'created_at, updated_at) '
+        "VALUES (?, ?, NULL, ?, ?, ?, '', ?, ?) "
+        'ON CONFLICT(id) DO UPDATE SET buddy_id = excluded.buddy_id',
+        [certId, buddyId, name, agency, level, now, now],
+      );
+    }
+  }
+
+  /// Human-readable name for a migrated buddy cert: the level's display name
+  /// when present, else the agency's.
+  String _displayNameForMigratedCert(String? level, String agency) {
+    if (level != null) {
+      return CertificationLevel.values
+          .firstWhere(
+            (e) => e.name == level,
+            orElse: () => CertificationLevel.other,
+          )
+          .displayName;
+    }
+    return CertificationAgency.values
+        .firstWhere(
+          (e) => e.name == agency,
+          orElse: () => CertificationAgency.other,
+        )
+        .displayName;
   }
 
   /// Idempotent DDL for the v103 media store objects. Called from the v103
@@ -5360,6 +5440,39 @@ class AppDatabase extends _$AppDatabase {
           await _assertMediaSubscriptionsHlc();
         }
         if (from < 108) await reportProgress();
+        if (from < 109) {
+          // issue #553: certifications can belong to a buddy. Add the owner
+          // column, then copy each buddy's inline cert into a certifications
+          // row (deterministic id so per-device migration converges). The copy
+          // runs here only -- see _migrateBuddyInlineCertifications.
+          await _assertCertificationBuddyOwnerColumn();
+          await _migrateBuddyInlineCertifications();
+        }
+        if (from < 109) await reportProgress();
+        if (from < 110) {
+          // issue #553 contract: the inline buddy cert columns are redundant
+          // (data now lives in certifications rows). Copy once more as a
+          // safety net -- covers a collision that advanced user_version to
+          // v109 without running the v109 copy -- THEN drop. SQLite >= 3.35
+          // supports DROP COLUMN; the PRAGMA guard keeps a fresh v110 db a
+          // no-op.
+          await _migrateBuddyInlineCertifications();
+          final buddyCols = await customSelect(
+            "PRAGMA table_info('buddies')",
+          ).get();
+          final names = buddyCols.map((c) => c.read<String>('name')).toSet();
+          if (names.contains('certification_level')) {
+            await customStatement(
+              'ALTER TABLE buddies DROP COLUMN certification_level',
+            );
+          }
+          if (names.contains('certification_agency')) {
+            await customStatement(
+              'ALTER TABLE buddies DROP COLUMN certification_agency',
+            );
+          }
+        }
+        if (from < 110) await reportProgress();
       },
       beforeOpen: (details) async {
         // Enable foreign keys
@@ -5378,6 +5491,13 @@ class AppDatabase extends _$AppDatabase {
 
         // v108 backstop: re-assert media_subscriptions.hlc.
         await _assertMediaSubscriptionsHlc();
+
+        // v109 backstop (issue #553): re-assert the certifications.buddy_id
+        // column ONLY. The one-time inline-cert data copy lives in the v109
+        // onUpgrade block, not here -- re-running it every open would
+        // resurrect a user-deleted buddy cert from the still-present inline
+        // column (dropped in v110).
+        await _assertCertificationBuddyOwnerColumn();
 
         // Built-in dive types are reference data: identical on every device and
         // undeletable through DiveTypeRepository. Nothing else restores them --

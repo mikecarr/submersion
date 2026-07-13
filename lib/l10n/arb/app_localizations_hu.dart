@@ -642,6 +642,9 @@ class AppLocalizationsHu extends AppLocalizations {
   String get buddies_action_add => 'Búvártárs hozzáadása';
 
   @override
+  String get buddies_action_addCertification => 'Képesítés hozzáadása';
+
+  @override
   String get buddies_action_addFirst => 'Add hozzá az első búvártársad';
 
   @override
@@ -898,6 +901,12 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get buddies_section_certification => 'Képesítés';
+
+  @override
+  String get buddies_section_certifications => 'Képesítések';
+
+  @override
+  String get buddies_certifications_empty => 'Nincsenek képesítések';
 
   @override
   String get buddies_section_contact => 'Kapcsolat';

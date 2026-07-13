@@ -12,6 +12,7 @@ import 'package:submersion/shared/widgets/master_detail/responsive_breakpoints.d
 import 'package:submersion/features/buddies/data/repositories/buddy_repository.dart';
 import 'package:submersion/features/buddies/domain/entities/buddy.dart';
 import 'package:submersion/features/buddies/presentation/providers/buddy_providers.dart';
+import 'package:submersion/features/certifications/presentation/providers/certification_providers.dart';
 import 'package:submersion/features/dive_log/domain/entities/dive.dart';
 import 'package:submersion/features/dive_log/presentation/providers/dive_providers.dart';
 import 'package:submersion/features/settings/presentation/providers/export_providers.dart';
@@ -133,11 +134,10 @@ class _BuddyDetailContent extends ConsumerWidget {
             const SizedBox(height: 24),
           ],
 
-          // Certification info
-          if (buddy.hasCertificationInfo) ...[
-            _buildCertificationSection(context),
-            const SizedBox(height: 24),
-          ],
+          // Certifications (issue #553): full list from the certifications
+          // table, with an empty state.
+          _buildCertificationSection(context, ref),
+          const SizedBox(height: 24),
 
           // Professional roles
           _buildRolesSection(context, ref),
@@ -461,7 +461,8 @@ class _BuddyDetailContent extends ConsumerWidget {
     );
   }
 
-  Widget _buildCertificationSection(BuildContext context) {
+  Widget _buildCertificationSection(BuildContext context, WidgetRef ref) {
+    final certsAsync = ref.watch(buddyCertificationsProvider(buddy.id));
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -469,26 +470,37 @@ class _BuddyDetailContent extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              context.l10n.buddies_section_certification,
+              context.l10n.buddies_section_certifications,
               style: Theme.of(
                 context,
               ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
-            if (buddy.certificationLevel != null)
-              ListTile(
-                leading: const Icon(Icons.card_membership),
-                title: Text(context.l10n.buddies_label_level),
-                subtitle: Text(buddy.certificationLevel!.displayName),
-                contentPadding: EdgeInsets.zero,
+            certsAsync.when(
+              loading: () => const Padding(
+                padding: EdgeInsets.symmetric(vertical: 8),
+                child: Center(child: CircularProgressIndicator()),
               ),
-            if (buddy.certificationAgency != null)
-              ListTile(
-                leading: const Icon(Icons.business),
-                title: Text(context.l10n.buddies_label_agency),
-                subtitle: Text(buddy.certificationAgency!.displayName),
-                contentPadding: EdgeInsets.zero,
-              ),
+              error: (error, _) =>
+                  Text('${context.l10n.common_label_error}: $error'),
+              data: (certs) => certs.isEmpty
+                  ? Text(
+                      context.l10n.buddies_certifications_empty,
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    )
+                  : Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        for (final cert in certs)
+                          ListTile(
+                            contentPadding: EdgeInsets.zero,
+                            leading: const Icon(Icons.card_membership),
+                            title: Text(cert.level?.displayName ?? cert.name),
+                            subtitle: Text(cert.agency.displayName),
+                          ),
+                      ],
+                    ),
+            ),
           ],
         ),
       ),

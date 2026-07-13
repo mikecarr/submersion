@@ -638,6 +638,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get buddies_action_add => 'إضافة رفيق';
 
   @override
+  String get buddies_action_addCertification => 'إضافة اعتماد';
+
+  @override
   String get buddies_action_addFirst => 'أضف أول رفيق غوص';
 
   @override
@@ -888,6 +891,12 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get buddies_section_certification => 'الاعتماد';
+
+  @override
+  String get buddies_section_certifications => 'الاعتمادات';
+
+  @override
+  String get buddies_certifications_empty => 'لا توجد اعتمادات';
 
   @override
   String get buddies_section_contact => 'الاتصال';

@@ -1699,6 +1699,7 @@ class SyncService {
     'certifications': [
       (field: 'courseId', parent: 'courses', nullable: true),
       (field: 'instructorId', parent: 'buddies', nullable: true),
+      (field: 'buddyId', parent: 'buddies', nullable: true),
     ],
     'courses': [(field: 'instructorId', parent: 'buddies', nullable: true)],
     'equipmentSetItems': [

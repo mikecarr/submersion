@@ -639,6 +639,9 @@ class AppLocalizationsNl extends AppLocalizations {
   String get buddies_action_add => 'Buddy toevoegen';
 
   @override
+  String get buddies_action_addCertification => 'Certificering toevoegen';
+
+  @override
   String get buddies_action_addFirst => 'Voeg je eerste buddy toe';
 
   @override
@@ -891,6 +894,12 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get buddies_section_certification => 'Certificering';
+
+  @override
+  String get buddies_section_certifications => 'Certificeringen';
+
+  @override
+  String get buddies_certifications_empty => 'Geen certificeringen';
 
   @override
   String get buddies_section_contact => 'Contact';

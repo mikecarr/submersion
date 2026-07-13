@@ -645,6 +645,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get buddies_action_add => 'Ajouter un binôme';
 
   @override
+  String get buddies_action_addCertification => 'Ajouter une certification';
+
+  @override
   String get buddies_action_addFirst => 'Ajouter votre premier binôme';
 
   @override
@@ -904,6 +907,12 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get buddies_section_certification => 'Certification';
+
+  @override
+  String get buddies_section_certifications => 'Certifications';
+
+  @override
+  String get buddies_certifications_empty => 'Aucune certification';
 
   @override
   String get buddies_section_contact => 'Contact';

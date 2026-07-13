@@ -417,6 +417,7 @@
     }
   },
   "buddies_action_add": "Add Buddy",
+  "buddies_action_addCertification": "Add certification",
   "buddies_action_addFirst": "Add your first buddy",
   "buddies_action_addTooltip": "Add a new dive buddy",
   "buddies_action_clearSearch": "Clear search",
@@ -490,6 +491,8 @@
   "buddies_search_hint": "Search by name, email, or phone",
   "buddies_search_noResults": "No buddies found for \"{query}\"",
   "buddies_section_certification": "Certification",
+  "buddies_section_certifications": "Certifications",
+  "buddies_certifications_empty": "No certifications",
   "buddies_section_contact": "Contact",
   "buddies_section_diveStatistics": "Dive Statistics",
   "buddies_section_notes": "Notes",

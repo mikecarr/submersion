@@ -642,6 +642,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get buddies_action_add => 'Tauchpartner hinzufügen';
 
   @override
+  String get buddies_action_addCertification => 'Zertifizierung hinzufügen';
+
+  @override
   String get buddies_action_addFirst =>
       'Fügen Sie Ihren ersten Tauchpartner hinzu';
 
@@ -901,6 +904,12 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get buddies_section_certification => 'Zertifizierung';
+
+  @override
+  String get buddies_section_certifications => 'Zertifizierungen';
+
+  @override
+  String get buddies_certifications_empty => 'Keine Zertifizierungen';
 
   @override
   String get buddies_section_contact => 'Kontakt';

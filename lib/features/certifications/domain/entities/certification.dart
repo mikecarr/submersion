@@ -8,6 +8,11 @@ import 'package:submersion/core/constants/enums.dart';
 class Certification extends Equatable {
   final String id;
   final String? diverId;
+
+  /// Owner when this certification belongs to a buddy instead of the diver
+  /// (issue #553). At most one of {diverId, buddyId} is set -- ownerless rows
+  /// are allowed (legacy rows and the no-validated-diver fallback).
+  final String? buddyId;
   final String name;
   final CertificationAgency agency;
   final CertificationLevel? level;
@@ -26,6 +31,7 @@ class Certification extends Equatable {
   const Certification({
     required this.id,
     this.diverId,
+    this.buddyId,
     required this.name,
     required this.agency,
     this.level,
@@ -79,6 +85,7 @@ class Certification extends Equatable {
   Certification copyWith({
     String? id,
     String? diverId,
+    String? buddyId,
     String? name,
     CertificationAgency? agency,
     CertificationLevel? level,
@@ -97,6 +104,7 @@ class Certification extends Equatable {
     return Certification(
       id: id ?? this.id,
       diverId: diverId ?? this.diverId,
+      buddyId: buddyId ?? this.buddyId,
       name: name ?? this.name,
       agency: agency ?? this.agency,
       level: level ?? this.level,
@@ -119,6 +127,7 @@ class Certification extends Equatable {
     return Certification(
       id: id,
       diverId: diverId,
+      buddyId: buddyId,
       name: name,
       agency: agency,
       level: level,
@@ -152,6 +161,7 @@ class Certification extends Equatable {
   List<Object?> get props => [
     id,
     diverId,
+    buddyId,
     name,
     agency,
     level,

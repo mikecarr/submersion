@@ -600,6 +600,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get buddies_action_add => '添加潜伴';
 
   @override
+  String get buddies_action_addCertification => '添加认证';
+
+  @override
   String get buddies_action_addFirst => '添加您的第一位潜伴';
 
   @override
@@ -845,6 +848,12 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get buddies_section_certification => '认证';
+
+  @override
+  String get buddies_section_certifications => '认证';
+
+  @override
+  String get buddies_certifications_empty => '无认证';
 
   @override
   String get buddies_section_contact => '联系方式';

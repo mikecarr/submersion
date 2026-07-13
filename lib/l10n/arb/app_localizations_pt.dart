@@ -643,6 +643,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get buddies_action_add => 'Adicionar Companheiro';
 
   @override
+  String get buddies_action_addCertification => 'Adicionar certificação';
+
+  @override
   String get buddies_action_addFirst => 'Adicione seu primeiro companheiro';
 
   @override
@@ -901,6 +904,12 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get buddies_section_certification => 'Certificação';
+
+  @override
+  String get buddies_section_certifications => 'Certificações';
+
+  @override
+  String get buddies_certifications_empty => 'Sem certificações';
 
   @override
   String get buddies_section_contact => 'Contato';
