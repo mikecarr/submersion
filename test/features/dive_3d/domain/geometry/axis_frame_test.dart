@@ -49,4 +49,15 @@ void main() {
       greaterThan(4),
     );
   });
+
+  test('asserts against zero divisions (would divide by zero)', () {
+    expect(
+      () => AxisFrame.build(bounds, referenceY: 3.0, timeDivs: 0),
+      throwsA(isA<AssertionError>()),
+    );
+    expect(
+      () => AxisFrame.build(bounds, referenceY: 3.0, zDivs: 0),
+      throwsA(isA<AssertionError>()),
+    );
+  });
 }

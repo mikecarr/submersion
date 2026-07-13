@@ -190,8 +190,13 @@ class TissueChromePainter extends CustomPainter {
       }
       canvas.drawPath(path, paint);
     }
-    // Iso-time lines (along compartments) for a decimated set of columns.
-    final step = (grid.columns / _maxWireColumns).ceil().clamp(1, grid.columns);
+    // Iso-time lines (along compartments) for a decimated set of columns. step
+    // is int-valued (int.clamp(int, int) -> int); the annotation is explicit so
+    // a future change that widens it to num fails at compile time, not in `+=`.
+    final int step = (grid.columns / _maxWireColumns).ceil().clamp(
+      1,
+      grid.columns,
+    );
     for (var col = 0; col < grid.columns; col += step) {
       final path = Path();
       for (var comp = 0; comp < grid.compartments; comp++) {

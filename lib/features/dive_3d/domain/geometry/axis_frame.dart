@@ -38,6 +38,11 @@ class AxisFrame {
     int timeDivs = 4,
     int zDivs = 4,
   }) {
+    // Both are used as divisors (i / timeDivs, i / zDivs); 0 would yield
+    // NaN/Infinity coordinates. Callers wanting no grid should skip the frame,
+    // not pass 0.
+    assert(timeDivs > 0, 'timeDivs must be > 0 (used as a divisor)');
+    assert(zDivs > 0, 'zDivs must be > 0 (used as a divisor)');
     final segments = <AxisSegment>[];
     const x0 = 0.0;
     const x1 = SceneBounds.xSpan;
