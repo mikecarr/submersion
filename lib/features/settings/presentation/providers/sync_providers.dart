@@ -1114,9 +1114,16 @@ class SyncNotifier extends StateNotifier<SyncState> {
       // Account-first resolution means _syncService.signOut() cleared the
       // PER-ACCOUNT Dropbox blob (and revoked); also clear the legacy
       // source-of-truth key, otherwise the UI still reads it as connected
-      // and the next credential mirror would resurrect it.
+      // and the next credential mirror would resurrect it. Best-effort: a
+      // keychain failure must not abort sign-out (selection/prefs/state
+      // still need clearing); the mirror would delete the per-account key
+      // on the next derivation regardless.
       if (selected == CloudProviderType.dropbox) {
-        await DropboxAuthStore().clear();
+        try {
+          await DropboxAuthStore().clear();
+        } catch (e) {
+          _log.warning('Could not clear legacy Dropbox key on sign-out: $e');
+        }
       }
     } else {
       // Match SyncService.signOut()'s metadata clearing without the
