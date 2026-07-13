@@ -185,33 +185,39 @@ class _S3ConfigPageState extends ConsumerState<S3ConfigPage> {
 
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
-    final storageMessage = context.l10n.settings_s3Config_error_secureStorage;
+    final l10n = context.l10n;
+    final storageMessage = l10n.settings_s3Config_error_secureStorage;
+    // Capture the app-level container before the first await. It outlives this
+    // page, so the provider writes / global refresh / re-derivation below all
+    // run (and never throw) even if the page is popped during an async gap --
+    // `ref` throws once the ConsumerState is disposed. Global providers other
+    // screens listen to (the sync settings page still mounted behind this
+    // route) must refresh whether or not THIS page survives.
+    final container = ProviderScope.containerOf(context, listen: false);
     setState(() => _busy = true);
     try {
-      await ref
+      await container
           .read(s3StorageProviderInstanceProvider)
           .saveConfig(_buildConfig());
-      ref.read(selectedCloudProviderTypeProvider.notifier).state =
+      container.read(selectedCloudProviderTypeProvider.notifier).state =
           CloudProviderType.s3;
-      await ref
+      await container
           .read(syncInitializerProvider)
           .saveProvider(CloudProviderType.s3);
-      // Refresh dependent state up front. These are global providers other
-      // screens listen to (e.g. the sync settings page still mounted behind
-      // this route), so they must run whether or not THIS page survives the
-      // in-flight re-derivation below. Run them while ref is still valid.
-      ref.read(syncStateProvider.notifier).refreshState();
-      ref.invalidate(s3ConfigProvider);
+      // Refresh dependent state before the in-flight re-derivation below so a
+      // mid-save pop can't leave those screens stale.
+      container.read(syncStateProvider.notifier).refreshState();
+      container.invalidate(s3ConfigProvider);
       // Re-derive the sync account so its per-account credential mirror
       // picks up this (possibly in-place) config edit; account-first
       // resolution reads that mirror. Invalidate + await because editing
       // while already on S3 doesn't re-fire the provider-type change.
-      ref.invalidate(selectedSyncAccountProvider);
-      await ref.read(selectedSyncAccountProvider.future);
+      container.invalidate(selectedSyncAccountProvider);
+      await container.read(selectedSyncAccountProvider.future);
       // Only UI work remains (snackbar + navigation); the page may have been
       // popped while the derivation was in flight, so gate that on mounted.
       if (!mounted) return;
-      _showSnack(context.l10n.settings_s3Config_saved);
+      _showSnack(l10n.settings_s3Config_saved);
       // Root-safe in widget tests; pops the pushed route in the app.
       await Navigator.maybePop(context);
     } on CloudStorageException catch (e) {
