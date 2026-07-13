@@ -3,12 +3,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:submersion/core/database/database.dart';
 
 void main() {
-  test('v108 drops the inline buddy certification columns but preserves the '
+  test('v110 drops the inline buddy certification columns but preserves the '
       'migrated cert row', () async {
     final nativeDb = NativeDatabase.memory(
       setup: (rawDb) {
-        rawDb.execute('PRAGMA user_version = 107');
-        // buddies still has the inline columns at v107.
+        rawDb.execute('PRAGMA user_version = 109');
+        // buddies still has the inline columns at v109.
         rawDb.execute('''
           CREATE TABLE buddies (
             id TEXT NOT NULL PRIMARY KEY, diver_id TEXT, name TEXT NOT NULL,
@@ -55,11 +55,11 @@ void main() {
     expect(cert.data['level'], 'cmas2StarDiver');
   });
 
-  test('v108 safety copy migrates a still-inline buddy cert before dropping '
-      '(covers a collision that reached v107 without the copy)', () async {
+  test('v110 safety copy migrates a still-inline buddy cert before dropping '
+      '(covers a collision that reached v109 without the copy)', () async {
     final nativeDb = NativeDatabase.memory(
       setup: (rawDb) {
-        rawDb.execute('PRAGMA user_version = 107');
+        rawDb.execute('PRAGMA user_version = 109');
         rawDb.execute('''
           CREATE TABLE buddies (
             id TEXT NOT NULL PRIMARY KEY, diver_id TEXT, name TEXT NOT NULL,

@@ -1376,9 +1376,10 @@ class Certifications extends Table {
   TextColumn get instructorId =>
       text().nullable().references(Buddies, #id, onDelete: KeyAction.setNull)();
   // Owner when this certification belongs to a buddy instead of the diver
-  // (issue #553). Exactly one of {diverId, buddyId} is set. Cascade so a
-  // buddy delete removes their certs (deletion tombstones are written
-  // explicitly in the repository -- cascade alone does not tombstone).
+  // (issue #553). At most one of {diverId, buddyId} is set (ownerless rows are
+  // allowed -- legacy + no-validated-diver). Cascade so a buddy delete removes
+  // their certs (deletion tombstones are written explicitly in the repository
+  // -- cascade alone does not tombstone).
   TextColumn get buddyId =>
       text().nullable().references(Buddies, #id, onDelete: KeyAction.cascade)();
   TextColumn get photoFrontPath => text()
@@ -2371,13 +2372,13 @@ class AppDatabase extends _$AppDatabase {
     }
   }
 
-  /// One-time copy of each buddy's inline certification into a certifications
-  /// row owned by that buddy (issue #553). Runs ONLY from the v109 onUpgrade
-  /// block -- never the beforeOpen backstop -- because the inline columns
-  /// survive until v110, and re-running the copy would resurrect a
-  /// user-deleted buddy cert. The id is deterministic (`buddycert-<buddyId>`)
-  /// and the insert upserts, so independent per-device migrations converge to
-  /// one row under sync instead of duplicating.
+  /// Copy each buddy's inline certification into a certifications row owned by
+  /// that buddy (issue #553). Invoked from the onUpgrade blocks only (v109
+  /// expand + the v110 contract safety-net), NEVER the beforeOpen backstop --
+  /// the inline columns survive until v110, and re-running the copy on every
+  /// open would resurrect a user-deleted buddy cert. The id is deterministic
+  /// (`buddycert-<buddyId>`) and the insert upserts, so independent per-device
+  /// migrations converge to one row under sync instead of duplicating.
   Future<void> _migrateBuddyInlineCertifications() async {
     final buddyCols = await customSelect("PRAGMA table_info('buddies')").get();
     final names = buddyCols.map((c) => c.read<String>('name')).toSet();

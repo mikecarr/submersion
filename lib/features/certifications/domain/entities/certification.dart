@@ -10,7 +10,8 @@ class Certification extends Equatable {
   final String? diverId;
 
   /// Owner when this certification belongs to a buddy instead of the diver
-  /// (issue #553). Exactly one of {diverId, buddyId} is set.
+  /// (issue #553). At most one of {diverId, buddyId} is set -- ownerless rows
+  /// are allowed (legacy rows and the no-validated-diver fallback).
   final String? buddyId;
   final String name;
   final CertificationAgency agency;

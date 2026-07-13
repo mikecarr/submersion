@@ -2,7 +2,7 @@ import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:submersion/core/database/database.dart';
 
-/// Minimal pre-v107 buddies + certifications shape (buddies still carry the
+/// Minimal pre-v109 buddies + certifications shape (buddies still carry the
 /// inline cert columns; certifications has no buddy_id).
 NativeDatabase _dbAt106({
   required String buddyId,
@@ -62,7 +62,7 @@ NativeDatabase _dbAt106({
       );
       if (preseedCertId != null) {
         // Models a row that already arrived via sync from an upgraded peer
-        // (the pre-v107 certifications table has no buddy_id column yet).
+        // (the pre-v109 certifications table has no buddy_id column yet).
         rawDb.execute(
           "INSERT INTO certifications (id, name, agency, created_at, "
           "updated_at) VALUES ('$preseedCertId', 'stale', 'padi', 0, 0)",
@@ -73,7 +73,7 @@ NativeDatabase _dbAt106({
 }
 
 void main() {
-  test('v107 adds buddy_id and copies a buddy inline cert into a '
+  test('v109 adds buddy_id and copies a buddy inline cert into a '
       'deterministic-id certifications row', () async {
     final db = AppDatabase(
       _dbAt106(buddyId: 'b1', level: 'cmas2StarDiver', agency: 'cmas'),
@@ -94,7 +94,7 @@ void main() {
     expect(certs.first.data['agency'], 'cmas');
   });
 
-  test('v107 defaults agency to "other" when the buddy had a level but no '
+  test('v109 defaults agency to "other" when the buddy had a level but no '
       'agency', () async {
     final db = AppDatabase(_dbAt106(buddyId: 'b2', level: 'openWater'));
     addTearDown(() => db.close());
@@ -104,7 +104,7 @@ void main() {
     expect(cert.data['agency'], 'other');
   });
 
-  test('v107 data copy upserts onto the deterministic id (no duplicate) when '
+  test('v109 data copy upserts onto the deterministic id (no duplicate) when '
       'that row already exists — models cross-device convergence', () async {
     final db = AppDatabase(
       _dbAt106(

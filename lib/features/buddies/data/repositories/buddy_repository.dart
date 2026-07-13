@@ -312,15 +312,18 @@ class BuddyRepository {
   Future<void> deleteBuddy(String id) async {
     try {
       _log.info('Deleting buddy: $id');
-      // issue #553: tombstone the buddy's certs explicitly. FK cascade deletes
-      // the rows but writes no deletion_log entry, so they would resurrect on
-      // the next sync.
-      for (final cert in await _certRepo.getCertificationsByBuddy(id)) {
-        await _certRepo.deleteCertification(cert.id);
-      }
-      // Dive buddies will be automatically deleted due to CASCADE
-      await (_db.delete(_db.buddies)..where((t) => t.id.equals(id))).go();
-      await _syncRepository.logDeletion(entityType: 'buddies', recordId: id);
+      // Atomic (issue #553 review): tombstone the buddy's certs, delete the
+      // buddy, and tombstone the buddy in one transaction. FK cascade deletes
+      // the cert rows but writes no deletion_log entry, so they must be
+      // tombstoned explicitly or they resurrect on the next sync.
+      await _db.transaction(() async {
+        for (final cert in await _certRepo.getCertificationsByBuddy(id)) {
+          await _certRepo.deleteCertification(cert.id);
+        }
+        // Dive buddies will be automatically deleted due to CASCADE
+        await (_db.delete(_db.buddies)..where((t) => t.id.equals(id))).go();
+        await _syncRepository.logDeletion(entityType: 'buddies', recordId: id);
+      });
       SyncEventBus.notifyLocalChange();
       _log.info('Deleted buddy: $id');
     } catch (e, stackTrace) {

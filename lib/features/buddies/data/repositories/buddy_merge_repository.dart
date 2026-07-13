@@ -647,17 +647,23 @@ class BuddyMergeRepository {
     if (ids.isEmpty) return;
     try {
       _log.info('Bulk deleting ${ids.length} buddies');
-      // issue #553: tombstone each buddy's certs before the cascade removes
-      // them silently (same reason as deleteBuddy).
-      for (final id in ids) {
-        for (final cert in await _certRepo.getCertificationsByBuddy(id)) {
-          await _certRepo.deleteCertification(cert.id);
+      // Atomic (issue #553 review): tombstone each buddy's certs (the cascade
+      // removes them silently otherwise), delete the buddies, and tombstone
+      // them -- all in one transaction.
+      await _db.transaction(() async {
+        for (final id in ids) {
+          for (final cert in await _certRepo.getCertificationsByBuddy(id)) {
+            await _certRepo.deleteCertification(cert.id);
+          }
         }
-      }
-      await (_db.delete(_db.buddies)..where((t) => t.id.isIn(ids))).go();
-      for (final id in ids) {
-        await _syncRepository.logDeletion(entityType: 'buddies', recordId: id);
-      }
+        await (_db.delete(_db.buddies)..where((t) => t.id.isIn(ids))).go();
+        for (final id in ids) {
+          await _syncRepository.logDeletion(
+            entityType: 'buddies',
+            recordId: id,
+          );
+        }
+      });
       SyncEventBus.notifyLocalChange();
       _log.info('Bulk deleted ${ids.length} buddies');
     } catch (e, stackTrace) {

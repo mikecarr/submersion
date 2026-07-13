@@ -154,24 +154,29 @@ class CertificationRepository {
     String buddyId,
     List<domain.Certification> desired,
   ) async {
-    final existing = await getCertificationsByBuddy(buddyId);
-    final existingIds = {for (final c in existing) c.id};
-    final keptIds = <String>{};
-    for (final cert in desired) {
-      final owned = cert.copyWith(buddyId: buddyId);
-      if (owned.id.isEmpty || !existingIds.contains(owned.id)) {
-        final created = await createCertification(owned);
-        keptIds.add(created.id);
-      } else {
-        await updateCertification(owned);
-        keptIds.add(owned.id);
+    // Atomic (issue #553 review): a mid-way interruption must not leave a
+    // partially-updated cert set. Mirrors the transaction pattern in
+    // BuddyMergeRepository.
+    await _db.transaction(() async {
+      final existing = await getCertificationsByBuddy(buddyId);
+      final existingIds = {for (final c in existing) c.id};
+      final keptIds = <String>{};
+      for (final cert in desired) {
+        final owned = cert.copyWith(buddyId: buddyId);
+        if (owned.id.isEmpty || !existingIds.contains(owned.id)) {
+          final created = await createCertification(owned);
+          keptIds.add(created.id);
+        } else {
+          await updateCertification(owned);
+          keptIds.add(owned.id);
+        }
       }
-    }
-    for (final c in existing) {
-      if (!keptIds.contains(c.id)) {
-        await deleteCertification(c.id);
+      for (final c in existing) {
+        if (!keptIds.contains(c.id)) {
+          await deleteCertification(c.id);
+        }
       }
-    }
+    });
   }
 
   /// Create a new certification
