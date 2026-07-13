@@ -45,12 +45,17 @@ TissuePick? pickNearestTissueVertex({
   var bestDistSq = thresholdSq;
   var bestDepth = double.negativeInfinity;
   for (var i = 0; i < projected.length; i++) {
-    final dSq = (projected[i] - cursor).distanceSquared;
+    final p = projected[i];
+    final dSq = (p - cursor).distanceSquared;
     if (dSq > thresholdSq) continue;
+    // Strictly-nearest wins. Depth only breaks a tie when this vertex projects
+    // to the *exact same screen point* as the incumbent (a front face over a
+    // back face) - a mere equal-distance tie between distinct points keeps the
+    // first-encountered vertex, matching the documented behavior.
     final better =
         bestIndex < 0 ||
         dSq < bestDistSq ||
-        (dSq == bestDistSq && viewDepths[i] > bestDepth);
+        (p == projected[bestIndex] && viewDepths[i] > bestDepth);
     if (better) {
       bestIndex = i;
       bestDistSq = dSq;

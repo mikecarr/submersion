@@ -36,7 +36,8 @@ void main() {
       expect(pick, isNull);
     });
 
-    test('on a near-tie prefers the front-most (greater viewDepth)', () {
+    test('on an exact screen-point overlap prefers the front-most '
+        '(greater viewDepth)', () {
       final overlap = <Offset>[const Offset(0, 0), const Offset(0, 0)];
       final pick = pickNearestTissueVertex(
         cursor: const Offset(0, 0),
@@ -46,6 +47,22 @@ void main() {
         compartments: 2,
       );
       expect(pick!.comp, 1);
+    });
+
+    test('an equidistant tie between distinct points ignores depth '
+        '(first encountered wins, not the deeper one)', () {
+      // Two different screen points the same distance (5px) from the cursor.
+      // Depth must NOT break this tie: they do not overlap, so the
+      // strictly-first vertex wins regardless of the second being "in front".
+      final equidistant = <Offset>[const Offset(-3, 4), const Offset(3, 4)];
+      final pick = pickNearestTissueVertex(
+        cursor: const Offset(0, 0),
+        projected: equidistant,
+        viewDepths: const [1.0, 5.0], // second is nearer the camera
+        columns: 1,
+        compartments: 2,
+      );
+      expect(pick!.comp, 0);
     });
 
     test('empty grid returns null', () {
