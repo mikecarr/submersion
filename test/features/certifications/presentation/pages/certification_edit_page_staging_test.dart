@@ -65,6 +65,11 @@ void main() {
     expect(staged!.buddyId, 'b1');
     expect(staged!.name, 'Nitrox');
 
+    // An unmodified Save preserves updatedAt, so the staged cert equals the
+    // persisted one and replaceBuddyCertifications skips it (no sync churn) --
+    // issue #553 review.
+    expect(staged!.updatedAt, DateTime(2024));
+
     // Staging bypasses the repository: nothing was persisted.
     expect(await repository.getCertificationById('staged-1'), isNull);
   });

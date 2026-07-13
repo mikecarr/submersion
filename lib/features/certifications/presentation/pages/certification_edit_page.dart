@@ -848,7 +848,11 @@ class _CertificationEditPageState extends ConsumerState<CertificationEditPage> {
         photoBack: _photoBack,
         notes: _notesController.text.trim(),
         createdAt: widget.initialCertification?.createdAt ?? now,
-        updatedAt: now,
+        // Preserve updatedAt so an unmodified Save equals the persisted cert
+        // and replaceBuddyCertifications skips it (issue #553 review). A real
+        // edit changes another prop, so the update still fires -- and
+        // updateCertification stamps its own updatedAt on commit anyway.
+        updatedAt: widget.initialCertification?.updatedAt ?? now,
       );
       widget.onStaged!(result);
       if (widget.embedded) {
