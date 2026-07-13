@@ -288,6 +288,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get settings_backupEncryption_newPassword => 'Nouveau mot de passe';
 
   @override
+  String get settings_backupEncryption_changePasswordWarn =>
+      'Sur un autre appareil, les sauvegardes créées avant cette modification nécessitent toujours leur mot de passe d\'origine. Votre code de récupération ouvre toutes les sauvegardes.';
+
+  @override
   String get settings_backupEncryption_warnLoss =>
       'Si vous oubliez votre mot de passe et perdez le code de récupération, les sauvegardes chiffrées ne pourront pas être récupérées.';
 

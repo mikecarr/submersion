@@ -71,6 +71,39 @@ void main() {
     },
   );
 
+  test('re-enable adopts the retained key (same MLK + libraryKeyId) so old '
+      'backups stay unlockable, but mints a fresh recovery code', () async {
+    final first = await service.enable(
+      passphrase: 'firstpass12',
+      kdf: _fastKdf,
+    );
+    final firstMlk = (await store.loadKey())!.mlk;
+
+    // Simulate Turn-off (flag only; key/mirror retained) then re-enable with
+    // a different password.
+    final second = await service.enable(
+      passphrase: 'secondpass12',
+      kdf: _fastKdf,
+    );
+
+    // Same key identity: on-device restore of pre-existing .sbe keeps working.
+    expect(second.libraryKeyId, first.libraryKeyId);
+    expect(
+      await (await store.loadKey())!.mlk.extractBytes(),
+      await firstMlk.extractBytes(),
+    );
+
+    // Fresh slots: the new password works, the fresh recovery code differs,
+    // and the OLD password no longer opens the current mirror.
+    final file = KeyslotFile.fromJsonBytes((await store.loadKeyslotMirror())!);
+    expect(second.recoveryCode, isNot(first.recoveryCode));
+    expect(
+      await Keyslots.tryUnwrap(file: file, secret: 'secondpass12'),
+      isNotNull,
+    );
+    expect(await Keyslots.tryUnwrap(file: file, secret: 'firstpass12'), isNull);
+  });
+
   test(
     'regenerateRecoveryCode: old code stops working, new one works',
     () async {

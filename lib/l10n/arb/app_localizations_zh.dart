@@ -256,6 +256,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_backupEncryption_newPassword => '新密码';
 
   @override
+  String get settings_backupEncryption_changePasswordWarn =>
+      '在其他设备上，此次更改之前创建的备份仍需使用其原始密码。你的恢复代码可以打开所有备份。';
+
+  @override
   String get settings_backupEncryption_warnLoss => '如果您忘记密码并丢失恢复代码，加密备份将无法恢复。';
 
   @override

@@ -35,15 +35,32 @@ class BackupEncryptionService {
   BackupEncryptionService({required BackupEncryptionKeyStore keyStore})
     : _keyStore = keyStore;
 
-  /// Generate a random master key, wrap it with a passphrase slot and a
-  /// recovery slot, persist local custody, and return the recovery code.
+  /// Wrap the backup master key with a fresh passphrase slot and recovery slot,
+  /// persist local custody, and return the recovery code.
+  ///
+  /// Re-enabling after "Turn off encryption" ADOPTS the retained key rather
+  /// than minting a new one. Turn-off only flips the prefs flag (it never
+  /// clears the key/mirror), so backups written under the previous key share
+  /// its `libraryKeyId`; reusing it keeps those backups restoring silently with
+  /// the cached key on this device instead of being stranded behind a brand-new
+  /// key. A fresh enable (no retained key) mints a random master key.
   Future<EnableBackupEncryptionResult> enable({
     required String passphrase,
     KdfParams kdf = const KdfParams(),
   }) async {
-    final mlkBytes = _randomBytes(32);
-    final mlk = SecretKey(mlkBytes);
-    final libraryKeyId = _uuid.v4();
+    final retained = await _keyStore.loadKey();
+    final SecretKey mlk;
+    final String libraryKeyId;
+    final List<int> mlkBytes;
+    if (retained != null) {
+      mlk = retained.mlk;
+      libraryKeyId = retained.libraryKeyId;
+      mlkBytes = await mlk.extractBytes();
+    } else {
+      mlkBytes = _randomBytes(32);
+      mlk = SecretKey(mlkBytes);
+      libraryKeyId = _uuid.v4();
+    }
     final recoveryCode = RecoveryCode.generate();
     final file = KeyslotFile(
       version: 1,

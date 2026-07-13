@@ -286,6 +286,10 @@ class AppLocalizationsNl extends AppLocalizations {
   String get settings_backupEncryption_newPassword => 'Nieuw wachtwoord';
 
   @override
+  String get settings_backupEncryption_changePasswordWarn =>
+      'Op een ander apparaat hebben back-ups die vóór deze wijziging zijn gemaakt nog steeds hun oorspronkelijke wachtwoord nodig. Je herstelcode opent alle back-ups.';
+
+  @override
   String get settings_backupEncryption_warnLoss =>
       'Als u uw wachtwoord vergeet en de herstelcode verliest, kunnen versleutelde back-ups niet worden hersteld.';
 

@@ -286,6 +286,10 @@ class AppLocalizationsHu extends AppLocalizations {
   String get settings_backupEncryption_newPassword => 'Új jelszó';
 
   @override
+  String get settings_backupEncryption_changePasswordWarn =>
+      'Másik eszközön a változtatás előtt készült biztonsági mentésekhez továbbra is az eredeti jelszavuk kell. A helyreállítási kód minden mentést megnyit.';
+
+  @override
   String get settings_backupEncryption_warnLoss =>
       'Ha elfelejti a jelszavát és elveszíti a helyreállítási kódot, a titkosított biztonsági mentések nem állíthatók helyre.';
 

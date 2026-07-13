@@ -21,6 +21,25 @@ loadable at that point), it never leaves the device, and it is pruned after a
 successful upgrade. Encrypting it would risk making the DB-upgrade safety net
 itself fail-closed. This backup is deliberately excluded from the guarantee above.
 
+**Password changes and cross-device restore (by design).** Each `.sbe` embeds
+its own keyslots at write time and is self-decrypting — there is no cross-device
+key coordination (that is the simplification that keeps the feature local-only
+and offline). Consequences the UI must be honest about:
+
+- On the **same device**, the master key is retained in secure storage, so every
+  backup restores silently regardless of later password changes.
+- On **another device**, a backup restores with the password *in effect when it
+  was written*. Changing the password does not re-key already-written backups, so
+  a new password opens only backups created after the change; older ones need
+  their original password.
+- The **recovery code is universal** across password changes (it unwraps every
+  backup on any device) *until* the user regenerates it; regeneration only affects
+  backups written afterward. The change-password dialog surfaces this
+  (`settings_backupEncryption_changePasswordWarn`).
+- **Re-enabling after Turn-off** reuses the retained key (Turn-off only flips the
+  prefs flag; the key/mirror stay), so pre-existing backups keep restoring
+  silently on-device instead of being stranded behind a freshly minted key.
+
 This reuses the encrypted-artifact format and crypto primitives already merged in
 #520 (encrypted cloud sync), but is a **separate, independent feature** with its own
 key, its own password, and its own recovery code. #520's sync-encryption service is

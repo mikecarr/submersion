@@ -280,6 +280,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settings_backupEncryption_newPassword => 'New password';
 
   @override
+  String get settings_backupEncryption_changePasswordWarn =>
+      'On another device, backups made before this change still need their original password. Your recovery code opens all backups.';
+
+  @override
   String get settings_backupEncryption_warnLoss =>
       'If you forget your password and lose the recovery code, encrypted backups cannot be recovered.';
 

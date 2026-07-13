@@ -287,6 +287,10 @@ class AppLocalizationsDe extends AppLocalizations {
   String get settings_backupEncryption_newPassword => 'Neues Passwort';
 
   @override
+  String get settings_backupEncryption_changePasswordWarn =>
+      'Auf einem anderen Gerät benötigen vor dieser Änderung erstellte Backups weiterhin ihr ursprüngliches Passwort. Dein Wiederherstellungscode öffnet alle Backups.';
+
+  @override
   String get settings_backupEncryption_warnLoss =>
       'Wenn Sie Ihr Passwort vergessen und den Wiederherstellungscode verlieren, können verschlüsselte Backups nicht wiederhergestellt werden.';
 

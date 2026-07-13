@@ -277,6 +277,10 @@ class AppLocalizationsHe extends AppLocalizations {
   String get settings_backupEncryption_newPassword => 'סיסמה חדשה';
 
   @override
+  String get settings_backupEncryption_changePasswordWarn =>
+      'במכשיר אחר, גיבויים שנוצרו לפני השינוי הזה עדיין דורשים את הסיסמה המקורית שלהם. קוד השחזור שלך פותח את כל הגיבויים.';
+
+  @override
   String get settings_backupEncryption_warnLoss =>
       'אם תשכח את הסיסמה שלך ותאבד את קוד השחזור, לא ניתן יהיה לשחזר גיבויים מוצפנים.';
 
