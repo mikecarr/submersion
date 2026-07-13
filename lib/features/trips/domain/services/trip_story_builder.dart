@@ -29,14 +29,23 @@ TripStory buildTripStory({
   final sortedDives = List<Dive>.of(dives)
     ..sort((a, b) => a.effectiveEntryTime.compareTo(b.effectiveEntryTime));
 
-  // Day span: trip range, extended to cover any dive outside it.
+  // Day span: trip range, extended to cover any dive or itinerary day outside
+  // it (e.g. trip dates edited after the itinerary was generated) so their
+  // content isn't silently dropped from the story.
   var start = _dateOnly(trip.startDate);
   var end = _dateOnly(trip.endDate);
+  void includeDate(DateTime date) {
+    final d = _dateOnly(date);
+    if (d.isBefore(start)) start = d;
+    if (d.isAfter(end)) end = d;
+  }
+
   if (sortedDives.isNotEmpty) {
-    final firstDive = _dateOnly(sortedDives.first.effectiveEntryTime);
-    final lastDive = _dateOnly(sortedDives.last.effectiveEntryTime);
-    if (firstDive.isBefore(start)) start = firstDive;
-    if (lastDive.isAfter(end)) end = lastDive;
+    includeDate(sortedDives.first.effectiveEntryTime);
+    includeDate(sortedDives.last.effectiveEntryTime);
+  }
+  for (final day in itineraryDays) {
+    includeDate(day.date);
   }
   // Round rather than truncate: a DST spring-forward inside the range makes
   // the hour delta 71, not 72, and integer division would drop a day (mirrors

@@ -83,6 +83,22 @@ void main() {
       expect(story.days.length, 6); // Mar 7..12
       expect(story.days.last.dives, hasLength(1));
     });
+
+    test('extends span to cover itinerary days outside nominal trip dates', () {
+      // Itinerary day on Mar 12, after the trip's nominal end (Mar 10).
+      final story = buildTripStory(
+        trip: _trip(),
+        dives: [],
+        itineraryDays: [_itin(6, DateTime(2026, 3, 12), port: 'Sorong')],
+        mediaByDiveId: {},
+        sightingsByDiveId: {},
+        checklistItems: [],
+        today: DateTime(2026, 6, 1),
+      );
+      expect(story.days.length, 6); // Mar 7..12
+      expect(story.days.last.date, DateTime(2026, 3, 12));
+      expect(story.days.last.itineraryDay?.portName, 'Sorong');
+    });
   });
 
   group('buildTripStory grouping', () {
