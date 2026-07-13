@@ -72,8 +72,14 @@ final equipmentSetSelectionInputsProvider =
     FutureProvider<EquipmentSetSelectionInputs>((ref) async {
       final repo = ref.watch(equipmentSetRepositoryProvider);
       final diverId = await ref.watch(validatedCurrentDiverIdProvider.future);
+      // Depend on equipmentSetsProvider so every set/item mutation (which
+      // invalidates it via the notifier's refresh) rebuilds this bundle too;
+      // otherwise a deleted or edited set could still be auto-applied to a new
+      // dive. Geofence-only mutations additionally invalidate this provider
+      // directly, since they do not touch equipmentSetsProvider.
+      final baseSets = await ref.watch(equipmentSetsProvider.future);
       final sets = <EquipmentSet>[];
-      for (final base in await repo.getAllSets(diverId: diverId)) {
+      for (final base in baseSets) {
         sets.add((await repo.getSetById(base.id, includeItems: true)) ?? base);
       }
       final geofences = await repo.getAllGeofences(diverId: diverId);

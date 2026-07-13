@@ -95,7 +95,9 @@ class _GeofenceEditorSheetState extends ConsumerState<_GeofenceEditorSheet> {
     final sitesAsync = ref.watch(sitesProvider);
     final hasCenter = _latitude != null && _longitude != null;
 
-    return Padding(
+    // Scrollable body so the controls stay reachable when the keyboard opens
+    // on small phones (the sheet's bottom padding grows by the keyboard inset).
+    return SingleChildScrollView(
       padding: EdgeInsets.only(
         left: 16,
         right: 16,

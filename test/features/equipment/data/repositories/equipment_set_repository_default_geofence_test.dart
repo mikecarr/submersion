@@ -95,4 +95,38 @@ void main() {
     await repo.removeGeofence('g1');
     expect(await repo.getGeofencesForSet('a'), isEmpty);
   });
+
+  test(
+    'deleteSet tombstones its geofences (cascade emits no tombstone)',
+    () async {
+      await repo.createSet(newSet('a', 'A', diverId: 'd1'));
+      await repo.addGeofence(
+        EquipmentSetGeofence(
+          id: 'g1',
+          setId: 'a',
+          latitude: 36.62,
+          longitude: -121.9,
+          radiusMeters: 24000,
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        ),
+      );
+
+      await repo.deleteSet('a');
+
+      // The child row is gone locally...
+      expect(await repo.getGeofencesForSet('a'), isEmpty);
+      // ...and both the set and the geofence carry deletion-log tombstones, so a
+      // peer will not resurrect the geofence over the cascade.
+      final tombstones = await db.select(db.deletionLog).get();
+      final byType = {for (final t in tombstones) t.entityType: t.recordId};
+      expect(byType['equipmentSets'], 'a');
+      expect(
+        tombstones.any(
+          (t) => t.entityType == 'equipmentSetGeofences' && t.recordId == 'g1',
+        ),
+        isTrue,
+      );
+    },
+  );
 }

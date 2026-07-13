@@ -165,13 +165,27 @@ class EquipmentSetRepository {
     SyncEventBus.notifyLocalChange();
   }
 
-  /// Delete an equipment set
+  /// Delete an equipment set.
+  ///
+  /// Geofences are a first-class synced child cascade-deleted by SQLite, but
+  /// cascades emit no deletion-log entries, so each geofence must be tombstoned
+  /// explicitly or a peer will resurrect it. Done in one transaction with the
+  /// set deletion (mirrors the buddy/certification deletion path).
   Future<void> deleteSet(String id) async {
-    await (_db.delete(_db.equipmentSets)..where((t) => t.id.equals(id))).go();
-    await _syncRepository.logDeletion(
-      entityType: 'equipmentSets',
-      recordId: id,
-    );
+    await _db.transaction(() async {
+      final geofences = await getGeofencesForSet(id);
+      await (_db.delete(_db.equipmentSets)..where((t) => t.id.equals(id))).go();
+      for (final g in geofences) {
+        await _syncRepository.logDeletion(
+          entityType: 'equipmentSetGeofences',
+          recordId: g.id,
+        );
+      }
+      await _syncRepository.logDeletion(
+        entityType: 'equipmentSets',
+        recordId: id,
+      );
+    });
     SyncEventBus.notifyLocalChange();
   }
 
