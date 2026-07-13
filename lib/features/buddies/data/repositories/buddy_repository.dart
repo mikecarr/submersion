@@ -317,8 +317,18 @@ class BuddyRepository {
       // the cert rows but writes no deletion_log entry, so they must be
       // tombstoned explicitly or they resurrect on the next sync.
       await _db.transaction(() async {
+        // Delete + tombstone cert rows inline (no per-cert notifyLocalChange):
+        // deleteCertification() emits an event per cert, which would fire
+        // observers mid-transaction. We tombstone here (the FK cascade writes
+        // no deletion_log) and emit a single notify after commit instead.
         for (final cert in await _certRepo.getCertificationsByBuddy(id)) {
-          await _certRepo.deleteCertification(cert.id);
+          await (_db.delete(
+            _db.certifications,
+          )..where((t) => t.id.equals(cert.id))).go();
+          await _syncRepository.logDeletion(
+            entityType: 'certifications',
+            recordId: cert.id,
+          );
         }
         // Dive buddies will be automatically deleted due to CASCADE
         await (_db.delete(_db.buddies)..where((t) => t.id.equals(id))).go();
@@ -840,25 +850,17 @@ class BuddyRepository {
     final certsByBuddy = await _certRepo.getCertificationsForBuddies(
       buddies.map((b) => b.id).toList(),
     );
-    return [
-      for (final b in buddies)
-        () {
-          final primary = primaryCertification(certsByBuddy[b.id] ?? const []);
-          return domain.Buddy(
-            id: b.id,
-            diverId: b.diverId,
-            name: b.name,
-            email: b.email,
-            phone: b.phone,
-            certificationLevel: primary?.level,
-            certificationAgency: primary?.agency,
-            photoPath: b.photoPath,
-            notes: b.notes,
-            createdAt: b.createdAt,
-            updatedAt: b.updatedAt,
-          );
-        }(),
-    ];
+    return buddies.map((b) {
+      // copyWith (not a field-by-field rebuild): the incoming buddy already has
+      // null cert fields (the inline columns were dropped in v110), so copyWith
+      // just sets the derived primary -- and stays correct if Buddy gains new
+      // fields later, which a full constructor call would silently drop.
+      final primary = primaryCertification(certsByBuddy[b.id] ?? const []);
+      return b.copyWith(
+        certificationLevel: primary?.level,
+        certificationAgency: primary?.agency,
+      );
+    }).toList();
   }
 
   domain.Buddy _mapRowToBuddy(Buddy row) {

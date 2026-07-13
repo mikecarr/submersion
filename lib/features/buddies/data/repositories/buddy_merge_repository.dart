@@ -651,9 +651,17 @@ class BuddyMergeRepository {
       // removes them silently otherwise), delete the buddies, and tombstone
       // them -- all in one transaction.
       await _db.transaction(() async {
+        // Delete + tombstone cert rows inline (no per-cert notifyLocalChange):
+        // a single notify fires after commit instead of one per cert.
         for (final id in ids) {
           for (final cert in await _certRepo.getCertificationsByBuddy(id)) {
-            await _certRepo.deleteCertification(cert.id);
+            await (_db.delete(
+              _db.certifications,
+            )..where((t) => t.id.equals(cert.id))).go();
+            await _syncRepository.logDeletion(
+              entityType: 'certifications',
+              recordId: cert.id,
+            );
           }
         }
         await (_db.delete(_db.buddies)..where((t) => t.id.isIn(ids))).go();
