@@ -67,7 +67,12 @@ class _CertificationEditPageState extends ConsumerState<CertificationEditPage> {
   Certification? _originalCertification;
   String? _instructorId;
 
-  bool get isEditing => widget.certificationId != null;
+  // Editing when opened by id (self-diver flow) OR when staging an existing
+  // cert (non-empty initialCertification.id) -- otherwise the "Add" labels
+  // show while editing a staged buddy cert (issue #553 review).
+  bool get isEditing =>
+      widget.certificationId != null ||
+      (widget.initialCertification?.id.isNotEmpty ?? false);
   bool get _isStaging => widget.onStaged != null;
 
   @override

@@ -159,15 +159,21 @@ class CertificationRepository {
     // BuddyMergeRepository.
     await _db.transaction(() async {
       final existing = await getCertificationsByBuddy(buddyId);
-      final existingIds = {for (final c in existing) c.id};
+      final existingById = {for (final c in existing) c.id: c};
       final keptIds = <String>{};
       for (final cert in desired) {
         final owned = cert.copyWith(buddyId: buddyId);
-        if (owned.id.isEmpty || !existingIds.contains(owned.id)) {
+        final current = existingById[owned.id];
+        if (owned.id.isEmpty || current == null) {
           final created = await createCertification(owned);
           keptIds.add(created.id);
         } else {
-          await updateCertification(owned);
+          // Only write when something actually changed, so saving a buddy
+          // (e.g. editing only name/notes) doesn't bump every cert's
+          // updatedAt and sync state (issue #553 review).
+          if (owned != current) {
+            await updateCertification(owned);
+          }
           keptIds.add(owned.id);
         }
       }

@@ -519,6 +519,8 @@ class UddfEntityImporter {
   ) async {
     if (selected.isEmpty) return 0;
     onProgress?.call(ImportPhase.buddies, 0, selected.length);
+    // One repository for the whole loop, not one per buddy (issue #553 review).
+    final certRepo = CertificationRepository();
     var count = 0;
 
     for (var i = 0; i < items.length; i++) {
@@ -555,7 +557,7 @@ class UddfEntityImporter {
         CertificationAgency.values,
       );
       if (certLevel != null || certAgency != null) {
-        await CertificationRepository().createCertification(
+        await certRepo.createCertification(
           Certification(
             id: '',
             buddyId: newId,

@@ -104,4 +104,21 @@ void main() {
     expect(now.map((c) => c.name), unorderedEquals(['Nitrox (EANx)', 'New']));
     expect(now.any((c) => c.id == drop.id), isFalse);
   });
+
+  test(
+    'replaceBuddyCertifications skips unchanged certs (no updatedAt churn)',
+    () async {
+      await makeBuddy('b1');
+      await repository.createCertification(buddyCert('b1', name: 'Nitrox'));
+      final loaded = (await repository.getCertificationsByBuddy('b1')).single;
+
+      // Re-committing the same (unchanged) cert must not rewrite it -- saving a
+      // buddy with unrelated edits shouldn't churn every cert's updatedAt.
+      await repository.replaceBuddyCertifications('b1', [loaded]);
+
+      final after = (await repository.getCertificationsByBuddy('b1')).single;
+      expect(after.id, loaded.id);
+      expect(after.updatedAt, loaded.updatedAt);
+    },
+  );
 }
