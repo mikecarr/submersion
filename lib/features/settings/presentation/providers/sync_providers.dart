@@ -4,18 +4,24 @@ import 'dart:io' show Platform;
 import 'package:cryptography/cryptography.dart' show SecretKey;
 import 'package:package_info_plus/package_info_plus.dart';
 
+import 'package:submersion/core/data/repositories/connected_accounts_repository.dart';
+import 'package:submersion/core/providers/account_providers.dart';
 import 'package:submersion/core/providers/provider.dart';
+import 'package:submersion/core/services/accounts/account_kind.dart';
+import 'package:submersion/core/services/accounts/connected_account.dart'
+    as domain;
 
 import 'package:submersion/core/data/repositories/sync_repository.dart';
 import 'package:submersion/core/domain/entities/storage_config.dart';
 import 'package:submersion/core/services/logger_service.dart';
+import 'package:submersion/core/services/cloud_storage/cloud_provider_instances.dart';
+export 'package:submersion/core/services/cloud_storage/cloud_provider_instances.dart'
+    show cloudProviderInstanceFor;
 import 'package:submersion/core/services/cloud_storage/cloud_storage_provider.dart';
 import 'package:submersion/core/services/cloud_storage/dropbox/dropbox_app.dart';
 import 'package:submersion/core/services/cloud_storage/dropbox/dropbox_auth_store.dart';
 import 'package:submersion/core/services/cloud_storage/dropbox_storage_provider.dart';
 import 'package:submersion/core/services/cloud_storage/encrypting_cloud_storage_provider.dart';
-import 'package:submersion/core/services/cloud_storage/google_drive_storage_provider.dart';
-import 'package:submersion/core/services/cloud_storage/icloud_storage_provider.dart';
 import 'package:submersion/core/services/cloud_storage/icloud_native_service.dart';
 import 'package:submersion/core/services/cloud_storage/s3/s3_config.dart';
 import 'package:submersion/core/services/cloud_storage/s3_storage_provider.dart';
@@ -232,28 +238,70 @@ final selectedCloudProviderTypeProvider = StateProvider<CloudProviderType?>(
   (ref) => null,
 );
 
-/// Cloud storage provider singletons
-final _googleDriveProvider = GoogleDriveStorageProvider();
-final _icloudProvider = ICloudStorageProvider();
-final _s3Provider = S3StorageProvider();
-final _dropboxProvider = DropboxStorageProvider();
-
-/// The singleton instance backing a [CloudProviderType]. Shared by the active
-/// provider resolution and by old-backend cleanup, which must reach a backend
-/// the user has already switched away from (so it is no longer the active
-/// provider).
-CloudStorageProvider cloudProviderInstanceFor(CloudProviderType type) {
-  switch (type) {
-    case CloudProviderType.icloud:
-      return _icloudProvider;
-    case CloudProviderType.googledrive:
-      return _googleDriveProvider;
-    case CloudProviderType.s3:
-      return _s3Provider;
-    case CloudProviderType.dropbox:
-      return _dropboxProvider;
+/// The sync account for [type]. The pre-account selection UI picks provider
+/// TYPES; this shim maps a type onto the accounts model so selection state
+/// stays consistent until the Phase 3 UI selects accounts directly.
+///
+/// Preference order: the persisted sync account (when it still matches the
+/// kind), then for single-instance kinds the kind's account, else a fresh
+/// row. S3 never adopts an arbitrary existing account: S3 accounts are
+/// instances (sync-S3 vs media-S3), so grabbing the newest could silently
+/// select the media-storage endpoint for sync.
+Future<domain.ConnectedAccount> ensureAccountForProviderType(
+  CloudProviderType type,
+  ConnectedAccountsRepository repo, {
+  SyncRepository? syncRepository,
+}) async {
+  final kind = AccountKind.fromCloudProviderType(type);
+  final persistedId = await (syncRepository ?? SyncRepository())
+      .getSyncAccountId();
+  if (persistedId != null) {
+    final persisted = await repo.getById(persistedId);
+    if (persisted != null && persisted.kind == kind) return persisted;
   }
+  if (kind == AccountKind.s3) {
+    return repo.create(
+      kind: kind,
+      label: cloudProviderInstanceFor(type).providerName,
+    );
+  }
+  return await repo.getByKind(kind) ??
+      await repo.create(
+        kind: kind,
+        label: cloudProviderInstanceFor(type).providerName,
+      );
 }
+
+/// The connected account driving sync, derived from the selected provider
+/// type and persisted to sync metadata. Resolution of the raw
+/// [CloudStorageProvider] stays on the legacy provider singletons in
+/// Phase 1: the connect UIs still write credentials to the legacy keychain
+/// keys, so account-keyed credential copies would go stale on the next
+/// config edit. Phase 3 rewires the connect UIs to per-account keys and
+/// flips [cloudStorageProviderProvider] to account-first resolution.
+final selectedSyncAccountProvider = FutureProvider<domain.ConnectedAccount?>((
+  ref,
+) async {
+  final type = ref.watch(selectedCloudProviderTypeProvider);
+  if (type == null) return null;
+  final repo = ref.watch(connectedAccountsRepositoryProvider);
+  try {
+    final account = await ensureAccountForProviderType(
+      type,
+      repo,
+      syncRepository: ref.read(syncRepositoryProvider),
+    );
+    await ref
+        .read(syncRepositoryProvider)
+        .setSyncAccount(accountId: account.id, providerType: type);
+    return account;
+  } catch (_) {
+    // Best-effort bookkeeping: the selection is re-derived on every launch,
+    // so a failed write (e.g. teardown racing this future) must not surface
+    // as a sync error.
+    return null;
+  }
+});
 
 /// Cloud storage provider instance (null if none selected or custom folder mode)
 ///
@@ -268,6 +316,11 @@ final cloudStorageProviderProvider = Provider<CloudStorageProvider?>((ref) {
 
   final providerType = ref.watch(selectedCloudProviderTypeProvider);
   if (providerType == null) return null;
+
+  // Keep the account bookkeeping alive: derives (and persists) the sync
+  // account row for the selected type. Raw-provider resolution stays on the
+  // legacy singletons in Phase 1 (see selectedSyncAccountProvider).
+  ref.watch(selectedSyncAccountProvider);
 
   final raw = cloudProviderInstanceFor(providerType);
   // End-to-end encryption: with an unlocked session, every byte through this
@@ -1200,7 +1253,7 @@ final restoreLastProviderProvider = FutureProvider<void>((ref) async {
 /// Direct access to the S3 provider singleton for the configuration UI
 /// (load/save config, test connection).
 final s3StorageProviderInstanceProvider = Provider<S3StorageProvider>(
-  (ref) => _s3Provider,
+  (ref) => s3ProviderInstance,
 );
 
 /// The stored S3 configuration, or null when S3 has not been set up.
@@ -1212,7 +1265,7 @@ final s3ConfigProvider = FutureProvider<S3Config?>((ref) async {
 /// Direct access to the Dropbox provider singleton for the connect UI
 /// (begin/complete authorization, account info).
 final dropboxStorageProviderInstanceProvider = Provider<DropboxStorageProvider>(
-  (ref) => _dropboxProvider,
+  (ref) => dropboxProviderInstance,
 );
 
 /// The stored Dropbox connection, or null when Dropbox is not connected.
