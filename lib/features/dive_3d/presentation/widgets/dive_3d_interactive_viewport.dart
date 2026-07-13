@@ -6,6 +6,7 @@ import 'package:submersion/features/dive_3d/domain/geometry/marker_layout.dart';
 import 'package:submersion/features/dive_3d/domain/scene_3d.dart';
 import 'package:submersion/features/dive_3d/presentation/renderer/preview_painter.dart';
 import 'package:submersion/features/dive_3d/presentation/renderer/scene_projector.dart';
+import 'package:submersion/features/dive_3d/presentation/renderer/scrub_cursor.dart';
 import 'package:submersion/features/dive_3d/presentation/scene_overlay.dart';
 
 /// How the scrub cursor is drawn: a dot riding the path (depth/tissue/career/
@@ -194,21 +195,7 @@ class _ScrubCursorPainter extends CustomPainter {
       );
     }
     final center = projector.project(scenePoint.x, scenePoint.y, scenePoint.z);
-    canvas.drawCircle(
-      center,
-      7,
-      Paint()
-        ..color = Colors.white.withValues(alpha: 0.9)
-        ..style = PaintingStyle.fill,
-    );
-    canvas.drawCircle(
-      center,
-      7,
-      Paint()
-        ..color = Colors.black.withValues(alpha: 0.5)
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 1.5,
-    );
+    paintScrubCursor(canvas, center);
   }
 
   @override
