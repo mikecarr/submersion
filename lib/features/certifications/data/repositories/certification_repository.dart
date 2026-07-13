@@ -156,7 +156,12 @@ class CertificationRepository {
   ) async {
     // Atomic (issue #553 review): a mid-way interruption must not leave a
     // partially-updated cert set. Mirrors the transaction pattern in
-    // BuddyMergeRepository.
+    // BuddyMergeRepository. The create/update/delete calls run with
+    // notify:false so a single notifyLocalChange() fires after commit instead
+    // of one per row mid-transaction (which would churn UI / let observers read
+    // a half-updated set). markRecordPending/logDeletion still run inside the
+    // transaction -- only the observable event is deferred.
+    var mutated = false;
     await _db.transaction(() async {
       final existing = await getCertificationsByBuddy(buddyId);
       final existingById = {for (final c in existing) c.id: c};
@@ -165,30 +170,35 @@ class CertificationRepository {
         final owned = cert.copyWith(buddyId: buddyId);
         final current = existingById[owned.id];
         if (owned.id.isEmpty || current == null) {
-          final created = await createCertification(owned);
+          final created = await createCertification(owned, notify: false);
           keptIds.add(created.id);
+          mutated = true;
         } else {
           // Only write when something actually changed, so saving a buddy
           // (e.g. editing only name/notes) doesn't bump every cert's
           // updatedAt and sync state (issue #553 review).
           if (owned != current) {
-            await updateCertification(owned);
+            await updateCertification(owned, notify: false);
+            mutated = true;
           }
           keptIds.add(owned.id);
         }
       }
       for (final c in existing) {
         if (!keptIds.contains(c.id)) {
-          await deleteCertification(c.id);
+          await deleteCertification(c.id, notify: false);
+          mutated = true;
         }
       }
     });
+    if (mutated) SyncEventBus.notifyLocalChange();
   }
 
   /// Create a new certification
   Future<domain.Certification> createCertification(
-    domain.Certification cert,
-  ) async {
+    domain.Certification cert, {
+    bool notify = true,
+  }) async {
     try {
       _log.info('Creating certification: ${cert.name}');
       final id = cert.id.isEmpty ? _uuid.v4() : cert.id;
@@ -232,7 +242,7 @@ class CertificationRepository {
         recordId: id,
         localUpdatedAt: now.millisecondsSinceEpoch,
       );
-      SyncEventBus.notifyLocalChange();
+      if (notify) SyncEventBus.notifyLocalChange();
 
       _log.info('Created certification with id: $id');
       return cert.copyWith(id: id, createdAt: now, updatedAt: now);
@@ -247,7 +257,10 @@ class CertificationRepository {
   }
 
   /// Update an existing certification
-  Future<void> updateCertification(domain.Certification cert) async {
+  Future<void> updateCertification(
+    domain.Certification cert, {
+    bool notify = true,
+  }) async {
     try {
       _log.info('Updating certification: ${cert.id}');
       final now = DateTime.now().millisecondsSinceEpoch;
@@ -276,7 +289,7 @@ class CertificationRepository {
         recordId: cert.id,
         localUpdatedAt: now,
       );
-      SyncEventBus.notifyLocalChange();
+      if (notify) SyncEventBus.notifyLocalChange();
       _log.info('Updated certification: ${cert.id}');
     } catch (e, stackTrace) {
       _log.error(
@@ -289,7 +302,7 @@ class CertificationRepository {
   }
 
   /// Delete a certification
-  Future<void> deleteCertification(String id) async {
+  Future<void> deleteCertification(String id, {bool notify = true}) async {
     try {
       _log.info('Deleting certification: $id');
       await (_db.delete(
@@ -299,7 +312,7 @@ class CertificationRepository {
         entityType: 'certifications',
         recordId: id,
       );
-      SyncEventBus.notifyLocalChange();
+      if (notify) SyncEventBus.notifyLocalChange();
       _log.info('Deleted certification: $id');
     } catch (e, stackTrace) {
       _log.error(
