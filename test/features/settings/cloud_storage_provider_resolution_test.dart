@@ -2,7 +2,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:submersion/core/data/repositories/sync_repository.dart';
+import 'package:submersion/core/providers/account_providers.dart';
 import 'package:submersion/core/services/accounts/account_kind.dart';
+import 'package:submersion/core/services/accounts/account_provider_registry.dart';
 import 'package:submersion/core/services/accounts/connected_account.dart'
     as domain;
 import 'package:submersion/core/services/cloud_storage/dropbox_storage_provider.dart';
@@ -75,6 +77,37 @@ void main() {
     expect(
       container.read(cloudStorageProviderProvider),
       isA<DropboxStorageProvider>(),
+    );
+  });
+
+  test('a matching-kind account with no registered SyncCapable falls back to '
+      'the shared provider singleton', () async {
+    SharedPreferences.setMockInitialValues({});
+    final prefs = await SharedPreferences.getInstance();
+    final container = ProviderContainer(
+      overrides: [
+        sharedPreferencesProvider.overrideWithValue(prefs),
+        selectedSyncAccountProvider.overrideWith(
+          (ref) async => account(AccountKind.dropbox),
+        ),
+        // An empty registry has no SyncCapable for the kind, so
+        // capabilityFor<SyncCapable>() returns null and resolution takes the
+        // `?? cloudProviderInstanceFor(...)` singleton fallback.
+        accountProviderRegistryProvider.overrideWithValue(
+          AccountProviderRegistry(const []),
+        ),
+      ],
+    );
+    addTearDown(container.dispose);
+
+    container.read(selectedCloudProviderTypeProvider.notifier).state =
+        CloudProviderType.dropbox;
+    await container.read(selectedSyncAccountProvider.future);
+
+    expect(
+      container.read(cloudStorageProviderProvider),
+      isA<DropboxStorageProvider>(),
+      reason: 'the singleton fallback still yields a Dropbox provider',
     );
   });
 }

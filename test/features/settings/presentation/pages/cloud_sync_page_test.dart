@@ -3,13 +3,18 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/testing.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:submersion/core/data/repositories/sync_repository.dart'
     show CloudProviderType, SyncRepository;
 import 'package:submersion/core/providers/provider.dart';
 import 'package:submersion/core/services/cloud_storage/cloud_storage_provider.dart';
+import 'package:submersion/core/services/cloud_storage/dropbox/dropbox_api_client.dart';
+import 'package:submersion/core/services/cloud_storage/dropbox/dropbox_auth_manager.dart';
 import 'package:submersion/core/services/cloud_storage/dropbox/dropbox_auth_store.dart'
-    show DropboxAuthData;
+    show DropboxAuthData, DropboxAuthStore;
+import 'package:submersion/core/services/cloud_storage/dropbox_storage_provider.dart';
 import 'package:submersion/core/services/cloud_storage/icloud_native_service.dart';
 import 'package:submersion/core/services/cloud_storage/s3/s3_config.dart';
 import 'package:submersion/core/services/cloud_storage/s3/s3_credentials_store.dart';
@@ -36,6 +41,7 @@ import 'package:submersion/l10n/arb/app_localizations_en.dart';
 
 import '../../../../helpers/fake_cloud_storage_provider.dart';
 import '../../../../helpers/mock_providers.dart';
+import '../../../../support/fake_keychain_storage.dart';
 
 /// In-memory [S3CredentialsStore] for testing -- no FlutterSecureStorage.
 class _MemoryCredentialsStore implements S3CredentialsStore {
@@ -340,6 +346,11 @@ void main() {
     bool settle = true,
     S3Config? s3Config,
     DropboxAuthData? dropboxAuth,
+    // The concrete Dropbox provider backing the connect dialog. Only the
+    // connect-flow test supplies one (a MockClient-backed provider so
+    // completeAuthorization succeeds); everything else leaves the real
+    // instance, which is never exercised because the dialog is not opened.
+    DropboxStorageProvider? dropboxInstance,
     // Existing tests exercise the Dropbox tile assuming it is visible; only
     // the "hidden until configured" test overrides this to false, covering
     // builds whose dropboxAppKey is empty.
@@ -400,6 +411,10 @@ void main() {
           // Same for the Dropbox connection: null means not connected.
           dropboxAuthDataProvider.overrideWith((ref) async => dropboxAuth),
           dropboxConfiguredProvider.overrideWith((ref) => dropboxConfigured),
+          if (dropboxInstance != null)
+            dropboxStorageProviderInstanceProvider.overrideWithValue(
+              dropboxInstance,
+            ),
         ],
         child: const MaterialApp(
           localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -1790,6 +1805,62 @@ void main() {
         expect(result.sync.signOutCalls, 1);
       },
     );
+
+    testWidgets('connecting via the dialog selects Dropbox and refreshes the '
+        'account mirror for account-first resolution', (tester) async {
+      // A MockClient whose token exchange succeeds, so the connect dialog
+      // completes authorization and pops true -- driving the onTap branch
+      // that selects the provider and refreshes selectedSyncAccountProvider.
+      final mock = MockClient((request) async {
+        if (request.url.path == '/oauth2/token') {
+          return http.Response(
+            '{"access_token":"at","refresh_token":"rt","expires_in":14400}',
+            200,
+            headers: {'content-type': 'application/json'},
+          );
+        }
+        return http.Response(
+          '{"email":"d@example.com","name":{"display_name":"Diver"}}',
+          200,
+          headers: {'content-type': 'application/json'},
+        );
+      });
+      final auth = DropboxAuthManager(
+        appKey: 'k',
+        store: DropboxAuthStore(storage: InMemoryKeychain()),
+        httpClient: mock,
+        verifierGenerator: () => 'a' * 43,
+      );
+      final dropbox = DropboxStorageProvider(
+        authManager: auth,
+        apiClient: DropboxApiClient(
+          getAccessToken: auth.getAccessToken,
+          onAccessTokenRejected: auth.invalidateAccessToken,
+          httpClient: mock,
+        ),
+      );
+
+      await pumpPage(tester, dropboxInstance: dropbox);
+
+      // Not connected: tapping the tile opens the connect dialog. The
+      // dialog's initState tries to open a browser (launchUrl throws under
+      // flutter_test); that is caught, so the code field still renders.
+      await tester.tap(find.text('Dropbox'));
+      await tester.pumpAndSettle();
+      expect(find.text('Connect Dropbox'), findsOneWidget);
+
+      // Paste a code and submit; the happy MockClient completes the token
+      // exchange, so the dialog pops true and the connect branch runs
+      // through _selectProvider + the account-mirror refresh.
+      await tester.enterText(find.byType(TextField), 'the-code');
+      await tester.tap(find.text('Connect'));
+      await tester.pumpAndSettle();
+
+      // The success snackbar proves _selectProvider reached the end and the
+      // post-connect account-mirror refresh (invalidate + await) completed
+      // without throwing.
+      expect(find.text('Connected to Fake'), findsOneWidget);
+    });
   });
 
   // ---------------------------------------------------------------------------

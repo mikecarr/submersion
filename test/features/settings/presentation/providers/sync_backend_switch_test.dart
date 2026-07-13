@@ -317,4 +317,30 @@ void main() {
       );
     });
   });
+
+  group('signOut', () {
+    test('a Dropbox sign-out clears the selection even when the legacy '
+        'keychain-clear fails (best-effort)', () async {
+      final backend = FakeCloudStorageProvider(
+        providerId: 'dropbox',
+        providerName: 'Dropbox',
+      );
+      final container = await makeContainer(backend);
+      container.read(selectedCloudProviderTypeProvider.notifier).state =
+          CloudProviderType.dropbox;
+      final notifier = container.read(syncStateProvider.notifier);
+
+      // DropboxAuthStore().clear() hits real secure storage, which throws
+      // under flutter_test; sign-out must swallow that and still complete.
+      await notifier.signOut();
+
+      expect(
+        container.read(selectedCloudProviderTypeProvider),
+        isNull,
+        reason:
+            'a keychain-clear failure must not abort sign-out: the provider '
+            'selection (and derived state) still has to be cleared',
+      );
+    });
+  });
 }
