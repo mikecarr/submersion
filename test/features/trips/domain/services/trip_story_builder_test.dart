@@ -19,8 +19,13 @@ Trip _trip({DateTime? start, DateTime? end}) {
   );
 }
 
-Dive _dive(String id, DateTime dateTime, {DiveSite? site}) {
-  return Dive(id: id, dateTime: dateTime, site: site);
+Dive _dive(
+  String id,
+  DateTime dateTime, {
+  DiveSite? site,
+  DateTime? entryTime,
+}) {
+  return Dive(id: id, dateTime: dateTime, entryTime: entryTime, site: site);
 }
 
 ItineraryDay _itin(int dayNumber, DateTime date, {String? port}) {
@@ -111,6 +116,28 @@ void main() {
         today: DateTime(2026, 6, 1),
       );
       expect(story.days[1].itineraryDay?.portName, 'Kralendijk');
+    });
+
+    test('buckets by effectiveEntryTime, not the legacy dateTime', () {
+      // Legacy dateTime says Mar 7, but the corrected entryTime is Mar 8.
+      final story = buildTripStory(
+        trip: _trip(),
+        dives: [
+          _dive(
+            'corrected',
+            DateTime(2026, 3, 7, 23),
+            entryTime: DateTime(2026, 3, 8, 0, 30),
+          ),
+        ],
+        itineraryDays: [],
+        mediaByDiveId: {},
+        sightingsByDiveId: {},
+        checklistItems: [],
+        today: DateTime(2026, 6, 1),
+      );
+      // Day index 1 == Mar 8 (trip starts Mar 7), where entryTime places it.
+      expect(story.days[0].dives, isEmpty);
+      expect(story.days[1].dives.single.id, 'corrected');
     });
   });
 

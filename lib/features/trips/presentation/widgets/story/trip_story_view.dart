@@ -86,7 +86,14 @@ class _TripStoryViewState extends ConsumerState<TripStoryView>
     _lastResolve = now;
 
     final viewportHeight = notification.metrics.viewportDimension;
-    final threshold = viewportHeight / 3;
+    // Day positions come from localToGlobal (screen coordinates), so anchor the
+    // threshold to the scrollable's global top rather than 0 — the story may sit
+    // below the top of the screen (e.g. under an app bar).
+    final scrollBox = notification.context?.findRenderObject() as RenderBox?;
+    final viewportTop = (scrollBox != null && scrollBox.attached)
+        ? scrollBox.localToGlobal(Offset.zero).dy
+        : 0.0;
+    final threshold = viewportTop + viewportHeight / 3;
     for (var i = _dayKeys.length - 1; i >= 0; i--) {
       final keyContext = _dayKeys[i].currentContext;
       if (keyContext == null) continue;

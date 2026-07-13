@@ -23,15 +23,18 @@ TripStory buildTripStory({
   required List<TripChecklistItem> checklistItems,
   required DateTime today,
 }) {
+  // Order, bucket, and span by effectiveEntryTime (entryTime ?? dateTime) so a
+  // dive with a corrected/explicit entry time lands in the same day and order
+  // as the rest of the app (DiveSummary.sortTimestamp, DayRhythmBar).
   final sortedDives = List<Dive>.of(dives)
-    ..sort((a, b) => a.dateTime.compareTo(b.dateTime));
+    ..sort((a, b) => a.effectiveEntryTime.compareTo(b.effectiveEntryTime));
 
   // Day span: trip range, extended to cover any dive outside it.
   var start = _dateOnly(trip.startDate);
   var end = _dateOnly(trip.endDate);
   if (sortedDives.isNotEmpty) {
-    final firstDive = _dateOnly(sortedDives.first.dateTime);
-    final lastDive = _dateOnly(sortedDives.last.dateTime);
+    final firstDive = _dateOnly(sortedDives.first.effectiveEntryTime);
+    final lastDive = _dateOnly(sortedDives.last.effectiveEntryTime);
     if (firstDive.isBefore(start)) start = firstDive;
     if (lastDive.isAfter(end)) end = lastDive;
   }
@@ -42,7 +45,9 @@ TripStory buildTripStory({
 
   final divesByDate = <DateTime, List<Dive>>{};
   for (final dive in sortedDives) {
-    divesByDate.putIfAbsent(_dateOnly(dive.dateTime), () => []).add(dive);
+    divesByDate
+        .putIfAbsent(_dateOnly(dive.effectiveEntryTime), () => [])
+        .add(dive);
   }
   final itineraryByDate = <DateTime, ItineraryDay>{
     for (final day in itineraryDays) _dateOnly(day.date): day,
