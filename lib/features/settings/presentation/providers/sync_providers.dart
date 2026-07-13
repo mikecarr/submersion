@@ -274,6 +274,10 @@ Future<domain.ConnectedAccount> ensureAccountForProviderType(
       );
 }
 
+/// File-scoped logger for the top-level sync providers (the provider bodies
+/// below are not class members, so they cannot use SyncNotifier's `_log`).
+const _providersLog = LoggerService('SyncProviders');
+
 /// The connected account driving sync, derived from the selected provider
 /// type and persisted to sync metadata.
 ///
@@ -303,12 +307,18 @@ final selectedSyncAccountProvider = FutureProvider<domain.ConnectedAccount?>((
         .setSyncAccount(accountId: account.id, providerType: type);
     await _mirrorLegacyCredentials(ref, account);
     return account;
-  } catch (_) {
+  } catch (e, st) {
     // Returning null degrades resolution to the legacy singleton, which is
     // the correct fallback: the selection is re-derived on every launch, so
     // a failed write (teardown race) must not surface as a sync error, and
     // a failed credential mirror must NOT leave account-first resolution
-    // reading a stale/missing per-account key.
+    // reading a stale/missing per-account key. Log (with error + stack) so
+    // the fallback is diagnosable in the field without changing behaviour.
+    _providersLog.warning(
+      'Sync account derivation failed; falling back to legacy resolution',
+      error: e,
+      stackTrace: st,
+    );
     return null;
   }
 });
@@ -1131,8 +1141,12 @@ class SyncNotifier extends StateNotifier<SyncState> {
       if (selected == CloudProviderType.dropbox) {
         try {
           await DropboxAuthStore().clear();
-        } catch (e) {
-          _log.warning('Could not clear legacy Dropbox key on sign-out: $e');
+        } catch (e, st) {
+          _log.warning(
+            'Could not clear legacy Dropbox key on sign-out',
+            error: e,
+            stackTrace: st,
+          );
         }
       }
     } else {
