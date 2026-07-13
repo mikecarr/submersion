@@ -333,4 +333,28 @@ Changed:
   code; falls back to `% of dive` when runtime is unavailable.
 - **Hover is pointer-only**; tap covers touch. No new gesture conflicts (tap was
   previously marker-only, and the tissue scene has no markers).
+
+## Post-review revisions (2026-07-13)
+
+Changes made after the initial implementation, in response to user feedback and
+the PR review:
+
+- **Axis labels — decision reversed.** The "ticks only, no on-canvas numbers"
+  rule above was reversed at the user's request ("no units or labels on the
+  axis"). The chrome painter now draws axis **titles** (Time / Saturation % /
+  Compartment) and **tick values** (minutes / 0-50-100% / compartment numbers)
+  via `TextPainter`, honoring the locale's `TextDirection` for RTL. On-canvas
+  text in the tissue scene is therefore intentional; the no-text convention
+  still holds for the dive/computers scenes.
+- **Compartment (Z) axis widened.** `SubsurfaceTissueBuilder.zHalfWidth` (3.5)
+  replaces the shared `SceneBounds.zSlabHalfWidth` (1.0) for the tissue scene
+  only, so the 16 compartments spread out enough to read and to carry labels.
+  The dive scene's reference planes are unaffected.
+- **Pan + discoverable zoom.** The viewport gained two-finger trackpad pan
+  (`PointerPanZoom` -> screen-space `Transform.translate`, cursor un-translated
+  for picking), trackpad pinch-zoom, and an on-screen +/-/reset control column.
+  One-finger drag still rotates; the mouse wheel still zooms.
+- **Review fixes.** Projection cache keyed by grid identity; `shouldRepaint`
+  covers style/bounds; tooltip guards out-of-range picks; picker uses squared
+  distance and guards zero compartments.
 ```
