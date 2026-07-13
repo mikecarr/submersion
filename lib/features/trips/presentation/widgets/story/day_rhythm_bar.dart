@@ -1,0 +1,117 @@
+import 'package:flutter/material.dart';
+
+import 'package:submersion/features/dive_log/domain/entities/dive.dart';
+import 'package:submersion/features/trips/domain/services/day_rhythm_layout.dart';
+import 'package:submersion/l10n/l10n_extension.dart';
+
+/// One day's dives plotted as blocks on a 24h axis. Night dives are tinted
+/// with the tertiary color; surface intervals appear as gaps.
+class DayRhythmBar extends StatelessWidget {
+  final List<Dive> dives;
+  final DateTime dayDate;
+  final double height;
+
+  const DayRhythmBar({
+    super.key,
+    required this.dives,
+    required this.dayDate,
+    this.height = 28,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final blocks = computeRhythmBlocks(dives, dayDate);
+    if (blocks.isEmpty) return const SizedBox.shrink();
+    final colorScheme = Theme.of(context).colorScheme;
+    final labelStyle = Theme.of(
+      context,
+    ).textTheme.labelSmall?.copyWith(color: colorScheme.onSurfaceVariant);
+
+    return Semantics(
+      label: context.l10n.trips_story_rhythm_semantics,
+      child: SizedBox(
+        height: height,
+        child: CustomPaint(
+          size: Size.infinite,
+          painter: _RhythmPainter(
+            blocks: blocks,
+            trackColor: colorScheme.surfaceContainerHighest,
+            dayColor: colorScheme.primary,
+            nightColor: colorScheme.tertiary,
+            tickTextStyle: labelStyle,
+            textDirection: Directionality.of(context),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _RhythmPainter extends CustomPainter {
+  final List<RhythmBlock> blocks;
+  final Color trackColor;
+  final Color dayColor;
+  final Color nightColor;
+  final TextStyle? tickTextStyle;
+  final TextDirection textDirection;
+
+  const _RhythmPainter({
+    required this.blocks,
+    required this.trackColor,
+    required this.dayColor,
+    required this.nightColor,
+    required this.tickTextStyle,
+    required this.textDirection,
+  });
+
+  static const _tickHours = [6, 12, 18];
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    const labelHeight = 12.0;
+    final trackHeight = size.height - labelHeight;
+    final trackRect = RRect.fromRectAndRadius(
+      Rect.fromLTWH(0, 0, size.width, trackHeight),
+      const Radius.circular(4),
+    );
+    canvas.drawRRect(trackRect, Paint()..color = trackColor);
+
+    for (final block in blocks) {
+      final rect = RRect.fromRectAndRadius(
+        Rect.fromLTWH(
+          block.startFraction * size.width,
+          2,
+          block.widthFraction * size.width,
+          trackHeight - 4,
+        ),
+        const Radius.circular(3),
+      );
+      canvas.drawRRect(
+        rect,
+        Paint()..color = block.isNight ? nightColor : dayColor,
+      );
+    }
+
+    for (final hour in _tickHours) {
+      final x = hour / 24 * size.width;
+      final painter = TextPainter(
+        text: TextSpan(text: '$hour:00', style: tickTextStyle),
+        textDirection: textDirection,
+      )..layout();
+      painter.paint(
+        canvas,
+        Offset(
+          (x - painter.width / 2).clamp(0, size.width - painter.width),
+          trackHeight + 1,
+        ),
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(_RhythmPainter oldDelegate) =>
+      oldDelegate.blocks != blocks ||
+      oldDelegate.dayColor != dayColor ||
+      oldDelegate.nightColor != nightColor ||
+      oldDelegate.trackColor != trackColor;
+}
