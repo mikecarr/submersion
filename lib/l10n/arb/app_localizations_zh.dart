@@ -210,6 +210,101 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_cloudSync_encryption_cancel => '取消';
 
   @override
+  String get settings_backupEncryption_title => '备份加密';
+
+  @override
+  String get settings_backupEncryption_subtitleOff => '使用密码保护您的备份';
+
+  @override
+  String get settings_backupEncryption_subtitleOn => '备份已使用您的密码加密';
+
+  @override
+  String get settings_backupEncryption_enable => '加密备份';
+
+  @override
+  String get settings_backupEncryption_turnOff => '关闭加密';
+
+  @override
+  String get settings_backupEncryption_turnOffTitle => '关闭备份加密？';
+
+  @override
+  String get settings_backupEncryption_turnOffBody =>
+      '新的备份将不再加密。现有的加密备份仍需使用您的密码才能恢复。';
+
+  @override
+  String get settings_backupEncryption_changePassword => '更改密码';
+
+  @override
+  String get settings_backupEncryption_regenerateRecovery => '重新生成恢复代码';
+
+  @override
+  String get settings_backupEncryption_password => '密码';
+
+  @override
+  String get settings_backupEncryption_passwordConfirm => '确认密码';
+
+  @override
+  String get settings_backupEncryption_passwordTooShort => '请至少使用 8 个字符';
+
+  @override
+  String get settings_backupEncryption_passwordMismatch => '两次输入的密码不一致';
+
+  @override
+  String get settings_backupEncryption_currentPassword => '当前密码';
+
+  @override
+  String get settings_backupEncryption_newPassword => '新密码';
+
+  @override
+  String get settings_backupEncryption_warnLoss => '如果您忘记密码并丢失恢复代码，加密备份将无法恢复。';
+
+  @override
+  String get settings_backupEncryption_recoveryTitle => '您的恢复代码';
+
+  @override
+  String get settings_backupEncryption_recoveryExplain =>
+      '请将此代码保存在安全的地方。如果您忘记密码，它可以解锁您的备份。';
+
+  @override
+  String get settings_backupEncryption_recoverySavedConfirm => '我已保存我的恢复代码';
+
+  @override
+  String get settings_backupEncryption_unlockTitle => '输入备份密码';
+
+  @override
+  String get settings_backupEncryption_unlockHint => '输入您的备份密码或恢复代码';
+
+  @override
+  String get settings_backupEncryption_continue => '继续';
+
+  @override
+  String get settings_backupEncryption_cancel => '取消';
+
+  @override
+  String get settings_backupEncryption_done => '完成';
+
+  @override
+  String get settings_backupEncryption_reencryptTitle => '加密现有备份？';
+
+  @override
+  String get settings_backupEncryption_reencryptBody =>
+      '您现有的备份仍未加密。现在使用您的新密码重新加密它们吗？';
+
+  @override
+  String get settings_backupEncryption_reencryptNow => '立即重新加密';
+
+  @override
+  String get settings_backupEncryption_reencryptNotNow => '暂不';
+
+  @override
+  String settings_backupEncryption_reencryptDone(int count) {
+    return '已重新加密 $count 个备份';
+  }
+
+  @override
+  String get settings_backupEncryption_wrongPassword => '密码或恢复代码不正确';
+
+  @override
   String settings_cloudSync_replace_globalBanner(String deviceName) {
     return '同步已暂停 — 资料库已从 \"$deviceName\" 上的备份替换。';
   }

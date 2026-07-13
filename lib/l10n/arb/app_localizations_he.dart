@@ -226,6 +226,111 @@ class AppLocalizationsHe extends AppLocalizations {
   String get settings_cloudSync_encryption_cancel => 'ביטול';
 
   @override
+  String get settings_backupEncryption_title => 'הצפנת גיבוי';
+
+  @override
+  String get settings_backupEncryption_subtitleOff =>
+      'הגן על הגיבויים שלך באמצעות סיסמה';
+
+  @override
+  String get settings_backupEncryption_subtitleOn =>
+      'הגיבויים מוצפנים באמצעות הסיסמה שלך';
+
+  @override
+  String get settings_backupEncryption_enable => 'הצפן גיבויים';
+
+  @override
+  String get settings_backupEncryption_turnOff => 'כבה הצפנה';
+
+  @override
+  String get settings_backupEncryption_turnOffTitle => 'לכבות את הצפנת הגיבוי?';
+
+  @override
+  String get settings_backupEncryption_turnOffBody =>
+      'גיבויים חדשים לא יוצפנו עוד. גיבויים מוצפנים קיימים עדיין דורשים את הסיסמה שלך לשחזור.';
+
+  @override
+  String get settings_backupEncryption_changePassword => 'שנה סיסמה';
+
+  @override
+  String get settings_backupEncryption_regenerateRecovery =>
+      'צור מחדש קוד שחזור';
+
+  @override
+  String get settings_backupEncryption_password => 'סיסמה';
+
+  @override
+  String get settings_backupEncryption_passwordConfirm => 'אימות סיסמה';
+
+  @override
+  String get settings_backupEncryption_passwordTooShort =>
+      'השתמש בלפחות 8 תווים';
+
+  @override
+  String get settings_backupEncryption_passwordMismatch =>
+      'הסיסמאות אינן תואמות';
+
+  @override
+  String get settings_backupEncryption_currentPassword => 'סיסמה נוכחית';
+
+  @override
+  String get settings_backupEncryption_newPassword => 'סיסמה חדשה';
+
+  @override
+  String get settings_backupEncryption_warnLoss =>
+      'אם תשכח את הסיסמה שלך ותאבד את קוד השחזור, לא ניתן יהיה לשחזר גיבויים מוצפנים.';
+
+  @override
+  String get settings_backupEncryption_recoveryTitle => 'קוד השחזור שלך';
+
+  @override
+  String get settings_backupEncryption_recoveryExplain =>
+      'שמור קוד זה במקום בטוח. הוא יכול לבטל את נעילת הגיבויים שלך אם תשכח את הסיסמה.';
+
+  @override
+  String get settings_backupEncryption_recoverySavedConfirm =>
+      'שמרתי את קוד השחזור שלי';
+
+  @override
+  String get settings_backupEncryption_unlockTitle => 'הזן סיסמת גיבוי';
+
+  @override
+  String get settings_backupEncryption_unlockHint =>
+      'הזן את סיסמת הגיבוי או קוד השחזור שלך';
+
+  @override
+  String get settings_backupEncryption_continue => 'המשך';
+
+  @override
+  String get settings_backupEncryption_cancel => 'ביטול';
+
+  @override
+  String get settings_backupEncryption_done => 'סיום';
+
+  @override
+  String get settings_backupEncryption_reencryptTitle =>
+      'להצפין גיבויים קיימים?';
+
+  @override
+  String get settings_backupEncryption_reencryptBody =>
+      'הגיבויים הקיימים שלך עדיין אינם מוצפנים. להצפין אותם מחדש כעת באמצעות הסיסמה החדשה שלך?';
+
+  @override
+  String get settings_backupEncryption_reencryptNow => 'הצפן מחדש כעת';
+
+  @override
+  String get settings_backupEncryption_reencryptNotNow => 'לא כעת';
+
+  @override
+  String settings_backupEncryption_reencryptDone(int count) {
+    return '$count גיבויים הוצפנו מחדש';
+  }
+
+  @override
+  String get settings_backupEncryption_wrongPassword =>
+      'סיסמה או קוד שחזור שגויים';
+
+  @override
   String settings_cloudSync_replace_globalBanner(String deviceName) {
     return 'הסנכרון מושהה — הספרייה הוחלפה מגיבוי במכשיר \"$deviceName\".';
   }

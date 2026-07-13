@@ -230,6 +230,114 @@ class AppLocalizationsAr extends AppLocalizations {
   String get settings_cloudSync_encryption_cancel => 'إلغاء';
 
   @override
+  String get settings_backupEncryption_title => 'تشفير النسخ الاحتياطي';
+
+  @override
+  String get settings_backupEncryption_subtitleOff =>
+      'احمِ نسخك الاحتياطية بكلمة مرور';
+
+  @override
+  String get settings_backupEncryption_subtitleOn =>
+      'النسخ الاحتياطية مشفّرة بكلمة مرورك';
+
+  @override
+  String get settings_backupEncryption_enable => 'تشفير النسخ الاحتياطية';
+
+  @override
+  String get settings_backupEncryption_turnOff => 'إيقاف التشفير';
+
+  @override
+  String get settings_backupEncryption_turnOffTitle =>
+      'إيقاف تشفير النسخ الاحتياطي؟';
+
+  @override
+  String get settings_backupEncryption_turnOffBody =>
+      'لن يتم تشفير النسخ الاحتياطية الجديدة بعد الآن. لا تزال النسخ الاحتياطية المشفّرة الحالية بحاجة إلى كلمة مرورك للاستعادة.';
+
+  @override
+  String get settings_backupEncryption_changePassword => 'تغيير كلمة المرور';
+
+  @override
+  String get settings_backupEncryption_regenerateRecovery =>
+      'إعادة إنشاء رمز الاسترداد';
+
+  @override
+  String get settings_backupEncryption_password => 'كلمة المرور';
+
+  @override
+  String get settings_backupEncryption_passwordConfirm => 'تأكيد كلمة المرور';
+
+  @override
+  String get settings_backupEncryption_passwordTooShort =>
+      'استخدم 8 أحرف على الأقل';
+
+  @override
+  String get settings_backupEncryption_passwordMismatch =>
+      'كلمتا المرور غير متطابقتين';
+
+  @override
+  String get settings_backupEncryption_currentPassword => 'كلمة المرور الحالية';
+
+  @override
+  String get settings_backupEncryption_newPassword => 'كلمة المرور الجديدة';
+
+  @override
+  String get settings_backupEncryption_warnLoss =>
+      'إذا نسيت كلمة المرور وفقدت رمز الاسترداد، فلن يمكن استعادة النسخ الاحتياطية المشفّرة.';
+
+  @override
+  String get settings_backupEncryption_recoveryTitle =>
+      'رمز الاسترداد الخاص بك';
+
+  @override
+  String get settings_backupEncryption_recoveryExplain =>
+      'احفظ هذا الرمز في مكان آمن. يمكنه فتح نسخك الاحتياطية إذا نسيت كلمة مرورك.';
+
+  @override
+  String get settings_backupEncryption_recoverySavedConfirm =>
+      'لقد حفظت رمز الاسترداد الخاص بي';
+
+  @override
+  String get settings_backupEncryption_unlockTitle =>
+      'أدخل كلمة مرور النسخ الاحتياطي';
+
+  @override
+  String get settings_backupEncryption_unlockHint =>
+      'أدخل كلمة مرور النسخ الاحتياطي أو رمز الاسترداد';
+
+  @override
+  String get settings_backupEncryption_continue => 'متابعة';
+
+  @override
+  String get settings_backupEncryption_cancel => 'إلغاء';
+
+  @override
+  String get settings_backupEncryption_done => 'تم';
+
+  @override
+  String get settings_backupEncryption_reencryptTitle =>
+      'تشفير النسخ الاحتياطية الحالية؟';
+
+  @override
+  String get settings_backupEncryption_reencryptBody =>
+      'لا تزال نسخك الاحتياطية الحالية غير مشفّرة. هل تريد إعادة تشفيرها الآن بكلمة مرورك الجديدة؟';
+
+  @override
+  String get settings_backupEncryption_reencryptNow => 'إعادة التشفير الآن';
+
+  @override
+  String get settings_backupEncryption_reencryptNotNow => 'ليس الآن';
+
+  @override
+  String settings_backupEncryption_reencryptDone(int count) {
+    return 'تمت إعادة تشفير $count نسخة احتياطية';
+  }
+
+  @override
+  String get settings_backupEncryption_wrongPassword =>
+      'كلمة المرور أو رمز الاسترداد غير صحيح';
+
+  @override
   String settings_cloudSync_replace_globalBanner(String deviceName) {
     return 'المزامنة متوقفة مؤقتًا — تم استبدال المكتبة من نسخة احتياطية على \"$deviceName\".';
   }

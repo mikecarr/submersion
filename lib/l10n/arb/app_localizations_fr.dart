@@ -234,6 +234,116 @@ class AppLocalizationsFr extends AppLocalizations {
   String get settings_cloudSync_encryption_cancel => 'Annuler';
 
   @override
+  String get settings_backupEncryption_title => 'Chiffrement des sauvegardes';
+
+  @override
+  String get settings_backupEncryption_subtitleOff =>
+      'Protégez vos sauvegardes avec un mot de passe';
+
+  @override
+  String get settings_backupEncryption_subtitleOn =>
+      'Les sauvegardes sont chiffrées avec votre mot de passe';
+
+  @override
+  String get settings_backupEncryption_enable => 'Chiffrer les sauvegardes';
+
+  @override
+  String get settings_backupEncryption_turnOff => 'Désactiver le chiffrement';
+
+  @override
+  String get settings_backupEncryption_turnOffTitle =>
+      'Désactiver le chiffrement des sauvegardes ?';
+
+  @override
+  String get settings_backupEncryption_turnOffBody =>
+      'Les nouvelles sauvegardes ne seront plus chiffrées. Les sauvegardes chiffrées existantes nécessitent toujours votre mot de passe pour être restaurées.';
+
+  @override
+  String get settings_backupEncryption_changePassword =>
+      'Changer le mot de passe';
+
+  @override
+  String get settings_backupEncryption_regenerateRecovery =>
+      'Générer un nouveau code de récupération';
+
+  @override
+  String get settings_backupEncryption_password => 'Mot de passe';
+
+  @override
+  String get settings_backupEncryption_passwordConfirm =>
+      'Confirmer le mot de passe';
+
+  @override
+  String get settings_backupEncryption_passwordTooShort =>
+      'Utilisez au moins 8 caractères';
+
+  @override
+  String get settings_backupEncryption_passwordMismatch =>
+      'Les mots de passe ne correspondent pas';
+
+  @override
+  String get settings_backupEncryption_currentPassword => 'Mot de passe actuel';
+
+  @override
+  String get settings_backupEncryption_newPassword => 'Nouveau mot de passe';
+
+  @override
+  String get settings_backupEncryption_warnLoss =>
+      'Si vous oubliez votre mot de passe et perdez le code de récupération, les sauvegardes chiffrées ne pourront pas être récupérées.';
+
+  @override
+  String get settings_backupEncryption_recoveryTitle =>
+      'Votre code de récupération';
+
+  @override
+  String get settings_backupEncryption_recoveryExplain =>
+      'Conservez ce code en lieu sûr. Il peut déverrouiller vos sauvegardes si vous oubliez votre mot de passe.';
+
+  @override
+  String get settings_backupEncryption_recoverySavedConfirm =>
+      'J\'ai enregistré mon code de récupération';
+
+  @override
+  String get settings_backupEncryption_unlockTitle =>
+      'Saisissez le mot de passe de sauvegarde';
+
+  @override
+  String get settings_backupEncryption_unlockHint =>
+      'Saisissez votre mot de passe de sauvegarde ou code de récupération';
+
+  @override
+  String get settings_backupEncryption_continue => 'Continuer';
+
+  @override
+  String get settings_backupEncryption_cancel => 'Annuler';
+
+  @override
+  String get settings_backupEncryption_done => 'Terminé';
+
+  @override
+  String get settings_backupEncryption_reencryptTitle =>
+      'Chiffrer les sauvegardes existantes ?';
+
+  @override
+  String get settings_backupEncryption_reencryptBody =>
+      'Vos sauvegardes existantes ne sont toujours pas chiffrées. Les rechiffrer maintenant avec votre nouveau mot de passe ?';
+
+  @override
+  String get settings_backupEncryption_reencryptNow => 'Rechiffrer maintenant';
+
+  @override
+  String get settings_backupEncryption_reencryptNotNow => 'Pas maintenant';
+
+  @override
+  String settings_backupEncryption_reencryptDone(int count) {
+    return '$count sauvegardes rechiffrées';
+  }
+
+  @override
+  String get settings_backupEncryption_wrongPassword =>
+      'Mot de passe ou code de récupération incorrect';
+
+  @override
   String settings_cloudSync_replace_globalBanner(String deviceName) {
     return 'Synchronisation en pause — la bibliothèque a été remplacée depuis une sauvegarde sur \"$deviceName\".';
   }

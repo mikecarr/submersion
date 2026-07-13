@@ -233,6 +233,115 @@ class AppLocalizationsHu extends AppLocalizations {
   String get settings_cloudSync_encryption_cancel => 'Mégse';
 
   @override
+  String get settings_backupEncryption_title => 'Biztonsági mentés titkosítása';
+
+  @override
+  String get settings_backupEncryption_subtitleOff =>
+      'Védje a biztonsági mentéseit jelszóval';
+
+  @override
+  String get settings_backupEncryption_subtitleOn =>
+      'A biztonsági mentések a jelszavával vannak titkosítva';
+
+  @override
+  String get settings_backupEncryption_enable =>
+      'Biztonsági mentések titkosítása';
+
+  @override
+  String get settings_backupEncryption_turnOff => 'Titkosítás kikapcsolása';
+
+  @override
+  String get settings_backupEncryption_turnOffTitle =>
+      'Kikapcsolja a biztonsági mentés titkosítását?';
+
+  @override
+  String get settings_backupEncryption_turnOffBody =>
+      'Az új biztonsági mentések többé nem lesznek titkosítva. A meglévő titkosított mentések visszaállításához továbbra is szükség van a jelszavára.';
+
+  @override
+  String get settings_backupEncryption_changePassword => 'Jelszó módosítása';
+
+  @override
+  String get settings_backupEncryption_regenerateRecovery =>
+      'Új helyreállítási kód létrehozása';
+
+  @override
+  String get settings_backupEncryption_password => 'Jelszó';
+
+  @override
+  String get settings_backupEncryption_passwordConfirm => 'Jelszó megerősítése';
+
+  @override
+  String get settings_backupEncryption_passwordTooShort =>
+      'Legalább 8 karaktert használjon';
+
+  @override
+  String get settings_backupEncryption_passwordMismatch =>
+      'A jelszavak nem egyeznek';
+
+  @override
+  String get settings_backupEncryption_currentPassword => 'Jelenlegi jelszó';
+
+  @override
+  String get settings_backupEncryption_newPassword => 'Új jelszó';
+
+  @override
+  String get settings_backupEncryption_warnLoss =>
+      'Ha elfelejti a jelszavát és elveszíti a helyreállítási kódot, a titkosított biztonsági mentések nem állíthatók helyre.';
+
+  @override
+  String get settings_backupEncryption_recoveryTitle =>
+      'A helyreállítási kódja';
+
+  @override
+  String get settings_backupEncryption_recoveryExplain =>
+      'Mentse el ezt a kódot biztonságos helyre. Feloldhatja vele a biztonsági mentéseit, ha elfelejti a jelszavát.';
+
+  @override
+  String get settings_backupEncryption_recoverySavedConfirm =>
+      'Elmentettem a helyreállítási kódomat';
+
+  @override
+  String get settings_backupEncryption_unlockTitle =>
+      'Adja meg a biztonsági mentés jelszavát';
+
+  @override
+  String get settings_backupEncryption_unlockHint =>
+      'Adja meg a biztonsági mentés jelszavát vagy a helyreállítási kódot';
+
+  @override
+  String get settings_backupEncryption_continue => 'Folytatás';
+
+  @override
+  String get settings_backupEncryption_cancel => 'Mégse';
+
+  @override
+  String get settings_backupEncryption_done => 'Kész';
+
+  @override
+  String get settings_backupEncryption_reencryptTitle =>
+      'Titkosítja a meglévő biztonsági mentéseket?';
+
+  @override
+  String get settings_backupEncryption_reencryptBody =>
+      'A meglévő biztonsági mentései még titkosítatlanok. Titkosítja őket most az új jelszavával?';
+
+  @override
+  String get settings_backupEncryption_reencryptNow => 'Titkosítás most';
+
+  @override
+  String get settings_backupEncryption_reencryptNotNow => 'Most nem';
+
+  @override
+  String settings_backupEncryption_reencryptDone(int count) {
+    return '$count biztonsági mentés újratitkosítva';
+  }
+
+  @override
+  String get settings_backupEncryption_wrongPassword =>
+      'Hibás jelszó vagy helyreállítási kód';
+
+  @override
   String settings_cloudSync_replace_globalBanner(String deviceName) {
     return 'A szinkronizálás szünetel — a könyvtárat egy biztonsági másolatból cserélték itt: \"$deviceName\".';
   }

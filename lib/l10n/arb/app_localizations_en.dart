@@ -228,6 +228,112 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settings_cloudSync_encryption_cancel => 'Cancel';
 
   @override
+  String get settings_backupEncryption_title => 'Backup encryption';
+
+  @override
+  String get settings_backupEncryption_subtitleOff =>
+      'Protect your backups with a password';
+
+  @override
+  String get settings_backupEncryption_subtitleOn =>
+      'Backups are encrypted with your password';
+
+  @override
+  String get settings_backupEncryption_enable => 'Encrypt backups';
+
+  @override
+  String get settings_backupEncryption_turnOff => 'Turn off encryption';
+
+  @override
+  String get settings_backupEncryption_turnOffTitle =>
+      'Turn off backup encryption?';
+
+  @override
+  String get settings_backupEncryption_turnOffBody =>
+      'New backups will no longer be encrypted. Existing encrypted backups still need your password to restore.';
+
+  @override
+  String get settings_backupEncryption_changePassword => 'Change password';
+
+  @override
+  String get settings_backupEncryption_regenerateRecovery =>
+      'Regenerate recovery code';
+
+  @override
+  String get settings_backupEncryption_password => 'Password';
+
+  @override
+  String get settings_backupEncryption_passwordConfirm => 'Confirm password';
+
+  @override
+  String get settings_backupEncryption_passwordTooShort =>
+      'Use at least 8 characters';
+
+  @override
+  String get settings_backupEncryption_passwordMismatch =>
+      'Passwords do not match';
+
+  @override
+  String get settings_backupEncryption_currentPassword => 'Current password';
+
+  @override
+  String get settings_backupEncryption_newPassword => 'New password';
+
+  @override
+  String get settings_backupEncryption_warnLoss =>
+      'If you forget your password and lose the recovery code, encrypted backups cannot be recovered.';
+
+  @override
+  String get settings_backupEncryption_recoveryTitle => 'Your recovery code';
+
+  @override
+  String get settings_backupEncryption_recoveryExplain =>
+      'Save this code somewhere safe. It can unlock your backups if you forget your password.';
+
+  @override
+  String get settings_backupEncryption_recoverySavedConfirm =>
+      'I have saved my recovery code';
+
+  @override
+  String get settings_backupEncryption_unlockTitle => 'Enter backup password';
+
+  @override
+  String get settings_backupEncryption_unlockHint =>
+      'Enter your backup password or recovery code';
+
+  @override
+  String get settings_backupEncryption_continue => 'Continue';
+
+  @override
+  String get settings_backupEncryption_cancel => 'Cancel';
+
+  @override
+  String get settings_backupEncryption_done => 'Done';
+
+  @override
+  String get settings_backupEncryption_reencryptTitle =>
+      'Encrypt existing backups?';
+
+  @override
+  String get settings_backupEncryption_reencryptBody =>
+      'Your existing backups are still unencrypted. Re-encrypt them now with your new password?';
+
+  @override
+  String get settings_backupEncryption_reencryptNow => 'Re-encrypt now';
+
+  @override
+  String get settings_backupEncryption_reencryptNotNow => 'Not now';
+
+  @override
+  String settings_backupEncryption_reencryptDone(int count) {
+    return 'Re-encrypted $count backups';
+  }
+
+  @override
+  String get settings_backupEncryption_wrongPassword =>
+      'Incorrect password or recovery code';
+
+  @override
   String settings_cloudSync_replace_globalBanner(String deviceName) {
     return 'Sync is paused — the library was replaced from a backup on \"$deviceName\".';
   }

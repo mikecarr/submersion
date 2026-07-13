@@ -233,6 +233,115 @@ class AppLocalizationsNl extends AppLocalizations {
   String get settings_cloudSync_encryption_cancel => 'Annuleren';
 
   @override
+  String get settings_backupEncryption_title => 'Back-upversleuteling';
+
+  @override
+  String get settings_backupEncryption_subtitleOff =>
+      'Bescherm uw back-ups met een wachtwoord';
+
+  @override
+  String get settings_backupEncryption_subtitleOn =>
+      'Back-ups worden versleuteld met uw wachtwoord';
+
+  @override
+  String get settings_backupEncryption_enable => 'Back-ups versleutelen';
+
+  @override
+  String get settings_backupEncryption_turnOff => 'Versleuteling uitschakelen';
+
+  @override
+  String get settings_backupEncryption_turnOffTitle =>
+      'Back-upversleuteling uitschakelen?';
+
+  @override
+  String get settings_backupEncryption_turnOffBody =>
+      'Nieuwe back-ups worden niet meer versleuteld. Bestaande versleutelde back-ups hebben nog steeds uw wachtwoord nodig om te herstellen.';
+
+  @override
+  String get settings_backupEncryption_changePassword => 'Wachtwoord wijzigen';
+
+  @override
+  String get settings_backupEncryption_regenerateRecovery =>
+      'Nieuwe herstelcode genereren';
+
+  @override
+  String get settings_backupEncryption_password => 'Wachtwoord';
+
+  @override
+  String get settings_backupEncryption_passwordConfirm =>
+      'Wachtwoord bevestigen';
+
+  @override
+  String get settings_backupEncryption_passwordTooShort =>
+      'Gebruik minstens 8 tekens';
+
+  @override
+  String get settings_backupEncryption_passwordMismatch =>
+      'Wachtwoorden komen niet overeen';
+
+  @override
+  String get settings_backupEncryption_currentPassword => 'Huidig wachtwoord';
+
+  @override
+  String get settings_backupEncryption_newPassword => 'Nieuw wachtwoord';
+
+  @override
+  String get settings_backupEncryption_warnLoss =>
+      'Als u uw wachtwoord vergeet en de herstelcode verliest, kunnen versleutelde back-ups niet worden hersteld.';
+
+  @override
+  String get settings_backupEncryption_recoveryTitle => 'Uw herstelcode';
+
+  @override
+  String get settings_backupEncryption_recoveryExplain =>
+      'Bewaar deze code op een veilige plek. Hij kan uw back-ups ontgrendelen als u uw wachtwoord vergeet.';
+
+  @override
+  String get settings_backupEncryption_recoverySavedConfirm =>
+      'Ik heb mijn herstelcode opgeslagen';
+
+  @override
+  String get settings_backupEncryption_unlockTitle =>
+      'Voer uw back-upwachtwoord in';
+
+  @override
+  String get settings_backupEncryption_unlockHint =>
+      'Voer uw back-upwachtwoord of herstelcode in';
+
+  @override
+  String get settings_backupEncryption_continue => 'Doorgaan';
+
+  @override
+  String get settings_backupEncryption_cancel => 'Annuleren';
+
+  @override
+  String get settings_backupEncryption_done => 'Klaar';
+
+  @override
+  String get settings_backupEncryption_reencryptTitle =>
+      'Bestaande back-ups versleutelen?';
+
+  @override
+  String get settings_backupEncryption_reencryptBody =>
+      'Uw bestaande back-ups zijn nog onversleuteld. Wilt u ze nu opnieuw versleutelen met uw nieuwe wachtwoord?';
+
+  @override
+  String get settings_backupEncryption_reencryptNow =>
+      'Nu opnieuw versleutelen';
+
+  @override
+  String get settings_backupEncryption_reencryptNotNow => 'Niet nu';
+
+  @override
+  String settings_backupEncryption_reencryptDone(int count) {
+    return '$count back-ups opnieuw versleuteld';
+  }
+
+  @override
+  String get settings_backupEncryption_wrongPassword =>
+      'Onjuist wachtwoord of herstelcode';
+
+  @override
   String settings_cloudSync_replace_globalBanner(String deviceName) {
     return 'Synchronisatie onderbroken — de bibliotheek is vervangen vanaf een back-up op \"$deviceName\".';
   }

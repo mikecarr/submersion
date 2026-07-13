@@ -233,6 +233,116 @@ class AppLocalizationsEs extends AppLocalizations {
   String get settings_cloudSync_encryption_cancel => 'Cancelar';
 
   @override
+  String get settings_backupEncryption_title =>
+      'Cifrado de copias de seguridad';
+
+  @override
+  String get settings_backupEncryption_subtitleOff =>
+      'Protege tus copias de seguridad con una contraseña';
+
+  @override
+  String get settings_backupEncryption_subtitleOn =>
+      'Las copias de seguridad se cifran con tu contraseña';
+
+  @override
+  String get settings_backupEncryption_enable => 'Cifrar copias de seguridad';
+
+  @override
+  String get settings_backupEncryption_turnOff => 'Desactivar el cifrado';
+
+  @override
+  String get settings_backupEncryption_turnOffTitle =>
+      '¿Desactivar el cifrado de copias de seguridad?';
+
+  @override
+  String get settings_backupEncryption_turnOffBody =>
+      'Las nuevas copias de seguridad ya no se cifrarán. Las copias de seguridad cifradas existentes seguirán necesitando tu contraseña para restaurarse.';
+
+  @override
+  String get settings_backupEncryption_changePassword => 'Cambiar contraseña';
+
+  @override
+  String get settings_backupEncryption_regenerateRecovery =>
+      'Regenerar código de recuperación';
+
+  @override
+  String get settings_backupEncryption_password => 'Contraseña';
+
+  @override
+  String get settings_backupEncryption_passwordConfirm =>
+      'Confirmar contraseña';
+
+  @override
+  String get settings_backupEncryption_passwordTooShort =>
+      'Usa al menos 8 caracteres';
+
+  @override
+  String get settings_backupEncryption_passwordMismatch =>
+      'Las contraseñas no coinciden';
+
+  @override
+  String get settings_backupEncryption_currentPassword => 'Contraseña actual';
+
+  @override
+  String get settings_backupEncryption_newPassword => 'Nueva contraseña';
+
+  @override
+  String get settings_backupEncryption_warnLoss =>
+      'Si olvidas tu contraseña y pierdes el código de recuperación, las copias de seguridad cifradas no se podrán recuperar.';
+
+  @override
+  String get settings_backupEncryption_recoveryTitle =>
+      'Tu código de recuperación';
+
+  @override
+  String get settings_backupEncryption_recoveryExplain =>
+      'Guarda este código en un lugar seguro. Puede desbloquear tus copias de seguridad si olvidas tu contraseña.';
+
+  @override
+  String get settings_backupEncryption_recoverySavedConfirm =>
+      'He guardado mi código de recuperación';
+
+  @override
+  String get settings_backupEncryption_unlockTitle =>
+      'Introduce la contraseña de la copia de seguridad';
+
+  @override
+  String get settings_backupEncryption_unlockHint =>
+      'Introduce tu contraseña de copia de seguridad o el código de recuperación';
+
+  @override
+  String get settings_backupEncryption_continue => 'Continuar';
+
+  @override
+  String get settings_backupEncryption_cancel => 'Cancelar';
+
+  @override
+  String get settings_backupEncryption_done => 'Hecho';
+
+  @override
+  String get settings_backupEncryption_reencryptTitle =>
+      '¿Cifrar las copias de seguridad existentes?';
+
+  @override
+  String get settings_backupEncryption_reencryptBody =>
+      'Tus copias de seguridad existentes aún no están cifradas. ¿Volver a cifrarlas ahora con tu nueva contraseña?';
+
+  @override
+  String get settings_backupEncryption_reencryptNow => 'Volver a cifrar ahora';
+
+  @override
+  String get settings_backupEncryption_reencryptNotNow => 'Ahora no';
+
+  @override
+  String settings_backupEncryption_reencryptDone(int count) {
+    return 'Se volvieron a cifrar $count copias de seguridad';
+  }
+
+  @override
+  String get settings_backupEncryption_wrongPassword =>
+      'Contraseña o código de recuperación incorrectos';
+
+  @override
   String settings_cloudSync_replace_globalBanner(String deviceName) {
     return 'Sincronización en pausa: la biblioteca se reemplazó desde una copia de seguridad en \"$deviceName\".';
   }
