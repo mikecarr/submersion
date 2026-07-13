@@ -196,17 +196,21 @@ class _S3ConfigPageState extends ConsumerState<S3ConfigPage> {
       await ref
           .read(syncInitializerProvider)
           .saveProvider(CloudProviderType.s3);
+      // Refresh dependent state up front. These are global providers other
+      // screens listen to (e.g. the sync settings page still mounted behind
+      // this route), so they must run whether or not THIS page survives the
+      // in-flight re-derivation below. Run them while ref is still valid.
+      ref.read(syncStateProvider.notifier).refreshState();
+      ref.invalidate(s3ConfigProvider);
       // Re-derive the sync account so its per-account credential mirror
       // picks up this (possibly in-place) config edit; account-first
       // resolution reads that mirror. Invalidate + await because editing
       // while already on S3 doesn't re-fire the provider-type change.
       ref.invalidate(selectedSyncAccountProvider);
       await ref.read(selectedSyncAccountProvider.future);
-      // The page may have been popped while the derivation was in flight;
-      // using ref after disposal throws.
+      // Only UI work remains (snackbar + navigation); the page may have been
+      // popped while the derivation was in flight, so gate that on mounted.
       if (!mounted) return;
-      ref.read(syncStateProvider.notifier).refreshState();
-      ref.invalidate(s3ConfigProvider);
       _showSnack(context.l10n.settings_s3Config_saved);
       // Root-safe in widget tests; pops the pushed route in the app.
       await Navigator.maybePop(context);
