@@ -9,6 +9,88 @@ class AppLocalizationsAr extends AppLocalizations {
   AppLocalizationsAr([String locale = 'ar']) : super(locale);
 
   @override
+  String diveLog_edit_geofenceSuggestion_near(String location) {
+    return 'بالقرب من $location';
+  }
+
+  @override
+  String get diveLog_edit_geofenceSuggestion_title => 'اقتراح المعدات';
+
+  @override
+  String diveLog_edit_geofenceSuggestion_body(String setName) {
+    return 'تطبيق مجموعة \"$setName\"؟';
+  }
+
+  @override
+  String get diveLog_edit_geofenceSuggestion_apply => 'تطبيق';
+
+  @override
+  String get common_action_dismiss => 'تجاهل';
+
+  @override
+  String get equipment_setEdit_defaultSwitch_title => 'المجموعة الافتراضية';
+
+  @override
+  String get equipment_setEdit_defaultSwitch_subtitle =>
+      'تُطبَّق تلقائيًا على الغطسات الجديدة التي لا تحتوي على معدات بعد';
+
+  @override
+  String get equipment_setEdit_geofencesTitle => 'الأسوار الجغرافية';
+
+  @override
+  String get equipment_setEdit_geofencesSubtitle =>
+      'اقترح هذه المجموعة تلقائيًا للغطسات القريبة من هذه المواقع';
+
+  @override
+  String get equipment_setEdit_addGeofence => 'إضافة سياج جغرافي';
+
+  @override
+  String get equipment_setEdit_editGeofence => 'Edit geofence';
+
+  @override
+  String get equipment_setEdit_removeGeofence => 'Remove geofence';
+
+  @override
+  String equipment_setEdit_geofenceRadius(String distance) {
+    return 'نصف القطر: $distance';
+  }
+
+  @override
+  String get equipment_geofenceEditor_title => 'سياج جغرافي';
+
+  @override
+  String get equipment_geofenceEditor_fromSite => 'من موقع الغوص';
+
+  @override
+  String get equipment_geofenceEditor_dropPin => 'إسقاط دبوس';
+
+  @override
+  String get equipment_geofenceEditor_labelLabel => 'التسمية';
+
+  @override
+  String get equipment_geofenceEditor_noCenter => 'اختر نقطة مركزية';
+
+  @override
+  String get equipment_geofenceEditor_save => 'حفظ السياج الجغرافي';
+
+  @override
+  String get equipment_sets_defaultBadge => 'افتراضي';
+
+  @override
+  String get equipment_setDetail_setAsDefault => 'تعيين كافتراضي';
+
+  @override
+  String equipment_setDetail_setAsDefaultSnackbar(String name) {
+    return 'أصبحت \"$name\" الآن مجموعتك الافتراضية';
+  }
+
+  @override
+  String get equipment_setDetail_geofencesTitle => 'الأسوار الجغرافية';
+
+  @override
+  String get equipment_setDetail_noGeofences => 'لا توجد أسوار جغرافية';
+
+  @override
   String trips_story_dayLabel(int number) {
     return 'اليوم $number';
   }

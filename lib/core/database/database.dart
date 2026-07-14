@@ -791,6 +791,11 @@ class EquipmentSets extends Table {
   IntColumn get createdAt => integer()();
   IntColumn get updatedAt => integer()();
 
+  /// Whether this set is the diver's default (auto-applied to new dives with
+  /// no equipment). Mutual exclusion is enforced per-diver at the repository
+  /// layer, mirroring DiverRepository.setDefaultDiver.
+  BoolColumn get isDefault => boolean().withDefault(const Constant(false))();
+
   /// Hybrid Logical Clock for cross-device conflict resolution
   /// (nullable: rows written before HLC rollout fall back to updatedAt).
   TextColumn get hlc => text().nullable()();
@@ -808,6 +813,30 @@ class EquipmentSetItems extends Table {
 
   @override
   Set<Column> get primaryKey => {setId, equipmentId};
+}
+
+/// Geofences attached to an equipment set. A geofence matches a dive when its
+/// center is within [radiusMeters] of any of the dive's known points (linked
+/// site GPS, or the computer's entry/exit fixes). First-class synced entity:
+/// own id + hlc.
+class EquipmentSetGeofences extends Table {
+  TextColumn get id => text()();
+  TextColumn get setId =>
+      text().references(EquipmentSets, #id, onDelete: KeyAction.cascade)();
+
+  /// Display label; seeded from the anchor site's name or diver-entered.
+  TextColumn get label => text().nullable()();
+  RealColumn get latitude => real()();
+  RealColumn get longitude => real()();
+  RealColumn get radiusMeters => real()();
+  IntColumn get createdAt => integer()();
+  IntColumn get updatedAt => integer()();
+
+  /// Hybrid Logical Clock for cross-device conflict resolution.
+  TextColumn get hlc => text().nullable()();
+
+  @override
+  Set<Column> get primaryKey => {id};
 }
 
 /// Marine life species catalog
@@ -2100,6 +2129,7 @@ class FieldPresets extends Table {
     DivePlanEquipment,
     EquipmentSets,
     EquipmentSetItems,
+    EquipmentSetGeofences,
     Species,
     Sightings,
     Media,
@@ -2174,7 +2204,7 @@ class AppDatabase extends _$AppDatabase {
 
   /// The current schema version as a static constant so that pre-open checks
   /// (e.g. version-mismatch guard) can reference it without an instance.
-  static const int currentSchemaVersion = 110;
+  static const int currentSchemaVersion = 111;
 
   /// Every schema version that has a migration block in onUpgrade.
   /// Used to calculate progress step counts. When adding a new migration,
@@ -2288,6 +2318,7 @@ class AppDatabase extends _$AppDatabase {
     108,
     109,
     110,
+    111,
   ];
 
   /// Idempotent DDL for the v106 connector-suggestion columns (Lightroom
@@ -2368,6 +2399,25 @@ class AppDatabase extends _$AppDatabase {
       await customStatement(
         'ALTER TABLE certifications ADD COLUMN buddy_id TEXT '
         'REFERENCES buddies (id) ON DELETE CASCADE',
+      );
+    }
+  }
+
+  /// v111: equipment_sets.is_default column + equipment_set_geofences table.
+  /// Idempotent (createTable is IF NOT EXISTS; the ALTER is PRAGMA-guarded) so
+  /// it is safe to call from both onUpgrade and the beforeOpen backstop.
+  Future<void> _assertEquipmentSetDefaultAndGeofenceSchema() async {
+    await createMigrator().createTable(equipmentSetGeofences);
+    final cols = await customSelect(
+      "PRAGMA table_info('equipment_sets')",
+    ).get();
+    final hasIsDefault = cols.any(
+      (c) => c.read<String>('name') == 'is_default',
+    );
+    if (cols.isNotEmpty && !hasIsDefault) {
+      await customStatement(
+        'ALTER TABLE equipment_sets ADD COLUMN is_default '
+        'INTEGER NOT NULL DEFAULT 0 CHECK (is_default IN (0, 1))',
       );
     }
   }
@@ -5473,6 +5523,10 @@ class AppDatabase extends _$AppDatabase {
           }
         }
         if (from < 110) await reportProgress();
+        if (from < 111) {
+          await _assertEquipmentSetDefaultAndGeofenceSchema();
+        }
+        if (from < 111) await reportProgress();
       },
       beforeOpen: (details) async {
         // Enable foreign keys
@@ -5498,6 +5552,10 @@ class AppDatabase extends _$AppDatabase {
         // resurrect a user-deleted buddy cert from the still-present inline
         // column (dropped in v110).
         await _assertCertificationBuddyOwnerColumn();
+
+        // v111 backstop: re-assert equipment_sets.is_default + the
+        // equipment_set_geofences table (parallel-branch collision self-heal).
+        await _assertEquipmentSetDefaultAndGeofenceSchema();
 
         // Built-in dive types are reference data: identical on every device and
         // undeletable through DiveTypeRepository. Nothing else restores them --

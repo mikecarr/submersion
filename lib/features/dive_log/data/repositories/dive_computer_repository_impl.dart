@@ -18,6 +18,9 @@ import 'package:submersion/core/database/database.dart'
         DiveProfileEvent,
         TankPressureProfilesCompanion;
 import 'package:submersion/core/matching/match_scorer.dart';
+import 'package:submersion/features/dive_sites/domain/entities/dive_site.dart'
+    show GeoPoint;
+import 'package:submersion/features/equipment/data/services/dive_equipment_defaulter.dart';
 import 'package:submersion/core/services/database_service.dart';
 import 'package:submersion/core/services/logger_service.dart';
 import 'package:submersion/core/services/sync/sync_event_bus.dart';
@@ -916,6 +919,21 @@ class DiveComputerRepository {
           entityType: 'dives',
           recordId: diveId,
           localUpdatedAt: now,
+        );
+
+        // Auto-apply the diver's default / geofenced equipment set to this
+        // freshly downloaded dive (only when it has no equipment yet). Entry
+        // and exit GPS fixes drive geofence matching.
+        final defaultPoints = <GeoPoint>[
+          if (entryLatitude != null && entryLongitude != null)
+            GeoPoint(entryLatitude, entryLongitude),
+          if (exitLatitude != null && exitLongitude != null)
+            GeoPoint(exitLatitude, exitLongitude),
+        ];
+        await DiveEquipmentDefaulter().applyDefaultEquipmentIfEmpty(
+          diveId: diveId,
+          diverId: diverId,
+          divePoints: defaultPoints,
         );
 
         // Create a data source record for provenance tracking.

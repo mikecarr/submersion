@@ -9,6 +9,89 @@ class AppLocalizationsHu extends AppLocalizations {
   AppLocalizationsHu([String locale = 'hu']) : super(locale);
 
   @override
+  String diveLog_edit_geofenceSuggestion_near(String location) {
+    return '$location közelében';
+  }
+
+  @override
+  String get diveLog_edit_geofenceSuggestion_title => 'Felszerelési javaslat';
+
+  @override
+  String diveLog_edit_geofenceSuggestion_body(String setName) {
+    return 'Alkalmazza a(z) \"$setName\" készletet?';
+  }
+
+  @override
+  String get diveLog_edit_geofenceSuggestion_apply => 'Alkalmaz';
+
+  @override
+  String get common_action_dismiss => 'Elvetés';
+
+  @override
+  String get equipment_setEdit_defaultSwitch_title => 'Alapértelmezett készlet';
+
+  @override
+  String get equipment_setEdit_defaultSwitch_subtitle =>
+      'Automatikusan alkalmazza az új, még felszerelés nélküli merülésekre';
+
+  @override
+  String get equipment_setEdit_geofencesTitle => 'Geokerítések';
+
+  @override
+  String get equipment_setEdit_geofencesSubtitle =>
+      'Automatikusan javasolja ezt a készletet az e helyek közelében végzett merülésekhez';
+
+  @override
+  String get equipment_setEdit_addGeofence => 'Geokerítés hozzáadása';
+
+  @override
+  String get equipment_setEdit_editGeofence => 'Edit geofence';
+
+  @override
+  String get equipment_setEdit_removeGeofence => 'Remove geofence';
+
+  @override
+  String equipment_setEdit_geofenceRadius(String distance) {
+    return 'Sugár: $distance';
+  }
+
+  @override
+  String get equipment_geofenceEditor_title => 'Geokerítés';
+
+  @override
+  String get equipment_geofenceEditor_fromSite => 'Merülőhelyről';
+
+  @override
+  String get equipment_geofenceEditor_dropPin => 'Gombostű elhelyezése';
+
+  @override
+  String get equipment_geofenceEditor_labelLabel => 'Címke';
+
+  @override
+  String get equipment_geofenceEditor_noCenter => 'Válasszon középpontot';
+
+  @override
+  String get equipment_geofenceEditor_save => 'Geokerítés mentése';
+
+  @override
+  String get equipment_sets_defaultBadge => 'Alapértelmezett';
+
+  @override
+  String get equipment_setDetail_setAsDefault =>
+      'Beállítás alapértelmezettként';
+
+  @override
+  String equipment_setDetail_setAsDefaultSnackbar(String name) {
+    return 'A(z) \"$name\" mostantól az alapértelmezett készleted';
+  }
+
+  @override
+  String get equipment_setDetail_geofencesTitle => 'Geokerítések';
+
+  @override
+  String get equipment_setDetail_noGeofences => 'Nincsenek geokerítések';
+
+  @override
   String trips_story_dayLabel(int number) {
     return '$number. nap';
   }

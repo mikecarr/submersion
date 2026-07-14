@@ -9,6 +9,89 @@ class AppLocalizationsFr extends AppLocalizations {
   AppLocalizationsFr([String locale = 'fr']) : super(locale);
 
   @override
+  String diveLog_edit_geofenceSuggestion_near(String location) {
+    return 'Près de $location';
+  }
+
+  @override
+  String get diveLog_edit_geofenceSuggestion_title =>
+      'Suggestion d\'équipement';
+
+  @override
+  String diveLog_edit_geofenceSuggestion_body(String setName) {
+    return 'Appliquer l\'ensemble \"$setName\" ?';
+  }
+
+  @override
+  String get diveLog_edit_geofenceSuggestion_apply => 'Appliquer';
+
+  @override
+  String get common_action_dismiss => 'Ignorer';
+
+  @override
+  String get equipment_setEdit_defaultSwitch_title => 'Ensemble par défaut';
+
+  @override
+  String get equipment_setEdit_defaultSwitch_subtitle =>
+      'Appliqué automatiquement aux nouvelles plongées sans équipement';
+
+  @override
+  String get equipment_setEdit_geofencesTitle => 'Géorepères';
+
+  @override
+  String get equipment_setEdit_geofencesSubtitle =>
+      'Suggérer automatiquement cet ensemble pour les plongées près de ces lieux';
+
+  @override
+  String get equipment_setEdit_addGeofence => 'Ajouter un géorepère';
+
+  @override
+  String get equipment_setEdit_editGeofence => 'Edit geofence';
+
+  @override
+  String get equipment_setEdit_removeGeofence => 'Remove geofence';
+
+  @override
+  String equipment_setEdit_geofenceRadius(String distance) {
+    return 'Rayon : $distance';
+  }
+
+  @override
+  String get equipment_geofenceEditor_title => 'Géorepère';
+
+  @override
+  String get equipment_geofenceEditor_fromSite => 'Depuis le site de plongée';
+
+  @override
+  String get equipment_geofenceEditor_dropPin => 'Placer un repère';
+
+  @override
+  String get equipment_geofenceEditor_labelLabel => 'Étiquette';
+
+  @override
+  String get equipment_geofenceEditor_noCenter => 'Choisir un point central';
+
+  @override
+  String get equipment_geofenceEditor_save => 'Enregistrer le géorepère';
+
+  @override
+  String get equipment_sets_defaultBadge => 'Par défaut';
+
+  @override
+  String get equipment_setDetail_setAsDefault => 'Définir par défaut';
+
+  @override
+  String equipment_setDetail_setAsDefaultSnackbar(String name) {
+    return '\"$name\" est désormais votre ensemble par défaut';
+  }
+
+  @override
+  String get equipment_setDetail_geofencesTitle => 'Géorepères';
+
+  @override
+  String get equipment_setDetail_noGeofences => 'Aucun géorepère';
+
+  @override
   String trips_story_dayLabel(int number) {
     return 'Jour $number';
   }

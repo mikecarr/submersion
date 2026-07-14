@@ -9,6 +9,88 @@ class AppLocalizationsHe extends AppLocalizations {
   AppLocalizationsHe([String locale = 'he']) : super(locale);
 
   @override
+  String diveLog_edit_geofenceSuggestion_near(String location) {
+    return 'ליד $location';
+  }
+
+  @override
+  String get diveLog_edit_geofenceSuggestion_title => 'הצעת ציוד';
+
+  @override
+  String diveLog_edit_geofenceSuggestion_body(String setName) {
+    return 'להחיל את ערכת \"$setName\"?';
+  }
+
+  @override
+  String get diveLog_edit_geofenceSuggestion_apply => 'החל';
+
+  @override
+  String get common_action_dismiss => 'התעלם';
+
+  @override
+  String get equipment_setEdit_defaultSwitch_title => 'ערכת ברירת מחדל';
+
+  @override
+  String get equipment_setEdit_defaultSwitch_subtitle =>
+      'מוחלת אוטומטית על צלילות חדשות שאין בהן ציוד עדיין';
+
+  @override
+  String get equipment_setEdit_geofencesTitle => 'גדרות גאוגרפיות';
+
+  @override
+  String get equipment_setEdit_geofencesSubtitle =>
+      'הצע ערכה זו אוטומטית לצלילות ליד מיקומים אלה';
+
+  @override
+  String get equipment_setEdit_addGeofence => 'הוסף גדר גאוגרפית';
+
+  @override
+  String get equipment_setEdit_editGeofence => 'Edit geofence';
+
+  @override
+  String get equipment_setEdit_removeGeofence => 'Remove geofence';
+
+  @override
+  String equipment_setEdit_geofenceRadius(String distance) {
+    return 'רדיוס: $distance';
+  }
+
+  @override
+  String get equipment_geofenceEditor_title => 'גדר גאוגרפית';
+
+  @override
+  String get equipment_geofenceEditor_fromSite => 'מאתר הצלילה';
+
+  @override
+  String get equipment_geofenceEditor_dropPin => 'הצב סיכה';
+
+  @override
+  String get equipment_geofenceEditor_labelLabel => 'תווית';
+
+  @override
+  String get equipment_geofenceEditor_noCenter => 'בחר נקודת מרכז';
+
+  @override
+  String get equipment_geofenceEditor_save => 'שמור גדר גאוגרפית';
+
+  @override
+  String get equipment_sets_defaultBadge => 'ברירת מחדל';
+
+  @override
+  String get equipment_setDetail_setAsDefault => 'הגדר כברירת מחדל';
+
+  @override
+  String equipment_setDetail_setAsDefaultSnackbar(String name) {
+    return '\"$name\" היא כעת ערכת ברירת המחדל שלך';
+  }
+
+  @override
+  String get equipment_setDetail_geofencesTitle => 'גדרות גאוגרפיות';
+
+  @override
+  String get equipment_setDetail_noGeofences => 'אין גדרות גאוגרפיות';
+
+  @override
   String trips_story_dayLabel(int number) {
     return 'יום $number';
   }

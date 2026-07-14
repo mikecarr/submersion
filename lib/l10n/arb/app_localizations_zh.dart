@@ -9,6 +9,86 @@ class AppLocalizationsZh extends AppLocalizations {
   AppLocalizationsZh([String locale = 'zh']) : super(locale);
 
   @override
+  String diveLog_edit_geofenceSuggestion_near(String location) {
+    return '靠近 $location';
+  }
+
+  @override
+  String get diveLog_edit_geofenceSuggestion_title => '装备建议';
+
+  @override
+  String diveLog_edit_geofenceSuggestion_body(String setName) {
+    return '应用\"$setName\"套装？';
+  }
+
+  @override
+  String get diveLog_edit_geofenceSuggestion_apply => '应用';
+
+  @override
+  String get common_action_dismiss => '忽略';
+
+  @override
+  String get equipment_setEdit_defaultSwitch_title => '默认套装';
+
+  @override
+  String get equipment_setEdit_defaultSwitch_subtitle => '自动应用于尚无装备的新潜水';
+
+  @override
+  String get equipment_setEdit_geofencesTitle => '地理围栏';
+
+  @override
+  String get equipment_setEdit_geofencesSubtitle => '自动为这些位置附近的潜水推荐此套装';
+
+  @override
+  String get equipment_setEdit_addGeofence => '添加地理围栏';
+
+  @override
+  String get equipment_setEdit_editGeofence => 'Edit geofence';
+
+  @override
+  String get equipment_setEdit_removeGeofence => 'Remove geofence';
+
+  @override
+  String equipment_setEdit_geofenceRadius(String distance) {
+    return '半径：$distance';
+  }
+
+  @override
+  String get equipment_geofenceEditor_title => '地理围栏';
+
+  @override
+  String get equipment_geofenceEditor_fromSite => '从潜点';
+
+  @override
+  String get equipment_geofenceEditor_dropPin => '放置图钉';
+
+  @override
+  String get equipment_geofenceEditor_labelLabel => '标签';
+
+  @override
+  String get equipment_geofenceEditor_noCenter => '选择一个中心点';
+
+  @override
+  String get equipment_geofenceEditor_save => '保存地理围栏';
+
+  @override
+  String get equipment_sets_defaultBadge => '默认';
+
+  @override
+  String get equipment_setDetail_setAsDefault => '设为默认';
+
+  @override
+  String equipment_setDetail_setAsDefaultSnackbar(String name) {
+    return '\"$name\"现在是您的默认套装';
+  }
+
+  @override
+  String get equipment_setDetail_geofencesTitle => '地理围栏';
+
+  @override
+  String get equipment_setDetail_noGeofences => '无地理围栏';
+
+  @override
   String trips_story_dayLabel(int number) {
     return '第 $number 天';
   }

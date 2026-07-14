@@ -9,6 +9,88 @@ class AppLocalizationsDe extends AppLocalizations {
   AppLocalizationsDe([String locale = 'de']) : super(locale);
 
   @override
+  String diveLog_edit_geofenceSuggestion_near(String location) {
+    return 'In der Nähe von $location';
+  }
+
+  @override
+  String get diveLog_edit_geofenceSuggestion_title => 'Ausrüstungsvorschlag';
+
+  @override
+  String diveLog_edit_geofenceSuggestion_body(String setName) {
+    return 'Set \"$setName\" übernehmen?';
+  }
+
+  @override
+  String get diveLog_edit_geofenceSuggestion_apply => 'Übernehmen';
+
+  @override
+  String get common_action_dismiss => 'Verwerfen';
+
+  @override
+  String get equipment_setEdit_defaultSwitch_title => 'Standard-Set';
+
+  @override
+  String get equipment_setEdit_defaultSwitch_subtitle =>
+      'Wird automatisch auf neue Tauchgänge ohne Ausrüstung angewendet';
+
+  @override
+  String get equipment_setEdit_geofencesTitle => 'Geofences';
+
+  @override
+  String get equipment_setEdit_geofencesSubtitle =>
+      'Dieses Set automatisch für Tauchgänge in der Nähe dieser Orte vorschlagen';
+
+  @override
+  String get equipment_setEdit_addGeofence => 'Geofence hinzufügen';
+
+  @override
+  String get equipment_setEdit_editGeofence => 'Edit geofence';
+
+  @override
+  String get equipment_setEdit_removeGeofence => 'Remove geofence';
+
+  @override
+  String equipment_setEdit_geofenceRadius(String distance) {
+    return 'Radius: $distance';
+  }
+
+  @override
+  String get equipment_geofenceEditor_title => 'Geofence';
+
+  @override
+  String get equipment_geofenceEditor_fromSite => 'Vom Tauchplatz';
+
+  @override
+  String get equipment_geofenceEditor_dropPin => 'Pin setzen';
+
+  @override
+  String get equipment_geofenceEditor_labelLabel => 'Bezeichnung';
+
+  @override
+  String get equipment_geofenceEditor_noCenter => 'Mittelpunkt wählen';
+
+  @override
+  String get equipment_geofenceEditor_save => 'Geofence speichern';
+
+  @override
+  String get equipment_sets_defaultBadge => 'Standard';
+
+  @override
+  String get equipment_setDetail_setAsDefault => 'Als Standard festlegen';
+
+  @override
+  String equipment_setDetail_setAsDefaultSnackbar(String name) {
+    return '\"$name\" ist jetzt dein Standard-Set';
+  }
+
+  @override
+  String get equipment_setDetail_geofencesTitle => 'Geofences';
+
+  @override
+  String get equipment_setDetail_noGeofences => 'Keine Geofences';
+
+  @override
   String trips_story_dayLabel(int number) {
     return 'Tag $number';
   }
