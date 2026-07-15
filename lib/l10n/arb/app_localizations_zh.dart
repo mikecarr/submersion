@@ -9010,6 +9010,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get equipment_detail_sizeLabel => '尺寸';
 
   @override
+  String get equipment_detail_thicknessLabel => '厚度';
+
+  @override
   String get equipment_detail_statusLabel => '状态';
 
   @override
@@ -9192,6 +9195,12 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get equipment_edit_statusLabel => '状态';
+
+  @override
+  String get equipment_edit_thicknessHint => '例如：5mm, 7mm';
+
+  @override
+  String get equipment_edit_thicknessLabel => '厚度';
 
   @override
   String get equipment_edit_typeLabel => '类型 *';

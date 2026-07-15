@@ -37,6 +37,7 @@ class _EquipmentEditPageState extends ConsumerState<EquipmentEditPage> {
   final _modelController = TextEditingController();
   final _serialController = TextEditingController();
   final _sizeController = TextEditingController();
+  final _thicknessController = TextEditingController();
   final _purchasePriceController = TextEditingController();
   final _purchaseCurrencyController = TextEditingController(text: 'USD');
   final _serviceIntervalController = TextEditingController();
@@ -62,6 +63,7 @@ class _EquipmentEditPageState extends ConsumerState<EquipmentEditPage> {
     _modelController.addListener(_onFieldChanged);
     _serialController.addListener(_onFieldChanged);
     _sizeController.addListener(_onFieldChanged);
+    _thicknessController.addListener(_onFieldChanged);
     _purchasePriceController.addListener(_onFieldChanged);
     _purchaseCurrencyController.addListener(_onFieldChanged);
     _serviceIntervalController.addListener(_onFieldChanged);
@@ -83,6 +85,7 @@ class _EquipmentEditPageState extends ConsumerState<EquipmentEditPage> {
     _modelController.dispose();
     _serialController.dispose();
     _sizeController.dispose();
+    _thicknessController.dispose();
     _purchasePriceController.dispose();
     _purchaseCurrencyController.dispose();
     _serviceIntervalController.dispose();
@@ -101,6 +104,7 @@ class _EquipmentEditPageState extends ConsumerState<EquipmentEditPage> {
     _modelController.text = equipment.model ?? '';
     _serialController.text = equipment.serialNumber ?? '';
     _sizeController.text = equipment.size ?? '';
+    _thicknessController.text = equipment.thickness ?? '';
     _purchasePriceController.text = equipment.purchasePrice?.toString() ?? '';
     _purchaseCurrencyController.text = equipment.purchaseCurrency;
     _serviceIntervalController.text =
@@ -292,20 +296,9 @@ class _EquipmentEditPageState extends ConsumerState<EquipmentEditPage> {
             ],
           ),
           const SizedBox(height: 16),
-
-          // Serial Number & Size
+          // Size & Thickness
           Row(
             children: [
-              Expanded(
-                child: TextFormField(
-                  controller: _serialController,
-                  decoration: InputDecoration(
-                    labelText: context.l10n.equipment_edit_serialNumberLabel,
-                    prefixIcon: const Icon(Icons.numbers),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 16),
               Expanded(
                 child: TextFormField(
                   controller: _sizeController,
@@ -316,10 +309,29 @@ class _EquipmentEditPageState extends ConsumerState<EquipmentEditPage> {
                   ),
                 ),
               ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: TextFormField(
+                  controller: _thicknessController,
+                  decoration: InputDecoration(
+                    labelText: context.l10n.equipment_edit_thicknessLabel,
+                    prefixIcon: const Icon(Icons.straighten),
+                    hintText: context.l10n.equipment_edit_thicknessHint,
+                  ),
+                ),
+              ),
             ],
           ),
-          const SizedBox(height: 24),
-
+          const SizedBox(height: 16),
+          // Serial #
+          TextFormField(
+            controller: _serialController,
+            decoration: InputDecoration(
+              labelText: context.l10n.equipment_edit_serialNumberLabel,
+              prefixIcon: const Icon(Icons.numbers),
+            ),
+          ),
+          const SizedBox(width: 24),
           // Purchase Date
           _buildDateSection(context),
           const SizedBox(height: 24),
@@ -887,6 +899,9 @@ class _EquipmentEditPageState extends ConsumerState<EquipmentEditPage> {
         size: _sizeController.text.trim().isEmpty
             ? null
             : _sizeController.text.trim(),
+        thickness: _thicknessController.text.trim().isEmpty
+            ? null
+            : _thicknessController.text.trim(),
         purchaseDate: _purchaseDate,
         purchasePrice: _purchasePriceController.text.isNotEmpty
             ? double.tryParse(_purchasePriceController.text)

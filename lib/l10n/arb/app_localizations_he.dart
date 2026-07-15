@@ -9206,6 +9206,9 @@ class AppLocalizationsHe extends AppLocalizations {
   String get equipment_detail_sizeLabel => 'מידה';
 
   @override
+  String get equipment_detail_thicknessLabel => 'עובי';
+
+  @override
   String get equipment_detail_statusLabel => 'סטטוס';
 
   @override
@@ -9394,6 +9397,12 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get equipment_edit_statusLabel => 'סטטוס';
+
+  @override
+  String get equipment_edit_thicknessHint => 'למשל, 5 מ\"מ, 7 מ\"מ';
+
+  @override
+  String get equipment_edit_thicknessLabel => 'עובי';
 
   @override
   String get equipment_edit_typeLabel => 'סוג *';

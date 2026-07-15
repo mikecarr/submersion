@@ -12,6 +12,7 @@ class EquipmentItem extends Equatable {
   final String? model;
   final String? serialNumber;
   final String? size; // S, M, L, XL, or specific size
+  final String? thickness; // 2,3,4,5,6 or 6mm
   final EquipmentStatus status;
   final DateTime? purchaseDate;
   final double? purchasePrice;
@@ -40,6 +41,7 @@ class EquipmentItem extends Equatable {
     this.model,
     this.serialNumber,
     this.size,
+    this.thickness,
     this.status = EquipmentStatus.active,
     this.purchaseDate,
     this.purchasePrice,
@@ -97,6 +99,7 @@ class EquipmentItem extends Equatable {
     String? model,
     String? serialNumber,
     String? size,
+    String? thickness,
     EquipmentStatus? status,
     DateTime? purchaseDate,
     double? purchasePrice,
@@ -119,6 +122,7 @@ class EquipmentItem extends Equatable {
       model: model ?? this.model,
       serialNumber: serialNumber ?? this.serialNumber,
       size: size ?? this.size,
+      thickness: thickness ?? this.thickness,
       status: status ?? this.status,
       purchaseDate: purchaseDate ?? this.purchaseDate,
       purchasePrice: purchasePrice ?? this.purchasePrice,
@@ -145,6 +149,7 @@ class EquipmentItem extends Equatable {
     model,
     serialNumber,
     size,
+    thickness,
     status,
     purchaseDate,
     purchasePrice,

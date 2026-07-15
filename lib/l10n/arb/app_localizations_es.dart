@@ -9423,6 +9423,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get equipment_detail_sizeLabel => 'Talla';
 
   @override
+  String get equipment_detail_thicknessLabel => 'Grosor';
+
+  @override
   String get equipment_detail_statusLabel => 'Estado';
 
   @override
@@ -9614,6 +9617,12 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get equipment_edit_statusLabel => 'Estado';
+
+  @override
+  String get equipment_edit_thicknessHint => 'p. ej., 5mm, 7mm';
+
+  @override
+  String get equipment_edit_thicknessLabel => 'Grosor';
 
   @override
   String get equipment_edit_typeLabel => 'Tipo *';
