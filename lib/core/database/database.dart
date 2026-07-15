@@ -696,8 +696,7 @@ class Equipment extends Table {
   TextColumn get model => text().nullable()();
   TextColumn get serialNumber => text().nullable()();
   TextColumn get size => text().nullable()(); // S, M, L, XL, or specific size
-  TextColumn get thickness =>
-      text().nullable()(); // 2, 3, 4, 5, 6 or 6mm (v112)
+  TextColumn get thickness => text().nullable()(); // 2,3,4,5,6 or 6mm (v105)
   // Buoyancy metadata (v104): net in-water buoyancy in kg (positive floats),
   // and dry weight in kg (feeds displacement scaling).
   RealColumn get buoyancyKg => real().nullable()();
