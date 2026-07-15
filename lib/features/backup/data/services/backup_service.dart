@@ -13,6 +13,7 @@ import 'package:submersion/core/data/repositories/sync_repository.dart';
 import 'package:submersion/core/services/backup_bookmark_service.dart';
 import 'package:submersion/core/services/cloud_storage/cloud_storage_provider.dart';
 import 'package:submersion/core/services/logger_service.dart';
+import 'package:submersion/core/services/sync/changeset_log/sync_temp_dir.dart';
 import 'package:submersion/core/services/sync/crypto/encryption_key_store.dart';
 import 'package:submersion/core/services/sync/library_epoch.dart';
 import 'package:submersion/core/services/sync/library_epoch_store.dart';
@@ -184,7 +185,7 @@ class BackupService {
       // write that into the target (filesystem copy or SAF stream).
       storedName =
           p.basenameWithoutExtension(filename) + BackupCrypto.fileExtension;
-      final tempDir = await getTemporaryDirectory();
+      final tempDir = await resolveSyncTempDir();
       // Per-invocation prefix so a foreground backup/share and the scheduled
       // background backup cannot collide on the shared temp dir within the same
       // second (the filename has only second precision). The final stored name
@@ -275,7 +276,7 @@ class BackupService {
     if (encKey == null) {
       await _dbAdapter.backup(destinationPath);
     } else {
-      final tempDir = await getTemporaryDirectory();
+      final tempDir = await resolveSyncTempDir();
       final plainPath = p.join(tempDir.path, 'export_${_uuid.v4()}.db');
       try {
         // Inside the try so a failed/partial backup still gets its plaintext
@@ -336,7 +337,7 @@ class BackupService {
 
     final encKey = await _activeBackupKey();
     final filename = _generateFilename();
-    final tempDir = await getTemporaryDirectory();
+    final tempDir = await resolveSyncTempDir();
 
     if (encKey == null) {
       final tempPath = p.join(tempDir.path, filename);
@@ -416,7 +417,7 @@ class BackupService {
         final newName =
             p.basenameWithoutExtension(localPath) + BackupCrypto.fileExtension;
         final newPath = p.join(dir, newName);
-        final tempDir = await getTemporaryDirectory();
+        final tempDir = await resolveSyncTempDir();
         final tempSbe = p.join(tempDir.path, 'reenc_${_uuid.v4()}.sbe');
         try {
           await BackupCrypto.encryptFile(
@@ -641,7 +642,7 @@ class BackupService {
           'Backup file not found locally or in cloud',
         );
       }
-      final tempDir = await getTemporaryDirectory();
+      final tempDir = await resolveSyncTempDir();
       sourcePath = p.join(tempDir.path, record.filename);
       await _safPort.readBackup(documentUri: localRef, destPath: sourcePath);
     } else if (localRef != null && await File(localRef).exists()) {
@@ -1210,7 +1211,7 @@ class BackupService {
           'uploading backup UNENCRYPTED',
         );
       } else {
-        final tempDir = await getTemporaryDirectory();
+        final tempDir = await resolveSyncTempDir();
         uploadName =
             p.basenameWithoutExtension(filename) + BackupCrypto.fileExtension;
         uploadPath = p.join(tempDir.path, uploadName);
@@ -1256,7 +1257,7 @@ class BackupService {
     if (!await BackupCrypto.isEncryptedBackup(sourcePath)) {
       return _MaterializedBackup(sourcePath, isTemp: false);
     }
-    final tempDir = await getTemporaryDirectory();
+    final tempDir = await resolveSyncTempDir();
     final decrypted = p.join(tempDir.path, 'restore_${_uuid.v4()}.db');
     final syncKey = await _encryptionKeyStore?.loadKey();
     final backupKey = await _backupEncryptionKeyStore?.loadKey();
@@ -1331,7 +1332,7 @@ class BackupService {
     }
 
     final bytes = await _cloudProvider.downloadFile(cloudFileId);
-    final tempDir = await getTemporaryDirectory();
+    final tempDir = await resolveSyncTempDir();
     final tempPath = p.join(tempDir.path, filename);
     await File(tempPath).writeAsBytes(bytes);
     return tempPath;

@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:cryptography/cryptography.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -9,9 +10,11 @@ import 'package:submersion/core/data/repositories/sync_repository.dart';
 import 'package:submersion/core/database/database.dart';
 import 'package:submersion/core/services/backup_bookmark_service.dart';
 import 'package:submersion/core/services/cloud_storage/cloud_storage_provider.dart';
+import 'package:submersion/core/services/sync/crypto/keyslots.dart';
 import 'package:submersion/core/services/sync/library_epoch_store.dart';
 import 'package:submersion/core/services/sync/post_restore_sync_store.dart';
 import 'package:submersion/features/backup/data/repositories/backup_preferences.dart';
+import 'package:submersion/features/backup/data/services/backup_crypto.dart';
 import 'package:submersion/features/backup/data/services/backup_service.dart';
 import 'package:submersion/features/backup/domain/entities/backup_record.dart';
 import 'package:submersion/features/backup/domain/entities/backup_settings.dart';
@@ -1382,6 +1385,112 @@ void main() {
             frequency: BackupFrequency.monthly,
           ).frequencyDuration,
           const Duration(days: 30),
+        );
+      });
+    });
+
+    // Restoring an ENCRYPTED (.sbe) backup on a freshly installed system failed
+    // with `PathNotFoundException: Cannot open file, path = '.../Library/Caches/
+    // app.submersion/restore_<uuid>.db' (errno = 2)`. getTemporaryDirectory()
+    // maps to the sandbox Library/Caches/<bundleId> dir, which path_provider
+    // returns but never creates; on a fresh install it is absent, so decrypting
+    // the artifact to a temp .db threw. Same root cause as the sync #554 fix
+    // (resolveSyncTempDir does create(recursive: true)) but on the backup
+    // restore path. Mirrors sync_temp_dir_test.dart.
+    group('encrypted restore into a missing temp dir (fresh install)', () {
+      const passphrase = 'correct horse battery staple';
+      const keyId = '8f14e45f-ceea-467f-ab37-a10a8d5f4c11';
+      const fastKdf = KdfParams(m: 1024, t: 3, p: 1);
+      late Directory sandbox;
+      late Directory missingTemp;
+      late Uint8List keyslotBytes;
+      late SecretKey mlk;
+
+      setUp(() async {
+        mlk = SecretKey(List<int>.generate(32, (i) => (i * 13 + 5) % 256));
+        keyslotBytes = KeyslotFile(
+          version: 1,
+          libraryKeyId: keyId,
+          slots: [
+            await Keyslots.createSlot(
+              type: 'passphrase',
+              secret: passphrase,
+              mlk: mlk,
+              kdf: fastKdf,
+            ),
+          ],
+        ).toJsonBytes();
+
+        sandbox = await Directory.systemTemp.createTemp('backup_fresh_');
+        // path_provider hands back this path but has NOT created it -- the
+        // macOS Library/Caches situation on a fresh install.
+        missingTemp = Directory(
+          '${sandbox.path}/Library/Caches/app.submersion',
+        );
+        expect(
+          missingTemp.existsSync(),
+          isFalse,
+          reason: 'precondition: the temp dir does not exist yet',
+        );
+
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+            .setMockMethodCallHandler(
+              const MethodChannel('plugins.flutter.io/path_provider'),
+              (call) async {
+                if (call.method == 'getTemporaryDirectory') {
+                  return missingTemp.path;
+                }
+                // The pre-restore backup writes into the documents dir, which
+                // must exist for the flow to reach the decrypt step.
+                if (call.method == 'getApplicationDocumentsDirectory') {
+                  return sandbox.path;
+                }
+                return null;
+              },
+            );
+      });
+
+      tearDown(() async {
+        // Restore the file-wide handler installed in setUpAll.
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+            .setMockMethodCallHandler(
+              const MethodChannel('plugins.flutter.io/path_provider'),
+              (call) async =>
+                  call.method == 'getTemporaryDirectory' ||
+                      call.method == 'getApplicationDocumentsDirectory'
+                  ? Directory.systemTemp.path
+                  : null,
+            );
+        if (sandbox.existsSync()) await sandbox.delete(recursive: true);
+      });
+
+      test('restoreFromFile decrypts and restores without a pre-created '
+          'temp dir', () async {
+        final plain = File('${sandbox.path}/plain.db');
+        await plain.writeAsString('fake db contents');
+        final sbe = File('${sandbox.path}/backup${BackupCrypto.fileExtension}');
+        await BackupCrypto.encryptFile(
+          inPath: plain.path,
+          outPath: sbe.path,
+          mlk: mlk,
+          libraryKeyId: keyId,
+          keyslotBytes: keyslotBytes,
+        );
+
+        final service = BackupService(
+          dbAdapter: fakeDb,
+          preferences: preferences,
+          syncRepository: _SpySyncRepository(),
+        );
+
+        await service.restoreFromFile(sbe.path, encryptionSecret: passphrase);
+
+        expect(
+          fakeDb.restoreCallCount,
+          1,
+          reason:
+              'the decrypted DB must be restored even though the temp dir '
+              'did not exist on a fresh install',
         );
       });
     });
