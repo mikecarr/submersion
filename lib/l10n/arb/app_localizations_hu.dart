@@ -9409,6 +9409,9 @@ class AppLocalizationsHu extends AppLocalizations {
   String get equipment_detail_sizeLabel => 'Meret';
 
   @override
+  String get equipment_detail_thicknessLabel => 'Vastagság';
+
+  @override
   String get equipment_detail_statusLabel => 'Allapot';
 
   @override
@@ -9604,6 +9607,12 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get equipment_edit_statusLabel => 'Allapot';
+
+  @override
+  String get equipment_edit_thicknessHint => 'pl. 5mm, 7mm';
+
+  @override
+  String get equipment_edit_thicknessLabel => 'Vastagság';
 
   @override
   String get equipment_edit_typeLabel => 'Tipus *';

@@ -566,6 +566,12 @@ class _EquipmentDetailContent extends ConsumerWidget {
                 context.l10n.equipment_detail_sizeLabel,
                 equipment.size!,
               ),
+            if (equipment.thickness != null)
+              _buildDetailRow(
+                context,
+                context.l10n.equipment_detail_thicknessLabel,
+                equipment.thickness!,
+              ),
             if (equipment.purchaseDate != null)
               _buildDetailRow(
                 context,

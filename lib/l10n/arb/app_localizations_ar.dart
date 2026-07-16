@@ -9261,6 +9261,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get equipment_detail_sizeLabel => 'المقاس';
 
   @override
+  String get equipment_detail_thicknessLabel => 'السُمك';
+
+  @override
   String get equipment_detail_statusLabel => 'الحالة';
 
   @override
@@ -9451,6 +9454,12 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get equipment_edit_statusLabel => 'الحالة';
+
+  @override
+  String get equipment_edit_thicknessHint => 'مثلاً 5 مم، 7 مم';
+
+  @override
+  String get equipment_edit_thicknessLabel => 'السُمك';
 
   @override
   String get equipment_edit_typeLabel => 'النوع *';

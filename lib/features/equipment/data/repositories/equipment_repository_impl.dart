@@ -180,6 +180,7 @@ class EquipmentRepository {
               model: Value(equipment.model),
               serialNumber: Value(equipment.serialNumber),
               size: Value(equipment.size),
+              thickness: Value(equipment.thickness),
               status: Value(equipment.status.name),
               purchaseDate: Value(
                 equipment.purchaseDate?.millisecondsSinceEpoch,
@@ -240,6 +241,7 @@ class EquipmentRepository {
           model: Value(equipment.model),
           serialNumber: Value(equipment.serialNumber),
           size: Value(equipment.size),
+          thickness: Value(equipment.thickness),
           status: Value(equipment.status.name),
           purchaseDate: Value(equipment.purchaseDate?.millisecondsSinceEpoch),
           purchasePrice: Value(equipment.purchasePrice),
@@ -556,6 +558,7 @@ class EquipmentRepository {
       model: row.model,
       serialNumber: row.serialNumber,
       size: row.size,
+      thickness: row.thickness,
       status: EquipmentStatus.values.firstWhere(
         (s) => s.name == row.status,
         orElse: () => EquipmentStatus.active,
