@@ -233,6 +233,8 @@ class SyncData {
   final List<Map<String, dynamic>> certifications;
   final List<Map<String, dynamic>> courses;
   final List<Map<String, dynamic>> serviceRecords;
+  final List<Map<String, dynamic>> serviceKinds;
+  final List<Map<String, dynamic>> serviceSchedules;
   final List<Map<String, dynamic>> diveCenters;
   final List<Map<String, dynamic>> trips;
   final List<Map<String, dynamic>> liveaboardDetails;
@@ -290,6 +292,8 @@ class SyncData {
     this.certifications = const [],
     this.courses = const [],
     this.serviceRecords = const [],
+    this.serviceKinds = const [],
+    this.serviceSchedules = const [],
     this.diveCenters = const [],
     this.trips = const [],
     this.liveaboardDetails = const [],
@@ -348,6 +352,8 @@ class SyncData {
     'certifications': certifications,
     'courses': courses,
     'serviceRecords': serviceRecords,
+    'serviceKinds': serviceKinds,
+    'serviceSchedules': serviceSchedules,
     'diveCenters': diveCenters,
     'trips': trips,
     'liveaboardDetails': liveaboardDetails,
@@ -407,6 +413,8 @@ class SyncData {
       certifications: _parseList(json['certifications']),
       courses: _parseList(json['courses']),
       serviceRecords: _parseList(json['serviceRecords']),
+      serviceKinds: _parseList(json['serviceKinds']),
+      serviceSchedules: _parseList(json['serviceSchedules']),
       diveCenters: _parseList(json['diveCenters']),
       trips: _parseList(json['trips']),
       liveaboardDetails: _parseList(json['liveaboardDetails']),
@@ -613,6 +621,20 @@ class SyncDataSerializer {
     (key: 'certifications', table: _db.certifications, blob: true, full: null),
     (key: 'courses', table: _db.courses, blob: false, full: null),
     (key: 'serviceRecords', table: _db.serviceRecords, blob: false, full: null),
+    // serviceKinds excludes built-in reference data (isBuiltIn=false), so
+    // reuse its exporter rather than paging all rows.
+    (
+      key: 'serviceKinds',
+      table: null,
+      blob: false,
+      full: () => _exportServiceKinds(null),
+    ),
+    (
+      key: 'serviceSchedules',
+      table: _db.serviceSchedules,
+      blob: false,
+      full: null,
+    ),
     (key: 'diveCenters', table: _db.diveCenters, blob: false, full: null),
     (key: 'trips', table: _db.trips, blob: false, full: null),
     (
@@ -1032,6 +1054,14 @@ class SyncDataSerializer {
         'serviceRecords',
         () => _exportServiceRecords(hlcSince),
       ),
+      serviceKinds: await _safeExport(
+        'serviceKinds',
+        () => _exportServiceKinds(hlcSince),
+      ),
+      serviceSchedules: await _safeExport(
+        'serviceSchedules',
+        () => _exportServiceSchedules(hlcSince),
+      ),
       diveCenters: await _safeExport(
         'diveCenters',
         () => _exportDiveCenters(hlcSince),
@@ -1389,6 +1419,16 @@ class SyncDataSerializer {
           _db.serviceRecords,
         )..where((t) => t.id.equals(recordId))).getSingleOrNull();
         return row?.toJson();
+      case 'serviceKinds':
+        final row = await (_db.select(
+          _db.serviceKinds,
+        )..where((t) => t.id.equals(recordId))).getSingleOrNull();
+        return row?.toJson();
+      case 'serviceSchedules':
+        final row = await (_db.select(
+          _db.serviceSchedules,
+        )..where((t) => t.id.equals(recordId))).getSingleOrNull();
+        return row?.toJson();
       case 'diveCenters':
         final row = await (_db.select(
           _db.diveCenters,
@@ -1739,6 +1779,16 @@ class SyncDataSerializer {
           _db.serviceRecords,
         )..where((t) => t.id.isIn(idList))).get();
         return {for (final r in rows) r.id: r.toJson()};
+      case 'serviceKinds':
+        final rows = await (_db.select(
+          _db.serviceKinds,
+        )..where((t) => t.id.isIn(idList))).get();
+        return {for (final r in rows) r.id: r.toJson()};
+      case 'serviceSchedules':
+        final rows = await (_db.select(
+          _db.serviceSchedules,
+        )..where((t) => t.id.isIn(idList))).get();
+        return {for (final r in rows) r.id: r.toJson()};
       case 'csvPresets':
         final rows = await (_db.select(
           _db.csvPresets,
@@ -1936,6 +1986,20 @@ class SyncDataSerializer {
             .into(_db.serviceRecords)
             .insertOnConflictUpdate(
               ServiceRecord.fromJson(data).toCompanion(false),
+            );
+        return;
+      case 'serviceKinds':
+        await _db
+            .into(_db.serviceKinds)
+            .insertOnConflictUpdate(
+              ServiceKindRow.fromJson(data).toCompanion(false),
+            );
+        return;
+      case 'serviceSchedules':
+        await _db
+            .into(_db.serviceSchedules)
+            .insertOnConflictUpdate(
+              ServiceScheduleRow.fromJson(data).toCompanion(false),
             );
         return;
       case 'diveCenters':
@@ -2385,6 +2449,26 @@ class SyncDataSerializer {
             _db.serviceRecords,
             records
                 .map((r) => ServiceRecord.fromJson(r).toCompanion(false))
+                .toList(),
+          ),
+        );
+        return;
+      case 'serviceKinds':
+        await _db.batch(
+          (b) => b.insertAllOnConflictUpdate(
+            _db.serviceKinds,
+            records
+                .map((r) => ServiceKindRow.fromJson(r).toCompanion(false))
+                .toList(),
+          ),
+        );
+        return;
+      case 'serviceSchedules':
+        await _db.batch(
+          (b) => b.insertAllOnConflictUpdate(
+            _db.serviceSchedules,
+            records
+                .map((r) => ServiceScheduleRow.fromJson(r).toCompanion(false))
                 .toList(),
           ),
         );
@@ -2891,6 +2975,10 @@ class SyncDataSerializer {
         return plain(_db.certifications, _db.certifications.id);
       case 'serviceRecords':
         return plain(_db.serviceRecords, _db.serviceRecords.id);
+      case 'serviceKinds':
+        return plain(_db.serviceKinds, _db.serviceKinds.id);
+      case 'serviceSchedules':
+        return plain(_db.serviceSchedules, _db.serviceSchedules.id);
       case 'media':
         return plain(_db.media, _db.media.id);
       default:
@@ -2945,6 +3033,11 @@ class SyncDataSerializer {
       case 'fieldPresets':
         await (_db.delete(
           _db.fieldPresets,
+        )..where((t) => t.isBuiltIn.equals(false))).go();
+        return;
+      case 'serviceKinds':
+        await (_db.delete(
+          _db.serviceKinds,
         )..where((t) => t.isBuiltIn.equals(false))).go();
         return;
     }
@@ -3062,6 +3155,10 @@ class SyncDataSerializer {
         return _db.certifications;
       case 'serviceRecords':
         return _db.serviceRecords;
+      case 'serviceKinds':
+        return _db.serviceKinds;
+      case 'serviceSchedules':
+        return _db.serviceSchedules;
       case 'media':
         return _db.media;
       default:
@@ -3201,6 +3298,16 @@ class SyncDataSerializer {
       case 'serviceRecords':
         await (_db.delete(
           _db.serviceRecords,
+        )..where((t) => t.id.equals(recordId))).go();
+        return;
+      case 'serviceKinds':
+        await (_db.delete(
+          _db.serviceKinds,
+        )..where((t) => t.id.equals(recordId))).go();
+        return;
+      case 'serviceSchedules':
+        await (_db.delete(
+          _db.serviceSchedules,
         )..where((t) => t.id.equals(recordId))).go();
         return;
       case 'diveCenters':
@@ -3677,6 +3784,31 @@ class SyncDataSerializer {
     String? hlcSince,
   ) async {
     final query = _db.select(_db.serviceRecords);
+    if (hlcSince != null) {
+      query.where((t) => t.hlc.isBiggerThanValue(hlcSince));
+    }
+    final rows = await query.get();
+    return rows.map((r) => r.toJson()).toList();
+  }
+
+  /// Built-in kinds are reference data (seeded on every device, undeletable)
+  /// and are never exported -- mirrors the built-in dive-types convention.
+  Future<List<Map<String, dynamic>>> _exportServiceKinds(
+    String? hlcSince,
+  ) async {
+    final query = _db.select(_db.serviceKinds)
+      ..where((t) => t.isBuiltIn.equals(false));
+    if (hlcSince != null) {
+      query.where((t) => t.hlc.isBiggerThanValue(hlcSince));
+    }
+    final rows = await query.get();
+    return rows.map((r) => r.toJson()).toList();
+  }
+
+  Future<List<Map<String, dynamic>>> _exportServiceSchedules(
+    String? hlcSince,
+  ) async {
+    final query = _db.select(_db.serviceSchedules);
     if (hlcSince != null) {
       query.where((t) => t.hlc.isBiggerThanValue(hlcSince));
     }

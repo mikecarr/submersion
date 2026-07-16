@@ -1057,6 +1057,16 @@ class SyncService {
             records: data.serviceRecords,
             hasUpdatedAt: true,
           ),
+          (
+            type: 'serviceKinds',
+            records: data.serviceKinds,
+            hasUpdatedAt: true,
+          ),
+          (
+            type: 'serviceSchedules',
+            records: data.serviceSchedules,
+            hasUpdatedAt: true,
+          ),
           (type: 'settings', records: data.settings, hasUpdatedAt: true),
           (type: 'media', records: data.media, hasUpdatedAt: false),
           (type: 'mediaStores', records: data.mediaStores, hasUpdatedAt: false),
@@ -1607,6 +1617,8 @@ class SyncService {
     'sightings': false,
     'certifications': true,
     'serviceRecords': true,
+    'serviceKinds': true,
+    'serviceSchedules': true,
     'settings': true,
     'media': false,
     'mediaStores': false,
@@ -1723,6 +1735,10 @@ class SyncService {
     ],
     'serviceRecords': [
       (field: 'equipmentId', parent: 'equipment', nullable: false),
+    ],
+    'serviceSchedules': [
+      (field: 'equipmentId', parent: 'equipment', nullable: false),
+      (field: 'serviceKindId', parent: 'serviceKinds', nullable: false),
     ],
   };
 
