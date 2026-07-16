@@ -76,9 +76,7 @@ backstop following the v111 equipment-set pattern.
 | valueMin / valueMax | real, nullable | warning thresholds, not hard blocks |
 | isRequired | bool | required items must end Done or Flagged (not Skipped) |
 | createdAt / updatedAt | datetime | |
-
-No `hlc` — child rows serialize under their parent, like the existing
-checklist template items.
+| hlc | text, nullable | sync clock (matches the existing `checklist_template_items` pattern: child tables are first-class HLC entities) |
 
 ### PreDiveChecklistSessions
 
@@ -88,6 +86,7 @@ checklist template items.
 | diverId | text, nullable | refs Divers |
 | templateId | text, nullable | refs templates, SET NULL on delete |
 | templateName | text | snapshot; survives template deletion |
+| strictOrder | bool | snapshot of the template's flag at session start |
 | diveId | text, nullable | refs Dives, SET NULL on delete |
 | tripId | text, nullable | refs Trips, SET NULL on delete |
 | startedAt | datetime | |
@@ -113,8 +112,7 @@ checklist template items.
 | completedAt | datetime, nullable | stamped at tap time |
 | equipmentId | text, nullable | refs Gear, SET NULL; set for equipment-expanded rows |
 | createdAt / updatedAt | datetime | |
-
-No `hlc` — child rows.
+| hlc | text, nullable | session items are mutated individually during a run, so each row is a first-class HLC entity |
 
 ### Design invariants
 
@@ -151,9 +149,10 @@ permanently shows a flag-count badge.
 
 At session start, each `equipmentSet` placeholder item expands into one
 session item per gear item in the chosen set (`equipmentId` set, title from
-the gear item, grouped under the placeholder's section). Set choice defaults
-to the existing `bestSetFor()` geofence/default selector with a manual
-picker. Service status is computed at expansion time from existing service
+the gear item, grouped under the placeholder's section). Set choice
+pre-selects the diver's default set with a manual picker; geofenced
+pre-selection via `bestSetFor()` would need current-phone-location plumbing
+the start flow does not have, so it is a follow-up, not v1. Service status is computed at expansion time from existing service
 records: an overdue item starts pre-`flagged` with an explanatory note; the
 diver may clear it to `done`, which is itself a timestamped audit event.
 Expanded rows inherit `isRequired` from their placeholder. If no set is
