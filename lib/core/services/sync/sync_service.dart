@@ -18,6 +18,7 @@ import 'package:submersion/core/services/sync/changeset_log/sync_temp_dir.dart';
 import 'package:submersion/core/services/sync/changeset_log/changeset_log_layout.dart';
 import 'package:submersion/core/services/sync/changeset_log/changeset_reader.dart';
 import 'package:submersion/core/services/sync/changeset_log/changeset_writer.dart';
+import 'package:submersion/core/services/sync/changeset_log/device_retirement.dart';
 import 'package:submersion/core/services/sync/changeset_log/peer_cursor_store.dart';
 import 'package:submersion/core/services/sync/changeset_log/publish_state_store.dart';
 import 'package:submersion/core/services/sync/changeset_log/stale_restore_detector.dart';
@@ -456,6 +457,22 @@ class SyncService {
         for (final c in cursorRows)
           if (c.appliedHlcHigh != null) c.peerDeviceId: c.appliedHlcHigh!,
       };
+
+      // Retire peers idle past the retirement period (best-effort; never
+      // fatal to the sync). Marker-first ordering guarantees the fence.
+      try {
+        await DeviceRetirement().sweep(
+          provider: provider,
+          folderId: folderId,
+          selfDeviceId: deviceId,
+          peerManifests: pullResult.peerManifests,
+          alreadyRetired: pullResult.retiredPeerIds,
+          retiredPeerHasFiles: pullResult.retiredPeerHasFiles,
+          nowMillis: DateTime.now().millisecondsSinceEpoch,
+        );
+      } catch (e) {
+        _log.warning('Device retirement sweep failed (non-fatal): $e');
+      }
 
       // ---- Upload: publish our delta ----
       _reportProgress(SyncPhase.uploading, 0.8, 'Publishing changes...');
