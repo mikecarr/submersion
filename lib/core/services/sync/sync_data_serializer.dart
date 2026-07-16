@@ -232,6 +232,8 @@ class SyncData {
   final List<Map<String, dynamic>> diveBuddies;
   final List<Map<String, dynamic>> certifications;
   final List<Map<String, dynamic>> courses;
+  final List<Map<String, dynamic>> courseRequirements;
+  final List<Map<String, dynamic>> courseRequirementDives;
   final List<Map<String, dynamic>> serviceRecords;
   final List<Map<String, dynamic>> diveCenters;
   final List<Map<String, dynamic>> trips;
@@ -289,6 +291,8 @@ class SyncData {
     this.diveBuddies = const [],
     this.certifications = const [],
     this.courses = const [],
+    this.courseRequirements = const [],
+    this.courseRequirementDives = const [],
     this.serviceRecords = const [],
     this.diveCenters = const [],
     this.trips = const [],
@@ -347,6 +351,8 @@ class SyncData {
     'diveBuddies': diveBuddies,
     'certifications': certifications,
     'courses': courses,
+    'courseRequirements': courseRequirements,
+    'courseRequirementDives': courseRequirementDives,
     'serviceRecords': serviceRecords,
     'diveCenters': diveCenters,
     'trips': trips,
@@ -406,6 +412,8 @@ class SyncData {
       diveBuddies: _parseList(json['diveBuddies']),
       certifications: _parseList(json['certifications']),
       courses: _parseList(json['courses']),
+      courseRequirements: _parseList(json['courseRequirements']),
+      courseRequirementDives: _parseList(json['courseRequirementDives']),
       serviceRecords: _parseList(json['serviceRecords']),
       diveCenters: _parseList(json['diveCenters']),
       trips: _parseList(json['trips']),
@@ -612,6 +620,18 @@ class SyncDataSerializer {
     (key: 'diveBuddies', table: _db.diveBuddies, blob: false, full: null),
     (key: 'certifications', table: _db.certifications, blob: true, full: null),
     (key: 'courses', table: _db.courses, blob: false, full: null),
+    (
+      key: 'courseRequirements',
+      table: _db.courseRequirements,
+      blob: false,
+      full: null,
+    ),
+    (
+      key: 'courseRequirementDives',
+      table: _db.courseRequirementDives,
+      blob: false,
+      full: null,
+    ),
     (key: 'serviceRecords', table: _db.serviceRecords, blob: false, full: null),
     (key: 'diveCenters', table: _db.diveCenters, blob: false, full: null),
     (key: 'trips', table: _db.trips, blob: false, full: null),
@@ -1028,6 +1048,14 @@ class SyncDataSerializer {
         () => _exportCertifications(hlcSince),
       ),
       courses: await _safeExport('courses', () => _exportCourses(hlcSince)),
+      courseRequirements: await _safeExport(
+        'courseRequirements',
+        () => _exportCourseRequirements(hlcSince),
+      ),
+      courseRequirementDives: await _safeExport(
+        'courseRequirementDives',
+        () => _exportCourseRequirementDives(hlcSince),
+      ),
       serviceRecords: await _safeExport(
         'serviceRecords',
         () => _exportServiceRecords(hlcSince),
@@ -1384,6 +1412,16 @@ class SyncDataSerializer {
         )..where((t) => t.id.equals(recordId))).getSingleOrNull();
         // Drift-generated toJson keeps fetch symmetric with import.
         return row?.toJson();
+      case 'courseRequirements':
+        final row = await (_db.select(
+          _db.courseRequirements,
+        )..where((t) => t.id.equals(recordId))).getSingleOrNull();
+        return row?.toJson();
+      case 'courseRequirementDives':
+        final row = await (_db.select(
+          _db.courseRequirementDives,
+        )..where((t) => t.id.equals(recordId))).getSingleOrNull();
+        return row?.toJson();
       case 'serviceRecords':
         final row = await (_db.select(
           _db.serviceRecords,
@@ -1734,6 +1772,11 @@ class SyncDataSerializer {
           _db.courses,
         )..where((t) => t.id.isIn(idList))).get();
         return {for (final r in rows) r.id: r.toJson()};
+      case 'courseRequirements':
+        final rows = await (_db.select(
+          _db.courseRequirements,
+        )..where((t) => t.id.isIn(idList))).get();
+        return {for (final r in rows) r.id: r.toJson()};
       case 'serviceRecords':
         final rows = await (_db.select(
           _db.serviceRecords,
@@ -1930,6 +1973,20 @@ class SyncDataSerializer {
         await _db
             .into(_db.courses)
             .insertOnConflictUpdate(Course.fromJson(data).toCompanion(false));
+        return;
+      case 'courseRequirements':
+        await _db
+            .into(_db.courseRequirements)
+            .insertOnConflictUpdate(
+              CourseRequirementRow.fromJson(data).toCompanion(false),
+            );
+        return;
+      case 'courseRequirementDives':
+        // Clockless junction: plain fromJson, no null-overwrite semantics
+        // (#474 rule -- .toCompanion(false) is for HLC entities only).
+        await _db
+            .into(_db.courseRequirementDives)
+            .insertOnConflictUpdate(CourseRequirementDiveRow.fromJson(data));
         return;
       case 'serviceRecords':
         await _db
@@ -2376,6 +2433,24 @@ class SyncDataSerializer {
           (b) => b.insertAllOnConflictUpdate(
             _db.courses,
             records.map((r) => Course.fromJson(r).toCompanion(false)).toList(),
+          ),
+        );
+        return;
+      case 'courseRequirements':
+        await _db.batch(
+          (b) => b.insertAllOnConflictUpdate(
+            _db.courseRequirements,
+            records
+                .map((r) => CourseRequirementRow.fromJson(r).toCompanion(false))
+                .toList(),
+          ),
+        );
+        return;
+      case 'courseRequirementDives':
+        await _db.batch(
+          (b) => b.insertAllOnConflictUpdate(
+            _db.courseRequirementDives,
+            records.map(CourseRequirementDiveRow.fromJson).toList(),
           ),
         );
         return;
@@ -2849,6 +2924,10 @@ class SyncDataSerializer {
         return plain(_db.tags, _db.tags.id);
       case 'courses':
         return plain(_db.courses, _db.courses.id);
+      case 'courseRequirements':
+        return plain(_db.courseRequirements, _db.courseRequirements.id);
+      case 'courseRequirementDives':
+        return plain(_db.courseRequirementDives, _db.courseRequirementDives.id);
       case 'dives':
         return plain(_db.dives, _db.dives.id);
       case 'diveSites':
@@ -3020,6 +3099,10 @@ class SyncDataSerializer {
         return _db.tags;
       case 'courses':
         return _db.courses;
+      case 'courseRequirements':
+        return _db.courseRequirements;
+      case 'courseRequirementDives':
+        return _db.courseRequirementDives;
       case 'dives':
         return _db.dives;
       case 'diveSites':
@@ -3196,6 +3279,16 @@ class SyncDataSerializer {
       case 'courses':
         await (_db.delete(
           _db.courses,
+        )..where((t) => t.id.equals(recordId))).go();
+        return;
+      case 'courseRequirements':
+        await (_db.delete(
+          _db.courseRequirements,
+        )..where((t) => t.id.equals(recordId))).go();
+        return;
+      case 'courseRequirementDives':
+        await (_db.delete(
+          _db.courseRequirementDives,
         )..where((t) => t.id.equals(recordId))).go();
         return;
       case 'serviceRecords':
@@ -3670,6 +3763,37 @@ class SyncDataSerializer {
       query.where((t) => t.hlc.isBiggerThanValue(hlcSince));
     }
     final rows = await query.get();
+    return rows.map((r) => r.toJson()).toList();
+  }
+
+  Future<List<Map<String, dynamic>>> _exportCourseRequirements(
+    String? hlcSince,
+  ) async {
+    final query = _db.select(_db.courseRequirements);
+    if (hlcSince != null) {
+      query.where((t) => t.hlc.isBiggerThanValue(hlcSince));
+    }
+    final rows = await query.get();
+    return rows.map((r) => r.toJson()).toList();
+  }
+
+  /// Clockless junction: delta export rides the PARENT requirement's hlc
+  /// (linkDive/unlinkDive bump it), mirroring equipmentSetItems.
+  Future<List<Map<String, dynamic>>> _exportCourseRequirementDives(
+    String? hlcSince,
+  ) async {
+    if (hlcSince != null) {
+      final changed = await (_db.select(
+        _db.courseRequirements,
+      )..where((t) => t.hlc.isBiggerThanValue(hlcSince))).get();
+      final requirementIds = changed.map((r) => r.id).toSet();
+      if (requirementIds.isEmpty) return [];
+      final rows = await (_db.select(
+        _db.courseRequirementDives,
+      )..where((t) => t.requirementId.isIn(requirementIds))).get();
+      return rows.map((r) => r.toJson()).toList();
+    }
+    final rows = await _db.select(_db.courseRequirementDives).get();
     return rows.map((r) => r.toJson()).toList();
   }
 
