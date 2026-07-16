@@ -2136,16 +2136,34 @@ class AppLocalizationsHe extends AppLocalizations {
   String get courses_action_add => 'הוסף קורס';
 
   @override
+  String get courses_action_addFromTemplate => 'הוסף מתבנית';
+
+  @override
+  String get courses_action_addRequirement => 'הוסף דרישה';
+
+  @override
   String get courses_action_create => 'צור קורס';
+
+  @override
+  String get courses_action_deleteRequirement => 'מחק דרישה';
 
   @override
   String get courses_action_edit => 'ערוך קורס';
 
   @override
+  String get courses_action_editRequirement => 'ערוך דרישה';
+
+  @override
   String get courses_action_exportTrainingLog => 'ייצא יומן אימונים';
 
   @override
+  String get courses_action_linkDive => 'קשר';
+
+  @override
   String get courses_action_markCompleted => 'סמן כהושלם';
+
+  @override
+  String get courses_action_unlinkDive => 'בטל קישור צלילה';
 
   @override
   String get courses_action_moreOptions => 'אפשרויות נוספות';
@@ -2319,6 +2337,35 @@ class AppLocalizationsHe extends AppLocalizations {
   String get courses_picker_tapToLink => 'לחץ כדי לקשר לקורס אימון';
 
   @override
+  String courses_requirement_diveProgress(int count, int target) {
+    return '$count מתוך $target צלילות';
+  }
+
+  @override
+  String get courses_requirement_field_name => 'שם';
+
+  @override
+  String get courses_requirement_field_targetCount => 'צלילות נדרשות';
+
+  @override
+  String get courses_requirement_kind_checklist => 'פריט לסימון';
+
+  @override
+  String get courses_requirement_kind_dive => 'דרישת צלילה';
+
+  @override
+  String get courses_requirement_suggestions => 'צלילות מוצעות';
+
+  @override
+  String get courses_requirements_empty =>
+      'עקוב אחר צלילות הרפתקה, דרישות קדם ופריטים לסימון עבור קורס זה.';
+
+  @override
+  String courses_requirements_progress(int satisfied, int total) {
+    return '$satisfied מתוך $total הושלמו';
+  }
+
+  @override
   String get courses_section_details => 'פרטי הקורס';
 
   @override
@@ -2329,6 +2376,9 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get courses_section_notes => 'הערות';
+
+  @override
+  String get courses_section_requirements => 'דרישות';
 
   @override
   String get courses_section_trainingDives => 'צלילות אימון';
@@ -2352,6 +2402,11 @@ class AppLocalizationsHe extends AppLocalizations {
   @override
   String courses_status_semanticLabel(Object status, Object duration) {
     return '$status, $duration';
+  }
+
+  @override
+  String courses_template_addsCount(int count) {
+    return 'מוסיף $count דרישות';
   }
 
   @override
@@ -2386,6 +2441,9 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get courses_validation_nameRequired => 'נא להזין שם קורס';
+
+  @override
+  String get dashboard_activeCourses_title => 'קורסים בתהליך';
 
   @override
   String get dashboard_activity_daySinceDiving => 'יום מאז הצלילה האחרונה';

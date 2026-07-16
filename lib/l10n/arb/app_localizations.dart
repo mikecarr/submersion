@@ -3744,11 +3744,29 @@ abstract class AppLocalizations {
   /// **'Add Course'**
   String get courses_action_add;
 
+  /// No description provided for @courses_action_addFromTemplate.
+  ///
+  /// In en, this message translates to:
+  /// **'Add from template'**
+  String get courses_action_addFromTemplate;
+
+  /// No description provided for @courses_action_addRequirement.
+  ///
+  /// In en, this message translates to:
+  /// **'Add requirement'**
+  String get courses_action_addRequirement;
+
   /// No description provided for @courses_action_create.
   ///
   /// In en, this message translates to:
   /// **'Create Course'**
   String get courses_action_create;
+
+  /// No description provided for @courses_action_deleteRequirement.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete requirement'**
+  String get courses_action_deleteRequirement;
 
   /// No description provided for @courses_action_edit.
   ///
@@ -3756,17 +3774,35 @@ abstract class AppLocalizations {
   /// **'Edit course'**
   String get courses_action_edit;
 
+  /// No description provided for @courses_action_editRequirement.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit requirement'**
+  String get courses_action_editRequirement;
+
   /// No description provided for @courses_action_exportTrainingLog.
   ///
   /// In en, this message translates to:
   /// **'Export Training Log'**
   String get courses_action_exportTrainingLog;
 
+  /// No description provided for @courses_action_linkDive.
+  ///
+  /// In en, this message translates to:
+  /// **'Link'**
+  String get courses_action_linkDive;
+
   /// No description provided for @courses_action_markCompleted.
   ///
   /// In en, this message translates to:
   /// **'Mark as Completed'**
   String get courses_action_markCompleted;
+
+  /// No description provided for @courses_action_unlinkDive.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlink dive'**
+  String get courses_action_unlinkDive;
 
   /// No description provided for @courses_action_moreOptions.
   ///
@@ -4080,6 +4116,54 @@ abstract class AppLocalizations {
   /// **'Tap to link to a training course'**
   String get courses_picker_tapToLink;
 
+  /// No description provided for @courses_requirement_diveProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} of {target} dives'**
+  String courses_requirement_diveProgress(int count, int target);
+
+  /// No description provided for @courses_requirement_field_name.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get courses_requirement_field_name;
+
+  /// No description provided for @courses_requirement_field_targetCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Required dives'**
+  String get courses_requirement_field_targetCount;
+
+  /// No description provided for @courses_requirement_kind_checklist.
+  ///
+  /// In en, this message translates to:
+  /// **'Check-off item'**
+  String get courses_requirement_kind_checklist;
+
+  /// No description provided for @courses_requirement_kind_dive.
+  ///
+  /// In en, this message translates to:
+  /// **'Dive requirement'**
+  String get courses_requirement_kind_dive;
+
+  /// No description provided for @courses_requirement_suggestions.
+  ///
+  /// In en, this message translates to:
+  /// **'Suggested dives'**
+  String get courses_requirement_suggestions;
+
+  /// No description provided for @courses_requirements_empty.
+  ///
+  /// In en, this message translates to:
+  /// **'Track adventure dives, prerequisites, and check-offs for this course.'**
+  String get courses_requirements_empty;
+
+  /// No description provided for @courses_requirements_progress.
+  ///
+  /// In en, this message translates to:
+  /// **'{satisfied} of {total} complete'**
+  String courses_requirements_progress(int satisfied, int total);
+
   /// No description provided for @courses_section_details.
   ///
   /// In en, this message translates to:
@@ -4103,6 +4187,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Notes'**
   String get courses_section_notes;
+
+  /// No description provided for @courses_section_requirements.
+  ///
+  /// In en, this message translates to:
+  /// **'Requirements'**
+  String get courses_section_requirements;
 
   /// No description provided for @courses_section_trainingDives.
   ///
@@ -4139,6 +4229,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{status}, {duration}'**
   String courses_status_semanticLabel(Object status, Object duration);
+
+  /// No description provided for @courses_template_addsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Adds {count} requirements'**
+  String courses_template_addsCount(int count);
 
   /// No description provided for @courses_summary_overview.
   ///
@@ -4205,6 +4301,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Please enter a course name'**
   String get courses_validation_nameRequired;
+
+  /// No description provided for @dashboard_activeCourses_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Courses in progress'**
+  String get dashboard_activeCourses_title;
 
   /// No description provided for @dashboard_activity_daySinceDiving.
   ///

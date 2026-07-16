@@ -2200,17 +2200,35 @@ class AppLocalizationsPt extends AppLocalizations {
   String get courses_action_add => 'Adicionar Curso';
 
   @override
+  String get courses_action_addFromTemplate => 'Adicionar a partir de modelo';
+
+  @override
+  String get courses_action_addRequirement => 'Adicionar requisito';
+
+  @override
   String get courses_action_create => 'Criar Curso';
 
   @override
+  String get courses_action_deleteRequirement => 'Excluir requisito';
+
+  @override
   String get courses_action_edit => 'Editar curso';
+
+  @override
+  String get courses_action_editRequirement => 'Editar requisito';
 
   @override
   String get courses_action_exportTrainingLog =>
       'Exportar Registro de Treinamento';
 
   @override
+  String get courses_action_linkDive => 'Vincular';
+
+  @override
   String get courses_action_markCompleted => 'Marcar como Concluído';
+
+  @override
+  String get courses_action_unlinkDive => 'Desvincular mergulho';
 
   @override
   String get courses_action_moreOptions => 'Mais opções';
@@ -2391,6 +2409,35 @@ class AppLocalizationsPt extends AppLocalizations {
       'Toque para vincular a um curso de treinamento';
 
   @override
+  String courses_requirement_diveProgress(int count, int target) {
+    return '$count de $target mergulhos';
+  }
+
+  @override
+  String get courses_requirement_field_name => 'Nome';
+
+  @override
+  String get courses_requirement_field_targetCount => 'Mergulhos necessários';
+
+  @override
+  String get courses_requirement_kind_checklist => 'Item de verificação';
+
+  @override
+  String get courses_requirement_kind_dive => 'Requisito de mergulho';
+
+  @override
+  String get courses_requirement_suggestions => 'Mergulhos sugeridos';
+
+  @override
+  String get courses_requirements_empty =>
+      'Acompanhe mergulhos de aventura, pré-requisitos e itens de verificação deste curso.';
+
+  @override
+  String courses_requirements_progress(int satisfied, int total) {
+    return '$satisfied de $total concluídos';
+  }
+
+  @override
   String get courses_section_details => 'Detalhes do Curso';
 
   @override
@@ -2401,6 +2448,9 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get courses_section_notes => 'Notas';
+
+  @override
+  String get courses_section_requirements => 'Requisitos';
 
   @override
   String get courses_section_trainingDives => 'Mergulhos de Treinamento';
@@ -2424,6 +2474,11 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String courses_status_semanticLabel(Object status, Object duration) {
     return '$status, $duration';
+  }
+
+  @override
+  String courses_template_addsCount(int count) {
+    return 'Adiciona $count requisitos';
   }
 
   @override
@@ -2459,6 +2514,9 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get courses_validation_nameRequired => 'Digite um nome para o curso';
+
+  @override
+  String get dashboard_activeCourses_title => 'Cursos em andamento';
 
   @override
   String get dashboard_activity_daySinceDiving => 'Dia sem mergulhar';
