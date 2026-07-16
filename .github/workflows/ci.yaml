@@ -543,7 +543,9 @@ jobs:
 
       - name: Upload macOS artifact
         uses: actions/upload-artifact@v7
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        if: >
+          github.event_name == 'pull_request' ||
+          (github.ref == 'refs/heads/main' && github.event_name == 'push')
         with:
           name: macos-build
           path: build/macos/Build/Products/Release/submersion.app
@@ -640,7 +642,9 @@ jobs:
 
       - name: Upload Android artifact
         uses: actions/upload-artifact@v7
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        if: >
+          github.event_name == 'pull_request' ||
+          (github.ref == 'refs/heads/main' && github.event_name == 'push')
         with:
           name: android-apk
           path: build/app/outputs/flutter-apk/app-release.apk
@@ -713,7 +717,9 @@ jobs:
 
       - name: Upload Linux artifact
         uses: actions/upload-artifact@v7
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        if: >
+          github.event_name == 'pull_request' ||
+          (github.ref == 'refs/heads/main' && github.event_name == 'push')
         with:
           name: linux-build
           path: build/linux/x64/release/bundle
@@ -787,11 +793,27 @@ jobs:
 
       - name: Upload Windows artifact
         uses: actions/upload-artifact@v7
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        if: >
+          github.event_name == 'pull_request' ||
+          (github.ref == 'refs/heads/main' && github.event_name == 'push')
         with:
           name: windows-build
           path: build\windows\x64\runner\Release
           retention-days: 7
+
+  pr-number:
+    name: Record PR number
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Write PR number to file
+        run: echo "${{ github.event.number }}" > pr-number.txt
+      - name: Upload PR number artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: pr-number
+          path: pr-number.txt
+          retention-days: 1
 
   # Single aggregation gate. Because the build jobs now run in parallel with the
   # test shards (needs: codegen, not needs: test), a green build no longer
