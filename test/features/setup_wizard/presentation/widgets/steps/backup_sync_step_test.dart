@@ -157,7 +157,7 @@ void main() {
       expect(find.text('Manage in Settings'), findsOneWidget);
 
       // Toggling the cloud-copy switch drives setCloudBackupEnabled.
-      await tester.tap(find.text('Keep a backup copy in the cloud'));
+      await tester.tap(find.text('Store backups in the cloud'));
       await tester.pumpAndSettle();
     });
   }

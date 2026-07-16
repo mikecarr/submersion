@@ -73,10 +73,10 @@ void main() {
     await pumpWizard(tester);
 
     expect(find.text('Welcome to Submersion'), findsOneWidget);
-    expect(find.text('Set up a new logbook'), findsOneWidget);
+    expect(find.text('Set up a new profile'), findsOneWidget);
     expect(find.text('I have existing Submersion data'), findsOneWidget);
 
-    await tester.tap(find.text('Set up a new logbook'));
+    await tester.tap(find.text('Set up a new profile'));
     await pumpWizard(tester);
 
     expect(find.text('Create Your Profile'), findsOneWidget);
@@ -97,6 +97,79 @@ void main() {
     await tester.tap(find.widgetWithText(OutlinedButton, 'Back'));
     await pumpWizard(tester);
     expect(find.text('Create Your Profile'), findsOneWidget);
+  });
+
+  testWidgets('wizard card hugs its content instead of filling the viewport', (
+    tester,
+  ) async {
+    // A tall viewport makes "hug content" vs "fill height" unambiguous.
+    tester.view.physicalSize = const Size(1200, 2400);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+
+    final overrides = await getBaseOverrides();
+    await tester.pumpWidget(
+      testApp(
+        overrides: overrides,
+        child: const SetupWizardPage(mode: SetupWizardMode.firstRun),
+      ),
+    );
+    await pumpWizard(tester);
+
+    // The fork step is short, so the translucent card must be far shorter
+    // than the 2400px viewport (regression guard against the old
+    // SizedBox.expand full-height card).
+    final cardHeight = tester
+        .getSize(find.byKey(const ValueKey('setup_wizard_card')))
+        .height;
+    expect(cardHeight, lessThan(1200));
+  });
+
+  testWidgets('branch steps hug their content too, not the full viewport', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1200, 2400);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+
+    final overrides = await getBaseOverrides();
+    await tester.pumpWidget(
+      testApp(
+        overrides: [
+          ...overrides,
+          isApplePlatformProvider.overrideWithValue(false),
+          dropboxConfiguredProvider.overrideWithValue(false),
+          iCloudAvailabilityProvider.overrideWith(
+            (ref) async => ICloudAvailability.unsupported,
+          ),
+          backupOperationProvider.overrideWith((ref) => _FakeBackupOp()),
+          storageConfigNotifierProvider.overrideWith(
+            (ref) => _FakeStorageNotifier(),
+          ),
+          syncInitializerProvider.overrideWithValue(_FakeSyncInit()),
+          syncStateProvider.overrideWith((ref) => _FakeSyncNotifier()),
+        ],
+        child: const SetupWizardPage(mode: SetupWizardMode.firstRun),
+      ),
+    );
+    await pumpWizard(tester);
+
+    await tester.tap(find.text('I have existing Submersion data'));
+    await pumpWizard(tester);
+    await tester.tap(find.text('Open an existing folder'));
+    await pumpWizard(tester);
+    expect(find.text('Open existing folder'), findsOneWidget);
+
+    // The open-folder step is short (a title and a button). It uses a
+    // SingleChildScrollView, which under the wizard's loose Flexible
+    // constraints sizes to min(content, available) — so it hugs here and only
+    // scrolls when a step is taller than the card, rather than filling the
+    // 2400px viewport. (Guards the fix for the branch steps that previously
+    // used filling Center/Expanded layouts.)
+    final cardHeight = tester
+        .getSize(find.byKey(const ValueKey('setup_wizard_card')))
+        .height;
+    expect(cardHeight, lessThan(1200));
   });
 
   testWidgets('skip setup jumps from profile straight to finish placeholder', (
@@ -162,7 +235,7 @@ void main() {
 
     await tester.tap(backButton);
     await pumpWizard(tester);
-    expect(find.text('Set up a new logbook'), findsOneWidget);
+    expect(find.text('Set up a new profile'), findsOneWidget);
   });
 
   testWidgets('existing-data path renders each source step, reversibly', (
@@ -234,7 +307,7 @@ void main() {
     );
     await pumpWizard(tester);
 
-    await tester.tap(find.text('Set up a new logbook'));
+    await tester.tap(find.text('Set up a new profile'));
     await pumpWizard(tester);
     await tester.enterText(find.byType(TextFormField), 'Eric');
     await pumpWizard(tester);

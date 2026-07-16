@@ -97,8 +97,9 @@ class _SyncConnectStepState extends ConsumerState<SyncConnectStep> {
       case _PullPhase.connect:
         // Reuse the provider cards; connecting enables the continue gate.
         return Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Expanded(child: BackupSyncStep(mode: widget.mode)),
+            Flexible(child: BackupSyncStep(mode: widget.mode)),
             SafeArea(
               top: false,
               child: Padding(
@@ -112,9 +113,10 @@ class _SyncConnectStepState extends ConsumerState<SyncConnectStep> {
           ],
         );
       case _PullPhase.pulling:
-        return Center(
+        return Padding(
+          padding: const EdgeInsets.all(24),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
             children: [
               CircularProgressIndicator(value: syncState.progress),
               const SizedBox(height: 12),
@@ -123,9 +125,10 @@ class _SyncConnectStepState extends ConsumerState<SyncConnectStep> {
           ),
         );
       case _PullPhase.done:
-        return Center(
+        return Padding(
+          padding: const EdgeInsets.all(24),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
             children: [
               Icon(
                 Icons.check_circle,
@@ -146,28 +149,26 @@ class _SyncConnectStepState extends ConsumerState<SyncConnectStep> {
           ),
         );
       case _PullPhase.empty:
-        return Center(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  l10n.setup_syncPull_noLibrary_title,
-                  style: theme.textTheme.titleLarge,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  l10n.setup_syncPull_noLibrary_message,
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 16),
-                FilledButton(
-                  onPressed: widget.onNoLibrary,
-                  child: Text(l10n.setup_sync_libraryFound_keepFresh),
-                ),
-              ],
-            ),
+        return Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                l10n.setup_syncPull_noLibrary_title,
+                style: theme.textTheme.titleLarge,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                l10n.setup_syncPull_noLibrary_message,
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 16),
+              FilledButton(
+                onPressed: widget.onNoLibrary,
+                child: Text(l10n.setup_sync_libraryFound_keepFresh),
+              ),
+            ],
           ),
         );
     }

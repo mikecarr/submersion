@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:submersion/core/providers/provider.dart';
 import 'package:submersion/features/setup_wizard/domain/setup_wizard_models.dart';
 import 'package:submersion/features/setup_wizard/presentation/providers/setup_wizard_providers.dart';
+import 'package:submersion/features/setup_wizard/presentation/widgets/wizard_surface_style.dart';
 import 'package:submersion/l10n/l10n_extension.dart';
 
 /// Chooses which existing-data source to load from.
@@ -36,6 +37,9 @@ class ExistingChoiceStep extends ConsumerWidget {
       ExistingDataSource source,
     ) {
       return Card(
+        elevation: 0,
+        color: WizardSurfaceStyle.optionFill(theme),
+        shape: WizardSurfaceStyle.optionShape(theme),
         child: ListTile(
           leading: Icon(icon, color: theme.colorScheme.primary),
           title: Text(title),

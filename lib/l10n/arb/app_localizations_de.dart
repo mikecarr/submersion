@@ -5348,8 +5348,7 @@ class AppLocalizationsDe extends AppLocalizations {
       'Einheiten, Darstellung und Backup-Einstellungen erneut durchgehen';
 
   @override
-  String get setup_backup_cloudCopy =>
-      'Eine Sicherungskopie in der Cloud aufbewahren';
+  String get setup_backup_cloudCopy => 'Backups in der Cloud speichern';
 
   @override
   String get setup_backup_frequency => 'Häufigkeit';
@@ -5364,14 +5363,14 @@ class AppLocalizationsDe extends AppLocalizations {
   String get setup_backup_frequency_weekly => 'Wöchentlich';
 
   @override
-  String get setup_backup_scheduleSubtitle => 'Ihr Logbuch regelmäßig sichern';
+  String get setup_backup_scheduleSubtitle => 'Ihre Daten regelmäßig sichern';
 
   @override
   String get setup_backup_scheduleToggle => 'Automatische Sicherungen';
 
   @override
   String get setup_backup_subtitle =>
-      'Schützen Sie Ihr Tauchlogbuch vom ersten Tag an.';
+      'Schützen Sie Ihre Daten vom ersten Tag an.';
 
   @override
   String get setup_backup_title => 'Sicherung & Synchronisierung';
@@ -5564,7 +5563,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get setup_sync_subtitle =>
-      'Ihr Logbuch auf allen Geräten synchronisieren';
+      'Ihre Daten auf allen Geräten synchronisieren';
 
   @override
   String get setup_units_advanced => 'Einheiten anpassen';
@@ -5625,7 +5624,7 @@ class AppLocalizationsDe extends AppLocalizations {
       'Taucherprofil erstellen und die App einrichten';
 
   @override
-  String get setup_welcome_startFresh_title => 'Neues Logbuch einrichten';
+  String get setup_welcome_startFresh_title => 'Neues Profil einrichten';
 
   @override
   String get setup_welcome_subtitle =>
