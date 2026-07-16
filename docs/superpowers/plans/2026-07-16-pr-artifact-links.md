@@ -204,18 +204,21 @@ jobs:
               { label: 'Linux',         job: 'Build Linux',   artifact: 'linux-build' },
             ];
 
-            // 3. List this run's artifacts and jobs.
-            const artifacts = await github.paginate(
-              github.rest.actions.listWorkflowRunArtifacts,
-              { owner, repo, run_id: run.id, per_page: 100 },
+            // 3. List this run's artifacts and jobs. Both Actions endpoints
+            // return { total_count, artifacts|jobs: [...] }; read the namespaced
+            // array off .data directly (unambiguous, unlike paginate's response
+            // normalization). per_page: 100 covers this run's counts.
+            const artifactsResp = await github.rest.actions.listWorkflowRunArtifacts({
+              owner, repo, run_id: run.id, per_page: 100,
+            });
+            const artifactByName = new Map(
+              artifactsResp.data.artifacts.map(a => [a.name, a]),
             );
-            const artifactByName = new Map(artifacts.map(a => [a.name, a]));
 
-            const jobs = await github.paginate(
-              github.rest.actions.listJobsForWorkflowRun,
-              { owner, repo, run_id: run.id, per_page: 100 },
-            );
-            const jobByName = new Map(jobs.map(j => [j.name, j]));
+            const jobsResp = await github.rest.actions.listJobsForWorkflowRun({
+              owner, repo, run_id: run.id, per_page: 100,
+            });
+            const jobByName = new Map(jobsResp.data.jobs.map(j => [j.name, j]));
 
             // 4. Render one row per platform.
             const runUrl = `https://github.com/${owner}/${repo}/actions/runs/${run.id}`;
@@ -229,6 +232,8 @@ jobs:
                 cell = `❌ [build failed](${job.html_url})`;
               } else if (job && (job.conclusion === 'cancelled' || job.conclusion === 'skipped')) {
                 cell = '⚠️ skipped';
+              } else if (job && job.conclusion === 'success') {
+                cell = '⚠️ artifact missing';
               } else {
                 cell = '⚠️ unavailable';
               }
