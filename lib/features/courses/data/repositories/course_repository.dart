@@ -353,10 +353,34 @@ class CourseRepository {
         [id],
       );
 
+      // Course requirement children are removed by FK cascade, but sync
+      // needs per-row tombstones (issue #466) or peers resurrect them.
+      final requirements = await (_db.select(
+        _db.courseRequirements,
+      )..where((t) => t.courseId.equals(id))).get();
+      final requirementIds = requirements.map((r) => r.id).toList();
+      final links = requirementIds.isEmpty
+          ? <CourseRequirementDiveRow>[]
+          : await (_db.select(
+              _db.courseRequirementDives,
+            )..where((t) => t.requirementId.isIn(requirementIds))).get();
+
       // Delete the course
       await (_db.delete(_db.courses)..where((t) => t.id.equals(id))).go();
 
       await _syncRepository.logDeletion(entityType: 'courses', recordId: id);
+      for (final requirement in requirements) {
+        await _syncRepository.logDeletion(
+          entityType: 'courseRequirements',
+          recordId: requirement.id,
+        );
+      }
+      for (final link in links) {
+        await _syncRepository.logDeletion(
+          entityType: 'courseRequirementDives',
+          recordId: link.id,
+        );
+      }
       SyncEventBus.notifyLocalChange();
       _log.info('Deleted course: $id');
     } catch (e, stackTrace) {
