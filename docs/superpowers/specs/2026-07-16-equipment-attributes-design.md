@@ -63,7 +63,7 @@ New table `equipment_attributes` in `lib/core/database/database.dart`:
 | `attrKey`     | TEXT              | Catalog key, or the user's label for custom fields |
 | `isCustom`    | BOOL default false| Prevents collision between a user field named "thickness" and a future catalog key |
 | `valueText`   | TEXT nullable     | Text values, choice-option keys, thickness designations |
-| `valueNum`    | REAL nullable     | Canonical metric numbers; flags 0/1; dates as unix seconds |
+| `valueNum`    | REAL nullable     | Canonical metric numbers; flags 0/1; dates as unix milliseconds |
 | `sortOrder`   | INT default 0     | Display order for custom fields                    |
 | `createdAt`   | INT               |                                                    |
 | `updatedAt`   | INT               |                                                    |
@@ -142,7 +142,8 @@ attributes plus type-specific ones.
   the display string; l10n relabels freely, sync compares
   language-independent values, stats GROUP BY is bucket-safe.
 - `flag` — valueNum 0/1.
-- `date` — valueNum unix seconds; locale-formatted at display.
+- `date` — valueNum unix milliseconds (codebase convention); locale-formatted
+  at display.
 
 **Universal (every type):** `buoyancy_kg`, `dry_weight_kg` (number, massKg).
 These replace the v104 columns; the weight-prediction planner must switch its
@@ -245,9 +246,10 @@ Join path: `dives ← dive_equipment ← equipment ← equipment_attributes`.
   precedent. As an HLC entity it uses `.toCompanion(false)` (#474 rule) so
   cleared nullable fields actually clear on the remote. Deletions ride the
   existing tombstone pipeline. Older clients ignore the unknown payload field.
-- **Backup/restore:** the table joins the JSON backup manifest (and thus
-  encrypted `.sbe` backups). Restore-replace and merge need no special
-  handling; cascade delete from equipment covers orphaning.
+- **Backup/restore:** no change needed — backups are a raw SQLite `.db` file
+  copy (see `backup_database_adapter.dart`), so the new table rides along
+  automatically, including in encrypted `.sbe` backups. Cascade delete from
+  equipment covers orphaning.
 - **CSV export:** `generateEquipmentCsvContent` keeps its existing `size` /
   `thickness` / `buoyancyKg` / `weightKg` headers for spreadsheet back-compat
   but sources them from attribute rows, and appends an `attributes` column
