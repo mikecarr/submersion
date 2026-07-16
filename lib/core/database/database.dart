@@ -2408,16 +2408,10 @@ class AppDatabase extends _$AppDatabase {
   /// v112: equipment.thickness column. Idempotent so it is safe to call from
   /// both onUpgrade and the beforeOpen backstop.
   Future<void> _assertEquipmentThicknessColumn() async {
-    final cols = await customSelect(
-      "PRAGMA table_info('equipment')",
-    ).get();
-    final hasThickness = cols.any(
-      (c) => c.read<String>('name') == 'thickness',
-    );
+    final cols = await customSelect("PRAGMA table_info('equipment')").get();
+    final hasThickness = cols.any((c) => c.read<String>('name') == 'thickness');
     if (cols.isNotEmpty && !hasThickness) {
-      await customStatement(
-        'ALTER TABLE equipment ADD COLUMN thickness TEXT',
-      );
+      await customStatement('ALTER TABLE equipment ADD COLUMN thickness TEXT');
     }
   }
 
