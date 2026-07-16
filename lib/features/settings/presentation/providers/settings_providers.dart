@@ -75,6 +75,12 @@ class SettingsKeys {
   static const String fullscreenHiddenTiles = 'fullscreen_hidden_tiles';
   static const String fullscreenReadoutCardX = 'fullscreen_readout_card_x';
   static const String fullscreenReadoutCardY = 'fullscreen_readout_card_y';
+
+  // Perdix-style media overlay preferences (device-local, stored directly in
+  // SharedPreferences rather than per-diver in the DB).
+  static const String perdixOverlayEnabled = 'perdix_overlay_enabled';
+  static const String perdixOverlayX = 'perdix_overlay_x';
+  static const String perdixOverlayY = 'perdix_overlay_y';
 }
 
 /// App settings state
@@ -314,6 +320,15 @@ class AppSettings {
   final double? fullscreenReadoutCardX;
   final double? fullscreenReadoutCardY;
 
+  /// Perdix-style media overlay: shown over photos/videos when enabled.
+  /// Device-local, not per-diver.
+  final bool perdixOverlayEnabled;
+
+  /// Perdix overlay position as fractions (0..1) of the movable range;
+  /// null means the default corner. See DraggablePerdixOverlay.
+  final double? perdixOverlayX;
+  final double? perdixOverlayY;
+
   const AppSettings({
     this.depthUnit = DepthUnit.meters,
     this.temperatureUnit = TemperatureUnit.celsius,
@@ -412,6 +427,9 @@ class AppSettings {
     this.fullscreenHiddenTiles = const [],
     this.fullscreenReadoutCardX,
     this.fullscreenReadoutCardY,
+    this.perdixOverlayEnabled = false,
+    this.perdixOverlayX,
+    this.perdixOverlayY,
   });
 
   /// Compute the current unit preset based on actual unit values
@@ -544,6 +562,9 @@ class AppSettings {
     List<String>? fullscreenHiddenTiles,
     double? fullscreenReadoutCardX,
     double? fullscreenReadoutCardY,
+    bool? perdixOverlayEnabled,
+    double? perdixOverlayX,
+    double? perdixOverlayY,
   }) {
     return AppSettings(
       depthUnit: depthUnit ?? this.depthUnit,
@@ -669,6 +690,9 @@ class AppSettings {
           fullscreenReadoutCardX ?? this.fullscreenReadoutCardX,
       fullscreenReadoutCardY:
           fullscreenReadoutCardY ?? this.fullscreenReadoutCardY,
+      perdixOverlayEnabled: perdixOverlayEnabled ?? this.perdixOverlayEnabled,
+      perdixOverlayX: perdixOverlayX ?? this.perdixOverlayX,
+      perdixOverlayY: perdixOverlayY ?? this.perdixOverlayY,
     );
   }
 }
@@ -770,6 +794,10 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
       final fullscreenReadoutCardY = prefs.getDouble(
         SettingsKeys.fullscreenReadoutCardY,
       );
+      final perdixOverlayEnabled =
+          prefs.getBool(SettingsKeys.perdixOverlayEnabled) ?? false;
+      final perdixOverlayX = prefs.getDouble(SettingsKeys.perdixOverlayX);
+      final perdixOverlayY = prefs.getDouble(SettingsKeys.perdixOverlayY);
 
       final diverId = _validatedDiverId;
       if (diverId == null) {
@@ -779,6 +807,9 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
           fullscreenHiddenTiles: fullscreenHiddenTiles,
           fullscreenReadoutCardX: fullscreenReadoutCardX,
           fullscreenReadoutCardY: fullscreenReadoutCardY,
+          perdixOverlayEnabled: perdixOverlayEnabled,
+          perdixOverlayX: perdixOverlayX,
+          perdixOverlayY: perdixOverlayY,
         );
         return;
       }
@@ -790,6 +821,9 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
         fullscreenHiddenTiles: fullscreenHiddenTiles,
         fullscreenReadoutCardX: fullscreenReadoutCardX,
         fullscreenReadoutCardY: fullscreenReadoutCardY,
+        perdixOverlayEnabled: perdixOverlayEnabled,
+        perdixOverlayX: perdixOverlayX,
+        perdixOverlayY: perdixOverlayY,
       );
 
       // Schedule notifications with the loaded settings
@@ -840,6 +874,18 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
     final readoutCardY = state.fullscreenReadoutCardY;
     if (readoutCardY != null) {
       await prefs.setDouble(SettingsKeys.fullscreenReadoutCardY, readoutCardY);
+    }
+    await prefs.setBool(
+      SettingsKeys.perdixOverlayEnabled,
+      state.perdixOverlayEnabled,
+    );
+    final perdixX = state.perdixOverlayX;
+    if (perdixX != null) {
+      await prefs.setDouble(SettingsKeys.perdixOverlayX, perdixX);
+    }
+    final perdixY = state.perdixOverlayY;
+    if (perdixY != null) {
+      await prefs.setDouble(SettingsKeys.perdixOverlayY, perdixY);
     }
 
     final diverId = _validatedDiverId;
@@ -1310,6 +1356,21 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
     state = state.copyWith(
       fullscreenReadoutCardX: x.isFinite ? x.clamp(0.0, 1.0) : 1.0,
       fullscreenReadoutCardY: y.isFinite ? y.clamp(0.0, 1.0) : 0.0,
+    );
+    await _saveSettings();
+  }
+
+  Future<void> setPerdixOverlayEnabled(bool value) async {
+    state = state.copyWith(perdixOverlayEnabled: value);
+    await _saveSettings();
+  }
+
+  Future<void> setPerdixOverlayPosition(double x, double y) async {
+    // Same 0..1 fraction contract and non-finite canonicalization as
+    // setFullscreenReadoutCardPosition; default corner is top-right (1, 0).
+    state = state.copyWith(
+      perdixOverlayX: x.isFinite ? x.clamp(0.0, 1.0) : 1.0,
+      perdixOverlayY: y.isFinite ? y.clamp(0.0, 1.0) : 0.0,
     );
     await _saveSettings();
   }
