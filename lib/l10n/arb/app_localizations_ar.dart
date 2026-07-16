@@ -5232,7 +5232,7 @@ class AppLocalizationsAr extends AppLocalizations {
       'مراجعة الوحدات والمظهر وخيارات النسخ الاحتياطي';
 
   @override
-  String get setup_backup_cloudCopy => 'الاحتفاظ بنسخة احتياطية في السحابة';
+  String get setup_backup_cloudCopy => 'تخزين النسخ الاحتياطية في السحابة';
 
   @override
   String get setup_backup_frequency => 'التكرار';
@@ -5248,13 +5248,13 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get setup_backup_scheduleSubtitle =>
-      'انسخ سجل غوصك احتياطيًا وفق جدول زمني';
+      'انسخ بياناتك احتياطيًا وفق جدول زمني';
 
   @override
   String get setup_backup_scheduleToggle => 'نسخ احتياطي تلقائي';
 
   @override
-  String get setup_backup_subtitle => 'احمِ سجل غوصك من اليوم الأول.';
+  String get setup_backup_subtitle => 'احمِ بياناتك من اليوم الأول.';
 
   @override
   String get setup_backup_title => 'النسخ الاحتياطي والمزامنة';
@@ -5322,7 +5322,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get setup_finish_feature_statistics => 'استكشف إحصاءات الغوص';
 
   @override
-  String get setup_finish_start => 'ابدأ التسجيل';
+  String get setup_finish_start => 'لنبدأ';
 
   @override
   String get setup_finish_subtitle => 'يمكن لـ Submersion أيضًا...';
@@ -5441,7 +5441,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get setup_sync_notConnected => 'غير متصل';
 
   @override
-  String get setup_sync_subtitle => 'زامن سجلك عبر الأجهزة';
+  String get setup_sync_subtitle => 'زامن بياناتك عبر الأجهزة';
 
   @override
   String get setup_units_advanced => 'ضبط الوحدات';
@@ -5502,7 +5502,7 @@ class AppLocalizationsAr extends AppLocalizations {
       'أنشئ ملف الغواص الخاص بك واضبط التطبيق';
 
   @override
-  String get setup_welcome_startFresh_title => 'إعداد سجل جديد';
+  String get setup_welcome_startFresh_title => 'إعداد ملف تعريف جديد';
 
   @override
   String get setup_welcome_subtitle => 'تسجيل وتحليل متقدم للغوص';

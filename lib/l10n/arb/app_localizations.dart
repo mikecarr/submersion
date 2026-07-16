@@ -8981,7 +8981,7 @@ abstract class AppLocalizations {
   /// No description provided for @setup_backup_cloudCopy.
   ///
   /// In en, this message translates to:
-  /// **'Keep a backup copy in the cloud'**
+  /// **'Store backups in the cloud'**
   String get setup_backup_cloudCopy;
 
   /// No description provided for @setup_backup_frequency.
@@ -9011,7 +9011,7 @@ abstract class AppLocalizations {
   /// No description provided for @setup_backup_scheduleSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Back up your logbook on a schedule'**
+  /// **'Back up your data on a schedule'**
   String get setup_backup_scheduleSubtitle;
 
   /// No description provided for @setup_backup_scheduleToggle.
@@ -9023,7 +9023,7 @@ abstract class AppLocalizations {
   /// No description provided for @setup_backup_subtitle.
   ///
   /// In en, this message translates to:
-  /// **'Protect your dive log from day one.'**
+  /// **'Protect your data from day one.'**
   String get setup_backup_subtitle;
 
   /// No description provided for @setup_backup_title.
@@ -9143,7 +9143,7 @@ abstract class AppLocalizations {
   /// No description provided for @setup_finish_start.
   ///
   /// In en, this message translates to:
-  /// **'Start logging'**
+  /// **'Get started'**
   String get setup_finish_start;
 
   /// No description provided for @setup_finish_subtitle.
@@ -9365,7 +9365,7 @@ abstract class AppLocalizations {
   /// No description provided for @setup_sync_subtitle.
   ///
   /// In en, this message translates to:
-  /// **'Sync your logbook across devices'**
+  /// **'Sync your data across devices'**
   String get setup_sync_subtitle;
 
   /// No description provided for @setup_units_advanced.
@@ -9479,7 +9479,7 @@ abstract class AppLocalizations {
   /// No description provided for @setup_welcome_startFresh_title.
   ///
   /// In en, this message translates to:
-  /// **'Set up a new logbook'**
+  /// **'Set up a new profile'**
   String get setup_welcome_startFresh_title;
 
   /// No description provided for @setup_welcome_subtitle.

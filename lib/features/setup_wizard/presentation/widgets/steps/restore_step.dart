@@ -102,41 +102,39 @@ class RestoreStep extends ConsumerWidget {
 
     final inProgress = operation.status == BackupOperationStatus.inProgress;
 
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              l10n.setup_restore_title,
-              style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            l10n.setup_restore_title,
+            style: theme.textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.w600,
             ),
-            const SizedBox(height: 24),
-            if (inProgress) ...[
-              const CircularProgressIndicator(),
-              const SizedBox(height: 12),
-              Text(operation.message ?? l10n.setup_restore_inProgress),
-            ] else ...[
-              if (operation.status == BackupOperationStatus.error &&
-                  operation.message != null) ...[
-                Text(
-                  operation.message!,
-                  style: TextStyle(color: theme.colorScheme.error),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 12),
-              ],
-              FilledButton.icon(
-                onPressed: () => _pickAndRestore(context, ref),
-                icon: const Icon(Icons.folder_open),
-                label: Text(l10n.setup_restore_pick),
+          ),
+          const SizedBox(height: 24),
+          if (inProgress) ...[
+            const CircularProgressIndicator(),
+            const SizedBox(height: 12),
+            Text(operation.message ?? l10n.setup_restore_inProgress),
+          ] else ...[
+            if (operation.status == BackupOperationStatus.error &&
+                operation.message != null) ...[
+              Text(
+                operation.message!,
+                style: TextStyle(color: theme.colorScheme.error),
+                textAlign: TextAlign.center,
               ),
+              const SizedBox(height: 12),
             ],
+            FilledButton.icon(
+              onPressed: () => _pickAndRestore(context, ref),
+              icon: const Icon(Icons.folder_open),
+              label: Text(l10n.setup_restore_pick),
+            ),
           ],
-        ),
+        ],
       ),
     );
   }

@@ -5310,7 +5310,7 @@ class AppLocalizationsNl extends AppLocalizations {
       'Eenheden, weergave en back-upkeuzes opnieuw bekijken';
 
   @override
-  String get setup_backup_cloudCopy => 'Een back-upkopie in de cloud bewaren';
+  String get setup_backup_cloudCopy => 'Back-ups opslaan in de cloud';
 
   @override
   String get setup_backup_frequency => 'Frequentie';
@@ -5326,13 +5326,13 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get setup_backup_scheduleSubtitle =>
-      'Maak volgens schema een back-up van je logboek';
+      'Maak volgens schema een back-up van je gegevens';
 
   @override
   String get setup_backup_scheduleToggle => 'Automatische back-ups';
 
   @override
-  String get setup_backup_subtitle => 'Bescherm je duiklogboek vanaf dag één.';
+  String get setup_backup_subtitle => 'Bescherm je gegevens vanaf dag één.';
 
   @override
   String get setup_backup_title => 'Back-ups en synchronisatie';
@@ -5402,7 +5402,7 @@ class AppLocalizationsNl extends AppLocalizations {
       'Statistieken over je duiken verkennen';
 
   @override
-  String get setup_finish_start => 'Beginnen met loggen';
+  String get setup_finish_start => 'Aan de slag';
 
   @override
   String get setup_finish_subtitle => 'Submersion kan ook...';
@@ -5522,7 +5522,8 @@ class AppLocalizationsNl extends AppLocalizations {
   String get setup_sync_notConnected => 'Niet verbonden';
 
   @override
-  String get setup_sync_subtitle => 'Synchroniseer je logboek tussen apparaten';
+  String get setup_sync_subtitle =>
+      'Synchroniseer je gegevens tussen apparaten';
 
   @override
   String get setup_units_advanced => 'Eenheden verfijnen';
@@ -5583,7 +5584,7 @@ class AppLocalizationsNl extends AppLocalizations {
       'Maak je duikersprofiel en stel de app in';
 
   @override
-  String get setup_welcome_startFresh_title => 'Een nieuw logboek instellen';
+  String get setup_welcome_startFresh_title => 'Een nieuw profiel instellen';
 
   @override
   String get setup_welcome_subtitle => 'Geavanceerd duiklogboek en analyse';

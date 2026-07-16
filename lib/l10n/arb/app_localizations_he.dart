@@ -5204,7 +5204,7 @@ class AppLocalizationsHe extends AppLocalizations {
       'עיון מחדש ביחידות, במראה ובאפשרויות הגיבוי';
 
   @override
-  String get setup_backup_cloudCopy => 'שמירת עותק גיבוי בענן';
+  String get setup_backup_cloudCopy => 'אחסון גיבויים בענן';
 
   @override
   String get setup_backup_frequency => 'תדירות';
@@ -5219,13 +5219,13 @@ class AppLocalizationsHe extends AppLocalizations {
   String get setup_backup_frequency_weekly => 'שבועי';
 
   @override
-  String get setup_backup_scheduleSubtitle => 'גיבוי יומן הצלילה לפי לוח זמנים';
+  String get setup_backup_scheduleSubtitle => 'גיבוי הנתונים לפי לוח זמנים';
 
   @override
   String get setup_backup_scheduleToggle => 'גיבויים אוטומטיים';
 
   @override
-  String get setup_backup_subtitle => 'הגנו על יומן הצלילה שלכם מהיום הראשון.';
+  String get setup_backup_subtitle => 'הגנו על הנתונים שלכם מהיום הראשון.';
 
   @override
   String get setup_backup_title => 'גיבויים וסנכרון';
@@ -5293,7 +5293,7 @@ class AppLocalizationsHe extends AppLocalizations {
       'חקר סטטיסטיקות על הצלילות שלכם';
 
   @override
-  String get setup_finish_start => 'התחלת רישום';
+  String get setup_finish_start => 'בואו נתחיל';
 
   @override
   String get setup_finish_subtitle => 'Submersion יכול גם...';
@@ -5412,7 +5412,7 @@ class AppLocalizationsHe extends AppLocalizations {
   String get setup_sync_notConnected => 'לא מחובר';
 
   @override
-  String get setup_sync_subtitle => 'סנכרון היומן בין מכשירים';
+  String get setup_sync_subtitle => 'סנכרון הנתונים בין מכשירים';
 
   @override
   String get setup_units_advanced => 'כוונון יחידות';
@@ -5472,7 +5472,7 @@ class AppLocalizationsHe extends AppLocalizations {
       'צרו פרופיל צולל והגדירו את האפליקציה';
 
   @override
-  String get setup_welcome_startFresh_title => 'הגדרת יומן חדש';
+  String get setup_welcome_startFresh_title => 'הגדרת פרופיל חדש';
 
   @override
   String get setup_welcome_subtitle => 'רישום וניתוח צלילה מתקדם';

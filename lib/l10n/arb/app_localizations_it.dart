@@ -5349,7 +5349,7 @@ class AppLocalizationsIt extends AppLocalizations {
       'Rivedi unità, aspetto e opzioni di backup';
 
   @override
-  String get setup_backup_cloudCopy => 'Conserva una copia di backup nel cloud';
+  String get setup_backup_cloudCopy => 'Archivia i backup nel cloud';
 
   @override
   String get setup_backup_frequency => 'Frequenza';
@@ -5365,14 +5365,14 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get setup_backup_scheduleSubtitle =>
-      'Esegui il backup del tuo logbook a intervalli regolari';
+      'Esegui il backup dei tuoi dati a intervalli regolari';
 
   @override
   String get setup_backup_scheduleToggle => 'Backup automatici';
 
   @override
   String get setup_backup_subtitle =>
-      'Proteggi il tuo registro immersioni fin dal primo giorno.';
+      'Proteggi i tuoi dati fin dal primo giorno.';
 
   @override
   String get setup_backup_title => 'Backup e sincronizzazione';
@@ -5443,7 +5443,7 @@ class AppLocalizationsIt extends AppLocalizations {
       'Esplora le statistiche delle tue immersioni';
 
   @override
-  String get setup_finish_start => 'Inizia a registrare';
+  String get setup_finish_start => 'Inizia';
 
   @override
   String get setup_finish_subtitle => 'Submersion può anche...';
@@ -5565,7 +5565,7 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get setup_sync_subtitle =>
-      'Sincronizza il tuo logbook su tutti i dispositivi';
+      'Sincronizza i tuoi dati su tutti i dispositivi';
 
   @override
   String get setup_units_advanced => 'Regola le unità';
@@ -5625,7 +5625,7 @@ class AppLocalizationsIt extends AppLocalizations {
       'Crea il tuo profilo subacqueo e configura l\'app';
 
   @override
-  String get setup_welcome_startFresh_title => 'Configura un nuovo logbook';
+  String get setup_welcome_startFresh_title => 'Configura un nuovo profilo';
 
   @override
   String get setup_welcome_subtitle =>

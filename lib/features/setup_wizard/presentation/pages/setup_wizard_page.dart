@@ -36,23 +36,9 @@ const _formZone = {
 };
 
 class _SetupWizardPageState extends ConsumerState<SetupWizardPage> {
-  final _pageController = PageController();
   int _currentIndex = 0;
 
-  @override
-  void dispose() {
-    _pageController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _animateTo(int index) async {
-    if (_pageController.hasClients) {
-      await _pageController.animateToPage(
-        index,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-      );
-    }
+  void _animateTo(int index) {
     if (mounted) setState(() => _currentIndex = index);
   }
 
@@ -225,17 +211,12 @@ class _SetupWizardPageState extends ConsumerState<SetupWizardPage> {
   @override
   Widget build(BuildContext context) {
     final draft = ref.watch(setupWizardProvider(widget.mode));
+    final theme = Theme.of(context);
     final steps = computeSteps(draft);
     if (_currentIndex >= steps.length) {
-      _currentIndex = steps.length - 1;
       // The step list shrank under us (e.g. the adopt pivot from the fresh
-      // path to the shorter existing-data path). Resync the controller
-      // post-frame so the PageView can't sit on an out-of-range page.
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted && _pageController.hasClients) {
-          _pageController.jumpToPage(_currentIndex);
-        }
-      });
+      // path to the shorter existing-data path). Clamp to the last page.
+      _currentIndex = steps.length - 1;
     }
     final defs = steps.map(_defFor).toList();
     final currentId = steps[_currentIndex];
@@ -250,44 +231,79 @@ class _SetupWizardPageState extends ConsumerState<SetupWizardPage> {
 
     return Scaffold(
       body: OceanBackground(
+        // Match the startup splash's bright ocean so the background does not
+        // visibly darken when the splash dissolves into the wizard.
+        brightness: Brightness.light,
         child: SafeArea(
           child: Center(
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 560),
-              child: SizedBox.expand(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Card(
-                    clipBehavior: Clip.antiAlias,
-                    child: Column(
-                      children: [
-                        if (labelledIndex >= 0)
-                          WizardStepIndicator(
-                            labels: labelledIds.map(_stepLabel).toList(),
-                            currentStep: labelledIndex,
-                          )
-                        // Choice/existing-data steps have no bottom bar, so a
-                        // slim top back bar keeps every step past the fork
-                        // reversible.
-                        else if (_currentIndex > 0)
-                          _buildBackBar(),
-                        // Keyed so the PageView survives the indicator and
-                        // bottom bar toggling in and out of the Column (a
-                        // slot shift would otherwise remount it at page 0).
-                        Expanded(
-                          key: const ValueKey('setup_wizard_pages'),
-                          child: PageView(
-                            controller: _pageController,
-                            physics: const NeverScrollableScrollPhysics(),
-                            children: [
-                              for (final def in defs)
-                                Builder(builder: def.builder),
-                            ],
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Material(
+                  key: const ValueKey('setup_wizard_card'),
+                  color: theme.colorScheme.surface.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(16),
+                  clipBehavior: Clip.antiAlias,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (labelledIndex >= 0)
+                        WizardStepIndicator(
+                          labels: labelledIds.map(_stepLabel).toList(),
+                          currentStep: labelledIndex,
+                        )
+                      // Choice/existing-data steps have no bottom bar, so a
+                      // slim top back bar keeps every step past the fork
+                      // reversible.
+                      else if (_currentIndex > 0)
+                        _buildBackBar(),
+                      // Keyed so the switcher survives the indicator and bottom
+                      // bar toggling in and out of the Column (a slot shift
+                      // would otherwise remount it and restart the transition).
+                      // Flexible (loose) inside a min-height Column lets the
+                      // card hug the current step's content and only scroll
+                      // when a step is taller than the available space.
+                      Flexible(
+                        key: const ValueKey('setup_wizard_pages'),
+                        child: AnimatedSize(
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeInOut,
+                          alignment: Alignment.topCenter,
+                          child: AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 300),
+                            switchInCurve: Curves.easeInOut,
+                            switchOutCurve: Curves.easeInOut,
+                            transitionBuilder: (child, animation) =>
+                                FadeTransition(
+                                  opacity: animation,
+                                  child: SlideTransition(
+                                    position: Tween<Offset>(
+                                      begin: const Offset(0, 0.03),
+                                      end: Offset.zero,
+                                    ).animate(animation),
+                                    child: child,
+                                  ),
+                                ),
+                            layoutBuilder: (currentChild, previousChildren) =>
+                                Stack(
+                                  alignment: Alignment.topCenter,
+                                  children: [
+                                    ...previousChildren,
+                                    ?currentChild,
+                                  ],
+                                ),
+                            child: KeyedSubtree(
+                              key: ValueKey(_currentIndex),
+                              child: Builder(
+                                builder: defs[_currentIndex].builder,
+                              ),
+                            ),
                           ),
                         ),
-                        if (inFormZone) _buildBottomBar(defs[_currentIndex]),
-                      ],
-                    ),
+                      ),
+                      if (inFormZone) _buildBottomBar(defs[_currentIndex]),
+                    ],
                   ),
                 ),
               ),

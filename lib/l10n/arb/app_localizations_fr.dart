@@ -5373,8 +5373,7 @@ class AppLocalizationsFr extends AppLocalizations {
       'Revoir les unités, l\'apparence et les choix de sauvegarde';
 
   @override
-  String get setup_backup_cloudCopy =>
-      'Conserver une copie de sauvegarde dans le cloud';
+  String get setup_backup_cloudCopy => 'Stocker les sauvegardes dans le cloud';
 
   @override
   String get setup_backup_frequency => 'Fréquence';
@@ -5390,14 +5389,14 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get setup_backup_scheduleSubtitle =>
-      'Sauvegardez votre carnet selon un calendrier';
+      'Sauvegardez vos données selon un calendrier';
 
   @override
   String get setup_backup_scheduleToggle => 'Sauvegardes automatiques';
 
   @override
   String get setup_backup_subtitle =>
-      'Protégez votre carnet de plongée dès le premier jour.';
+      'Protégez vos données dès le premier jour.';
 
   @override
   String get setup_backup_title => 'Sauvegardes et synchronisation';
@@ -5591,7 +5590,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get setup_sync_subtitle =>
-      'Synchronisez votre carnet entre vos appareils';
+      'Synchronisez vos données entre vos appareils';
 
   @override
   String get setup_units_advanced => 'Ajuster les unités';
@@ -5652,7 +5651,7 @@ class AppLocalizationsFr extends AppLocalizations {
       'Créez votre profil de plongeur et configurez l\'application';
 
   @override
-  String get setup_welcome_startFresh_title => 'Créer un nouveau carnet';
+  String get setup_welcome_startFresh_title => 'Créer un nouveau profil';
 
   @override
   String get setup_welcome_subtitle =>

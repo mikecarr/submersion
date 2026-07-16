@@ -5330,7 +5330,7 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get setup_backup_cloudCopy =>
-      'Biztonsági másolat megőrzése a felhőben';
+      'Biztonsági mentések tárolása a felhőben';
 
   @override
   String get setup_backup_frequency => 'Gyakoriság';
@@ -5346,14 +5346,13 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get setup_backup_scheduleSubtitle =>
-      'Naplója rendszeres biztonsági mentése';
+      'Adatok rendszeres biztonsági mentése';
 
   @override
   String get setup_backup_scheduleToggle => 'Automatikus biztonsági mentés';
 
   @override
-  String get setup_backup_subtitle =>
-      'Védje merülési naplóját az első naptól kezdve.';
+  String get setup_backup_subtitle => 'Védje adatait az első naptól kezdve.';
 
   @override
   String get setup_backup_title => 'Biztonsági mentés és szinkronizálás';
@@ -5424,7 +5423,7 @@ class AppLocalizationsHu extends AppLocalizations {
       'Merülési statisztikák felfedezése';
 
   @override
-  String get setup_finish_start => 'Naplózás indítása';
+  String get setup_finish_start => 'Kezdés';
 
   @override
   String get setup_finish_subtitle => 'A Submersion ezenkívül...';
@@ -5544,7 +5543,7 @@ class AppLocalizationsHu extends AppLocalizations {
   String get setup_sync_notConnected => 'Nincs csatlakoztatva';
 
   @override
-  String get setup_sync_subtitle => 'Napló szinkronizálása az eszközök között';
+  String get setup_sync_subtitle => 'Adatok szinkronizálása az eszközök között';
 
   @override
   String get setup_units_advanced => 'Egységek finomhangolása';
@@ -5605,7 +5604,7 @@ class AppLocalizationsHu extends AppLocalizations {
       'Búvárprofil létrehozása és az alkalmazás beállítása';
 
   @override
-  String get setup_welcome_startFresh_title => 'Új napló beállítása';
+  String get setup_welcome_startFresh_title => 'Új profil beállítása';
 
   @override
   String get setup_welcome_subtitle => 'Fejlett merülés napló és elemzés';

@@ -10,6 +10,7 @@ import 'package:submersion/features/settings/presentation/providers/sync_provide
 import 'package:submersion/features/settings/presentation/widgets/dropbox_connect_dialog.dart';
 import 'package:submersion/features/setup_wizard/domain/setup_wizard_models.dart';
 import 'package:submersion/features/setup_wizard/presentation/providers/setup_wizard_providers.dart';
+import 'package:submersion/features/setup_wizard/presentation/widgets/wizard_option_card_style.dart';
 import 'package:submersion/l10n/l10n_extension.dart';
 
 /// Backup schedule plus optional cloud sync provider connection.
@@ -218,6 +219,7 @@ class _BackupSyncStepState extends ConsumerState<BackupSyncStep> {
             const SizedBox(height: 8),
             if (iCloudAvailable)
               _providerCard(
+                theme: theme,
                 icon: Icons.cloud,
                 name: 'iCloud',
                 onTap: _connecting
@@ -229,6 +231,9 @@ class _BackupSyncStepState extends ConsumerState<BackupSyncStep> {
             else if (isApple &&
                 iCloudAvailability == ICloudAvailability.unsupported)
               Card(
+                elevation: 0,
+                color: WizardOptionCardStyle.fill(theme),
+                shape: WizardOptionCardStyle.shape(theme),
                 margin: const EdgeInsets.symmetric(vertical: 4),
                 child: ListTile(
                   enabled: false,
@@ -239,6 +244,7 @@ class _BackupSyncStepState extends ConsumerState<BackupSyncStep> {
               ),
             if (dropboxConfigured)
               _providerCard(
+                theme: theme,
                 icon: Icons.cloud_queue,
                 name: 'Dropbox',
                 onTap: _connecting
@@ -246,6 +252,7 @@ class _BackupSyncStepState extends ConsumerState<BackupSyncStep> {
                     : () => _connect(CloudProviderType.dropbox),
               ),
             _providerCard(
+              theme: theme,
               icon: Icons.storage,
               name: 'S3',
               onTap: _connecting ? null : _openS3Config,
@@ -264,11 +271,15 @@ class _BackupSyncStepState extends ConsumerState<BackupSyncStep> {
   }
 
   Widget _providerCard({
+    required ThemeData theme,
     required IconData icon,
     required String name,
     required VoidCallback? onTap,
   }) {
     return Card(
+      elevation: 0,
+      color: WizardOptionCardStyle.fill(theme),
+      shape: WizardOptionCardStyle.shape(theme),
       margin: const EdgeInsets.symmetric(vertical: 4),
       child: ListTile(
         leading: Icon(icon),

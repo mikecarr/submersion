@@ -80,7 +80,7 @@ void main() {
     expect(find.text("You're all set"), findsOneWidget);
     expect(find.text('Download dives from your dive computer'), findsOneWidget);
 
-    await tester.tap(find.text('Start logging'));
+    await tester.tap(find.text('Get started'));
     await tester.runAsync(() async {
       // Apply performs real DB writes; let them settle outside fake time.
       await Future<void>.delayed(const Duration(milliseconds: 300));
@@ -123,13 +123,13 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Start logging'));
+    await tester.tap(find.text('Get started'));
     await tester.pumpAndSettle();
 
     expect(find.textContaining('Could not complete setup'), findsOneWidget);
     // Button re-enabled so the user can retry.
     final button = tester.widget<FilledButton>(
-      find.widgetWithText(FilledButton, 'Start logging'),
+      find.widgetWithText(FilledButton, 'Get started'),
     );
     expect(button.onPressed, isNotNull);
   });

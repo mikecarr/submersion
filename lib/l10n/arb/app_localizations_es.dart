@@ -5349,7 +5349,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get setup_backup_cloudCopy =>
-      'Guardar una copia de seguridad en la nube';
+      'Almacena copias de seguridad en la nube';
 
   @override
   String get setup_backup_frequency => 'Frecuencia';
@@ -5365,14 +5365,13 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get setup_backup_scheduleSubtitle =>
-      'Haz copias de seguridad de tu diario según una programación';
+      'Haz copias de seguridad de tus datos según una programación';
 
   @override
   String get setup_backup_scheduleToggle => 'Copias de seguridad automáticas';
 
   @override
-  String get setup_backup_subtitle =>
-      'Protege tu registro de buceo desde el primer día.';
+  String get setup_backup_subtitle => 'Protege tus datos desde el primer día.';
 
   @override
   String get setup_backup_title => 'Copias de seguridad y sincronización';
@@ -5444,7 +5443,7 @@ class AppLocalizationsEs extends AppLocalizations {
       'Explora estadísticas sobre tus inmersiones';
 
   @override
-  String get setup_finish_start => 'Empezar a registrar';
+  String get setup_finish_start => 'Comenzar';
 
   @override
   String get setup_finish_subtitle => 'Submersion también puede...';
@@ -5565,7 +5564,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get setup_sync_notConnected => 'No conectado';
 
   @override
-  String get setup_sync_subtitle => 'Sincroniza tu diario entre dispositivos';
+  String get setup_sync_subtitle => 'Sincroniza tus datos entre dispositivos';
 
   @override
   String get setup_units_advanced => 'Ajustar unidades';
@@ -5625,7 +5624,7 @@ class AppLocalizationsEs extends AppLocalizations {
       'Crea tu perfil de buceador y configura la aplicación';
 
   @override
-  String get setup_welcome_startFresh_title => 'Configurar un diario nuevo';
+  String get setup_welcome_startFresh_title => 'Configurar un perfil nuevo';
 
   @override
   String get setup_welcome_subtitle =>

@@ -52,40 +52,38 @@ class _OpenFolderStepState extends ConsumerState<OpenFolderStep> {
     final theme = Theme.of(context);
     final l10n = context.l10n;
 
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              l10n.setup_folder_title,
-              style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            l10n.setup_folder_title,
+            style: theme.textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.w600,
             ),
-            const SizedBox(height: 24),
-            if (_busy) ...[
-              const CircularProgressIndicator(),
-              const SizedBox(height: 12),
-              Text(l10n.setup_folder_switching),
-            ] else ...[
-              if (_error != null) ...[
-                Text(
-                  _error!,
-                  style: TextStyle(color: theme.colorScheme.error),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 12),
-              ],
-              FilledButton.icon(
-                onPressed: _pickFolder,
-                icon: const Icon(Icons.folder_open),
-                label: Text(l10n.setup_folder_pick),
+          ),
+          const SizedBox(height: 24),
+          if (_busy) ...[
+            const CircularProgressIndicator(),
+            const SizedBox(height: 12),
+            Text(l10n.setup_folder_switching),
+          ] else ...[
+            if (_error != null) ...[
+              Text(
+                _error!,
+                style: TextStyle(color: theme.colorScheme.error),
+                textAlign: TextAlign.center,
               ),
+              const SizedBox(height: 12),
             ],
+            FilledButton.icon(
+              onPressed: _pickFolder,
+              icon: const Icon(Icons.folder_open),
+              label: Text(l10n.setup_folder_pick),
+            ),
           ],
-        ),
+        ],
       ),
     );
   }

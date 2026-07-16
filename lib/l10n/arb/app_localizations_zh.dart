@@ -5069,7 +5069,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_manage_setupAssistant_subtitle => '重新设置单位、外观和备份选项';
 
   @override
-  String get setup_backup_cloudCopy => '在云端保留备份副本';
+  String get setup_backup_cloudCopy => '在云端存储备份';
 
   @override
   String get setup_backup_frequency => '频率';
@@ -5084,13 +5084,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get setup_backup_frequency_weekly => '每周';
 
   @override
-  String get setup_backup_scheduleSubtitle => '按计划备份你的潜水日志';
+  String get setup_backup_scheduleSubtitle => '按计划备份你的数据';
 
   @override
   String get setup_backup_scheduleToggle => '自动备份';
 
   @override
-  String get setup_backup_subtitle => '从第一天起保护你的潜水日志。';
+  String get setup_backup_subtitle => '从第一天起保护你的数据。';
 
   @override
   String get setup_backup_title => '备份与同步';
@@ -5152,7 +5152,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get setup_finish_feature_statistics => '探索你的潜水统计数据';
 
   @override
-  String get setup_finish_start => '开始记录';
+  String get setup_finish_start => '开始使用';
 
   @override
   String get setup_finish_subtitle => 'Submersion 还可以...';
@@ -5269,7 +5269,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get setup_sync_notConnected => '未连接';
 
   @override
-  String get setup_sync_subtitle => '在多设备间同步日志';
+  String get setup_sync_subtitle => '在多设备间同步数据';
 
   @override
   String get setup_units_advanced => '微调单位';
@@ -5326,7 +5326,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get setup_welcome_startFresh_subtitle => '创建潜水员档案并配置应用';
 
   @override
-  String get setup_welcome_startFresh_title => '创建新日志';
+  String get setup_welcome_startFresh_title => '创建新档案';
 
   @override
   String get setup_welcome_subtitle => '高级潜水日志与分析';

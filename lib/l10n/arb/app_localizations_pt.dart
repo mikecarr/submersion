@@ -5348,7 +5348,7 @@ class AppLocalizationsPt extends AppLocalizations {
       'Reveja unidades, aparência e opções de backup';
 
   @override
-  String get setup_backup_cloudCopy => 'Manter uma cópia de backup na nuvem';
+  String get setup_backup_cloudCopy => 'Armazenar backups na nuvem';
 
   @override
   String get setup_backup_frequency => 'Frequência';
@@ -5364,14 +5364,14 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get setup_backup_scheduleSubtitle =>
-      'Faça backup do seu registro periodicamente';
+      'Faça backup dos seus dados periodicamente';
 
   @override
   String get setup_backup_scheduleToggle => 'Backups automáticos';
 
   @override
   String get setup_backup_subtitle =>
-      'Proteja seu registro de mergulho desde o primeiro dia.';
+      'Proteja seus dados desde o primeiro dia.';
 
   @override
   String get setup_backup_title => 'Backups e sincronização';
@@ -5442,7 +5442,7 @@ class AppLocalizationsPt extends AppLocalizations {
       'Explore estatísticas sobre seus mergulhos';
 
   @override
-  String get setup_finish_start => 'Começar a registrar';
+  String get setup_finish_start => 'Começar';
 
   @override
   String get setup_finish_subtitle => 'O Submersion também pode...';
@@ -5562,8 +5562,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get setup_sync_notConnected => 'Não conectado';
 
   @override
-  String get setup_sync_subtitle =>
-      'Sincronize seu registro entre dispositivos';
+  String get setup_sync_subtitle => 'Sincronize seus dados entre dispositivos';
 
   @override
   String get setup_units_advanced => 'Ajustar unidades';
@@ -5623,7 +5622,7 @@ class AppLocalizationsPt extends AppLocalizations {
       'Crie seu perfil de mergulhador e configure o aplicativo';
 
   @override
-  String get setup_welcome_startFresh_title => 'Configurar um novo registro';
+  String get setup_welcome_startFresh_title => 'Configurar um novo perfil';
 
   @override
   String get setup_welcome_subtitle =>

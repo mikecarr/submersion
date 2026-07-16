@@ -5251,7 +5251,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Revisit units, appearance, and backup choices';
 
   @override
-  String get setup_backup_cloudCopy => 'Keep a backup copy in the cloud';
+  String get setup_backup_cloudCopy => 'Store backups in the cloud';
 
   @override
   String get setup_backup_frequency => 'Frequency';
@@ -5266,14 +5266,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get setup_backup_frequency_weekly => 'Weekly';
 
   @override
-  String get setup_backup_scheduleSubtitle =>
-      'Back up your logbook on a schedule';
+  String get setup_backup_scheduleSubtitle => 'Back up your data on a schedule';
 
   @override
   String get setup_backup_scheduleToggle => 'Automatic backups';
 
   @override
-  String get setup_backup_subtitle => 'Protect your dive log from day one.';
+  String get setup_backup_subtitle => 'Protect your data from day one.';
 
   @override
   String get setup_backup_title => 'Backups & Sync';
@@ -5342,7 +5341,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Explore statistics about your diving';
 
   @override
-  String get setup_finish_start => 'Start logging';
+  String get setup_finish_start => 'Get started';
 
   @override
   String get setup_finish_subtitle => 'Submersion can also...';
@@ -5462,7 +5461,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get setup_sync_notConnected => 'Not connected';
 
   @override
-  String get setup_sync_subtitle => 'Sync your logbook across devices';
+  String get setup_sync_subtitle => 'Sync your data across devices';
 
   @override
   String get setup_units_advanced => 'Fine-tune units';
@@ -5523,7 +5522,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Create your diver profile and configure the app';
 
   @override
-  String get setup_welcome_startFresh_title => 'Set up a new logbook';
+  String get setup_welcome_startFresh_title => 'Set up a new profile';
 
   @override
   String get setup_welcome_subtitle => 'Advanced dive logging and analytics';
