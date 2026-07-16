@@ -605,20 +605,19 @@ final dueClocksProvider = FutureProvider<List<DueClock>>((ref) async {
   return due;
 });
 
-/// Worst clock severity per equipment id (absent = ok); list badges read this
-/// so they do not run per-row queries.
-final equipmentServiceSeverityProvider =
-    FutureProvider<Map<String, ServiceClockSeverity>>((ref) async {
-      final due = await ref.watch(dueClocksProvider.future);
-      final worst = <String, ServiceClockSeverity>{};
-      for (final d in due) {
-        final current = worst[d.item.id];
-        if (current == null || d.status.severity.index > current.index) {
-          worst[d.item.id] = d.status.severity;
-        }
-      }
-      return worst;
-    });
+/// Worst due clock per equipment id (absent = all clocks ok); list badges
+/// read this so they do not run per-row queries. dueClocksProvider is sorted
+/// overdue-first, so the first clock seen per item is its worst.
+final equipmentWorstClockProvider = FutureProvider<Map<String, DueClock>>((
+  ref,
+) async {
+  final due = await ref.watch(dueClocksProvider.future);
+  final worst = <String, DueClock>{};
+  for (final d in due) {
+    worst.putIfAbsent(d.item.id, () => d);
+  }
+  return worst;
+});
 
 /// Clocks that block an upcoming trip: date trigger before the trip ends, or
 /// already due/overdue now. Usage triggers are never forecast into the trip.

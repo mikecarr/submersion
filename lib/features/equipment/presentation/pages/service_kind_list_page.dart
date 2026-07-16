@@ -111,7 +111,7 @@ class ServiceKindListPage extends ConsumerWidget {
     await ref.read(serviceKindRepositoryProvider).deleteKind(kind.id);
     ref.invalidate(serviceKindsProvider);
     ref.invalidate(dueClocksProvider);
-    ref.invalidate(equipmentServiceSeverityProvider);
+    ref.invalidate(equipmentWorstClockProvider);
   }
 
   Future<void> _showEditDialog(

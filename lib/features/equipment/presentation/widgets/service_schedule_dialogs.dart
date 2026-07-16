@@ -13,7 +13,7 @@ void invalidateServiceClockProviders(WidgetRef ref, String equipmentId) {
   ref.invalidate(serviceClockStatusesProvider(equipmentId));
   ref.invalidate(serviceSchedulesForEquipmentProvider(equipmentId));
   ref.invalidate(dueClocksProvider);
-  ref.invalidate(equipmentServiceSeverityProvider);
+  ref.invalidate(equipmentWorstClockProvider);
 }
 
 /// Bottom sheet listing service kinds that apply to [equipmentType] and are

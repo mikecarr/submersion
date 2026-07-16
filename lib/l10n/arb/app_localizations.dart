@@ -16420,6 +16420,36 @@ abstract class AppLocalizations {
   /// **'every {hours} hours'**
   String equipment_serviceKinds_everyHours(String hours);
 
+  /// No description provided for @dashboard_serviceDue_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Service due'**
+  String get dashboard_serviceDue_title;
+
+  /// No description provided for @dashboard_serviceDue_more.
+  ///
+  /// In en, this message translates to:
+  /// **'+{count} more'**
+  String dashboard_serviceDue_more(int count);
+
+  /// No description provided for @dashboard_alerts_clockDue.
+  ///
+  /// In en, this message translates to:
+  /// **'{name}: {kind} due'**
+  String dashboard_alerts_clockDue(String name, String kind);
+
+  /// No description provided for @dashboard_alerts_clockOverdue.
+  ///
+  /// In en, this message translates to:
+  /// **'{name}: {kind} overdue'**
+  String dashboard_alerts_clockOverdue(String name, String kind);
+
+  /// No description provided for @equipment_list_worstClock.
+  ///
+  /// In en, this message translates to:
+  /// **'{kind} overdue'**
+  String equipment_list_worstClock(String kind);
+
   /// No description provided for @equipment_detail_serviceIntervalLabel.
   ///
   /// In en, this message translates to:

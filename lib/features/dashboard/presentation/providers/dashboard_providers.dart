@@ -10,7 +10,11 @@ import 'package:submersion/features/statistics/presentation/providers/statistics
 
 /// Dashboard alerts data class
 class DashboardAlerts {
+  /// Legacy single-clock list (kept for existing consumers).
   final List<EquipmentItem> equipmentServiceDue;
+
+  /// Per-clock service alerts from the service ledger (overdue/due-soon).
+  final List<DueClock> serviceClocksDue;
   final bool insuranceExpiringSoon;
   final bool insuranceExpired;
   final DateTime? insuranceExpiryDate;
@@ -18,6 +22,7 @@ class DashboardAlerts {
 
   const DashboardAlerts({
     required this.equipmentServiceDue,
+    this.serviceClocksDue = const [],
     required this.insuranceExpiringSoon,
     required this.insuranceExpired,
     this.insuranceExpiryDate,
@@ -25,12 +30,10 @@ class DashboardAlerts {
   });
 
   bool get hasAlerts =>
-      equipmentServiceDue.isNotEmpty ||
-      insuranceExpiringSoon ||
-      insuranceExpired;
+      serviceClocksDue.isNotEmpty || insuranceExpiringSoon || insuranceExpired;
 
   int get alertCount {
-    int count = equipmentServiceDue.length;
+    int count = serviceClocksDue.length;
     if (insuranceExpiringSoon || insuranceExpired) count++;
     return count;
   }
@@ -83,10 +86,12 @@ final recentDivesProvider = FutureProvider<List<Dive>>((ref) async {
 /// Dashboard alerts provider - combines equipment and insurance alerts
 final dashboardAlertsProvider = FutureProvider<DashboardAlerts>((ref) async {
   final serviceDue = await ref.watch(serviceDueEquipmentProvider.future);
+  final clocksDue = await ref.watch(dueClocksProvider.future);
   final diver = await ref.watch(currentDiverProvider.future);
 
   return DashboardAlerts(
     equipmentServiceDue: serviceDue,
+    serviceClocksDue: clocksDue,
     insuranceExpiringSoon: diver?.insurance.isExpiringSoon ?? false,
     insuranceExpired: diver?.insurance.isExpired ?? false,
     insuranceExpiryDate: diver?.insurance.expiryDate,

@@ -5190,6 +5190,45 @@
       }
     }
   },
+  "dashboard_serviceDue_title": "Service due",
+  "dashboard_serviceDue_more": "+{count} more",
+  "@dashboard_serviceDue_more": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "dashboard_alerts_clockDue": "{name}: {kind} due",
+  "@dashboard_alerts_clockDue": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "kind": {
+        "type": "String"
+      }
+    }
+  },
+  "dashboard_alerts_clockOverdue": "{name}: {kind} overdue",
+  "@dashboard_alerts_clockOverdue": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "kind": {
+        "type": "String"
+      }
+    }
+  },
+  "equipment_list_worstClock": "{kind} overdue",
+  "@equipment_list_worstClock": {
+    "placeholders": {
+      "kind": {
+        "type": "String"
+      }
+    }
+  },
   "equipment_detail_serviceIntervalLabel": "Service Interval",
   "equipment_detail_serviceIntervalValue": "{days} days",
   "equipment_detail_serviceOverdue": "Service is overdue!",

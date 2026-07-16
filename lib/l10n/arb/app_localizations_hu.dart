@@ -9553,6 +9553,29 @@ class AppLocalizationsHu extends AppLocalizations {
   }
 
   @override
+  String get dashboard_serviceDue_title => 'Service due';
+
+  @override
+  String dashboard_serviceDue_more(int count) {
+    return '+$count more';
+  }
+
+  @override
+  String dashboard_alerts_clockDue(String name, String kind) {
+    return '$name: $kind due';
+  }
+
+  @override
+  String dashboard_alerts_clockOverdue(String name, String kind) {
+    return '$name: $kind overdue';
+  }
+
+  @override
+  String equipment_list_worstClock(String kind) {
+    return '$kind overdue';
+  }
+
+  @override
   String get equipment_detail_serviceIntervalLabel => 'Szerviz intervallum';
 
   @override
