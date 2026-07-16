@@ -9495,6 +9495,75 @@ class AppLocalizationsPt extends AppLocalizations {
   String get equipment_scheduleDialog_cancel => 'Cancel';
 
   @override
+  String get equipment_serviceKinds_title => 'Service types';
+
+  @override
+  String get equipment_serviceKinds_builtIn => 'Built-in';
+
+  @override
+  String get equipment_serviceKinds_custom => 'Custom';
+
+  @override
+  String get equipment_serviceKinds_add => 'Add service type';
+
+  @override
+  String get equipment_serviceKinds_editTitle => 'Edit service type';
+
+  @override
+  String get equipment_serviceKinds_nameLabel => 'Name';
+
+  @override
+  String get equipment_serviceKinds_nameRequired => 'A name is required';
+
+  @override
+  String get equipment_serviceKinds_appliesTo => 'Applies to';
+
+  @override
+  String get equipment_serviceKinds_autoAttach =>
+      'Attach automatically to new gear';
+
+  @override
+  String get equipment_serviceKinds_deleteConfirmTitle =>
+      'Delete service type?';
+
+  @override
+  String get equipment_serviceKinds_deleteConfirmBody =>
+      'Clocks using this service type will be removed.';
+
+  @override
+  String get equipment_serviceKinds_delete => 'Delete';
+
+  @override
+  String get equipment_serviceKinds_cancel => 'Cancel';
+
+  @override
+  String get equipment_serviceKinds_save => 'Save';
+
+  @override
+  String get equipment_serviceKinds_emptyCustom =>
+      'No custom service types yet';
+
+  @override
+  String equipment_serviceKinds_intervalSummary(String summary) {
+    return '$summary';
+  }
+
+  @override
+  String equipment_serviceKinds_everyDays(int days) {
+    return 'every $days days';
+  }
+
+  @override
+  String equipment_serviceKinds_everyDives(int dives) {
+    return 'every $dives dives';
+  }
+
+  @override
+  String equipment_serviceKinds_everyHours(String hours) {
+    return 'every $hours hours';
+  }
+
+  @override
   String get equipment_detail_serviceIntervalLabel => 'Intervalo de Manutencao';
 
   @override

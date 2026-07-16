@@ -5143,6 +5143,53 @@
   "equipment_scheduleDialog_clearAnchor": "Clear baseline date",
   "equipment_scheduleDialog_save": "Save",
   "equipment_scheduleDialog_cancel": "Cancel",
+  "equipment_serviceKinds_title": "Service types",
+  "equipment_serviceKinds_builtIn": "Built-in",
+  "equipment_serviceKinds_custom": "Custom",
+  "equipment_serviceKinds_add": "Add service type",
+  "equipment_serviceKinds_editTitle": "Edit service type",
+  "equipment_serviceKinds_nameLabel": "Name",
+  "equipment_serviceKinds_nameRequired": "A name is required",
+  "equipment_serviceKinds_appliesTo": "Applies to",
+  "equipment_serviceKinds_autoAttach": "Attach automatically to new gear",
+  "equipment_serviceKinds_deleteConfirmTitle": "Delete service type?",
+  "equipment_serviceKinds_deleteConfirmBody": "Clocks using this service type will be removed.",
+  "equipment_serviceKinds_delete": "Delete",
+  "equipment_serviceKinds_cancel": "Cancel",
+  "equipment_serviceKinds_save": "Save",
+  "equipment_serviceKinds_emptyCustom": "No custom service types yet",
+  "equipment_serviceKinds_intervalSummary": "{summary}",
+  "@equipment_serviceKinds_intervalSummary": {
+    "placeholders": {
+      "summary": {
+        "type": "String"
+      }
+    }
+  },
+  "equipment_serviceKinds_everyDays": "every {days} days",
+  "@equipment_serviceKinds_everyDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "equipment_serviceKinds_everyDives": "every {dives} dives",
+  "@equipment_serviceKinds_everyDives": {
+    "placeholders": {
+      "dives": {
+        "type": "int"
+      }
+    }
+  },
+  "equipment_serviceKinds_everyHours": "every {hours} hours",
+  "@equipment_serviceKinds_everyHours": {
+    "placeholders": {
+      "hours": {
+        "type": "String"
+      }
+    }
+  },
   "equipment_detail_serviceIntervalLabel": "Service Interval",
   "equipment_detail_serviceIntervalValue": "{days} days",
   "equipment_detail_serviceOverdue": "Service is overdue!",

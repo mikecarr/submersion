@@ -58,6 +58,7 @@ import 'package:submersion/features/equipment/presentation/pages/equipment_list_
 import 'package:submersion/features/equipment/presentation/pages/equipment_detail_page.dart';
 import 'package:submersion/features/equipment/presentation/pages/equipment_edit_page.dart';
 import 'package:submersion/features/equipment/presentation/pages/equipment_set_list_page.dart';
+import 'package:submersion/features/equipment/presentation/pages/service_kind_list_page.dart';
 import 'package:submersion/features/equipment/presentation/pages/equipment_set_detail_page.dart';
 import 'package:submersion/features/equipment/presentation/pages/equipment_set_edit_page.dart';
 import 'package:submersion/features/trips/presentation/pages/trip_list_page.dart';
@@ -478,6 +479,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                     ],
                   ),
                 ],
+              ),
+              GoRoute(
+                path: 'service-types',
+                name: 'manageServiceTypes',
+                builder: (context, state) => const ServiceKindListPage(),
               ),
               GoRoute(
                 path: ':equipmentId',

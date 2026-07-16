@@ -16306,6 +16306,120 @@ abstract class AppLocalizations {
   /// **'Cancel'**
   String get equipment_scheduleDialog_cancel;
 
+  /// No description provided for @equipment_serviceKinds_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Service types'**
+  String get equipment_serviceKinds_title;
+
+  /// No description provided for @equipment_serviceKinds_builtIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Built-in'**
+  String get equipment_serviceKinds_builtIn;
+
+  /// No description provided for @equipment_serviceKinds_custom.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom'**
+  String get equipment_serviceKinds_custom;
+
+  /// No description provided for @equipment_serviceKinds_add.
+  ///
+  /// In en, this message translates to:
+  /// **'Add service type'**
+  String get equipment_serviceKinds_add;
+
+  /// No description provided for @equipment_serviceKinds_editTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit service type'**
+  String get equipment_serviceKinds_editTitle;
+
+  /// No description provided for @equipment_serviceKinds_nameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get equipment_serviceKinds_nameLabel;
+
+  /// No description provided for @equipment_serviceKinds_nameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'A name is required'**
+  String get equipment_serviceKinds_nameRequired;
+
+  /// No description provided for @equipment_serviceKinds_appliesTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Applies to'**
+  String get equipment_serviceKinds_appliesTo;
+
+  /// No description provided for @equipment_serviceKinds_autoAttach.
+  ///
+  /// In en, this message translates to:
+  /// **'Attach automatically to new gear'**
+  String get equipment_serviceKinds_autoAttach;
+
+  /// No description provided for @equipment_serviceKinds_deleteConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete service type?'**
+  String get equipment_serviceKinds_deleteConfirmTitle;
+
+  /// No description provided for @equipment_serviceKinds_deleteConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Clocks using this service type will be removed.'**
+  String get equipment_serviceKinds_deleteConfirmBody;
+
+  /// No description provided for @equipment_serviceKinds_delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get equipment_serviceKinds_delete;
+
+  /// No description provided for @equipment_serviceKinds_cancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get equipment_serviceKinds_cancel;
+
+  /// No description provided for @equipment_serviceKinds_save.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get equipment_serviceKinds_save;
+
+  /// No description provided for @equipment_serviceKinds_emptyCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'No custom service types yet'**
+  String get equipment_serviceKinds_emptyCustom;
+
+  /// No description provided for @equipment_serviceKinds_intervalSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{summary}'**
+  String equipment_serviceKinds_intervalSummary(String summary);
+
+  /// No description provided for @equipment_serviceKinds_everyDays.
+  ///
+  /// In en, this message translates to:
+  /// **'every {days} days'**
+  String equipment_serviceKinds_everyDays(int days);
+
+  /// No description provided for @equipment_serviceKinds_everyDives.
+  ///
+  /// In en, this message translates to:
+  /// **'every {dives} dives'**
+  String equipment_serviceKinds_everyDives(int dives);
+
+  /// No description provided for @equipment_serviceKinds_everyHours.
+  ///
+  /// In en, this message translates to:
+  /// **'every {hours} hours'**
+  String equipment_serviceKinds_everyHours(String hours);
+
   /// No description provided for @equipment_detail_serviceIntervalLabel.
   ///
   /// In en, this message translates to:
