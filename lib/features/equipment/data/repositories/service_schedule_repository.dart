@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:drift/drift.dart';
 import 'package:uuid/uuid.dart';
 
@@ -117,6 +119,29 @@ class ServiceScheduleRepository {
           updatedAt: now,
         ),
       );
+    }
+  }
+
+  /// The widest configured reminder-days value for [diverId] (default 30):
+  /// used as the dueSoon threshold so a clock turns amber as soon as its
+  /// earliest reminder would fire. Read straight from diver_settings rather
+  /// than the settings notifier to keep clock evaluation free of provider
+  /// initialization order.
+  Future<int> getDueSoonWindowDays({String? diverId}) async {
+    if (diverId == null) return 30;
+    final row =
+        await (_db.select(_db.diverSettings)
+              ..where((t) => t.diverId.equals(diverId))
+              ..limit(1))
+            .getSingleOrNull();
+    if (row == null) return 30;
+    try {
+      final days = (jsonDecode(row.serviceReminderDays) as List<dynamic>)
+          .cast<int>();
+      if (days.isEmpty) return 30;
+      return days.reduce((a, b) => a > b ? a : b);
+    } catch (_) {
+      return 30;
     }
   }
 

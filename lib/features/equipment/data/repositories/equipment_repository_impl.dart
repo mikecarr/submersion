@@ -223,7 +223,10 @@ class EquipmentRepository {
       );
 
       _log.info('Created equipment with id: $id');
-      return equipment.copyWith(id: id);
+      return equipment.copyWith(
+        id: id,
+        createdAt: DateTime.fromMillisecondsSinceEpoch(now),
+      );
     } catch (e, stackTrace) {
       _log.error(
         'Failed to create equipment: ${equipment.name}',
@@ -664,6 +667,7 @@ class EquipmentRepository {
       customReminderDays: row.customReminderDays != null
           ? (jsonDecode(row.customReminderDays!) as List<dynamic>).cast<int>()
           : null,
+      createdAt: DateTime.fromMillisecondsSinceEpoch(row.createdAt),
     );
   }
 }
