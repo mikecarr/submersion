@@ -11758,6 +11758,74 @@ class AppLocalizationsDe extends AppLocalizations {
       'NDL, Ceiling, Gewebsauslastung, O2-Toxizität';
 
   @override
+  String get diveDetailSection_safetyReview_name => 'Safety Review';
+
+  @override
+  String get diveDetailSection_safetyReview_description =>
+      'Automatic post-dive profile observations';
+
+  @override
+  String get safetyReview_sectionTitle => 'Safety review';
+
+  @override
+  String safetyReview_findingCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count observations',
+      one: '1 observation',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String safetyReview_rapidAscent_title(String rate, String duration) {
+    return 'Ascent exceeded $rate for $duration';
+  }
+
+  @override
+  String safetyReview_missedDecoStop_title(String excess, String duration) {
+    return 'Depth was $excess above the required stop ceiling for $duration';
+  }
+
+  @override
+  String safetyReview_omittedSafetyStop_title(String remaining) {
+    return 'The recommended safety stop was cut short by $remaining';
+  }
+
+  @override
+  String safetyReview_sawtoothProfile_title(int count) {
+    return '$count repeated up-and-down depth changes during the dive';
+  }
+
+  @override
+  String safetyReview_highSurfaceGf_title(String gf, String gfHigh) {
+    return 'Surfaced at gradient factor $gf, above the configured $gfHigh';
+  }
+
+  @override
+  String safetyReview_timeRange(String start, String end) {
+    return 'At $start–$end';
+  }
+
+  @override
+  String get safetyReview_dismiss => 'Dismiss';
+
+  @override
+  String get safetyReview_restore => 'Restore';
+
+  @override
+  String safetyReview_showDismissed(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Show $count dismissed',
+      one: 'Show 1 dismissed',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get diveDetailSection_sacSegments_name => 'SAC-Rate nach Segment';
 
   @override
