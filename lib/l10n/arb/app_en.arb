@@ -6720,6 +6720,92 @@
   "safetyHub_surfaceIntervalLink": "Surface interval tool",
   "safetyHub_surfaceIntervalLink_subtitle": "Educational tissue desaturation model",
   "safetyHub_settingsLink": "Safety settings",
+  "emergencyCard_title": "Emergency",
+  "emergencyCard_callDan": "Call {name}",
+  "@emergencyCard_callDan": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "emergencyCard_callDan_subtitle": "Diver emergency hotline. Call first: they coordinate evacuation and chamber referral.",
+  "emergencyCard_ems": "Local emergency services: {number}",
+  "@emergencyCard_ems": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "emergencyCard_diverSection": "Diver",
+  "emergencyCard_bloodType": "Blood type: {value}",
+  "@emergencyCard_bloodType": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "emergencyCard_allergies": "Allergies: {value}",
+  "@emergencyCard_allergies": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "emergencyCard_medications": "Medications: {value}",
+  "@emergencyCard_medications": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "emergencyCard_contactsSection": "Emergency contacts",
+  "emergencyCard_insuranceSection": "Dive insurance",
+  "emergencyCard_insurancePolicy": "Policy {number}",
+  "@emergencyCard_insurancePolicy": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "emergencyCard_chambersSection": "Hyperbaric chambers",
+  "emergencyCard_chambersNote": "Availability changes. Always call the diver emergency hotline first for referral.",
+  "emergencyCard_chamberVerified": "Details verified {date}",
+  "@emergencyCard_chamberVerified": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "emergencyCard_hideChamber": "Hide",
+  "emergencyCard_addChamber": "Add chamber",
+  "emergencyCard_deleteChamber": "Delete",
+  "emergencyCard_regionLabel": "Region: {region}",
+  "@emergencyCard_regionLabel": {
+    "placeholders": {
+      "region": {
+        "type": "String"
+      }
+    }
+  },
+  "emergencyCard_regionUnknown": "Region unknown - using worldwide hotline",
+  "emergencyCard_noDiverData": "No diver profile data. Add emergency contacts, medical and insurance details in Diver Profile settings.",
+  "addChamber_title": "Add chamber",
+  "addChamber_name": "Name",
+  "addChamber_country": "Country code (e.g. US)",
+  "addChamber_city": "City",
+  "addChamber_phone": "Phone",
+  "addChamber_notes": "Notes",
+  "addChamber_save": "Save",
+  "safetyHub_emergencyCardLink": "Emergency card",
+  "safetyHub_emergencyCardLink_subtitle": "Offline: hotline, EMS, chambers, your medical and insurance details",
+  "dashboard_quickAction_emergency": "Emergency card",
   "diveLog_detail_altitudeMismatch_title": "Site is at altitude",
   "diveLog_detail_altitudeMismatch_subtitle": "This site records an altitude but the dive has none set, so decompression analysis assumed sea level. Set the dive's altitude to correct it.",
   "safetyHub_alert_noFly": "No-fly: {remaining} remaining",
