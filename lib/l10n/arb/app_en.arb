@@ -2304,6 +2304,32 @@
   "@diveLog_edit_overline_tanks": {
     "description": "Sub-header overline above the tank rows in the Gas & Gear edit section"
   },
+  "diveLog_edit_profile_draw": "Draw a profile",
+  "@diveLog_edit_profile_draw": {
+    "description": "Dive profile row placeholder when no profile exists; tapping opens the draw editor"
+  },
+  "diveLog_edit_profile_none": "Not recorded",
+  "@diveLog_edit_profile_none": {
+    "description": "Dive profile row value on a new dive with no profile data"
+  },
+  "diveLog_edit_profile_outliers": "{count, plural, one{1 potential outlier detected} other{{count} potential outliers detected}}",
+  "@diveLog_edit_profile_outliers": {
+    "description": "Chip under the dive profile row offering outlier cleanup",
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "diveLog_edit_profile_points": "{count, plural, one{1 point} other{{count} points}}",
+  "@diveLog_edit_profile_points": {
+    "description": "Dive profile row value: number of recorded profile samples",
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
   "diveLog_edit_row_addSite": "Add site",
   "@diveLog_edit_row_addSite": {
     "description": "Placeholder when no site selected"
@@ -2311,6 +2337,10 @@
   "diveLog_edit_row_diveCenter": "Dive center",
   "@diveLog_edit_row_diveCenter": {
     "description": "Row label: dive center picker"
+  },
+  "diveLog_edit_row_diveProfile": "Dive profile",
+  "@diveLog_edit_row_diveProfile": {
+    "description": "Row label: dive profile (points count / draw affordance)"
   },
   "diveLog_edit_row_entry": "Entry",
   "@diveLog_edit_row_entry": {

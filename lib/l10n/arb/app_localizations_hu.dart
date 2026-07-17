@@ -4368,10 +4368,41 @@ class AppLocalizationsHu extends AppLocalizations {
   String get diveLog_edit_overline_tanks => 'Palackok';
 
   @override
+  String get diveLog_edit_profile_draw => 'Profil rajzolása';
+
+  @override
+  String get diveLog_edit_profile_none => 'Nincs rögzítve';
+
+  @override
+  String diveLog_edit_profile_outliers(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count lehetséges kiugró érték észlelve',
+      one: '1 lehetséges kiugró érték észlelve',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String diveLog_edit_profile_points(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count pont',
+      one: '1 pont',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get diveLog_edit_row_addSite => 'Merülőhely hozzáadása';
 
   @override
   String get diveLog_edit_row_diveCenter => 'Búvárközpont';
+
+  @override
+  String get diveLog_edit_row_diveProfile => 'Merülési profil';
 
   @override
   String get diveLog_edit_row_entry => 'Beszállás';

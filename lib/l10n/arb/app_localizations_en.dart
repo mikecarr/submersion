@@ -4306,10 +4306,41 @@ class AppLocalizationsEn extends AppLocalizations {
   String get diveLog_edit_overline_tanks => 'Tanks';
 
   @override
+  String get diveLog_edit_profile_draw => 'Draw a profile';
+
+  @override
+  String get diveLog_edit_profile_none => 'Not recorded';
+
+  @override
+  String diveLog_edit_profile_outliers(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count potential outliers detected',
+      one: '1 potential outlier detected',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String diveLog_edit_profile_points(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count points',
+      one: '1 point',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get diveLog_edit_row_addSite => 'Add site';
 
   @override
   String get diveLog_edit_row_diveCenter => 'Dive center';
+
+  @override
+  String get diveLog_edit_row_diveProfile => 'Dive profile';
 
   @override
   String get diveLog_edit_row_entry => 'Entry';

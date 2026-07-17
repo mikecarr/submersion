@@ -4267,10 +4267,41 @@ class AppLocalizationsHe extends AppLocalizations {
   String get diveLog_edit_overline_tanks => 'מיכלים';
 
   @override
+  String get diveLog_edit_profile_draw => 'שרטוט פרופיל';
+
+  @override
+  String get diveLog_edit_profile_none => 'לא הוקלט';
+
+  @override
+  String diveLog_edit_profile_outliers(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'זוהו $count חריגות אפשריות',
+      one: 'זוהתה חריגה אפשרית אחת',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String diveLog_edit_profile_points(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count נקודות',
+      one: 'נקודה אחת',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get diveLog_edit_row_addSite => 'הוספת אתר';
 
   @override
   String get diveLog_edit_row_diveCenter => 'מרכז צלילה';
+
+  @override
+  String get diveLog_edit_row_diveProfile => 'פרופיל צלילה';
 
   @override
   String get diveLog_edit_row_entry => 'כניסה';

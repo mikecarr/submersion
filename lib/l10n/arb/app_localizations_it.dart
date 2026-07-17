@@ -4385,10 +4385,41 @@ class AppLocalizationsIt extends AppLocalizations {
   String get diveLog_edit_overline_tanks => 'Bombole';
 
   @override
+  String get diveLog_edit_profile_draw => 'Disegna un profilo';
+
+  @override
+  String get diveLog_edit_profile_none => 'Non registrato';
+
+  @override
+  String diveLog_edit_profile_outliers(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count possibili valori anomali rilevati',
+      one: '1 possibile valore anomalo rilevato',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String diveLog_edit_profile_points(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count punti',
+      one: '1 punto',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get diveLog_edit_row_addSite => 'Aggiungi sito';
 
   @override
   String get diveLog_edit_row_diveCenter => 'Diving center';
+
+  @override
+  String get diveLog_edit_row_diveProfile => 'Profilo di immersione';
 
   @override
   String get diveLog_edit_row_entry => 'Entrata';

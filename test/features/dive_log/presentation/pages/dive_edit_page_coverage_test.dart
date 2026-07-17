@@ -270,7 +270,7 @@ void main() {
     expect(find.text('Surface interval'), findsOneWidget);
     expect(find.textContaining('Belize'), findsWidgets);
     expect(find.text('11 points'), findsOneWidget);
-    expect(find.text('Edit Profile'), findsOneWidget);
+    expect(find.text('Dive profile'), findsOneWidget);
     // Profile-derived one-tap calculate buttons on the metric rows.
     expect(find.byIcon(Icons.calculate_outlined), findsWidgets);
 
