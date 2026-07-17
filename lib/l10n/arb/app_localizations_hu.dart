@@ -11851,9 +11851,6 @@ class AppLocalizationsHu extends AppLocalizations {
       'Irányadó időközök egyetlen nullidős merülés, ismétlő merülések és dekós merülések után';
 
   @override
-  String get safetyHub_title => 'Biztonság';
-
-  @override
   String safetyHub_noFly_active_title(String remaining) {
     return 'Repülési tilalom: $remaining van hátra';
   }
@@ -11888,27 +11885,6 @@ class AppLocalizationsHu extends AppLocalizations {
   @override
   String get safetyHub_noFly_disclaimer =>
       'DAN/UHMS irányelvek az utolsó merüléstől számítva. Nem helyettesíti a búvárkomputer no-fly idejét.';
-
-  @override
-  String get safetyHub_surfaceIntervalLink => 'Felszíni intervallum eszköz';
-
-  @override
-  String get safetyHub_surfaceIntervalLink_subtitle =>
-      'Oktató jellegű szöveti telítettségcsökkenési modell';
-
-  @override
-  String get safetyHub_settingsLink => 'Biztonsági beállítások';
-
-  @override
-  String get planning_card_safety_title => 'Biztonság';
-
-  @override
-  String get planning_card_safety_subtitle =>
-      'Repülési visszaszámlálás, vészhelyzeti kártya, kvázibaleset-napló';
-
-  @override
-  String get tools_safety_description =>
-      'A merülés utáni repülés visszaszámlálója, az offline vészhelyzeti kártya és a privát kvázibaleset-napló egy helyen.';
 
   @override
   String get emergencyCard_title => 'Vészhelyzet';
@@ -20294,4 +20270,15 @@ class AppLocalizationsHu extends AppLocalizations {
   @override
   String get media_unavailablePlaceholder_volumeOffline =>
       'A kötet nincs csatlakoztatva';
+
+  @override
+  String get planning_card_noFly_subtitle =>
+      'Irányadó visszaszámlálás az utolsó merüléseidtől';
+
+  @override
+  String get settings_section_safety_title => 'Biztonság';
+
+  @override
+  String get settings_section_safety_subtitle =>
+      'Áttekintési szabályok és repülés merülés után';
 }

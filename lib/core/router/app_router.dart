@@ -93,9 +93,9 @@ import 'package:submersion/features/settings/presentation/pages/default_visible_
 import 'package:submersion/features/settings/presentation/pages/dive_detail_sections_page.dart';
 import 'package:submersion/features/safety/presentation/pages/add_chamber_page.dart';
 import 'package:submersion/features/safety/presentation/pages/incident_edit_page.dart';
+import 'package:submersion/features/safety/presentation/pages/no_fly_page.dart';
 import 'package:submersion/features/safety/presentation/pages/incidents_list_page.dart';
 import 'package:submersion/features/safety/presentation/pages/emergency_card_page.dart';
-import 'package:submersion/features/safety/presentation/pages/safety_hub_page.dart';
 import 'package:submersion/features/settings/presentation/pages/safety_settings_page.dart';
 import 'package:submersion/features/settings/presentation/pages/language_settings_page.dart';
 import 'package:submersion/features/settings/presentation/pages/nav_customization_page.dart';
@@ -269,6 +269,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                     name: 'surfaceInterval',
                     builder: (context, state) =>
                         const SurfaceIntervalToolPage(),
+                  ),
+                  GoRoute(
+                    path: 'no-fly',
+                    name: 'noFly',
+                    builder: (context, state) => const NoFlyPage(),
                   ),
                   // GPS Logger moved to top-level /gps-log; keep old deep
                   // links working.
@@ -805,44 +810,25 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             ),
           ),
 
-          // Safety hub (no-fly status, emergency card, near-miss log)
+          // Near-miss incident log (entry point: Settings > Manage)
           GoRoute(
-            path: '/safety',
-            name: 'safety',
-            builder: (context, state) => const SafetyHubPage(),
+            path: '/incidents',
+            name: 'incidents',
+            builder: (context, state) => const IncidentsListPage(),
             routes: [
               GoRoute(
-                path: 'incidents',
-                name: 'incidents',
-                builder: (context, state) => const IncidentsListPage(),
-                routes: [
-                  GoRoute(
-                    path: 'new',
-                    name: 'incidentNew',
-                    builder: (context, state) => IncidentEditPage(
-                      diveId: state.uri.queryParameters['diveId'],
-                    ),
-                  ),
-                  GoRoute(
-                    path: ':incidentId',
-                    name: 'incidentEdit',
-                    builder: (context, state) => IncidentEditPage(
-                      incidentId: state.pathParameters['incidentId'],
-                    ),
-                  ),
-                ],
+                path: 'new',
+                name: 'incidentNew',
+                builder: (context, state) => IncidentEditPage(
+                  diveId: state.uri.queryParameters['diveId'],
+                ),
               ),
               GoRoute(
-                path: 'emergency-card',
-                name: 'emergencyCard',
-                builder: (context, state) => const EmergencyCardPage(),
-                routes: [
-                  GoRoute(
-                    path: 'add-chamber',
-                    name: 'addChamber',
-                    builder: (context, state) => const AddChamberPage(),
-                  ),
-                ],
+                path: ':incidentId',
+                name: 'incidentEdit',
+                builder: (context, state) => IncidentEditPage(
+                  incidentId: state.pathParameters['incidentId'],
+                ),
               ),
             ],
           ),
@@ -1065,6 +1051,18 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                     name: 'editEmergencyContacts',
                     builder: (context, state) =>
                         const EmergencyContactsEditPage(),
+                  ),
+                  GoRoute(
+                    path: 'emergency-card',
+                    name: 'emergencyCard',
+                    builder: (context, state) => const EmergencyCardPage(),
+                    routes: [
+                      GoRoute(
+                        path: 'add-chamber',
+                        name: 'addChamber',
+                        builder: (context, state) => const AddChamberPage(),
+                      ),
+                    ],
                   ),
                   GoRoute(
                     path: 'medical',

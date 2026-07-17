@@ -5800,7 +5800,6 @@
   "safetySettings_noFlyPreset_standard": "Estándar (12/18/24 h)",
   "safetySettings_noFlyPreset_strict": "Estricto (18/24/48 h)",
   "safetySettings_noFlyPreset_subtitle": "Intervalos orientativos tras una única inmersión sin deco, inmersiones sucesivas e inmersiones con deco",
-  "safetyHub_title": "Seguridad",
   "safetyHub_noFly_active_title": "No volar: quedan {remaining}",
   "@safetyHub_noFly_active_title": {"placeholders": {"remaining": {"type": "String"}}},
   "safetyHub_noFly_until": "Hasta {time}",
@@ -5814,9 +5813,6 @@
   "safetyHub_noFly_category_deco": "Tras una inmersión con descompresión: pauta de {hours} h",
   "@safetyHub_noFly_category_deco": {"placeholders": {"hours": {"type": "int"}}},
   "safetyHub_noFly_disclaimer": "Pautas DAN/UHMS desde tu última inmersión. No sustituye el tiempo de no volar de tu ordenador de buceo.",
-  "safetyHub_surfaceIntervalLink": "Herramienta de intervalo en superficie",
-  "safetyHub_surfaceIntervalLink_subtitle": "Modelo educativo de desaturación de tejidos",
-  "safetyHub_settingsLink": "Ajustes de seguridad",
   "safetyHub_alert_noFly": "No volar: quedan {remaining}",
   "@safetyHub_alert_noFly": {"placeholders": {"remaining": {"type": "String"}}},
   "diveLog_detail_altitudeMismatch_title": "El punto de buceo está en altitud",
@@ -5892,7 +5888,7 @@
   "diveLog_detail_menu_logNearMiss": "Registrar casi incidente",
   "diveLog_detail_linkedIncidents": "{count, plural, =1{1 casi incidente vinculado a esta inmersión} other{{count} casi incidentes vinculados a esta inmersión}}",
   "@diveLog_detail_linkedIncidents": {"placeholders": {"count": {"type": "int"}}},
-  "planning_card_safety_title": "Seguridad",
-  "planning_card_safety_subtitle": "Cuenta atrás de no volar, tarjeta de emergencia, registro de casi incidentes",
-  "tools_safety_description": "La cuenta atrás para volar tras bucear, la tarjeta de emergencia sin conexión y tu registro privado de casi incidentes en un solo lugar."
+  "planning_card_noFly_subtitle": "Cuenta atrás orientativa desde tus últimas inmersiones",
+  "settings_section_safety_title": "Seguridad",
+  "settings_section_safety_subtitle": "Reglas de revisión y volar tras bucear"
 }

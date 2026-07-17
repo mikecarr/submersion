@@ -20192,12 +20192,6 @@ abstract class AppLocalizations {
   /// **'Guideline intervals after a single no-deco dive, repetitive dives, and deco dives'**
   String get safetySettings_noFlyPreset_subtitle;
 
-  /// No description provided for @safetyHub_title.
-  ///
-  /// In en, this message translates to:
-  /// **'Safety'**
-  String get safetyHub_title;
-
   /// No description provided for @safetyHub_noFly_active_title.
   ///
   /// In en, this message translates to:
@@ -20245,42 +20239,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'DAN/UHMS guideline intervals from your last dive. Not a substitute for your dive computer\'s no-fly time.'**
   String get safetyHub_noFly_disclaimer;
-
-  /// No description provided for @safetyHub_surfaceIntervalLink.
-  ///
-  /// In en, this message translates to:
-  /// **'Surface interval tool'**
-  String get safetyHub_surfaceIntervalLink;
-
-  /// No description provided for @safetyHub_surfaceIntervalLink_subtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Educational tissue desaturation model'**
-  String get safetyHub_surfaceIntervalLink_subtitle;
-
-  /// No description provided for @safetyHub_settingsLink.
-  ///
-  /// In en, this message translates to:
-  /// **'Safety settings'**
-  String get safetyHub_settingsLink;
-
-  /// No description provided for @planning_card_safety_title.
-  ///
-  /// In en, this message translates to:
-  /// **'Safety'**
-  String get planning_card_safety_title;
-
-  /// No description provided for @planning_card_safety_subtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'No-fly countdown, emergency card, near-miss log'**
-  String get planning_card_safety_subtitle;
-
-  /// No description provided for @tools_safety_description.
-  ///
-  /// In en, this message translates to:
-  /// **'Flying-after-diving countdown, the offline emergency card, and your private near-miss log in one place.'**
-  String get tools_safety_description;
 
   /// No description provided for @emergencyCard_title.
   ///
@@ -34025,6 +33983,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Volume not mounted'**
   String get media_unavailablePlaceholder_volumeOffline;
+
+  /// No description provided for @planning_card_noFly_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Guideline countdown from your last dives'**
+  String get planning_card_noFly_subtitle;
+
+  /// No description provided for @settings_section_safety_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Safety'**
+  String get settings_section_safety_title;
+
+  /// No description provided for @settings_section_safety_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Review rules & flying after diving'**
+  String get settings_section_safety_subtitle;
 }
 
 class _AppLocalizationsDelegate

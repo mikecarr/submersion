@@ -5800,7 +5800,6 @@
   "safetySettings_noFlyPreset_standard": "Standard (12/18/24 h)",
   "safetySettings_noFlyPreset_strict": "Rigoroso (18/24/48 h)",
   "safetySettings_noFlyPreset_subtitle": "Intervalli indicativi dopo una singola immersione senza deco, immersioni ripetitive e immersioni con deco",
-  "safetyHub_title": "Sicurezza",
   "safetyHub_noFly_active_title": "No-fly: mancano {remaining}",
   "@safetyHub_noFly_active_title": {"placeholders": {"remaining": {"type": "String"}}},
   "safetyHub_noFly_until": "Fino alle {time}",
@@ -5814,9 +5813,6 @@
   "safetyHub_noFly_category_deco": "Dopo un'immersione con decompressione: linea guida di {hours} h",
   "@safetyHub_noFly_category_deco": {"placeholders": {"hours": {"type": "int"}}},
   "safetyHub_noFly_disclaimer": "Linee guida DAN/UHMS dall'ultima immersione. Non sostituisce il tempo no-fly del tuo computer subacqueo.",
-  "safetyHub_surfaceIntervalLink": "Strumento intervallo di superficie",
-  "safetyHub_surfaceIntervalLink_subtitle": "Modello educativo di desaturazione dei tessuti",
-  "safetyHub_settingsLink": "Impostazioni di sicurezza",
   "safetyHub_alert_noFly": "No-fly: mancano {remaining}",
   "@safetyHub_alert_noFly": {"placeholders": {"remaining": {"type": "String"}}},
   "diveLog_detail_altitudeMismatch_title": "Il sito è in quota",
@@ -5892,7 +5888,7 @@
   "diveLog_detail_menu_logNearMiss": "Registra quasi incidente",
   "diveLog_detail_linkedIncidents": "{count, plural, =1{1 quasi incidente collegato a questa immersione} other{{count} quasi incidenti collegati a questa immersione}}",
   "@diveLog_detail_linkedIncidents": {"placeholders": {"count": {"type": "int"}}},
-  "planning_card_safety_title": "Sicurezza",
-  "planning_card_safety_subtitle": "Conto alla rovescia no-fly, scheda di emergenza, registro dei quasi incidenti",
-  "tools_safety_description": "Il conto alla rovescia per volare dopo l'immersione, la scheda di emergenza offline e il tuo registro privato dei quasi incidenti in un unico posto."
+  "planning_card_noFly_subtitle": "Conto alla rovescia indicativo dalle ultime immersioni",
+  "settings_section_safety_title": "Sicurezza",
+  "settings_section_safety_subtitle": "Regole di revisione e volo dopo l'immersione"
 }

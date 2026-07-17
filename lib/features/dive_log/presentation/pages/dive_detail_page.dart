@@ -721,7 +721,7 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
                   _reparseDive(context, ref, dive);
                   break;
                 case 'logNearMiss':
-                  context.push('/safety/incidents/new?diveId=$diveId');
+                  context.push('/incidents/new?diveId=$diveId');
                   break;
                 case 'delete':
                   _showDeleteConfirmation(context, ref);
@@ -884,7 +884,7 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
                   _reparseDive(context, ref, dive);
                   break;
                 case 'logNearMiss':
-                  context.push('/safety/incidents/new?diveId=$diveId');
+                  context.push('/incidents/new?diveId=$diveId');
                   break;
                 case 'delete':
                   _showDeleteConfirmation(context, ref);

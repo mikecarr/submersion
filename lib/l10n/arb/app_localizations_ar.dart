@@ -11664,9 +11664,6 @@ class AppLocalizationsAr extends AppLocalizations {
       'فترات إرشادية بعد غطسة واحدة بلا توقفات، وغطسات متكررة، وغطسات بتخفيف الضغط';
 
   @override
-  String get safetyHub_title => 'السلامة';
-
-  @override
   String safetyHub_noFly_active_title(String remaining) {
     return 'حظر الطيران: متبقٍ $remaining';
   }
@@ -11701,27 +11698,6 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get safetyHub_noFly_disclaimer =>
       'إرشادات DAN/UHMS منذ آخر غطسة. ليست بديلاً عن وقت حظر الطيران في حاسوب الغوص الخاص بك.';
-
-  @override
-  String get safetyHub_surfaceIntervalLink => 'أداة الفاصل السطحي';
-
-  @override
-  String get safetyHub_surfaceIntervalLink_subtitle =>
-      'نموذج تعليمي لتخلص الأنسجة من التشبع';
-
-  @override
-  String get safetyHub_settingsLink => 'إعدادات السلامة';
-
-  @override
-  String get planning_card_safety_title => 'السلامة';
-
-  @override
-  String get planning_card_safety_subtitle =>
-      'عدّاد حظر الطيران، بطاقة الطوارئ، سجل الحوادث الوشيكة';
-
-  @override
-  String get tools_safety_description =>
-      'عدّاد الطيران بعد الغوص وبطاقة الطوارئ دون اتصال وسجل حوادثك الوشيكة الخاص في مكان واحد.';
 
   @override
   String get emergencyCard_title => 'الطوارئ';
@@ -19976,4 +19952,14 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get media_unavailablePlaceholder_volumeOffline =>
       'وحدة التخزين غير مثبتة';
+
+  @override
+  String get planning_card_noFly_subtitle => 'عدّاد إرشادي منذ آخر غطساتك';
+
+  @override
+  String get settings_section_safety_title => 'السلامة';
+
+  @override
+  String get settings_section_safety_subtitle =>
+      'قواعد المراجعة والطيران بعد الغوص';
 }

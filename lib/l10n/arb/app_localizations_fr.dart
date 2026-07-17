@@ -11927,9 +11927,6 @@ class AppLocalizationsFr extends AppLocalizations {
       'Intervalles indicatifs après une plongée unique sans déco, des plongées successives et des plongées avec déco';
 
   @override
-  String get safetyHub_title => 'Sécurité';
-
-  @override
   String safetyHub_noFly_active_title(String remaining) {
     return 'Interdiction de vol : $remaining restant';
   }
@@ -11964,27 +11961,6 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get safetyHub_noFly_disclaimer =>
       'Recommandations DAN/UHMS depuis votre dernière plongée. Ne remplace pas le temps d\'interdiction de vol de votre ordinateur de plongée.';
-
-  @override
-  String get safetyHub_surfaceIntervalLink => 'Outil d\'intervalle de surface';
-
-  @override
-  String get safetyHub_surfaceIntervalLink_subtitle =>
-      'Modèle pédagogique de désaturation des tissus';
-
-  @override
-  String get safetyHub_settingsLink => 'Réglages de sécurité';
-
-  @override
-  String get planning_card_safety_title => 'Sécurité';
-
-  @override
-  String get planning_card_safety_subtitle =>
-      'Compte à rebours d\'interdiction de vol, carte d\'urgence, journal des presque-accidents';
-
-  @override
-  String get tools_safety_description =>
-      'Le compte à rebours vol-après-plongée, la carte d\'urgence hors ligne et votre journal privé des presque-accidents au même endroit.';
 
   @override
   String get emergencyCard_title => 'Urgence';
@@ -20423,4 +20399,15 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get media_unavailablePlaceholder_volumeOffline => 'Volume non monté';
+
+  @override
+  String get planning_card_noFly_subtitle =>
+      'Compte à rebours indicatif depuis vos dernières plongées';
+
+  @override
+  String get settings_section_safety_title => 'Sécurité';
+
+  @override
+  String get settings_section_safety_subtitle =>
+      'Règles du bilan et vol après la plongée';
 }

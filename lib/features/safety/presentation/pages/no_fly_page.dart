@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import 'package:submersion/features/safety/domain/services/no_fly_service.dart';
@@ -10,16 +9,16 @@ import 'package:submersion/features/safety/presentation/providers/no_fly_provide
 import 'package:submersion/l10n/arb/app_localizations.dart';
 import 'package:submersion/l10n/l10n_extension.dart';
 
-/// Safety hub: current no-fly status plus entry points to the safety
-/// tooling (emergency card and near-miss log arrive in later phases).
-class SafetyHubPage extends ConsumerStatefulWidget {
-  const SafetyHubPage({super.key});
+/// Flying-after-diving status: the DAN/UHMS guideline countdown from the
+/// most recent dives. Lives in the Planning section.
+class NoFlyPage extends ConsumerStatefulWidget {
+  const NoFlyPage({super.key});
 
   @override
-  ConsumerState<SafetyHubPage> createState() => _SafetyHubPageState();
+  ConsumerState<NoFlyPage> createState() => _NoFlyPageState();
 }
 
-class _SafetyHubPageState extends ConsumerState<SafetyHubPage> {
+class _NoFlyPageState extends ConsumerState<NoFlyPage> {
   Timer? _ticker;
 
   @override
@@ -43,60 +42,20 @@ class _SafetyHubPageState extends ConsumerState<SafetyHubPage> {
     final statusAsync = ref.watch(noFlyStatusProvider);
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.safetyHub_title)),
+      appBar: AppBar(title: Text(l10n.safetySettings_noFlyHeader)),
       body: ListView(
         padding: const EdgeInsets.all(16),
-        children: [
-          _NoFlyCard(status: statusAsync.value),
-          const SizedBox(height: 16),
-          Card(
-            child: ListTile(
-              leading: Icon(
-                Icons.emergency_outlined,
-                color: Theme.of(context).colorScheme.error,
-              ),
-              title: Text(l10n.safetyHub_emergencyCardLink),
-              subtitle: Text(l10n.safetyHub_emergencyCardLink_subtitle),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () => context.push('/safety/emergency-card'),
-            ),
-          ),
-          Card(
-            child: ListTile(
-              leading: const Icon(Icons.flag_outlined),
-              title: Text(l10n.safetyHub_incidentsLink),
-              subtitle: Text(l10n.safetyHub_incidentsLink_subtitle),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () => context.push('/safety/incidents'),
-            ),
-          ),
-          Card(
-            child: ListTile(
-              leading: const Icon(Icons.hourglass_bottom),
-              title: Text(l10n.safetyHub_surfaceIntervalLink),
-              subtitle: Text(l10n.safetyHub_surfaceIntervalLink_subtitle),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () => context.push('/planning/surface-interval'),
-            ),
-          ),
-          Card(
-            child: ListTile(
-              leading: const Icon(Icons.settings_outlined),
-              title: Text(l10n.safetyHub_settingsLink),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () => context.push('/settings/safety'),
-            ),
-          ),
-        ],
+        children: [NoFlyStatusCard(status: statusAsync.value)],
       ),
     );
   }
 }
 
-class _NoFlyCard extends StatelessWidget {
+/// The no-fly countdown card (also usable on other surfaces).
+class NoFlyStatusCard extends StatelessWidget {
   final NoFlyStatus? status;
 
-  const _NoFlyCard({required this.status});
+  const NoFlyStatusCard({required this.status, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -151,7 +110,7 @@ class _NoFlyCard extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             Text(
-              _categoryText(l10n, status!.category, remaining),
+              _categoryText(l10n, status!.category),
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
@@ -170,11 +129,7 @@ class _NoFlyCard extends StatelessWidget {
     );
   }
 
-  String _categoryText(
-    AppLocalizations l10n,
-    NoFlyCategory category,
-    Duration remaining,
-  ) {
+  String _categoryText(AppLocalizations l10n, NoFlyCategory category) {
     final hours = status!.interval.inHours;
     return switch (category) {
       NoFlyCategory.single => l10n.safetyHub_noFly_category_single(hours),
@@ -186,7 +141,7 @@ class _NoFlyCard extends StatelessWidget {
   }
 }
 
-/// "14h 20m" style remaining-time label shared by hub and dashboard.
+/// "14h 20m" style remaining-time label shared with the dashboard banner.
 String formatNoFlyRemaining(Duration remaining) {
   final hours = remaining.inHours;
   final minutes = remaining.inMinutes % 60;

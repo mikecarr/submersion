@@ -5800,7 +5800,6 @@
   "safetySettings_noFlyPreset_standard": "Standaard (12/18/24 u)",
   "safetySettings_noFlyPreset_strict": "Strikt (18/24/48 u)",
   "safetySettings_noFlyPreset_subtitle": "Richttijden na een enkele duik zonder deco, herhalingsduiken en decoduiken",
-  "safetyHub_title": "Veiligheid",
   "safetyHub_noFly_active_title": "Vliegverbod: nog {remaining}",
   "@safetyHub_noFly_active_title": {"placeholders": {"remaining": {"type": "String"}}},
   "safetyHub_noFly_until": "Tot {time}",
@@ -5814,9 +5813,6 @@
   "safetyHub_noFly_category_deco": "Na een decompressieduik: richtlijn van {hours} u",
   "@safetyHub_noFly_category_deco": {"placeholders": {"hours": {"type": "int"}}},
   "safetyHub_noFly_disclaimer": "DAN/UHMS-richtlijnen vanaf je laatste duik. Geen vervanging voor de no-fly-tijd van je duikcomputer.",
-  "safetyHub_surfaceIntervalLink": "Oppervlakte-interval-tool",
-  "safetyHub_surfaceIntervalLink_subtitle": "Educatief model van weefselontzadiging",
-  "safetyHub_settingsLink": "Veiligheidsinstellingen",
   "safetyHub_alert_noFly": "Vliegverbod: nog {remaining}",
   "@safetyHub_alert_noFly": {"placeholders": {"remaining": {"type": "String"}}},
   "diveLog_detail_altitudeMismatch_title": "Duikstek ligt op hoogte",
@@ -5892,7 +5888,7 @@
   "diveLog_detail_menu_logNearMiss": "Bijna-ongeval vastleggen",
   "diveLog_detail_linkedIncidents": "{count, plural, =1{1 bijna-ongeval gekoppeld aan deze duik} other{{count} bijna-ongevallen gekoppeld aan deze duik}}",
   "@diveLog_detail_linkedIncidents": {"placeholders": {"count": {"type": "int"}}},
-  "planning_card_safety_title": "Veiligheid",
-  "planning_card_safety_subtitle": "Vliegverbod-aftelling, noodkaart, bijna-ongevallenlog",
-  "tools_safety_description": "De aftelling voor vliegen na het duiken, de offline noodkaart en je privé bijna-ongevallenlog op één plek."
+  "planning_card_noFly_subtitle": "Richtlijn-aftelling vanaf je laatste duiken",
+  "settings_section_safety_title": "Veiligheid",
+  "settings_section_safety_subtitle": "Controleregels & vliegen na het duiken"
 }

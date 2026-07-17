@@ -5800,7 +5800,6 @@
   "safetySettings_noFlyPreset_standard": "Standard (12/18/24 h)",
   "safetySettings_noFlyPreset_strict": "Strict (18/24/48 h)",
   "safetySettings_noFlyPreset_subtitle": "Intervalles indicatifs après une plongée unique sans déco, des plongées successives et des plongées avec déco",
-  "safetyHub_title": "Sécurité",
   "safetyHub_noFly_active_title": "Interdiction de vol : {remaining} restant",
   "@safetyHub_noFly_active_title": {"placeholders": {"remaining": {"type": "String"}}},
   "safetyHub_noFly_until": "Jusqu'à {time}",
@@ -5814,9 +5813,6 @@
   "safetyHub_noFly_category_deco": "Après une plongée avec décompression : recommandation de {hours} h",
   "@safetyHub_noFly_category_deco": {"placeholders": {"hours": {"type": "int"}}},
   "safetyHub_noFly_disclaimer": "Recommandations DAN/UHMS depuis votre dernière plongée. Ne remplace pas le temps d'interdiction de vol de votre ordinateur de plongée.",
-  "safetyHub_surfaceIntervalLink": "Outil d'intervalle de surface",
-  "safetyHub_surfaceIntervalLink_subtitle": "Modèle pédagogique de désaturation des tissus",
-  "safetyHub_settingsLink": "Réglages de sécurité",
   "safetyHub_alert_noFly": "Interdiction de vol : {remaining} restant",
   "@safetyHub_alert_noFly": {"placeholders": {"remaining": {"type": "String"}}},
   "diveLog_detail_altitudeMismatch_title": "Le site est en altitude",
@@ -5892,7 +5888,7 @@
   "diveLog_detail_menu_logNearMiss": "Consigner un presque-accident",
   "diveLog_detail_linkedIncidents": "{count, plural, =1{1 presque-accident lié à cette plongée} other{{count} presque-accidents liés à cette plongée}}",
   "@diveLog_detail_linkedIncidents": {"placeholders": {"count": {"type": "int"}}},
-  "planning_card_safety_title": "Sécurité",
-  "planning_card_safety_subtitle": "Compte à rebours d'interdiction de vol, carte d'urgence, journal des presque-accidents",
-  "tools_safety_description": "Le compte à rebours vol-après-plongée, la carte d'urgence hors ligne et votre journal privé des presque-accidents au même endroit."
+  "planning_card_noFly_subtitle": "Compte à rebours indicatif depuis vos dernières plongées",
+  "settings_section_safety_title": "Sécurité",
+  "settings_section_safety_subtitle": "Règles du bilan et vol après la plongée"
 }

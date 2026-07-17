@@ -5800,7 +5800,6 @@
   "safetySettings_noFlyPreset_standard": "قياسي (12/18/24 س)",
   "safetySettings_noFlyPreset_strict": "صارم (18/24/48 س)",
   "safetySettings_noFlyPreset_subtitle": "فترات إرشادية بعد غطسة واحدة بلا توقفات، وغطسات متكررة، وغطسات بتخفيف الضغط",
-  "safetyHub_title": "السلامة",
   "safetyHub_noFly_active_title": "حظر الطيران: متبقٍ {remaining}",
   "@safetyHub_noFly_active_title": {"placeholders": {"remaining": {"type": "String"}}},
   "safetyHub_noFly_until": "حتى {time}",
@@ -5814,9 +5813,6 @@
   "safetyHub_noFly_category_deco": "بعد غطسة بتخفيف الضغط: إرشاد {hours} ساعة",
   "@safetyHub_noFly_category_deco": {"placeholders": {"hours": {"type": "int"}}},
   "safetyHub_noFly_disclaimer": "إرشادات DAN/UHMS منذ آخر غطسة. ليست بديلاً عن وقت حظر الطيران في حاسوب الغوص الخاص بك.",
-  "safetyHub_surfaceIntervalLink": "أداة الفاصل السطحي",
-  "safetyHub_surfaceIntervalLink_subtitle": "نموذج تعليمي لتخلص الأنسجة من التشبع",
-  "safetyHub_settingsLink": "إعدادات السلامة",
   "safetyHub_alert_noFly": "حظر الطيران: متبقٍ {remaining}",
   "@safetyHub_alert_noFly": {"placeholders": {"remaining": {"type": "String"}}},
   "diveLog_detail_altitudeMismatch_title": "موقع الغوص على ارتفاع",
@@ -5892,7 +5888,7 @@
   "diveLog_detail_menu_logNearMiss": "تسجيل حادث وشيك",
   "diveLog_detail_linkedIncidents": "{count, plural, =1{حادث وشيك واحد مرتبط بهذه الغطسة} other{{count} حوادث وشيكة مرتبطة بهذه الغطسة}}",
   "@diveLog_detail_linkedIncidents": {"placeholders": {"count": {"type": "int"}}},
-  "planning_card_safety_title": "السلامة",
-  "planning_card_safety_subtitle": "عدّاد حظر الطيران، بطاقة الطوارئ، سجل الحوادث الوشيكة",
-  "tools_safety_description": "عدّاد الطيران بعد الغوص وبطاقة الطوارئ دون اتصال وسجل حوادثك الوشيكة الخاص في مكان واحد."
+  "planning_card_noFly_subtitle": "عدّاد إرشادي منذ آخر غطساتك",
+  "settings_section_safety_title": "السلامة",
+  "settings_section_safety_subtitle": "قواعد المراجعة والطيران بعد الغوص"
 }

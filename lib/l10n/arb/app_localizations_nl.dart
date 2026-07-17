@@ -11797,9 +11797,6 @@ class AppLocalizationsNl extends AppLocalizations {
       'Richttijden na een enkele duik zonder deco, herhalingsduiken en decoduiken';
 
   @override
-  String get safetyHub_title => 'Veiligheid';
-
-  @override
   String safetyHub_noFly_active_title(String remaining) {
     return 'Vliegverbod: nog $remaining';
   }
@@ -11834,27 +11831,6 @@ class AppLocalizationsNl extends AppLocalizations {
   @override
   String get safetyHub_noFly_disclaimer =>
       'DAN/UHMS-richtlijnen vanaf je laatste duik. Geen vervanging voor de no-fly-tijd van je duikcomputer.';
-
-  @override
-  String get safetyHub_surfaceIntervalLink => 'Oppervlakte-interval-tool';
-
-  @override
-  String get safetyHub_surfaceIntervalLink_subtitle =>
-      'Educatief model van weefselontzadiging';
-
-  @override
-  String get safetyHub_settingsLink => 'Veiligheidsinstellingen';
-
-  @override
-  String get planning_card_safety_title => 'Veiligheid';
-
-  @override
-  String get planning_card_safety_subtitle =>
-      'Vliegverbod-aftelling, noodkaart, bijna-ongevallenlog';
-
-  @override
-  String get tools_safety_description =>
-      'De aftelling voor vliegen na het duiken, de offline noodkaart en je privé bijna-ongevallenlog op één plek.';
 
   @override
   String get emergencyCard_title => 'Noodgeval';
@@ -20196,4 +20172,15 @@ class AppLocalizationsNl extends AppLocalizations {
   @override
   String get media_unavailablePlaceholder_volumeOffline =>
       'Volume niet gekoppeld';
+
+  @override
+  String get planning_card_noFly_subtitle =>
+      'Richtlijn-aftelling vanaf je laatste duiken';
+
+  @override
+  String get settings_section_safety_title => 'Veiligheid';
+
+  @override
+  String get settings_section_safety_subtitle =>
+      'Controleregels & vliegen na het duiken';
 }

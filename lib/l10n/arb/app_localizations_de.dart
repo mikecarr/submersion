@@ -11879,9 +11879,6 @@ class AppLocalizationsDe extends AppLocalizations {
       'Richtwerte nach einem einzelnen Nullzeit-Tauchgang, Wiederholungstauchgängen und Deko-Tauchgängen';
 
   @override
-  String get safetyHub_title => 'Sicherheit';
-
-  @override
   String safetyHub_noFly_active_title(String remaining) {
     return 'Flugverbot: noch $remaining';
   }
@@ -11916,27 +11913,6 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get safetyHub_noFly_disclaimer =>
       'DAN/UHMS-Richtwerte ab dem letzten Tauchgang. Kein Ersatz für die Flugverbotszeit Ihres Tauchcomputers.';
-
-  @override
-  String get safetyHub_surfaceIntervalLink => 'Oberflächenpausen-Tool';
-
-  @override
-  String get safetyHub_surfaceIntervalLink_subtitle =>
-      'Lehrreiches Modell der Gewebeentsättigung';
-
-  @override
-  String get safetyHub_settingsLink => 'Sicherheitseinstellungen';
-
-  @override
-  String get planning_card_safety_title => 'Sicherheit';
-
-  @override
-  String get planning_card_safety_subtitle =>
-      'Flugverbots-Countdown, Notfallkarte, Beinahe-Unfall-Log';
-
-  @override
-  String get tools_safety_description =>
-      'Countdown fürs Fliegen nach dem Tauchen, die Offline-Notfallkarte und dein privates Beinahe-Unfall-Log an einem Ort.';
 
   @override
   String get emergencyCard_title => 'Notfall';
@@ -20322,4 +20298,15 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get media_unavailablePlaceholder_volumeOffline =>
       'Volume nicht eingebunden';
+
+  @override
+  String get planning_card_noFly_subtitle =>
+      'Richtwert-Countdown ab deinen letzten Tauchgängen';
+
+  @override
+  String get settings_section_safety_title => 'Sicherheit';
+
+  @override
+  String get settings_section_safety_subtitle =>
+      'Überprüfungsregeln & Fliegen nach dem Tauchen';
 }

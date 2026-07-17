@@ -11582,9 +11582,6 @@ class AppLocalizationsHe extends AppLocalizations {
       'מרווחים מנחים אחרי צלילה בודדת ללא דקו, צלילות חוזרות וצלילות דקומפרסיה';
 
   @override
-  String get safetyHub_title => 'בטיחות';
-
-  @override
   String safetyHub_noFly_active_title(String remaining) {
     return 'איסור טיסה: נותרו $remaining';
   }
@@ -11619,27 +11616,6 @@ class AppLocalizationsHe extends AppLocalizations {
   @override
   String get safetyHub_noFly_disclaimer =>
       'הנחיות DAN/UHMS מאז הצלילה האחרונה. אינו תחליף לזמן איסור הטיסה של מחשב הצלילה שלך.';
-
-  @override
-  String get safetyHub_surfaceIntervalLink => 'כלי מרווח פני השטח';
-
-  @override
-  String get safetyHub_surfaceIntervalLink_subtitle =>
-      'מודל לימודי של פליטת גזים מהרקמות';
-
-  @override
-  String get safetyHub_settingsLink => 'הגדרות בטיחות';
-
-  @override
-  String get planning_card_safety_title => 'בטיחות';
-
-  @override
-  String get planning_card_safety_subtitle =>
-      'ספירה לאחור לטיסה, כרטיס חירום, יומן כמעט-תאונות';
-
-  @override
-  String get tools_safety_description =>
-      'הספירה לאחור לטיסה אחרי צלילה, כרטיס החירום הלא-מקוון ויומן הכמעט-תאונות הפרטי שלך במקום אחד.';
 
   @override
   String get emergencyCard_title => 'חירום';
@@ -19834,4 +19810,14 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get media_unavailablePlaceholder_volumeOffline => 'הכונן אינו מחובר';
+
+  @override
+  String get planning_card_noFly_subtitle =>
+      'ספירה לאחור מנחה מהצלילות האחרונות שלך';
+
+  @override
+  String get settings_section_safety_title => 'בטיחות';
+
+  @override
+  String get settings_section_safety_subtitle => 'כללי סקירה וטיסה אחרי צלילה';
 }

@@ -3,7 +3,7 @@ import 'package:submersion/core/providers/provider.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:submersion/features/dashboard/presentation/providers/dashboard_providers.dart';
-import 'package:submersion/features/safety/presentation/pages/safety_hub_page.dart'
+import 'package:submersion/features/safety/presentation/pages/no_fly_page.dart'
     show formatNoFlyRemaining;
 import 'package:submersion/l10n/l10n_extension.dart';
 
@@ -56,7 +56,7 @@ class _CompactAlertsBanner extends StatelessWidget {
 
   void _onTap(BuildContext context) {
     if (alerts.noFlyStatus != null) {
-      context.push('/safety');
+      context.push('/planning/no-fly');
       return;
     }
     if (alerts.alertCount == 1) {

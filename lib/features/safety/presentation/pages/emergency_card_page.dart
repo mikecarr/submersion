@@ -27,7 +27,9 @@ class EmergencyCardPage extends ConsumerWidget {
           IconButton(
             icon: const Icon(Icons.add_location_alt_outlined),
             tooltip: l10n.emergencyCard_addChamber,
-            onPressed: () => context.push('/safety/emergency-card/add-chamber'),
+            onPressed: () => context.push(
+              '/settings/diver-profile/emergency-card/add-chamber',
+            ),
           ),
         ],
       ),

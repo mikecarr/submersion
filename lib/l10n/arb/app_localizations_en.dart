@@ -11692,9 +11692,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'Guideline intervals after a single no-deco dive, repetitive dives, and deco dives';
 
   @override
-  String get safetyHub_title => 'Safety';
-
-  @override
   String safetyHub_noFly_active_title(String remaining) {
     return 'No-fly: $remaining remaining';
   }
@@ -11728,27 +11725,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get safetyHub_noFly_disclaimer =>
       'DAN/UHMS guideline intervals from your last dive. Not a substitute for your dive computer\'s no-fly time.';
-
-  @override
-  String get safetyHub_surfaceIntervalLink => 'Surface interval tool';
-
-  @override
-  String get safetyHub_surfaceIntervalLink_subtitle =>
-      'Educational tissue desaturation model';
-
-  @override
-  String get safetyHub_settingsLink => 'Safety settings';
-
-  @override
-  String get planning_card_safety_title => 'Safety';
-
-  @override
-  String get planning_card_safety_subtitle =>
-      'No-fly countdown, emergency card, near-miss log';
-
-  @override
-  String get tools_safety_description =>
-      'Flying-after-diving countdown, the offline emergency card, and your private near-miss log in one place.';
 
   @override
   String get emergencyCard_title => 'Emergency';
@@ -20010,4 +19986,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get media_unavailablePlaceholder_volumeOffline => 'Volume not mounted';
+
+  @override
+  String get planning_card_noFly_subtitle =>
+      'Guideline countdown from your last dives';
+
+  @override
+  String get settings_section_safety_title => 'Safety';
+
+  @override
+  String get settings_section_safety_subtitle =>
+      'Review rules & flying after diving';
 }

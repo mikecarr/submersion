@@ -5800,7 +5800,6 @@
   "safetySettings_noFlyPreset_standard": "标准(12/18/24 小时)",
   "safetySettings_noFlyPreset_strict": "严格(18/24/48 小时)",
   "safetySettings_noFlyPreset_subtitle": "单次免减压潜水、重复潜水和减压潜水后的指导间隔",
-  "safetyHub_title": "安全",
   "safetyHub_noFly_active_title": "禁飞:剩余 {remaining}",
   "@safetyHub_noFly_active_title": {"placeholders": {"remaining": {"type": "String"}}},
   "safetyHub_noFly_until": "直到 {time}",
@@ -5814,9 +5813,6 @@
   "safetyHub_noFly_category_deco": "减压潜水后:{hours} 小时指导值",
   "@safetyHub_noFly_category_deco": {"placeholders": {"hours": {"type": "int"}}},
   "safetyHub_noFly_disclaimer": "自最后一次潜水起的 DAN/UHMS 指导值。不能替代潜水电脑的禁飞时间。",
-  "safetyHub_surfaceIntervalLink": "水面间隔工具",
-  "safetyHub_surfaceIntervalLink_subtitle": "组织脱饱和教学模型",
-  "safetyHub_settingsLink": "安全设置",
   "safetyHub_alert_noFly": "禁飞:剩余 {remaining}",
   "@safetyHub_alert_noFly": {"placeholders": {"remaining": {"type": "String"}}},
   "diveLog_detail_altitudeMismatch_title": "潜点位于高海拔",
@@ -5892,7 +5888,7 @@
   "diveLog_detail_menu_logNearMiss": "记录未遂事件",
   "diveLog_detail_linkedIncidents": "{count, plural, =1{1 起未遂事件与此次潜水关联} other{{count} 起未遂事件与此次潜水关联}}",
   "@diveLog_detail_linkedIncidents": {"placeholders": {"count": {"type": "int"}}},
-  "planning_card_safety_title": "安全",
-  "planning_card_safety_subtitle": "禁飞倒计时、紧急卡片、未遂事件日志",
-  "tools_safety_description": "潜水后飞行倒计时、离线紧急卡片和你的私密未遂事件日志,尽在一处。"
+  "planning_card_noFly_subtitle": "基于最近潜水的指导倒计时",
+  "settings_section_safety_title": "安全",
+  "settings_section_safety_subtitle": "回顾规则与潜水后飞行"
 }

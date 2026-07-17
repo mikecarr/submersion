@@ -6673,7 +6673,6 @@
   "safetySettings_noFlyPreset_standard": "Standard (12/18/24 h)",
   "safetySettings_noFlyPreset_strict": "Strict (18/24/48 h)",
   "safetySettings_noFlyPreset_subtitle": "Guideline intervals after a single no-deco dive, repetitive dives, and deco dives",
-  "safetyHub_title": "Safety",
   "safetyHub_noFly_active_title": "No-fly: {remaining} remaining",
   "@safetyHub_noFly_active_title": {
     "placeholders": {
@@ -6717,12 +6716,6 @@
     }
   },
   "safetyHub_noFly_disclaimer": "DAN/UHMS guideline intervals from your last dive. Not a substitute for your dive computer's no-fly time.",
-  "safetyHub_surfaceIntervalLink": "Surface interval tool",
-  "safetyHub_surfaceIntervalLink_subtitle": "Educational tissue desaturation model",
-  "safetyHub_settingsLink": "Safety settings",
-  "planning_card_safety_title": "Safety",
-  "planning_card_safety_subtitle": "No-fly countdown, emergency card, near-miss log",
-  "tools_safety_description": "Flying-after-diving countdown, the offline emergency card, and your private near-miss log in one place.",
   "emergencyCard_title": "Emergency",
   "emergencyCard_callDan": "Call {name}",
   "@emergencyCard_callDan": {
@@ -12730,5 +12723,8 @@
   "settings_setupGuide_statusTodo": "Not set up",
   "settings_setupGuide_open": "Open",
   "settings_connectedAccounts_loadError": "Could not load accounts",
-  "media_unavailablePlaceholder_volumeOffline": "Volume not mounted"
+  "media_unavailablePlaceholder_volumeOffline": "Volume not mounted",
+  "planning_card_noFly_subtitle": "Guideline countdown from your last dives",
+  "settings_section_safety_title": "Safety",
+  "settings_section_safety_subtitle": "Review rules & flying after diving"
 }

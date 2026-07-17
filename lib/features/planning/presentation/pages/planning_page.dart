@@ -218,11 +218,11 @@ List<_PlanningTool> _planningToolsOf(BuildContext context) {
       route: '/planning/surface-interval',
     ),
     _PlanningTool(
-      icon: Icons.health_and_safety_outlined,
+      icon: Icons.airplanemode_inactive,
       color: colorScheme.error,
-      title: context.l10n.planning_card_safety_title,
-      subtitle: context.l10n.planning_card_safety_subtitle,
-      route: '/safety',
+      title: context.l10n.safetySettings_noFlyHeader,
+      subtitle: context.l10n.planning_card_noFly_subtitle,
+      route: '/planning/no-fly',
     ),
   ];
 }

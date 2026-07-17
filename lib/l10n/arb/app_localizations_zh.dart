@@ -11321,9 +11321,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get safetySettings_noFlyPreset_subtitle => '单次免减压潜水、重复潜水和减压潜水后的指导间隔';
 
   @override
-  String get safetyHub_title => '安全';
-
-  @override
   String safetyHub_noFly_active_title(String remaining) {
     return '禁飞:剩余 $remaining';
   }
@@ -11357,24 +11354,6 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String get safetyHub_noFly_disclaimer =>
       '自最后一次潜水起的 DAN/UHMS 指导值。不能替代潜水电脑的禁飞时间。';
-
-  @override
-  String get safetyHub_surfaceIntervalLink => '水面间隔工具';
-
-  @override
-  String get safetyHub_surfaceIntervalLink_subtitle => '组织脱饱和教学模型';
-
-  @override
-  String get safetyHub_settingsLink => '安全设置';
-
-  @override
-  String get planning_card_safety_title => '安全';
-
-  @override
-  String get planning_card_safety_subtitle => '禁飞倒计时、紧急卡片、未遂事件日志';
-
-  @override
-  String get tools_safety_description => '潜水后飞行倒计时、离线紧急卡片和你的私密未遂事件日志,尽在一处。';
 
   @override
   String get emergencyCard_title => '紧急情况';
@@ -19307,4 +19286,13 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get media_unavailablePlaceholder_volumeOffline => '卷未挂载';
+
+  @override
+  String get planning_card_noFly_subtitle => '基于最近潜水的指导倒计时';
+
+  @override
+  String get settings_section_safety_title => '安全';
+
+  @override
+  String get settings_section_safety_subtitle => '回顾规则与潜水后飞行';
 }

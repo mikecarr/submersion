@@ -11875,9 +11875,6 @@ class AppLocalizationsEs extends AppLocalizations {
       'Intervalos orientativos tras una única inmersión sin deco, inmersiones sucesivas e inmersiones con deco';
 
   @override
-  String get safetyHub_title => 'Seguridad';
-
-  @override
   String safetyHub_noFly_active_title(String remaining) {
     return 'No volar: quedan $remaining';
   }
@@ -11912,28 +11909,6 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get safetyHub_noFly_disclaimer =>
       'Pautas DAN/UHMS desde tu última inmersión. No sustituye el tiempo de no volar de tu ordenador de buceo.';
-
-  @override
-  String get safetyHub_surfaceIntervalLink =>
-      'Herramienta de intervalo en superficie';
-
-  @override
-  String get safetyHub_surfaceIntervalLink_subtitle =>
-      'Modelo educativo de desaturación de tejidos';
-
-  @override
-  String get safetyHub_settingsLink => 'Ajustes de seguridad';
-
-  @override
-  String get planning_card_safety_title => 'Seguridad';
-
-  @override
-  String get planning_card_safety_subtitle =>
-      'Cuenta atrás de no volar, tarjeta de emergencia, registro de casi incidentes';
-
-  @override
-  String get tools_safety_description =>
-      'La cuenta atrás para volar tras bucear, la tarjeta de emergencia sin conexión y tu registro privado de casi incidentes en un solo lugar.';
 
   @override
   String get emergencyCard_title => 'Emergencia';
@@ -20362,4 +20337,15 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get media_unavailablePlaceholder_volumeOffline => 'Volumen no montado';
+
+  @override
+  String get planning_card_noFly_subtitle =>
+      'Cuenta atrás orientativa desde tus últimas inmersiones';
+
+  @override
+  String get settings_section_safety_title => 'Seguridad';
+
+  @override
+  String get settings_section_safety_subtitle =>
+      'Reglas de revisión y volar tras bucear';
 }

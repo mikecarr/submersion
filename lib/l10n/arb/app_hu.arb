@@ -5800,7 +5800,6 @@
   "safetySettings_noFlyPreset_standard": "Normál (12/18/24 ó)",
   "safetySettings_noFlyPreset_strict": "Szigorú (18/24/48 ó)",
   "safetySettings_noFlyPreset_subtitle": "Irányadó időközök egyetlen nullidős merülés, ismétlő merülések és dekós merülések után",
-  "safetyHub_title": "Biztonság",
   "safetyHub_noFly_active_title": "Repülési tilalom: {remaining} van hátra",
   "@safetyHub_noFly_active_title": {"placeholders": {"remaining": {"type": "String"}}},
   "safetyHub_noFly_until": "Eddig: {time}",
@@ -5814,9 +5813,6 @@
   "safetyHub_noFly_category_deco": "Dekompressziós merülés után: {hours} ó irányelv",
   "@safetyHub_noFly_category_deco": {"placeholders": {"hours": {"type": "int"}}},
   "safetyHub_noFly_disclaimer": "DAN/UHMS irányelvek az utolsó merüléstől számítva. Nem helyettesíti a búvárkomputer no-fly idejét.",
-  "safetyHub_surfaceIntervalLink": "Felszíni intervallum eszköz",
-  "safetyHub_surfaceIntervalLink_subtitle": "Oktató jellegű szöveti telítettségcsökkenési modell",
-  "safetyHub_settingsLink": "Biztonsági beállítások",
   "safetyHub_alert_noFly": "Repülési tilalom: {remaining} van hátra",
   "@safetyHub_alert_noFly": {"placeholders": {"remaining": {"type": "String"}}},
   "diveLog_detail_altitudeMismatch_title": "A merülőhely magaslaton fekszik",
@@ -5892,7 +5888,7 @@
   "diveLog_detail_menu_logNearMiss": "Kvázibaleset rögzítése",
   "diveLog_detail_linkedIncidents": "{count, plural, =1{1 kvázibaleset kapcsolódik ehhez a merüléshez} other{{count} kvázibaleset kapcsolódik ehhez a merüléshez}}",
   "@diveLog_detail_linkedIncidents": {"placeholders": {"count": {"type": "int"}}},
-  "planning_card_safety_title": "Biztonság",
-  "planning_card_safety_subtitle": "Repülési visszaszámlálás, vészhelyzeti kártya, kvázibaleset-napló",
-  "tools_safety_description": "A merülés utáni repülés visszaszámlálója, az offline vészhelyzeti kártya és a privát kvázibaleset-napló egy helyen."
+  "planning_card_noFly_subtitle": "Irányadó visszaszámlálás az utolsó merüléseidtől",
+  "settings_section_safety_title": "Biztonság",
+  "settings_section_safety_subtitle": "Áttekintési szabályok és repülés merülés után"
 }

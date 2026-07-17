@@ -30,7 +30,7 @@ class LinkedIncidentsRow extends ConsumerWidget {
         label: Text(
           context.l10n.diveLog_detail_linkedIncidents(incidents.length),
         ),
-        onPressed: () => context.push('/safety/incidents'),
+        onPressed: () => context.push('/incidents'),
       ),
     );
   }

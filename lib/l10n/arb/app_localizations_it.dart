@@ -11884,9 +11884,6 @@ class AppLocalizationsIt extends AppLocalizations {
       'Intervalli indicativi dopo una singola immersione senza deco, immersioni ripetitive e immersioni con deco';
 
   @override
-  String get safetyHub_title => 'Sicurezza';
-
-  @override
   String safetyHub_noFly_active_title(String remaining) {
     return 'No-fly: mancano $remaining';
   }
@@ -11921,28 +11918,6 @@ class AppLocalizationsIt extends AppLocalizations {
   @override
   String get safetyHub_noFly_disclaimer =>
       'Linee guida DAN/UHMS dall\'ultima immersione. Non sostituisce il tempo no-fly del tuo computer subacqueo.';
-
-  @override
-  String get safetyHub_surfaceIntervalLink =>
-      'Strumento intervallo di superficie';
-
-  @override
-  String get safetyHub_surfaceIntervalLink_subtitle =>
-      'Modello educativo di desaturazione dei tessuti';
-
-  @override
-  String get safetyHub_settingsLink => 'Impostazioni di sicurezza';
-
-  @override
-  String get planning_card_safety_title => 'Sicurezza';
-
-  @override
-  String get planning_card_safety_subtitle =>
-      'Conto alla rovescia no-fly, scheda di emergenza, registro dei quasi incidenti';
-
-  @override
-  String get tools_safety_description =>
-      'Il conto alla rovescia per volare dopo l\'immersione, la scheda di emergenza offline e il tuo registro privato dei quasi incidenti in un unico posto.';
 
   @override
   String get emergencyCard_title => 'Emergenza';
@@ -20350,4 +20325,15 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get media_unavailablePlaceholder_volumeOffline => 'Volume non montato';
+
+  @override
+  String get planning_card_noFly_subtitle =>
+      'Conto alla rovescia indicativo dalle ultime immersioni';
+
+  @override
+  String get settings_section_safety_title => 'Sicurezza';
+
+  @override
+  String get settings_section_safety_subtitle =>
+      'Regole di revisione e volo dopo l\'immersione';
 }

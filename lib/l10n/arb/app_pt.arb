@@ -5800,7 +5800,6 @@
   "safetySettings_noFlyPreset_standard": "Padrão (12/18/24 h)",
   "safetySettings_noFlyPreset_strict": "Rigoroso (18/24/48 h)",
   "safetySettings_noFlyPreset_subtitle": "Intervalos orientativos após um único mergulho sem deco, mergulhos repetitivos e mergulhos com deco",
-  "safetyHub_title": "Segurança",
   "safetyHub_noFly_active_title": "Não voar: faltam {remaining}",
   "@safetyHub_noFly_active_title": {"placeholders": {"remaining": {"type": "String"}}},
   "safetyHub_noFly_until": "Até {time}",
@@ -5814,9 +5813,6 @@
   "safetyHub_noFly_category_deco": "Após um mergulho com descompressão: orientação de {hours} h",
   "@safetyHub_noFly_category_deco": {"placeholders": {"hours": {"type": "int"}}},
   "safetyHub_noFly_disclaimer": "Orientações DAN/UHMS desde o último mergulho. Não substitui o tempo de não voar do seu computador de mergulho.",
-  "safetyHub_surfaceIntervalLink": "Ferramenta de intervalo de superfície",
-  "safetyHub_surfaceIntervalLink_subtitle": "Modelo educativo de dessaturação dos tecidos",
-  "safetyHub_settingsLink": "Configurações de segurança",
   "safetyHub_alert_noFly": "Não voar: faltam {remaining}",
   "@safetyHub_alert_noFly": {"placeholders": {"remaining": {"type": "String"}}},
   "diveLog_detail_altitudeMismatch_title": "O ponto de mergulho fica em altitude",
@@ -5892,7 +5888,7 @@
   "diveLog_detail_menu_logNearMiss": "Registrar quase acidente",
   "diveLog_detail_linkedIncidents": "{count, plural, =1{1 quase acidente vinculado a este mergulho} other{{count} quase acidentes vinculados a este mergulho}}",
   "@diveLog_detail_linkedIncidents": {"placeholders": {"count": {"type": "int"}}},
-  "planning_card_safety_title": "Segurança",
-  "planning_card_safety_subtitle": "Contagem para voar, cartão de emergência, registro de quase acidentes",
-  "tools_safety_description": "A contagem para voar após mergulhar, o cartão de emergência offline e seu registro privado de quase acidentes em um só lugar."
+  "planning_card_noFly_subtitle": "Contagem orientativa desde seus últimos mergulhos",
+  "settings_section_safety_title": "Segurança",
+  "settings_section_safety_subtitle": "Regras de revisão e voar após mergulhar"
 }

@@ -5800,7 +5800,6 @@
   "safetySettings_noFlyPreset_standard": "רגיל (12/18/24 ש')",
   "safetySettings_noFlyPreset_strict": "מחמיר (18/24/48 ש')",
   "safetySettings_noFlyPreset_subtitle": "מרווחים מנחים אחרי צלילה בודדת ללא דקו, צלילות חוזרות וצלילות דקומפרסיה",
-  "safetyHub_title": "בטיחות",
   "safetyHub_noFly_active_title": "איסור טיסה: נותרו {remaining}",
   "@safetyHub_noFly_active_title": {"placeholders": {"remaining": {"type": "String"}}},
   "safetyHub_noFly_until": "עד {time}",
@@ -5814,9 +5813,6 @@
   "safetyHub_noFly_category_deco": "אחרי צלילת דקומפרסיה: הנחיה של {hours} שעות",
   "@safetyHub_noFly_category_deco": {"placeholders": {"hours": {"type": "int"}}},
   "safetyHub_noFly_disclaimer": "הנחיות DAN/UHMS מאז הצלילה האחרונה. אינו תחליף לזמן איסור הטיסה של מחשב הצלילה שלך.",
-  "safetyHub_surfaceIntervalLink": "כלי מרווח פני השטח",
-  "safetyHub_surfaceIntervalLink_subtitle": "מודל לימודי של פליטת גזים מהרקמות",
-  "safetyHub_settingsLink": "הגדרות בטיחות",
   "safetyHub_alert_noFly": "איסור טיסה: נותרו {remaining}",
   "@safetyHub_alert_noFly": {"placeholders": {"remaining": {"type": "String"}}},
   "diveLog_detail_altitudeMismatch_title": "אתר הצלילה נמצא בגובה",
@@ -5892,7 +5888,7 @@
   "diveLog_detail_menu_logNearMiss": "רישום כמעט-תאונה",
   "diveLog_detail_linkedIncidents": "{count, plural, =1{כמעט-תאונה אחת מקושרת לצלילה זו} other{{count} כמעט-תאונות מקושרות לצלילה זו}}",
   "@diveLog_detail_linkedIncidents": {"placeholders": {"count": {"type": "int"}}},
-  "planning_card_safety_title": "בטיחות",
-  "planning_card_safety_subtitle": "ספירה לאחור לטיסה, כרטיס חירום, יומן כמעט-תאונות",
-  "tools_safety_description": "הספירה לאחור לטיסה אחרי צלילה, כרטיס החירום הלא-מקוון ויומן הכמעט-תאונות הפרטי שלך במקום אחד."
+  "planning_card_noFly_subtitle": "ספירה לאחור מנחה מהצלילות האחרונות שלך",
+  "settings_section_safety_title": "בטיחות",
+  "settings_section_safety_subtitle": "כללי סקירה וטיסה אחרי צלילה"
 }
