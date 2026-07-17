@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:submersion/core/providers/provider.dart';
 import 'package:submersion/features/dive_log/domain/entities/dive.dart';
@@ -35,11 +36,11 @@ void main() {
             diveProvider(diveId).overrideWith((ref) async => dive),
             siteProvider(siteId).overrideWith((ref) async => site),
             siteDiveCountProvider(siteId).overrideWith((ref) async => 0),
-          ].cast(),
-          child: MaterialApp(
+          ].cast<Override>(),
+          child: const MaterialApp(
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
-            home: const DiveDetailPage(
+            home: DiveDetailPage(
               diveId: diveId,
               embedded: true,
               embeddedSiteId: siteId,
@@ -76,7 +77,7 @@ void main() {
               diveProvider(diveId).overrideWith((ref) async => dive),
               siteProvider(siteId).overrideWith((ref) async => site),
               siteDiveCountProvider(siteId).overrideWith((ref) async => 0),
-            ].cast(),
+            ].cast<Override>(),
             child: MaterialApp(
               localizationsDelegates: AppLocalizations.localizationsDelegates,
               supportedLocales: AppLocalizations.supportedLocales,

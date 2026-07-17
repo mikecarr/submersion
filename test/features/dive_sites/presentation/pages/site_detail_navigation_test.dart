@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:submersion/core/constants/list_view_mode.dart';
@@ -55,7 +56,7 @@ void main() {
             ),
             siteProvider(site.id).overrideWith((ref) async => site),
             siteDiveCountProvider(site.id).overrideWith((ref) async => 0),
-          ].cast(),
+          ].cast<Override>(),
           child: MaterialApp.router(
             routerConfig: router,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
