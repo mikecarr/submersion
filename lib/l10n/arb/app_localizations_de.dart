@@ -2250,6 +2250,94 @@ class AppLocalizationsDe extends AppLocalizations {
   String get preDive_item_valueMax => 'Max (warning)';
 
   @override
+  String preDive_runner_progress(int done, int total) {
+    return '$done of $total';
+  }
+
+  @override
+  String get preDive_runner_complete => 'Complete';
+
+  @override
+  String preDive_runner_completeFlagged(int count) {
+    return 'Complete with $count flagged items?';
+  }
+
+  @override
+  String get preDive_runner_abort => 'Abort checklist';
+
+  @override
+  String get preDive_runner_abortConfirm =>
+      'Abort this checklist? It will be kept in history as aborted.';
+
+  @override
+  String get preDive_runner_skip => 'Skip';
+
+  @override
+  String get preDive_runner_flag => 'Flag';
+
+  @override
+  String get preDive_runner_undo => 'Reset to pending';
+
+  @override
+  String get preDive_runner_addNote => 'Add note';
+
+  @override
+  String get preDive_runner_enterValue => 'Enter value';
+
+  @override
+  String preDive_runner_flaggedBadge(int count) {
+    return '$count flagged';
+  }
+
+  @override
+  String get preDive_runner_locked => 'This checklist is locked';
+
+  @override
+  String get preDive_sessions_title => 'Pre-Dive Checklists';
+
+  @override
+  String get preDive_sessions_empty => 'No checklist runs yet';
+
+  @override
+  String get preDive_sessions_resume => 'Resume';
+
+  @override
+  String get preDive_sessions_start => 'Start checklist';
+
+  @override
+  String get preDive_sessions_statusCompleted => 'Completed';
+
+  @override
+  String get preDive_sessions_statusAborted => 'Aborted';
+
+  @override
+  String get preDive_sessions_statusInProgress => 'In progress';
+
+  @override
+  String get preDive_sessions_linkedDive => 'Linked dive';
+
+  @override
+  String get preDive_sessions_delete => 'Delete';
+
+  @override
+  String get preDive_sessions_deleteConfirm => 'Delete this checklist record?';
+
+  @override
+  String get preDive_start_title => 'Start pre-dive checklist';
+
+  @override
+  String get preDive_start_template => 'Checklist';
+
+  @override
+  String get preDive_start_equipmentSet => 'Equipment set';
+
+  @override
+  String get preDive_start_noEquipmentSet => 'None';
+
+  @override
+  String get preDive_start_begin => 'Begin';
+
+  @override
   String get settings_manage_preDiveChecklists => 'Pre-Dive Checklists';
 
   @override

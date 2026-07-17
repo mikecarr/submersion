@@ -3822,6 +3822,168 @@ abstract class AppLocalizations {
   /// **'Max (warning)'**
   String get preDive_item_valueMax;
 
+  /// No description provided for @preDive_runner_progress.
+  ///
+  /// In en, this message translates to:
+  /// **'{done} of {total}'**
+  String preDive_runner_progress(int done, int total);
+
+  /// No description provided for @preDive_runner_complete.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete'**
+  String get preDive_runner_complete;
+
+  /// No description provided for @preDive_runner_completeFlagged.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete with {count} flagged items?'**
+  String preDive_runner_completeFlagged(int count);
+
+  /// No description provided for @preDive_runner_abort.
+  ///
+  /// In en, this message translates to:
+  /// **'Abort checklist'**
+  String get preDive_runner_abort;
+
+  /// No description provided for @preDive_runner_abortConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Abort this checklist? It will be kept in history as aborted.'**
+  String get preDive_runner_abortConfirm;
+
+  /// No description provided for @preDive_runner_skip.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get preDive_runner_skip;
+
+  /// No description provided for @preDive_runner_flag.
+  ///
+  /// In en, this message translates to:
+  /// **'Flag'**
+  String get preDive_runner_flag;
+
+  /// No description provided for @preDive_runner_undo.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset to pending'**
+  String get preDive_runner_undo;
+
+  /// No description provided for @preDive_runner_addNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Add note'**
+  String get preDive_runner_addNote;
+
+  /// No description provided for @preDive_runner_enterValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter value'**
+  String get preDive_runner_enterValue;
+
+  /// No description provided for @preDive_runner_flaggedBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} flagged'**
+  String preDive_runner_flaggedBadge(int count);
+
+  /// No description provided for @preDive_runner_locked.
+  ///
+  /// In en, this message translates to:
+  /// **'This checklist is locked'**
+  String get preDive_runner_locked;
+
+  /// No description provided for @preDive_sessions_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Pre-Dive Checklists'**
+  String get preDive_sessions_title;
+
+  /// No description provided for @preDive_sessions_empty.
+  ///
+  /// In en, this message translates to:
+  /// **'No checklist runs yet'**
+  String get preDive_sessions_empty;
+
+  /// No description provided for @preDive_sessions_resume.
+  ///
+  /// In en, this message translates to:
+  /// **'Resume'**
+  String get preDive_sessions_resume;
+
+  /// No description provided for @preDive_sessions_start.
+  ///
+  /// In en, this message translates to:
+  /// **'Start checklist'**
+  String get preDive_sessions_start;
+
+  /// No description provided for @preDive_sessions_statusCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get preDive_sessions_statusCompleted;
+
+  /// No description provided for @preDive_sessions_statusAborted.
+  ///
+  /// In en, this message translates to:
+  /// **'Aborted'**
+  String get preDive_sessions_statusAborted;
+
+  /// No description provided for @preDive_sessions_statusInProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'In progress'**
+  String get preDive_sessions_statusInProgress;
+
+  /// No description provided for @preDive_sessions_linkedDive.
+  ///
+  /// In en, this message translates to:
+  /// **'Linked dive'**
+  String get preDive_sessions_linkedDive;
+
+  /// No description provided for @preDive_sessions_delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get preDive_sessions_delete;
+
+  /// No description provided for @preDive_sessions_deleteConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this checklist record?'**
+  String get preDive_sessions_deleteConfirm;
+
+  /// No description provided for @preDive_start_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Start pre-dive checklist'**
+  String get preDive_start_title;
+
+  /// No description provided for @preDive_start_template.
+  ///
+  /// In en, this message translates to:
+  /// **'Checklist'**
+  String get preDive_start_template;
+
+  /// No description provided for @preDive_start_equipmentSet.
+  ///
+  /// In en, this message translates to:
+  /// **'Equipment set'**
+  String get preDive_start_equipmentSet;
+
+  /// No description provided for @preDive_start_noEquipmentSet.
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get preDive_start_noEquipmentSet;
+
+  /// No description provided for @preDive_start_begin.
+  ///
+  /// In en, this message translates to:
+  /// **'Begin'**
+  String get preDive_start_begin;
+
   /// No description provided for @settings_manage_preDiveChecklists.
   ///
   /// In en, this message translates to:

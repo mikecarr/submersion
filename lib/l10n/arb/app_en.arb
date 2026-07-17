@@ -1307,6 +1307,57 @@
   "preDive_item_valueUnit": "Unit",
   "preDive_item_valueMin": "Min (warning)",
   "preDive_item_valueMax": "Max (warning)",
+  "preDive_runner_progress": "{done} of {total}",
+  "@preDive_runner_progress": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "preDive_runner_complete": "Complete",
+  "preDive_runner_completeFlagged": "Complete with {count} flagged items?",
+  "@preDive_runner_completeFlagged": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "preDive_runner_abort": "Abort checklist",
+  "preDive_runner_abortConfirm": "Abort this checklist? It will be kept in history as aborted.",
+  "preDive_runner_skip": "Skip",
+  "preDive_runner_flag": "Flag",
+  "preDive_runner_undo": "Reset to pending",
+  "preDive_runner_addNote": "Add note",
+  "preDive_runner_enterValue": "Enter value",
+  "preDive_runner_flaggedBadge": "{count} flagged",
+  "@preDive_runner_flaggedBadge": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "preDive_runner_locked": "This checklist is locked",
+  "preDive_sessions_title": "Pre-Dive Checklists",
+  "preDive_sessions_empty": "No checklist runs yet",
+  "preDive_sessions_resume": "Resume",
+  "preDive_sessions_start": "Start checklist",
+  "preDive_sessions_statusCompleted": "Completed",
+  "preDive_sessions_statusAborted": "Aborted",
+  "preDive_sessions_statusInProgress": "In progress",
+  "preDive_sessions_linkedDive": "Linked dive",
+  "preDive_sessions_delete": "Delete",
+  "preDive_sessions_deleteConfirm": "Delete this checklist record?",
+  "preDive_start_title": "Start pre-dive checklist",
+  "preDive_start_template": "Checklist",
+  "preDive_start_equipmentSet": "Equipment set",
+  "preDive_start_noEquipmentSet": "None",
+  "preDive_start_begin": "Begin",
   "settings_manage_preDiveChecklists": "Pre-Dive Checklists",
   "settings_manage_preDiveChecklists_subtitle": "Buddy checks, CCR build lists, gear packing",
   "common_action_back": "Back",
