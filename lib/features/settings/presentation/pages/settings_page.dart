@@ -316,7 +316,6 @@ class _MobileSettingsTile extends StatelessWidget {
       'data' => context.l10n.settings_section_data_title,
       'about' => context.l10n.settings_section_about_title,
       'dataSources' => context.l10n.settings_section_dataSources_title,
-      'dataQuality' => context.l10n.dataQuality_settings_title,
       'sharedData' => context.l10n.settings_sharedData_sectionTitle,
       _ => section.title,
     };
@@ -333,7 +332,6 @@ class _MobileSettingsTile extends StatelessWidget {
       'data' => context.l10n.settings_section_data_subtitle,
       'about' => context.l10n.settings_section_about_subtitle,
       'dataSources' => context.l10n.settings_section_dataSources_subtitle,
-      'dataQuality' => context.l10n.dataQuality_settings_subtitle,
       _ => section.subtitle,
     };
   }
@@ -346,9 +344,6 @@ class _MobileSettingsTile extends StatelessWidget {
         break;
       case 'appearance':
         context.push('/settings/appearance');
-        break;
-      case 'dataQuality':
-        context.push('/settings/data-quality');
         break;
       default:
         // For sections that don't have dedicated pages,
@@ -2044,6 +2039,14 @@ class _DataSectionContent extends ConsumerWidget {
                   subtitle: const Text('Adjust times for imported dives'),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => context.push('/settings/fix-dive-times'),
+                ),
+                const Divider(height: 1),
+                ListTile(
+                  leading: const Icon(Icons.rule),
+                  title: Text(context.l10n.dataQuality_settings_title),
+                  subtitle: Text(context.l10n.dataQuality_settings_subtitle),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push('/settings/data-quality'),
                 ),
               ],
             ),
