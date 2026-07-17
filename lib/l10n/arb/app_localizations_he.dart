@@ -11123,6 +11123,18 @@ class AppLocalizationsHe extends AppLocalizations {
   String get plannerCanvas_tab_setup => 'הגדרה';
 
   @override
+  String get plannerCanvas_o2Narcotic => 'התייחס לחמצן כמשכר';
+
+  @override
+  String get plannerCanvas_rates_ascent => 'קצב עלייה';
+
+  @override
+  String get plannerCanvas_rates_descent => 'קצב ירידה';
+
+  @override
+  String get plannerCanvas_rates_title => 'קצבים';
+
+  @override
   String get plannerCanvas_range_title => 'טבלת טווחים';
 
   @override

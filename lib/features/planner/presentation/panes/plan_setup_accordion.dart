@@ -6,6 +6,7 @@ import 'package:submersion/features/dive_planner/presentation/widgets/plan_gear_
 import 'package:submersion/features/dive_planner/presentation/widgets/setup/plan_deco_section.dart';
 import 'package:submersion/features/dive_planner/presentation/widgets/setup/plan_environment_section.dart';
 import 'package:submersion/features/dive_planner/presentation/widgets/setup/plan_gas_section.dart';
+import 'package:submersion/features/dive_planner/presentation/widgets/setup/plan_rates_section.dart';
 import 'package:submersion/features/planner/domain/entities/dive_plan.dart'
     as domain;
 import 'package:submersion/features/planner/presentation/providers/planner_layout_providers.dart';
@@ -65,6 +66,11 @@ class _PlanSetupAccordionState extends ConsumerState<PlanSetupAccordion> {
         'deco',
         context.l10n.divePlanner_label_decompression,
         const PlanDecoSection(),
+      ),
+      (
+        'rates',
+        context.l10n.plannerCanvas_rates_title,
+        const PlanRatesSection(),
       ),
       ('gas', context.l10n.diveField_category_gas, const PlanGasSection()),
       (

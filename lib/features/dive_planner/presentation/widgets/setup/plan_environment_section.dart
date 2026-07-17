@@ -15,13 +15,26 @@ class PlanEnvironmentSection extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final planState = ref.watch(divePlanNotifierProvider);
+    final o2Narcotic = ref.watch(settingsProvider.select((s) => s.o2Narcotic));
     final units = UnitFormatter(ref.watch(settingsProvider));
-    return _AltitudeInput(
-      altitude: planState.altitude,
-      units: units,
-      compact: true,
-      onChanged: (value) =>
-          ref.read(divePlanNotifierProvider.notifier).updateAltitude(value),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _AltitudeInput(
+          altitude: planState.altitude,
+          units: units,
+          compact: true,
+          onChanged: (value) =>
+              ref.read(divePlanNotifierProvider.notifier).updateAltitude(value),
+        ),
+        SwitchListTile(
+          contentPadding: EdgeInsets.zero,
+          title: Text(context.l10n.plannerCanvas_o2Narcotic),
+          value: o2Narcotic,
+          onChanged: (value) =>
+              ref.read(settingsProvider.notifier).setO2Narcotic(value),
+        ),
+      ],
     );
   }
 }

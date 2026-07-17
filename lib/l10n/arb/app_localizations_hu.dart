@@ -11381,6 +11381,18 @@ class AppLocalizationsHu extends AppLocalizations {
   String get plannerCanvas_tab_setup => 'Beállítás';
 
   @override
+  String get plannerCanvas_o2Narcotic => 'O₂ kezelése kábítóként';
+
+  @override
+  String get plannerCanvas_rates_ascent => 'Emelkedési ütem';
+
+  @override
+  String get plannerCanvas_rates_descent => 'Merülési ütem';
+
+  @override
+  String get plannerCanvas_rates_title => 'Ütemek';
+
+  @override
   String get plannerCanvas_range_title => 'Tartománytáblázat';
 
   @override

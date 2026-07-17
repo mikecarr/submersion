@@ -11410,6 +11410,18 @@ class AppLocalizationsDe extends AppLocalizations {
   String get plannerCanvas_tab_setup => 'Einrichtung';
 
   @override
+  String get plannerCanvas_o2Narcotic => 'O₂ als narkotisch behandeln';
+
+  @override
+  String get plannerCanvas_rates_ascent => 'Aufstiegsrate';
+
+  @override
+  String get plannerCanvas_rates_descent => 'Abstiegsrate';
+
+  @override
+  String get plannerCanvas_rates_title => 'Raten';
+
+  @override
   String get plannerCanvas_range_title => 'Bereichstabelle';
 
   @override

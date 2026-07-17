@@ -36,7 +36,7 @@ void main() {
   ) async {
     await tester.pumpWidget(_harness());
     await tester.pumpAndSettle();
-    expect(find.byType(ExpansionTile), findsNWidgets(5));
+    expect(find.byType(ExpansionTile), findsNWidgets(6));
     expect(find.byType(CcrSettingsSection), findsNothing);
     expect(find.byType(PlanDecoSection), findsNothing);
   });
@@ -75,7 +75,7 @@ void main() {
         .read(divePlanNotifierProvider.notifier)
         .updateMode(domain.PlanMode.ccr);
     await tester.pumpAndSettle();
-    expect(find.byType(ExpansionTile), findsNWidgets(6));
+    expect(find.byType(ExpansionTile), findsNWidgets(7));
     expect(find.text('CCR'), findsOneWidget);
   });
 

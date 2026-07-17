@@ -11415,6 +11415,18 @@ class AppLocalizationsPt extends AppLocalizations {
   String get plannerCanvas_tab_setup => 'Configuração';
 
   @override
+  String get plannerCanvas_o2Narcotic => 'Tratar o O₂ como narcótico';
+
+  @override
+  String get plannerCanvas_rates_ascent => 'Taxa de subida';
+
+  @override
+  String get plannerCanvas_rates_descent => 'Taxa de descida';
+
+  @override
+  String get plannerCanvas_rates_title => 'Taxas';
+
+  @override
   String get plannerCanvas_range_title => 'Tabela de variações';
 
   @override

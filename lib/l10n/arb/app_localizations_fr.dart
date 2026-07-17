@@ -11454,6 +11454,18 @@ class AppLocalizationsFr extends AppLocalizations {
   String get plannerCanvas_tab_setup => 'Réglages';
 
   @override
+  String get plannerCanvas_o2Narcotic => 'Traiter l\'O₂ comme narcotique';
+
+  @override
+  String get plannerCanvas_rates_ascent => 'Vitesse de remontée';
+
+  @override
+  String get plannerCanvas_rates_descent => 'Vitesse de descente';
+
+  @override
+  String get plannerCanvas_rates_title => 'Vitesses';
+
+  @override
   String get plannerCanvas_range_title => 'Table de variations';
 
   @override
