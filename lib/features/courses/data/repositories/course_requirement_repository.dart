@@ -95,8 +95,11 @@ class CourseRequirementRepository {
                   linkId: link.id,
                   diveId: dive.id,
                   diveNumber: dive.diveNumber,
+                  // Dive times are wall-clock-as-UTC; decode with isUtc so
+                  // the shown date never shifts with the device timezone.
                   dateTime: DateTime.fromMillisecondsSinceEpoch(
                     dive.diveDateTime,
+                    isUtc: true,
                   ),
                   siteName: site?.name,
                 ),
@@ -290,13 +293,31 @@ class CourseRequirementRepository {
   }) async {
     try {
       final id = linkIdFor(requirementId, diveId);
-      // Drift's insert return value does not distinguish an ignored
-      // conflict, so check existence explicitly (importDiveRole pattern).
-      // A true no-op must not bump the parent hlc or emit sync churn.
-      final existing = await (_db.select(
-        _db.courseRequirementDives,
-      )..where((t) => t.id.equals(id))).getSingleOrNull();
-      if (existing != null) return;
+      // Once-per-course invariant: a dive credits at most one requirement
+      // of a course (the suggestion query already assumes this, but the
+      // same suggestion list renders under every unsatisfied requirement,
+      // so two taps before providers refresh could double-count). This
+      // also covers the duplicate-link case for the same requirement --
+      // Drift's insert return value cannot distinguish an ignored
+      // conflict, so the check is explicit (importDiveRole pattern), and
+      // a no-op must not bump the parent hlc or emit sync churn. Enforced
+      // locally at write time; concurrent links from two devices to
+      // different requirements still merge via sync and are resolved by
+      // the user unlinking one.
+      final existingInCourse = await _db
+          .customSelect(
+            'SELECT l.id FROM course_requirement_dives l '
+            'JOIN course_requirements r ON r.id = l.requirement_id '
+            'WHERE l.dive_id = ?1 AND r.course_id = '
+            '(SELECT course_id FROM course_requirements WHERE id = ?2) '
+            'LIMIT 1',
+            variables: [
+              Variable.withString(diveId),
+              Variable.withString(requirementId),
+            ],
+          )
+          .get();
+      if (existingInCourse.isNotEmpty) return;
 
       final now = DateTime.now().millisecondsSinceEpoch;
       await _db
@@ -402,8 +423,10 @@ class CourseRequirementRepository {
           RequirementDiveSummary(
             diveId: row.data['id'] as String,
             diveNumber: row.data['dive_number'] as int?,
+            // Wall-clock-as-UTC, same as the linked-dive summaries above.
             dateTime: DateTime.fromMillisecondsSinceEpoch(
               row.data['dive_date_time'] as int,
+              isUtc: true,
             ),
             siteName: row.data['site_name'] as String?,
           ),

@@ -209,6 +209,53 @@ void main() {
       );
     });
 
+    test('a dive credits at most one requirement per course, but may '
+        'credit requirements of a different course', () async {
+      await _seedDiverAndCourse();
+      await _seedDive('dive-1');
+      final db = DatabaseService.instance.database;
+      await db.customStatement(
+        "INSERT INTO courses (id, diver_id, name, agency, start_date, "
+        "created_at, updated_at) "
+        "VALUES ('course-2', 'diver-1', 'Deep', 'padi', 1000, 1000, 1000)",
+      );
+
+      final deep = await repository.createRequirement(
+        courseId: 'course-1',
+        name: 'Deep adventure dive',
+        kind: RequirementKind.dive,
+      );
+      final elective = await repository.createRequirement(
+        courseId: 'course-1',
+        name: 'Elective adventure dives',
+        kind: RequirementKind.dive,
+        targetCount: 3,
+      );
+      final otherCourse = await repository.createRequirement(
+        courseId: 'course-2',
+        name: 'Deep training dives',
+        kind: RequirementKind.dive,
+        targetCount: 4,
+      );
+
+      await repository.linkDive(requirementId: deep.id, diveId: 'dive-1');
+      // Same course, different requirement: blocked (once per course).
+      await repository.linkDive(requirementId: elective.id, diveId: 'dive-1');
+      // Different course: allowed (deliberate, agencies differ).
+      await repository.linkDive(
+        requirementId: otherCourse.id,
+        diveId: 'dive-1',
+      );
+
+      final course1 = await repository.getCourseProgress('course-1');
+      final byId = {for (final p in course1.requirements) p.requirement.id: p};
+      expect(byId[deep.id]!.creditCount, 1);
+      expect(byId[elective.id]!.creditCount, 0);
+
+      final course2 = await repository.getCourseProgress('course-2');
+      expect(course2.requirements.single.creditCount, 1);
+    });
+
     test('linking bumps the parent requirement updatedAt (sync gate)', () async {
       await _seedDiverAndCourse();
       await _seedDive('dive-1');
