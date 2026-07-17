@@ -14,8 +14,10 @@ final qualityScanServiceProvider = Provider<QualityScanService>(
 );
 
 /// Drives the Dives app-bar badge; live under sync because findings are
-/// ordinary synced rows.
-final openQualityFindingsCountProvider = StreamProvider<int>(
+/// ordinary synced rows. autoDispose so the Drift stream subscription is
+/// cancelled when no widget is watching (also drains its pending timer in
+/// widget tests).
+final openQualityFindingsCountProvider = StreamProvider.autoDispose<int>(
   (ref) => ref.watch(qualityFindingsRepositoryProvider).watchOpenCount(),
 );
 

@@ -16,24 +16,26 @@ Set<QualityCategory> categoriesFor(QualityChip chip) => switch (chip) {
   QualityChip.sources => {QualityCategory.source},
 };
 
-final qualityFindingsStreamProvider = StreamProvider<List<QualityFinding>>(
-  (ref) => ref.watch(qualityFindingsRepositoryProvider).watchFindings(),
-);
+final qualityFindingsStreamProvider =
+    StreamProvider.autoDispose<List<QualityFinding>>(
+      (ref) => ref.watch(qualityFindingsRepositoryProvider).watchFindings(),
+    );
 
 final qualityInboxChipProvider = StateProvider<QualityChip>(
   (_) => QualityChip.all,
 );
 
-final diveOpenFindingsCountProvider = StreamProvider.family<int, String>(
-  (ref, diveId) => ref
-      .watch(qualityFindingsRepositoryProvider)
-      .watchOpenCountForDive(diveId),
-);
+final diveOpenFindingsCountProvider = StreamProvider.autoDispose
+    .family<int, String>(
+      (ref, diveId) => ref
+          .watch(qualityFindingsRepositoryProvider)
+          .watchOpenCountForDive(diveId),
+    );
 
 /// Open-finding count over an import's dive set (for the import summary line).
 /// List-keyed families need a stable key; callers pass a fixed list instance.
-final importedDivesOpenFindingsCountProvider =
-    StreamProvider.family<int, List<String>>((ref, diveIds) {
+final importedDivesOpenFindingsCountProvider = StreamProvider.autoDispose
+    .family<int, List<String>>((ref, diveIds) {
       final repo = ref.watch(qualityFindingsRepositoryProvider);
       return repo.watchFindings().map(
         (all) => all
