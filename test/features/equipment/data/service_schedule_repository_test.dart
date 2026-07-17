@@ -1,3 +1,4 @@
+import 'package:drift/drift.dart' hide isNull, isNotNull;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:submersion/core/constants/enums.dart';
 import 'package:submersion/core/database/database.dart';
@@ -66,6 +67,60 @@ void main() {
     expect(o2.intervalDays, 180);
     expect(o2.anchorDate, DateTime(2026, 3, 1));
   });
+
+  test(
+    'usage samples union dive_equipment and dive_tanks without doubles',
+    () async {
+      final tank = await makeTank();
+      final now = DateTime.now().millisecondsSinceEpoch;
+
+      Future<void> insertDive(String id, int? runtime, int? bottomTime) => db
+          .into(db.dives)
+          .insert(
+            DivesCompanion.insert(
+              id: id,
+              diveDateTime: now,
+              createdAt: now,
+              updatedAt: now,
+            ).copyWith(runtime: Value(runtime), bottomTime: Value(bottomTime)),
+          );
+
+      // Dive 1: linked via BOTH the junction and a dive_tanks row -> one
+      // sample, duration from runtime.
+      await insertDive('d1', 3600, 3000);
+      await db
+          .into(db.diveEquipment)
+          .insert(
+            DiveEquipmentCompanion.insert(diveId: 'd1', equipmentId: tank.id),
+          );
+      await db
+          .into(db.diveTanks)
+          .insert(
+            DiveTanksCompanion.insert(
+              id: 't1',
+              diveId: 'd1',
+            ).copyWith(equipmentId: Value(tank.id)),
+          );
+
+      // Dive 2: linked only via dive_tanks; no runtime -> bottom_time wins.
+      await insertDive('d2', null, 1800);
+      await db
+          .into(db.diveTanks)
+          .insert(
+            DiveTanksCompanion.insert(
+              id: 't2',
+              diveId: 'd2',
+            ).copyWith(equipmentId: Value(tank.id)),
+          );
+
+      // Dive 3: not linked to this equipment at all.
+      await insertDive('d3', 999, null);
+
+      final samples = await equipmentRepo.getUsageSamplesForEquipment(tank.id);
+      expect(samples, hasLength(2));
+      expect(samples.map((s) => s.durationSeconds).toSet(), {3600, 1800});
+    },
+  );
 
   test('deleting equipment tombstones its schedules', () async {
     final tank = await makeTank();

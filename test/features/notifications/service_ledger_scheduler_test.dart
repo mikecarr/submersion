@@ -1,13 +1,43 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:submersion/core/constants/enums.dart';
 import 'package:submersion/core/database/database.dart';
+import 'package:submersion/core/services/notification_service.dart';
 import 'package:submersion/features/equipment/data/repositories/equipment_repository_impl.dart';
 import 'package:submersion/features/equipment/data/repositories/service_schedule_repository.dart';
 import 'package:submersion/features/equipment/domain/entities/equipment_item.dart';
 import 'package:submersion/features/notifications/data/services/notification_scheduler.dart';
 import 'package:submersion/features/settings/presentation/providers/settings_providers.dart';
+import 'package:submersion/features/trips/data/repositories/trip_repository.dart';
+import 'package:submersion/features/trips/domain/entities/trip.dart' as domain;
 
 import '../../helpers/test_database.dart';
+
+/// Captures trip-reminder calls; every other member no-ops (desktop-style).
+class _FakeNotificationService implements NotificationService {
+  final tripReminders = <({String tripId, int itemCount, DateTime fireAt})>[];
+
+  @override
+  Future<int> scheduleTripServiceReminder({
+    required String tripId,
+    required String tripName,
+    required int itemCount,
+    required DateTime scheduledDate,
+  }) async {
+    tripReminders.add((
+      tripId: tripId,
+      itemCount: itemCount,
+      fireAt: scheduledDate,
+    ));
+    return 1;
+  }
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) {
+    final name = invocation.memberName.toString();
+    if (name.contains('scheduleServiceReminder')) return Future.value(0);
+    return Future.value();
+  }
+}
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -62,6 +92,47 @@ void main() {
       // Re-running is idempotent (already-scheduled check is per clock).
       await NotificationScheduler().scheduleAll(settings: const AppSettings());
       expect(await db.select(db.scheduledNotifications).get(), hasLength(4));
+    },
+  );
+
+  test(
+    'trip reminder fires once at start minus lead days for blocked gear',
+    () async {
+      final now = DateTime.now();
+      final tank = await equipmentRepo.createEquipment(
+        const EquipmentItem(id: '', name: 'AL80', type: EquipmentType.tank),
+      );
+      // Overdue hydro: blocks any upcoming trip.
+      final schedules = await scheduleRepo.getSchedulesForEquipment(tank.id);
+      final hydro = schedules.firstWhere((s) => s.serviceKindId == 'hydro');
+      await scheduleRepo.updateSchedule(
+        hydro.copyWith(anchorDate: now.subtract(const Duration(days: 2190))),
+      );
+
+      final trip = await TripRepository().createTrip(
+        domain.Trip(
+          id: '',
+          name: 'Bonaire',
+          startDate: now.add(const Duration(days: 30)),
+          endDate: now.add(const Duration(days: 37)),
+          createdAt: now,
+          updatedAt: now,
+        ),
+      );
+
+      final fake = _FakeNotificationService();
+      await NotificationScheduler(
+        notificationService: fake,
+      ).scheduleAll(settings: const AppSettings());
+
+      expect(fake.tripReminders, hasLength(1));
+      final reminder = fake.tripReminders.single;
+      expect(reminder.tripId, trip.id);
+      expect(reminder.itemCount, greaterThanOrEqualTo(1));
+      // Fires tripServiceLeadDays (default 14) before the trip starts.
+      final expectedDay = trip.startDate.subtract(const Duration(days: 14));
+      expect(reminder.fireAt.day, expectedDay.day);
+      expect(reminder.fireAt.isBefore(trip.startDate), isTrue);
     },
   );
 
