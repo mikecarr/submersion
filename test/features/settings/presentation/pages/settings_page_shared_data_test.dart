@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:submersion/core/providers/provider.dart';
 import 'package:submersion/core/constants/units.dart';
+import 'package:submersion/core/deco/entities/cns_calculation_method.dart';
 import 'package:submersion/features/divers/data/repositories/diver_repository.dart'
     show DeleteDiverResult;
 import 'package:submersion/features/divers/domain/entities/diver.dart';
@@ -233,6 +234,9 @@ class _MockSettingsNotifier extends StateNotifier<AppSettings>
   @override
   Future<void> setDefaultCnsSource(MetricDataSource value) async =>
       state = state.copyWith(defaultCnsSource: value);
+  @override
+  Future<void> setCnsCalculationMethod(CnsCalculationMethod value) async =>
+      state = state.copyWith(cnsCalculationMethod: value);
   @override
   Future<void> setCardColorAttribute(CardColorAttribute attribute) async =>
       state = state.copyWith(cardColorAttribute: attribute);

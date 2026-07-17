@@ -12,6 +12,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:submersion/core/constants/profile_metrics.dart';
 import 'package:submersion/core/constants/units.dart';
+import 'package:submersion/core/deco/entities/cns_calculation_method.dart';
 import 'package:submersion/core/services/logger_service.dart';
 import 'package:submersion/features/divers/presentation/providers/diver_providers.dart';
 import 'package:submersion/features/notifications/data/services/notification_scheduler.dart';
@@ -154,6 +155,10 @@ class AppSettings {
 
   /// Default data source for CNS metric (computer or calculated)
   final MetricDataSource defaultCnsSource;
+
+  /// Algorithm used for calculated CNS%; see
+  /// docs/plans/2026-07-16-cns-calculation-method-setting-design.md
+  final CnsCalculationMethod cnsCalculationMethod;
 
   // Appearance settings
   /// Which attribute to use for card background coloring
@@ -352,6 +357,7 @@ class AppSettings {
     this.defaultCeilingSource = MetricDataSource.calculated,
     this.defaultTtsSource = MetricDataSource.calculated,
     this.defaultCnsSource = MetricDataSource.calculated,
+    this.cnsCalculationMethod = CnsCalculationMethod.shearwater,
     // Appearance defaults
     this.cardColorAttribute = CardColorAttribute.none,
     this.diveListViewMode = ListViewMode.detailed,
@@ -485,6 +491,7 @@ class AppSettings {
     MetricDataSource? defaultCeilingSource,
     MetricDataSource? defaultTtsSource,
     MetricDataSource? defaultCnsSource,
+    CnsCalculationMethod? cnsCalculationMethod,
     CardColorAttribute? cardColorAttribute,
     ListViewMode? diveListViewMode,
     ListViewMode? siteListViewMode,
@@ -585,6 +592,7 @@ class AppSettings {
       defaultCeilingSource: defaultCeilingSource ?? this.defaultCeilingSource,
       defaultTtsSource: defaultTtsSource ?? this.defaultTtsSource,
       defaultCnsSource: defaultCnsSource ?? this.defaultCnsSource,
+      cnsCalculationMethod: cnsCalculationMethod ?? this.cnsCalculationMethod,
       cardColorAttribute: cardColorAttribute ?? this.cardColorAttribute,
       diveListViewMode: diveListViewMode ?? this.diveListViewMode,
       siteListViewMode: siteListViewMode ?? this.siteListViewMode,
@@ -1050,6 +1058,11 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
     await _saveSettings();
   }
 
+  Future<void> setCnsCalculationMethod(CnsCalculationMethod value) async {
+    state = state.copyWith(cnsCalculationMethod: value);
+    await _saveSettings();
+  }
+
   // Appearance setters
 
   Future<void> setCardColorAttribute(CardColorAttribute attribute) async {
@@ -1441,6 +1454,10 @@ final ppO2MaxDecoProvider = Provider<double>((ref) {
 
 final cnsWarningThresholdProvider = Provider<int>((ref) {
   return ref.watch(settingsProvider.select((s) => s.cnsWarningThreshold));
+});
+
+final cnsCalculationMethodProvider = Provider<CnsCalculationMethod>((ref) {
+  return ref.watch(settingsProvider.select((s) => s.cnsCalculationMethod));
 });
 
 final ascentRateWarningProvider = Provider<double>((ref) {

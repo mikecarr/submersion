@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:submersion/core/deco/entities/cns_calculation_method.dart';
 import 'package:submersion/core/providers/provider.dart';
 import 'package:submersion/features/divers/data/repositories/diver_repository.dart';
 import 'package:submersion/features/divers/domain/entities/diver.dart';
@@ -337,6 +338,27 @@ void main() {
         expect(container.read(settingsProvider).showAscentRateColors, isTrue);
       },
     );
+
+    test('setCnsCalculationMethod updates state and persists', () async {
+      container.read(settingsProvider.notifier);
+      await waitForInit();
+
+      expect(
+        container.read(settingsProvider).cnsCalculationMethod,
+        CnsCalculationMethod.shearwater,
+      );
+      await container
+          .read(settingsProvider.notifier)
+          .setCnsCalculationMethod(CnsCalculationMethod.subsurface);
+      expect(
+        container.read(settingsProvider).cnsCalculationMethod,
+        CnsCalculationMethod.subsurface,
+      );
+      expect(
+        container.read(cnsCalculationMethodProvider),
+        CnsCalculationMethod.subsurface,
+      );
+    });
 
     test('fullscreen tile preferences persist and reload', () async {
       final notifier = container.read(settingsProvider.notifier);

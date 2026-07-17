@@ -1196,6 +1196,9 @@ class DiverSettings extends Table {
       integer().withDefault(const Constant(1))();
   IntColumn get defaultTtsSource => integer().withDefault(const Constant(1))();
   IntColumn get defaultCnsSource => integer().withDefault(const Constant(1))();
+  // CNS calculation method: 'classic' | 'shearwater' | 'subsurface' (v113)
+  TextColumn get cnsCalculationMethod =>
+      text().withDefault(const Constant('shearwater'))();
   // Appearance settings
   BoolColumn get showDepthColoredDiveCards =>
       boolean().withDefault(const Constant(false))();
@@ -2210,7 +2213,7 @@ class AppDatabase extends _$AppDatabase {
 
   /// The current schema version as a static constant so that pre-open checks
   /// (e.g. version-mismatch guard) can reference it without an instance.
-  static const int currentSchemaVersion = 113;
+  static const int currentSchemaVersion = 114;
 
   /// Every schema version that has a migration block in onUpgrade.
   /// Used to calculate progress step counts. When adding a new migration,
@@ -2327,6 +2330,7 @@ class AppDatabase extends _$AppDatabase {
     111,
     112,
     113,
+    114,
   ];
 
   /// Idempotent DDL for the v106 connector-suggestion columns (Lightroom
@@ -2411,11 +2415,11 @@ class AppDatabase extends _$AppDatabase {
     }
   }
 
-  /// v113: collapse duplicate tombstones (newest deleted_at per entity_type +
+  /// v114: collapse duplicate tombstones (newest deleted_at per entity_type +
   /// record_id wins) and (re-)assert the unique index that keeps the deletion
   /// log collapsed. Cheap when the index already exists; the dedupe DELETE
   /// only runs when index creation fails on pre-existing duplicates. Called
-  /// from the v113 upgrade and the beforeOpen backstop (parallel-branch
+  /// from the v114 upgrade and the beforeOpen backstop (parallel-branch
   /// schema-version collisions heal here, mirroring the v111 backstop).
   Future<void> ensureDeletionLogIndex() async {
     // Self-guarding when the table is absent (minimal migration-test
@@ -2451,6 +2455,24 @@ class AppDatabase extends _$AppDatabase {
     final hasThickness = cols.any((c) => c.read<String>('name') == 'thickness');
     if (cols.isNotEmpty && !hasThickness) {
       await customStatement('ALTER TABLE equipment ADD COLUMN thickness TEXT');
+    }
+  }
+
+  /// v113: diver_settings.cns_calculation_method column. Self-guarding when
+  /// the diver_settings table is absent (partial-schema migration tests), so
+  /// it is safe to call from both onUpgrade and the beforeOpen backstop.
+  Future<void> _assertCnsCalculationMethodColumn() async {
+    final cols = await customSelect(
+      "PRAGMA table_info('diver_settings')",
+    ).get();
+    final hasColumn = cols.any(
+      (c) => c.read<String>('name') == 'cns_calculation_method',
+    );
+    if (cols.isNotEmpty && !hasColumn) {
+      await customStatement(
+        "ALTER TABLE diver_settings ADD COLUMN cns_calculation_method "
+        "TEXT NOT NULL DEFAULT 'shearwater'",
+      );
     }
   }
 
@@ -5583,6 +5605,10 @@ class AppDatabase extends _$AppDatabase {
         }
         if (from < 112) await reportProgress();
         if (from < 113) {
+          await _assertCnsCalculationMethodColumn();
+        }
+        if (from < 113) await reportProgress();
+        if (from < 114) {
           // Guarded like the beforeOpen backstops: minimal migration-test
           // fixtures may lack the table entirely.
           final peerCursorCols = await customSelect(
@@ -5596,7 +5622,7 @@ class AppDatabase extends _$AppDatabase {
           }
           await ensureDeletionLogIndex();
         }
-        if (from < 113) await reportProgress();
+        if (from < 114) await reportProgress();
       },
       beforeOpen: (details) async {
         // Enable foreign keys
@@ -5630,7 +5656,10 @@ class AppDatabase extends _$AppDatabase {
         // v112 backstop: re-assert equipment.thickness column.
         await _assertEquipmentThicknessColumn();
 
-        // v113 backstop: re-assert sync_peer_cursors.applied_hlc_high and the
+        // v113 backstop: re-assert diver_settings.cns_calculation_method.
+        await _assertCnsCalculationMethodColumn();
+
+        // v114 backstop: re-assert sync_peer_cursors.applied_hlc_high and the
         // deletion_log unique index.
         final peerCursorCols = await customSelect(
           "PRAGMA table_info('sync_peer_cursors')",
