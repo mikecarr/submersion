@@ -1366,6 +1366,23 @@
   "diveDetailSection_preDiveChecklist_name": "Pre-Dive Check",
   "diveDetailSection_preDiveChecklist_description": "Linked pre-dive checklist session",
   "diveLog_listPage_bottomSheet_preDiveChecklist": "Start pre-dive checklist",
+  "preDive_dashboard_title": "Pre-Dive Check",
+  "preDive_dashboard_resume": "Resume - {done} of {total}",
+  "@preDive_dashboard_resume": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "preDive_dashboard_start": "Start pre-dive check",
+  "tools_preDive_title": "Pre-Dive Checklists",
+  "tools_preDive_subtitle": "Run and review checklist sessions",
+  "tools_preDive_description": "Buddy checks, CCR build lists, and gear packing with an audit trail",
+  "trips_detail_preDive_action": "Pre-dive checklist",
   "settings_manage_preDiveChecklists": "Pre-Dive Checklists",
   "settings_manage_preDiveChecklists_subtitle": "Buddy checks, CCR build lists, gear packing",
   "common_action_back": "Back",

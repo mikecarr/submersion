@@ -2355,6 +2355,30 @@ class AppLocalizationsIt extends AppLocalizations {
       'Start pre-dive checklist';
 
   @override
+  String get preDive_dashboard_title => 'Pre-Dive Check';
+
+  @override
+  String preDive_dashboard_resume(int done, int total) {
+    return 'Resume - $done of $total';
+  }
+
+  @override
+  String get preDive_dashboard_start => 'Start pre-dive check';
+
+  @override
+  String get tools_preDive_title => 'Pre-Dive Checklists';
+
+  @override
+  String get tools_preDive_subtitle => 'Run and review checklist sessions';
+
+  @override
+  String get tools_preDive_description =>
+      'Buddy checks, CCR build lists, and gear packing with an audit trail';
+
+  @override
+  String get trips_detail_preDive_action => 'Pre-dive checklist';
+
+  @override
   String get settings_manage_preDiveChecklists => 'Pre-Dive Checklists';
 
   @override

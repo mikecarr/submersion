@@ -4032,6 +4032,48 @@ abstract class AppLocalizations {
   /// **'Start pre-dive checklist'**
   String get diveLog_listPage_bottomSheet_preDiveChecklist;
 
+  /// No description provided for @preDive_dashboard_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Pre-Dive Check'**
+  String get preDive_dashboard_title;
+
+  /// No description provided for @preDive_dashboard_resume.
+  ///
+  /// In en, this message translates to:
+  /// **'Resume - {done} of {total}'**
+  String preDive_dashboard_resume(int done, int total);
+
+  /// No description provided for @preDive_dashboard_start.
+  ///
+  /// In en, this message translates to:
+  /// **'Start pre-dive check'**
+  String get preDive_dashboard_start;
+
+  /// No description provided for @tools_preDive_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Pre-Dive Checklists'**
+  String get tools_preDive_title;
+
+  /// No description provided for @tools_preDive_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Run and review checklist sessions'**
+  String get tools_preDive_subtitle;
+
+  /// No description provided for @tools_preDive_description.
+  ///
+  /// In en, this message translates to:
+  /// **'Buddy checks, CCR build lists, and gear packing with an audit trail'**
+  String get tools_preDive_description;
+
+  /// No description provided for @trips_detail_preDive_action.
+  ///
+  /// In en, this message translates to:
+  /// **'Pre-dive checklist'**
+  String get trips_detail_preDive_action;
+
   /// No description provided for @settings_manage_preDiveChecklists.
   ///
   /// In en, this message translates to:
