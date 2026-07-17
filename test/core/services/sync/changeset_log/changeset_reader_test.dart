@@ -293,6 +293,27 @@ void main() {
     );
   });
 
+  test('pull uses a caller-supplied listing instead of re-listing', () async {
+    await DiveRepository().createDive(
+      createTestDiveWithBottomTime(id: 'pre-1', diveNumber: 1),
+    );
+    await publishAsPeer();
+
+    // An empty pre-listing must be honored verbatim: the peer's files exist
+    // in the cloud but the reader must not issue its own listFiles call.
+    final result = await reader.pull(
+      provider: provider,
+      selfDeviceId: 'reader-self',
+      folderId: folder,
+      apply: spyApply,
+      applyBaseFile: spyApplyBaseFile(applied),
+      preListedFiles: const [],
+    );
+
+    expect(result.peersProcessed, 0);
+    expect(applied, isEmpty);
+  });
+
   test('pull returns live peer manifests', () async {
     await DiveRepository().createDive(
       createTestDiveWithBottomTime(id: 'man-1', diveNumber: 1),

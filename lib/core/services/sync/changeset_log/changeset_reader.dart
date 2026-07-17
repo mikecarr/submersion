@@ -57,12 +57,21 @@ class ChangesetReader {
     required ApplyPayload apply,
     required ApplyBaseFile applyBaseFile,
     String? currentEpochId,
+    List<CloudFileInfo>? preListedFiles,
   }) async {
     final providerId = provider.providerId;
-    final files = await provider.listFiles(
-      folderId: folderId,
-      namePattern: ChangesetLogLayout.prefix,
-    );
+    // [preListedFiles] lets the caller reuse a listing it just made (the
+    // retirement-fence check lists the same folder immediately before this
+    // pull), saving a round-trip on high-latency backends. Safe because
+    // nothing mutates the folder between that listing and this pull, and
+    // every consumer is already tolerant of a slightly stale view (a missing
+    // file reads as a transient gap and retries next sync).
+    final files =
+        preListedFiles ??
+        await provider.listFiles(
+          folderId: folderId,
+          namePattern: ChangesetLogLayout.prefix,
+        );
     final byName = {for (final f in files) f.name: f};
     final peerIds = ChangesetLogLayout.peerDeviceIds(
       files.map((f) => f.name),

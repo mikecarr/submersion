@@ -413,13 +413,13 @@ class SyncService {
       // before merging anything, or stale local rows would resurrect
       // fleet-wide. Detected ONLY by the durable marker -- a missing manifest
       // alone is routine listing lag and cold-starts harmlessly.
-      final fenceResult = await _checkRetirementFence(
+      final fence = await _checkRetirementFence(
         provider,
         folderId,
         deviceId,
         currentEpochId,
       );
-      if (fenceResult != null) return fenceResult;
+      if (fence.terminal != null) return fence.terminal!;
 
       // ---- Stale-restore: cold-start to re-pull the authoritative library ----
       if (await _staleRestoreDetector.isStaleRestore(
@@ -450,6 +450,9 @@ class SyncService {
         selfDeviceId: deviceId,
         folderId: folderId,
         currentEpochId: currentEpochId,
+        // Reuse the fence check's listing (null after a rejoin, which mutates
+        // the folder and needs a fresh view).
+        preListedFiles: fence.files,
         apply: (payload) async {
           final r = await _applyRemotePayload(payload, lastSyncTime);
           recordsSynced += r.recordsApplied;
@@ -2414,10 +2417,14 @@ class SyncService {
   /// fix-ups (active diver, follow-up sync).
   /// Retirement fence: if the fleet retired this device while it was offline
   /// (its retirement marker is present), rebuild from the current cloud
-  /// library before doing anything else. Returns a terminal [SyncResult] only
-  /// on failure; null means "not fenced" or "fence completed -- continue this
-  /// sync normally" (the follow-through pull/publish then republishes us).
-  Future<SyncResult?> _checkRetirementFence(
+  /// library before doing anything else. `terminal` is non-null only on
+  /// failure; a null `terminal` means "not fenced" or "fence completed --
+  /// continue this sync normally" (the follow-through pull/publish then
+  /// republishes us). `files` carries this check's folder listing back to the
+  /// caller for reuse by the pull when the fence did NOT fire (after a rejoin
+  /// the listing is stale -- the rejoin mutated the folder -- so it is null).
+  Future<({SyncResult? terminal, List<CloudFileInfo>? files})>
+  _checkRetirementFence(
     CloudStorageProvider provider,
     String folderId,
     String deviceId,
@@ -2429,14 +2436,14 @@ class SyncService {
       namePattern: ChangesetLogLayout.prefix,
     );
     final marker = files.where((f) => f.name == markerName).toList();
-    if (marker.isEmpty) return null;
+    if (marker.isEmpty) return (terminal: null, files: files);
     final retiredPeers = <String>{
       for (final f in files)
         if (ChangesetLogLayout.isRetiredMarker(f.name) &&
             ChangesetLogLayout.deviceIdOf(f.name) != null)
           ChangesetLogLayout.deviceIdOf(f.name)!,
     };
-    return _rejoinAfterRetirement(
+    final terminal = await _rejoinAfterRetirement(
       provider: provider,
       folderId: folderId,
       deviceId: deviceId,
@@ -2444,6 +2451,7 @@ class SyncService {
       markerId: marker.first.id,
       retiredPeers: retiredPeers,
     );
+    return (terminal: terminal, files: null);
   }
 
   Future<SyncResult?> _rejoinAfterRetirement({
