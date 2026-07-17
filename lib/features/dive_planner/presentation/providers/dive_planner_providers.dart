@@ -162,6 +162,23 @@ class DivePlanNotifier extends StateNotifier<DivePlanState> {
     );
   }
 
+  /// Replace one segment with one or more segments in place (used by the
+  /// chart's split gesture). Orders are renumbered.
+  void replaceSegment(String id, List<PlanSegment> replacements) {
+    final segments = List<PlanSegment>.from(state.segments);
+    final index = segments.indexWhere((s) => s.id == id);
+    if (index < 0) return;
+    segments
+      ..removeAt(index)
+      ..insertAll(index, replacements);
+    _updateSegmentOrders(segments);
+    state = state.copyWith(
+      segments: segments,
+      isDirty: true,
+      updatedAt: DateTime.now(),
+    );
+  }
+
   /// Remove a segment from the plan.
   void removeSegment(String id) {
     final segments = state.segments.where((s) => s.id != id).toList();
