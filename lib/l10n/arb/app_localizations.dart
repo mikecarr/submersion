@@ -16174,6 +16174,12 @@ abstract class AppLocalizations {
   /// **'Size'**
   String get equipment_detail_sizeLabel;
 
+  /// No description provided for @equipment_detail_thicknessLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Thickness'**
+  String get equipment_detail_thicknessLabel;
+
   /// No description provided for @equipment_detail_statusLabel.
   ///
   /// In en, this message translates to:
@@ -16521,6 +16527,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Status'**
   String get equipment_edit_statusLabel;
+
+  /// No description provided for @equipment_edit_thicknessHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g., 5mm, 7mm'**
+  String get equipment_edit_thicknessHint;
+
+  /// No description provided for @equipment_edit_thicknessLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Thickness'**
+  String get equipment_edit_thicknessLabel;
 
   /// No description provided for @equipment_edit_typeLabel.
   ///

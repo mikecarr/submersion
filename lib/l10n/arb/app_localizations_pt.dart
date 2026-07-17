@@ -9420,6 +9420,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get equipment_detail_sizeLabel => 'Tamanho';
 
   @override
+  String get equipment_detail_thicknessLabel => 'Espessura';
+
+  @override
   String get equipment_detail_statusLabel => 'Status';
 
   @override
@@ -9616,6 +9619,12 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get equipment_edit_statusLabel => 'Status';
+
+  @override
+  String get equipment_edit_thicknessHint => 'ex: 5mm, 7mm';
+
+  @override
+  String get equipment_edit_thicknessLabel => 'Espessura';
 
   @override
   String get equipment_edit_typeLabel => 'Tipo *';

@@ -39,7 +39,7 @@ void main() {
     'ensureDeletionLogIndex collapses pre-existing duplicates, newest wins',
     () async {
       final db = DatabaseService.instance.database;
-      // Simulate a pre-v112 database: drop the index, insert raw duplicates.
+      // Simulate a pre-v113 database: drop the index, insert raw duplicates.
       await db.customStatement(
         'DROP INDEX IF EXISTS idx_deletion_log_entity_record',
       );

@@ -696,6 +696,7 @@ class Equipment extends Table {
   TextColumn get model => text().nullable()();
   TextColumn get serialNumber => text().nullable()();
   TextColumn get size => text().nullable()(); // S, M, L, XL, or specific size
+  TextColumn get thickness => text().nullable()(); // 2,3,4,5,6 or 6mm (v112)
   // Buoyancy metadata (v104): net in-water buoyancy in kg (positive floats),
   // and dry weight in kg (feeds displacement scaling).
   RealColumn get buoyancyKg => real().nullable()();
@@ -2209,7 +2210,7 @@ class AppDatabase extends _$AppDatabase {
 
   /// The current schema version as a static constant so that pre-open checks
   /// (e.g. version-mismatch guard) can reference it without an instance.
-  static const int currentSchemaVersion = 112;
+  static const int currentSchemaVersion = 113;
 
   /// Every schema version that has a migration block in onUpgrade.
   /// Used to calculate progress step counts. When adding a new migration,
@@ -2325,6 +2326,7 @@ class AppDatabase extends _$AppDatabase {
     110,
     111,
     112,
+    113,
   ];
 
   /// Idempotent DDL for the v106 connector-suggestion columns (Lightroom
@@ -2409,11 +2411,11 @@ class AppDatabase extends _$AppDatabase {
     }
   }
 
-  /// v112: collapse duplicate tombstones (newest deleted_at per entity_type +
+  /// v113: collapse duplicate tombstones (newest deleted_at per entity_type +
   /// record_id wins) and (re-)assert the unique index that keeps the deletion
   /// log collapsed. Cheap when the index already exists; the dedupe DELETE
   /// only runs when index creation fails on pre-existing duplicates. Called
-  /// from the v112 upgrade and the beforeOpen backstop (parallel-branch
+  /// from the v113 upgrade and the beforeOpen backstop (parallel-branch
   /// schema-version collisions heal here, mirroring the v111 backstop).
   Future<void> ensureDeletionLogIndex() async {
     // Self-guarding when the table is absent (minimal migration-test
@@ -2439,6 +2441,16 @@ class AppDatabase extends _$AppDatabase {
         )
       ''');
       await customStatement(createIndex);
+    }
+  }
+
+  /// v112: equipment.thickness column. Idempotent so it is safe to call from
+  /// both onUpgrade and the beforeOpen backstop.
+  Future<void> _assertEquipmentThicknessColumn() async {
+    final cols = await customSelect("PRAGMA table_info('equipment')").get();
+    final hasThickness = cols.any((c) => c.read<String>('name') == 'thickness');
+    if (cols.isNotEmpty && !hasThickness) {
+      await customStatement('ALTER TABLE equipment ADD COLUMN thickness TEXT');
     }
   }
 
@@ -5567,6 +5579,10 @@ class AppDatabase extends _$AppDatabase {
         }
         if (from < 111) await reportProgress();
         if (from < 112) {
+          await _assertEquipmentThicknessColumn();
+        }
+        if (from < 112) await reportProgress();
+        if (from < 113) {
           // Guarded like the beforeOpen backstops: minimal migration-test
           // fixtures may lack the table entirely.
           final peerCursorCols = await customSelect(
@@ -5580,7 +5596,7 @@ class AppDatabase extends _$AppDatabase {
           }
           await ensureDeletionLogIndex();
         }
-        if (from < 112) await reportProgress();
+        if (from < 113) await reportProgress();
       },
       beforeOpen: (details) async {
         // Enable foreign keys
@@ -5611,7 +5627,10 @@ class AppDatabase extends _$AppDatabase {
         // equipment_set_geofences table (parallel-branch collision self-heal).
         await _assertEquipmentSetDefaultAndGeofenceSchema();
 
-        // v112 backstop: re-assert sync_peer_cursors.applied_hlc_high and the
+        // v112 backstop: re-assert equipment.thickness column.
+        await _assertEquipmentThicknessColumn();
+
+        // v113 backstop: re-assert sync_peer_cursors.applied_hlc_high and the
         // deletion_log unique index.
         final peerCursorCols = await customSelect(
           "PRAGMA table_info('sync_peer_cursors')",

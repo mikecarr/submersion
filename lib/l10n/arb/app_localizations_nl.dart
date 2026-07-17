@@ -9361,6 +9361,9 @@ class AppLocalizationsNl extends AppLocalizations {
   String get equipment_detail_sizeLabel => 'Maat';
 
   @override
+  String get equipment_detail_thicknessLabel => 'Dikte';
+
+  @override
   String get equipment_detail_statusLabel => 'Status';
 
   @override
@@ -9555,6 +9558,12 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get equipment_edit_statusLabel => 'Status';
+
+  @override
+  String get equipment_edit_thicknessHint => 'bijv. 5mm, 7mm';
+
+  @override
+  String get equipment_edit_thicknessLabel => 'Dikte';
 
   @override
   String get equipment_edit_typeLabel => 'Type *';
