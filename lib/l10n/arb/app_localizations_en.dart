@@ -9409,11 +9409,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'No custom service types yet';
 
   @override
-  String equipment_serviceKinds_intervalSummary(String summary) {
-    return '$summary';
-  }
-
-  @override
   String equipment_serviceKinds_everyDays(int days) {
     return 'every $days days';
   }

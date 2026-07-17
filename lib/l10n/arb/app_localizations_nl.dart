@@ -9347,184 +9347,180 @@ class AppLocalizationsNl extends AppLocalizations {
   String get equipment_detail_serviceInfoTitle => 'Service-informatie';
 
   @override
-  String get equipment_serviceClocks_title => 'Service clocks';
+  String get equipment_serviceClocks_title => 'Serviceintervallen';
 
   @override
-  String get equipment_serviceClocks_addClock => 'Add clock';
+  String get equipment_serviceClocks_addClock => 'Interval toevoegen';
 
   @override
-  String get equipment_serviceClocks_logService => 'Log service';
+  String get equipment_serviceClocks_logService => 'Service registreren';
 
   @override
-  String get equipment_serviceClocks_edit => 'Edit intervals';
+  String get equipment_serviceClocks_edit => 'Intervallen bewerken';
 
   @override
-  String get equipment_serviceClocks_pause => 'Pause';
+  String get equipment_serviceClocks_pause => 'Pauzeren';
 
   @override
-  String get equipment_serviceClocks_resume => 'Resume';
+  String get equipment_serviceClocks_resume => 'Hervatten';
 
   @override
-  String get equipment_serviceClocks_remove => 'Remove';
+  String get equipment_serviceClocks_remove => 'Verwijderen';
 
   @override
-  String get equipment_serviceClocks_paused => 'Paused';
+  String get equipment_serviceClocks_paused => 'Gepauzeerd';
 
   @override
-  String get equipment_serviceClocks_empty => 'No service clocks';
+  String get equipment_serviceClocks_empty => 'Geen serviceintervallen';
 
   @override
   String equipment_serviceClocks_dueOn(String date) {
-    return 'Due $date';
+    return 'Vervalt op $date';
   }
 
   @override
   String equipment_serviceClocks_overdueSince(String date) {
-    return 'Overdue since $date';
+    return 'Achterstallig sinds $date';
   }
 
   @override
   String equipment_serviceClocks_divesLeft(int remaining, int total) {
-    return '$remaining of $total dives left';
+    return '$remaining van $total duiken resterend';
   }
 
   @override
   String equipment_serviceClocks_hoursLeft(String remaining, String total) {
-    return '$remaining of $total hours left';
+    return '$remaining van $total uur resterend';
   }
 
   @override
-  String get equipment_serviceClocks_manageKinds => 'Manage service types';
+  String get equipment_serviceClocks_manageKinds => 'Servicetypen beheren';
 
   @override
-  String get equipment_serviceClocks_appliesToClock => 'Applies to clock';
+  String get equipment_serviceClocks_appliesToClock => 'Gekoppeld aan interval';
 
   @override
-  String get equipment_serviceClocks_noClockOption => 'Not tied to a clock';
+  String get equipment_serviceClocks_noClockOption =>
+      'Niet aan een interval gekoppeld';
 
   @override
-  String get equipment_scheduleDialog_title => 'Edit clock';
+  String get equipment_scheduleDialog_title => 'Interval bewerken';
 
   @override
-  String get equipment_scheduleDialog_intervalDays => 'Interval (days)';
+  String get equipment_scheduleDialog_intervalDays => 'Interval (dagen)';
 
   @override
-  String get equipment_scheduleDialog_intervalDives => 'Interval (dives)';
+  String get equipment_scheduleDialog_intervalDives => 'Interval (duiken)';
 
   @override
-  String get equipment_scheduleDialog_intervalHours => 'Interval (hours)';
+  String get equipment_scheduleDialog_intervalHours => 'Interval (uren)';
 
   @override
   String equipment_scheduleDialog_inheritHint(String value) {
-    return 'Default: $value';
+    return 'Standaard: $value';
   }
 
   @override
-  String get equipment_scheduleDialog_anchorDate => 'Baseline date';
+  String get equipment_scheduleDialog_anchorDate => 'Referentiedatum';
 
   @override
   String get equipment_scheduleDialog_anchorHint =>
-      'Used when no service record of this kind exists yet';
+      'Wordt gebruikt zolang er nog geen servicerecord van dit type bestaat';
 
   @override
-  String get equipment_scheduleDialog_clearAnchor => 'Clear baseline date';
+  String get equipment_scheduleDialog_clearAnchor => 'Referentiedatum wissen';
 
   @override
-  String get equipment_scheduleDialog_save => 'Save';
+  String get equipment_scheduleDialog_save => 'Opslaan';
 
   @override
-  String get equipment_scheduleDialog_cancel => 'Cancel';
+  String get equipment_scheduleDialog_cancel => 'Annuleren';
 
   @override
-  String get equipment_serviceKinds_title => 'Service types';
+  String get equipment_serviceKinds_title => 'Servicetypen';
 
   @override
-  String get equipment_serviceKinds_builtIn => 'Built-in';
+  String get equipment_serviceKinds_builtIn => 'Ingebouwd';
 
   @override
-  String get equipment_serviceKinds_custom => 'Custom';
+  String get equipment_serviceKinds_custom => 'Aangepast';
 
   @override
-  String get equipment_serviceKinds_add => 'Add service type';
+  String get equipment_serviceKinds_add => 'Servicetype toevoegen';
 
   @override
-  String get equipment_serviceKinds_editTitle => 'Edit service type';
+  String get equipment_serviceKinds_editTitle => 'Servicetype bewerken';
 
   @override
-  String get equipment_serviceKinds_nameLabel => 'Name';
+  String get equipment_serviceKinds_nameLabel => 'Naam';
 
   @override
-  String get equipment_serviceKinds_nameRequired => 'A name is required';
+  String get equipment_serviceKinds_nameRequired => 'Een naam is verplicht';
 
   @override
-  String get equipment_serviceKinds_appliesTo => 'Applies to';
+  String get equipment_serviceKinds_appliesTo => 'Geldt voor';
 
   @override
   String get equipment_serviceKinds_autoAttach =>
-      'Attach automatically to new gear';
+      'Automatisch koppelen aan nieuwe uitrusting';
 
   @override
   String get equipment_serviceKinds_deleteConfirmTitle =>
-      'Delete service type?';
+      'Servicetype verwijderen?';
 
   @override
   String get equipment_serviceKinds_deleteConfirmBody =>
-      'Clocks using this service type will be removed.';
+      'Intervallen die dit servicetype gebruiken worden verwijderd.';
 
   @override
-  String get equipment_serviceKinds_delete => 'Delete';
+  String get equipment_serviceKinds_delete => 'Verwijderen';
 
   @override
-  String get equipment_serviceKinds_cancel => 'Cancel';
+  String get equipment_serviceKinds_cancel => 'Annuleren';
 
   @override
-  String get equipment_serviceKinds_save => 'Save';
+  String get equipment_serviceKinds_save => 'Opslaan';
 
   @override
   String get equipment_serviceKinds_emptyCustom =>
-      'No custom service types yet';
-
-  @override
-  String equipment_serviceKinds_intervalSummary(String summary) {
-    return '$summary';
-  }
+      'Nog geen aangepaste servicetypen';
 
   @override
   String equipment_serviceKinds_everyDays(int days) {
-    return 'every $days days';
+    return 'elke $days dagen';
   }
 
   @override
   String equipment_serviceKinds_everyDives(int dives) {
-    return 'every $dives dives';
+    return 'elke $dives duiken';
   }
 
   @override
   String equipment_serviceKinds_everyHours(String hours) {
-    return 'every $hours hours';
+    return 'elke $hours uur';
   }
 
   @override
-  String get dashboard_serviceDue_title => 'Service due';
+  String get dashboard_serviceDue_title => 'Service nodig';
 
   @override
   String dashboard_serviceDue_more(int count) {
-    return '+$count more';
+    return '+$count meer';
   }
 
   @override
   String dashboard_alerts_clockDue(String name, String kind) {
-    return '$name: $kind due';
+    return '$name: $kind nodig';
   }
 
   @override
   String dashboard_alerts_clockOverdue(String name, String kind) {
-    return '$name: $kind overdue';
+    return '$name: $kind achterstallig';
   }
 
   @override
   String equipment_list_worstClock(String kind) {
-    return '$kind overdue';
+    return '$kind achterstallig';
   }
 
   @override
@@ -9532,28 +9528,29 @@ class AppLocalizationsNl extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count items need service before this trip',
-      one: '1 item needs service before this trip',
+      other: '$count items hebben vóór deze reis service nodig',
+      one: '1 item heeft vóór deze reis service nodig',
     );
     return '$_temp0';
   }
 
   @override
   String trips_serviceAlert_dueBefore(String kind, String date) {
-    return '$kind due $date';
+    return '$kind vervalt op $date';
   }
 
   @override
   String trips_serviceAlert_overdue(String kind) {
-    return '$kind overdue';
+    return '$kind achterstallig';
   }
 
   @override
-  String get settings_notifications_tripLeadTitle => 'Trip service lead time';
+  String get settings_notifications_tripLeadTitle =>
+      'Aanlooptijd voor service vóór reizen';
 
   @override
   String settings_notifications_tripLeadDays(int days) {
-    return '$days days before a trip';
+    return '$days dagen vóór een reis';
   }
 
   @override

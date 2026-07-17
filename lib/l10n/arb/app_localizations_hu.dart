@@ -9395,184 +9395,180 @@ class AppLocalizationsHu extends AppLocalizations {
   String get equipment_detail_serviceInfoTitle => 'Szerviz informaciok';
 
   @override
-  String get equipment_serviceClocks_title => 'Service clocks';
+  String get equipment_serviceClocks_title => 'Szervizintervallumok';
 
   @override
-  String get equipment_serviceClocks_addClock => 'Add clock';
+  String get equipment_serviceClocks_addClock => 'Intervallum hozzáadása';
 
   @override
-  String get equipment_serviceClocks_logService => 'Log service';
+  String get equipment_serviceClocks_logService => 'Szerviz rögzítése';
 
   @override
-  String get equipment_serviceClocks_edit => 'Edit intervals';
+  String get equipment_serviceClocks_edit => 'Intervallumok szerkesztése';
 
   @override
-  String get equipment_serviceClocks_pause => 'Pause';
+  String get equipment_serviceClocks_pause => 'Szüneteltetés';
 
   @override
-  String get equipment_serviceClocks_resume => 'Resume';
+  String get equipment_serviceClocks_resume => 'Folytatás';
 
   @override
-  String get equipment_serviceClocks_remove => 'Remove';
+  String get equipment_serviceClocks_remove => 'Eltávolítás';
 
   @override
-  String get equipment_serviceClocks_paused => 'Paused';
+  String get equipment_serviceClocks_paused => 'Szüneteltetve';
 
   @override
-  String get equipment_serviceClocks_empty => 'No service clocks';
+  String get equipment_serviceClocks_empty => 'Nincsenek szervizintervallumok';
 
   @override
   String equipment_serviceClocks_dueOn(String date) {
-    return 'Due $date';
+    return 'Esedékes: $date';
   }
 
   @override
   String equipment_serviceClocks_overdueSince(String date) {
-    return 'Overdue since $date';
+    return '$date óta esedékes';
   }
 
   @override
   String equipment_serviceClocks_divesLeft(int remaining, int total) {
-    return '$remaining of $total dives left';
+    return '$remaining / $total merülés van hátra';
   }
 
   @override
   String equipment_serviceClocks_hoursLeft(String remaining, String total) {
-    return '$remaining of $total hours left';
+    return '$remaining / $total óra van hátra';
   }
 
   @override
-  String get equipment_serviceClocks_manageKinds => 'Manage service types';
+  String get equipment_serviceClocks_manageKinds => 'Szerviztípusok kezelése';
 
   @override
-  String get equipment_serviceClocks_appliesToClock => 'Applies to clock';
+  String get equipment_serviceClocks_appliesToClock => 'Kapcsolódó intervallum';
 
   @override
-  String get equipment_serviceClocks_noClockOption => 'Not tied to a clock';
+  String get equipment_serviceClocks_noClockOption =>
+      'Nem tartozik intervallumhoz';
 
   @override
-  String get equipment_scheduleDialog_title => 'Edit clock';
+  String get equipment_scheduleDialog_title => 'Intervallum szerkesztése';
 
   @override
-  String get equipment_scheduleDialog_intervalDays => 'Interval (days)';
+  String get equipment_scheduleDialog_intervalDays => 'Intervallum (nap)';
 
   @override
-  String get equipment_scheduleDialog_intervalDives => 'Interval (dives)';
+  String get equipment_scheduleDialog_intervalDives => 'Intervallum (merülés)';
 
   @override
-  String get equipment_scheduleDialog_intervalHours => 'Interval (hours)';
+  String get equipment_scheduleDialog_intervalHours => 'Intervallum (óra)';
 
   @override
   String equipment_scheduleDialog_inheritHint(String value) {
-    return 'Default: $value';
+    return 'Alapértelmezés: $value';
   }
 
   @override
-  String get equipment_scheduleDialog_anchorDate => 'Baseline date';
+  String get equipment_scheduleDialog_anchorDate => 'Kiindulási dátum';
 
   @override
   String get equipment_scheduleDialog_anchorHint =>
-      'Used when no service record of this kind exists yet';
+      'Akkor használjuk, ha még nincs ilyen típusú szervizbejegyzés';
 
   @override
-  String get equipment_scheduleDialog_clearAnchor => 'Clear baseline date';
+  String get equipment_scheduleDialog_clearAnchor => 'Kiindulási dátum törlése';
 
   @override
-  String get equipment_scheduleDialog_save => 'Save';
+  String get equipment_scheduleDialog_save => 'Mentés';
 
   @override
-  String get equipment_scheduleDialog_cancel => 'Cancel';
+  String get equipment_scheduleDialog_cancel => 'Mégse';
 
   @override
-  String get equipment_serviceKinds_title => 'Service types';
+  String get equipment_serviceKinds_title => 'Szerviztípusok';
 
   @override
-  String get equipment_serviceKinds_builtIn => 'Built-in';
+  String get equipment_serviceKinds_builtIn => 'Beépített';
 
   @override
-  String get equipment_serviceKinds_custom => 'Custom';
+  String get equipment_serviceKinds_custom => 'Egyéni';
 
   @override
-  String get equipment_serviceKinds_add => 'Add service type';
+  String get equipment_serviceKinds_add => 'Szerviztípus hozzáadása';
 
   @override
-  String get equipment_serviceKinds_editTitle => 'Edit service type';
+  String get equipment_serviceKinds_editTitle => 'Szerviztípus szerkesztése';
 
   @override
-  String get equipment_serviceKinds_nameLabel => 'Name';
+  String get equipment_serviceKinds_nameLabel => 'Név';
 
   @override
-  String get equipment_serviceKinds_nameRequired => 'A name is required';
+  String get equipment_serviceKinds_nameRequired => 'A név megadása kötelező';
 
   @override
-  String get equipment_serviceKinds_appliesTo => 'Applies to';
+  String get equipment_serviceKinds_appliesTo => 'Vonatkozik erre';
 
   @override
   String get equipment_serviceKinds_autoAttach =>
-      'Attach automatically to new gear';
+      'Automatikus hozzáadás új felszereléshez';
 
   @override
   String get equipment_serviceKinds_deleteConfirmTitle =>
-      'Delete service type?';
+      'Törli a szerviztípust?';
 
   @override
   String get equipment_serviceKinds_deleteConfirmBody =>
-      'Clocks using this service type will be removed.';
+      'Az ezt a szerviztípust használó intervallumok eltávolításra kerülnek.';
 
   @override
-  String get equipment_serviceKinds_delete => 'Delete';
+  String get equipment_serviceKinds_delete => 'Törlés';
 
   @override
-  String get equipment_serviceKinds_cancel => 'Cancel';
+  String get equipment_serviceKinds_cancel => 'Mégse';
 
   @override
-  String get equipment_serviceKinds_save => 'Save';
+  String get equipment_serviceKinds_save => 'Mentés';
 
   @override
   String get equipment_serviceKinds_emptyCustom =>
-      'No custom service types yet';
-
-  @override
-  String equipment_serviceKinds_intervalSummary(String summary) {
-    return '$summary';
-  }
+      'Még nincsenek egyéni szerviztípusok';
 
   @override
   String equipment_serviceKinds_everyDays(int days) {
-    return 'every $days days';
+    return '$days naponta';
   }
 
   @override
   String equipment_serviceKinds_everyDives(int dives) {
-    return 'every $dives dives';
+    return '$dives merülésenként';
   }
 
   @override
   String equipment_serviceKinds_everyHours(String hours) {
-    return 'every $hours hours';
+    return '$hours óránként';
   }
 
   @override
-  String get dashboard_serviceDue_title => 'Service due';
+  String get dashboard_serviceDue_title => 'Esedékes szerviz';
 
   @override
   String dashboard_serviceDue_more(int count) {
-    return '+$count more';
+    return '+$count további';
   }
 
   @override
   String dashboard_alerts_clockDue(String name, String kind) {
-    return '$name: $kind due';
+    return '$name: $kind esedékes';
   }
 
   @override
   String dashboard_alerts_clockOverdue(String name, String kind) {
-    return '$name: $kind overdue';
+    return '$name: $kind lejárt';
   }
 
   @override
   String equipment_list_worstClock(String kind) {
-    return '$kind overdue';
+    return '$kind lejárt';
   }
 
   @override
@@ -9580,28 +9576,29 @@ class AppLocalizationsHu extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count items need service before this trip',
-      one: '1 item needs service before this trip',
+      other: '$count felszerelés szervizt igényel az utazás előtt',
+      one: '1 felszerelés szervizt igényel az utazás előtt',
     );
     return '$_temp0';
   }
 
   @override
   String trips_serviceAlert_dueBefore(String kind, String date) {
-    return '$kind due $date';
+    return '$kind esedékes: $date';
   }
 
   @override
   String trips_serviceAlert_overdue(String kind) {
-    return '$kind overdue';
+    return '$kind lejárt';
   }
 
   @override
-  String get settings_notifications_tripLeadTitle => 'Trip service lead time';
+  String get settings_notifications_tripLeadTitle =>
+      'Utazás előtti szervizértesítési idő';
 
   @override
   String settings_notifications_tripLeadDays(int days) {
-    return '$days days before a trip';
+    return '$days nappal az utazás előtt';
   }
 
   @override

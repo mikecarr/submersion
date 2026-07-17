@@ -8996,184 +8996,174 @@ class AppLocalizationsZh extends AppLocalizations {
   String get equipment_detail_serviceInfoTitle => '维护信息';
 
   @override
-  String get equipment_serviceClocks_title => 'Service clocks';
+  String get equipment_serviceClocks_title => '维护倒计时';
 
   @override
-  String get equipment_serviceClocks_addClock => 'Add clock';
+  String get equipment_serviceClocks_addClock => '添加倒计时';
 
   @override
-  String get equipment_serviceClocks_logService => 'Log service';
+  String get equipment_serviceClocks_logService => '记录维护';
 
   @override
-  String get equipment_serviceClocks_edit => 'Edit intervals';
+  String get equipment_serviceClocks_edit => '编辑间隔';
 
   @override
-  String get equipment_serviceClocks_pause => 'Pause';
+  String get equipment_serviceClocks_pause => '暂停';
 
   @override
-  String get equipment_serviceClocks_resume => 'Resume';
+  String get equipment_serviceClocks_resume => '恢复';
 
   @override
-  String get equipment_serviceClocks_remove => 'Remove';
+  String get equipment_serviceClocks_remove => '移除';
 
   @override
-  String get equipment_serviceClocks_paused => 'Paused';
+  String get equipment_serviceClocks_paused => '已暂停';
 
   @override
-  String get equipment_serviceClocks_empty => 'No service clocks';
+  String get equipment_serviceClocks_empty => '暂无维护倒计时';
 
   @override
   String equipment_serviceClocks_dueOn(String date) {
-    return 'Due $date';
+    return '$date 到期';
   }
 
   @override
   String equipment_serviceClocks_overdueSince(String date) {
-    return 'Overdue since $date';
+    return '自 $date 起逾期';
   }
 
   @override
   String equipment_serviceClocks_divesLeft(int remaining, int total) {
-    return '$remaining of $total dives left';
+    return '剩余 $remaining/$total 次潜水';
   }
 
   @override
   String equipment_serviceClocks_hoursLeft(String remaining, String total) {
-    return '$remaining of $total hours left';
+    return '剩余 $remaining/$total 小时';
   }
 
   @override
-  String get equipment_serviceClocks_manageKinds => 'Manage service types';
+  String get equipment_serviceClocks_manageKinds => '管理维护类型';
 
   @override
-  String get equipment_serviceClocks_appliesToClock => 'Applies to clock';
+  String get equipment_serviceClocks_appliesToClock => '适用的倒计时';
 
   @override
-  String get equipment_serviceClocks_noClockOption => 'Not tied to a clock';
+  String get equipment_serviceClocks_noClockOption => '不关联倒计时';
 
   @override
-  String get equipment_scheduleDialog_title => 'Edit clock';
+  String get equipment_scheduleDialog_title => '编辑倒计时';
 
   @override
-  String get equipment_scheduleDialog_intervalDays => 'Interval (days)';
+  String get equipment_scheduleDialog_intervalDays => '间隔（天）';
 
   @override
-  String get equipment_scheduleDialog_intervalDives => 'Interval (dives)';
+  String get equipment_scheduleDialog_intervalDives => '间隔（潜水次数）';
 
   @override
-  String get equipment_scheduleDialog_intervalHours => 'Interval (hours)';
+  String get equipment_scheduleDialog_intervalHours => '间隔（小时）';
 
   @override
   String equipment_scheduleDialog_inheritHint(String value) {
-    return 'Default: $value';
+    return '默认：$value';
   }
 
   @override
-  String get equipment_scheduleDialog_anchorDate => 'Baseline date';
+  String get equipment_scheduleDialog_anchorDate => '基准日期';
 
   @override
-  String get equipment_scheduleDialog_anchorHint =>
-      'Used when no service record of this kind exists yet';
+  String get equipment_scheduleDialog_anchorHint => '在尚无此类维护记录时使用';
 
   @override
-  String get equipment_scheduleDialog_clearAnchor => 'Clear baseline date';
+  String get equipment_scheduleDialog_clearAnchor => '清除基准日期';
 
   @override
-  String get equipment_scheduleDialog_save => 'Save';
+  String get equipment_scheduleDialog_save => '保存';
 
   @override
-  String get equipment_scheduleDialog_cancel => 'Cancel';
+  String get equipment_scheduleDialog_cancel => '取消';
 
   @override
-  String get equipment_serviceKinds_title => 'Service types';
+  String get equipment_serviceKinds_title => '维护类型';
 
   @override
-  String get equipment_serviceKinds_builtIn => 'Built-in';
+  String get equipment_serviceKinds_builtIn => '内置';
 
   @override
-  String get equipment_serviceKinds_custom => 'Custom';
+  String get equipment_serviceKinds_custom => '自定义';
 
   @override
-  String get equipment_serviceKinds_add => 'Add service type';
+  String get equipment_serviceKinds_add => '添加维护类型';
 
   @override
-  String get equipment_serviceKinds_editTitle => 'Edit service type';
+  String get equipment_serviceKinds_editTitle => '编辑维护类型';
 
   @override
-  String get equipment_serviceKinds_nameLabel => 'Name';
+  String get equipment_serviceKinds_nameLabel => '名称';
 
   @override
-  String get equipment_serviceKinds_nameRequired => 'A name is required';
+  String get equipment_serviceKinds_nameRequired => '名称为必填项';
 
   @override
-  String get equipment_serviceKinds_appliesTo => 'Applies to';
+  String get equipment_serviceKinds_appliesTo => '适用于';
 
   @override
-  String get equipment_serviceKinds_autoAttach =>
-      'Attach automatically to new gear';
+  String get equipment_serviceKinds_autoAttach => '自动附加到新装备';
 
   @override
-  String get equipment_serviceKinds_deleteConfirmTitle =>
-      'Delete service type?';
+  String get equipment_serviceKinds_deleteConfirmTitle => '删除维护类型？';
 
   @override
-  String get equipment_serviceKinds_deleteConfirmBody =>
-      'Clocks using this service type will be removed.';
+  String get equipment_serviceKinds_deleteConfirmBody => '使用此维护类型的倒计时将被移除。';
 
   @override
-  String get equipment_serviceKinds_delete => 'Delete';
+  String get equipment_serviceKinds_delete => '删除';
 
   @override
-  String get equipment_serviceKinds_cancel => 'Cancel';
+  String get equipment_serviceKinds_cancel => '取消';
 
   @override
-  String get equipment_serviceKinds_save => 'Save';
+  String get equipment_serviceKinds_save => '保存';
 
   @override
-  String get equipment_serviceKinds_emptyCustom =>
-      'No custom service types yet';
-
-  @override
-  String equipment_serviceKinds_intervalSummary(String summary) {
-    return '$summary';
-  }
+  String get equipment_serviceKinds_emptyCustom => '暂无自定义维护类型';
 
   @override
   String equipment_serviceKinds_everyDays(int days) {
-    return 'every $days days';
+    return '每 $days 天';
   }
 
   @override
   String equipment_serviceKinds_everyDives(int dives) {
-    return 'every $dives dives';
+    return '每 $dives 次潜水';
   }
 
   @override
   String equipment_serviceKinds_everyHours(String hours) {
-    return 'every $hours hours';
+    return '每 $hours 小时';
   }
 
   @override
-  String get dashboard_serviceDue_title => 'Service due';
+  String get dashboard_serviceDue_title => '维护到期';
 
   @override
   String dashboard_serviceDue_more(int count) {
-    return '+$count more';
+    return '+$count 项';
   }
 
   @override
   String dashboard_alerts_clockDue(String name, String kind) {
-    return '$name: $kind due';
+    return '$name：$kind到期';
   }
 
   @override
   String dashboard_alerts_clockOverdue(String name, String kind) {
-    return '$name: $kind overdue';
+    return '$name：$kind已逾期';
   }
 
   @override
   String equipment_list_worstClock(String kind) {
-    return '$kind overdue';
+    return '$kind已逾期';
   }
 
   @override
@@ -9181,28 +9171,27 @@ class AppLocalizationsZh extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count items need service before this trip',
-      one: '1 item needs service before this trip',
+      other: '$count 件装备需要在此行程前维护',
     );
     return '$_temp0';
   }
 
   @override
   String trips_serviceAlert_dueBefore(String kind, String date) {
-    return '$kind due $date';
+    return '$kind将于 $date 到期';
   }
 
   @override
   String trips_serviceAlert_overdue(String kind) {
-    return '$kind overdue';
+    return '$kind已逾期';
   }
 
   @override
-  String get settings_notifications_tripLeadTitle => 'Trip service lead time';
+  String get settings_notifications_tripLeadTitle => '行程维护提前提醒';
 
   @override
   String settings_notifications_tripLeadDays(int days) {
-    return '$days days before a trip';
+    return '行程前 $days 天';
   }
 
   @override

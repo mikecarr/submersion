@@ -5158,14 +5158,6 @@
   "equipment_serviceKinds_cancel": "Cancel",
   "equipment_serviceKinds_save": "Save",
   "equipment_serviceKinds_emptyCustom": "No custom service types yet",
-  "equipment_serviceKinds_intervalSummary": "{summary}",
-  "@equipment_serviceKinds_intervalSummary": {
-    "placeholders": {
-      "summary": {
-        "type": "String"
-      }
-    }
-  },
   "equipment_serviceKinds_everyDays": "every {days} days",
   "@equipment_serviceKinds_everyDays": {
     "placeholders": {

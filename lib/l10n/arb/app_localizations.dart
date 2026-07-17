@@ -16396,12 +16396,6 @@ abstract class AppLocalizations {
   /// **'No custom service types yet'**
   String get equipment_serviceKinds_emptyCustom;
 
-  /// No description provided for @equipment_serviceKinds_intervalSummary.
-  ///
-  /// In en, this message translates to:
-  /// **'{summary}'**
-  String equipment_serviceKinds_intervalSummary(String summary);
-
   /// No description provided for @equipment_serviceKinds_everyDays.
   ///
   /// In en, this message translates to:
