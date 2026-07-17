@@ -11677,118 +11677,119 @@ class AppLocalizationsNl extends AppLocalizations {
       'NDL, plafond, weefsel-heatmap, O2-toxiciteit';
 
   @override
-  String get diveDetailSection_safetyReview_name => 'Safety Review';
+  String get diveDetailSection_safetyReview_name => 'Veiligheidscontrole';
 
   @override
   String get diveDetailSection_safetyReview_description =>
-      'Automatic post-dive profile observations';
+      'Automatische profielobservaties na de duik';
 
   @override
-  String get safetyReview_sectionTitle => 'Safety review';
+  String get safetyReview_sectionTitle => 'Veiligheidscontrole';
 
   @override
   String safetyReview_findingCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count observations',
-      one: '1 observation',
+      other: '$count observaties',
+      one: '1 observatie',
     );
     return '$_temp0';
   }
 
   @override
   String safetyReview_rapidAscent_title(String rate, String duration) {
-    return 'Ascent exceeded $rate for $duration';
+    return 'Opstijging overschreed $rate gedurende $duration';
   }
 
   @override
   String safetyReview_missedDecoStop_title(String excess, String duration) {
-    return 'Depth was $excess above the required stop ceiling for $duration';
+    return 'Diepte lag $excess boven het vereiste stopplafond gedurende $duration';
   }
 
   @override
   String safetyReview_omittedSafetyStop_title(String remaining) {
-    return 'The recommended safety stop was cut short by $remaining';
+    return 'De aanbevolen veiligheidsstop is met $remaining ingekort';
   }
 
   @override
   String safetyReview_sawtoothProfile_title(int count) {
-    return '$count repeated up-and-down depth changes during the dive';
+    return '$count herhaalde op-en-neer dieptewisselingen tijdens de duik';
   }
 
   @override
   String safetyReview_highSurfaceGf_title(String gf, String gfHigh) {
-    return 'Surfaced at gradient factor $gf, above the configured $gfHigh';
+    return 'Aan de oppervlakte gekomen met gradiëntfactor $gf, boven de ingestelde $gfHigh';
   }
 
   @override
   String safetyReview_timeRange(String start, String end) {
-    return 'At $start–$end';
+    return 'Op $start–$end';
   }
 
   @override
-  String get safetyReview_dismiss => 'Dismiss';
+  String get safetyReview_dismiss => 'Negeren';
 
   @override
-  String get safetyReview_restore => 'Restore';
+  String get safetyReview_restore => 'Herstellen';
 
   @override
-  String get safetySettings_title => 'Safety review';
+  String get safetySettings_title => 'Veiligheidscontrole';
 
   @override
   String get safetySettings_entry_subtitle =>
-      'Post-dive observations and rules';
+      'Observaties en regels na de duik';
 
   @override
-  String get safetySettings_masterToggle => 'Post-dive safety review';
+  String get safetySettings_masterToggle => 'Veiligheidscontrole na de duik';
 
   @override
   String get safetySettings_masterToggle_subtitle =>
-      'Automatically note ascent, stop, and profile observations on analyzed dives';
+      'Automatisch observaties over opstijging, stops en profiel noteren bij geanalyseerde duiken';
 
   @override
-  String get safetySettings_rulesHeader => 'Rules';
+  String get safetySettings_rulesHeader => 'Regels';
 
   @override
-  String get safetySettings_rule_rapidAscent => 'Rapid ascents';
+  String get safetySettings_rule_rapidAscent => 'Snelle opstijgingen';
 
   @override
   String get safetySettings_rule_missedDecoStop =>
-      'Missed or shortened deco stops';
+      'Gemiste of ingekorte decostops';
 
   @override
-  String get safetySettings_rule_omittedSafetyStop => 'Omitted safety stops';
+  String get safetySettings_rule_omittedSafetyStop =>
+      'Overgeslagen veiligheidsstops';
 
   @override
-  String get safetySettings_rule_sawtoothProfile => 'Sawtooth profiles';
+  String get safetySettings_rule_sawtoothProfile => 'Zaagtandprofielen';
 
   @override
   String get safetySettings_rule_highSurfaceGf =>
-      'High surfacing gradient factor';
+      'Hoge gradiëntfactor bij opduiken';
 
   @override
-  String get safetySettings_analyzeAll => 'Analyze all dives';
+  String get safetySettings_analyzeAll => 'Alle duiken analyseren';
 
   @override
   String get safetySettings_analyzeAll_subtitle =>
-      'Run the safety review over every dive with a profile that has not been analyzed yet';
+      'Voer de veiligheidscontrole uit op alle duiken met een profiel die nog niet geanalyseerd zijn';
 
   @override
   String safetySettings_analyzeAll_progress(int done, int total) {
-    return 'Analyzed $done of $total';
+    return '$done van $total geanalyseerd';
   }
 
   @override
-  String get safetySettings_analyzeAll_done => 'Analysis complete';
+  String get safetySettings_analyzeAll_done => 'Analyse voltooid';
 
   @override
   String safetyReview_showDismissed(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'Show $count dismissed',
-      one: 'Show 1 dismissed',
+      other: 'Toon $count genegeerde',
+      one: 'Toon 1 genegeerde',
     );
     return '$_temp0';
   }

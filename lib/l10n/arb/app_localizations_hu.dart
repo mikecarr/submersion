@@ -11730,118 +11730,120 @@ class AppLocalizationsHu extends AppLocalizations {
       'NDL, plafon, szövet hőtérkép, O2 toxicitás';
 
   @override
-  String get diveDetailSection_safetyReview_name => 'Safety Review';
+  String get diveDetailSection_safetyReview_name => 'Biztonsági áttekintés';
 
   @override
   String get diveDetailSection_safetyReview_description =>
-      'Automatic post-dive profile observations';
+      'Automatikus profilmegfigyelések a merülés után';
 
   @override
-  String get safetyReview_sectionTitle => 'Safety review';
+  String get safetyReview_sectionTitle => 'Biztonsági áttekintés';
 
   @override
   String safetyReview_findingCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count observations',
-      one: '1 observation',
+      other: '$count megfigyelés',
+      one: '1 megfigyelés',
     );
     return '$_temp0';
   }
 
   @override
   String safetyReview_rapidAscent_title(String rate, String duration) {
-    return 'Ascent exceeded $rate for $duration';
+    return 'A felemelkedés $duration ideig meghaladta a(z) $rate értéket';
   }
 
   @override
   String safetyReview_missedDecoStop_title(String excess, String duration) {
-    return 'Depth was $excess above the required stop ceiling for $duration';
+    return 'A mélység $duration ideig $excess értékkel az előírt megállási plafon felett volt';
   }
 
   @override
   String safetyReview_omittedSafetyStop_title(String remaining) {
-    return 'The recommended safety stop was cut short by $remaining';
+    return 'Az ajánlott biztonsági megálló $remaining idővel rövidült';
   }
 
   @override
   String safetyReview_sawtoothProfile_title(int count) {
-    return '$count repeated up-and-down depth changes during the dive';
+    return '$count ismételt fel-le mélységváltozás a merülés során';
   }
 
   @override
   String safetyReview_highSurfaceGf_title(String gf, String gfHigh) {
-    return 'Surfaced at gradient factor $gf, above the configured $gfHigh';
+    return 'Felszínre érkezés $gf gradiens faktorral, a beállított $gfHigh felett';
   }
 
   @override
   String safetyReview_timeRange(String start, String end) {
-    return 'At $start–$end';
+    return '$start–$end időpontban';
   }
 
   @override
-  String get safetyReview_dismiss => 'Dismiss';
+  String get safetyReview_dismiss => 'Elvetés';
 
   @override
-  String get safetyReview_restore => 'Restore';
+  String get safetyReview_restore => 'Visszaállítás';
 
   @override
-  String get safetySettings_title => 'Safety review';
+  String get safetySettings_title => 'Biztonsági áttekintés';
 
   @override
   String get safetySettings_entry_subtitle =>
-      'Post-dive observations and rules';
+      'Merülés utáni megfigyelések és szabályok';
 
   @override
-  String get safetySettings_masterToggle => 'Post-dive safety review';
+  String get safetySettings_masterToggle =>
+      'Merülés utáni biztonsági áttekintés';
 
   @override
   String get safetySettings_masterToggle_subtitle =>
-      'Automatically note ascent, stop, and profile observations on analyzed dives';
+      'Felemelkedési, megállási és profilmegfigyelések automatikus rögzítése az elemzett merüléseknél';
 
   @override
-  String get safetySettings_rulesHeader => 'Rules';
+  String get safetySettings_rulesHeader => 'Szabályok';
 
   @override
-  String get safetySettings_rule_rapidAscent => 'Rapid ascents';
+  String get safetySettings_rule_rapidAscent => 'Gyors felemelkedések';
 
   @override
   String get safetySettings_rule_missedDecoStop =>
-      'Missed or shortened deco stops';
+      'Kihagyott vagy lerövidített deko megállók';
 
   @override
-  String get safetySettings_rule_omittedSafetyStop => 'Omitted safety stops';
+  String get safetySettings_rule_omittedSafetyStop =>
+      'Kihagyott biztonsági megállók';
 
   @override
-  String get safetySettings_rule_sawtoothProfile => 'Sawtooth profiles';
+  String get safetySettings_rule_sawtoothProfile => 'Fűrészfog-profilok';
 
   @override
   String get safetySettings_rule_highSurfaceGf =>
-      'High surfacing gradient factor';
+      'Magas gradiens faktor felszínre érkezéskor';
 
   @override
-  String get safetySettings_analyzeAll => 'Analyze all dives';
+  String get safetySettings_analyzeAll => 'Összes merülés elemzése';
 
   @override
   String get safetySettings_analyzeAll_subtitle =>
-      'Run the safety review over every dive with a profile that has not been analyzed yet';
+      'A biztonsági áttekintés futtatása minden olyan profillal rendelkező merülésen, amely még nincs elemezve';
 
   @override
   String safetySettings_analyzeAll_progress(int done, int total) {
-    return 'Analyzed $done of $total';
+    return '$done / $total elemezve';
   }
 
   @override
-  String get safetySettings_analyzeAll_done => 'Analysis complete';
+  String get safetySettings_analyzeAll_done => 'Elemzés kész';
 
   @override
   String safetyReview_showDismissed(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'Show $count dismissed',
-      one: 'Show 1 dismissed',
+      other: '$count elvetett megjelenítése',
+      one: '1 elvetett megjelenítése',
     );
     return '$_temp0';
   }

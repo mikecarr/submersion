@@ -11209,118 +11209,112 @@ class AppLocalizationsZh extends AppLocalizations {
   String get diveDetailSection_decoO2_description => '免减压极限、上限深度、组织热力图、氧气毒性';
 
   @override
-  String get diveDetailSection_safetyReview_name => 'Safety Review';
+  String get diveDetailSection_safetyReview_name => '安全回顾';
 
   @override
-  String get diveDetailSection_safetyReview_description =>
-      'Automatic post-dive profile observations';
+  String get diveDetailSection_safetyReview_description => '潜水后自动生成的剖面观察';
 
   @override
-  String get safetyReview_sectionTitle => 'Safety review';
+  String get safetyReview_sectionTitle => '安全回顾';
 
   @override
   String safetyReview_findingCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count observations',
-      one: '1 observation',
+      other: '$count 条观察',
+      one: '1 条观察',
     );
     return '$_temp0';
   }
 
   @override
   String safetyReview_rapidAscent_title(String rate, String duration) {
-    return 'Ascent exceeded $rate for $duration';
+    return '上升速度超过 $rate,持续 $duration';
   }
 
   @override
   String safetyReview_missedDecoStop_title(String excess, String duration) {
-    return 'Depth was $excess above the required stop ceiling for $duration';
+    return '深度高于所需停留天花板 $excess,持续 $duration';
   }
 
   @override
   String safetyReview_omittedSafetyStop_title(String remaining) {
-    return 'The recommended safety stop was cut short by $remaining';
+    return '建议的安全停留缩短了 $remaining';
   }
 
   @override
   String safetyReview_sawtoothProfile_title(int count) {
-    return '$count repeated up-and-down depth changes during the dive';
+    return '潜水期间出现 $count 次反复的上下深度变化';
   }
 
   @override
   String safetyReview_highSurfaceGf_title(String gf, String gfHigh) {
-    return 'Surfaced at gradient factor $gf, above the configured $gfHigh';
+    return '出水时梯度因子为 $gf,高于设定的 $gfHigh';
   }
 
   @override
   String safetyReview_timeRange(String start, String end) {
-    return 'At $start–$end';
+    return '于 $start–$end';
   }
 
   @override
-  String get safetyReview_dismiss => 'Dismiss';
+  String get safetyReview_dismiss => '忽略';
 
   @override
-  String get safetyReview_restore => 'Restore';
+  String get safetyReview_restore => '恢复';
 
   @override
-  String get safetySettings_title => 'Safety review';
+  String get safetySettings_title => '安全回顾';
 
   @override
-  String get safetySettings_entry_subtitle =>
-      'Post-dive observations and rules';
+  String get safetySettings_entry_subtitle => '潜水后的观察与规则';
 
   @override
-  String get safetySettings_masterToggle => 'Post-dive safety review';
+  String get safetySettings_masterToggle => '潜水后安全回顾';
 
   @override
-  String get safetySettings_masterToggle_subtitle =>
-      'Automatically note ascent, stop, and profile observations on analyzed dives';
+  String get safetySettings_masterToggle_subtitle => '自动记录已分析潜水的上升、停留和剖面观察';
 
   @override
-  String get safetySettings_rulesHeader => 'Rules';
+  String get safetySettings_rulesHeader => '规则';
 
   @override
-  String get safetySettings_rule_rapidAscent => 'Rapid ascents';
+  String get safetySettings_rule_rapidAscent => '快速上升';
 
   @override
-  String get safetySettings_rule_missedDecoStop =>
-      'Missed or shortened deco stops';
+  String get safetySettings_rule_missedDecoStop => '错过或缩短的减压停留';
 
   @override
-  String get safetySettings_rule_omittedSafetyStop => 'Omitted safety stops';
+  String get safetySettings_rule_omittedSafetyStop => '省略的安全停留';
 
   @override
-  String get safetySettings_rule_sawtoothProfile => 'Sawtooth profiles';
+  String get safetySettings_rule_sawtoothProfile => '锯齿形剖面';
 
   @override
-  String get safetySettings_rule_highSurfaceGf =>
-      'High surfacing gradient factor';
+  String get safetySettings_rule_highSurfaceGf => '出水时梯度因子过高';
 
   @override
-  String get safetySettings_analyzeAll => 'Analyze all dives';
+  String get safetySettings_analyzeAll => '分析所有潜水';
 
   @override
-  String get safetySettings_analyzeAll_subtitle =>
-      'Run the safety review over every dive with a profile that has not been analyzed yet';
+  String get safetySettings_analyzeAll_subtitle => '对所有具有剖面且尚未分析的潜水运行安全回顾';
 
   @override
   String safetySettings_analyzeAll_progress(int done, int total) {
-    return 'Analyzed $done of $total';
+    return '已分析 $done/$total';
   }
 
   @override
-  String get safetySettings_analyzeAll_done => 'Analysis complete';
+  String get safetySettings_analyzeAll_done => '分析完成';
 
   @override
   String safetyReview_showDismissed(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'Show $count dismissed',
-      one: 'Show 1 dismissed',
+      other: '显示 $count 条已忽略',
+      one: '显示 1 条已忽略',
     );
     return '$_temp0';
   }

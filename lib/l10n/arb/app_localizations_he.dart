@@ -11464,118 +11464,117 @@ class AppLocalizationsHe extends AppLocalizations {
       'NDL, תקרה, מפת חום של רקמות, רעילות O2';
 
   @override
-  String get diveDetailSection_safetyReview_name => 'Safety Review';
+  String get diveDetailSection_safetyReview_name => 'סקירת בטיחות';
 
   @override
   String get diveDetailSection_safetyReview_description =>
-      'Automatic post-dive profile observations';
+      'תצפיות אוטומטיות על פרופיל הצלילה לאחר הצלילה';
 
   @override
-  String get safetyReview_sectionTitle => 'Safety review';
+  String get safetyReview_sectionTitle => 'סקירת בטיחות';
 
   @override
   String safetyReview_findingCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count observations',
-      one: '1 observation',
+      other: '$count תצפיות',
+      one: 'תצפית אחת',
     );
     return '$_temp0';
   }
 
   @override
   String safetyReview_rapidAscent_title(String rate, String duration) {
-    return 'Ascent exceeded $rate for $duration';
+    return 'העלייה חרגה מ-$rate למשך $duration';
   }
 
   @override
   String safetyReview_missedDecoStop_title(String excess, String duration) {
-    return 'Depth was $excess above the required stop ceiling for $duration';
+    return 'העומק היה $excess מעל תקרת העצירה הנדרשת למשך $duration';
   }
 
   @override
   String safetyReview_omittedSafetyStop_title(String remaining) {
-    return 'The recommended safety stop was cut short by $remaining';
+    return 'עצירת הבטיחות המומלצת קוצרה ב-$remaining';
   }
 
   @override
   String safetyReview_sawtoothProfile_title(int count) {
-    return '$count repeated up-and-down depth changes during the dive';
+    return '$count שינויי עומק חוזרים מעלה ומטה במהלך הצלילה';
   }
 
   @override
   String safetyReview_highSurfaceGf_title(String gf, String gfHigh) {
-    return 'Surfaced at gradient factor $gf, above the configured $gfHigh';
+    return 'עלייה לפני השטח עם פקטור גרדיאנט $gf, מעל $gfHigh שהוגדר';
   }
 
   @override
   String safetyReview_timeRange(String start, String end) {
-    return 'At $start–$end';
+    return 'ב-$start–$end';
   }
 
   @override
-  String get safetyReview_dismiss => 'Dismiss';
+  String get safetyReview_dismiss => 'התעלם';
 
   @override
-  String get safetyReview_restore => 'Restore';
+  String get safetyReview_restore => 'שחזר';
 
   @override
-  String get safetySettings_title => 'Safety review';
+  String get safetySettings_title => 'סקירת בטיחות';
 
   @override
-  String get safetySettings_entry_subtitle =>
-      'Post-dive observations and rules';
+  String get safetySettings_entry_subtitle => 'תצפיות וכללים לאחר הצלילה';
 
   @override
-  String get safetySettings_masterToggle => 'Post-dive safety review';
+  String get safetySettings_masterToggle => 'סקירת בטיחות לאחר הצלילה';
 
   @override
   String get safetySettings_masterToggle_subtitle =>
-      'Automatically note ascent, stop, and profile observations on analyzed dives';
+      'רישום אוטומטי של תצפיות עלייה, עצירות ופרופיל בצלילות שנותחו';
 
   @override
-  String get safetySettings_rulesHeader => 'Rules';
+  String get safetySettings_rulesHeader => 'כללים';
 
   @override
-  String get safetySettings_rule_rapidAscent => 'Rapid ascents';
+  String get safetySettings_rule_rapidAscent => 'עליות מהירות';
 
   @override
   String get safetySettings_rule_missedDecoStop =>
-      'Missed or shortened deco stops';
+      'עצירות דקו שהוחמצו או קוצרו';
 
   @override
-  String get safetySettings_rule_omittedSafetyStop => 'Omitted safety stops';
+  String get safetySettings_rule_omittedSafetyStop => 'עצירות בטיחות שהושמטו';
 
   @override
-  String get safetySettings_rule_sawtoothProfile => 'Sawtooth profiles';
+  String get safetySettings_rule_sawtoothProfile => 'פרופילי שן מסור';
 
   @override
   String get safetySettings_rule_highSurfaceGf =>
-      'High surfacing gradient factor';
+      'פקטור גרדיאנט גבוה בעלייה לפני השטח';
 
   @override
-  String get safetySettings_analyzeAll => 'Analyze all dives';
+  String get safetySettings_analyzeAll => 'נתח את כל הצלילות';
 
   @override
   String get safetySettings_analyzeAll_subtitle =>
-      'Run the safety review over every dive with a profile that has not been analyzed yet';
+      'הרצת סקירת הבטיחות על כל צלילה עם פרופיל שטרם נותחה';
 
   @override
   String safetySettings_analyzeAll_progress(int done, int total) {
-    return 'Analyzed $done of $total';
+    return 'נותחו $done מתוך $total';
   }
 
   @override
-  String get safetySettings_analyzeAll_done => 'Analysis complete';
+  String get safetySettings_analyzeAll_done => 'הניתוח הושלם';
 
   @override
   String safetyReview_showDismissed(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'Show $count dismissed',
-      one: 'Show 1 dismissed',
+      other: 'הצג $count תצפיות שהוסתרו',
+      one: 'הצג תצפית אחת שהוסתרה',
     );
     return '$_temp0';
   }
