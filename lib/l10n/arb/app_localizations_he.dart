@@ -11639,6 +11639,26 @@ class AppLocalizationsHe extends AppLocalizations {
   }
 
   @override
+  String get buoyancy_adjust => 'התאמה';
+
+  @override
+  String get buoyancy_whatIfTitle => 'התאמת צלילה זו';
+
+  @override
+  String get buoyancy_whatIfLead => 'משקולות';
+
+  @override
+  String get buoyancy_whatIfSuit => 'ציפת החליפה';
+
+  @override
+  String get buoyancy_whatIfReset => 'איפוס';
+
+  @override
+  String buoyancy_whatIfDelta(String delta) {
+    return '$delta מול בפועל';
+  }
+
+  @override
   String get diveDetailSection_tanks_name => 'בלונים';
 
   @override

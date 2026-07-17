@@ -9,6 +9,7 @@ import 'package:submersion/features/dive_log/data/services/buoyancy_twin_assembl
 import 'package:submersion/features/dive_log/presentation/providers/buoyancy_twin_provider.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/buoyancy_chart.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/buoyancy_history_strip.dart';
+import 'package:submersion/features/dive_log/presentation/widgets/buoyancy_what_if_sheet.dart';
 import 'package:submersion/l10n/l10n_extension.dart';
 
 /// Dive-detail section presenting the modeled net buoyancy through the dive:
@@ -52,6 +53,16 @@ class BuoyancySection extends ConsumerWidget {
                   ),
                 ),
                 const Spacer(),
+                TextButton.icon(
+                  onPressed: () => showBuoyancyWhatIfSheet(
+                    context,
+                    baseInput: outcome.result.input,
+                    units: units,
+                  ),
+                  icon: const Icon(Icons.tune, size: 16),
+                  label: Text(context.l10n.buoyancy_adjust),
+                ),
+                const SizedBox(width: 4),
                 Tooltip(
                   message: context.l10n.buoyancy_tooltip,
                   child: Icon(

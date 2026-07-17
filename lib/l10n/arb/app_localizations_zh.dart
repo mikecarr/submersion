@@ -11373,6 +11373,26 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get buoyancy_adjust => '调整';
+
+  @override
+  String get buoyancy_whatIfTitle => '调整此次潜水';
+
+  @override
+  String get buoyancy_whatIfLead => '配重';
+
+  @override
+  String get buoyancy_whatIfSuit => '潜水服浮力';
+
+  @override
+  String get buoyancy_whatIfReset => '重置';
+
+  @override
+  String buoyancy_whatIfDelta(String delta) {
+    return '$delta（对比实际）';
+  }
+
+  @override
   String get diveDetailSection_tanks_name => '气瓶';
 
   @override

@@ -11908,6 +11908,26 @@ class AppLocalizationsHu extends AppLocalizations {
   }
 
   @override
+  String get buoyancy_adjust => 'Módosítás';
+
+  @override
+  String get buoyancy_whatIfTitle => 'Merülés módosítása';
+
+  @override
+  String get buoyancy_whatIfLead => 'Ólom';
+
+  @override
+  String get buoyancy_whatIfSuit => 'Ruha felhajtóereje';
+
+  @override
+  String get buoyancy_whatIfReset => 'Visszaállítás';
+
+  @override
+  String buoyancy_whatIfDelta(String delta) {
+    return '$delta a tényleceshez';
+  }
+
+  @override
   String get diveDetailSection_tanks_name => 'Palackok';
 
   @override

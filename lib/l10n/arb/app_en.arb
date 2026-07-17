@@ -6642,6 +6642,15 @@
   "@buoyancy_historyLess": {
     "placeholders": { "delta": { "type": "String" } }
   },
+  "buoyancy_adjust": "Adjust",
+  "buoyancy_whatIfTitle": "Adjust this dive",
+  "buoyancy_whatIfLead": "Lead",
+  "buoyancy_whatIfSuit": "Suit buoyancy",
+  "buoyancy_whatIfReset": "Reset",
+  "buoyancy_whatIfDelta": "{delta} vs. actual",
+  "@buoyancy_whatIfDelta": {
+    "placeholders": { "delta": { "type": "String" } }
+  },
   "diveDetailSection_tanks_name": "Cylinders",
   "diveDetailSection_tanks_description": "Cylinder list, gas mixes, pressures, MOD/MND, per-tank SAC",
   "diveDetailSection_buddies_name": "Buddies",

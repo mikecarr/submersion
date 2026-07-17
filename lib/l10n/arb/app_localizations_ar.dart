@@ -11724,6 +11724,26 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
+  String get buoyancy_adjust => 'تعديل';
+
+  @override
+  String get buoyancy_whatIfTitle => 'تعديل هذه الغطسة';
+
+  @override
+  String get buoyancy_whatIfLead => 'الرصاص';
+
+  @override
+  String get buoyancy_whatIfSuit => 'طفو البدلة';
+
+  @override
+  String get buoyancy_whatIfReset => 'إعادة تعيين';
+
+  @override
+  String buoyancy_whatIfDelta(String delta) {
+    return '$delta مقابل الفعلي';
+  }
+
+  @override
   String get diveDetailSection_tanks_name => 'الأسطوانات';
 
   @override

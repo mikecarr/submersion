@@ -100,6 +100,7 @@ class BuoyancyTwinAssembler {
         altitudeMeters: dive.altitude,
         waterType: dive.waterType,
       ),
+      totalMassKg: rig.totalMassKg,
     );
   }
 

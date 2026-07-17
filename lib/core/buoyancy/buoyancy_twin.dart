@@ -97,6 +97,10 @@ class TwinInput {
   final double droppableLeadKg;
   final DiveEnvironment environment;
 
+  /// Body + rig displaced mass; lets the what-if sheet rescale the water term
+  /// when the water type changes without re-assembling from the database.
+  final double totalMassKg;
+
   const TwinInput({
     required this.profile,
     required this.tanks,
@@ -105,7 +109,26 @@ class TwinInput {
     required this.leadKg,
     required this.droppableLeadKg,
     required this.environment,
+    this.totalMassKg = 0.0,
   });
+
+  TwinInput copyWith({
+    List<TwinTankInput>? tanks,
+    TwinSuitInput? suit,
+    List<TwinStaticTerm>? staticTerms,
+    double? leadKg,
+    double? droppableLeadKg,
+    DiveEnvironment? environment,
+  }) => TwinInput(
+    profile: profile,
+    tanks: tanks ?? this.tanks,
+    suit: suit ?? this.suit,
+    staticTerms: staticTerms ?? this.staticTerms,
+    leadKg: leadKg ?? this.leadKg,
+    droppableLeadKg: droppableLeadKg ?? this.droppableLeadKg,
+    environment: environment ?? this.environment,
+    totalMassKg: totalMassKg,
+  );
 }
 
 /// The buoyancy state at one profile sample.

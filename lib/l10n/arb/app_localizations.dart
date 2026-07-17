@@ -20324,6 +20324,42 @@ abstract class AppLocalizations {
   /// **'You typically carry {delta} less than the model suggests'**
   String buoyancy_historyLess(String delta);
 
+  /// No description provided for @buoyancy_adjust.
+  ///
+  /// In en, this message translates to:
+  /// **'Adjust'**
+  String get buoyancy_adjust;
+
+  /// No description provided for @buoyancy_whatIfTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Adjust this dive'**
+  String get buoyancy_whatIfTitle;
+
+  /// No description provided for @buoyancy_whatIfLead.
+  ///
+  /// In en, this message translates to:
+  /// **'Lead'**
+  String get buoyancy_whatIfLead;
+
+  /// No description provided for @buoyancy_whatIfSuit.
+  ///
+  /// In en, this message translates to:
+  /// **'Suit buoyancy'**
+  String get buoyancy_whatIfSuit;
+
+  /// No description provided for @buoyancy_whatIfReset.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset'**
+  String get buoyancy_whatIfReset;
+
+  /// No description provided for @buoyancy_whatIfDelta.
+  ///
+  /// In en, this message translates to:
+  /// **'{delta} vs. actual'**
+  String buoyancy_whatIfDelta(String delta);
+
   /// No description provided for @diveDetailSection_tanks_name.
   ///
   /// In en, this message translates to:

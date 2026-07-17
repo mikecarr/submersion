@@ -11933,6 +11933,26 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String get buoyancy_adjust => 'Ajustar';
+
+  @override
+  String get buoyancy_whatIfTitle => 'Ajustar esta inmersión';
+
+  @override
+  String get buoyancy_whatIfLead => 'Lastre';
+
+  @override
+  String get buoyancy_whatIfSuit => 'Flotabilidad del traje';
+
+  @override
+  String get buoyancy_whatIfReset => 'Restablecer';
+
+  @override
+  String buoyancy_whatIfDelta(String delta) {
+    return '$delta vs real';
+  }
+
+  @override
   String get diveDetailSection_tanks_name => 'Tanques';
 
   @override
