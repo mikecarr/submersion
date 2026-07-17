@@ -1218,6 +1218,7 @@
   "buoyancy_historyModeled": "Modelado",
   "buoyancy_historyMore": "Você costuma levar {delta} a mais do que o modelo sugere",
   "buoyancy_historyLess": "Você costuma levar {delta} a menos do que o modelo sugere",
+  "buoyancy_throughDive": "Durante o mergulho",
   "buoyancy_adjust": "Ajustar",
   "buoyancy_whatIfTitle": "Ajustar este mergulho",
   "buoyancy_whatIfLead": "Lastro",

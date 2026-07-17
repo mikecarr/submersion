@@ -11986,6 +11986,9 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String get buoyancy_throughDive => 'Pendant la plongée';
+
+  @override
   String get buoyancy_adjust => 'Ajuster';
 
   @override

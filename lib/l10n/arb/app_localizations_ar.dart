@@ -11724,6 +11724,9 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
+  String get buoyancy_throughDive => 'خلال الغطسة';
+
+  @override
   String get buoyancy_adjust => 'تعديل';
 
   @override

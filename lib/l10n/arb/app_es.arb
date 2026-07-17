@@ -1218,6 +1218,7 @@
   "buoyancy_historyModeled": "Modelado",
   "buoyancy_historyMore": "Sueles llevar {delta} más de lo que sugiere el modelo",
   "buoyancy_historyLess": "Sueles llevar {delta} menos de lo que sugiere el modelo",
+  "buoyancy_throughDive": "Durante la inmersión",
   "buoyancy_adjust": "Ajustar",
   "buoyancy_whatIfTitle": "Ajustar esta inmersión",
   "buoyancy_whatIfLead": "Lastre",

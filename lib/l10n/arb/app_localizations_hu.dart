@@ -11908,6 +11908,9 @@ class AppLocalizationsHu extends AppLocalizations {
   }
 
   @override
+  String get buoyancy_throughDive => 'A merülés során';
+
+  @override
   String get buoyancy_adjust => 'Módosítás';
 
   @override

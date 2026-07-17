@@ -3730,6 +3730,7 @@
   "buoyancy_historyModeled": "ממודל",
   "buoyancy_historyMore": "בדרך כלל אתה נושא {delta} יותר ממה שהמודל מציע",
   "buoyancy_historyLess": "בדרך כלל אתה נושא {delta} פחות ממה שהמודל מציע",
+  "buoyancy_throughDive": "לאורך הצלילה",
   "buoyancy_adjust": "התאמה",
   "buoyancy_whatIfTitle": "התאמת צלילה זו",
   "buoyancy_whatIfLead": "משקולות",

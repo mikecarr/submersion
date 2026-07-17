@@ -5264,6 +5264,7 @@
   "buoyancy_historyModeled": "Modellezett",
   "buoyancy_historyMore": "Általában {delta}-mal többet viszel, mint amit a modell javasol",
   "buoyancy_historyLess": "Általában {delta}-mal kevesebbet viszel, mint amit a modell javasol",
+  "buoyancy_throughDive": "A merülés során",
   "buoyancy_adjust": "Módosítás",
   "buoyancy_whatIfTitle": "Merülés módosítása",
   "buoyancy_whatIfLead": "Ólom",

@@ -6642,6 +6642,7 @@
   "@buoyancy_historyLess": {
     "placeholders": { "delta": { "type": "String" } }
   },
+  "buoyancy_throughDive": "Through the dive",
   "buoyancy_adjust": "Adjust",
   "buoyancy_whatIfTitle": "Adjust this dive",
   "buoyancy_whatIfLead": "Lead",

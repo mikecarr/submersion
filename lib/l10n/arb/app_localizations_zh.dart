@@ -11373,6 +11373,9 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get buoyancy_throughDive => '整个潜水过程';
+
+  @override
   String get buoyancy_adjust => '调整';
 
   @override

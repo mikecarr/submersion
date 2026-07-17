@@ -5303,6 +5303,7 @@
   "buoyancy_historyModeled": "Modellato",
   "buoyancy_historyMore": "Di solito porti {delta} in più rispetto al modello",
   "buoyancy_historyLess": "Di solito porti {delta} in meno rispetto al modello",
+  "buoyancy_throughDive": "Durante l'immersione",
   "buoyancy_adjust": "Regola",
   "buoyancy_whatIfTitle": "Regola questa immersione",
   "buoyancy_whatIfLead": "Zavorra",

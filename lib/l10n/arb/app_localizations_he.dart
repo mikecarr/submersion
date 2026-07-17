@@ -11639,6 +11639,9 @@ class AppLocalizationsHe extends AppLocalizations {
   }
 
   @override
+  String get buoyancy_throughDive => 'לאורך הצלילה';
+
+  @override
   String get buoyancy_adjust => 'התאמה';
 
   @override

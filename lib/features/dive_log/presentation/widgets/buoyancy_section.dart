@@ -11,6 +11,7 @@ import 'package:submersion/features/dive_log/presentation/widgets/buoyancy_chart
 import 'package:submersion/features/dive_log/presentation/widgets/buoyancy_history_strip.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/buoyancy_what_if_sheet.dart';
 import 'package:submersion/l10n/l10n_extension.dart';
+import 'package:submersion/shared/widgets/twin_summary_rows.dart';
 
 /// Dive-detail section presenting the modeled net buoyancy through the dive:
 /// a plain-language final-stop verdict, an expandable term breakdown, and
@@ -89,7 +90,11 @@ class BuoyancySection extends ConsumerWidget {
             const SizedBox(height: 12),
             _breakdown(context, o),
             const SizedBox(height: 12),
-            _summary(context, outcome),
+            TwinSummaryRows(
+              outputs: o,
+              units: units,
+              wingLiftCapacityKg: outcome.wingLiftCapacityKg,
+            ),
             const SizedBox(height: 16),
             BuoyancyHistoryStrip(diveId: diveId, units: units),
             ..._hints(context, outcome),
@@ -147,84 +152,6 @@ class BuoyancySection extends ConsumerWidget {
           Text(
             units.formatWeight(term.kg),
             style: theme.textTheme.bodyMedium?.copyWith(fontFeatures: const []),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _summary(BuildContext context, BuoyancyTwinOutcome outcome) {
-    final l10n = context.l10n;
-    final o = outcome.outputs;
-    final wing = outcome.wingLiftCapacityKg;
-    final tiles = <Widget>[
-      _tile(context, l10n.buoyancy_beginNet, units.formatWeight(o.beginNetKg)),
-      _tile(context, l10n.buoyancy_endNet, units.formatWeight(o.endNetKg)),
-      _tile(
-        context,
-        l10n.buoyancy_swing,
-        units.formatWeight((o.endNetKg - o.beginNetKg).abs()),
-      ),
-      _tile(
-        context,
-        l10n.buoyancy_peakLift,
-        units.formatWeight(o.peakLiftDemandKg),
-        warning: wing != null && o.peakLiftDemandKg > wing
-            ? l10n.buoyancy_wingWarning
-            : null,
-      ),
-      _tile(
-        context,
-        l10n.buoyancy_minDitchable,
-        units.formatWeight(o.minDitchableKg),
-        warning: o.droppableLeadKg < o.minDitchableKg
-            ? l10n.buoyancy_ditchWarning
-            : null,
-      ),
-      if (o.drysuitGasLiters > 0)
-        _tile(
-          context,
-          l10n.buoyancy_drysuitGas,
-          units.formatVolume(o.drysuitGasLiters),
-        ),
-    ];
-    return Wrap(spacing: 24, runSpacing: 12, children: tiles);
-  }
-
-  Widget _tile(
-    BuildContext context,
-    String label,
-    String value, {
-    String? warning,
-  }) {
-    final theme = Theme.of(context);
-    return SizedBox(
-      width: 150,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            label,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.outline,
-            ),
-          ),
-          const SizedBox(height: 2),
-          Row(
-            children: [
-              Text(value, style: theme.textTheme.titleMedium),
-              if (warning != null) ...[
-                const SizedBox(width: 4),
-                Tooltip(
-                  message: warning,
-                  child: Icon(
-                    Icons.warning_amber_rounded,
-                    size: 18,
-                    color: theme.colorScheme.error,
-                  ),
-                ),
-              ],
-            ],
           ),
         ],
       ),

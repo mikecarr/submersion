@@ -11855,6 +11855,9 @@ class AppLocalizationsNl extends AppLocalizations {
   }
 
   @override
+  String get buoyancy_throughDive => 'Tijdens de duik';
+
+  @override
   String get buoyancy_adjust => 'Aanpassen';
 
   @override

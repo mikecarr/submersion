@@ -1102,6 +1102,7 @@
   "buoyancy_historyModeled": "المُنمذَج",
   "buoyancy_historyMore": "عادةً ما تحمل {delta} أكثر مما يقترحه النموذج",
   "buoyancy_historyLess": "عادةً ما تحمل {delta} أقل مما يقترحه النموذج",
+  "buoyancy_throughDive": "خلال الغطسة",
   "buoyancy_adjust": "تعديل",
   "buoyancy_whatIfTitle": "تعديل هذه الغطسة",
   "buoyancy_whatIfLead": "الرصاص",

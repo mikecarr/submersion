@@ -1310,6 +1310,7 @@
   "buoyancy_historyModeled": "模型建议",
   "buoyancy_historyMore": "你通常比模型建议多带 {delta}",
   "buoyancy_historyLess": "你通常比模型建议少带 {delta}",
+  "buoyancy_throughDive": "整个潜水过程",
   "buoyancy_adjust": "调整",
   "buoyancy_whatIfTitle": "调整此次潜水",
   "buoyancy_whatIfLead": "配重",

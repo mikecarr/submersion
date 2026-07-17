@@ -1218,6 +1218,7 @@
   "buoyancy_historyModeled": "Modelliert",
   "buoyancy_historyMore": "Du trägst typischerweise {delta} mehr als vom Modell vorgeschlagen",
   "buoyancy_historyLess": "Du trägst typischerweise {delta} weniger als vom Modell vorgeschlagen",
+  "buoyancy_throughDive": "Im Tauchgangverlauf",
   "buoyancy_adjust": "Anpassen",
   "buoyancy_whatIfTitle": "Diesen Tauchgang anpassen",
   "buoyancy_whatIfLead": "Blei",

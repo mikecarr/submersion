@@ -20324,6 +20324,12 @@ abstract class AppLocalizations {
   /// **'You typically carry {delta} less than the model suggests'**
   String buoyancy_historyLess(String delta);
 
+  /// No description provided for @buoyancy_throughDive.
+  ///
+  /// In en, this message translates to:
+  /// **'Through the dive'**
+  String get buoyancy_throughDive;
+
   /// No description provided for @buoyancy_adjust.
   ///
   /// In en, this message translates to:
