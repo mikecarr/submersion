@@ -12,6 +12,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:submersion/core/constants/dive_detail_sections.dart';
 import 'package:submersion/core/constants/enums.dart';
 import 'package:submersion/features/data_quality/data/services/quality_scan_service.dart';
+import 'package:submersion/features/data_quality/presentation/providers/quality_inbox_providers.dart';
 import 'package:submersion/features/marine_life/presentation/utils/species_category_icon.dart';
 import 'package:submersion/core/constants/list_view_mode.dart';
 import 'package:submersion/core/constants/units.dart';
@@ -946,6 +947,31 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
                           dive.site?.name ??
                           context.l10n.diveLog_listPage_unknownSite,
                       style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                    Consumer(
+                      builder: (context, ref, _) {
+                        final count =
+                            ref
+                                .watch(diveOpenFindingsCountProvider(dive.id))
+                                .value ??
+                            0;
+                        if (count == 0) return const SizedBox.shrink();
+                        return Padding(
+                          padding: const EdgeInsets.only(top: 4),
+                          child: ActionChip(
+                            avatar: Icon(
+                              Icons.rule,
+                              size: 16,
+                              color: colorScheme.tertiary,
+                            ),
+                            label: Text(
+                              '${context.l10n.dataQuality_detail_chip} ($count)',
+                            ),
+                            onPressed: () =>
+                                context.push('/dives/quality?dive=${dive.id}'),
+                          ),
+                        );
+                      },
                     ),
                     if (dive.effectiveName != null && dive.site != null)
                       Text(

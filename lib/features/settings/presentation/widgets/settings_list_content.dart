@@ -48,6 +48,13 @@ const settingsSections = [
     color: Colors.green,
   ),
   SettingsSection(
+    id: 'dataQuality',
+    icon: Icons.rule,
+    title: 'Data quality',
+    subtitle: 'Choose which checks run when scanning',
+    color: Colors.teal,
+  ),
+  SettingsSection(
     id: 'dataSources',
     icon: Icons.favorite,
     title: 'Apple HealthKit',

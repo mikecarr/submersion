@@ -26,6 +26,7 @@ import 'package:submersion/features/dive_centers/presentation/providers/dive_cen
 import 'package:submersion/features/dive_log/data/services/dive_merge_service.dart';
 import 'package:submersion/features/dive_log/domain/entities/dive.dart';
 import 'package:submersion/features/dive_log/domain/entities/dive_summary.dart';
+import 'package:submersion/features/data_quality/presentation/providers/data_quality_providers.dart';
 import 'package:submersion/features/dive_log/presentation/providers/dive_providers.dart';
 import 'package:submersion/features/dive_log/presentation/pages/dive_list_page.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/add_dive_bottom_sheet.dart';
@@ -772,6 +773,21 @@ class _DiveListContentState extends ConsumerState<DiveListContent> {
           icon: const Icon(Icons.sort),
           tooltip: context.l10n.diveLog_listPage_tooltip_sort,
           onPressed: () => _showSortSheet(context),
+        ),
+        Consumer(
+          builder: (context, ref, _) {
+            final count =
+                ref.watch(openQualityFindingsCountProvider).value ?? 0;
+            return IconButton(
+              icon: Badge(
+                isLabelVisible: count > 0,
+                label: Text('$count'),
+                child: const Icon(Icons.rule),
+              ),
+              tooltip: context.l10n.dataQuality_badge_tooltip,
+              onPressed: () => context.push('/dives/quality'),
+            );
+          },
         ),
         PopupMenuButton<String>(
           icon: const Icon(Icons.more_vert),

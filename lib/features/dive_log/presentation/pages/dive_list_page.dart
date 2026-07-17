@@ -20,6 +20,7 @@ import 'package:submersion/core/constants/dive_field.dart';
 import 'package:submersion/core/constants/dive_search.dart';
 import 'package:submersion/features/dive_log/domain/entities/dive.dart';
 import 'package:submersion/features/dive_log/domain/entities/dive_summary.dart';
+import 'package:submersion/features/data_quality/presentation/providers/data_quality_providers.dart';
 import 'package:submersion/features/dive_log/presentation/providers/dive_providers.dart';
 import 'package:submersion/features/dive_log/presentation/providers/view_config_providers.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/add_dive_bottom_sheet.dart';
@@ -208,6 +209,18 @@ class _DiveListPageState extends ConsumerState<DiveListPage> {
             onPressed: () {
               showSearch(context: context, delegate: DiveSearchDelegate(ref));
             },
+          ),
+          IconButton(
+            icon: Badge(
+              isLabelVisible:
+                  (ref.watch(openQualityFindingsCountProvider).value ?? 0) > 0,
+              label: Text(
+                '${ref.watch(openQualityFindingsCountProvider).value ?? 0}',
+              ),
+              child: const Icon(Icons.rule, size: 20),
+            ),
+            tooltip: context.l10n.dataQuality_badge_tooltip,
+            onPressed: () => context.push('/dives/quality'),
           ),
           IconButton(
             icon: Badge(

@@ -23,14 +23,14 @@ void main() {
         id: 'd1',
         dateTime: DateTime.utc(2026, 7, 1, 10),
         tanks: [
-          domain.DiveTank(
+          const domain.DiveTank(
             id: 'tA',
             gasMix: domain.GasMix(o2: 21, he: 0),
             order: 0,
             startPressure: 60,
             endPressure: 200,
           ),
-          domain.DiveTank(
+          const domain.DiveTank(
             id: 'tB',
             gasMix: domain.GasMix(o2: 50, he: 0),
             order: 1,
