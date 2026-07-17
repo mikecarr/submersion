@@ -761,7 +761,7 @@ class SyncRepository {
       await _db.transaction(() async {
         // One tombstone per record: replace any prior tombstone for this key
         // so its deletedAt/hlc advance (re-delete refreshes the stamp) and the
-        // v112 unique index is never violated.
+        // v113 unique index is never violated.
         await (_db.delete(_db.deletionLog)..where(
               (t) =>
                   t.entityType.equals(entityType) & t.recordId.equals(recordId),
