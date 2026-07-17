@@ -126,6 +126,7 @@ dependencies:
   linked_scroll_controller: ^0.2.0
   cryptography: ^2.9.0
   cryptography_flutter: ^2.3.4
+  flutter_web_auth_2: ^5.0.3
 
 dev_dependencies:
   flutter_test:
