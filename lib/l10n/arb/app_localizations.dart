@@ -19268,6 +19268,12 @@ abstract class AppLocalizations {
   /// **'Extra minutes'**
   String get plannerCanvas_contingency_timeDelta;
 
+  /// No description provided for @plannerCanvas_chart_meanDepth.
+  ///
+  /// In en, this message translates to:
+  /// **'mean {depth}'**
+  String plannerCanvas_chart_meanDepth(String depth);
+
   /// No description provided for @plannerCanvas_contingency_title.
   ///
   /// In en, this message translates to:

@@ -11240,6 +11240,11 @@ class AppLocalizationsNl extends AppLocalizations {
   String get plannerCanvas_contingency_timeDelta => 'Extra minuten';
 
   @override
+  String plannerCanvas_chart_meanDepth(String depth) {
+    return 'gem. $depth';
+  }
+
+  @override
   String get plannerCanvas_contingency_title => 'Noodplannen';
 
   @override

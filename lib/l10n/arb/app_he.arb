@@ -3549,6 +3549,14 @@
   "plannerCanvas_contingency_depthDelta": "עומק נוסף",
   "plannerCanvas_contingency_lostGas": "אבדן {gas}",
   "plannerCanvas_contingency_timeDelta": "דקות נוספות",
+  "plannerCanvas_chart_meanDepth": "ממוצע {depth}",
+  "@plannerCanvas_chart_meanDepth": {
+    "placeholders": {
+      "depth": {
+        "type": "String"
+      }
+    }
+  },
   "plannerCanvas_contingency_title": "תוכניות חירום",
   "plannerCanvas_contingency_turnFraction": "שבר פנייה",
   "plannerCanvas_contingency_turnRule": "כלל לחץ פנייה",

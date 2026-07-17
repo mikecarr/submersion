@@ -11363,6 +11363,11 @@ class AppLocalizationsFr extends AppLocalizations {
   String get plannerCanvas_contingency_timeDelta => 'Minutes en plus';
 
   @override
+  String plannerCanvas_chart_meanDepth(String depth) {
+    return 'moyenne $depth';
+  }
+
+  @override
   String get plannerCanvas_contingency_title => 'Plans de secours';
 
   @override

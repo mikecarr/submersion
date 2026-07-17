@@ -10801,6 +10801,11 @@ class AppLocalizationsZh extends AppLocalizations {
   String get plannerCanvas_contingency_timeDelta => '额外分钟';
 
   @override
+  String plannerCanvas_chart_meanDepth(String depth) {
+    return '平均 $depth';
+  }
+
+  @override
   String get plannerCanvas_contingency_title => '应急计划';
 
   @override

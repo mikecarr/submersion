@@ -3549,6 +3549,14 @@
   "plannerCanvas_contingency_depthDelta": "Extra mélység",
   "plannerCanvas_contingency_lostGas": "{gas} elveszett",
   "plannerCanvas_contingency_timeDelta": "Extra percek",
+  "plannerCanvas_chart_meanDepth": "átlag {depth}",
+  "@plannerCanvas_chart_meanDepth": {
+    "placeholders": {
+      "depth": {
+        "type": "String"
+      }
+    }
+  },
   "plannerCanvas_contingency_title": "Vészhelyzeti tervek",
   "plannerCanvas_contingency_turnFraction": "Fordulási hányad",
   "plannerCanvas_contingency_turnRule": "Fordulónyomás-szabály",

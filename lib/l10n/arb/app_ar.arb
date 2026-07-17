@@ -3583,6 +3583,14 @@
   "plannerCanvas_contingency_depthDelta": "عمق إضافي",
   "plannerCanvas_contingency_lostGas": "فقدان {gas}",
   "plannerCanvas_contingency_timeDelta": "دقائق إضافية",
+  "plannerCanvas_chart_meanDepth": "المتوسط {depth}",
+  "@plannerCanvas_chart_meanDepth": {
+    "placeholders": {
+      "depth": {
+        "type": "String"
+      }
+    }
+  },
   "plannerCanvas_contingency_title": "خطط الطوارئ",
   "plannerCanvas_contingency_turnFraction": "نسبة العودة",
   "plannerCanvas_contingency_turnRule": "قاعدة ضغط العودة",

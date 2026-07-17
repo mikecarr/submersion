@@ -6351,6 +6351,14 @@
     }
   },
   "plannerCanvas_contingency_timeDelta": "Extra minutes",
+  "plannerCanvas_chart_meanDepth": "mean {depth}",
+  "@plannerCanvas_chart_meanDepth": {
+    "placeholders": {
+      "depth": {
+        "type": "String"
+      }
+    }
+  },
   "plannerCanvas_contingency_title": "Contingencies",
   "plannerCanvas_contingency_turnFraction": "Turn fraction",
   "plannerCanvas_contingency_turnRule": "Turn pressure rule",

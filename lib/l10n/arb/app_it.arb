@@ -3549,6 +3549,14 @@
   "plannerCanvas_contingency_depthDelta": "Profondità extra",
   "plannerCanvas_contingency_lostGas": "{gas} perso",
   "plannerCanvas_contingency_timeDelta": "Minuti extra",
+  "plannerCanvas_chart_meanDepth": "media {depth}",
+  "@plannerCanvas_chart_meanDepth": {
+    "placeholders": {
+      "depth": {
+        "type": "String"
+      }
+    }
+  },
   "plannerCanvas_contingency_title": "Contingenze",
   "plannerCanvas_contingency_turnFraction": "Frazione di rientro",
   "plannerCanvas_contingency_turnRule": "Regola pressione di rientro",

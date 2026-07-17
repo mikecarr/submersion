@@ -11292,6 +11292,11 @@ class AppLocalizationsHu extends AppLocalizations {
   String get plannerCanvas_contingency_timeDelta => 'Extra percek';
 
   @override
+  String plannerCanvas_chart_meanDepth(String depth) {
+    return 'átlag $depth';
+  }
+
+  @override
   String get plannerCanvas_contingency_title => 'Vészhelyzeti tervek';
 
   @override

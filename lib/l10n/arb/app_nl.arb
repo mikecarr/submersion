@@ -3583,6 +3583,14 @@
   "plannerCanvas_contingency_depthDelta": "Extra diepte",
   "plannerCanvas_contingency_lostGas": "{gas} verloren",
   "plannerCanvas_contingency_timeDelta": "Extra minuten",
+  "plannerCanvas_chart_meanDepth": "gem. {depth}",
+  "@plannerCanvas_chart_meanDepth": {
+    "placeholders": {
+      "depth": {
+        "type": "String"
+      }
+    }
+  },
   "plannerCanvas_contingency_title": "Noodplannen",
   "plannerCanvas_contingency_turnFraction": "Keerfractie",
   "plannerCanvas_contingency_turnRule": "Keerdruk-regel",
