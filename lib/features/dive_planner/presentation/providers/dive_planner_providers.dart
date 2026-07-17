@@ -350,6 +350,16 @@ class DivePlanNotifier extends StateNotifier<DivePlanState> {
     );
   }
 
+  /// Update ascent and/or descent rate in meters per minute.
+  void updateRates({double? ascent, double? descent}) {
+    state = state.copyWith(
+      ascentRate: ascent,
+      descentRate: descent,
+      isDirty: true,
+      updatedAt: DateTime.now(),
+    );
+  }
+
   /// Update dive site.
   void updateSite(String? siteId) {
     state = state.copyWith(

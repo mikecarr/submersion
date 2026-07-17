@@ -487,6 +487,12 @@ class DivePlanState extends Equatable {
   /// Surface air consumption rate in L/min.
   final double sacRate;
 
+  /// Ascent rate in meters per minute (Subsurface parity, G7/G8).
+  final double ascentRate;
+
+  /// Descent rate in meters per minute.
+  final double descentRate;
+
   /// Surface interval before this dive (for repetitive diving).
   final Duration? surfaceInterval;
 
@@ -554,6 +560,8 @@ class DivePlanState extends Equatable {
     this.gfLow = 30,
     this.gfHigh = 70,
     this.sacRate = 15.0,
+    this.ascentRate = 9.0,
+    this.descentRate = 18.0,
     this.surfaceInterval,
     this.initialTissueState,
     this.sourceDiveId,
@@ -614,6 +622,8 @@ class DivePlanState extends Equatable {
     int? gfLow,
     int? gfHigh,
     double? sacRate,
+    double? ascentRate,
+    double? descentRate,
     Duration? surfaceInterval,
     List<TissueCompartment>? initialTissueState,
     String? sourceDiveId,
@@ -654,6 +664,8 @@ class DivePlanState extends Equatable {
       gfLow: gfLow ?? this.gfLow,
       gfHigh: gfHigh ?? this.gfHigh,
       sacRate: sacRate ?? this.sacRate,
+      ascentRate: ascentRate ?? this.ascentRate,
+      descentRate: descentRate ?? this.descentRate,
       surfaceInterval: clearSurfaceInterval
           ? null
           : (surfaceInterval ?? this.surfaceInterval),
@@ -706,6 +718,8 @@ class DivePlanState extends Equatable {
     gfLow,
     gfHigh,
     sacRate,
+    ascentRate,
+    descentRate,
     surfaceInterval,
     initialTissueState,
     sourceDiveId,
