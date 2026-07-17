@@ -12528,6 +12528,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'Gradient Factors';
 
   @override
+  String get settings_decompression_header_oxygenToxicity => 'Oxygen Toxicity';
+
+  @override
   String settings_decompression_preset_selectLabel(Object presetName) {
     return 'Select $presetName conservatism preset';
   }
@@ -12551,6 +12554,67 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settings_decompression_endLimit_dialog_title => 'END Limit';
+
+  @override
+  String get settings_decompression_cnsMethodTitle => 'CNS calculation';
+
+  @override
+  String get settings_decompression_cnsMethodClassic =>
+      'NOAA table, stepped (classic)';
+
+  @override
+  String get settings_decompression_cnsMethodClassicDesc =>
+      'Charges each 0.1 bar band at its harsher edge. Submersion\'s original method.';
+
+  @override
+  String get settings_decompression_cnsMethodShearwater =>
+      'Linear interpolation (Shearwater-style)';
+
+  @override
+  String get settings_decompression_cnsMethodShearwaterDesc =>
+      'Interpolates between the NOAA limits as documented by Shearwater. Matches most dive computers.';
+
+  @override
+  String get settings_decompression_cnsMethodSubsurface =>
+      'Exponential fit (as Subsurface)';
+
+  @override
+  String get settings_decompression_cnsMethodSubsurfaceDesc =>
+      'Smooth curve fit to the NOAA table. Matches Subsurface\'s calculated CNS.';
+
+  @override
+  String get settings_decompression_cnsMethodAboutTitle =>
+      'About these methods';
+
+  @override
+  String get settings_decompression_cnsMethodAboutBody =>
+      'All three methods are built on the oxygen exposure limits of the NOAA Diving Manual (300 minutes at a ppO2 of 1.0 bar, 45 minutes at 1.6 bar). The table only defines limits in 0.1 bar steps: the classic method charges everything in a band at the band\'s harsher edge, which systematically overstates exposure between entries. Shearwater\'s dive computers document interpolating linearly between the NOAA limits, with a fixed 15% per minute above 1.65 bar. Subsurface replaced its table lookup in 2019 with a smooth two-line exponential fit to the same NOAA data (Robert C. Helling), which also extends naturally beyond 1.6 bar. Between table entries the two smooth methods agree within about one CNS point; the classic method reads higher.';
+
+  @override
+  String get settings_decompression_cnsMethodDisclaimer =>
+      'Names refer to the published methods of the respective projects and manufacturers; no affiliation or endorsement is implied. Computed values may differ from actual dive computer readings.';
+
+  @override
+  String get settings_decompression_cnsMethodSourcesTitle => 'Sources';
+
+  @override
+  String get settings_linkOpenFailed => 'Could not open the link.';
+
+  @override
+  String get settings_decompression_cnsMethodSourceNoaa =>
+      'NOAA: Diving Program (publisher of the NOAA Diving Manual)';
+
+  @override
+  String get settings_decompression_cnsMethodSourceShearwater =>
+      'Shearwater: The CNS Oxygen Clock';
+
+  @override
+  String get settings_decompression_cnsMethodSourceTheoreticalDiver =>
+      'The Theoretical Diver: Calculating oxygen CNS toxicity';
+
+  @override
+  String get settings_decompression_cnsMethodSourceSubsurface =>
+      'Subsurface: implementation (divelist.cpp)';
 
   @override
   String get settings_existingDb_cancel => 'Cancel';

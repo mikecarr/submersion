@@ -12502,6 +12502,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get settings_decompression_header_gradientFactors => 'عوامل التدرج';
 
   @override
+  String get settings_decompression_header_oxygenToxicity => 'سمية الأكسجين';
+
+  @override
   String settings_decompression_preset_selectLabel(Object presetName) {
     return 'اختيار إعداد التحفظ المسبق $presetName';
   }
@@ -12525,6 +12528,66 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get settings_decompression_endLimit_dialog_title => 'حد END';
+
+  @override
+  String get settings_decompression_cnsMethodTitle => 'حساب الـ CNS';
+
+  @override
+  String get settings_decompression_cnsMethodClassic =>
+      'جدول NOAA، متدرّج (كلاسيكي)';
+
+  @override
+  String get settings_decompression_cnsMethodClassicDesc =>
+      'يحسب كل نطاق 0.1 bar عند حدّه الأكثر صرامة. الطريقة الأصلية في Submersion.';
+
+  @override
+  String get settings_decompression_cnsMethodShearwater =>
+      'استيفاء خطي (بأسلوب Shearwater)';
+
+  @override
+  String get settings_decompression_cnsMethodShearwaterDesc =>
+      'يستوفي بين حدود NOAA كما توثّقها Shearwater. يتوافق مع معظم حواسيب الغوص.';
+
+  @override
+  String get settings_decompression_cnsMethodSubsurface =>
+      'ملاءمة أسّية (مثل Subsurface)';
+
+  @override
+  String get settings_decompression_cnsMethodSubsurfaceDesc =>
+      'ملاءمة منحنى سلس لجدول NOAA. يتوافق مع الـ CNS المحسوب في Subsurface.';
+
+  @override
+  String get settings_decompression_cnsMethodAboutTitle => 'حول هذه الطرق';
+
+  @override
+  String get settings_decompression_cnsMethodAboutBody =>
+      'تستند الطرق الثلاث جميعها إلى حدود التعرض للأكسجين في دليل الغوص من NOAA (300 دقيقة عند ppO2 يبلغ 1.0 bar، و45 دقيقة عند 1.6 bar). لا يحدد الجدول الحدود إلا بخطوات مقدارها 0.1 bar: تحسب الطريقة الكلاسيكية كل ما يقع ضمن نطاق عند حدّه الأكثر صرامة، مما يبالغ بشكل منهجي في تقدير التعرض بين القيم. توثّق حواسيب الغوص من Shearwater استيفاءً خطيًا بين حدود NOAA، بمعدل ثابت قدره 15% في الدقيقة فوق 1.65 bar. استبدلت Subsurface في عام 2019 بحثها في الجدول بملاءمة أسّية سلسة من جزأين على البيانات نفسها من NOAA (Robert C. Helling)، وهي تمتد أيضًا بشكل طبيعي إلى ما بعد 1.6 bar. بين قيم الجدول، تتوافق الطريقتان السلستان في حدود نقطة CNS واحدة تقريبًا؛ بينما تعطي الطريقة الكلاسيكية قيمًا أعلى.';
+
+  @override
+  String get settings_decompression_cnsMethodDisclaimer =>
+      'تشير الأسماء إلى الطرق المنشورة للمشاريع والمصنّعين المعنيين؛ ولا يتضمن ذلك أي انتماء أو تأييد. قد تختلف القيم المحسوبة عن القراءات الفعلية لحاسوب الغوص.';
+
+  @override
+  String get settings_decompression_cnsMethodSourcesTitle => 'المصادر';
+
+  @override
+  String get settings_linkOpenFailed => 'تعذر فتح الرابط.';
+
+  @override
+  String get settings_decompression_cnsMethodSourceNoaa =>
+      'NOAA: Diving Program (ناشر دليل الغوص NOAA Diving Manual)';
+
+  @override
+  String get settings_decompression_cnsMethodSourceShearwater =>
+      'Shearwater: ساعة أكسجين CNS';
+
+  @override
+  String get settings_decompression_cnsMethodSourceTheoreticalDiver =>
+      'The Theoretical Diver: حساب سمّية أكسجين CNS';
+
+  @override
+  String get settings_decompression_cnsMethodSourceSubsurface =>
+      'Subsurface: التنفيذ (divelist.cpp)';
 
   @override
   String get settings_existingDb_cancel => 'إلغاء';

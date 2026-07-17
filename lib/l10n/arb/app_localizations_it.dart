@@ -12741,6 +12741,10 @@ class AppLocalizationsIt extends AppLocalizations {
       'Fattori di gradiente';
 
   @override
+  String get settings_decompression_header_oxygenToxicity =>
+      'Tossicità dell\'ossigeno';
+
+  @override
   String settings_decompression_preset_selectLabel(Object presetName) {
     return 'Seleziona preset di conservatismo $presetName';
   }
@@ -12764,6 +12768,67 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get settings_decompression_endLimit_dialog_title => 'Limite END';
+
+  @override
+  String get settings_decompression_cnsMethodTitle => 'Calcolo del CNS';
+
+  @override
+  String get settings_decompression_cnsMethodClassic =>
+      'Tabella NOAA, a gradini (classico)';
+
+  @override
+  String get settings_decompression_cnsMethodClassicDesc =>
+      'Calcola ogni banda di 0,1 bar al suo estremo più severo. Metodo originale di Submersion.';
+
+  @override
+  String get settings_decompression_cnsMethodShearwater =>
+      'Interpolazione lineare (stile Shearwater)';
+
+  @override
+  String get settings_decompression_cnsMethodShearwaterDesc =>
+      'Interpola tra i limiti NOAA come documentato da Shearwater. Corrisponde alla maggior parte dei computer subacquei.';
+
+  @override
+  String get settings_decompression_cnsMethodSubsurface =>
+      'Adattamento esponenziale (come Subsurface)';
+
+  @override
+  String get settings_decompression_cnsMethodSubsurfaceDesc =>
+      'Adattamento a curva liscia sulla tabella NOAA. Corrisponde al CNS calcolato da Subsurface.';
+
+  @override
+  String get settings_decompression_cnsMethodAboutTitle =>
+      'Informazioni su questi metodi';
+
+  @override
+  String get settings_decompression_cnsMethodAboutBody =>
+      'Tutti e tre i metodi si basano sui limiti di esposizione all\'ossigeno del NOAA Diving Manual (300 minuti a un ppO2 di 1,0 bar, 45 minuti a 1,6 bar). La tabella definisce i limiti solo a passi di 0,1 bar: il metodo classico calcola tutto ciò che rientra in una banda al suo estremo più severo, sovrastimando sistematicamente l\'esposizione tra le voci. I computer subacquei Shearwater documentano un\'interpolazione lineare tra i limiti NOAA, con un valore fisso del 15 % al minuto oltre 1,65 bar. Nel 2019 Subsurface ha sostituito la ricerca in tabella con un adattamento esponenziale liscio a due segmenti sugli stessi dati NOAA (Robert C. Helling), che si estende in modo naturale anche oltre 1,6 bar. Tra le voci della tabella i due metodi lisci concordano entro circa un punto CNS; il metodo classico mostra valori più alti.';
+
+  @override
+  String get settings_decompression_cnsMethodDisclaimer =>
+      'I nomi si riferiscono ai metodi pubblicati dei rispettivi progetti e produttori; non è implicata alcuna affiliazione o approvazione. I valori calcolati possono differire dalle letture effettive del computer subacqueo.';
+
+  @override
+  String get settings_decompression_cnsMethodSourcesTitle => 'Fonti';
+
+  @override
+  String get settings_linkOpenFailed => 'Impossibile aprire il link.';
+
+  @override
+  String get settings_decompression_cnsMethodSourceNoaa =>
+      'NOAA: Diving Program (editore del NOAA Diving Manual)';
+
+  @override
+  String get settings_decompression_cnsMethodSourceShearwater =>
+      'Shearwater: l\'orologio dell\'ossigeno CNS';
+
+  @override
+  String get settings_decompression_cnsMethodSourceTheoreticalDiver =>
+      'The Theoretical Diver: calcolo della tossicità CNS dell\'ossigeno';
+
+  @override
+  String get settings_decompression_cnsMethodSourceSubsurface =>
+      'Subsurface: implementazione (divelist.cpp)';
 
   @override
   String get settings_existingDb_cancel => 'Annulla';
