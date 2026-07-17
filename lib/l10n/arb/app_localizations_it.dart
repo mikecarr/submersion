@@ -11923,6 +11923,9 @@ class AppLocalizationsIt extends AppLocalizations {
   String get buoyancy_chartRig => 'Attrezzatura + zavorra';
 
   @override
+  String get buoyancy_chartMinutes => 'Tempo (min)';
+
+  @override
   String get buoyancy_historyTitle => 'Cronologia zavorra';
 
   @override

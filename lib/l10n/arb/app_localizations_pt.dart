@@ -11924,6 +11924,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get buoyancy_chartRig => 'Equipamento + lastro';
 
   @override
+  String get buoyancy_chartMinutes => 'Tempo (min)';
+
+  @override
   String get buoyancy_historyTitle => 'Histórico de lastro';
 
   @override

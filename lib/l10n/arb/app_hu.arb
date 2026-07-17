@@ -5259,6 +5259,7 @@
   "buoyancy_linkSuitHint": "Kapcsolj egy búvárruhát ehhez a merüléshez a teljesebb képért",
   "buoyancy_chartNet": "Nettó",
   "buoyancy_chartRig": "Felszerelés + ólom",
+  "buoyancy_chartMinutes": "Idő (perc)",
   "buoyancy_historyTitle": "Ólomelőzmények",
   "buoyancy_historyCarried": "Vitt",
   "buoyancy_historyModeled": "Modellezett",

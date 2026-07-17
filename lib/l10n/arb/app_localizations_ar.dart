@@ -11705,6 +11705,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get buoyancy_chartRig => 'المعدات + الرصاص';
 
   @override
+  String get buoyancy_chartMinutes => 'الزمن (دقيقة)';
+
+  @override
   String get buoyancy_historyTitle => 'سجل الترصيص';
 
   @override

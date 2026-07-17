@@ -5298,6 +5298,7 @@
   "buoyancy_linkSuitHint": "Associa una muta a questa immersione per un quadro più completo",
   "buoyancy_chartNet": "Netto",
   "buoyancy_chartRig": "Attrezzatura + zavorra",
+  "buoyancy_chartMinutes": "Tempo (min)",
   "buoyancy_historyTitle": "Cronologia zavorra",
   "buoyancy_historyCarried": "Portato",
   "buoyancy_historyModeled": "Modellato",

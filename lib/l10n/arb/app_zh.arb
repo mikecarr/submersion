@@ -1305,6 +1305,7 @@
   "buoyancy_linkSuitHint": "为本次潜水关联一件暴露服以获得更完整的分析",
   "buoyancy_chartNet": "净值",
   "buoyancy_chartRig": "装备 + 配重",
+  "buoyancy_chartMinutes": "时间（分钟）",
   "buoyancy_historyTitle": "配重历史",
   "buoyancy_historyCarried": "实际携带",
   "buoyancy_historyModeled": "模型建议",

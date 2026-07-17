@@ -11917,6 +11917,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get buoyancy_chartRig => 'Rig + Blei';
 
   @override
+  String get buoyancy_chartMinutes => 'Zeit (min)';
+
+  @override
   String get buoyancy_historyTitle => 'Bleiverlauf';
 
   @override

@@ -11620,6 +11620,9 @@ class AppLocalizationsHe extends AppLocalizations {
   String get buoyancy_chartRig => 'ציוד + משקולות';
 
   @override
+  String get buoyancy_chartMinutes => 'זמן (דק\')';
+
+  @override
   String get buoyancy_historyTitle => 'היסטוריית משקולות';
 
   @override

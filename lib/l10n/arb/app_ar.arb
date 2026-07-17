@@ -1097,6 +1097,7 @@
   "buoyancy_linkSuitHint": "اربط بدلة تعرّض بهذه الغطسة للحصول على صورة أوفى",
   "buoyancy_chartNet": "الصافي",
   "buoyancy_chartRig": "المعدات + الرصاص",
+  "buoyancy_chartMinutes": "الزمن (دقيقة)",
   "buoyancy_historyTitle": "سجل الترصيص",
   "buoyancy_historyCarried": "المحمول",
   "buoyancy_historyModeled": "المُنمذَج",

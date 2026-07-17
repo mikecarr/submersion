@@ -1213,6 +1213,7 @@
   "buoyancy_linkSuitHint": "Associe uma roupa de exposição a este mergulho para um quadro mais completo",
   "buoyancy_chartNet": "Líquido",
   "buoyancy_chartRig": "Equipamento + lastro",
+  "buoyancy_chartMinutes": "Tempo (min)",
   "buoyancy_historyTitle": "Histórico de lastro",
   "buoyancy_historyCarried": "Levado",
   "buoyancy_historyModeled": "Modelado",

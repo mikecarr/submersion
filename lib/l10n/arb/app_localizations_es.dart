@@ -11914,6 +11914,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get buoyancy_chartRig => 'Equipo + lastre';
 
   @override
+  String get buoyancy_chartMinutes => 'Tiempo (min)';
+
+  @override
   String get buoyancy_historyTitle => 'Historial de lastre';
 
   @override

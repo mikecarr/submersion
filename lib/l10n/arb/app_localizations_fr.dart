@@ -11967,6 +11967,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get buoyancy_chartRig => 'Équipement + lest';
 
   @override
+  String get buoyancy_chartMinutes => 'Temps (min)';
+
+  @override
   String get buoyancy_historyTitle => 'Historique de lestage';
 
   @override

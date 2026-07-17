@@ -20294,6 +20294,12 @@ abstract class AppLocalizations {
   /// **'Rig + lead'**
   String get buoyancy_chartRig;
 
+  /// No description provided for @buoyancy_chartMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'Time (min)'**
+  String get buoyancy_chartMinutes;
+
   /// No description provided for @buoyancy_historyTitle.
   ///
   /// In en, this message translates to:

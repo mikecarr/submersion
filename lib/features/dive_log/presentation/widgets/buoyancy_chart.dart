@@ -73,6 +73,11 @@ class BuoyancyChart extends StatelessWidget {
           ),
           titlesData: FlTitlesData(
             leftTitles: AxisTitles(
+              axisNameSize: 20,
+              axisNameWidget: Text(
+                '${context.l10n.buoyancy_chartNet} (${units.weightSymbol})',
+                style: theme.textTheme.bodySmall,
+              ),
               sideTitles: SideTitles(
                 showTitles: true,
                 reservedSize: 40,
@@ -83,6 +88,11 @@ class BuoyancyChart extends StatelessWidget {
               ),
             ),
             bottomTitles: AxisTitles(
+              axisNameSize: 20,
+              axisNameWidget: Text(
+                context.l10n.buoyancy_chartMinutes,
+                style: theme.textTheme.bodySmall,
+              ),
               sideTitles: SideTitles(
                 showTitles: true,
                 reservedSize: 24,

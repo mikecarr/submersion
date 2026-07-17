@@ -1213,6 +1213,7 @@
   "buoyancy_linkSuitHint": "Verknüpfe einen Tauchanzug mit diesem Tauchgang für ein vollständigeres Bild",
   "buoyancy_chartNet": "Netto",
   "buoyancy_chartRig": "Rig + Blei",
+  "buoyancy_chartMinutes": "Zeit (min)",
   "buoyancy_historyTitle": "Bleiverlauf",
   "buoyancy_historyCarried": "Getragen",
   "buoyancy_historyModeled": "Modelliert",

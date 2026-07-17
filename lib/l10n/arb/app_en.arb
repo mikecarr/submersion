@@ -6631,6 +6631,7 @@
   "buoyancy_linkSuitHint": "Link an exposure suit to this dive for a fuller picture",
   "buoyancy_chartNet": "Net",
   "buoyancy_chartRig": "Rig + lead",
+  "buoyancy_chartMinutes": "Time (min)",
   "buoyancy_historyTitle": "Weighting history",
   "buoyancy_historyCarried": "Carried",
   "buoyancy_historyModeled": "Modeled",

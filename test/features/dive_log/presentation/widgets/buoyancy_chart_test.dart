@@ -7,6 +7,7 @@ import 'package:submersion/core/deco/entities/dive_environment.dart';
 import 'package:submersion/core/utils/unit_formatter.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/buoyancy_chart.dart';
 import 'package:submersion/features/settings/presentation/providers/settings_providers.dart';
+import 'package:submersion/l10n/arb/app_localizations.dart';
 
 BuoyancyTwinResult _result(List<TwinSample> samples) => BuoyancyTwinResult(
   samples: samples,
@@ -57,23 +58,25 @@ void main() {
     });
   });
 
-  testWidgets('renders a LineChart for a multi-sample result', (tester) async {
+  testWidgets('renders a LineChart with labelled axes', (tester) async {
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: BuoyancyChart(
-            result: _result([_s(0, 0, 2), _s(60, 10, 1), _s(120, 5, 1.5)]),
-            units: units,
-          ),
-        ),
+      const MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: Scaffold(body: _ChartHost()),
       ),
     );
     expect(find.byType(LineChart), findsOneWidget);
+    // Axis name labels are present (X = time, Y = net in the weight unit).
+    expect(find.text('Time (min)'), findsOneWidget);
+    expect(find.textContaining('Net'), findsWidgets);
   });
 
   testWidgets('renders nothing for fewer than two samples', (tester) async {
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
         home: Scaffold(
           body: BuoyancyChart(result: _result([_s(0, 0, 2)]), units: units),
         ),
@@ -81,4 +84,13 @@ void main() {
     );
     expect(find.byType(LineChart), findsNothing);
   });
+}
+
+class _ChartHost extends StatelessWidget {
+  const _ChartHost();
+  @override
+  Widget build(BuildContext context) => BuoyancyChart(
+    result: _result([_s(0, 0, 2), _s(60, 10, 1), _s(120, 5, 1.5)]),
+    units: const UnitFormatter(AppSettings()),
+  );
 }

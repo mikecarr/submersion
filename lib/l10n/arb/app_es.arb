@@ -1213,6 +1213,7 @@
   "buoyancy_linkSuitHint": "Asocia un traje a esta inmersión para un panorama más completo",
   "buoyancy_chartNet": "Neto",
   "buoyancy_chartRig": "Equipo + lastre",
+  "buoyancy_chartMinutes": "Tiempo (min)",
   "buoyancy_historyTitle": "Historial de lastre",
   "buoyancy_historyCarried": "Llevado",
   "buoyancy_historyModeled": "Modelado",

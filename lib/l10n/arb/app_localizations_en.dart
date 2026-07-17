@@ -11731,6 +11731,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get buoyancy_chartRig => 'Rig + lead';
 
   @override
+  String get buoyancy_chartMinutes => 'Time (min)';
+
+  @override
   String get buoyancy_historyTitle => 'Weighting history';
 
   @override
