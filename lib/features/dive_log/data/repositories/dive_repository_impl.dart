@@ -4381,6 +4381,42 @@ class DiveRepository {
     }
   }
 
+  /// Narrow tank-record fix for pressure repairs: writes only the provided
+  /// pressures on one tank. Marks the tank row and parent dive pending.
+  /// No transaction/notify -- the repair executor owns those.
+  Future<void> updateTankRecordPressures({
+    required String diveId,
+    required String tankId,
+    double? startPressure,
+    double? endPressure,
+  }) async {
+    if (startPressure == null && endPressure == null) return;
+    final now = DateTime.now().millisecondsSinceEpoch;
+    await (_db.update(_db.diveTanks)..where((t) => t.id.equals(tankId))).write(
+      DiveTanksCompanion(
+        startPressure: startPressure != null
+            ? Value(startPressure)
+            : const Value.absent(),
+        endPressure: endPressure != null
+            ? Value(endPressure)
+            : const Value.absent(),
+      ),
+    );
+    await (_db.update(_db.dives)..where((t) => t.id.equals(diveId))).write(
+      DivesCompanion(updatedAt: Value(now)),
+    );
+    await _syncRepository.markRecordPending(
+      entityType: 'diveTanks',
+      recordId: tankId,
+      localUpdatedAt: now,
+    );
+    await _syncRepository.markRecordPending(
+      entityType: 'dives',
+      recordId: diveId,
+      localUpdatedAt: now,
+    );
+  }
+
   /// Load each dive's ordered dive-type slugs from the junction, keyed by dive
   /// id. Used by the mappers and the summary query to hydrate `diveTypeIds`.
   Future<Map<String, List<String>>> _diveTypesForDives(
