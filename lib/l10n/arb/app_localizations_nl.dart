@@ -11320,6 +11320,15 @@ class AppLocalizationsNl extends AppLocalizations {
       'Cellen tonen de tijd naar de oppervlakte; rood = niet duikbaar zoals gepland';
 
   @override
+  String get plannerCanvas_pane_collapse => 'Paneel inklappen';
+
+  @override
+  String get plannerCanvas_pane_expand => 'Paneel uitklappen';
+
+  @override
+  String get plannerCanvas_tab_setup => 'Instellingen';
+
+  @override
   String get plannerCanvas_range_title => 'Bereiktabel';
 
   @override

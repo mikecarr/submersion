@@ -1,0 +1,19 @@
+import 'package:submersion/core/providers/provider.dart';
+
+/// Session-scoped layout state for the planner's Mission Control layout.
+/// Collapse state is remembered for the session, not persisted (same policy
+/// as the contingencies-expanded toggle in plan_canvas_providers.dart).
+
+/// Whether the desktop editor pane (segments/tanks/setup) is collapsed.
+final editorPaneCollapsedProvider = StateProvider<bool>((_) => false);
+
+/// Whether the desktop results pane is collapsed.
+final resultsPaneCollapsedProvider = StateProvider<bool>((_) => false);
+
+/// Active phone tab: 0 Plan, 1 Tanks, 2 Setup, 3 Results.
+final plannerPhoneTabProvider = StateProvider<int>((_) => 0);
+
+/// Setup-accordion section to reveal (header chip deep-links). Keys:
+/// 'deco' | 'gas' | 'environment' | 'ccr' | 'contingencies' | 'gear'.
+/// Consumed and cleared by the accordion after expanding the section.
+final setupFocusSectionProvider = StateProvider<String?>((_) => null);

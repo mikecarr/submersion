@@ -11401,6 +11401,15 @@ class AppLocalizationsDe extends AppLocalizations {
       'Zellen zeigen die Zeit bis zur Oberfläche; rot = nicht wie geplant tauchbar';
 
   @override
+  String get plannerCanvas_pane_collapse => 'Bereich einklappen';
+
+  @override
+  String get plannerCanvas_pane_expand => 'Bereich ausklappen';
+
+  @override
+  String get plannerCanvas_tab_setup => 'Einrichtung';
+
+  @override
   String get plannerCanvas_range_title => 'Bereichstabelle';
 
   @override

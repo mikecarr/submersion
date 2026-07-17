@@ -11391,6 +11391,15 @@ class AppLocalizationsEs extends AppLocalizations {
       'Las celdas muestran el tiempo hasta la superficie; rojo = no buceable según lo planeado';
 
   @override
+  String get plannerCanvas_pane_collapse => 'Contraer panel';
+
+  @override
+  String get plannerCanvas_pane_expand => 'Expandir panel';
+
+  @override
+  String get plannerCanvas_tab_setup => 'Configuración';
+
+  @override
   String get plannerCanvas_range_title => 'Tabla de rangos';
 
   @override

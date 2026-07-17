@@ -19388,6 +19388,24 @@ abstract class AppLocalizations {
   /// **'Cells show time to surface; red = not diveable as planned'**
   String get plannerCanvas_range_legend;
 
+  /// No description provided for @plannerCanvas_pane_collapse.
+  ///
+  /// In en, this message translates to:
+  /// **'Collapse panel'**
+  String get plannerCanvas_pane_collapse;
+
+  /// No description provided for @plannerCanvas_pane_expand.
+  ///
+  /// In en, this message translates to:
+  /// **'Expand panel'**
+  String get plannerCanvas_pane_expand;
+
+  /// No description provided for @plannerCanvas_tab_setup.
+  ///
+  /// In en, this message translates to:
+  /// **'Setup'**
+  String get plannerCanvas_tab_setup;
+
   /// No description provided for @plannerCanvas_range_title.
   ///
   /// In en, this message translates to:

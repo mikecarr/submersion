@@ -11372,6 +11372,15 @@ class AppLocalizationsHu extends AppLocalizations {
       'A cellák a felszínre érés idejét mutatják; piros = a terv szerint nem merülhető';
 
   @override
+  String get plannerCanvas_pane_collapse => 'Panel összecsukása';
+
+  @override
+  String get plannerCanvas_pane_expand => 'Panel kibontása';
+
+  @override
+  String get plannerCanvas_tab_setup => 'Beállítás';
+
+  @override
   String get plannerCanvas_range_title => 'Tartománytáblázat';
 
   @override

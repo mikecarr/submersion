@@ -11406,6 +11406,15 @@ class AppLocalizationsPt extends AppLocalizations {
       'As células mostram o tempo até a superfície; vermelho = não mergulhável como planejado';
 
   @override
+  String get plannerCanvas_pane_collapse => 'Recolher painel';
+
+  @override
+  String get plannerCanvas_pane_expand => 'Expandir painel';
+
+  @override
+  String get plannerCanvas_tab_setup => 'Configuração';
+
+  @override
   String get plannerCanvas_range_title => 'Tabela de variações';
 
   @override

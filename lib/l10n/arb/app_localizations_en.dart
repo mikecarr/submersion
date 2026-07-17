@@ -11220,6 +11220,15 @@ class AppLocalizationsEn extends AppLocalizations {
       'Cells show time to surface; red = not diveable as planned';
 
   @override
+  String get plannerCanvas_pane_collapse => 'Collapse panel';
+
+  @override
+  String get plannerCanvas_pane_expand => 'Expand panel';
+
+  @override
+  String get plannerCanvas_tab_setup => 'Setup';
+
+  @override
   String get plannerCanvas_range_title => 'Range table';
 
   @override

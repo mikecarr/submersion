@@ -11114,6 +11114,15 @@ class AppLocalizationsHe extends AppLocalizations {
       'התאים מציגים את זמן העלייה לפני המים; אדום = לא ניתן לצלול כמתוכנן';
 
   @override
+  String get plannerCanvas_pane_collapse => 'כווץ חלונית';
+
+  @override
+  String get plannerCanvas_pane_expand => 'הרחב חלונית';
+
+  @override
+  String get plannerCanvas_tab_setup => 'הגדרה';
+
+  @override
   String get plannerCanvas_range_title => 'טבלת טווחים';
 
   @override

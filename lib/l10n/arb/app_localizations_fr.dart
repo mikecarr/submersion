@@ -11445,6 +11445,15 @@ class AppLocalizationsFr extends AppLocalizations {
       'Les cellules indiquent le temps de remontée ; rouge = non plongeable comme prévu';
 
   @override
+  String get plannerCanvas_pane_collapse => 'Réduire le panneau';
+
+  @override
+  String get plannerCanvas_pane_expand => 'Développer le panneau';
+
+  @override
+  String get plannerCanvas_tab_setup => 'Réglages';
+
+  @override
   String get plannerCanvas_range_title => 'Table de variations';
 
   @override

@@ -10877,6 +10877,15 @@ class AppLocalizationsZh extends AppLocalizations {
   String get plannerCanvas_range_legend => '单元格显示到达水面所需时间；红色 = 无法按计划潜水';
 
   @override
+  String get plannerCanvas_pane_collapse => '折叠面板';
+
+  @override
+  String get plannerCanvas_pane_expand => '展开面板';
+
+  @override
+  String get plannerCanvas_tab_setup => '设置';
+
+  @override
   String get plannerCanvas_range_title => '范围表';
 
   @override

@@ -11190,6 +11190,15 @@ class AppLocalizationsAr extends AppLocalizations {
       'تعرض الخلايا زمن الصعود إلى السطح؛ الأحمر = غير قابلة للغطس كما هو مخطط';
 
   @override
+  String get plannerCanvas_pane_collapse => 'طي اللوحة';
+
+  @override
+  String get plannerCanvas_pane_expand => 'توسيع اللوحة';
+
+  @override
+  String get plannerCanvas_tab_setup => 'الإعداد';
+
+  @override
   String get plannerCanvas_range_title => 'جدول النطاقات';
 
   @override
