@@ -4290,10 +4290,44 @@ class AppLocalizationsAr extends AppLocalizations {
   String get diveLog_edit_notesHint => 'أضف ملاحظات حول هذه الغوصة...';
 
   @override
+  String get diveLog_edit_overline_tanks => 'الأسطوانات';
+
+  @override
+  String get diveLog_edit_profile_draw => 'رسم ملف الغوص';
+
+  @override
+  String get diveLog_edit_profile_none => 'غير مسجل';
+
+  @override
+  String diveLog_edit_profile_outliers(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'تم اكتشاف $count قيم شاذة محتملة',
+      one: 'تم اكتشاف قيمة شاذة محتملة واحدة',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String diveLog_edit_profile_points(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count نقاط',
+      one: 'نقطة واحدة',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get diveLog_edit_row_addSite => 'إضافة موقع';
 
   @override
   String get diveLog_edit_row_diveCenter => 'مركز الغوص';
+
+  @override
+  String get diveLog_edit_row_diveProfile => 'ملف الغوص';
 
   @override
   String get diveLog_edit_row_entry => 'الدخول';

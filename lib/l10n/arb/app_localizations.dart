@@ -7346,6 +7346,36 @@ abstract class AppLocalizations {
   /// **'Add notes about this dive...'**
   String get diveLog_edit_notesHint;
 
+  /// Sub-header overline above the tank rows in the Gas & Gear edit section
+  ///
+  /// In en, this message translates to:
+  /// **'Tanks'**
+  String get diveLog_edit_overline_tanks;
+
+  /// Dive profile row placeholder when no profile exists; tapping opens the draw editor
+  ///
+  /// In en, this message translates to:
+  /// **'Draw a profile'**
+  String get diveLog_edit_profile_draw;
+
+  /// Dive profile row value on a new dive with no profile data
+  ///
+  /// In en, this message translates to:
+  /// **'Not recorded'**
+  String get diveLog_edit_profile_none;
+
+  /// Chip under the dive profile row offering outlier cleanup
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{1 potential outlier detected} other{{count} potential outliers detected}}'**
+  String diveLog_edit_profile_outliers(num count);
+
+  /// Dive profile row value: number of recorded profile samples
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{1 point} other{{count} points}}'**
+  String diveLog_edit_profile_points(num count);
+
   /// Placeholder when no site selected
   ///
   /// In en, this message translates to:
@@ -7357,6 +7387,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Dive center'**
   String get diveLog_edit_row_diveCenter;
+
+  /// Row label: dive profile (points count / draw affordance)
+  ///
+  /// In en, this message translates to:
+  /// **'Dive profile'**
+  String get diveLog_edit_row_diveProfile;
 
   /// Row label: entry date and time
   ///

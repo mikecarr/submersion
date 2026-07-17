@@ -4152,10 +4152,42 @@ class AppLocalizationsZh extends AppLocalizations {
   String get diveLog_edit_notesHint => '添加关于此次潜水的备注...';
 
   @override
+  String get diveLog_edit_overline_tanks => '气瓶';
+
+  @override
+  String get diveLog_edit_profile_draw => '绘制潜水曲线';
+
+  @override
+  String get diveLog_edit_profile_none => '未记录';
+
+  @override
+  String diveLog_edit_profile_outliers(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '检测到 $count 个可能的异常点',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String diveLog_edit_profile_points(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 个点',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get diveLog_edit_row_addSite => '添加潜点';
 
   @override
   String get diveLog_edit_row_diveCenter => '潜水中心';
+
+  @override
+  String get diveLog_edit_row_diveProfile => '潜水曲线';
 
   @override
   String get diveLog_edit_row_entry => '入水';

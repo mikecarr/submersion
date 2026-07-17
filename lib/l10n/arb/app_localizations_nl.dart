@@ -4354,10 +4354,44 @@ class AppLocalizationsNl extends AppLocalizations {
   String get diveLog_edit_notesHint => 'Voeg notities toe over deze duik...';
 
   @override
+  String get diveLog_edit_overline_tanks => 'Flessen';
+
+  @override
+  String get diveLog_edit_profile_draw => 'Profiel tekenen';
+
+  @override
+  String get diveLog_edit_profile_none => 'Niet vastgelegd';
+
+  @override
+  String diveLog_edit_profile_outliers(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count mogelijke uitschieters gedetecteerd',
+      one: '1 mogelijke uitschieter gedetecteerd',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String diveLog_edit_profile_points(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count punten',
+      one: '1 punt',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get diveLog_edit_row_addSite => 'Duikstek toevoegen';
 
   @override
   String get diveLog_edit_row_diveCenter => 'Duikcentrum';
+
+  @override
+  String get diveLog_edit_row_diveProfile => 'Duikprofiel';
 
   @override
   String get diveLog_edit_row_entry => 'Te water';

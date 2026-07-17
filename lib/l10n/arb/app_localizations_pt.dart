@@ -4382,10 +4382,44 @@ class AppLocalizationsPt extends AppLocalizations {
       'Adicione anotacoes sobre este mergulho...';
 
   @override
+  String get diveLog_edit_overline_tanks => 'Cilindros';
+
+  @override
+  String get diveLog_edit_profile_draw => 'Desenhar um perfil';
+
+  @override
+  String get diveLog_edit_profile_none => 'Nao registrado';
+
+  @override
+  String diveLog_edit_profile_outliers(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count possiveis valores atipicos detectados',
+      one: '1 possivel valor atipico detectado',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String diveLog_edit_profile_points(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count pontos',
+      one: '1 ponto',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get diveLog_edit_row_addSite => 'Adicionar ponto';
 
   @override
   String get diveLog_edit_row_diveCenter => 'Operadora de mergulho';
+
+  @override
+  String get diveLog_edit_row_diveProfile => 'Perfil de mergulho';
 
   @override
   String get diveLog_edit_row_entry => 'Entrada';

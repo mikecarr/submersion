@@ -4387,10 +4387,44 @@ class AppLocalizationsDe extends AppLocalizations {
       'Notizen zu diesem Tauchgang hinzufügen...';
 
   @override
+  String get diveLog_edit_overline_tanks => 'Flaschen';
+
+  @override
+  String get diveLog_edit_profile_draw => 'Profil zeichnen';
+
+  @override
+  String get diveLog_edit_profile_none => 'Nicht aufgezeichnet';
+
+  @override
+  String diveLog_edit_profile_outliers(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count mögliche Ausreißer erkannt',
+      one: '1 möglicher Ausreißer erkannt',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String diveLog_edit_profile_points(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Punkte',
+      one: '1 Punkt',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get diveLog_edit_row_addSite => 'Tauchplatz hinzufügen';
 
   @override
   String get diveLog_edit_row_diveCenter => 'Tauchbasis';
+
+  @override
+  String get diveLog_edit_row_diveProfile => 'Tauchprofil';
 
   @override
   String get diveLog_edit_row_entry => 'Einstieg';
