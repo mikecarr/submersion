@@ -1,0 +1,157 @@
+import 'package:drift/drift.dart' hide isNull, isNotNull;
+import 'package:flutter_test/flutter_test.dart';
+
+import 'package:submersion/core/data/repositories/sync_repository.dart';
+import 'package:submersion/core/database/database.dart';
+import 'package:submersion/features/dive_log/data/repositories/safety_findings_repository.dart';
+import 'package:submersion/features/dive_log/domain/entities/safety_finding.dart';
+
+import '../../../../helpers/test_database.dart';
+
+void main() {
+  late AppDatabase db;
+  late SyncRepository syncRepository;
+  late SafetyFindingsRepository repo;
+  final now = DateTime.utc(2026, 7, 16);
+
+  SafetyFinding finding(
+    String id, {
+    SafetyRuleId rule = SafetyRuleId.rapidAscent,
+  }) => SafetyFinding(
+    id: id,
+    diveId: 'dive-1',
+    ruleId: rule,
+    severity: SafetySeverity.caution,
+    startTimestamp: 100,
+    endTimestamp: 140,
+    value: 14.2,
+    engineVersion: 1,
+    createdAt: now,
+  );
+
+  Future<void> createTestDive(String id) async {
+    final ts = now.millisecondsSinceEpoch;
+    await db
+        .into(db.dives)
+        .insert(
+          DivesCompanion(
+            id: Value(id),
+            diveDateTime: Value(ts),
+            createdAt: Value(ts),
+            updatedAt: Value(ts),
+          ),
+        );
+  }
+
+  setUp(() async {
+    db = await setUpTestDatabase();
+    syncRepository = SyncRepository();
+    repo = SafetyFindingsRepository(db: db, syncRepository: syncRepository);
+    await createTestDive('dive-1');
+  });
+
+  tearDown(() => tearDownTestDatabase());
+
+  test('getReview returns null for a never-analyzed dive', () async {
+    expect(await repo.getReview('dive-1'), isNull);
+  });
+
+  test('saveReview then getReview round-trips findings', () async {
+    await repo.saveReview(
+      SafetyReview(
+        diveId: 'dive-1',
+        engineVersion: 1,
+        reviewedAt: now,
+        findings: [
+          finding('f1'),
+          finding('f2', rule: SafetyRuleId.sawtoothProfile),
+        ],
+      ),
+    );
+    final review = await repo.getReview('dive-1');
+    expect(review, isNotNull);
+    expect(review!.engineVersion, 1);
+    expect(review.findings, hasLength(2));
+    expect(review.findings.first.ruleId, SafetyRuleId.rapidAscent);
+    expect(review.findings.first.value, 14.2);
+  });
+
+  test('saveReview replaces prior findings', () async {
+    await repo.saveReview(
+      SafetyReview(
+        diveId: 'dive-1',
+        engineVersion: 1,
+        reviewedAt: now,
+        findings: [finding('f1')],
+      ),
+    );
+    await repo.saveReview(
+      SafetyReview(
+        diveId: 'dive-1',
+        engineVersion: 2,
+        reviewedAt: now,
+        findings: [finding('f3')],
+      ),
+    );
+    final review = await repo.getReview('dive-1');
+    expect(review!.engineVersion, 2);
+    expect(review.findings.map((f) => f.id), ['f3']);
+  });
+
+  test('a zero-findings review still marks the dive analyzed', () async {
+    await repo.saveReview(
+      SafetyReview(
+        diveId: 'dive-1',
+        engineVersion: 1,
+        reviewedAt: now,
+        findings: const [],
+      ),
+    );
+    final review = await repo.getReview('dive-1');
+    expect(review, isNotNull);
+    expect(review!.findings, isEmpty);
+  });
+
+  test('setDismissed toggles dismissedAt', () async {
+    await repo.saveReview(
+      SafetyReview(
+        diveId: 'dive-1',
+        engineVersion: 1,
+        reviewedAt: now,
+        findings: [finding('f1')],
+      ),
+    );
+    await repo.setDismissed(findingId: 'f1', dismissed: true, now: now);
+    var review = await repo.getReview('dive-1');
+    expect(review!.findings.single.isDismissed, isTrue);
+    await repo.setDismissed(findingId: 'f1', dismissed: false, now: now);
+    review = await repo.getReview('dive-1');
+    expect(review!.findings.single.isDismissed, isFalse);
+  });
+
+  test(
+    'clearReviewForDive removes marker and findings with tombstones',
+    () async {
+      await repo.saveReview(
+        SafetyReview(
+          diveId: 'dive-1',
+          engineVersion: 1,
+          reviewedAt: now,
+          findings: [finding('f1')],
+        ),
+      );
+      await SafetyFindingsRepository.clearReviewForDive(
+        db,
+        syncRepository,
+        'dive-1',
+      );
+      expect(await repo.getReview('dive-1'), isNull);
+
+      final tombstones = await db.select(db.deletionLog).get();
+      expect(
+        tombstones.map((t) => t.entityType).toSet(),
+        containsAll(['diveSafetyFindings', 'diveSafetyReviews']),
+      );
+    },
+  );
+}

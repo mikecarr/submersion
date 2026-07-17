@@ -115,3 +115,25 @@ class SafetyFinding extends Equatable {
     createdAt,
   ];
 }
+
+/// A dive's stored safety review: the engine version it was produced with
+/// plus all findings (including dismissed ones).
+class SafetyReview extends Equatable {
+  final String diveId;
+  final int engineVersion;
+  final DateTime reviewedAt;
+  final List<SafetyFinding> findings;
+
+  const SafetyReview({
+    required this.diveId,
+    required this.engineVersion,
+    required this.reviewedAt,
+    required this.findings,
+  });
+
+  List<SafetyFinding> get activeFindings =>
+      findings.where((f) => !f.isDismissed).toList();
+
+  @override
+  List<Object?> get props => [diveId, engineVersion, reviewedAt, findings];
+}

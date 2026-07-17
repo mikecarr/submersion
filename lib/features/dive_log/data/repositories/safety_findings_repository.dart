@@ -1,0 +1,165 @@
+import 'package:drift/drift.dart';
+
+import 'package:submersion/core/data/repositories/sync_repository.dart';
+import 'package:submersion/core/database/database.dart';
+import 'package:submersion/core/services/database_service.dart';
+import 'package:submersion/core/services/sync/sync_event_bus.dart';
+import 'package:submersion/features/dive_log/domain/entities/safety_finding.dart';
+
+/// Persistence for post-dive safety reviews.
+///
+/// dive_safety_reviews is the "analyzed" marker (one row per analyzed dive);
+/// dive_safety_findings holds the observations. Both are write-once children
+/// of dives (no HLC columns): sync integrity comes from markRecordPending on
+/// writes and per-row logDeletion on deletes, mirroring DiveProfileEvents.
+class SafetyFindingsRepository {
+  // Lazy getter (not a captured instance) so a restore that swaps the
+  // DatabaseService database is picked up, matching DiveRepository.
+  final AppDatabase? _dbOverride;
+  final SyncRepository _syncRepository;
+
+  SafetyFindingsRepository({AppDatabase? db, SyncRepository? syncRepository})
+    : _dbOverride = db,
+      _syncRepository = syncRepository ?? SyncRepository();
+
+  AppDatabase get _db => _dbOverride ?? DatabaseService.instance.database;
+
+  Future<SafetyReview?> getReview(String diveId) async {
+    final marker = await (_db.select(
+      _db.diveSafetyReviews,
+    )..where((t) => t.diveId.equals(diveId))).getSingleOrNull();
+    if (marker == null) return null;
+    final rows =
+        await (_db.select(_db.diveSafetyFindings)
+              ..where((t) => t.diveId.equals(diveId))
+              ..orderBy([(t) => OrderingTerm.asc(t.startTimestamp)]))
+            .get();
+    return SafetyReview(
+      diveId: diveId,
+      engineVersion: marker.engineVersion,
+      reviewedAt: DateTime.fromMillisecondsSinceEpoch(marker.reviewedAt),
+      findings: [for (final row in rows) _toDomain(row)],
+    );
+  }
+
+  Future<void> saveReview(SafetyReview review) async {
+    await _db.transaction(() async {
+      final existing = await (_db.select(
+        _db.diveSafetyFindings,
+      )..where((t) => t.diveId.equals(review.diveId))).get();
+      await (_db.delete(
+        _db.diveSafetyFindings,
+      )..where((t) => t.diveId.equals(review.diveId))).go();
+      for (final row in existing) {
+        await _syncRepository.logDeletion(
+          entityType: 'diveSafetyFindings',
+          recordId: row.id,
+        );
+      }
+      final reviewedAtMs = review.reviewedAt.millisecondsSinceEpoch;
+      await _db
+          .into(_db.diveSafetyReviews)
+          .insertOnConflictUpdate(
+            DiveSafetyReviewsCompanion.insert(
+              diveId: review.diveId,
+              engineVersion: review.engineVersion,
+              reviewedAt: reviewedAtMs,
+            ),
+          );
+      await _syncRepository.markRecordPending(
+        entityType: 'diveSafetyReviews',
+        recordId: review.diveId,
+        localUpdatedAt: reviewedAtMs,
+      );
+      for (final finding in review.findings) {
+        await _db
+            .into(_db.diveSafetyFindings)
+            .insert(
+              DiveSafetyFindingsCompanion.insert(
+                id: finding.id,
+                diveId: finding.diveId,
+                ruleId: finding.ruleId.dbValue,
+                severity: finding.severity.dbValue,
+                startTimestamp: Value(finding.startTimestamp),
+                endTimestamp: Value(finding.endTimestamp),
+                value: Value(finding.value),
+                engineVersion: finding.engineVersion,
+                dismissedAt: Value(finding.dismissedAt?.millisecondsSinceEpoch),
+                createdAt: finding.createdAt.millisecondsSinceEpoch,
+              ),
+            );
+        await _syncRepository.markRecordPending(
+          entityType: 'diveSafetyFindings',
+          recordId: finding.id,
+          localUpdatedAt: finding.createdAt.millisecondsSinceEpoch,
+        );
+      }
+    });
+    SyncEventBus.notifyLocalChange();
+  }
+
+  Future<void> setDismissed({
+    required String findingId,
+    required bool dismissed,
+    required DateTime now,
+  }) async {
+    await (_db.update(
+      _db.diveSafetyFindings,
+    )..where((t) => t.id.equals(findingId))).write(
+      DiveSafetyFindingsCompanion(
+        dismissedAt: Value(dismissed ? now.millisecondsSinceEpoch : null),
+      ),
+    );
+    await _syncRepository.markRecordPending(
+      entityType: 'diveSafetyFindings',
+      recordId: findingId,
+      localUpdatedAt: now.millisecondsSinceEpoch,
+    );
+    SyncEventBus.notifyLocalChange();
+  }
+
+  /// Invalidation hook for profile writes: drops the review so the next view
+  /// recomputes against the new profile. Static so both dive repositories
+  /// can call it without holding a SafetyFindingsRepository.
+  static Future<void> clearReviewForDive(
+    AppDatabase db,
+    SyncRepository sync,
+    String diveId,
+  ) async {
+    final existing = await (db.select(
+      db.diveSafetyFindings,
+    )..where((t) => t.diveId.equals(diveId))).get();
+    await (db.delete(
+      db.diveSafetyFindings,
+    )..where((t) => t.diveId.equals(diveId))).go();
+    for (final row in existing) {
+      await sync.logDeletion(
+        entityType: 'diveSafetyFindings',
+        recordId: row.id,
+      );
+    }
+    final deletedMarker = await (db.delete(
+      db.diveSafetyReviews,
+    )..where((t) => t.diveId.equals(diveId))).go();
+    if (deletedMarker > 0) {
+      await sync.logDeletion(entityType: 'diveSafetyReviews', recordId: diveId);
+    }
+  }
+
+  SafetyFinding _toDomain(DiveSafetyFinding row) {
+    return SafetyFinding(
+      id: row.id,
+      diveId: row.diveId,
+      ruleId: SafetyRuleId.fromDbValue(row.ruleId) ?? SafetyRuleId.rapidAscent,
+      severity: SafetySeverity.fromDbValue(row.severity),
+      startTimestamp: row.startTimestamp,
+      endTimestamp: row.endTimestamp,
+      value: row.value,
+      engineVersion: row.engineVersion,
+      dismissedAt: row.dismissedAt == null
+          ? null
+          : DateTime.fromMillisecondsSinceEpoch(row.dismissedAt!),
+      createdAt: DateTime.fromMillisecondsSinceEpoch(row.createdAt),
+    );
+  }
+}

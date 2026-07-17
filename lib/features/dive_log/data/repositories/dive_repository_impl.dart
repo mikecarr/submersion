@@ -35,6 +35,7 @@ import 'package:submersion/features/equipment/domain/entities/equipment_item.dar
 import 'package:submersion/features/dive_log/domain/entities/dive_custom_field.dart'
     as domain;
 import 'package:submersion/features/dive_log/data/repositories/dive_custom_field_repository.dart';
+import 'package:submersion/features/dive_log/data/repositories/safety_findings_repository.dart';
 import 'package:submersion/features/tags/domain/entities/tag.dart' as domain;
 import 'package:submersion/features/tags/data/repositories/tag_repository.dart';
 import 'package:submersion/features/trips/domain/entities/trip.dart' as domain;
@@ -578,6 +579,13 @@ class DiveRepository {
           );
         }
       });
+
+      // Profile changed: drop the stored safety review so it recomputes.
+      await SafetyFindingsRepository.clearReviewForDive(
+        _db,
+        _syncRepository,
+        diveId,
+      );
 
       await _syncRepository.markRecordPending(
         entityType: 'dives',
