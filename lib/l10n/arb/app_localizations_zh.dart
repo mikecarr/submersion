@@ -4152,6 +4152,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get diveLog_edit_notesHint => '添加关于此次潜水的备注...';
 
   @override
+  String get diveLog_edit_overline_tanks => '气瓶';
+
+  @override
   String get diveLog_edit_row_addSite => '添加潜点';
 
   @override

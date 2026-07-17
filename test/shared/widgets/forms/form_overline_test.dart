@@ -44,6 +44,13 @@ void main() {
     expect(button.onPressed, isNull);
   });
 
+  testWidgets('trailingText renders before actions', (tester) async {
+    await tester.pumpWidget(
+      _wrap(const FormOverline(label: 'Weight', trailingText: '4.0 kg')),
+    );
+    expect(find.text('4.0 kg'), findsOneWidget);
+  });
+
   testWidgets('busy action shows a progress indicator', (tester) async {
     await tester.pumpWidget(
       _wrap(

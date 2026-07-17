@@ -4382,6 +4382,9 @@ class AppLocalizationsPt extends AppLocalizations {
       'Adicione anotacoes sobre este mergulho...';
 
   @override
+  String get diveLog_edit_overline_tanks => 'Cilindros';
+
+  @override
   String get diveLog_edit_row_addSite => 'Adicionar ponto';
 
   @override

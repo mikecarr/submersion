@@ -4303,6 +4303,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get diveLog_edit_notesHint => 'Add notes about this dive...';
 
   @override
+  String get diveLog_edit_overline_tanks => 'Tanks';
+
+  @override
   String get diveLog_edit_row_addSite => 'Add site';
 
   @override

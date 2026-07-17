@@ -51,7 +51,7 @@ import 'package:submersion/features/dive_log/presentation/widgets/edit_sections/
 import 'package:submersion/features/dive_log/presentation/widgets/edit_sections/experience_section.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/edit_sections/gas_gear_section.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/edit_sections/rare_sections.dart';
-import 'package:submersion/features/dive_log/presentation/widgets/edit_sections/tank_card.dart';
+import 'package:submersion/features/dive_log/presentation/widgets/edit_sections/tank_row.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/edit_sections/the_dive_section.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/edit_sections/trip_section.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/pickers/computer_source_sheet.dart';
@@ -77,6 +77,9 @@ import 'package:submersion/features/dive_log/presentation/widgets/dive_type_mult
 import 'package:submersion/l10n/l10n_extension.dart';
 import 'package:submersion/shared/widgets/forms/add_section_row.dart';
 import 'package:submersion/shared/widgets/forms/edit_form_scaffold.dart';
+import 'package:submersion/shared/widgets/forms/form_append_row.dart';
+import 'package:submersion/shared/widgets/forms/form_empty_row.dart';
+import 'package:submersion/shared/widgets/forms/form_overline.dart';
 import 'package:submersion/shared/widgets/forms/form_row.dart';
 import 'package:submersion/shared/widgets/forms/form_section.dart';
 import 'package:submersion/shared/widgets/forms/responsive_form_columns.dart';
@@ -1080,7 +1083,7 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
     return Column(
       children: [
         for (var i = 0; i < _tanks.length; i++)
-          TankCard(
+          TankRow(
             key: ValueKey(_tanks[i].id),
             tank: _tanks[i],
             tankNumber: i + 1,
@@ -2404,17 +2407,35 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
       expanded: _isExpanded('gasGear', defaultValue: defaultExpanded),
       onToggle: () => _toggleSection('gasGear', defaultValue: defaultExpanded),
       summary: _gasGearSummary(),
-      modeSelector: DiveModeSelector(
-        selectedMode: _diveMode,
-        onChanged: (mode) {
-          _markDirty();
-          setState(() => _diveMode = mode);
-        },
+      modeChild: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          FormRow.custom(
+            label: context.l10n.diveLog_diveMode_title,
+            child: DiveModeSelector(
+              selectedMode: _diveMode,
+              dense: true,
+              onChanged: (mode) {
+                _markDirty();
+                setState(() => _diveMode = mode);
+              },
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(14, 0, 14, 10),
+            child: Text(
+              DiveModeSelector.descriptionFor(context, _diveMode),
+              style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ),
+        ],
       ),
       rebreatherPanel: _rebreatherPanel(),
-      tankCards: [
+      tanks: [
         for (var i = 0; i < _tanks.length; i++)
-          TankCard(
+          TankRow(
             key: ValueKey(_tanks[i].id),
             tank: _tanks[i],
             tankNumber: i + 1,
@@ -2809,37 +2830,28 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
   }
 
   Widget _equipmentChild() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(14, 10, 14, 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                context.l10n.diveLog_edit_section_equipment,
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  TextButton.icon(
-                    onPressed: _showEquipmentSetPicker,
-                    icon: const Icon(Icons.folder_special, size: 18),
-                    label: Text(context.l10n.diveLog_edit_useSet),
-                  ),
-                  TextButton.icon(
-                    onPressed: _showEquipmentPicker,
-                    icon: const Icon(Icons.add, size: 18),
-                    label: Text(context.l10n.diveLog_edit_add),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          if (_geofenceSuggestion != null)
-            GeofenceSuggestionBanner(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        FormOverline(
+          label: context.l10n.diveLog_edit_section_equipment,
+          actions: [
+            FormOverlineAction(
+              label: context.l10n.diveLog_edit_useSet,
+              icon: Icons.folder_special,
+              onPressed: _showEquipmentSetPicker,
+            ),
+            FormOverlineAction(
+              label: context.l10n.diveLog_edit_add,
+              icon: Icons.add,
+              onPressed: _showEquipmentPicker,
+            ),
+          ],
+        ),
+        if (_geofenceSuggestion != null)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(14, 4, 14, 0),
+            child: GeofenceSuggestionBanner(
               setName: _geofenceSuggestion!.name,
               locationLabel: _selectedSite?.name,
               onApply: () {
@@ -2857,98 +2869,73 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
                 _geofenceSuggestion = null;
               }),
             ),
-          if (_selectedEquipment.isEmpty) ...[
-            const SizedBox(height: 8),
-            Center(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                child: Column(
-                  children: [
-                    Icon(
-                      Icons.inventory_2_outlined,
-                      size: 48,
-                      color: Theme.of(
+          ),
+        if (_selectedEquipment.isEmpty)
+          FormEmptyRow(label: context.l10n.diveLog_edit_noEquipmentSelected)
+        else
+          Padding(
+            padding: const EdgeInsets.fromLTRB(14, 0, 14, 8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                ...List.generate(_selectedEquipment.length, (index) {
+                  final item = _selectedEquipment[index];
+                  return ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: CircleAvatar(
+                      backgroundColor: Theme.of(
                         context,
-                      ).colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      context.l10n.diveLog_edit_noEquipmentSelected,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ).colorScheme.primaryContainer,
+                      child: Icon(
+                        _getEquipmentIcon(item.type),
+                        color: Theme.of(context).colorScheme.onPrimaryContainer,
+                        size: 20,
                       ),
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      context.l10n.diveLog_edit_equipmentHint,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    title: Text(item.name),
+                    subtitle: Text(item.type.displayName),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.close, size: 18),
+                      tooltip:
+                          context.l10n.diveLog_edit_tooltip_removeEquipment,
+                      onPressed: () {
+                        setState(() {
+                          _markDirty();
+                          _selectedEquipment.removeAt(index);
+                        });
+                      },
+                    ),
+                  );
+                }),
+                const SizedBox(height: 8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    // "Save as Set" is single-dive only; in bulk mode the
+                    // membership editor replaces this editor entirely.
+                    if (!widget.isBulk) ...[
+                      TextButton.icon(
+                        onPressed: _saveEquipmentAsSet,
+                        icon: const Icon(Icons.save_alt, size: 18),
+                        label: Text(context.l10n.diveLog_edit_saveAsSet),
                       ),
+                      const SizedBox(width: 8),
+                    ],
+                    TextButton(
+                      onPressed: () {
+                        setState(() {
+                          _markDirty();
+                          _selectedEquipment.clear();
+                        });
+                      },
+                      child: Text(context.l10n.diveLog_edit_clearAllEquipment),
                     ),
                   ],
                 ),
-              ),
+              ],
             ),
-          ] else ...[
-            const Divider(),
-            ...List.generate(_selectedEquipment.length, (index) {
-              final item = _selectedEquipment[index];
-              return ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: CircleAvatar(
-                  backgroundColor: Theme.of(
-                    context,
-                  ).colorScheme.primaryContainer,
-                  child: Icon(
-                    _getEquipmentIcon(item.type),
-                    color: Theme.of(context).colorScheme.onPrimaryContainer,
-                    size: 20,
-                  ),
-                ),
-                title: Text(item.name),
-                subtitle: Text(item.type.displayName),
-                trailing: IconButton(
-                  icon: const Icon(Icons.close, size: 18),
-                  tooltip: context.l10n.diveLog_edit_tooltip_removeEquipment,
-                  onPressed: () {
-                    setState(() {
-                      _markDirty();
-                      _selectedEquipment.removeAt(index);
-                    });
-                  },
-                ),
-              );
-            }),
-            if (_selectedEquipment.isNotEmpty) ...[
-              const SizedBox(height: 8),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  // "Save as Set" is single-dive only; in bulk mode the
-                  // membership editor replaces this editor entirely.
-                  if (!widget.isBulk) ...[
-                    TextButton.icon(
-                      onPressed: _saveEquipmentAsSet,
-                      icon: const Icon(Icons.save_alt, size: 18),
-                      label: Text(context.l10n.diveLog_edit_saveAsSet),
-                    ),
-                    const SizedBox(width: 8),
-                  ],
-                  TextButton(
-                    onPressed: () {
-                      setState(() {
-                        _markDirty();
-                        _selectedEquipment.clear();
-                      });
-                    },
-                    child: Text(context.l10n.diveLog_edit_clearAllEquipment),
-                  ),
-                ],
-              ),
-            ],
-          ],
-        ],
-      ),
+          ),
+      ],
     );
   }
 
@@ -3985,99 +3972,103 @@ class _DiveEditPageState extends ConsumerState<DiveEditPage> {
 
   Widget _weightChild(UnitFormatter units) {
     final totalWeight = _weights.fold(0.0, (sum, w) => sum + w.amountKg);
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(14, 10, 14, 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        FormOverline(
+          label: context.l10n.diveLog_edit_section_weight,
+          trailingText: _weights.isEmpty
+              ? null
+              : context.l10n.diveLog_edit_weightTotal(
+                  units.formatWeight(totalWeight),
+                ),
+        ),
+        if (_weights.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(14, 4, 14, 0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                ..._weights.asMap().entries.map((entry) {
+                  final index = entry.key;
+                  final weight = entry.value;
+                  return _buildWeightEntryRow(index, weight, units);
+                }),
+              ],
+            ),
+          ),
+        FormAppendRow(
+          label: context.l10n.diveLog_edit_addWeightEntry,
+          onTap: () {
+            setState(() {
+              _markDirty();
+              _weights.add(
+                DiveWeight(
+                  id: _uuid.v4(),
+                  diveId: widget.diveId ?? '',
+                  weightType: WeightType.integrated,
+                  amountKg: 0,
+                ),
+              );
+            });
+          },
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(14, 4, 14, 12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                context.l10n.diveLog_edit_section_weight,
-                style: Theme.of(context).textTheme.titleMedium,
+                context.l10n.diveLog_edit_weightFeedback_label,
+                style: Theme.of(context).textTheme.labelLarge,
               ),
-              if (_weights.isNotEmpty)
-                Text(
-                  context.l10n.diveLog_edit_weightTotal(
-                    units.formatWeight(totalWeight),
+              const SizedBox(height: 4),
+              SegmentedButton<WeightingFeedback>(
+                emptySelectionAllowed: true,
+                segments: [
+                  ButtonSegment(
+                    value: WeightingFeedback.correct,
+                    label: Text(
+                      context.l10n.diveLog_edit_weightFeedback_correct,
+                    ),
                   ),
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
+                  ButtonSegment(
+                    value: WeightingFeedback.overweighted,
+                    label: Text(context.l10n.diveLog_edit_weightFeedback_over),
+                  ),
+                  ButtonSegment(
+                    value: WeightingFeedback.underweighted,
+                    label: Text(context.l10n.diveLog_edit_weightFeedback_under),
+                  ),
+                ],
+                selected: {?_weightingFeedback},
+                onSelectionChanged: (selection) => setState(() {
+                  _weightingFeedback = selection.isEmpty
+                      ? null
+                      : selection.first;
+                  _markDirty();
+                }),
+              ),
+              if (_weightingFeedback == WeightingFeedback.overweighted ||
+                  _weightingFeedback == WeightingFeedback.underweighted) ...[
+                const SizedBox(height: 8),
+                TextFormField(
+                  controller: _weightingFeedbackAmountController,
+                  decoration: InputDecoration(
+                    labelText: context.l10n.diveLog_edit_weightFeedback_amount(
+                      units.weightSymbol,
+                    ),
+                  ),
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
+                  onChanged: (_) => _markDirty(),
                 ),
+              ],
             ],
           ),
-          const SizedBox(height: 16),
-          ..._weights.asMap().entries.map((entry) {
-            final index = entry.key;
-            final weight = entry.value;
-            return _buildWeightEntryRow(index, weight, units);
-          }),
-          const SizedBox(height: 8),
-          OutlinedButton.icon(
-            onPressed: () {
-              setState(() {
-                _markDirty();
-                _weights.add(
-                  DiveWeight(
-                    id: _uuid.v4(),
-                    diveId: widget.diveId ?? '',
-                    weightType: WeightType.integrated,
-                    amountKg: 0,
-                  ),
-                );
-              });
-            },
-            icon: const Icon(Icons.add),
-            label: Text(context.l10n.diveLog_edit_addWeightEntry),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            context.l10n.diveLog_edit_weightFeedback_label,
-            style: Theme.of(context).textTheme.labelLarge,
-          ),
-          const SizedBox(height: 4),
-          SegmentedButton<WeightingFeedback>(
-            emptySelectionAllowed: true,
-            segments: [
-              ButtonSegment(
-                value: WeightingFeedback.correct,
-                label: Text(context.l10n.diveLog_edit_weightFeedback_correct),
-              ),
-              ButtonSegment(
-                value: WeightingFeedback.overweighted,
-                label: Text(context.l10n.diveLog_edit_weightFeedback_over),
-              ),
-              ButtonSegment(
-                value: WeightingFeedback.underweighted,
-                label: Text(context.l10n.diveLog_edit_weightFeedback_under),
-              ),
-            ],
-            selected: {?_weightingFeedback},
-            onSelectionChanged: (selection) => setState(() {
-              _weightingFeedback = selection.isEmpty ? null : selection.first;
-              _markDirty();
-            }),
-          ),
-          if (_weightingFeedback == WeightingFeedback.overweighted ||
-              _weightingFeedback == WeightingFeedback.underweighted) ...[
-            const SizedBox(height: 8),
-            TextFormField(
-              controller: _weightingFeedbackAmountController,
-              decoration: InputDecoration(
-                labelText: context.l10n.diveLog_edit_weightFeedback_amount(
-                  units.weightSymbol,
-                ),
-              ),
-              keyboardType: const TextInputType.numberWithOptions(
-                decimal: true,
-              ),
-              onChanged: (_) => _markDirty(),
-            ),
-          ],
-        ],
-      ),
+        ),
+      ],
     );
   }
 

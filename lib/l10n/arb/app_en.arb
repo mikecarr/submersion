@@ -2300,6 +2300,10 @@
   "diveLog_edit_noMarineLife": "No marine life logged",
   "diveLog_edit_notSpecified": "Not specified",
   "diveLog_edit_notesHint": "Add notes about this dive...",
+  "diveLog_edit_overline_tanks": "Tanks",
+  "@diveLog_edit_overline_tanks": {
+    "description": "Sub-header overline above the tank rows in the Gas & Gear edit section"
+  },
   "diveLog_edit_row_addSite": "Add site",
   "@diveLog_edit_row_addSite": {
     "description": "Placeholder when no site selected"

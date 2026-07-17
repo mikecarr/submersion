@@ -4365,6 +4365,9 @@ class AppLocalizationsHu extends AppLocalizations {
       'Jegyzetek hozzaadasa ehhez a meruleshez...';
 
   @override
+  String get diveLog_edit_overline_tanks => 'Palackok';
+
+  @override
   String get diveLog_edit_row_addSite => 'Merülőhely hozzáadása';
 
   @override

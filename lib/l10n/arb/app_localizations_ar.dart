@@ -4290,6 +4290,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get diveLog_edit_notesHint => 'أضف ملاحظات حول هذه الغوصة...';
 
   @override
+  String get diveLog_edit_overline_tanks => 'الأسطوانات';
+
+  @override
   String get diveLog_edit_row_addSite => 'إضافة موقع';
 
   @override

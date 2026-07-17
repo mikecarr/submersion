@@ -23,10 +23,18 @@ class FormOverlineAction {
 /// optional accent text actions docked to its trailing edge. This is the
 /// only sub-header style inside sections (spec: one subordinate style).
 class FormOverline extends StatelessWidget {
-  const FormOverline({super.key, required this.label, this.actions = const []});
+  const FormOverline({
+    super.key,
+    required this.label,
+    this.actions = const [],
+    this.trailingText,
+  });
 
   final String label;
   final List<FormOverlineAction> actions;
+
+  /// Muted text docked before the actions (e.g. the weight total).
+  final String? trailingText;
 
   @override
   Widget build(BuildContext context) {
@@ -42,6 +50,16 @@ class FormOverline extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
             ),
           ),
+          if (trailingText != null)
+            Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: Text(
+                trailingText!,
+                style: Theme.of(
+                  context,
+                ).textTheme.labelMedium!.copyWith(fontWeight: FontWeight.w600),
+              ),
+            ),
           for (final action in actions)
             TextButton.icon(
               onPressed: action.busy ? null : action.onPressed,

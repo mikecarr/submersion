@@ -4387,6 +4387,9 @@ class AppLocalizationsDe extends AppLocalizations {
       'Notizen zu diesem Tauchgang hinzufügen...';
 
   @override
+  String get diveLog_edit_overline_tanks => 'Flaschen';
+
+  @override
   String get diveLog_edit_row_addSite => 'Tauchplatz hinzufügen';
 
   @override
