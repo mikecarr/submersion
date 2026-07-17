@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:submersion/core/database/database.dart';
 
 void main() {
-  test('v113 creates the four pre-dive checklist tables', () async {
+  test('v117 creates the four pre-dive checklist tables', () async {
     final nativeDb = NativeDatabase.memory(
       setup: (rawDb) {
         rawDb.execute('PRAGMA user_version = 112');
@@ -68,8 +68,10 @@ void main() {
     }
   });
 
-  test('v113 is the current schema version (exact-latest tripwire)', () {
-    expect(AppDatabase.currentSchemaVersion, 113);
-    expect(AppDatabase.migrationVersions, contains(113));
+  test('v117 is on the migration ladder', () {
+    // greaterThanOrEqualTo + contains from the start (superseded-tripwire
+    // convention): parallel branches share one version scalar.
+    expect(AppDatabase.currentSchemaVersion, greaterThanOrEqualTo(117));
+    expect(AppDatabase.migrationVersions, contains(117));
   });
 }

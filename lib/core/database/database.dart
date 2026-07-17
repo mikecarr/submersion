@@ -2469,7 +2469,7 @@ class AppDatabase extends _$AppDatabase {
 
   /// The current schema version as a static constant so that pre-open checks
   /// (e.g. version-mismatch guard) can reference it without an instance.
-  static const int currentSchemaVersion = 113;
+  static const int currentSchemaVersion = 117;
 
   /// Every schema version that has a migration block in onUpgrade.
   /// Used to calculate progress step counts. When adding a new migration,
@@ -2585,7 +2585,7 @@ class AppDatabase extends _$AppDatabase {
     110,
     111,
     112,
-    113,
+    117,
   ];
 
   /// Idempotent DDL for the v106 connector-suggestion columns (Lightroom
@@ -2680,7 +2680,7 @@ class AppDatabase extends _$AppDatabase {
     }
   }
 
-  /// v113: pre-dive checklist tables. Migrator.createTable is IF NOT EXISTS,
+  /// v117: pre-dive checklist tables. Migrator.createTable is IF NOT EXISTS,
   /// so this is safe to call from both onUpgrade and the beforeOpen backstop
   /// (parallel-branch version-collision self-heal).
   Future<void> _assertPreDiveChecklistSchema() async {
@@ -2982,7 +2982,7 @@ class AppDatabase extends _$AppDatabase {
         // upgraded databases).
         await customStatement(kSeedBuiltInDiveRolesSql);
 
-        // Seed built-in pre-dive checklist templates (the v113 migration
+        // Seed built-in pre-dive checklist templates (the v117 migration
         // backfills these for upgraded databases).
         await customStatement(kSeedBuiltInPreDiveTemplatesSql);
         await customStatement(kSeedBuiltInPreDiveTemplateItemsSql);
@@ -5836,12 +5836,12 @@ class AppDatabase extends _$AppDatabase {
           await _assertEquipmentThicknessColumn();
         }
         if (from < 112) await reportProgress();
-        if (from < 113) {
+        if (from < 117) {
           await _assertPreDiveChecklistSchema();
           await customStatement(kSeedBuiltInPreDiveTemplatesSql);
           await customStatement(kSeedBuiltInPreDiveTemplateItemsSql);
         }
-        if (from < 113) await reportProgress();
+        if (from < 117) await reportProgress();
       },
       beforeOpen: (details) async {
         // Enable foreign keys
@@ -5875,7 +5875,7 @@ class AppDatabase extends _$AppDatabase {
         // v112 backstop: re-assert equipment.thickness column.
         await _assertEquipmentThicknessColumn();
 
-        // v113 backstop: re-assert the pre-dive checklist tables and their
+        // v117 backstop: re-assert the pre-dive checklist tables and their
         // built-in templates (same rationale as the dive-types re-seed).
         await _assertPreDiveChecklistSchema();
         await customStatement(kSeedBuiltInPreDiveTemplatesSql);
