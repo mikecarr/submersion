@@ -50,4 +50,44 @@ void main() {
       expect(rapid.first.diveId, 'dive-1');
     });
   });
+
+  group('missed deco stop rule', () {
+    test('clean dive produces no missed stop findings', () {
+      final findings = reviewProfile(cleanDiveProfile());
+      expect(
+        findings.where((f) => f.ruleId == SafetyRuleId.missedDecoStop),
+        isEmpty,
+      );
+    });
+
+    test('blowing through deco stops produces a significant finding', () {
+      final findings = reviewProfile(missedDecoStopProfile());
+      final missed = findings
+          .where((f) => f.ruleId == SafetyRuleId.missedDecoStop)
+          .toList();
+      expect(missed, isNotEmpty);
+      expect(missed.first.severity, SafetySeverity.significant);
+      expect(missed.first.value, greaterThan(0));
+    });
+  });
+
+  group('high surface GF rule', () {
+    test('clean dive surfaces below GF-high', () {
+      final findings = reviewProfile(cleanDiveProfile());
+      expect(
+        findings.where((f) => f.ruleId == SafetyRuleId.highSurfaceGf),
+        isEmpty,
+      );
+    });
+
+    test('deco violation dive surfaces above GF-high', () {
+      final findings = reviewProfile(missedDecoStopProfile());
+      final high = findings
+          .where((f) => f.ruleId == SafetyRuleId.highSurfaceGf)
+          .toList();
+      expect(high, isNotEmpty);
+      expect(high.first.severity, SafetySeverity.info);
+      expect(high.first.value, greaterThan(70)); // fixture GF-high is 70
+    });
+  });
 }

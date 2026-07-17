@@ -52,3 +52,12 @@ ProfileAnalysis analyzeFixture({
       (18, 1200),
       (0, 60), // 18 m in 60 s = 18 m/min, straight to surface
     ]);
+
+/// 45 m for 25 min builds a real deco obligation, then a direct 9 m/min
+/// ascent to the surface blows through every required stop.
+({List<double> depths, List<int> timestamps}) missedDecoStopProfile() =>
+    buildProfile([
+      (45, 180), // descend to 45 m over 3 min
+      (45, 1500), // 25 min bottom time on air
+      (0, 300), // straight up at 9 m/min, no stops
+    ]);
