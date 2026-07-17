@@ -5891,5 +5891,8 @@
   "safetyHub_incidentsLink_subtitle": "הערות אירועים פרטיות ולא ענישתיות",
   "diveLog_detail_menu_logNearMiss": "רישום כמעט-תאונה",
   "diveLog_detail_linkedIncidents": "{count, plural, =1{כמעט-תאונה אחת מקושרת לצלילה זו} other{{count} כמעט-תאונות מקושרות לצלילה זו}}",
-  "@diveLog_detail_linkedIncidents": {"placeholders": {"count": {"type": "int"}}}
+  "@diveLog_detail_linkedIncidents": {"placeholders": {"count": {"type": "int"}}},
+  "planning_card_safety_title": "בטיחות",
+  "planning_card_safety_subtitle": "ספירה לאחור לטיסה, כרטיס חירום, יומן כמעט-תאונות",
+  "tools_safety_description": "הספירה לאחור לטיסה אחרי צלילה, כרטיס החירום הלא-מקוון ויומן הכמעט-תאונות הפרטי שלך במקום אחד."
 }

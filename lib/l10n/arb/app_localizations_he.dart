@@ -11631,6 +11631,17 @@ class AppLocalizationsHe extends AppLocalizations {
   String get safetyHub_settingsLink => 'הגדרות בטיחות';
 
   @override
+  String get planning_card_safety_title => 'בטיחות';
+
+  @override
+  String get planning_card_safety_subtitle =>
+      'ספירה לאחור לטיסה, כרטיס חירום, יומן כמעט-תאונות';
+
+  @override
+  String get tools_safety_description =>
+      'הספירה לאחור לטיסה אחרי צלילה, כרטיס החירום הלא-מקוון ויומן הכמעט-תאונות הפרטי שלך במקום אחד.';
+
+  @override
   String get emergencyCard_title => 'חירום';
 
   @override

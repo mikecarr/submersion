@@ -6720,6 +6720,9 @@
   "safetyHub_surfaceIntervalLink": "Surface interval tool",
   "safetyHub_surfaceIntervalLink_subtitle": "Educational tissue desaturation model",
   "safetyHub_settingsLink": "Safety settings",
+  "planning_card_safety_title": "Safety",
+  "planning_card_safety_subtitle": "No-fly countdown, emergency card, near-miss log",
+  "tools_safety_description": "Flying-after-diving countdown, the offline emergency card, and your private near-miss log in one place.",
   "emergencyCard_title": "Emergency",
   "emergencyCard_callDan": "Call {name}",
   "@emergencyCard_callDan": {

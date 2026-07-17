@@ -11928,6 +11928,17 @@ class AppLocalizationsDe extends AppLocalizations {
   String get safetyHub_settingsLink => 'Sicherheitseinstellungen';
 
   @override
+  String get planning_card_safety_title => 'Sicherheit';
+
+  @override
+  String get planning_card_safety_subtitle =>
+      'Flugverbots-Countdown, Notfallkarte, Beinahe-Unfall-Log';
+
+  @override
+  String get tools_safety_description =>
+      'Countdown fürs Fliegen nach dem Tauchen, die Offline-Notfallkarte und dein privates Beinahe-Unfall-Log an einem Ort.';
+
+  @override
   String get emergencyCard_title => 'Notfall';
 
   @override

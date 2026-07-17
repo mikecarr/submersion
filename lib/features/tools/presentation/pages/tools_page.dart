@@ -52,6 +52,17 @@ class ToolsPage extends StatelessWidget {
             description: context.l10n.tools_weight_description,
             onTap: () => context.go('/planning/weight-calculator'),
           ),
+          const SizedBox(height: 12),
+
+          // Safety Hub Card
+          _ToolCard(
+            icon: Icons.health_and_safety_outlined,
+            iconColor: colorScheme.error,
+            title: context.l10n.planning_card_safety_title,
+            subtitle: context.l10n.planning_card_safety_subtitle,
+            description: context.l10n.tools_safety_description,
+            onTap: () => context.go('/safety'),
+          ),
           const SizedBox(height: 24),
 
           // Info Card

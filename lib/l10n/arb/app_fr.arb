@@ -5891,5 +5891,8 @@
   "safetyHub_incidentsLink_subtitle": "Notes d'incidents privées et non punitives",
   "diveLog_detail_menu_logNearMiss": "Consigner un presque-accident",
   "diveLog_detail_linkedIncidents": "{count, plural, =1{1 presque-accident lié à cette plongée} other{{count} presque-accidents liés à cette plongée}}",
-  "@diveLog_detail_linkedIncidents": {"placeholders": {"count": {"type": "int"}}}
+  "@diveLog_detail_linkedIncidents": {"placeholders": {"count": {"type": "int"}}},
+  "planning_card_safety_title": "Sécurité",
+  "planning_card_safety_subtitle": "Compte à rebours d'interdiction de vol, carte d'urgence, journal des presque-accidents",
+  "tools_safety_description": "Le compte à rebours vol-après-plongée, la carte d'urgence hors ligne et votre journal privé des presque-accidents au même endroit."
 }

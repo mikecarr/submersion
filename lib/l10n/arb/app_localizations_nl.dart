@@ -11846,6 +11846,17 @@ class AppLocalizationsNl extends AppLocalizations {
   String get safetyHub_settingsLink => 'Veiligheidsinstellingen';
 
   @override
+  String get planning_card_safety_title => 'Veiligheid';
+
+  @override
+  String get planning_card_safety_subtitle =>
+      'Vliegverbod-aftelling, noodkaart, bijna-ongevallenlog';
+
+  @override
+  String get tools_safety_description =>
+      'De aftelling voor vliegen na het duiken, de offline noodkaart en je privé bijna-ongevallenlog op één plek.';
+
+  @override
   String get emergencyCard_title => 'Noodgeval';
 
   @override

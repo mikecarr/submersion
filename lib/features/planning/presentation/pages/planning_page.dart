@@ -217,6 +217,13 @@ List<_PlanningTool> _planningToolsOf(BuildContext context) {
       subtitle: context.l10n.planning_card_surfaceInterval_subtitle,
       route: '/planning/surface-interval',
     ),
+    _PlanningTool(
+      icon: Icons.health_and_safety_outlined,
+      color: colorScheme.error,
+      title: context.l10n.planning_card_safety_title,
+      subtitle: context.l10n.planning_card_safety_subtitle,
+      route: '/safety',
+    ),
   ];
 }
 

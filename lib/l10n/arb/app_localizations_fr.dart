@@ -11976,6 +11976,17 @@ class AppLocalizationsFr extends AppLocalizations {
   String get safetyHub_settingsLink => 'Réglages de sécurité';
 
   @override
+  String get planning_card_safety_title => 'Sécurité';
+
+  @override
+  String get planning_card_safety_subtitle =>
+      'Compte à rebours d\'interdiction de vol, carte d\'urgence, journal des presque-accidents';
+
+  @override
+  String get tools_safety_description =>
+      'Le compte à rebours vol-après-plongée, la carte d\'urgence hors ligne et votre journal privé des presque-accidents au même endroit.';
+
+  @override
   String get emergencyCard_title => 'Urgence';
 
   @override

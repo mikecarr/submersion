@@ -11368,6 +11368,15 @@ class AppLocalizationsZh extends AppLocalizations {
   String get safetyHub_settingsLink => '安全设置';
 
   @override
+  String get planning_card_safety_title => '安全';
+
+  @override
+  String get planning_card_safety_subtitle => '禁飞倒计时、紧急卡片、未遂事件日志';
+
+  @override
+  String get tools_safety_description => '潜水后飞行倒计时、离线紧急卡片和你的私密未遂事件日志,尽在一处。';
+
+  @override
   String get emergencyCard_title => '紧急情况';
 
   @override

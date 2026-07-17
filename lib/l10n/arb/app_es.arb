@@ -5891,5 +5891,8 @@
   "safetyHub_incidentsLink_subtitle": "Notas de incidentes privadas y sin ánimo punitivo",
   "diveLog_detail_menu_logNearMiss": "Registrar casi incidente",
   "diveLog_detail_linkedIncidents": "{count, plural, =1{1 casi incidente vinculado a esta inmersión} other{{count} casi incidentes vinculados a esta inmersión}}",
-  "@diveLog_detail_linkedIncidents": {"placeholders": {"count": {"type": "int"}}}
+  "@diveLog_detail_linkedIncidents": {"placeholders": {"count": {"type": "int"}}},
+  "planning_card_safety_title": "Seguridad",
+  "planning_card_safety_subtitle": "Cuenta atrás de no volar, tarjeta de emergencia, registro de casi incidentes",
+  "tools_safety_description": "La cuenta atrás para volar tras bucear, la tarjeta de emergencia sin conexión y tu registro privado de casi incidentes en un solo lugar."
 }

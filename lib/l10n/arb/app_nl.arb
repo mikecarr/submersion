@@ -5891,5 +5891,8 @@
   "safetyHub_incidentsLink_subtitle": "Privé, niet-bestraffende incidentnotities",
   "diveLog_detail_menu_logNearMiss": "Bijna-ongeval vastleggen",
   "diveLog_detail_linkedIncidents": "{count, plural, =1{1 bijna-ongeval gekoppeld aan deze duik} other{{count} bijna-ongevallen gekoppeld aan deze duik}}",
-  "@diveLog_detail_linkedIncidents": {"placeholders": {"count": {"type": "int"}}}
+  "@diveLog_detail_linkedIncidents": {"placeholders": {"count": {"type": "int"}}},
+  "planning_card_safety_title": "Veiligheid",
+  "planning_card_safety_subtitle": "Vliegverbod-aftelling, noodkaart, bijna-ongevallenlog",
+  "tools_safety_description": "De aftelling voor vliegen na het duiken, de offline noodkaart en je privé bijna-ongevallenlog op één plek."
 }

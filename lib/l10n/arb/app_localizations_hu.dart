@@ -11900,6 +11900,17 @@ class AppLocalizationsHu extends AppLocalizations {
   String get safetyHub_settingsLink => 'Biztonsági beállítások';
 
   @override
+  String get planning_card_safety_title => 'Biztonság';
+
+  @override
+  String get planning_card_safety_subtitle =>
+      'Repülési visszaszámlálás, vészhelyzeti kártya, kvázibaleset-napló';
+
+  @override
+  String get tools_safety_description =>
+      'A merülés utáni repülés visszaszámlálója, az offline vészhelyzeti kártya és a privát kvázibaleset-napló egy helyen.';
+
+  @override
   String get emergencyCard_title => 'Vészhelyzet';
 
   @override

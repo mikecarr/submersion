@@ -20264,6 +20264,24 @@ abstract class AppLocalizations {
   /// **'Safety settings'**
   String get safetyHub_settingsLink;
 
+  /// No description provided for @planning_card_safety_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Safety'**
+  String get planning_card_safety_title;
+
+  /// No description provided for @planning_card_safety_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No-fly countdown, emergency card, near-miss log'**
+  String get planning_card_safety_subtitle;
+
+  /// No description provided for @tools_safety_description.
+  ///
+  /// In en, this message translates to:
+  /// **'Flying-after-diving countdown, the offline emergency card, and your private near-miss log in one place.'**
+  String get tools_safety_description;
+
   /// No description provided for @emergencyCard_title.
   ///
   /// In en, this message translates to:

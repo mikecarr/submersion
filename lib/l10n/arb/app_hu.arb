@@ -5891,5 +5891,8 @@
   "safetyHub_incidentsLink_subtitle": "Privát, nem büntető jellegű eseményjegyzetek",
   "diveLog_detail_menu_logNearMiss": "Kvázibaleset rögzítése",
   "diveLog_detail_linkedIncidents": "{count, plural, =1{1 kvázibaleset kapcsolódik ehhez a merüléshez} other{{count} kvázibaleset kapcsolódik ehhez a merüléshez}}",
-  "@diveLog_detail_linkedIncidents": {"placeholders": {"count": {"type": "int"}}}
+  "@diveLog_detail_linkedIncidents": {"placeholders": {"count": {"type": "int"}}},
+  "planning_card_safety_title": "Biztonság",
+  "planning_card_safety_subtitle": "Repülési visszaszámlálás, vészhelyzeti kártya, kvázibaleset-napló",
+  "tools_safety_description": "A merülés utáni repülés visszaszámlálója, az offline vészhelyzeti kártya és a privát kvázibaleset-napló egy helyen."
 }

@@ -11934,6 +11934,17 @@ class AppLocalizationsIt extends AppLocalizations {
   String get safetyHub_settingsLink => 'Impostazioni di sicurezza';
 
   @override
+  String get planning_card_safety_title => 'Sicurezza';
+
+  @override
+  String get planning_card_safety_subtitle =>
+      'Conto alla rovescia no-fly, scheda di emergenza, registro dei quasi incidenti';
+
+  @override
+  String get tools_safety_description =>
+      'Il conto alla rovescia per volare dopo l\'immersione, la scheda di emergenza offline e il tuo registro privato dei quasi incidenti in un unico posto.';
+
+  @override
   String get emergencyCard_title => 'Emergenza';
 
   @override

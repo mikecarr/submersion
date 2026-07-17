@@ -11925,6 +11925,17 @@ class AppLocalizationsEs extends AppLocalizations {
   String get safetyHub_settingsLink => 'Ajustes de seguridad';
 
   @override
+  String get planning_card_safety_title => 'Seguridad';
+
+  @override
+  String get planning_card_safety_subtitle =>
+      'Cuenta atrás de no volar, tarjeta de emergencia, registro de casi incidentes';
+
+  @override
+  String get tools_safety_description =>
+      'La cuenta atrás para volar tras bucear, la tarjeta de emergencia sin conexión y tu registro privado de casi incidentes en un solo lugar.';
+
+  @override
   String get emergencyCard_title => 'Emergencia';
 
   @override

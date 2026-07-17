@@ -5891,5 +5891,8 @@
   "safetyHub_incidentsLink_subtitle": "ملاحظات حوادث خاصة وغير عقابية",
   "diveLog_detail_menu_logNearMiss": "تسجيل حادث وشيك",
   "diveLog_detail_linkedIncidents": "{count, plural, =1{حادث وشيك واحد مرتبط بهذه الغطسة} other{{count} حوادث وشيكة مرتبطة بهذه الغطسة}}",
-  "@diveLog_detail_linkedIncidents": {"placeholders": {"count": {"type": "int"}}}
+  "@diveLog_detail_linkedIncidents": {"placeholders": {"count": {"type": "int"}}},
+  "planning_card_safety_title": "السلامة",
+  "planning_card_safety_subtitle": "عدّاد حظر الطيران، بطاقة الطوارئ، سجل الحوادث الوشيكة",
+  "tools_safety_description": "عدّاد الطيران بعد الغوص وبطاقة الطوارئ دون اتصال وسجل حوادثك الوشيكة الخاص في مكان واحد."
 }

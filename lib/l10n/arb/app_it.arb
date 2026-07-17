@@ -5891,5 +5891,8 @@
   "safetyHub_incidentsLink_subtitle": "Note private e non punitive sugli incidenti",
   "diveLog_detail_menu_logNearMiss": "Registra quasi incidente",
   "diveLog_detail_linkedIncidents": "{count, plural, =1{1 quasi incidente collegato a questa immersione} other{{count} quasi incidenti collegati a questa immersione}}",
-  "@diveLog_detail_linkedIncidents": {"placeholders": {"count": {"type": "int"}}}
+  "@diveLog_detail_linkedIncidents": {"placeholders": {"count": {"type": "int"}}},
+  "planning_card_safety_title": "Sicurezza",
+  "planning_card_safety_subtitle": "Conto alla rovescia no-fly, scheda di emergenza, registro dei quasi incidenti",
+  "tools_safety_description": "Il conto alla rovescia per volare dopo l'immersione, la scheda di emergenza offline e il tuo registro privato dei quasi incidenti in un unico posto."
 }

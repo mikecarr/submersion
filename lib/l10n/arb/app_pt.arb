@@ -5891,5 +5891,8 @@
   "safetyHub_incidentsLink_subtitle": "Notas de incidentes privadas e não punitivas",
   "diveLog_detail_menu_logNearMiss": "Registrar quase acidente",
   "diveLog_detail_linkedIncidents": "{count, plural, =1{1 quase acidente vinculado a este mergulho} other{{count} quase acidentes vinculados a este mergulho}}",
-  "@diveLog_detail_linkedIncidents": {"placeholders": {"count": {"type": "int"}}}
+  "@diveLog_detail_linkedIncidents": {"placeholders": {"count": {"type": "int"}}},
+  "planning_card_safety_title": "Segurança",
+  "planning_card_safety_subtitle": "Contagem para voar, cartão de emergência, registro de quase acidentes",
+  "tools_safety_description": "A contagem para voar após mergulhar, o cartão de emergência offline e seu registro privado de quase acidentes em um só lugar."
 }

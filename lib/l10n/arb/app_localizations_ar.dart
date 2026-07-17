@@ -11713,6 +11713,17 @@ class AppLocalizationsAr extends AppLocalizations {
   String get safetyHub_settingsLink => 'إعدادات السلامة';
 
   @override
+  String get planning_card_safety_title => 'السلامة';
+
+  @override
+  String get planning_card_safety_subtitle =>
+      'عدّاد حظر الطيران، بطاقة الطوارئ، سجل الحوادث الوشيكة';
+
+  @override
+  String get tools_safety_description =>
+      'عدّاد الطيران بعد الغوص وبطاقة الطوارئ دون اتصال وسجل حوادثك الوشيكة الخاص في مكان واحد.';
+
+  @override
   String get emergencyCard_title => 'الطوارئ';
 
   @override

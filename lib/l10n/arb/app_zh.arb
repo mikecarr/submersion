@@ -5891,5 +5891,8 @@
   "safetyHub_incidentsLink_subtitle": "私密、非惩罚性的事件记录",
   "diveLog_detail_menu_logNearMiss": "记录未遂事件",
   "diveLog_detail_linkedIncidents": "{count, plural, =1{1 起未遂事件与此次潜水关联} other{{count} 起未遂事件与此次潜水关联}}",
-  "@diveLog_detail_linkedIncidents": {"placeholders": {"count": {"type": "int"}}}
+  "@diveLog_detail_linkedIncidents": {"placeholders": {"count": {"type": "int"}}},
+  "planning_card_safety_title": "安全",
+  "planning_card_safety_subtitle": "禁飞倒计时、紧急卡片、未遂事件日志",
+  "tools_safety_description": "潜水后飞行倒计时、离线紧急卡片和你的私密未遂事件日志,尽在一处。"
 }

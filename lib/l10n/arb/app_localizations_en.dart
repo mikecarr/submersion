@@ -11740,6 +11740,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get safetyHub_settingsLink => 'Safety settings';
 
   @override
+  String get planning_card_safety_title => 'Safety';
+
+  @override
+  String get planning_card_safety_subtitle =>
+      'No-fly countdown, emergency card, near-miss log';
+
+  @override
+  String get tools_safety_description =>
+      'Flying-after-diving countdown, the offline emergency card, and your private near-miss log in one place.';
+
+  @override
   String get emergencyCard_title => 'Emergency';
 
   @override

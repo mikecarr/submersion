@@ -5891,5 +5891,8 @@
   "safetyHub_incidentsLink_subtitle": "Private, nicht wertende Vorfallnotizen",
   "diveLog_detail_menu_logNearMiss": "Beinahe-Unfall erfassen",
   "diveLog_detail_linkedIncidents": "{count, plural, =1{1 Beinahe-Unfall mit diesem Tauchgang verknüpft} other{{count} Beinahe-Unfälle mit diesem Tauchgang verknüpft}}",
-  "@diveLog_detail_linkedIncidents": {"placeholders": {"count": {"type": "int"}}}
+  "@diveLog_detail_linkedIncidents": {"placeholders": {"count": {"type": "int"}}},
+  "planning_card_safety_title": "Sicherheit",
+  "planning_card_safety_subtitle": "Flugverbots-Countdown, Notfallkarte, Beinahe-Unfall-Log",
+  "tools_safety_description": "Countdown fürs Fliegen nach dem Tauchen, die Offline-Notfallkarte und dein privates Beinahe-Unfall-Log an einem Ort."
 }
