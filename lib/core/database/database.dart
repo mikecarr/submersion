@@ -2462,6 +2462,24 @@ class AppDatabase extends _$AppDatabase {
   /// INSERT OR IGNORE keeps a re-run harmless, but this is still only called
   /// from onUpgrade (never beforeOpen) to avoid resurrecting cleared values.
   Future<void> _migrateLegacyEquipmentColumnsToAttributes() async {
+    // PRAGMA-guarded like every other migration helper: a database without
+    // the equipment table or without a given legacy column (minimal
+    // old-schema test fixtures; ancient databases) simply has nothing to
+    // copy for that column.
+    final cols = await customSelect("PRAGMA table_info('equipment')").get();
+    final names = cols.map((c) => c.read<String>('name')).toSet();
+    if (names.isEmpty) return;
+    // Every copy reads the parent-row timestamps.
+    if (!names.contains('created_at') || !names.contains('updated_at')) {
+      return;
+    }
+    if (names.contains('size')) await _copyLegacySizeColumn();
+    if (names.contains('thickness')) await _copyLegacyThicknessColumn();
+    if (names.contains('buoyancy_kg')) await _copyLegacyBuoyancyColumn();
+    if (names.contains('weight_kg')) await _copyLegacyDryWeightColumn();
+  }
+
+  Future<void> _copyLegacySizeColumn() async {
     await customStatement('''
       INSERT OR IGNORE INTO equipment_attributes
         (id, equipment_id, attr_key, is_custom, value_text, value_num,
@@ -2470,6 +2488,9 @@ class AppDatabase extends _$AppDatabase {
              0, created_at, updated_at, NULL
       FROM equipment WHERE size IS NOT NULL AND TRIM(size) != ''
     ''');
+  }
+
+  Future<void> _copyLegacyThicknessColumn() async {
     await customStatement('''
       INSERT OR IGNORE INTO equipment_attributes
         (id, equipment_id, attr_key, is_custom, value_text, value_num,
@@ -2481,6 +2502,9 @@ class AppDatabase extends _$AppDatabase {
              0, created_at, updated_at, NULL
       FROM equipment WHERE thickness IS NOT NULL AND TRIM(thickness) != ''
     ''');
+  }
+
+  Future<void> _copyLegacyBuoyancyColumn() async {
     await customStatement('''
       INSERT OR IGNORE INTO equipment_attributes
         (id, equipment_id, attr_key, is_custom, value_text, value_num,
@@ -2489,6 +2513,9 @@ class AppDatabase extends _$AppDatabase {
              buoyancy_kg, 0, created_at, updated_at, NULL
       FROM equipment WHERE buoyancy_kg IS NOT NULL
     ''');
+  }
+
+  Future<void> _copyLegacyDryWeightColumn() async {
     await customStatement('''
       INSERT OR IGNORE INTO equipment_attributes
         (id, equipment_id, attr_key, is_custom, value_text, value_num,
