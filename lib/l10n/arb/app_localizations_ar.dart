@@ -11824,6 +11824,115 @@ class AppLocalizationsAr extends AppLocalizations {
   String get dashboard_quickAction_emergency => 'بطاقة الطوارئ';
 
   @override
+  String get incidents_title => 'سجل الحوادث الوشيكة';
+
+  @override
+  String get incidents_empty =>
+      'لا حوادث وشيكة مسجلة. تدوين ما كاد أن يسوء - دون إصدار أحكام - يجعل الأنماط مرئية قبل أن تتحول إلى حوادث.';
+
+  @override
+  String get incidents_add => 'تسجيل حادث وشيك';
+
+  @override
+  String get incidents_linkedDive => 'مرتبط بغطسة';
+
+  @override
+  String get incidents_delete_confirm => 'حذف تقرير الحادث الوشيك هذا؟';
+
+  @override
+  String get incidentEdit_title_new => 'تسجيل حادث وشيك';
+
+  @override
+  String get incidentEdit_title_edit => 'تعديل الحادث الوشيك';
+
+  @override
+  String get incidentEdit_category => 'الفئة';
+
+  @override
+  String get incidentEdit_severity => 'الخطورة';
+
+  @override
+  String get incidentEdit_severity_minor => 'طفيف';
+
+  @override
+  String get incidentEdit_severity_moderate => 'متوسط';
+
+  @override
+  String get incidentEdit_severity_serious => 'خطير';
+
+  @override
+  String get incidentEdit_date => 'متى حدث';
+
+  @override
+  String get incidentEdit_narrative => 'ماذا حدث';
+
+  @override
+  String get incidentEdit_narrative_hint =>
+      'الحقائق فقط، بكلماتك. يبقى هذا خاصًا.';
+
+  @override
+  String get incidentEdit_contributingFactors => 'ما الذي ساهم (اختياري)';
+
+  @override
+  String get incidentEdit_lessonsLearned =>
+      'ما الذي سيساعد المرة القادمة (اختياري)';
+
+  @override
+  String get incidentEdit_save => 'حفظ';
+
+  @override
+  String get incidentEdit_privacyNote =>
+      'تتزامن تقارير الحوادث الوشيكة بين أجهزتك وتُضمَّن في النسخ الاحتياطية، لكنها لا تُضمَّن أبدًا في التصدير أو صفحات السجل المشتركة.';
+
+  @override
+  String get incidentCategory_buoyancy => 'الطفو';
+
+  @override
+  String get incidentCategory_gasSupply => 'إمداد الغاز';
+
+  @override
+  String get incidentCategory_equipment => 'المعدات';
+
+  @override
+  String get incidentCategory_buddySeparation => 'الانفصال عن الرفيق';
+
+  @override
+  String get incidentCategory_marineLife => 'الحياة البحرية';
+
+  @override
+  String get incidentCategory_boatSurface => 'القارب / السطح';
+
+  @override
+  String get incidentCategory_medical => 'طبي';
+
+  @override
+  String get incidentCategory_planning => 'التخطيط';
+
+  @override
+  String get incidentCategory_other => 'أخرى';
+
+  @override
+  String get safetyHub_incidentsLink => 'سجل الحوادث الوشيكة';
+
+  @override
+  String get safetyHub_incidentsLink_subtitle =>
+      'ملاحظات حوادث خاصة وغير عقابية';
+
+  @override
+  String get diveLog_detail_menu_logNearMiss => 'تسجيل حادث وشيك';
+
+  @override
+  String diveLog_detail_linkedIncidents(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count حوادث وشيكة مرتبطة بهذه الغطسة',
+      one: 'حادث وشيك واحد مرتبط بهذه الغطسة',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get diveLog_detail_altitudeMismatch_title => 'موقع الغوص على ارتفاع';
 
   @override

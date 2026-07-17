@@ -92,6 +92,8 @@ import 'package:submersion/features/settings/presentation/pages/column_config_pa
 import 'package:submersion/features/settings/presentation/pages/default_visible_metrics_page.dart';
 import 'package:submersion/features/settings/presentation/pages/dive_detail_sections_page.dart';
 import 'package:submersion/features/safety/presentation/pages/add_chamber_page.dart';
+import 'package:submersion/features/safety/presentation/pages/incident_edit_page.dart';
+import 'package:submersion/features/safety/presentation/pages/incidents_list_page.dart';
 import 'package:submersion/features/safety/presentation/pages/emergency_card_page.dart';
 import 'package:submersion/features/safety/presentation/pages/safety_hub_page.dart';
 import 'package:submersion/features/settings/presentation/pages/safety_settings_page.dart';
@@ -809,6 +811,27 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             name: 'safety',
             builder: (context, state) => const SafetyHubPage(),
             routes: [
+              GoRoute(
+                path: 'incidents',
+                name: 'incidents',
+                builder: (context, state) => const IncidentsListPage(),
+                routes: [
+                  GoRoute(
+                    path: 'new',
+                    name: 'incidentNew',
+                    builder: (context, state) => IncidentEditPage(
+                      diveId: state.uri.queryParameters['diveId'],
+                    ),
+                  ),
+                  GoRoute(
+                    path: ':incidentId',
+                    name: 'incidentEdit',
+                    builder: (context, state) => IncidentEditPage(
+                      incidentId: state.pathParameters['incidentId'],
+                    ),
+                  ),
+                ],
+              ),
               GoRoute(
                 path: 'emergency-card',
                 name: 'emergencyCard',

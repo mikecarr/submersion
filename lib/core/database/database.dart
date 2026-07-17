@@ -1850,6 +1850,30 @@ class EmergencyChambers extends Table {
   Set<Column> get primaryKey => {id};
 }
 
+/// Near-miss incident reports (safety phase 4). Standalone aggregate root
+/// with optional dive link; the link is severed (not cascaded) on dive
+/// deletion so the report survives. Synced between the diver's devices but
+/// deliberately absent from every outbound exporter.
+class Incidents extends Table {
+  TextColumn get id => text()();
+  TextColumn get diverId =>
+      text().nullable().references(Divers, #id, onDelete: KeyAction.cascade)();
+  TextColumn get diveId =>
+      text().nullable().references(Dives, #id, onDelete: KeyAction.setNull)();
+  IntColumn get occurredAt => integer()();
+  TextColumn get category => text()();
+  TextColumn get severity => text()();
+  TextColumn get narrative => text()();
+  TextColumn get contributingFactors => text().nullable()();
+  TextColumn get lessonsLearned => text().nullable()();
+  IntColumn get createdAt => integer()();
+  IntColumn get updatedAt => integer()();
+  TextColumn get hlc => text().nullable()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
 /// Gas switches during a dive
 class GasSwitches extends Table {
   TextColumn get id => text()();
@@ -2223,6 +2247,7 @@ class FieldPresets extends Table {
     DiveSafetyReviews,
     DiveSafetyFindings,
     EmergencyChambers,
+    Incidents,
     GasSwitches,
     TankPressureProfiles,
     TideRecords,
@@ -2275,7 +2300,7 @@ class AppDatabase extends _$AppDatabase {
 
   /// The current schema version as a static constant so that pre-open checks
   /// (e.g. version-mismatch guard) can reference it without an instance.
-  static const int currentSchemaVersion = 118;
+  static const int currentSchemaVersion = 119;
 
   /// Every schema version that has a migration block in onUpgrade.
   /// Used to calculate progress step counts. When adding a new migration,
@@ -2394,6 +2419,7 @@ class AppDatabase extends _$AppDatabase {
     116,
     117,
     118,
+    119,
   ];
 
   /// Idempotent DDL for the v106 connector-suggestion columns (Lightroom
@@ -2551,6 +2577,12 @@ class AppDatabase extends _$AppDatabase {
         'ALTER TABLE diver_settings ADD COLUMN emergency_region TEXT',
       );
     }
+  }
+
+  /// v119: incidents table (near-miss log). Idempotent for onUpgrade +
+  /// beforeOpen backstop use.
+  Future<void> _assertIncidentsSchema() async {
+    await createMigrator().createTable(incidents);
   }
 
   /// v111: equipment_sets.is_default column + equipment_set_geofences table.
@@ -5693,6 +5725,10 @@ class AppDatabase extends _$AppDatabase {
           await _assertEmergencyCardSchema();
         }
         if (from < 118) await reportProgress();
+        if (from < 119) {
+          await _assertIncidentsSchema();
+        }
+        if (from < 119) await reportProgress();
       },
       beforeOpen: (details) async {
         // Enable foreign keys
@@ -5735,6 +5771,9 @@ class AppDatabase extends _$AppDatabase {
 
         // v118 backstop: re-assert emergency card schema.
         await _assertEmergencyCardSchema();
+
+        // v119 backstop: re-assert incidents table.
+        await _assertIncidentsSchema();
 
         // Built-in dive types are reference data: identical on every device and
         // undeletable through DiveTypeRepository. Nothing else restores them --

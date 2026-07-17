@@ -20444,6 +20444,198 @@ abstract class AppLocalizations {
   /// **'Emergency card'**
   String get dashboard_quickAction_emergency;
 
+  /// No description provided for @incidents_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Near-miss log'**
+  String get incidents_title;
+
+  /// No description provided for @incidents_empty.
+  ///
+  /// In en, this message translates to:
+  /// **'No near-misses logged. Recording what almost went wrong - without judgment - is how patterns become visible before they become accidents.'**
+  String get incidents_empty;
+
+  /// No description provided for @incidents_add.
+  ///
+  /// In en, this message translates to:
+  /// **'Log near-miss'**
+  String get incidents_add;
+
+  /// No description provided for @incidents_linkedDive.
+  ///
+  /// In en, this message translates to:
+  /// **'Linked to a dive'**
+  String get incidents_linkedDive;
+
+  /// No description provided for @incidents_delete_confirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this near-miss report?'**
+  String get incidents_delete_confirm;
+
+  /// No description provided for @incidentEdit_title_new.
+  ///
+  /// In en, this message translates to:
+  /// **'Log near-miss'**
+  String get incidentEdit_title_new;
+
+  /// No description provided for @incidentEdit_title_edit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit near-miss'**
+  String get incidentEdit_title_edit;
+
+  /// No description provided for @incidentEdit_category.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get incidentEdit_category;
+
+  /// No description provided for @incidentEdit_severity.
+  ///
+  /// In en, this message translates to:
+  /// **'Severity'**
+  String get incidentEdit_severity;
+
+  /// No description provided for @incidentEdit_severity_minor.
+  ///
+  /// In en, this message translates to:
+  /// **'Minor'**
+  String get incidentEdit_severity_minor;
+
+  /// No description provided for @incidentEdit_severity_moderate.
+  ///
+  /// In en, this message translates to:
+  /// **'Moderate'**
+  String get incidentEdit_severity_moderate;
+
+  /// No description provided for @incidentEdit_severity_serious.
+  ///
+  /// In en, this message translates to:
+  /// **'Serious'**
+  String get incidentEdit_severity_serious;
+
+  /// No description provided for @incidentEdit_date.
+  ///
+  /// In en, this message translates to:
+  /// **'When it happened'**
+  String get incidentEdit_date;
+
+  /// No description provided for @incidentEdit_narrative.
+  ///
+  /// In en, this message translates to:
+  /// **'What happened'**
+  String get incidentEdit_narrative;
+
+  /// No description provided for @incidentEdit_narrative_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Just the facts, in your own words. This stays private.'**
+  String get incidentEdit_narrative_hint;
+
+  /// No description provided for @incidentEdit_contributingFactors.
+  ///
+  /// In en, this message translates to:
+  /// **'What contributed (optional)'**
+  String get incidentEdit_contributingFactors;
+
+  /// No description provided for @incidentEdit_lessonsLearned.
+  ///
+  /// In en, this message translates to:
+  /// **'What would help next time (optional)'**
+  String get incidentEdit_lessonsLearned;
+
+  /// No description provided for @incidentEdit_save.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get incidentEdit_save;
+
+  /// No description provided for @incidentEdit_privacyNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Near-miss reports sync between your devices and are included in your backups, but are never included in exports or shared logbook pages.'**
+  String get incidentEdit_privacyNote;
+
+  /// No description provided for @incidentCategory_buoyancy.
+  ///
+  /// In en, this message translates to:
+  /// **'Buoyancy'**
+  String get incidentCategory_buoyancy;
+
+  /// No description provided for @incidentCategory_gasSupply.
+  ///
+  /// In en, this message translates to:
+  /// **'Gas supply'**
+  String get incidentCategory_gasSupply;
+
+  /// No description provided for @incidentCategory_equipment.
+  ///
+  /// In en, this message translates to:
+  /// **'Equipment'**
+  String get incidentCategory_equipment;
+
+  /// No description provided for @incidentCategory_buddySeparation.
+  ///
+  /// In en, this message translates to:
+  /// **'Buddy separation'**
+  String get incidentCategory_buddySeparation;
+
+  /// No description provided for @incidentCategory_marineLife.
+  ///
+  /// In en, this message translates to:
+  /// **'Marine life'**
+  String get incidentCategory_marineLife;
+
+  /// No description provided for @incidentCategory_boatSurface.
+  ///
+  /// In en, this message translates to:
+  /// **'Boat / surface'**
+  String get incidentCategory_boatSurface;
+
+  /// No description provided for @incidentCategory_medical.
+  ///
+  /// In en, this message translates to:
+  /// **'Medical'**
+  String get incidentCategory_medical;
+
+  /// No description provided for @incidentCategory_planning.
+  ///
+  /// In en, this message translates to:
+  /// **'Planning'**
+  String get incidentCategory_planning;
+
+  /// No description provided for @incidentCategory_other.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get incidentCategory_other;
+
+  /// No description provided for @safetyHub_incidentsLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Near-miss log'**
+  String get safetyHub_incidentsLink;
+
+  /// No description provided for @safetyHub_incidentsLink_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Private, non-punitive incident notes'**
+  String get safetyHub_incidentsLink_subtitle;
+
+  /// No description provided for @diveLog_detail_menu_logNearMiss.
+  ///
+  /// In en, this message translates to:
+  /// **'Log near-miss'**
+  String get diveLog_detail_menu_logNearMiss;
+
+  /// No description provided for @diveLog_detail_linkedIncidents.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 near-miss linked to this dive} other{{count} near-misses linked to this dive}}'**
+  String diveLog_detail_linkedIncidents(int count);
+
   /// No description provided for @diveLog_detail_altitudeMismatch_title.
   ///
   /// In en, this message translates to:
