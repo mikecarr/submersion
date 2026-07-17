@@ -1,5 +1,6 @@
 import 'package:uuid/uuid.dart';
 
+import 'package:submersion/core/deco/ascent_rate_calculator.dart';
 import 'package:submersion/features/dive_log/data/services/profile_analysis_service.dart';
 import 'package:submersion/features/dive_log/domain/entities/safety_finding.dart';
 
@@ -29,6 +30,7 @@ class SafetyReviewService {
     findings.addAll(_rapidAscentFindings(diveId, analysis, now, nextId));
     findings.addAll(_missedDecoStopFindings(diveId, analysis, now, nextId));
     findings.addAll(_omittedSafetyStopFindings(diveId, analysis, now, nextId));
+    findings.addAll(_sawtoothFindings(diveId, analysis, now, nextId));
     findings.addAll(_highSurfaceGfFindings(diveId, analysis, now, nextId));
 
     return findings;
@@ -164,6 +166,88 @@ class SafetyReviewService {
         createdAt: now,
       ),
     ];
+  }
+
+  static const double _toothAmplitudeMeters = 3.0;
+  static const int _minToothCount = 3;
+
+  /// Repeated up-and-down depth changes. A "tooth" is an ascent of at least
+  /// [_toothAmplitudeMeters] followed by a re-descent of at least the same
+  /// amplitude; the final surface ascent never re-descends, so it cannot
+  /// count.
+  List<SafetyFinding> _sawtoothFindings(
+    String diveId,
+    ProfileAnalysis analysis,
+    DateTime now,
+    String Function() nextId,
+  ) {
+    final samples = analysis.ascentRates;
+    if (samples.length < 3) return const [];
+
+    final points = _zigzag(samples, _toothAmplitudeMeters);
+
+    // Count teeth: an interior turning point shallower than both neighbors
+    // means the diver ascended >= amplitude and then re-descended >=
+    // amplitude.
+    var toothCount = 0;
+    int? firstToothTs;
+    int? lastToothTs;
+    for (var i = 1; i < points.length - 1; i++) {
+      final isShallowPoint =
+          points[i].depth < points[i - 1].depth &&
+          points[i].depth < points[i + 1].depth;
+      if (isShallowPoint) {
+        toothCount++;
+        firstToothTs ??= points[i].ts;
+        lastToothTs = points[i].ts;
+      }
+    }
+
+    if (toothCount < _minToothCount) return const [];
+    return [
+      SafetyFinding(
+        id: nextId(),
+        diveId: diveId,
+        ruleId: SafetyRuleId.sawtoothProfile,
+        severity: SafetySeverity.caution,
+        startTimestamp: firstToothTs,
+        endTimestamp: lastToothTs,
+        value: toothCount.toDouble(),
+        engineVersion: engineVersion,
+        createdAt: now,
+      ),
+    ];
+  }
+
+  /// Reduces the depth series to alternating turning points, ignoring
+  /// reversals smaller than [amplitude]. Standard zigzag filter.
+  List<({int ts, double depth})> _zigzag(
+    List<AscentRatePoint> samples,
+    double amplitude,
+  ) {
+    final points = <({int ts, double depth})>[
+      (ts: samples.first.timestamp, depth: samples.first.depth),
+    ];
+    var extreme = points.first; // furthest point of the current leg
+    var direction = 0; // +1 = getting deeper, -1 = getting shallower
+    for (final sample in samples.skip(1)) {
+      final p = (ts: sample.timestamp, depth: sample.depth);
+      if (direction == 0) {
+        if ((p.depth - points.first.depth).abs() >= amplitude) {
+          direction = p.depth > points.first.depth ? 1 : -1;
+          extreme = p;
+        }
+      } else if ((direction == 1 && p.depth >= extreme.depth) ||
+          (direction == -1 && p.depth <= extreme.depth)) {
+        extreme = p; // same direction: extend the current leg
+      } else if ((extreme.depth - p.depth).abs() >= amplitude) {
+        points.add(extreme); // confirmed turning point
+        direction = -direction;
+        extreme = p;
+      }
+    }
+    points.add(extreme);
+    return points;
   }
 
   /// Surfacing GF above the configured GF-high. Informational only: the

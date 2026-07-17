@@ -119,4 +119,24 @@ void main() {
       );
     });
   });
+
+  group('sawtooth profile rule', () {
+    test('clean dive produces no sawtooth finding', () {
+      final findings = reviewProfile(cleanDiveProfile());
+      expect(
+        findings.where((f) => f.ruleId == SafetyRuleId.sawtoothProfile),
+        isEmpty,
+      );
+    });
+
+    test('three 6 m excursions produce a sawtooth caution', () {
+      final findings = reviewProfile(sawtoothProfile());
+      final sawtooth = findings
+          .where((f) => f.ruleId == SafetyRuleId.sawtoothProfile)
+          .toList();
+      expect(sawtooth, hasLength(1));
+      expect(sawtooth.first.severity, SafetySeverity.caution);
+      expect(sawtooth.first.value, greaterThanOrEqualTo(3));
+    });
+  });
 }

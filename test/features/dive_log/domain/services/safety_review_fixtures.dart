@@ -72,3 +72,20 @@ ProfileAnalysis analyzeFixture({
       (18, 1200),
       (0, 140), // ~7.7 m/min direct ascent
     ]);
+
+/// 20 m bottom with three 6 m up-and-back excursions (20 -> 14 -> 20),
+/// then a normal slow ascent with safety stop.
+({List<double> depths, List<int> timestamps}) sawtoothProfile() =>
+    buildProfile([
+      (20, 120),
+      (20, 300),
+      (14, 90), (20, 90), // tooth 1
+      (20, 120),
+      (14, 90), (20, 90), // tooth 2
+      (20, 120),
+      (14, 90), (20, 90), // tooth 3
+      (20, 120),
+      (5, 190), // slow ascent
+      (5, 180), // safety stop
+      (0, 90),
+    ]);
