@@ -61,9 +61,11 @@ void main() {
   test('creates with generated id and reads back', () async {
     final created = await repository.createTemplate(template());
     expect(created.id, isNotEmpty);
+    // beforeOpen seeds the four built-ins; user templates come after them.
     final all = await repository.getAllTemplates();
-    expect(all, hasLength(1));
-    expect(all.first.name, 'BWRAF');
+    final userTemplates = all.where((t) => !t.isBuiltIn).toList();
+    expect(userTemplates, hasLength(1));
+    expect(userTemplates.first.name, 'BWRAF');
   });
 
   test('saveItems round-trips typed fields sorted by order', () async {
@@ -98,7 +100,8 @@ void main() {
     for (final it in items) {
       expect(await tombstoneCount('preDiveChecklistTemplateItems', it.id), 1);
     }
-    expect(await repository.getAllTemplates(), isEmpty);
+    final remaining = await repository.getAllTemplates();
+    expect(remaining.where((t) => !t.isBuiltIn), isEmpty);
   });
 
   test('built-in templates reject update, delete, and saveItems', () async {
@@ -160,7 +163,9 @@ void main() {
         template(name: 'Theirs').copyWith(diverId: 'diver-2'),
       );
       final mine = await repository.getAllTemplates(diverId: 'diver-1');
-      expect(mine.map((t) => t.name).toSet(), {'Global built-in', 'Mine'});
+      final names = mine.map((t) => t.name).toSet();
+      expect(names, containsAll({'Global built-in', 'Mine'}));
+      expect(names, isNot(contains('Theirs')));
     },
   );
 }
