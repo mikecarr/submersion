@@ -125,19 +125,23 @@ void main() {
     expect(find.byType(PlanEditorPane), findsOneWidget);
   });
 
-  testWidgets('middle width shows chart and results with editor drawer', (
-    tester,
-  ) async {
+  testWidgets('middle width keeps the editor visible; results are revealed '
+      'by the chevron', (tester) async {
     await setSize(tester, const Size(1000, 800));
     await tester.pumpWidget(harness());
     seed(tester);
     await tester.pumpAndSettle();
 
-    expect(find.byType(PlanResultsPane), findsOneWidget);
-    expect(find.byType(PlanEditorPane), findsNothing);
-    await tester.tap(find.byIcon(Icons.menu));
-    await tester.pumpAndSettle();
     expect(find.byType(PlanEditorPane), findsOneWidget);
+    expect(find.byType(PlanResultsPane), findsNothing);
+
+    await tester.tap(find.byTooltip('Expand panel').last);
+    await tester.pumpAndSettle();
+    expect(find.byType(PlanResultsPane), findsOneWidget);
+
+    await tester.tap(find.byTooltip('Collapse panel').last);
+    await tester.pumpAndSettle();
+    expect(find.byType(PlanResultsPane), findsNothing);
   });
 
   testWidgets('save action clears the dirty flag', (tester) async {

@@ -48,8 +48,6 @@ class PlanCanvasPage extends ConsumerStatefulWidget {
 }
 
 class _PlanCanvasPageState extends ConsumerState<PlanCanvasPage> {
-  final _scaffoldKey = GlobalKey<ScaffoldState>();
-
   /// Owns the always-visible results pane so it is created once (not per
   /// build) and disposed with the page. Shared by the phone Results tab.
   final _wideResultsController = ScrollController();
@@ -77,19 +75,11 @@ class _PlanCanvasPageState extends ConsumerState<PlanCanvasPage> {
   @override
   Widget build(BuildContext context) {
     final planState = ref.watch(divePlanNotifierProvider);
-    final bodyWidth = MediaQuery.sizeOf(context).width;
     final units = UnitFormatter(ref.watch(settingsProvider));
 
     return Scaffold(
-      key: _scaffoldKey,
-      drawer: const Drawer(child: SafeArea(child: PlanEditorPane())),
       appBar: AppBar(
-        leading: bodyWidth >= 760 && bodyWidth < 1160
-            ? IconButton(
-                icon: const Icon(Icons.menu),
-                onPressed: () => _scaffoldKey.currentState?.openDrawer(),
-              )
-            : const BackButton(),
+        leading: const BackButton(),
         title: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -189,8 +179,7 @@ class _PlanCanvasPageState extends ConsumerState<PlanCanvasPage> {
       body: LayoutBuilder(
         builder: (context, constraints) {
           final width = constraints.maxWidth;
-          if (width >= 1160) return _buildThreePane();
-          if (width >= 760) return _buildDrawerMode();
+          if (width >= 760) return _buildDesktop(fullWidth: width >= 1160);
           return _buildPhone(constraints);
         },
       ),
@@ -234,11 +223,8 @@ class _PlanCanvasPageState extends ConsumerState<PlanCanvasPage> {
 
   /// Reveal a Setup accordion section in whatever layout mode is active.
   void _focusSetup(String section) {
-    final bodyWidth = MediaQuery.sizeOf(context).width;
-    if (bodyWidth < 760) {
+    if (MediaQuery.sizeOf(context).width < 760) {
       ref.read(plannerPhoneTabProvider.notifier).state = 2;
-    } else if (bodyWidth < 1160) {
-      _scaffoldKey.currentState?.openDrawer();
     } else {
       ref.read(editorPaneCollapsedProvider.notifier).state = false;
     }
@@ -247,17 +233,40 @@ class _PlanCanvasPageState extends ConsumerState<PlanCanvasPage> {
 
   // --- Layout modes ---
 
-  Widget _buildThreePane() {
+  /// Desktop: the editor pane is always visible (collapsible, never hidden
+  /// behind a drawer). At full width the results pane shows by default; at
+  /// middle widths it defaults to hidden and the right chevron reveals it.
+  Widget _buildDesktop({required bool fullWidth}) {
     final editorCollapsed = ref.watch(editorPaneCollapsedProvider);
-    final resultsCollapsed = ref.watch(resultsPaneCollapsedProvider);
+    final resultsVisible = fullWidth
+        ? !ref.watch(resultsPaneCollapsedProvider)
+        : ref.watch(resultsPaneNarrowExpandedProvider);
+
+    void toggleResults() {
+      if (fullWidth) {
+        ref.read(resultsPaneCollapsedProvider.notifier).update((v) => !v);
+      } else {
+        ref.read(resultsPaneNarrowExpandedProvider.notifier).update((v) => !v);
+      }
+    }
+
     return Row(
       children: [
         if (!editorCollapsed) ...[
-          const SizedBox(width: 300, child: PlanEditorPane()),
+          const SizedBox(width: 320, child: PlanEditorPane()),
           const VerticalDivider(width: 1),
         ],
-        Expanded(child: _chartColumn(showPaneToggles: true)),
-        if (!resultsCollapsed) ...[
+        Expanded(
+          child: _chartColumn(
+            editorCollapsed: editorCollapsed,
+            onToggleEditor: () => ref
+                .read(editorPaneCollapsedProvider.notifier)
+                .update((v) => !v),
+            resultsVisible: resultsVisible,
+            onToggleResults: toggleResults,
+          ),
+        ),
+        if (resultsVisible) ...[
           const VerticalDivider(width: 1),
           SizedBox(
             width: 320,
@@ -268,22 +277,12 @@ class _PlanCanvasPageState extends ConsumerState<PlanCanvasPage> {
     );
   }
 
-  Widget _buildDrawerMode() {
-    return Row(
-      children: [
-        Expanded(child: _chartColumn(showPaneToggles: false)),
-        const VerticalDivider(width: 1),
-        SizedBox(
-          width: 320,
-          child: PlanResultsPane(controller: _wideResultsController),
-        ),
-      ],
-    );
-  }
-
-  Widget _chartColumn({required bool showPaneToggles}) {
-    final editorCollapsed = ref.watch(editorPaneCollapsedProvider);
-    final resultsCollapsed = ref.watch(resultsPaneCollapsedProvider);
+  Widget _chartColumn({
+    required bool editorCollapsed,
+    required VoidCallback onToggleEditor,
+    required bool resultsVisible,
+    required VoidCallback onToggleResults,
+  }) {
     return Column(
       children: [
         Expanded(
@@ -295,42 +294,32 @@ class _PlanCanvasPageState extends ConsumerState<PlanCanvasPage> {
                   child: PlanProfileChart(),
                 ),
               ),
-              if (showPaneToggles) ...[
-                Positioned(
-                  left: 4,
-                  top: 4,
-                  child: IconButton(
-                    tooltip: editorCollapsed
-                        ? context.l10n.plannerCanvas_pane_expand
-                        : context.l10n.plannerCanvas_pane_collapse,
-                    icon: Icon(
-                      editorCollapsed
-                          ? Icons.chevron_right
-                          : Icons.chevron_left,
-                    ),
-                    onPressed: () => ref
-                        .read(editorPaneCollapsedProvider.notifier)
-                        .update((value) => !value),
+              Positioned(
+                left: 4,
+                top: 4,
+                child: IconButton(
+                  tooltip: editorCollapsed
+                      ? context.l10n.plannerCanvas_pane_expand
+                      : context.l10n.plannerCanvas_pane_collapse,
+                  icon: Icon(
+                    editorCollapsed ? Icons.chevron_right : Icons.chevron_left,
                   ),
+                  onPressed: onToggleEditor,
                 ),
-                Positioned(
-                  right: 4,
-                  top: 4,
-                  child: IconButton(
-                    tooltip: resultsCollapsed
-                        ? context.l10n.plannerCanvas_pane_expand
-                        : context.l10n.plannerCanvas_pane_collapse,
-                    icon: Icon(
-                      resultsCollapsed
-                          ? Icons.chevron_left
-                          : Icons.chevron_right,
-                    ),
-                    onPressed: () => ref
-                        .read(resultsPaneCollapsedProvider.notifier)
-                        .update((value) => !value),
+              ),
+              Positioned(
+                right: 4,
+                top: 4,
+                child: IconButton(
+                  tooltip: resultsVisible
+                      ? context.l10n.plannerCanvas_pane_collapse
+                      : context.l10n.plannerCanvas_pane_expand,
+                  icon: Icon(
+                    resultsVisible ? Icons.chevron_right : Icons.chevron_left,
                   ),
+                  onPressed: onToggleResults,
                 ),
-              ],
+              ),
             ],
           ),
         ),

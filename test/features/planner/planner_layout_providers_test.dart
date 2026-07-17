@@ -8,6 +8,7 @@ void main() {
     addTearDown(container.dispose);
     expect(container.read(editorPaneCollapsedProvider), isFalse);
     expect(container.read(resultsPaneCollapsedProvider), isFalse);
+    expect(container.read(resultsPaneNarrowExpandedProvider), isFalse);
     expect(container.read(plannerPhoneTabProvider), 0);
     expect(container.read(setupFocusSectionProvider), isNull);
   });

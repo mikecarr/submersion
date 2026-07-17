@@ -10,6 +10,11 @@ final editorPaneCollapsedProvider = StateProvider<bool>((_) => false);
 /// Whether the desktop results pane is collapsed.
 final resultsPaneCollapsedProvider = StateProvider<bool>((_) => false);
 
+/// Whether the results pane is shown at middle widths (760-1160), where it
+/// defaults to hidden so the always-visible editor and the chart get the
+/// space. Distinct from [resultsPaneCollapsedProvider] (wide-mode state).
+final resultsPaneNarrowExpandedProvider = StateProvider<bool>((_) => false);
+
 /// Active phone tab: 0 Plan, 1 Tanks, 2 Setup, 3 Results.
 final plannerPhoneTabProvider = StateProvider<int>((_) => 0);
 

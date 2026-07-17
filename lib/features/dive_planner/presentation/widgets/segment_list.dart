@@ -146,9 +146,19 @@ class _SegmentTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
+    // Compact trailing controls so the description keeps its width inside
+    // a 320px editor pane; the whole tile is tap-to-edit.
+    const compactButton = BoxConstraints.tightFor(width: 32, height: 32);
     return ListTile(
+      contentPadding: const EdgeInsets.only(left: 12, right: 8),
+      horizontalTitleGap: 10,
+      onTap: onEdit,
       leading: _SegmentIcon(type: segment.type),
-      title: Text(_formatDescription()),
+      title: Text(
+        _formatDescription(),
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
+      ),
       subtitle: Text(
         '${segment.durationFormatted} • ${segment.gasMix.name}',
         style: theme.textTheme.bodySmall,
@@ -157,18 +167,27 @@ class _SegmentTile extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           IconButton(
-            icon: const Icon(Icons.edit, size: 20),
+            icon: const Icon(Icons.edit, size: 18),
+            padding: EdgeInsets.zero,
+            constraints: compactButton,
+            visualDensity: VisualDensity.compact,
             tooltip: context.l10n.divePlanner_segmentList_editSegment,
             onPressed: onEdit,
           ),
           IconButton(
-            icon: const Icon(Icons.delete, size: 20),
+            icon: const Icon(Icons.delete, size: 18),
+            padding: EdgeInsets.zero,
+            constraints: compactButton,
+            visualDensity: VisualDensity.compact,
             tooltip: context.l10n.divePlanner_segmentList_deleteSegment,
             onPressed: onDelete,
           ),
           ReorderableDragStartListener(
             index: index,
-            child: const Icon(Icons.drag_handle),
+            child: const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 4),
+              child: Icon(Icons.drag_handle, size: 20),
+            ),
           ),
         ],
       ),
