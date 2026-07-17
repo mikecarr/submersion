@@ -67,13 +67,18 @@ class _PhotoViewerPageState extends ConsumerState<PhotoViewerPage> {
     VideoPlayerController? controller,
   ) {
     if (!mounted) return;
-    setState(() {
-      if (controller == null) {
-        _videoControllers.remove(mediaId);
-      } else {
-        _videoControllers[mediaId] = controller;
-      }
-    });
+    if (controller == null) {
+      // The removal path runs from _VideoItemState.dispose, which can fire
+      // while the tree is locked (viewer teardown, page eviction). Drop the
+      // dead controller immediately so nothing reads it, but defer the
+      // rebuild to the next frame.
+      _videoControllers.remove(mediaId);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) setState(() {});
+      });
+    } else {
+      setState(() => _videoControllers[mediaId] = controller);
+    }
   }
 
   @override
