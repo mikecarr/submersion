@@ -30,7 +30,7 @@ class ScheduledNotificationRepository {
   }
 
   /// Check if a notification is already scheduled. When [scheduleId] is
-  /// given, the match is per service clock (v113 multi-clock ledger).
+  /// given, the match is per service clock (v115 multi-clock ledger).
   Future<bool> isScheduled({
     required String equipmentId,
     required int reminderDaysBefore,

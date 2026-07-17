@@ -2,7 +2,7 @@ import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:submersion/core/database/database.dart';
 
-/// Minimal v112 database: only the tables the v113 step reads or alters.
+/// Minimal v112 database: only the tables the v115 step reads or alters.
 NativeDatabase _dbAt112() {
   return NativeDatabase.memory(
     setup: (rawDb) {
@@ -64,7 +64,7 @@ NativeDatabase _dbAt112() {
 }
 
 void main() {
-  test('v113 creates ledger tables, seeds kinds, backfills legacy', () async {
+  test('v115 creates ledger tables, seeds kinds, backfills legacy', () async {
     final db = AppDatabase(_dbAt112());
     addTearDown(() => db.close());
 
@@ -129,7 +129,7 @@ void main() {
   });
 
   test(
-    'v113 backfill is idempotent (re-running assert does not duplicate)',
+    'v115 backfill is idempotent (re-running assert does not duplicate)',
     () async {
       final db = AppDatabase(_dbAt112());
       addTearDown(() => db.close());
@@ -141,8 +141,8 @@ void main() {
     },
   );
 
-  test('version ladder includes 113', () {
-    expect(AppDatabase.currentSchemaVersion, 113);
-    expect(AppDatabase.migrationVersions, contains(113));
+  test('version ladder includes 115', () {
+    expect(AppDatabase.currentSchemaVersion, greaterThanOrEqualTo(115));
+    expect(AppDatabase.migrationVersions, contains(115));
   });
 }

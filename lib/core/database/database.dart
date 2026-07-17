@@ -1354,7 +1354,7 @@ class DiverSettings extends Table {
       text().withDefault(const Constant('[7, 14, 30]'))(); // JSON array
   TextColumn get reminderTime =>
       text().withDefault(const Constant('09:00'))(); // HH:mm format
-  // v113: days before a trip to nag about gear due before trip end.
+  // v115: days before a trip to nag about gear due before trip end.
   IntColumn get tripServiceLeadDays =>
       integer().withDefault(const Constant(14))();
   // Data source badge visibility (v55)
@@ -1501,7 +1501,7 @@ class ServiceRecords extends Table {
       text().references(Equipment, #id, onDelete: KeyAction.cascade)();
   TextColumn get serviceType => text()(); // annual, repair, inspection, etc.
 
-  /// v113: which service kind this record fulfills (resets that clock).
+  /// v115: which service kind this record fulfills (resets that clock).
   /// Plain text (no FK) so records survive custom-kind deletion.
   TextColumn get serviceKindId => text().nullable()();
   IntColumn get serviceDate => integer()();
@@ -2150,7 +2150,7 @@ class ScheduledNotifications extends Table {
   TextColumn get equipmentId =>
       text().references(Equipment, #id, onDelete: KeyAction.cascade)();
 
-  /// v113: the service schedule this reminder belongs to (null = legacy
+  /// v115: the service schedule this reminder belongs to (null = legacy
   /// single-clock reminder). Local-only table, not synced.
   TextColumn get scheduleId => text().nullable()();
   IntColumn get scheduledDate => integer()(); // Unix timestamp
@@ -2308,7 +2308,7 @@ class AppDatabase extends _$AppDatabase {
 
   /// The current schema version as a static constant so that pre-open checks
   /// (e.g. version-mismatch guard) can reference it without an instance.
-  static const int currentSchemaVersion = 113;
+  static const int currentSchemaVersion = 115;
 
   /// Every schema version that has a migration block in onUpgrade.
   /// Used to calculate progress step counts. When adding a new migration,
@@ -2424,7 +2424,7 @@ class AppDatabase extends _$AppDatabase {
     110,
     111,
     112,
-    113,
+    115,
   ];
 
   /// Idempotent DDL for the v106 connector-suggestion columns (Lightroom
@@ -2538,7 +2538,7 @@ class AppDatabase extends _$AppDatabase {
     }
   }
 
-  /// v113: service ledger -- service_kinds + service_schedules tables,
+  /// v115: service ledger -- service_kinds + service_schedules tables,
   /// service_records.service_kind_id, scheduled_notifications.schedule_id,
   /// diver_settings.trip_service_lead_days, built-in kind seed, and the
   /// legacy single-clock backfill. Idempotent; called from onUpgrade AND
@@ -2606,8 +2606,8 @@ class AppDatabase extends _$AppDatabase {
     }
   }
 
-  /// v113 one-time data copy: items with a legacy single-clock interval get
-  /// one "General service" schedule. Invoked from the v113 onUpgrade block
+  /// v115 one-time data copy: items with a legacy single-clock interval get
+  /// one "General service" schedule. Invoked from the v115 onUpgrade block
   /// only, NEVER the beforeOpen backstop -- re-running on every open would
   /// resurrect a schedule the user deleted (mirrors the v109 buddy-cert
   /// rule). The deterministic id ('legacy-svc-' || equipment id) plus
@@ -2896,7 +2896,7 @@ class AppDatabase extends _$AppDatabase {
         // upgraded databases).
         await customStatement(kSeedBuiltInDiveRolesSql);
 
-        // Seed built-in service kinds (the v113 migration backfills these
+        // Seed built-in service kinds (the v115 migration backfills these
         // for upgraded databases; beforeOpen re-asserts).
         await customStatement(kSeedBuiltInServiceKindsSql);
       },
@@ -5749,11 +5749,11 @@ class AppDatabase extends _$AppDatabase {
           await _assertEquipmentThicknessColumn();
         }
         if (from < 112) await reportProgress();
-        if (from < 113) {
+        if (from < 115) {
           await _assertServiceLedgerSchema();
           await _backfillLegacyServiceSchedules();
         }
-        if (from < 113) await reportProgress();
+        if (from < 115) await reportProgress();
       },
       beforeOpen: (details) async {
         // Enable foreign keys
@@ -5787,7 +5787,7 @@ class AppDatabase extends _$AppDatabase {
         // v112 backstop: re-assert equipment.thickness column.
         await _assertEquipmentThicknessColumn();
 
-        // v113 backstop: re-assert service ledger schema + built-in kinds.
+        // v115 backstop: re-assert service ledger schema + built-in kinds.
         // The legacy backfill is NOT here (onUpgrade only) -- re-running it
         // would resurrect user-deleted schedules.
         await _assertServiceLedgerSchema();

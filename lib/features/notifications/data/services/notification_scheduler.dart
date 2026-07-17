@@ -248,7 +248,7 @@ class NotificationScheduler {
   }
 
   /// Cancel notifications for an equipment item. Cancels by the RECORDED
-  /// platform ids (v113 ids derive from schedule ids, so recomputing from
+  /// platform ids (v115 ids derive from schedule ids, so recomputing from
   /// the equipment id would miss them); the legacy equipment-hash ids are
   /// also cancelled for pre-ledger rows.
   Future<void> _cancelForEquipment(
