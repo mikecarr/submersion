@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:flutter/painting.dart';
 
 /// A copy of [source] consisting of dash segments of length [dash] separated

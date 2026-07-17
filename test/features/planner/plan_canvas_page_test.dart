@@ -7,7 +7,7 @@ import 'package:submersion/features/dive_planner/presentation/providers/dive_pla
 import 'package:submersion/features/dive_planner/presentation/widgets/plan_settings_panel.dart';
 import 'package:submersion/features/dive_planner/presentation/widgets/segment_list.dart';
 import 'package:submersion/features/planner/presentation/pages/plan_canvas_page.dart';
-import 'package:submersion/features/planner/presentation/widgets/plan_canvas_chart.dart';
+import 'package:submersion/features/planner/presentation/chart/plan_profile_chart.dart';
 import 'package:submersion/features/planner/presentation/widgets/plan_status_chips.dart';
 import 'package:submersion/features/settings/presentation/providers/settings_providers.dart';
 
@@ -63,7 +63,7 @@ void main() {
     seed(tester);
     await tester.pumpAndSettle();
 
-    expect(find.byType(PlanCanvasChart), findsOneWidget);
+    expect(find.byType(PlanProfileChart), findsOneWidget);
     expect(find.byType(PlanStatusChips), findsOneWidget);
     expect(find.byType(SegmentList), findsOneWidget);
     expect(find.byType(DraggableScrollableSheet), findsOneWidget);

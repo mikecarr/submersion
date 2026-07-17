@@ -23,7 +23,7 @@ import 'package:submersion/features/planner/presentation/widgets/ccr_settings_se
 import 'package:submersion/features/planner/presentation/widgets/contingency_chips.dart';
 import 'package:submersion/features/planner/presentation/widgets/contingency_settings_section.dart';
 import 'package:submersion/features/planner/presentation/widgets/follow_dive_sheet.dart';
-import 'package:submersion/features/planner/presentation/widgets/plan_canvas_chart.dart';
+import 'package:submersion/features/planner/presentation/chart/plan_profile_chart.dart';
 import 'package:submersion/features/planner/presentation/widgets/plan_results_sheet.dart';
 import 'package:submersion/features/planner/presentation/widgets/plan_status_chips.dart';
 import 'package:submersion/features/planner/presentation/widgets/saved_plans_sheet.dart';
@@ -266,7 +266,7 @@ class _PlanCanvasPageState extends ConsumerState<PlanCanvasPage> {
                   height: constraints.maxHeight * 0.42,
                   child: const Padding(
                     padding: EdgeInsets.all(8),
-                    child: PlanCanvasChart(),
+                    child: PlanProfileChart(),
                   ),
                 ),
                 Padding(
@@ -362,7 +362,7 @@ class _PlanCanvasPageState extends ConsumerState<PlanCanvasPage> {
               const Expanded(
                 child: Padding(
                   padding: EdgeInsets.all(12),
-                  child: PlanCanvasChart(),
+                  child: PlanProfileChart(),
                 ),
               ),
               Padding(
