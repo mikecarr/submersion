@@ -327,14 +327,7 @@ class _SiteDetailContentState extends ConsumerState<_SiteDetailContent> {
             onPressed: () {
               final state = GoRouterState.of(context);
               final currentPath = state.uri.path;
-              final params = Map<String, String>.from(
-                state.uri.queryParameters,
-              );
-              params['mode'] = 'edit';
-              params['selected'] = widget.siteId;
-              context.go(
-                Uri(path: currentPath, queryParameters: params).toString(),
-              );
+              context.go('$currentPath?selected=${widget.siteId}&mode=edit');
             },
           ),
           PopupMenuButton<String>(

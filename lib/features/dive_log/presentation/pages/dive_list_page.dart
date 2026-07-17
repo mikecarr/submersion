@@ -158,7 +158,10 @@ class _DiveListPageState extends ConsumerState<DiveListPage> {
         tableContent: const DiveListContent(showAppBar: false),
         detailBuilder: (context, id) {
           final state = GoRouterState.of(context);
-          final siteId = state.uri.queryParameters['site'];
+          final rawSiteId = state.uri.queryParameters['site'];
+          final siteId = (rawSiteId == null || rawSiteId.isEmpty)
+              ? null
+              : rawSiteId;
           return DiveDetailPage(
             diveId: id,
             embedded: true,
@@ -322,7 +325,10 @@ class _DiveListPageState extends ConsumerState<DiveListPage> {
         ),
         detailBuilder: (context, diveId) {
           final state = GoRouterState.of(context);
-          final siteId = state.uri.queryParameters['site'];
+          final rawSiteId = state.uri.queryParameters['site'];
+          final siteId = (rawSiteId == null || rawSiteId.isEmpty)
+              ? null
+              : rawSiteId;
           return DiveDetailPage(
             diveId: diveId,
             embedded: true,

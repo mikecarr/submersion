@@ -192,9 +192,10 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.embeddedSiteId != null) {
+    final embeddedSiteId = widget.embeddedSiteId;
+    if (embeddedSiteId != null && embeddedSiteId.isNotEmpty) {
       return SiteDetailPage(
-        siteId: widget.embeddedSiteId!,
+        siteId: embeddedSiteId,
         embedded: true,
         onClose: widget.onCloseEmbeddedSite,
       );

@@ -29,9 +29,9 @@ void main() {
 
       final overrides = await getBaseOverrides();
 
-final router = GoRouter(
-  initialLocation: '/other',
-  routes: [
+      final router = GoRouter(
+        initialLocation: '/other',
+        routes: [
           GoRoute(
             path: '/other',
             builder: (context, state) => Scaffold(
