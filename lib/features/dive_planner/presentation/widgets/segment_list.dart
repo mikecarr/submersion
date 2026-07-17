@@ -70,6 +70,11 @@ class SegmentList extends ConsumerWidget {
                     segment: segment,
                     units: units,
                     index: index,
+                    selected:
+                        ref.watch(selectedSegmentIdProvider) == segment.id,
+                    onSelect: () =>
+                        ref.read(selectedSegmentIdProvider.notifier).state =
+                            segment.id,
                     onEdit: () => _showEditSegmentDialog(context, ref, segment),
                     onDelete: () => ref
                         .read(divePlanNotifierProvider.notifier)
@@ -130,6 +135,8 @@ class _SegmentTile extends StatelessWidget {
   final PlanSegment segment;
   final UnitFormatter units;
   final int index;
+  final bool selected;
+  final VoidCallback onSelect;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
 
@@ -138,6 +145,8 @@ class _SegmentTile extends StatelessWidget {
     required this.segment,
     required this.units,
     required this.index,
+    required this.selected,
+    required this.onSelect,
     required this.onEdit,
     required this.onDelete,
   });
@@ -147,12 +156,17 @@ class _SegmentTile extends StatelessWidget {
     final theme = Theme.of(context);
 
     // Compact trailing controls so the description keeps its width inside
-    // a 320px editor pane; the whole tile is tap-to-edit.
+    // a 320px editor pane; tapping selects (mirrors the chart), the pencil
+    // edits.
     const compactButton = BoxConstraints.tightFor(width: 32, height: 32);
     return ListTile(
       contentPadding: const EdgeInsets.only(left: 12, right: 8),
       horizontalTitleGap: 10,
-      onTap: onEdit,
+      selected: selected,
+      selectedTileColor: theme.colorScheme.primaryContainer.withValues(
+        alpha: 0.35,
+      ),
+      onTap: onSelect,
       leading: _SegmentIcon(type: segment.type),
       title: Text(
         _formatDescription(),
