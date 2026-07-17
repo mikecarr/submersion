@@ -100,8 +100,13 @@ class LightroomApiClient {
         : Uri.parse('$baseUrl/v2/catalogs/$catalogId/assets').replace(
             queryParameters: {
               'subtype': 'image;video',
-              'captured_after': ?_isoWallClock(capturedAfter),
-              'captured_before': ?_isoWallClock(capturedBefore),
+              // captured_after and captured_before are mutually exclusive on
+              // this endpoint (Adobe returns 400 if both are sent). Prefer the
+              // upper bound; the scanner pages `next` (older) from there.
+              if (capturedBefore != null)
+                'captured_before': _isoWallClock(capturedBefore)!
+              else if (capturedAfter != null)
+                'captured_after': _isoWallClock(capturedAfter)!,
             },
           );
     final json = await _getJson(uri);
@@ -151,7 +156,7 @@ class LightroomApiClient {
     );
     final response = await _http.get(uri, headers: await _headers());
     if (response.statusCode < 200 || response.statusCode >= 300) {
-      throw _errorFor(response.statusCode);
+      throw _errorFor(response.statusCode, response.body);
     }
     return response.bodyBytes;
   }
@@ -168,7 +173,7 @@ class LightroomApiClient {
   Future<Map<String, Object?>> _getJson(Uri uri) async {
     final response = await _http.get(uri, headers: await _headers());
     if (response.statusCode < 200 || response.statusCode >= 300) {
-      throw _errorFor(response.statusCode);
+      throw _errorFor(response.statusCode, response.body);
     }
     final decoded = jsonDecode(stripAbuseGuard(response.body));
     if (decoded is! Map<String, Object?>) {
@@ -177,14 +182,23 @@ class LightroomApiClient {
     return decoded;
   }
 
-  LightroomApiException _errorFor(int statusCode) {
+  LightroomApiException _errorFor(int statusCode, [String? body]) {
     if (statusCode == 401) {
       return const LightroomApiException(
         401,
         'Adobe rejected the credentials. Reconnect Lightroom in Settings.',
       );
     }
-    return LightroomApiException(statusCode, 'Lightroom API error $statusCode');
+    // Surface Adobe's error body (usually JSON naming the offending
+    // parameter); the bare status code alone hides the actual problem.
+    final trimmed = body?.trim() ?? '';
+    final detail = trimmed.isEmpty
+        ? ''
+        : ': ${trimmed.length > 300 ? trimmed.substring(0, 300) : trimmed}';
+    return LightroomApiException(
+      statusCode,
+      'Lightroom API error $statusCode$detail',
+    );
   }
 
   List<Map<String, Object?>> _resources(Map<String, Object?> json) {

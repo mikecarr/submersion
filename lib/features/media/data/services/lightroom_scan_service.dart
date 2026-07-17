@@ -212,16 +212,27 @@ class LightroomScanService {
   ) async {
     final assets = <LightroomAsset>[];
     for (final span in spans) {
+      // captured_after/captured_before are mutually exclusive on the assets
+      // endpoint, so query the upper bound only and page `next` (older). The
+      // listing is newest-first, so once assets cross below the window start
+      // every later page is older too -- stop then.
       String? next;
+      var reachedStart = false;
       do {
         final page = await _api.listAssets(
           catalogId,
-          capturedAfter: span.start,
           capturedBefore: span.end,
           nextUrl: next,
         );
-        assets.addAll(page.assets);
-        next = page.nextUrl;
+        for (final asset in page.assets) {
+          final captureDate = asset.captureDate;
+          if (captureDate != null && captureDate.isBefore(span.start)) {
+            reachedStart = true;
+            continue;
+          }
+          assets.add(asset);
+        }
+        next = reachedStart ? null : page.nextUrl;
       } while (next != null);
     }
     return assets;

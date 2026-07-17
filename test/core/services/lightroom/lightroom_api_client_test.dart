@@ -113,9 +113,12 @@ void main() {
       );
       expect(captured.url.path, '/v2/catalogs/cat1/assets');
       expect(captured.url.queryParameters['subtype'], 'image;video');
+      // captured_after and captured_before are mutually exclusive on this
+      // endpoint (Adobe returns 400 if both are sent); with both supplied,
+      // only the upper bound goes on the wire.
       expect(
-        captured.url.queryParameters['captured_after'],
-        '2026-07-01T09:00:00.000',
+        captured.url.queryParameters.containsKey('captured_after'),
+        isFalse,
       );
       expect(
         captured.url.queryParameters['captured_before'],
@@ -139,6 +142,24 @@ void main() {
       );
     },
   );
+
+  test('listAssets sends captured_after alone when only the lower bound is '
+      'set', () async {
+    late http.Request captured;
+    final c = await client((req) async {
+      captured = req;
+      return http.Response('$_guard${jsonEncode({'resources': []})}', 200);
+    });
+    await c.listAssets('cat1', capturedAfter: DateTime.utc(2026, 7, 1, 9));
+    expect(
+      captured.url.queryParameters['captured_after'],
+      '2026-07-01T09:00:00.000',
+    );
+    expect(
+      captured.url.queryParameters.containsKey('captured_before'),
+      isFalse,
+    );
+  });
 
   test('listAssets with nextUrl requests it verbatim', () async {
     late http.Request captured;
