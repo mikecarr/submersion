@@ -11,6 +11,7 @@ DiveProfilePoint p(int t, double depth) =>
     DiveProfilePoint(timestamp: t, depth: depth);
 
 Widget host(Widget overlay) => MaterialApp(
+  locale: const Locale('en'),
   localizationsDelegates: AppLocalizations.localizationsDelegates,
   supportedLocales: AppLocalizations.supportedLocales,
   home: Scaffold(
