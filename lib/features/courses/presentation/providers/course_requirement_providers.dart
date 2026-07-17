@@ -52,11 +52,11 @@ final activeCoursesProgressProvider =
       ref.invalidateSelfWhen(
         ref.watch(diveRepositoryProvider).watchDivesChanges(),
       );
+      final progresses = await Future.wait(
+        courses.map((course) => repository.getCourseProgress(course.id)),
+      );
       return [
-        for (final course in courses)
-          (
-            course: course,
-            progress: await repository.getCourseProgress(course.id),
-          ),
+        for (var i = 0; i < courses.length; i++)
+          (course: courses[i], progress: progresses[i]),
       ];
     });

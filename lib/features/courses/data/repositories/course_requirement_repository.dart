@@ -289,12 +289,21 @@ class CourseRequirementRepository {
     required String diveId,
   }) async {
     try {
+      final id = linkIdFor(requirementId, diveId);
+      // Drift's insert return value does not distinguish an ignored
+      // conflict, so check existence explicitly (importDiveRole pattern).
+      // A true no-op must not bump the parent hlc or emit sync churn.
+      final existing = await (_db.select(
+        _db.courseRequirementDives,
+      )..where((t) => t.id.equals(id))).getSingleOrNull();
+      if (existing != null) return;
+
       final now = DateTime.now().millisecondsSinceEpoch;
       await _db
           .into(_db.courseRequirementDives)
           .insert(
             CourseRequirementDivesCompanion(
-              id: Value(linkIdFor(requirementId, diveId)),
+              id: Value(id),
               requirementId: Value(requirementId),
               diveId: Value(diveId),
               createdAt: Value(now),

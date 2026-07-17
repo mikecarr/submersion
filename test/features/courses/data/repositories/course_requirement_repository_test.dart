@@ -154,7 +154,22 @@ void main() {
           targetCount: 3,
         );
         await repository.linkDive(requirementId: req.id, diveId: 'dive-1');
+
+        // A duplicate link must be a TRUE no-op: no parent updatedAt/hlc
+        // bump, no sync churn (PR #601 review).
+        final db = DatabaseService.instance.database;
+        await db.customStatement(
+          "UPDATE course_requirements SET updated_at = 1 "
+          "WHERE id = '${req.id}'",
+        );
         await repository.linkDive(requirementId: req.id, diveId: 'dive-1');
+        final row = await db
+            .customSelect(
+              "SELECT updated_at FROM course_requirements "
+              "WHERE id = '${req.id}'",
+            )
+            .getSingle();
+        expect(row.data['updated_at'], 1);
 
         final progress = await repository.getCourseProgress('course-1');
         final reqProgress = progress.requirements.single;

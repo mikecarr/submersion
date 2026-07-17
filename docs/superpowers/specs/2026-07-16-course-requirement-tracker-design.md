@@ -2,7 +2,8 @@
 
 **Date:** 2026-07-16
 **Status:** Approved design, pending implementation plan
-**Schema:** v112
+**Schema:** v114 (drafted as v112; renumbered when main claimed v112 for
+equipment.thickness and PR #600 reserved v113 — see the schema-version ladder)
 
 ## Problem
 
@@ -28,7 +29,7 @@ no way to see "3 of 5 done" or which logged dives counted.
    for in-progress courses. A dive-detail "credited to" chip is explicitly out
    of scope for this iteration.
 
-## Data model (schema v112)
+## Data model (schema v114)
 
 ### New table `course_requirements`
 
@@ -47,20 +48,29 @@ no way to see "3 of 5 done" or which logged dives counted.
 
 ### New junction `course_requirement_dives`
 
-Surrogate UUID `id` PK (composite-PK tombstone lesson, #347), `requirementId`
-(FK → `course_requirements`, cascade), `diveId` (FK → `dives`, cascade),
-`createdAt`, `hlc`. Unique index on `(requirementId, diveId)` prevents
-double-crediting one dive to the same requirement. A dive may link to
-requirements in *different* courses — deliberate; agencies differ on
-double-counting and we do not police it.
+Columns: `id` PK, `requirementId` (FK → `course_requirements`, cascade),
+`diveId` (FK → `dives`, cascade), `createdAt`. The `id` is a DETERMINISTIC
+UUIDv5 of `(requirementId, diveId)` (`CourseRequirementRepository.linkIdFor`),
+so the same link created on two devices converges to a single row under sync
+upsert and duplicate links dedupe on the primary key — no unique index
+needed. The junction is CLOCKLESS (no `hlc` column): delta export rides the
+parent requirement's `hlc`, which `linkDive`/`unlinkDive` bump (the
+`equipment_set_items` pattern). A dive may link to requirements in
+*different* courses — deliberate; agencies differ on double-counting and we
+do not police it.
+
+*(Revised during implementation: an earlier draft of this section specified a
+junction-local `hlc` column and a unique index on `(requirementId, diveId)`;
+the deterministic-id + parent-gated design replaced both.)*
 
 ### Migration & sync
 
-- `onUpgrade` v111→v112 creates both tables; matching `beforeOpen` re-assert
-  backstop (v109 pattern). No data migration, no seeding.
-- Both tables emit per-row tombstones on delete (#466 child-delete lesson) and
-  use `nullToAbsent` companions — they are child tables, not HLC-merge roots,
-  so the `.toCompanion(false)` rule for HLC root entities does not apply.
+- `onUpgrade` `from < 114` creates both tables; matching `beforeOpen`
+  re-assert backstop (v109 pattern). No data migration, no seeding.
+- Both tables emit per-row tombstones on delete (#466 child-delete lesson).
+  `course_requirements` is an HLC merge-root (registered in `_hlcTargets`,
+  applied with `.toCompanion(false)` per the #474 rule); the junction is a
+  clockless child applied with the plain companion form.
 
 ### Template catalog
 
@@ -166,7 +176,7 @@ TDD throughout:
 - **Repository tests** (in-memory Drift): CRUD; `applyTemplate` appends;
   link/unlink writes tombstone rows; `getSuggestedDives` filtering (date
   window, already-linked exclusion, diver scoping, cap); cascade on course
-  delete; migration test v111→v112.
+  delete; schema-shape migration test (v114).
 - **Entity tests:** `isSatisfied` and `CourseProgress` roll-up, including
   `targetCount > 1` and checklist kinds.
 - **Widget tests:** requirements section (checkbox toggle, progress text,

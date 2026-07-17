@@ -16,6 +16,7 @@ Widget _wrap(Widget child, SharedPreferences prefs) {
     overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
     child: MaterialApp(
       themeAnimationDuration: Duration.zero,
+      locale: const Locale('en'),
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       home: Scaffold(body: child),

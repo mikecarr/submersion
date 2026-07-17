@@ -26,6 +26,7 @@ Widget _wrap(Widget child) {
   return ProviderScope(
     child: MaterialApp(
       themeAnimationDuration: Duration.zero,
+      locale: const Locale('en'),
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       home: Scaffold(body: SingleChildScrollView(child: child)),

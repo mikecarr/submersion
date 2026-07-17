@@ -2206,7 +2206,7 @@ class FieldPresets extends Table {
     SiteSpecies,
     // Training courses (v1.5)
     Courses,
-    // Course requirement tracker (v112)
+    // Course requirement tracker (v114)
     CourseRequirements,
     CourseRequirementDives,
     // Sync tables
