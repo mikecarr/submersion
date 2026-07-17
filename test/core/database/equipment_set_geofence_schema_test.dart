@@ -74,8 +74,10 @@ void main() {
     },
   );
 
-  test('v112 is the current schema version (exact-latest tripwire)', () {
-    expect(AppDatabase.currentSchemaVersion, 112);
+  test('v112 is in the schema version ladder', () {
+    // Relaxed from exact-latest when v118 (data quality assistant) claimed
+    // the top of the ladder.
+    expect(AppDatabase.currentSchemaVersion, greaterThanOrEqualTo(112));
     expect(AppDatabase.migrationVersions, contains(112));
   });
 }
