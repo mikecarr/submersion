@@ -11,7 +11,7 @@
 ## Global Constraints
 
 - All work happens in the worktree `/Users/ericgriffin/repos/submersion-app/submersion/.claude/worktrees/safety-features`. Never touch the main checkout.
-- Schema version: bump `currentSchemaVersion` from **112 → 115** (113 is claimed by PR #600's renumber, 114 by the equipment-attributes spec). Before Task 5, re-verify with `grep -n "currentSchemaVersion = " lib/core/database/database.dart` — if main has moved past 114, claim the next free number instead and use it everywhere this plan says 115.
+- Schema version: bump `currentSchemaVersion` from **112 → 116** (113 is claimed by PR #600's renumber, 114 by the equipment-attributes spec, 115 by PR #602 gear service ledger). Before Task 5, re-verify with `grep -n "currentSchemaVersion = " lib/core/database/database.dart` — if main has moved past 115, claim the next free number instead and use it everywhere this plan says 116.
 - Child-of-dive tables carry NO hlc/updatedAt columns (mirror `DiveProfileEvents`, `lib/core/database/database.dart:1757`). Sync correctness comes from `_syncRepository.markRecordPending(...)` on writes and `_syncRepository.logDeletion(...)` per deleted row.
 - Tone requirements from the spec: neutral wording ("Ascent exceeded 12 m/min for 40 s at 18 m"), no red alarm iconography on the dive list (small neutral dot only), per-finding dismiss, master + per-rule settings toggles.
 - No emojis anywhere. All user-visible strings via l10n (`context.l10n.<key>`); en first, all 10 other locales in the final task.
@@ -876,7 +876,7 @@ git commit -m "feat: add sawtooth profile rule"
 
 ---
 
-### Task 5: Database schema v115 — findings tables + settings columns
+### Task 5: Database schema v116 — findings tables + settings columns
 
 **Files:**
 - Modify: `lib/core/database/database.dart`
@@ -891,7 +891,7 @@ git commit -m "feat: add sawtooth profile rule"
 - [ ] **Step 1: Re-verify the schema ladder**
 
 Run: `grep -n "currentSchemaVersion = " lib/core/database/database.dart`
-Expected: `static const int currentSchemaVersion = 112;`. If it is already >= 115, pick the next free number and substitute it for 115 in every step below (and in the memory note at the end of the plan).
+Expected: `static const int currentSchemaVersion = 112;`. If it is already >= 116, pick the next free number and substitute it for 116 in every step below (and in the memory note at the end of the plan).
 
 - [ ] **Step 2: Write the failing schema test**
 
@@ -1014,13 +1014,13 @@ In `class DiverSettings` (line ~1133), after the last `BoolColumn` in the file's
 
 - [ ] **Step 6: Add migration + backstop**
 
-Bump the version: `static const int currentSchemaVersion = 115;` (line ~2208).
+Bump the version: `static const int currentSchemaVersion = 116;` (line ~2208).
 
 First read one existing idempotent assert helper to copy its exact style: `grep -n "_assertEquipmentThicknessColumn" lib/core/database/database.dart` and read that method. Then add a sibling:
 
 ```dart
   /// Idempotently creates the safety review tables, index, and settings
-  /// columns (v115). Safe to re-run: used by both onUpgrade and the
+  /// columns (v116). Safe to re-run: used by both onUpgrade and the
   /// beforeOpen backstop so parallel-branch schema version collisions
   /// self-heal.
   Future<void> _assertSafetyReviewSchema() async {
@@ -1052,10 +1052,10 @@ First read one existing idempotent assert helper to copy its exact style: `grep 
 In `onUpgrade`, after the `if (from < 112)` block (line ~5541):
 
 ```dart
-        if (from < 115) {
+        if (from < 116) {
           await _assertSafetyReviewSchema();
         }
-        if (from < 115) await reportProgress();
+        if (from < 116) await reportProgress();
 ```
 
 In `beforeOpen` (line ~5547), alongside the other `_assert*` backstops:
@@ -1079,7 +1079,7 @@ Expected: PASS.
 ```bash
 dart format .
 git add lib/core/database/database.dart lib/core/database/database.g.dart test/core/database/safety_review_schema_test.dart
-git commit -m "feat: add dive safety review tables and settings columns (schema v115)"
+git commit -m "feat: add dive safety review tables and settings columns (schema v116)"
 ```
 
 ---

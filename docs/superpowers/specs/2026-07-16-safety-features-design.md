@@ -207,7 +207,7 @@ shared/printable logbook output.)
 
 - New migrations claim the next free schema rungs at implementation time. As
   of this writing: main is at v112, PR #600 renumbers to v113, v114 is claimed
-  by the equipment-attributes spec → phase 1 starts at **v115**; re-verify the
+  by the equipment-attributes spec → phase 1 starts at **v116**; re-verify the
   ladder when each phase lands.
 - All new tables follow existing conventions: HLC columns for parent/aggregate
   entities, write-once child conventions (no HLC; `markRecordPending` +
