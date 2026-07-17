@@ -1583,6 +1583,35 @@ class _NotificationsSectionContent extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: 16),
+            Card(
+              child: ListTile(
+                leading: const Icon(Icons.luggage),
+                title: Text(context.l10n.settings_notifications_tripLeadTitle),
+                subtitle: Text(
+                  context.l10n.settings_notifications_tripLeadDays(
+                    settings.tripServiceLeadDays,
+                  ),
+                ),
+                trailing: DropdownButton<int>(
+                  value: settings.tripServiceLeadDays,
+                  underline: const SizedBox.shrink(),
+                  items: [7, 14, 21, 30]
+                      .map(
+                        (days) =>
+                            DropdownMenuItem(value: days, child: Text('$days')),
+                      )
+                      .toList(),
+                  onChanged: (days) {
+                    if (days != null) {
+                      ref
+                          .read(settingsProvider.notifier)
+                          .setTripServiceLeadDays(days);
+                    }
+                  },
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
             _buildInfoCard(
               context,
               context.l10n.settings_notifications_howItWorks_title,

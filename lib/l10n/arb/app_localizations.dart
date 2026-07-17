@@ -16468,6 +16468,18 @@ abstract class AppLocalizations {
   /// **'{kind} overdue'**
   String trips_serviceAlert_overdue(String kind);
 
+  /// No description provided for @settings_notifications_tripLeadTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Trip service lead time'**
+  String get settings_notifications_tripLeadTitle;
+
+  /// No description provided for @settings_notifications_tripLeadDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{days} days before a trip'**
+  String settings_notifications_tripLeadDays(int days);
+
   /// No description provided for @equipment_detail_serviceIntervalLabel.
   ///
   /// In en, this message translates to:

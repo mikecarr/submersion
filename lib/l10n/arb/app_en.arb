@@ -5256,6 +5256,15 @@
       }
     }
   },
+  "settings_notifications_tripLeadTitle": "Trip service lead time",
+  "settings_notifications_tripLeadDays": "{days} days before a trip",
+  "@settings_notifications_tripLeadDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
   "equipment_detail_serviceIntervalLabel": "Service Interval",
   "equipment_detail_serviceIntervalValue": "{days} days",
   "equipment_detail_serviceOverdue": "Service is overdue!",

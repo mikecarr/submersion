@@ -124,10 +124,16 @@ class NotificationService {
     return false;
   }
 
-  /// Schedule a notification for equipment service
+  /// Schedule a notification for one service clock.
+  ///
+  /// The platform id derives from [scheduleId], NOT the equipment id: two
+  /// clocks on one item (hydro + VIP on a cylinder) must not collide, and
+  /// flutter_local_notifications silently replaces on id collision.
   Future<int> scheduleServiceReminder({
+    required String scheduleId,
     required String equipmentId,
     required String equipmentName,
+    required String kindName,
     required String? brandModel,
     required DateTime scheduledDate,
     required int daysBefore,
@@ -135,12 +141,13 @@ class NotificationService {
     // Skip on desktop platforms
     if (!_isMobilePlatform) return 0;
 
-    final notificationId = equipmentId.hashCode + daysBefore;
+    final notificationId = scheduleId.hashCode + daysBefore;
 
-    final title = 'Service Due: $equipmentName';
+    final title = '$kindName due: $equipmentName';
     final body = daysBefore > 0
-        ? '${brandModel ?? equipmentName} service is due in $daysBefore days'
-        : '${brandModel ?? equipmentName} service is overdue';
+        ? '${brandModel ?? equipmentName}: $kindName is due in '
+              '$daysBefore days'
+        : '${brandModel ?? equipmentName}: $kindName is overdue';
 
     const androidDetails = AndroidNotificationDetails(
       'equipment_service_reminders',
@@ -179,6 +186,59 @@ class NotificationService {
       'Scheduled notification $notificationId for $equipmentName at $scheduledTz',
     );
 
+    return notificationId;
+  }
+
+  /// Schedule the one-per-trip nag: gear needs service before the trip.
+  /// Same channel as equipment reminders; the id derives from the trip id.
+  Future<int> scheduleTripServiceReminder({
+    required String tripId,
+    required String tripName,
+    required int itemCount,
+    required DateTime scheduledDate,
+  }) async {
+    if (!_isMobilePlatform) return 0;
+
+    final notificationId = tripId.hashCode ^ 0x5EAF1CE;
+    final title = 'Gear service before $tripName';
+    final body = itemCount == 1
+        ? '1 item needs service before this trip'
+        : '$itemCount items need service before this trip';
+
+    const androidDetails = AndroidNotificationDetails(
+      'equipment_service_reminders',
+      'Equipment Service Reminders',
+      channelDescription: 'Reminders for equipment service due dates',
+      importance: Importance.defaultImportance,
+      priority: Priority.defaultPriority,
+      category: AndroidNotificationCategory.reminder,
+    );
+
+    const iosDetails = DarwinNotificationDetails(
+      presentAlert: true,
+      presentBadge: true,
+      presentSound: true,
+    );
+
+    const details = NotificationDetails(
+      android: androidDetails,
+      iOS: iosDetails,
+    );
+
+    final scheduledTz = tz.TZDateTime.from(scheduledDate, tz.local);
+    await _plugin.zonedSchedule(
+      id: notificationId,
+      title: title,
+      body: body,
+      scheduledDate: scheduledTz,
+      notificationDetails: details,
+      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+    );
+
+    _log.info(
+      'Scheduled trip service notification $notificationId for $tripName '
+      'at $scheduledTz',
+    );
     return notificationId;
   }
 

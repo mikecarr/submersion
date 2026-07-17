@@ -9610,6 +9610,14 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String get settings_notifications_tripLeadTitle => 'Trip service lead time';
+
+  @override
+  String settings_notifications_tripLeadDays(int days) {
+    return '$days days before a trip';
+  }
+
+  @override
   String get equipment_detail_serviceIntervalLabel => 'Intervalo de servicio';
 
   @override
