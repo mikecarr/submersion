@@ -1,7 +1,7 @@
-import '../entities/dive_quality_context.dart';
-import '../entities/quality_finding.dart';
-import '../quality_thresholds.dart';
-import 'quality_detector.dart';
+import 'package:submersion/features/data_quality/domain/entities/dive_quality_context.dart';
+import 'package:submersion/features/data_quality/domain/entities/quality_finding.dart';
+import 'package:submersion/features/data_quality/domain/quality_thresholds.dart';
+import 'package:submersion/features/data_quality/domain/detectors/quality_detector.dart';
 
 class TankAssignmentDetector extends QualityDetector {
   const TankAssignmentDetector();

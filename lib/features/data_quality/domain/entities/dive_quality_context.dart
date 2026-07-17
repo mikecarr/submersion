@@ -1,6 +1,7 @@
-import '../../../dive_log/domain/entities/dive.dart' as domain;
-import '../../../dive_log/domain/entities/dive_data_source.dart';
-import '../../../dive_log/domain/entities/gas_switch.dart';
+import 'package:submersion/features/dive_log/domain/entities/dive.dart'
+    as domain;
+import 'package:submersion/features/dive_log/domain/entities/dive_data_source.dart';
+import 'package:submersion/features/dive_log/domain/entities/gas_switch.dart';
 
 class QualitySample {
   const QualitySample({required this.t, required this.depth, this.temp});

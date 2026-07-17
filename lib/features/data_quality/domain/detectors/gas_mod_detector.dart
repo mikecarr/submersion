@@ -1,11 +1,12 @@
 import 'package:collection/collection.dart';
 
-import '../../../../core/constants/enums.dart';
-import '../../../dive_log/domain/entities/dive.dart' as domain;
-import '../entities/dive_quality_context.dart';
-import '../entities/quality_finding.dart';
-import '../quality_thresholds.dart';
-import 'quality_detector.dart';
+import 'package:submersion/core/constants/enums.dart';
+import 'package:submersion/features/dive_log/domain/entities/dive.dart'
+    as domain;
+import 'package:submersion/features/data_quality/domain/entities/dive_quality_context.dart';
+import 'package:submersion/features/data_quality/domain/entities/quality_finding.dart';
+import 'package:submersion/features/data_quality/domain/quality_thresholds.dart';
+import 'package:submersion/features/data_quality/domain/detectors/quality_detector.dart';
 
 /// Flags recorded gas/depth combinations that contradict physics or
 /// procedure: the recorded mix or the recorded switch depth is wrong.

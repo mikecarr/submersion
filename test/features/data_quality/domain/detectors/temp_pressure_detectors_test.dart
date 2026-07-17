@@ -2,7 +2,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:submersion/features/data_quality/domain/detectors/pressure_anomaly_detector.dart';
 import 'package:submersion/features/data_quality/domain/detectors/temp_anomaly_detector.dart';
 import 'package:submersion/features/data_quality/domain/entities/dive_quality_context.dart';
-import 'package:submersion/features/data_quality/domain/entities/quality_finding.dart';
 import 'package:submersion/features/dive_log/domain/entities/dive.dart'
     as domain;
 

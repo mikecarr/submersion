@@ -1,12 +1,13 @@
 import 'package:drift/drift.dart';
 
-import '../../../../core/database/database.dart';
-import '../../../../core/services/database_service.dart';
-import '../../../dive_log/data/repositories/dive_repository_impl.dart';
-import '../../../dive_log/domain/entities/dive.dart' as domain;
-import '../../../dive_log/domain/entities/gas_switch.dart';
-import '../../domain/entities/dive_quality_context.dart';
-import '../../domain/quality_thresholds.dart';
+import 'package:submersion/core/database/database.dart';
+import 'package:submersion/core/services/database_service.dart';
+import 'package:submersion/features/dive_log/data/repositories/dive_repository_impl.dart';
+import 'package:submersion/features/dive_log/domain/entities/dive.dart'
+    as domain;
+import 'package:submersion/features/dive_log/domain/entities/gas_switch.dart';
+import 'package:submersion/features/data_quality/domain/entities/dive_quality_context.dart';
+import 'package:submersion/features/data_quality/domain/quality_thresholds.dart';
 
 class QualityContextBuilder {
   QualityContextBuilder({DiveRepository? diveRepository})

@@ -2,11 +2,11 @@ import 'dart:convert';
 
 import 'package:drift/drift.dart';
 
-import '../../../../core/data/repositories/sync_repository.dart';
-import '../../../../core/database/database.dart';
-import '../../../../core/services/database_service.dart';
-import '../../../../core/services/sync/sync_event_bus.dart';
-import '../../domain/entities/quality_finding.dart';
+import 'package:submersion/core/data/repositories/sync_repository.dart';
+import 'package:submersion/core/database/database.dart';
+import 'package:submersion/core/services/database_service.dart';
+import 'package:submersion/core/services/sync/sync_event_bus.dart';
+import 'package:submersion/features/data_quality/domain/entities/quality_finding.dart';
 
 class ScanApplyResult {
   const ScanApplyResult({

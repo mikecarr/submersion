@@ -1,7 +1,7 @@
-import 'package:meta/meta.dart';
+import 'package:flutter/foundation.dart';
 
-import '../entities/dive_quality_context.dart';
-import '../entities/quality_finding.dart';
+import 'package:submersion/features/data_quality/domain/entities/dive_quality_context.dart';
+import 'package:submersion/features/data_quality/domain/entities/quality_finding.dart';
 
 /// A pure, synchronous quality check. Implementations must not do IO and
 /// must read every threshold from QualityThresholds.

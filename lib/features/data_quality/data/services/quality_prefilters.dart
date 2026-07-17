@@ -1,8 +1,8 @@
 import 'package:drift/drift.dart';
 
-import '../../../../core/database/database.dart';
-import '../../../../core/services/database_service.dart';
-import '../../domain/quality_thresholds.dart';
+import 'package:submersion/core/database/database.dart';
+import 'package:submersion/core/services/database_service.dart';
+import 'package:submersion/features/data_quality/domain/quality_thresholds.dart';
 
 /// Cheap SQL passes that narrow the full library to per-detector candidate
 /// sets before any context is built. A dive absent from a detector's set is
@@ -69,8 +69,8 @@ class QualityPrefilters {
       'SELECT d.id AS id FROM dives d WHERE d.water_temp IS NOT NULL AND '
       '(d.water_temp < ?1 OR d.water_temp > ?2)',
       [
-        Variable(QualityThresholds.waterTempMinC),
-        Variable(QualityThresholds.waterTempMaxC),
+        const Variable(QualityThresholds.waterTempMinC),
+        const Variable(QualityThresholds.waterTempMaxC),
       ],
     );
 

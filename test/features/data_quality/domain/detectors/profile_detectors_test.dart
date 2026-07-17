@@ -110,10 +110,10 @@ void main() {
       // 6 m per 10 s sample = 36 m/min for t in [100, 140].
       final samples = [
         for (var t = 0; t <= 100; t += 10) QualitySample(t: t, depth: 40),
-        QualitySample(t: 110, depth: 34),
-        QualitySample(t: 120, depth: 28),
-        QualitySample(t: 130, depth: 22),
-        QualitySample(t: 140, depth: 16),
+        const QualitySample(t: 110, depth: 34),
+        const QualitySample(t: 120, depth: 28),
+        const QualitySample(t: 130, depth: 22),
+        const QualitySample(t: 140, depth: 16),
         for (var t = 150; t <= 300; t += 10) QualitySample(t: t, depth: 16),
       ];
       final ctx = makeContext(dive: makeTestDive(), samples: samples);
@@ -126,8 +126,8 @@ void main() {
     test('a 20 s burst is below the 30 s sustain threshold', () {
       final samples = [
         for (var t = 0; t <= 100; t += 10) QualitySample(t: t, depth: 40),
-        QualitySample(t: 110, depth: 34),
-        QualitySample(t: 120, depth: 28),
+        const QualitySample(t: 110, depth: 34),
+        const QualitySample(t: 120, depth: 28),
         for (var t = 130; t <= 300; t += 10) QualitySample(t: t, depth: 28),
       ];
       final ctx = makeContext(dive: makeTestDive(), samples: samples);
