@@ -615,7 +615,12 @@ String? _encodeDisabledRules(Set<String> rules) {
 Set<String> _decodeDisabledRules(String? raw) {
   if (raw == null || raw.isEmpty) return const {};
   try {
-    return (jsonDecode(raw) as List).cast<String>().toSet();
+    final decoded = jsonDecode(raw);
+    // Tolerate corrupted values (non-list JSON, non-string elements) from bad
+    // prefs or a malformed sync payload: fall back to "no rules disabled"
+    // rather than crashing settings load.
+    if (decoded is! List) return const {};
+    return decoded.whereType<String>().toSet();
   } on FormatException {
     return const {};
   }
