@@ -1211,6 +1211,8 @@
   "buoyancy_drysuitGas": "Gas de traje seco añadido",
   "buoyancy_estimatedPressures": "Las presiones de botella son estimadas",
   "buoyancy_linkSuitHint": "Asocia un traje a esta inmersión para un panorama más completo",
+  "buoyancy_chartNet": "Neto",
+  "buoyancy_chartRig": "Equipo + lastre",
   "diveDetailSection_weights_name": "Lastres",
   "diveImport_alreadyImported": "Ya importada",
   "diveImport_avgHR": "FC media",

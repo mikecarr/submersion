@@ -11917,6 +11917,12 @@ class AppLocalizationsIt extends AppLocalizations {
       'Associa una muta a questa immersione per un quadro più completo';
 
   @override
+  String get buoyancy_chartNet => 'Netto';
+
+  @override
+  String get buoyancy_chartRig => 'Attrezzatura + zavorra';
+
+  @override
   String get diveDetailSection_tanks_name => 'Bombole';
 
   @override

@@ -3723,6 +3723,8 @@
   "buoyancy_drysuitGas": "גז יבשה שנוסף",
   "buoyancy_estimatedPressures": "לחצי המכלים משוערים",
   "buoyancy_linkSuitHint": "קשר חליפת חשיפה לצלילה זו לתמונה מלאה יותר",
+  "buoyancy_chartNet": "נטו",
+  "buoyancy_chartRig": "ציוד + משקולות",
   "diveDetailSection_weights_name": "משקולות",
   "settings_appearance_header_language": "שפה",
   "settings_appearance_header_theme": "ערכת נושא",

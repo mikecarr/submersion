@@ -11725,6 +11725,12 @@ class AppLocalizationsEn extends AppLocalizations {
       'Link an exposure suit to this dive for a fuller picture';
 
   @override
+  String get buoyancy_chartNet => 'Net';
+
+  @override
+  String get buoyancy_chartRig => 'Rig + lead';
+
+  @override
   String get diveDetailSection_tanks_name => 'Cylinders';
 
   @override

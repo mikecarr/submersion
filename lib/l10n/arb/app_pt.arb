@@ -1211,6 +1211,8 @@
   "buoyancy_drysuitGas": "Gás de roupa seca adicionado",
   "buoyancy_estimatedPressures": "As pressões dos cilindros são estimadas",
   "buoyancy_linkSuitHint": "Associe uma roupa de exposição a este mergulho para um quadro mais completo",
+  "buoyancy_chartNet": "Líquido",
+  "buoyancy_chartRig": "Equipamento + lastro",
   "diveDetailSection_weights_name": "Pesos",
   "diveImport_alreadyImported": "Ja importado",
   "diveImport_avgHR": "FC Media",

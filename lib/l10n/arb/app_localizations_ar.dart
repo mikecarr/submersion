@@ -11699,6 +11699,12 @@ class AppLocalizationsAr extends AppLocalizations {
       'اربط بدلة تعرّض بهذه الغطسة للحصول على صورة أوفى';
 
   @override
+  String get buoyancy_chartNet => 'الصافي';
+
+  @override
+  String get buoyancy_chartRig => 'المعدات + الرصاص';
+
+  @override
   String get diveDetailSection_tanks_name => 'الأسطوانات';
 
   @override

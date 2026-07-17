@@ -5257,6 +5257,8 @@
   "buoyancy_drysuitGas": "Hozzáadott szárazruha-gáz",
   "buoyancy_estimatedPressures": "A palacknyomások becsültek",
   "buoyancy_linkSuitHint": "Kapcsolj egy búvárruhát ehhez a merüléshez a teljesebb képért",
+  "buoyancy_chartNet": "Nettó",
+  "buoyancy_chartRig": "Felszerelés + ólom",
   "diveDetailSection_weights_name": "Súlyok",
   "diveLog_edit_section_environment": "Environment",
   "diveLog_edit_subsection_weather": "Weather",

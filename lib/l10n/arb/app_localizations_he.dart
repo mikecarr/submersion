@@ -11614,6 +11614,12 @@ class AppLocalizationsHe extends AppLocalizations {
       'קשר חליפת חשיפה לצלילה זו לתמונה מלאה יותר';
 
   @override
+  String get buoyancy_chartNet => 'נטו';
+
+  @override
+  String get buoyancy_chartRig => 'ציוד + משקולות';
+
+  @override
   String get diveDetailSection_tanks_name => 'בלונים';
 
   @override

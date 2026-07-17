@@ -1211,6 +1211,8 @@
   "buoyancy_drysuitGas": "Trocki-Gas zugegeben",
   "buoyancy_estimatedPressures": "Flaschendrücke sind geschätzt",
   "buoyancy_linkSuitHint": "Verknüpfe einen Tauchanzug mit diesem Tauchgang für ein vollständigeres Bild",
+  "buoyancy_chartNet": "Netto",
+  "buoyancy_chartRig": "Rig + Blei",
   "diveDetailSection_weights_name": "Gewichte",
   "diveImport_alreadyImported": "Bereits importiert",
   "diveImport_avgHR": "Durchschn. HF",

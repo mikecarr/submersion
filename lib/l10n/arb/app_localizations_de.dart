@@ -11911,6 +11911,12 @@ class AppLocalizationsDe extends AppLocalizations {
       'Verknüpfe einen Tauchanzug mit diesem Tauchgang für ein vollständigeres Bild';
 
   @override
+  String get buoyancy_chartNet => 'Netto';
+
+  @override
+  String get buoyancy_chartRig => 'Rig + Blei';
+
+  @override
   String get diveDetailSection_tanks_name => 'Flaschen';
 
   @override

@@ -6629,6 +6629,8 @@
   "buoyancy_drysuitGas": "Drysuit gas added",
   "buoyancy_estimatedPressures": "Tank pressures are estimated",
   "buoyancy_linkSuitHint": "Link an exposure suit to this dive for a fuller picture",
+  "buoyancy_chartNet": "Net",
+  "buoyancy_chartRig": "Rig + lead",
   "diveDetailSection_tanks_name": "Cylinders",
   "diveDetailSection_tanks_description": "Cylinder list, gas mixes, pressures, MOD/MND, per-tank SAC",
   "diveDetailSection_buddies_name": "Buddies",

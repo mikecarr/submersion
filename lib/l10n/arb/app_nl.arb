@@ -1211,6 +1211,8 @@
   "buoyancy_drysuitGas": "Droogpakgas toegevoegd",
   "buoyancy_estimatedPressures": "Flesdrukken zijn geschat",
   "buoyancy_linkSuitHint": "Koppel een duikpak aan deze duik voor een vollediger beeld",
+  "buoyancy_chartNet": "Netto",
+  "buoyancy_chartRig": "Uitrusting + lood",
   "diveDetailSection_weights_name": "Gewichten",
   "diveImport_alreadyImported": "Al geimporteerd",
   "diveImport_avgHR": "Gem. HR",

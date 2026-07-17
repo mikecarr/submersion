@@ -11830,6 +11830,12 @@ class AppLocalizationsNl extends AppLocalizations {
       'Koppel een duikpak aan deze duik voor een vollediger beeld';
 
   @override
+  String get buoyancy_chartNet => 'Netto';
+
+  @override
+  String get buoyancy_chartRig => 'Uitrusting + lood';
+
+  @override
   String get diveDetailSection_tanks_name => 'Flessen';
 
   @override

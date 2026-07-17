@@ -11883,6 +11883,12 @@ class AppLocalizationsHu extends AppLocalizations {
       'Kapcsolj egy búvárruhát ehhez a merüléshez a teljesebb képért';
 
   @override
+  String get buoyancy_chartNet => 'Nettó';
+
+  @override
+  String get buoyancy_chartRig => 'Felszerelés + ólom';
+
+  @override
   String get diveDetailSection_tanks_name => 'Palackok';
 
   @override

@@ -5296,6 +5296,8 @@
   "buoyancy_drysuitGas": "Gas muta stagna aggiunto",
   "buoyancy_estimatedPressures": "Le pressioni delle bombole sono stimate",
   "buoyancy_linkSuitHint": "Associa una muta a questa immersione per un quadro più completo",
+  "buoyancy_chartNet": "Netto",
+  "buoyancy_chartRig": "Attrezzatura + zavorra",
   "diveDetailSection_weights_name": "Zavorra",
   "dashboard_activityStats_divesInYear": "immersioni nel {year}",
   "dashboard_hero_daysSinceLabel": "giorni dall'ultima immersione",

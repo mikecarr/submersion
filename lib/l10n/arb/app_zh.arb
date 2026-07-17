@@ -1303,6 +1303,8 @@
   "buoyancy_drysuitGas": "干式潜水服充气量",
   "buoyancy_estimatedPressures": "气瓶压力为估算值",
   "buoyancy_linkSuitHint": "为本次潜水关联一件暴露服以获得更完整的分析",
+  "buoyancy_chartNet": "净值",
+  "buoyancy_chartRig": "装备 + 配重",
   "diveDetailSection_weights_name": "重量",
   "diveImport_alreadyImported": "已导入",
   "diveImport_avgHR": "平均心率",

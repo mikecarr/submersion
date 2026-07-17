@@ -1095,6 +1095,8 @@
   "buoyancy_drysuitGas": "غاز البدلة الجافة المُضاف",
   "buoyancy_estimatedPressures": "ضغوط الأسطوانات تقديرية",
   "buoyancy_linkSuitHint": "اربط بدلة تعرّض بهذه الغطسة للحصول على صورة أوفى",
+  "buoyancy_chartNet": "الصافي",
+  "buoyancy_chartRig": "المعدات + الرصاص",
   "diveDetailSection_weights_name": "الأوزان",
   "diveComputer_action_setFavorite": "تعيين كمفضل",
   "diveComputer_discovery_chooseDifferentDevice": "اختيار جهاز آخر",

@@ -20282,6 +20282,18 @@ abstract class AppLocalizations {
   /// **'Link an exposure suit to this dive for a fuller picture'**
   String get buoyancy_linkSuitHint;
 
+  /// No description provided for @buoyancy_chartNet.
+  ///
+  /// In en, this message translates to:
+  /// **'Net'**
+  String get buoyancy_chartNet;
+
+  /// No description provided for @buoyancy_chartRig.
+  ///
+  /// In en, this message translates to:
+  /// **'Rig + lead'**
+  String get buoyancy_chartRig;
+
   /// No description provided for @diveDetailSection_tanks_name.
   ///
   /// In en, this message translates to:

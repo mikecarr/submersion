@@ -11908,6 +11908,12 @@ class AppLocalizationsEs extends AppLocalizations {
       'Asocia un traje a esta inmersión para un panorama más completo';
 
   @override
+  String get buoyancy_chartNet => 'Neto';
+
+  @override
+  String get buoyancy_chartRig => 'Equipo + lastre';
+
+  @override
   String get diveDetailSection_tanks_name => 'Tanques';
 
   @override

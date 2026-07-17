@@ -11961,6 +11961,12 @@ class AppLocalizationsFr extends AppLocalizations {
       'Associez une combinaison à cette plongée pour un tableau plus complet';
 
   @override
+  String get buoyancy_chartNet => 'Net';
+
+  @override
+  String get buoyancy_chartRig => 'Équipement + lest';
+
+  @override
   String get diveDetailSection_tanks_name => 'Bouteilles';
 
   @override

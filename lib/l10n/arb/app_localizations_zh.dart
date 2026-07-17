@@ -11348,6 +11348,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get buoyancy_linkSuitHint => '为本次潜水关联一件暴露服以获得更完整的分析';
 
   @override
+  String get buoyancy_chartNet => '净值';
+
+  @override
+  String get buoyancy_chartRig => '装备 + 配重';
+
+  @override
   String get diveDetailSection_tanks_name => '气瓶';
 
   @override

@@ -5257,6 +5257,8 @@
   "buoyancy_drysuitGas": "Gaz d'étanche ajouté",
   "buoyancy_estimatedPressures": "Les pressions des blocs sont estimées",
   "buoyancy_linkSuitHint": "Associez une combinaison à cette plongée pour un tableau plus complet",
+  "buoyancy_chartNet": "Net",
+  "buoyancy_chartRig": "Équipement + lest",
   "diveDetailSection_weights_name": "Lestage",
   "diveLog_edit_section_environment": "Environment",
   "diveLog_edit_subsection_weather": "Weather",

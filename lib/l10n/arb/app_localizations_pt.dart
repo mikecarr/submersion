@@ -11918,6 +11918,12 @@ class AppLocalizationsPt extends AppLocalizations {
       'Associe uma roupa de exposição a este mergulho para um quadro mais completo';
 
   @override
+  String get buoyancy_chartNet => 'Líquido';
+
+  @override
+  String get buoyancy_chartRig => 'Equipamento + lastro';
+
+  @override
   String get diveDetailSection_tanks_name => 'Cilindros';
 
   @override
