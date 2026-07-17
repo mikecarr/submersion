@@ -1724,6 +1724,9 @@ class SyncService {
     'serviceRecords': [
       (field: 'equipmentId', parent: 'equipment', nullable: false),
     ],
+    'equipmentAttributes': [
+      (field: 'equipmentId', parent: 'equipment', nullable: false),
+    ],
   };
 
   Future<_MergeResult> _mergeEntity({

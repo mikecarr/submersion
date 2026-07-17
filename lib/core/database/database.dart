@@ -728,6 +728,36 @@ class Equipment extends Table {
   Set<Column> get primaryKey => {id};
 }
 
+/// Type-specific and user-defined attributes for equipment items (v115).
+/// Curated rows (isCustom = false) use deterministic ids
+/// `attr_<equipmentId>_<attrKey>` so independently migrated devices converge;
+/// custom rows use random UUIDs. "Unset" is "no row" -- clearing a value
+/// deletes the row and writes a tombstone.
+@DataClassName('EquipmentAttributeRow')
+class EquipmentAttributes extends Table {
+  TextColumn get id => text()();
+  TextColumn get equipmentId =>
+      text().references(Equipment, #id, onDelete: KeyAction.cascade)();
+  TextColumn get attrKey => text()();
+  BoolColumn get isCustom => boolean().withDefault(const Constant(false))();
+  TextColumn get valueText => text().nullable()();
+  RealColumn get valueNum => real().nullable()();
+  IntColumn get sortOrder => integer().withDefault(const Constant(0))();
+  IntColumn get createdAt => integer()();
+  IntColumn get updatedAt => integer()();
+
+  /// Hybrid Logical Clock for cross-device conflict resolution.
+  TextColumn get hlc => text().nullable()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+
+  @override
+  List<Set<Column>> get uniqueKeys => [
+    {equipmentId, attrKey, isCustom},
+  ];
+}
+
 /// Junction table for equipment used per dive
 class DiveEquipment extends Table {
   TextColumn get diveId =>
@@ -2131,6 +2161,7 @@ class FieldPresets extends Table {
     EquipmentSets,
     EquipmentSetItems,
     EquipmentSetGeofences,
+    EquipmentAttributes,
     Species,
     Sightings,
     Media,
@@ -2205,7 +2236,7 @@ class AppDatabase extends _$AppDatabase {
 
   /// The current schema version as a static constant so that pre-open checks
   /// (e.g. version-mismatch guard) can reference it without an instance.
-  static const int currentSchemaVersion = 112;
+  static const int currentSchemaVersion = 115;
 
   /// Every schema version that has a migration block in onUpgrade.
   /// Used to calculate progress step counts. When adding a new migration,
@@ -2321,6 +2352,7 @@ class AppDatabase extends _$AppDatabase {
     110,
     111,
     112,
+    115,
   ];
 
   /// Idempotent DDL for the v106 connector-suggestion columns (Lightroom
@@ -2403,6 +2435,68 @@ class AppDatabase extends _$AppDatabase {
         'REFERENCES buddies (id) ON DELETE CASCADE',
       );
     }
+  }
+
+  /// v115: equipment_attributes table + indexes. Idempotent so it is safe to
+  /// call from both onUpgrade and the beforeOpen backstop. Deliberately does
+  /// NOT copy legacy data -- see _migrateLegacyEquipmentColumnsToAttributes,
+  /// which must run exactly once (re-running it on open would resurrect
+  /// attribute rows the user has since cleared).
+  Future<void> _assertEquipmentAttributesSchema() async {
+    await createMigrator().createTable(equipmentAttributes);
+    await customStatement('''
+      CREATE INDEX IF NOT EXISTS idx_equipment_attributes_equipment_id
+      ON equipment_attributes(equipment_id)
+    ''');
+    await customStatement('''
+      CREATE INDEX IF NOT EXISTS idx_equipment_attributes_key_num
+      ON equipment_attributes(attr_key, value_num)
+    ''');
+  }
+
+  /// v115 data copy: legacy equipment.size/thickness/buoyancy_kg/weight_kg
+  /// into equipment_attributes rows. Deterministic ids and parent-row
+  /// timestamps make the result byte-identical on every device that runs the
+  /// migration, so no sync traffic is needed to converge; hlc stays NULL
+  /// (LWW falls back to updated_at, same as pre-HLC equipment rows).
+  /// INSERT OR IGNORE keeps a re-run harmless, but this is still only called
+  /// from onUpgrade (never beforeOpen) to avoid resurrecting cleared values.
+  Future<void> _migrateLegacyEquipmentColumnsToAttributes() async {
+    await customStatement('''
+      INSERT OR IGNORE INTO equipment_attributes
+        (id, equipment_id, attr_key, is_custom, value_text, value_num,
+         sort_order, created_at, updated_at, hlc)
+      SELECT 'attr_' || id || '_size', id, 'size', 0, TRIM(size), NULL,
+             0, created_at, updated_at, NULL
+      FROM equipment WHERE size IS NOT NULL AND TRIM(size) != ''
+    ''');
+    await customStatement('''
+      INSERT OR IGNORE INTO equipment_attributes
+        (id, equipment_id, attr_key, is_custom, value_text, value_num,
+         sort_order, created_at, updated_at, hlc)
+      SELECT 'attr_' || id || '_thickness_mm', id, 'thickness_mm', 0,
+             TRIM(thickness),
+             CASE WHEN TRIM(thickness) GLOB '[0-9]*'
+                  THEN CAST(TRIM(thickness) AS REAL) ELSE NULL END,
+             0, created_at, updated_at, NULL
+      FROM equipment WHERE thickness IS NOT NULL AND TRIM(thickness) != ''
+    ''');
+    await customStatement('''
+      INSERT OR IGNORE INTO equipment_attributes
+        (id, equipment_id, attr_key, is_custom, value_text, value_num,
+         sort_order, created_at, updated_at, hlc)
+      SELECT 'attr_' || id || '_buoyancy_kg', id, 'buoyancy_kg', 0, NULL,
+             buoyancy_kg, 0, created_at, updated_at, NULL
+      FROM equipment WHERE buoyancy_kg IS NOT NULL
+    ''');
+    await customStatement('''
+      INSERT OR IGNORE INTO equipment_attributes
+        (id, equipment_id, attr_key, is_custom, value_text, value_num,
+         sort_order, created_at, updated_at, hlc)
+      SELECT 'attr_' || id || '_dry_weight_kg', id, 'dry_weight_kg', 0, NULL,
+             weight_kg, 0, created_at, updated_at, NULL
+      FROM equipment WHERE weight_kg IS NOT NULL
+    ''');
   }
 
   /// v112: equipment.thickness column. Idempotent so it is safe to call from
@@ -2540,6 +2634,7 @@ class AppDatabase extends _$AppDatabase {
     'trip_itinerary_days',
     'equipment',
     'equipment_sets',
+    'equipment_attributes',
     'dive_types',
     'dive_roles',
     'tank_presets',
@@ -5543,6 +5638,11 @@ class AppDatabase extends _$AppDatabase {
           await _assertEquipmentThicknessColumn();
         }
         if (from < 112) await reportProgress();
+        if (from < 115) {
+          await _assertEquipmentAttributesSchema();
+          await _migrateLegacyEquipmentColumnsToAttributes();
+        }
+        if (from < 115) await reportProgress();
       },
       beforeOpen: (details) async {
         // Enable foreign keys
@@ -5575,6 +5675,11 @@ class AppDatabase extends _$AppDatabase {
 
         // v112 backstop: re-assert equipment.thickness column.
         await _assertEquipmentThicknessColumn();
+
+        // v115 backstop: re-assert the equipment_attributes table (schema
+        // only -- the legacy-column copy must NOT run here, it would
+        // resurrect attribute rows the user has cleared).
+        await _assertEquipmentAttributesSchema();
 
         // Built-in dive types are reference data: identical on every device and
         // undeletable through DiveTypeRepository. Nothing else restores them --

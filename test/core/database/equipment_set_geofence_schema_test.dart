@@ -74,8 +74,11 @@ void main() {
     },
   );
 
-  test('v112 is the current schema version (exact-latest tripwire)', () {
-    expect(AppDatabase.currentSchemaVersion, 112);
+  test('v112 is in the migration ladder', () {
+    // v112 is now a past migration (the latest-version tripwire lives in the
+    // newest migration's test -- equipment attributes v115), so assert
+    // membership, not equality.
+    expect(AppDatabase.currentSchemaVersion, greaterThanOrEqualTo(112));
     expect(AppDatabase.migrationVersions, contains(112));
   });
 }
