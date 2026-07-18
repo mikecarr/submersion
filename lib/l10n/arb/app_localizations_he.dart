@@ -18487,13 +18487,13 @@ class AppLocalizationsHe extends AppLocalizations {
       'No data source integrations are available on this platform.';
 
   @override
-  String get diveLog_edit_section_environment => 'Environment';
+  String get diveLog_edit_section_environment => 'סביבה';
 
   @override
-  String get diveLog_edit_subsection_weather => 'Weather';
+  String get diveLog_edit_subsection_weather => 'מזג אוויר';
 
   @override
-  String get diveLog_edit_subsection_diveConditions => 'Dive Conditions';
+  String get diveLog_edit_subsection_diveConditions => 'תנאי צלילה';
 
   @override
   String get diveLog_edit_label_windSpeed => 'מהירות רוח';
@@ -18541,13 +18541,13 @@ class AppLocalizationsHe extends AppLocalizations {
       'Replace existing weather data with fetched data?';
 
   @override
-  String get diveLog_detail_section_environment => 'Environment';
+  String get diveLog_detail_section_environment => 'סביבה';
 
   @override
   String get diveLog_detail_subsection_weather => 'מזג אוויר';
 
   @override
-  String get diveLog_detail_subsection_diveConditions => 'Dive Conditions';
+  String get diveLog_detail_subsection_diveConditions => 'תנאי צלילה';
 
   @override
   String get diveLog_detail_label_windSpeed => 'מהירות רוח';

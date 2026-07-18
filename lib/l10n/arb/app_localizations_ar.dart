@@ -18626,13 +18626,13 @@ class AppLocalizationsAr extends AppLocalizations {
       'No data source integrations are available on this platform.';
 
   @override
-  String get diveLog_edit_section_environment => 'Environment';
+  String get diveLog_edit_section_environment => 'البيئة';
 
   @override
-  String get diveLog_edit_subsection_weather => 'Weather';
+  String get diveLog_edit_subsection_weather => 'الطقس';
 
   @override
-  String get diveLog_edit_subsection_diveConditions => 'Dive Conditions';
+  String get diveLog_edit_subsection_diveConditions => 'ظروف الغوص';
 
   @override
   String get diveLog_edit_label_windSpeed => 'سرعة الرياح';
@@ -18680,13 +18680,13 @@ class AppLocalizationsAr extends AppLocalizations {
       'Replace existing weather data with fetched data?';
 
   @override
-  String get diveLog_detail_section_environment => 'Environment';
+  String get diveLog_detail_section_environment => 'البيئة';
 
   @override
   String get diveLog_detail_subsection_weather => 'الطقس';
 
   @override
-  String get diveLog_detail_subsection_diveConditions => 'Dive Conditions';
+  String get diveLog_detail_subsection_diveConditions => 'ظروف الغوص';
 
   @override
   String get diveLog_detail_label_windSpeed => 'سرعة الرياح';
