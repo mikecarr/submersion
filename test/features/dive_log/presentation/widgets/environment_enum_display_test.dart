@@ -76,10 +76,22 @@ void main() {
   });
 
   group('German locale returns translated values (the #622 fix)', () {
-    test('weather enums are translated, not English', () {
-      expect(CloudCover.partlyCloudy.localizedName(de), 'Teils bewölkt');
-      expect(Precipitation.drizzle.localizedName(de), 'Nieselregen');
-      expect(CurrentDirection.south.localizedName(de), 'Süd');
+    test('values resolve through the German localization table', () {
+      // Compare against the generated getters rather than literal strings, so
+      // the test verifies key wiring without breaking when translators refine
+      // wording.
+      expect(
+        CloudCover.partlyCloudy.localizedName(de),
+        de.enum_cloudCover_partlyCloudy,
+      );
+      expect(
+        Precipitation.drizzle.localizedName(de),
+        de.enum_precipitation_drizzle,
+      );
+      expect(
+        CurrentDirection.south.localizedName(de),
+        de.enum_currentDirection_south,
+      );
     });
 
     test('German never falls back to the English displayName', () {
