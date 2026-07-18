@@ -11,6 +11,9 @@ Widget _buildTestWidget(MockSettingsNotifier notifier) {
   return ProviderScope(
     overrides: [settingsProvider.overrideWith((ref) => notifier)],
     child: const MaterialApp(
+      // Pin English so text-based finders stay deterministic regardless of the
+      // host platform locale.
+      locale: Locale('en'),
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       home: SafetySettingsPage(),

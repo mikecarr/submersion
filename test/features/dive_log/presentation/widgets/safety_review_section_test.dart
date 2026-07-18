@@ -57,6 +57,31 @@ void main() {
     expect(find.textContaining('Ascent exceeded'), findsOneWidget);
   });
 
+  testWidgets('renders a neutral placeholder when value is null', (
+    tester,
+  ) async {
+    await pump(
+      tester,
+      reviewWith([
+        SafetyFinding(
+          id: 'f-null',
+          diveId: 'dive-1',
+          ruleId: SafetyRuleId.rapidAscent,
+          severity: SafetySeverity.significant,
+          startTimestamp: 1500,
+          endTimestamp: 1540,
+          value: null,
+          engineVersion: 1,
+          createdAt: now,
+        ),
+      ]),
+    );
+    // A missing number must not read as a fabricated "0"; it shows "--" while
+    // still preserving the known duration.
+    expect(find.textContaining('Ascent exceeded --'), findsOneWidget);
+    expect(find.textContaining('exceeded 0'), findsNothing);
+  });
+
   testWidgets('renders nothing when there are no findings', (tester) async {
     await pump(tester, reviewWith(const []));
     expect(find.text('Safety review'), findsNothing);

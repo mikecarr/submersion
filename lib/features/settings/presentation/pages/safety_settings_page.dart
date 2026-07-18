@@ -37,7 +37,11 @@ class _SafetySettingsPageState extends ConsumerState<SafetySettingsPage> {
             title: Text(l10n.safetySettings_masterToggle),
             subtitle: Text(l10n.safetySettings_masterToggle_subtitle),
             value: enabled,
-            onChanged: (value) => notifier.setSafetyReviewEnabled(value),
+            // Locked during a backfill sweep: toggling off mid-run would leave
+            // the progress UI counting to a misleading "Analysis complete".
+            onChanged: _analyzing
+                ? null
+                : (value) => notifier.setSafetyReviewEnabled(value),
           ),
           const Divider(height: 1),
           Padding(
@@ -53,7 +57,9 @@ class _SafetySettingsPageState extends ConsumerState<SafetySettingsPage> {
             SwitchListTile(
               title: Text(_ruleLabel(l10n, rule)),
               value: !settings.safetyReviewDisabledRules.contains(rule.dbValue),
-              onChanged: enabled
+              // Same gating as the master toggle: keep the active rule set
+              // fixed while a sweep is computing over it.
+              onChanged: enabled && !_analyzing
                   ? (value) => notifier.setSafetyRuleEnabled(rule, value)
                   : null,
             ),
