@@ -2,6 +2,7 @@ import 'dart:io' show Platform;
 
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:submersion/core/constants/enums.dart';
 import 'package:submersion/core/providers/provider.dart';
 import 'package:submersion/core/providers/location_service_provider.dart';
 import 'package:go_router/go_router.dart';
@@ -81,6 +82,7 @@ class _SiteEditPageState extends ConsumerState<SiteEditPage> {
 
   double _rating = 0;
   SiteDifficulty? _difficulty;
+  WaterType? _waterType;
   bool _isLoading = false;
   bool _isInitialized = false;
   bool _hasChanges = false;
@@ -217,6 +219,7 @@ class _SiteEditPageState extends ConsumerState<SiteEditPage> {
     _parkingInfoController.text = site.parkingInfo ?? '';
     _rating = site.rating ?? 0;
     _difficulty = site.difficulty;
+    _waterType = site.waterType;
     _isShared = site.isShared;
     _altitudeController.text = site.altitude != null
         ? units.convertAltitude(site.altitude!).toStringAsFixed(0)
@@ -692,6 +695,7 @@ class _SiteEditPageState extends ConsumerState<SiteEditPage> {
       '${_minDepthController.text.isEmpty ? '?' : _minDepthController.text}'
           '-${_maxDepthController.text.isEmpty ? '?' : _maxDepthController.text}',
     if (_difficulty != null) _difficulty!.displayName,
+    if (_waterType != null) _waterType!.displayName,
     if (_rating > 0) '★' * _rating.round(),
   ].join(' · ');
 
@@ -792,6 +796,11 @@ class _SiteEditPageState extends ConsumerState<SiteEditPage> {
             }),
             onRatingCleared: () => setState(() {
               _rating = 0;
+              _hasChanges = true;
+            }),
+            waterType: _waterType,
+            onWaterTypeChanged: (value) => setState(() {
+              _waterType = value;
               _hasChanges = true;
             }),
             mergeExtras: widget.isMerging ? _mergeExtras : null,
@@ -1317,6 +1326,7 @@ class _SiteEditPageState extends ConsumerState<SiteEditPage> {
             ? null
             : _parkingInfoController.text.trim(),
         altitude: altitudeMeters,
+        waterType: _waterType,
         isShared: _isShared,
       );
 
