@@ -2155,16 +2155,34 @@ class AppLocalizationsAr extends AppLocalizations {
   String get courses_action_add => 'إضافة دورة';
 
   @override
+  String get courses_action_addFromTemplate => 'إضافة من قالب';
+
+  @override
+  String get courses_action_addRequirement => 'إضافة متطلب';
+
+  @override
   String get courses_action_create => 'إنشاء دورة';
+
+  @override
+  String get courses_action_deleteRequirement => 'حذف المتطلب';
 
   @override
   String get courses_action_edit => 'تعديل الدورة';
 
   @override
+  String get courses_action_editRequirement => 'تعديل المتطلب';
+
+  @override
   String get courses_action_exportTrainingLog => 'تصدير سجل التدريب';
 
   @override
+  String get courses_action_linkDive => 'ربط';
+
+  @override
   String get courses_action_markCompleted => 'وضع علامة كمكتمل';
+
+  @override
+  String get courses_action_unlinkDive => 'إلغاء ربط الغطسة';
 
   @override
   String get courses_action_moreOptions => 'المزيد من الخيارات';
@@ -2340,6 +2358,35 @@ class AppLocalizationsAr extends AppLocalizations {
   String get courses_picker_tapToLink => 'اضغط للربط بدورة تدريبية';
 
   @override
+  String courses_requirement_diveProgress(int count, int target) {
+    return '$count من $target غطسات';
+  }
+
+  @override
+  String get courses_requirement_field_name => 'الاسم';
+
+  @override
+  String get courses_requirement_field_targetCount => 'الغطسات المطلوبة';
+
+  @override
+  String get courses_requirement_kind_checklist => 'عنصر تحقق';
+
+  @override
+  String get courses_requirement_kind_dive => 'متطلب غطس';
+
+  @override
+  String get courses_requirement_suggestions => 'غطسات مقترحة';
+
+  @override
+  String get courses_requirements_empty =>
+      'تتبع غطسات المغامرة والمتطلبات المسبقة وعناصر التحقق لهذه الدورة.';
+
+  @override
+  String courses_requirements_progress(int satisfied, int total) {
+    return '$satisfied من $total مكتملة';
+  }
+
+  @override
   String get courses_section_details => 'تفاصيل الدورة';
 
   @override
@@ -2350,6 +2397,9 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get courses_section_notes => 'ملاحظات';
+
+  @override
+  String get courses_section_requirements => 'المتطلبات';
 
   @override
   String get courses_section_trainingDives => 'الغطسات التدريبية';
@@ -2373,6 +2423,11 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String courses_status_semanticLabel(Object status, Object duration) {
     return '$status، $duration';
+  }
+
+  @override
+  String courses_template_addsCount(int count) {
+    return 'يضيف $count متطلبات';
   }
 
   @override
@@ -2407,6 +2462,9 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get courses_validation_nameRequired => 'الرجاء إدخال اسم الدورة';
+
+  @override
+  String get dashboard_activeCourses_title => 'الدورات قيد التنفيذ';
 
   @override
   String get dashboard_activity_daySinceDiving => 'يوم منذ آخر غوصة';

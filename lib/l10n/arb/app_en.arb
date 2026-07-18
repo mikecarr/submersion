@@ -1336,10 +1336,16 @@
     "description": "Generic error snackbar shown when an action fails and the user should retry."
   },
   "courses_action_add": "Add Course",
+  "courses_action_addFromTemplate": "Add from template",
+  "courses_action_addRequirement": "Add requirement",
   "courses_action_create": "Create Course",
+  "courses_action_deleteRequirement": "Delete requirement",
   "courses_action_edit": "Edit course",
+  "courses_action_editRequirement": "Edit requirement",
   "courses_action_exportTrainingLog": "Export Training Log",
+  "courses_action_linkDive": "Link",
   "courses_action_markCompleted": "Mark as Completed",
+  "courses_action_unlinkDive": "Unlink dive",
   "courses_action_moreOptions": "More options",
   "courses_action_retry": "Retry",
   "courses_action_saveChanges": "Save Changes",
@@ -1392,16 +1398,26 @@
   "courses_picker_selectTitle": "Select Training Course",
   "courses_picker_selected": "selected",
   "courses_picker_tapToLink": "Tap to link to a training course",
+  "courses_requirement_diveProgress": "{count} of {target} dives",
+  "courses_requirement_field_name": "Name",
+  "courses_requirement_field_targetCount": "Required dives",
+  "courses_requirement_kind_checklist": "Check-off item",
+  "courses_requirement_kind_dive": "Dive requirement",
+  "courses_requirement_suggestions": "Suggested dives",
+  "courses_requirements_empty": "Track adventure dives, prerequisites, and check-offs for this course.",
+  "courses_requirements_progress": "{satisfied} of {total} complete",
   "courses_section_details": "Course Details",
   "courses_section_earnedCertification": "Earned Certification",
   "courses_section_instructor": "Instructor",
   "courses_section_notes": "Notes",
+  "courses_section_requirements": "Requirements",
   "courses_section_trainingDives": "Training Dives",
   "courses_status_completed": "Completed",
   "courses_status_daysSinceStart": "{days} days since start",
   "courses_status_durationDays": "{days} days",
   "courses_status_inProgress": "In Progress",
   "courses_status_semanticLabel": "{status}, {duration}",
+  "courses_template_addsCount": "Adds {count} requirements",
   "courses_summary_overview": "Overview",
   "courses_summary_quickActions": "Quick Actions",
   "courses_summary_recentCourses": "Recent Courses",
@@ -1462,6 +1478,33 @@
       }
     }
   },
+  "@courses_requirement_diveProgress": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "target": {
+        "type": "int"
+      }
+    }
+  },
+  "@courses_requirements_progress": {
+    "placeholders": {
+      "satisfied": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "@courses_template_addsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "@courses_status_daysSinceStart": {
     "placeholders": {
       "days": {
@@ -1486,6 +1529,7 @@
       }
     }
   },
+  "dashboard_activeCourses_title": "Courses in progress",
   "dashboard_activity_daySinceDiving": "Day since diving",
   "dashboard_activity_daysSinceDiving": "Days since diving",
   "dashboard_activity_diveInYear": "Dive in {year}",
