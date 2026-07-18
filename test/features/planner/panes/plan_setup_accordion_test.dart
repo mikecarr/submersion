@@ -92,4 +92,18 @@ void main() {
     expect(find.byType(PlanDecoSection), findsOneWidget);
     expect(container.read(setupFocusSectionProvider), isNull);
   });
+
+  testWidgets('setup focus on an unavailable section still clears', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_harness());
+    final container = ProviderScope.containerOf(
+      tester.element(find.byType(PlanSetupAccordion)),
+    );
+    // 'ccr' has no section on an OC plan (no controller registered). The focus
+    // must still be consumed, or it would re-schedule work on every rebuild.
+    container.read(setupFocusSectionProvider.notifier).state = 'ccr';
+    await tester.pumpAndSettle();
+    expect(container.read(setupFocusSectionProvider), isNull);
+  });
 }

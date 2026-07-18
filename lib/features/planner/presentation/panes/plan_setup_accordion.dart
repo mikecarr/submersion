@@ -47,6 +47,12 @@ class _PlanSetupAccordionState extends ConsumerState<PlanSetupAccordion> {
     if (pending != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
+        // Consume the pending focus first, unconditionally. The accordion
+        // builds every mode-valid section in this same pass, so a missing
+        // controller means the requested section is not available for the
+        // current plan mode - leaving the provider non-null would re-schedule
+        // this callback (and editor-pane auto-scroll) on every rebuild.
+        ref.read(setupFocusSectionProvider.notifier).state = null;
         final controller = _controllers[pending];
         if (controller == null) return;
         controller.expand();
@@ -58,7 +64,6 @@ class _PlanSetupAccordionState extends ConsumerState<PlanSetupAccordion> {
             alignment: 0.1,
           );
         }
-        ref.read(setupFocusSectionProvider.notifier).state = null;
       });
     }
 

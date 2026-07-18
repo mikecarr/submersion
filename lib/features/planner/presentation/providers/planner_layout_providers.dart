@@ -25,6 +25,7 @@ final plannerPhoneTabProvider = StateProvider<int>((_) => 0);
 final setupExpandedSectionsProvider = StateProvider<Set<String>>((_) => {});
 
 /// Setup-accordion section to reveal (header chip deep-links). Keys:
-/// 'deco' | 'gas' | 'environment' | 'ccr' | 'contingencies' | 'gear'.
+/// 'deco' | 'rates' | 'gas' | 'environment' | 'contingencies' | 'gear'
+/// always, plus 'ccr' (CCR mode) and 'pscr' (pSCR mode).
 /// Consumed and cleared by the accordion after expanding the section.
 final setupFocusSectionProvider = StateProvider<String?>((_) => null);
