@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -162,9 +163,11 @@ class _PhotoViewerPageState extends ConsumerState<PhotoViewerPage> {
                     hasEnrichment: enrichment?.depthMeters != null,
                     onOpenInLightroom: _lightroomWebUrl(currentItem) == null
                         ? null
-                        : () => launchUrl(
-                            Uri.parse(_lightroomWebUrl(currentItem)!),
-                            mode: LaunchMode.externalApplication,
+                        : () => unawaited(
+                            launchUrl(
+                              Uri.parse(_lightroomWebUrl(currentItem)!),
+                              mode: LaunchMode.externalApplication,
+                            ),
                           ),
                   ),
 
@@ -483,8 +486,9 @@ class _ConnectorVideoItem extends ConsumerWidget {
       behavior: HitTestBehavior.opaque,
       onTap: url == null
           ? null
-          : () =>
-                launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication),
+          : () => unawaited(
+              launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication),
+            ),
       child: Stack(
         alignment: Alignment.center,
         children: [
