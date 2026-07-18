@@ -187,6 +187,14 @@ class CourseRequirementRepository {
           name: Value(requirement.name.trim()),
           kind: Value(requirement.kind.name),
           targetCount: Value(requirement.targetCount),
+          // completedAt is only meaningful for checklist requirements. When
+          // the kind is (or becomes) dive, force it NULL so a later switch
+          // back to checklist does not resurface a stale completion; for
+          // checklist leave the column untouched (setChecklistComplete owns
+          // it) rather than overwriting with a possibly-unhydrated value.
+          completedAt: requirement.kind == RequirementKind.dive
+              ? const Value(null)
+              : const Value.absent(),
           sortOrder: Value(requirement.sortOrder),
           notes: Value(requirement.notes),
           updatedAt: Value(now),
@@ -300,38 +308,47 @@ class CourseRequirementRepository {
       // also covers the duplicate-link case for the same requirement --
       // Drift's insert return value cannot distinguish an ignored
       // conflict, so the check is explicit (importDiveRole pattern), and
-      // a no-op must not bump the parent hlc or emit sync churn. Enforced
-      // locally at write time; concurrent links from two devices to
-      // different requirements still merge via sync and are resolved by
-      // the user unlinking one.
-      final existingInCourse = await _db
-          .customSelect(
-            'SELECT l.id FROM course_requirement_dives l '
-            'JOIN course_requirements r ON r.id = l.requirement_id '
-            'WHERE l.dive_id = ?1 AND r.course_id = '
-            '(SELECT course_id FROM course_requirements WHERE id = ?2) '
-            'LIMIT 1',
-            variables: [
-              Variable.withString(diveId),
-              Variable.withString(requirementId),
-            ],
-          )
-          .get();
-      if (existingInCourse.isNotEmpty) return;
+      // a no-op must not bump the parent hlc or emit sync churn. The
+      // check+insert runs in a transaction: two concurrent taps each yield
+      // at their SELECT, so without the transaction both could observe no
+      // existing link and insert different deterministic ids. Drift
+      // serializes transactions, so the second one's SELECT sees the first
+      // commit and returns early. Enforced locally at write time;
+      // concurrent links from two devices to different requirements still
+      // merge via sync and are resolved by the user unlinking one.
+      final inserted = await _db.transaction(() async {
+        final existingInCourse = await _db
+            .customSelect(
+              'SELECT l.id FROM course_requirement_dives l '
+              'JOIN course_requirements r ON r.id = l.requirement_id '
+              'WHERE l.dive_id = ?1 AND r.course_id = '
+              '(SELECT course_id FROM course_requirements WHERE id = ?2) '
+              'LIMIT 1',
+              variables: [
+                Variable.withString(diveId),
+                Variable.withString(requirementId),
+              ],
+            )
+            .get();
+        if (existingInCourse.isNotEmpty) return false;
 
-      final now = DateTime.now().millisecondsSinceEpoch;
-      await _db
-          .into(_db.courseRequirementDives)
-          .insert(
-            CourseRequirementDivesCompanion(
-              id: Value(id),
-              requirementId: Value(requirementId),
-              diveId: Value(diveId),
-              createdAt: Value(now),
-            ),
-            mode: InsertMode.insertOrIgnore,
-          );
-      await _touchRequirement(requirementId, now);
+        final now = DateTime.now().millisecondsSinceEpoch;
+        await _db
+            .into(_db.courseRequirementDives)
+            .insert(
+              CourseRequirementDivesCompanion(
+                id: Value(id),
+                requirementId: Value(requirementId),
+                diveId: Value(diveId),
+                createdAt: Value(now),
+              ),
+              mode: InsertMode.insertOrIgnore,
+            );
+        await _touchRequirement(requirementId, now);
+        return true;
+      });
+      if (!inserted) return;
+
       SyncEventBus.notifyLocalChange();
       _log.info('Linked dive $diveId to requirement $requirementId');
     } catch (e, stackTrace) {

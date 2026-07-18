@@ -89,6 +89,52 @@ void main() {
       expect(progress.requirements.single.isSatisfied, isFalse);
     });
 
+    test('switching a checked checklist requirement to dive clears '
+        'completedAt', () async {
+      await _seedDiverAndCourse();
+      final req = await repository.createRequirement(
+        courseId: 'course-1',
+        name: 'Knowledge development',
+        kind: RequirementKind.checklist,
+      );
+      await repository.setChecklistComplete(req.id, true);
+      var progress = await repository.getCourseProgress('course-1');
+      expect(progress.requirements.single.requirement.completedAt, isNotNull);
+
+      await repository.updateRequirement(
+        progress.requirements.single.requirement.copyWith(
+          kind: RequirementKind.dive,
+        ),
+      );
+
+      progress = await repository.getCourseProgress('course-1');
+      final updated = progress.requirements.single.requirement;
+      expect(updated.kind, RequirementKind.dive);
+      expect(updated.completedAt, isNull);
+    });
+
+    test('editing a checklist requirement preserves completedAt', () async {
+      await _seedDiverAndCourse();
+      final req = await repository.createRequirement(
+        courseId: 'course-1',
+        name: 'Knowledge development',
+        kind: RequirementKind.checklist,
+      );
+      await repository.setChecklistComplete(req.id, true);
+      var progress = await repository.getCourseProgress('course-1');
+      final completedAt = progress.requirements.single.requirement.completedAt;
+      expect(completedAt, isNotNull);
+
+      await repository.updateRequirement(
+        progress.requirements.single.requirement.copyWith(name: 'Renamed'),
+      );
+
+      progress = await repository.getCourseProgress('course-1');
+      final updated = progress.requirements.single.requirement;
+      expect(updated.name, 'Renamed');
+      expect(updated.completedAt, completedAt);
+    });
+
     test(
       'deleteRequirement removes row and logs tombstones for links',
       () async {
@@ -254,6 +300,38 @@ void main() {
 
       final course2 = await repository.getCourseProgress('course-2');
       expect(course2.requirements.single.creditCount, 1);
+    });
+
+    test('concurrent links of one dive to two requirements credit only '
+        'one (once-per-course is atomic)', () async {
+      await _seedDiverAndCourse();
+      await _seedDive('dive-1');
+      final deep = await repository.createRequirement(
+        courseId: 'course-1',
+        name: 'Deep adventure dive',
+        kind: RequirementKind.dive,
+      );
+      final elective = await repository.createRequirement(
+        courseId: 'course-1',
+        name: 'Elective adventure dives',
+        kind: RequirementKind.dive,
+        targetCount: 3,
+      );
+
+      // Two rapid taps before providers refresh: both begin before either
+      // commits. The transaction in linkDive must serialize them so the
+      // dive is credited to exactly one requirement of the course.
+      await Future.wait([
+        repository.linkDive(requirementId: deep.id, diveId: 'dive-1'),
+        repository.linkDive(requirementId: elective.id, diveId: 'dive-1'),
+      ]);
+
+      final progress = await repository.getCourseProgress('course-1');
+      final total = progress.requirements.fold<int>(
+        0,
+        (sum, p) => sum + p.creditCount,
+      );
+      expect(total, 1);
     });
 
     test('linking bumps the parent requirement updatedAt (sync gate)', () async {
