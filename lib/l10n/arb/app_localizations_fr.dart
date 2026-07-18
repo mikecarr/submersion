@@ -9536,6 +9536,219 @@ class AppLocalizationsFr extends AppLocalizations {
   String get equipment_detail_serviceInfoTitle => 'Informations de revision';
 
   @override
+  String get equipment_serviceClocks_title => 'Compteurs d\'entretien';
+
+  @override
+  String get equipment_serviceClocks_addClock => 'Ajouter un compteur';
+
+  @override
+  String get equipment_serviceClocks_logService => 'Enregistrer un entretien';
+
+  @override
+  String get equipment_serviceClocks_edit => 'Modifier les intervalles';
+
+  @override
+  String get equipment_serviceClocks_pause => 'Suspendre';
+
+  @override
+  String get equipment_serviceClocks_resume => 'Reprendre';
+
+  @override
+  String get equipment_serviceClocks_remove => 'Supprimer';
+
+  @override
+  String get equipment_serviceClocks_paused => 'Suspendu';
+
+  @override
+  String get equipment_serviceClocks_empty => 'Aucun compteur d\'entretien';
+
+  @override
+  String equipment_serviceClocks_dueOn(String date) {
+    return 'Échéance le $date';
+  }
+
+  @override
+  String equipment_serviceClocks_overdueSince(String date) {
+    return 'En retard depuis le $date';
+  }
+
+  @override
+  String get equipment_serviceClocks_overdue => 'En retard';
+
+  @override
+  String equipment_serviceClocks_divesLeft(int remaining, int total) {
+    return '$remaining plongées restantes sur $total';
+  }
+
+  @override
+  String equipment_serviceClocks_hoursLeft(String remaining, String total) {
+    return '$remaining heures restantes sur $total';
+  }
+
+  @override
+  String get equipment_serviceClocks_manageKinds =>
+      'Gérer les types d\'entretien';
+
+  @override
+  String get equipment_serviceClocks_appliesToClock =>
+      'S\'applique au compteur';
+
+  @override
+  String get equipment_serviceClocks_noClockOption => 'Non lié à un compteur';
+
+  @override
+  String get equipment_scheduleDialog_title => 'Modifier le compteur';
+
+  @override
+  String get equipment_scheduleDialog_intervalDays => 'Intervalle (jours)';
+
+  @override
+  String get equipment_scheduleDialog_intervalDives => 'Intervalle (plongées)';
+
+  @override
+  String get equipment_scheduleDialog_intervalHours => 'Intervalle (heures)';
+
+  @override
+  String equipment_scheduleDialog_inheritHint(String value) {
+    return 'Par défaut : $value';
+  }
+
+  @override
+  String get equipment_scheduleDialog_anchorDate => 'Date de référence';
+
+  @override
+  String get equipment_scheduleDialog_anchorHint =>
+      'Utilisée lorsqu\'aucun entretien de ce type n\'a encore été enregistré';
+
+  @override
+  String get equipment_scheduleDialog_clearAnchor =>
+      'Effacer la date de référence';
+
+  @override
+  String get equipment_scheduleDialog_save => 'Enregistrer';
+
+  @override
+  String get equipment_scheduleDialog_cancel => 'Annuler';
+
+  @override
+  String get equipment_serviceKinds_title => 'Types d\'entretien';
+
+  @override
+  String get equipment_serviceKinds_builtIn => 'Intégrés';
+
+  @override
+  String get equipment_serviceKinds_custom => 'Personnalisés';
+
+  @override
+  String get equipment_serviceKinds_add => 'Ajouter un type d\'entretien';
+
+  @override
+  String get equipment_serviceKinds_editTitle =>
+      'Modifier le type d\'entretien';
+
+  @override
+  String get equipment_serviceKinds_nameLabel => 'Nom';
+
+  @override
+  String get equipment_serviceKinds_nameRequired => 'Un nom est requis';
+
+  @override
+  String get equipment_serviceKinds_appliesTo => 'S\'applique à';
+
+  @override
+  String get equipment_serviceKinds_autoAttach =>
+      'Associer automatiquement au nouvel équipement';
+
+  @override
+  String get equipment_serviceKinds_deleteConfirmTitle =>
+      'Supprimer ce type d\'entretien ?';
+
+  @override
+  String get equipment_serviceKinds_deleteConfirmBody =>
+      'Les compteurs utilisant ce type d\'entretien seront supprimés.';
+
+  @override
+  String get equipment_serviceKinds_delete => 'Supprimer';
+
+  @override
+  String get equipment_serviceKinds_cancel => 'Annuler';
+
+  @override
+  String get equipment_serviceKinds_save => 'Enregistrer';
+
+  @override
+  String get equipment_serviceKinds_emptyCustom =>
+      'Aucun type d\'entretien personnalisé pour le moment';
+
+  @override
+  String equipment_serviceKinds_everyDays(int days) {
+    return 'tous les $days jours';
+  }
+
+  @override
+  String equipment_serviceKinds_everyDives(int dives) {
+    return 'toutes les $dives plongées';
+  }
+
+  @override
+  String equipment_serviceKinds_everyHours(String hours) {
+    return 'toutes les $hours heures';
+  }
+
+  @override
+  String get dashboard_serviceDue_title => 'Entretien à prévoir';
+
+  @override
+  String dashboard_serviceDue_more(int count) {
+    return '+$count de plus';
+  }
+
+  @override
+  String dashboard_alerts_clockDue(String name, String kind) {
+    return '$name : $kind à échéance';
+  }
+
+  @override
+  String dashboard_alerts_clockOverdue(String name, String kind) {
+    return '$name : $kind en retard';
+  }
+
+  @override
+  String equipment_list_worstClock(String kind) {
+    return '$kind en retard';
+  }
+
+  @override
+  String trips_serviceAlert_count(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count équipements nécessitent un entretien avant ce voyage',
+      one: '1 équipement nécessite un entretien avant ce voyage',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String trips_serviceAlert_dueBefore(String kind, String date) {
+    return '$kind à échéance le $date';
+  }
+
+  @override
+  String trips_serviceAlert_overdue(String kind) {
+    return '$kind en retard';
+  }
+
+  @override
+  String get settings_notifications_tripLeadTitle =>
+      'Délai d\'alerte d\'entretien avant un voyage';
+
+  @override
+  String settings_notifications_tripLeadDays(int days) {
+    return '$days jours avant un voyage';
+  }
+
+  @override
   String get equipment_detail_serviceIntervalLabel => 'Intervalle de revision';
 
   @override
@@ -9837,6 +10050,17 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String equipment_list_tile_daysCount(Object days) {
     return '$days jours';
+  }
+
+  @override
+  String equipment_list_tile_serviceInDays(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: 'Revision dans $days jours',
+      one: 'Revision dans 1 jour',
+    );
+    return '$_temp0';
   }
 
   @override

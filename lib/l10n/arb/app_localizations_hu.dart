@@ -9487,6 +9487,216 @@ class AppLocalizationsHu extends AppLocalizations {
   String get equipment_detail_serviceInfoTitle => 'Szerviz informaciok';
 
   @override
+  String get equipment_serviceClocks_title => 'Szervizintervallumok';
+
+  @override
+  String get equipment_serviceClocks_addClock => 'Intervallum hozzáadása';
+
+  @override
+  String get equipment_serviceClocks_logService => 'Szerviz rögzítése';
+
+  @override
+  String get equipment_serviceClocks_edit => 'Intervallumok szerkesztése';
+
+  @override
+  String get equipment_serviceClocks_pause => 'Szüneteltetés';
+
+  @override
+  String get equipment_serviceClocks_resume => 'Folytatás';
+
+  @override
+  String get equipment_serviceClocks_remove => 'Eltávolítás';
+
+  @override
+  String get equipment_serviceClocks_paused => 'Szüneteltetve';
+
+  @override
+  String get equipment_serviceClocks_empty => 'Nincsenek szervizintervallumok';
+
+  @override
+  String equipment_serviceClocks_dueOn(String date) {
+    return 'Esedékes: $date';
+  }
+
+  @override
+  String equipment_serviceClocks_overdueSince(String date) {
+    return '$date óta esedékes';
+  }
+
+  @override
+  String get equipment_serviceClocks_overdue => 'Lejárt';
+
+  @override
+  String equipment_serviceClocks_divesLeft(int remaining, int total) {
+    return '$remaining / $total merülés van hátra';
+  }
+
+  @override
+  String equipment_serviceClocks_hoursLeft(String remaining, String total) {
+    return '$remaining / $total óra van hátra';
+  }
+
+  @override
+  String get equipment_serviceClocks_manageKinds => 'Szerviztípusok kezelése';
+
+  @override
+  String get equipment_serviceClocks_appliesToClock => 'Kapcsolódó intervallum';
+
+  @override
+  String get equipment_serviceClocks_noClockOption =>
+      'Nem tartozik intervallumhoz';
+
+  @override
+  String get equipment_scheduleDialog_title => 'Intervallum szerkesztése';
+
+  @override
+  String get equipment_scheduleDialog_intervalDays => 'Intervallum (nap)';
+
+  @override
+  String get equipment_scheduleDialog_intervalDives => 'Intervallum (merülés)';
+
+  @override
+  String get equipment_scheduleDialog_intervalHours => 'Intervallum (óra)';
+
+  @override
+  String equipment_scheduleDialog_inheritHint(String value) {
+    return 'Alapértelmezés: $value';
+  }
+
+  @override
+  String get equipment_scheduleDialog_anchorDate => 'Kiindulási dátum';
+
+  @override
+  String get equipment_scheduleDialog_anchorHint =>
+      'Akkor használjuk, ha még nincs ilyen típusú szervizbejegyzés';
+
+  @override
+  String get equipment_scheduleDialog_clearAnchor => 'Kiindulási dátum törlése';
+
+  @override
+  String get equipment_scheduleDialog_save => 'Mentés';
+
+  @override
+  String get equipment_scheduleDialog_cancel => 'Mégse';
+
+  @override
+  String get equipment_serviceKinds_title => 'Szerviztípusok';
+
+  @override
+  String get equipment_serviceKinds_builtIn => 'Beépített';
+
+  @override
+  String get equipment_serviceKinds_custom => 'Egyéni';
+
+  @override
+  String get equipment_serviceKinds_add => 'Szerviztípus hozzáadása';
+
+  @override
+  String get equipment_serviceKinds_editTitle => 'Szerviztípus szerkesztése';
+
+  @override
+  String get equipment_serviceKinds_nameLabel => 'Név';
+
+  @override
+  String get equipment_serviceKinds_nameRequired => 'A név megadása kötelező';
+
+  @override
+  String get equipment_serviceKinds_appliesTo => 'Vonatkozik erre';
+
+  @override
+  String get equipment_serviceKinds_autoAttach =>
+      'Automatikus hozzáadás új felszereléshez';
+
+  @override
+  String get equipment_serviceKinds_deleteConfirmTitle =>
+      'Törli a szerviztípust?';
+
+  @override
+  String get equipment_serviceKinds_deleteConfirmBody =>
+      'Az ezt a szerviztípust használó intervallumok eltávolításra kerülnek.';
+
+  @override
+  String get equipment_serviceKinds_delete => 'Törlés';
+
+  @override
+  String get equipment_serviceKinds_cancel => 'Mégse';
+
+  @override
+  String get equipment_serviceKinds_save => 'Mentés';
+
+  @override
+  String get equipment_serviceKinds_emptyCustom =>
+      'Még nincsenek egyéni szerviztípusok';
+
+  @override
+  String equipment_serviceKinds_everyDays(int days) {
+    return '$days naponta';
+  }
+
+  @override
+  String equipment_serviceKinds_everyDives(int dives) {
+    return '$dives merülésenként';
+  }
+
+  @override
+  String equipment_serviceKinds_everyHours(String hours) {
+    return '$hours óránként';
+  }
+
+  @override
+  String get dashboard_serviceDue_title => 'Esedékes szerviz';
+
+  @override
+  String dashboard_serviceDue_more(int count) {
+    return '+$count további';
+  }
+
+  @override
+  String dashboard_alerts_clockDue(String name, String kind) {
+    return '$name: $kind esedékes';
+  }
+
+  @override
+  String dashboard_alerts_clockOverdue(String name, String kind) {
+    return '$name: $kind lejárt';
+  }
+
+  @override
+  String equipment_list_worstClock(String kind) {
+    return '$kind lejárt';
+  }
+
+  @override
+  String trips_serviceAlert_count(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count felszerelés szervizt igényel az utazás előtt',
+      one: '1 felszerelés szervizt igényel az utazás előtt',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String trips_serviceAlert_dueBefore(String kind, String date) {
+    return '$kind esedékes: $date';
+  }
+
+  @override
+  String trips_serviceAlert_overdue(String kind) {
+    return '$kind lejárt';
+  }
+
+  @override
+  String get settings_notifications_tripLeadTitle =>
+      'Utazás előtti szervizértesítési idő';
+
+  @override
+  String settings_notifications_tripLeadDays(int days) {
+    return '$days nappal az utazás előtt';
+  }
+
+  @override
   String get equipment_detail_serviceIntervalLabel => 'Szerviz intervallum';
 
   @override
@@ -9788,6 +9998,17 @@ class AppLocalizationsHu extends AppLocalizations {
   @override
   String equipment_list_tile_daysCount(Object days) {
     return '$days nap';
+  }
+
+  @override
+  String equipment_list_tile_serviceInDays(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: 'Szerviz $days nap',
+      one: 'Szerviz 1 nap',
+    );
+    return '$_temp0';
   }
 
   @override

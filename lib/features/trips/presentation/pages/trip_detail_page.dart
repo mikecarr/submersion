@@ -17,6 +17,7 @@ import 'package:submersion/features/trips/presentation/providers/trip_providers.
 import 'package:submersion/features/trips/presentation/widgets/trip_itinerary_tab.dart';
 import 'package:submersion/features/trips/presentation/widgets/trip_overview_tab.dart';
 import 'package:submersion/features/trips/presentation/widgets/trip_photo_section.dart';
+import 'package:submersion/features/trips/presentation/widgets/trip_service_alert_banner.dart';
 import 'package:submersion/l10n/l10n_extension.dart';
 import 'package:submersion/shared/widgets/master_detail/responsive_breakpoints.dart';
 
@@ -117,6 +118,7 @@ class _TripDetailContent extends ConsumerWidget {
       return Column(
         children: [
           _buildEmbeddedHeader(context, ref, trip),
+          TripServiceAlertBanner(trip: trip),
           Expanded(child: body),
         ],
       );
@@ -127,7 +129,12 @@ class _TripDetailContent extends ConsumerWidget {
         title: Text(trip.name),
         actions: _buildAppBarActions(context, ref, trip),
       ),
-      body: body,
+      body: Column(
+        children: [
+          TripServiceAlertBanner(trip: trip),
+          Expanded(child: body),
+        ],
+      ),
     );
   }
 
@@ -176,6 +183,7 @@ class _TripDetailContent extends ConsumerWidget {
       return Column(
         children: [
           _buildEmbeddedHeader(context, ref, trip),
+          TripServiceAlertBanner(trip: trip),
           Expanded(child: tabbedBody),
         ],
       );
@@ -186,7 +194,12 @@ class _TripDetailContent extends ConsumerWidget {
         title: Text(trip.name),
         actions: _buildAppBarActions(context, ref, trip),
       ),
-      body: tabbedBody,
+      body: Column(
+        children: [
+          TripServiceAlertBanner(trip: trip),
+          Expanded(child: tabbedBody),
+        ],
+      ),
     );
   }
 

@@ -16288,6 +16288,336 @@ abstract class AppLocalizations {
   /// **'Service Information'**
   String get equipment_detail_serviceInfoTitle;
 
+  /// No description provided for @equipment_serviceClocks_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Service clocks'**
+  String get equipment_serviceClocks_title;
+
+  /// No description provided for @equipment_serviceClocks_addClock.
+  ///
+  /// In en, this message translates to:
+  /// **'Add clock'**
+  String get equipment_serviceClocks_addClock;
+
+  /// No description provided for @equipment_serviceClocks_logService.
+  ///
+  /// In en, this message translates to:
+  /// **'Log service'**
+  String get equipment_serviceClocks_logService;
+
+  /// No description provided for @equipment_serviceClocks_edit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit intervals'**
+  String get equipment_serviceClocks_edit;
+
+  /// No description provided for @equipment_serviceClocks_pause.
+  ///
+  /// In en, this message translates to:
+  /// **'Pause'**
+  String get equipment_serviceClocks_pause;
+
+  /// No description provided for @equipment_serviceClocks_resume.
+  ///
+  /// In en, this message translates to:
+  /// **'Resume'**
+  String get equipment_serviceClocks_resume;
+
+  /// No description provided for @equipment_serviceClocks_remove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get equipment_serviceClocks_remove;
+
+  /// No description provided for @equipment_serviceClocks_paused.
+  ///
+  /// In en, this message translates to:
+  /// **'Paused'**
+  String get equipment_serviceClocks_paused;
+
+  /// No description provided for @equipment_serviceClocks_empty.
+  ///
+  /// In en, this message translates to:
+  /// **'No service clocks'**
+  String get equipment_serviceClocks_empty;
+
+  /// No description provided for @equipment_serviceClocks_dueOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Due {date}'**
+  String equipment_serviceClocks_dueOn(String date);
+
+  /// No description provided for @equipment_serviceClocks_overdueSince.
+  ///
+  /// In en, this message translates to:
+  /// **'Overdue since {date}'**
+  String equipment_serviceClocks_overdueSince(String date);
+
+  /// No description provided for @equipment_serviceClocks_overdue.
+  ///
+  /// In en, this message translates to:
+  /// **'Overdue'**
+  String get equipment_serviceClocks_overdue;
+
+  /// No description provided for @equipment_serviceClocks_divesLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'{remaining} of {total} dives left'**
+  String equipment_serviceClocks_divesLeft(int remaining, int total);
+
+  /// No description provided for @equipment_serviceClocks_hoursLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'{remaining} of {total} hours left'**
+  String equipment_serviceClocks_hoursLeft(String remaining, String total);
+
+  /// No description provided for @equipment_serviceClocks_manageKinds.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage service types'**
+  String get equipment_serviceClocks_manageKinds;
+
+  /// No description provided for @equipment_serviceClocks_appliesToClock.
+  ///
+  /// In en, this message translates to:
+  /// **'Applies to clock'**
+  String get equipment_serviceClocks_appliesToClock;
+
+  /// No description provided for @equipment_serviceClocks_noClockOption.
+  ///
+  /// In en, this message translates to:
+  /// **'Not tied to a clock'**
+  String get equipment_serviceClocks_noClockOption;
+
+  /// No description provided for @equipment_scheduleDialog_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit clock'**
+  String get equipment_scheduleDialog_title;
+
+  /// No description provided for @equipment_scheduleDialog_intervalDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Interval (days)'**
+  String get equipment_scheduleDialog_intervalDays;
+
+  /// No description provided for @equipment_scheduleDialog_intervalDives.
+  ///
+  /// In en, this message translates to:
+  /// **'Interval (dives)'**
+  String get equipment_scheduleDialog_intervalDives;
+
+  /// No description provided for @equipment_scheduleDialog_intervalHours.
+  ///
+  /// In en, this message translates to:
+  /// **'Interval (hours)'**
+  String get equipment_scheduleDialog_intervalHours;
+
+  /// No description provided for @equipment_scheduleDialog_inheritHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Default: {value}'**
+  String equipment_scheduleDialog_inheritHint(String value);
+
+  /// No description provided for @equipment_scheduleDialog_anchorDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Baseline date'**
+  String get equipment_scheduleDialog_anchorDate;
+
+  /// No description provided for @equipment_scheduleDialog_anchorHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Used when no service record of this kind exists yet'**
+  String get equipment_scheduleDialog_anchorHint;
+
+  /// No description provided for @equipment_scheduleDialog_clearAnchor.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear baseline date'**
+  String get equipment_scheduleDialog_clearAnchor;
+
+  /// No description provided for @equipment_scheduleDialog_save.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get equipment_scheduleDialog_save;
+
+  /// No description provided for @equipment_scheduleDialog_cancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get equipment_scheduleDialog_cancel;
+
+  /// No description provided for @equipment_serviceKinds_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Service types'**
+  String get equipment_serviceKinds_title;
+
+  /// No description provided for @equipment_serviceKinds_builtIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Built-in'**
+  String get equipment_serviceKinds_builtIn;
+
+  /// No description provided for @equipment_serviceKinds_custom.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom'**
+  String get equipment_serviceKinds_custom;
+
+  /// No description provided for @equipment_serviceKinds_add.
+  ///
+  /// In en, this message translates to:
+  /// **'Add service type'**
+  String get equipment_serviceKinds_add;
+
+  /// No description provided for @equipment_serviceKinds_editTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit service type'**
+  String get equipment_serviceKinds_editTitle;
+
+  /// No description provided for @equipment_serviceKinds_nameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get equipment_serviceKinds_nameLabel;
+
+  /// No description provided for @equipment_serviceKinds_nameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'A name is required'**
+  String get equipment_serviceKinds_nameRequired;
+
+  /// No description provided for @equipment_serviceKinds_appliesTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Applies to'**
+  String get equipment_serviceKinds_appliesTo;
+
+  /// No description provided for @equipment_serviceKinds_autoAttach.
+  ///
+  /// In en, this message translates to:
+  /// **'Attach automatically to new gear'**
+  String get equipment_serviceKinds_autoAttach;
+
+  /// No description provided for @equipment_serviceKinds_deleteConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete service type?'**
+  String get equipment_serviceKinds_deleteConfirmTitle;
+
+  /// No description provided for @equipment_serviceKinds_deleteConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Clocks using this service type will be removed.'**
+  String get equipment_serviceKinds_deleteConfirmBody;
+
+  /// No description provided for @equipment_serviceKinds_delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get equipment_serviceKinds_delete;
+
+  /// No description provided for @equipment_serviceKinds_cancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get equipment_serviceKinds_cancel;
+
+  /// No description provided for @equipment_serviceKinds_save.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get equipment_serviceKinds_save;
+
+  /// No description provided for @equipment_serviceKinds_emptyCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'No custom service types yet'**
+  String get equipment_serviceKinds_emptyCustom;
+
+  /// No description provided for @equipment_serviceKinds_everyDays.
+  ///
+  /// In en, this message translates to:
+  /// **'every {days} days'**
+  String equipment_serviceKinds_everyDays(int days);
+
+  /// No description provided for @equipment_serviceKinds_everyDives.
+  ///
+  /// In en, this message translates to:
+  /// **'every {dives} dives'**
+  String equipment_serviceKinds_everyDives(int dives);
+
+  /// No description provided for @equipment_serviceKinds_everyHours.
+  ///
+  /// In en, this message translates to:
+  /// **'every {hours} hours'**
+  String equipment_serviceKinds_everyHours(String hours);
+
+  /// No description provided for @dashboard_serviceDue_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Service due'**
+  String get dashboard_serviceDue_title;
+
+  /// No description provided for @dashboard_serviceDue_more.
+  ///
+  /// In en, this message translates to:
+  /// **'+{count} more'**
+  String dashboard_serviceDue_more(int count);
+
+  /// No description provided for @dashboard_alerts_clockDue.
+  ///
+  /// In en, this message translates to:
+  /// **'{name}: {kind} due'**
+  String dashboard_alerts_clockDue(String name, String kind);
+
+  /// No description provided for @dashboard_alerts_clockOverdue.
+  ///
+  /// In en, this message translates to:
+  /// **'{name}: {kind} overdue'**
+  String dashboard_alerts_clockOverdue(String name, String kind);
+
+  /// No description provided for @equipment_list_worstClock.
+  ///
+  /// In en, this message translates to:
+  /// **'{kind} overdue'**
+  String equipment_list_worstClock(String kind);
+
+  /// No description provided for @trips_serviceAlert_count.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 item needs service before this trip} other{{count} items need service before this trip}}'**
+  String trips_serviceAlert_count(int count);
+
+  /// No description provided for @trips_serviceAlert_dueBefore.
+  ///
+  /// In en, this message translates to:
+  /// **'{kind} due {date}'**
+  String trips_serviceAlert_dueBefore(String kind, String date);
+
+  /// No description provided for @trips_serviceAlert_overdue.
+  ///
+  /// In en, this message translates to:
+  /// **'{kind} overdue'**
+  String trips_serviceAlert_overdue(String kind);
+
+  /// No description provided for @settings_notifications_tripLeadTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Trip service lead time'**
+  String get settings_notifications_tripLeadTitle;
+
+  /// No description provided for @settings_notifications_tripLeadDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{days} days before a trip'**
+  String settings_notifications_tripLeadDays(int days);
+
   /// No description provided for @equipment_detail_serviceIntervalLabel.
   ///
   /// In en, this message translates to:
@@ -16815,6 +17145,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{days} days'**
   String equipment_list_tile_daysCount(Object days);
+
+  /// No description provided for @equipment_list_tile_serviceInDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{days, plural, =1{Service in 1 day} other{Service in {days} days}}'**
+  String equipment_list_tile_serviceInDays(int days);
 
   /// No description provided for @equipment_list_tile_serviceDueChip.
   ///

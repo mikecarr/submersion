@@ -300,6 +300,9 @@ class AppSettings {
   final List<int> serviceReminderDays;
   final TimeOfDay reminderTime;
 
+  /// Days before a trip starts to nag about gear due before the trip ends.
+  final int tripServiceLeadDays;
+
   /// Show field-level data source attribution badges on dive details
   final bool showDataSourceBadges;
 
@@ -424,6 +427,7 @@ class AppSettings {
     // Notification defaults
     this.notificationsEnabled = true,
     this.serviceReminderDays = const [7, 14, 30],
+    this.tripServiceLeadDays = 14,
     this.reminderTime = const TimeOfDay(hour: 9, minute: 0),
     this.showDataSourceBadges = true,
     this.showProfilePanelInTableView = true,
@@ -560,6 +564,7 @@ class AppSettings {
     bool? defaultShowAscentRateLine,
     bool? notificationsEnabled,
     List<int>? serviceReminderDays,
+    int? tripServiceLeadDays,
     TimeOfDay? reminderTime,
     bool? showDataSourceBadges,
     bool? showProfilePanelInTableView,
@@ -680,6 +685,7 @@ class AppSettings {
           defaultShowAscentRateLine ?? this.defaultShowAscentRateLine,
       notificationsEnabled: notificationsEnabled ?? this.notificationsEnabled,
       serviceReminderDays: serviceReminderDays ?? this.serviceReminderDays,
+      tripServiceLeadDays: tripServiceLeadDays ?? this.tripServiceLeadDays,
       reminderTime: reminderTime ?? this.reminderTime,
       showDataSourceBadges: showDataSourceBadges ?? this.showDataSourceBadges,
       showProfilePanelInTableView:
@@ -1344,6 +1350,11 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
 
   Future<void> setReminderTime(TimeOfDay time) async {
     state = state.copyWith(reminderTime: time);
+    await _saveSettings();
+  }
+
+  Future<void> setTripServiceLeadDays(int days) async {
+    state = state.copyWith(tripServiceLeadDays: days);
     await _saveSettings();
   }
 

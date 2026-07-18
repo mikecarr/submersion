@@ -9339,6 +9339,218 @@ class AppLocalizationsAr extends AppLocalizations {
   String get equipment_detail_serviceInfoTitle => 'معلومات الصيانة';
 
   @override
+  String get equipment_serviceClocks_title => 'عدادات الصيانة';
+
+  @override
+  String get equipment_serviceClocks_addClock => 'إضافة عداد';
+
+  @override
+  String get equipment_serviceClocks_logService => 'تسجيل صيانة';
+
+  @override
+  String get equipment_serviceClocks_edit => 'تعديل الفترات';
+
+  @override
+  String get equipment_serviceClocks_pause => 'إيقاف مؤقت';
+
+  @override
+  String get equipment_serviceClocks_resume => 'استئناف';
+
+  @override
+  String get equipment_serviceClocks_remove => 'إزالة';
+
+  @override
+  String get equipment_serviceClocks_paused => 'متوقف مؤقتًا';
+
+  @override
+  String get equipment_serviceClocks_empty => 'لا توجد عدادات صيانة';
+
+  @override
+  String equipment_serviceClocks_dueOn(String date) {
+    return 'مستحق في $date';
+  }
+
+  @override
+  String equipment_serviceClocks_overdueSince(String date) {
+    return 'متأخر منذ $date';
+  }
+
+  @override
+  String get equipment_serviceClocks_overdue => 'متأخر';
+
+  @override
+  String equipment_serviceClocks_divesLeft(int remaining, int total) {
+    return 'متبقٍ $remaining من $total غوصة';
+  }
+
+  @override
+  String equipment_serviceClocks_hoursLeft(String remaining, String total) {
+    return 'متبقٍ $remaining من $total ساعة';
+  }
+
+  @override
+  String get equipment_serviceClocks_manageKinds => 'إدارة أنواع الصيانة';
+
+  @override
+  String get equipment_serviceClocks_appliesToClock => 'ينطبق على العداد';
+
+  @override
+  String get equipment_serviceClocks_noClockOption => 'غير مرتبط بعداد';
+
+  @override
+  String get equipment_scheduleDialog_title => 'تعديل العداد';
+
+  @override
+  String get equipment_scheduleDialog_intervalDays => 'الفترة (أيام)';
+
+  @override
+  String get equipment_scheduleDialog_intervalDives => 'الفترة (غوصات)';
+
+  @override
+  String get equipment_scheduleDialog_intervalHours => 'الفترة (ساعات)';
+
+  @override
+  String equipment_scheduleDialog_inheritHint(String value) {
+    return 'الافتراضي: $value';
+  }
+
+  @override
+  String get equipment_scheduleDialog_anchorDate => 'تاريخ الأساس';
+
+  @override
+  String get equipment_scheduleDialog_anchorHint =>
+      'يُستخدم عندما لا يوجد بعد سجل صيانة من هذا النوع';
+
+  @override
+  String get equipment_scheduleDialog_clearAnchor => 'مسح تاريخ الأساس';
+
+  @override
+  String get equipment_scheduleDialog_save => 'حفظ';
+
+  @override
+  String get equipment_scheduleDialog_cancel => 'إلغاء';
+
+  @override
+  String get equipment_serviceKinds_title => 'أنواع الصيانة';
+
+  @override
+  String get equipment_serviceKinds_builtIn => 'مدمج';
+
+  @override
+  String get equipment_serviceKinds_custom => 'مخصص';
+
+  @override
+  String get equipment_serviceKinds_add => 'إضافة نوع صيانة';
+
+  @override
+  String get equipment_serviceKinds_editTitle => 'تعديل نوع الصيانة';
+
+  @override
+  String get equipment_serviceKinds_nameLabel => 'الاسم';
+
+  @override
+  String get equipment_serviceKinds_nameRequired => 'الاسم مطلوب';
+
+  @override
+  String get equipment_serviceKinds_appliesTo => 'ينطبق على';
+
+  @override
+  String get equipment_serviceKinds_autoAttach =>
+      'إرفاق تلقائيًا بالمعدات الجديدة';
+
+  @override
+  String get equipment_serviceKinds_deleteConfirmTitle => 'حذف نوع الصيانة؟';
+
+  @override
+  String get equipment_serviceKinds_deleteConfirmBody =>
+      'ستتم إزالة العدادات التي تستخدم هذا النوع من الصيانة.';
+
+  @override
+  String get equipment_serviceKinds_delete => 'حذف';
+
+  @override
+  String get equipment_serviceKinds_cancel => 'إلغاء';
+
+  @override
+  String get equipment_serviceKinds_save => 'حفظ';
+
+  @override
+  String get equipment_serviceKinds_emptyCustom =>
+      'لا توجد أنواع صيانة مخصصة بعد';
+
+  @override
+  String equipment_serviceKinds_everyDays(int days) {
+    return 'كل $days يوم';
+  }
+
+  @override
+  String equipment_serviceKinds_everyDives(int dives) {
+    return 'كل $dives غوصة';
+  }
+
+  @override
+  String equipment_serviceKinds_everyHours(String hours) {
+    return 'كل $hours ساعة';
+  }
+
+  @override
+  String get dashboard_serviceDue_title => 'صيانة مستحقة';
+
+  @override
+  String dashboard_serviceDue_more(int count) {
+    return '+$count أخرى';
+  }
+
+  @override
+  String dashboard_alerts_clockDue(String name, String kind) {
+    return '$name: $kind مستحقة';
+  }
+
+  @override
+  String dashboard_alerts_clockOverdue(String name, String kind) {
+    return '$name: $kind متأخرة';
+  }
+
+  @override
+  String equipment_list_worstClock(String kind) {
+    return '$kind متأخرة';
+  }
+
+  @override
+  String trips_serviceAlert_count(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count قطعة معدات تحتاج إلى صيانة قبل هذه الرحلة',
+      many: '$count قطعة معدات تحتاج إلى صيانة قبل هذه الرحلة',
+      few: '$count قطع معدات تحتاج إلى صيانة قبل هذه الرحلة',
+      two: 'قطعتا معدات تحتاجان إلى صيانة قبل هذه الرحلة',
+      one: 'قطعة معدات واحدة تحتاج إلى صيانة قبل هذه الرحلة',
+      zero: 'لا توجد معدات تحتاج إلى صيانة قبل هذه الرحلة',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String trips_serviceAlert_dueBefore(String kind, String date) {
+    return '$kind مستحقة في $date';
+  }
+
+  @override
+  String trips_serviceAlert_overdue(String kind) {
+    return '$kind متأخرة';
+  }
+
+  @override
+  String get settings_notifications_tripLeadTitle =>
+      'مهلة التنبيه لصيانة الرحلة';
+
+  @override
+  String settings_notifications_tripLeadDays(int days) {
+    return '$days أيام قبل الرحلة';
+  }
+
+  @override
   String get equipment_detail_serviceIntervalLabel => 'فترة الصيانة';
 
   @override
@@ -9633,6 +9845,17 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String equipment_list_tile_daysCount(Object days) {
     return '$days يوم';
+  }
+
+  @override
+  String equipment_list_tile_serviceInDays(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: 'الصيانة خلال $days يوم',
+      one: 'الصيانة خلال يوم واحد',
+    );
+    return '$_temp0';
   }
 
   @override

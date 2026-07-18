@@ -218,6 +218,9 @@ class MockSettingsNotifier extends StateNotifier<AppSettings>
   Future<void> setReminderTime(TimeOfDay time) async =>
       state = state.copyWith(reminderTime: time);
   @override
+  Future<void> setTripServiceLeadDays(int days) async =>
+      state = state.copyWith(tripServiceLeadDays: days);
+  @override
   Future<void> toggleReminderDay(int days) async {
     final current = List<int>.from(state.serviceReminderDays);
     if (current.contains(days)) {

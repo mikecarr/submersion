@@ -9508,6 +9508,216 @@ class AppLocalizationsDe extends AppLocalizations {
   String get equipment_detail_serviceInfoTitle => 'Wartungsinformationen';
 
   @override
+  String get equipment_serviceClocks_title => 'Wartungsintervalle';
+
+  @override
+  String get equipment_serviceClocks_addClock => 'Intervall hinzufügen';
+
+  @override
+  String get equipment_serviceClocks_logService => 'Wartung erfassen';
+
+  @override
+  String get equipment_serviceClocks_edit => 'Intervalle bearbeiten';
+
+  @override
+  String get equipment_serviceClocks_pause => 'Pausieren';
+
+  @override
+  String get equipment_serviceClocks_resume => 'Fortsetzen';
+
+  @override
+  String get equipment_serviceClocks_remove => 'Entfernen';
+
+  @override
+  String get equipment_serviceClocks_paused => 'Pausiert';
+
+  @override
+  String get equipment_serviceClocks_empty => 'Keine Wartungsintervalle';
+
+  @override
+  String equipment_serviceClocks_dueOn(String date) {
+    return 'Fällig am $date';
+  }
+
+  @override
+  String equipment_serviceClocks_overdueSince(String date) {
+    return 'Überfällig seit $date';
+  }
+
+  @override
+  String get equipment_serviceClocks_overdue => 'Überfällig';
+
+  @override
+  String equipment_serviceClocks_divesLeft(int remaining, int total) {
+    return '$remaining von $total Tauchgängen übrig';
+  }
+
+  @override
+  String equipment_serviceClocks_hoursLeft(String remaining, String total) {
+    return '$remaining von $total Stunden übrig';
+  }
+
+  @override
+  String get equipment_serviceClocks_manageKinds => 'Wartungsarten verwalten';
+
+  @override
+  String get equipment_serviceClocks_appliesToClock => 'Zugehöriges Intervall';
+
+  @override
+  String get equipment_serviceClocks_noClockOption =>
+      'Keinem Intervall zugeordnet';
+
+  @override
+  String get equipment_scheduleDialog_title => 'Intervall bearbeiten';
+
+  @override
+  String get equipment_scheduleDialog_intervalDays => 'Intervall (Tage)';
+
+  @override
+  String get equipment_scheduleDialog_intervalDives => 'Intervall (Tauchgänge)';
+
+  @override
+  String get equipment_scheduleDialog_intervalHours => 'Intervall (Stunden)';
+
+  @override
+  String equipment_scheduleDialog_inheritHint(String value) {
+    return 'Standard: $value';
+  }
+
+  @override
+  String get equipment_scheduleDialog_anchorDate => 'Referenzdatum';
+
+  @override
+  String get equipment_scheduleDialog_anchorHint =>
+      'Wird verwendet, solange noch kein Wartungseintrag dieser Art vorliegt';
+
+  @override
+  String get equipment_scheduleDialog_clearAnchor => 'Referenzdatum löschen';
+
+  @override
+  String get equipment_scheduleDialog_save => 'Speichern';
+
+  @override
+  String get equipment_scheduleDialog_cancel => 'Abbrechen';
+
+  @override
+  String get equipment_serviceKinds_title => 'Wartungsarten';
+
+  @override
+  String get equipment_serviceKinds_builtIn => 'Integriert';
+
+  @override
+  String get equipment_serviceKinds_custom => 'Benutzerdefiniert';
+
+  @override
+  String get equipment_serviceKinds_add => 'Wartungsart hinzufügen';
+
+  @override
+  String get equipment_serviceKinds_editTitle => 'Wartungsart bearbeiten';
+
+  @override
+  String get equipment_serviceKinds_nameLabel => 'Name';
+
+  @override
+  String get equipment_serviceKinds_nameRequired => 'Ein Name ist erforderlich';
+
+  @override
+  String get equipment_serviceKinds_appliesTo => 'Gilt für';
+
+  @override
+  String get equipment_serviceKinds_autoAttach =>
+      'Automatisch an neue Ausrüstung anhängen';
+
+  @override
+  String get equipment_serviceKinds_deleteConfirmTitle =>
+      'Wartungsart löschen?';
+
+  @override
+  String get equipment_serviceKinds_deleteConfirmBody =>
+      'Wartungsintervalle mit dieser Wartungsart werden entfernt.';
+
+  @override
+  String get equipment_serviceKinds_delete => 'Löschen';
+
+  @override
+  String get equipment_serviceKinds_cancel => 'Abbrechen';
+
+  @override
+  String get equipment_serviceKinds_save => 'Speichern';
+
+  @override
+  String get equipment_serviceKinds_emptyCustom =>
+      'Noch keine benutzerdefinierten Wartungsarten';
+
+  @override
+  String equipment_serviceKinds_everyDays(int days) {
+    return 'alle $days Tage';
+  }
+
+  @override
+  String equipment_serviceKinds_everyDives(int dives) {
+    return 'alle $dives Tauchgänge';
+  }
+
+  @override
+  String equipment_serviceKinds_everyHours(String hours) {
+    return 'alle $hours Stunden';
+  }
+
+  @override
+  String get dashboard_serviceDue_title => 'Wartung fällig';
+
+  @override
+  String dashboard_serviceDue_more(int count) {
+    return '+$count weitere';
+  }
+
+  @override
+  String dashboard_alerts_clockDue(String name, String kind) {
+    return '$name: $kind fällig';
+  }
+
+  @override
+  String dashboard_alerts_clockOverdue(String name, String kind) {
+    return '$name: $kind überfällig';
+  }
+
+  @override
+  String equipment_list_worstClock(String kind) {
+    return '$kind überfällig';
+  }
+
+  @override
+  String trips_serviceAlert_count(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Ausrüstungsteile müssen vor dieser Reise gewartet werden',
+      one: '1 Ausrüstungsteil muss vor dieser Reise gewartet werden',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String trips_serviceAlert_dueBefore(String kind, String date) {
+    return '$kind fällig am $date';
+  }
+
+  @override
+  String trips_serviceAlert_overdue(String kind) {
+    return '$kind überfällig';
+  }
+
+  @override
+  String get settings_notifications_tripLeadTitle =>
+      'Vorlaufzeit für Wartung vor Reisen';
+
+  @override
+  String settings_notifications_tripLeadDays(int days) {
+    return '$days Tage vor einer Reise';
+  }
+
+  @override
   String get equipment_detail_serviceIntervalLabel => 'Wartungsintervall';
 
   @override
@@ -9809,6 +10019,17 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String equipment_list_tile_daysCount(Object days) {
     return '$days Tage';
+  }
+
+  @override
+  String equipment_list_tile_serviceInDays(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: 'Wartung in $days Tage',
+      one: 'Wartung in 1 Tag',
+    );
+    return '$_temp0';
   }
 
   @override
