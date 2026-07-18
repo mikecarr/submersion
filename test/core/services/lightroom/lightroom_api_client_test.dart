@@ -114,15 +114,16 @@ void main() {
       expect(captured.url.path, '/v2/catalogs/cat1/assets');
       expect(captured.url.queryParameters['subtype'], 'image;video');
       // captured_after and captured_before are mutually exclusive on this
-      // endpoint (Adobe returns 400 if both are sent); with both supplied,
-      // only the upper bound goes on the wire.
+      // endpoint (Adobe returns 400 if both are sent); Adobe lists oldest-first
+      // so the scanner queries the lower bound -- with both supplied, only
+      // captured_after goes on the wire.
       expect(
-        captured.url.queryParameters.containsKey('captured_after'),
+        captured.url.queryParameters.containsKey('captured_before'),
         isFalse,
       );
       expect(
-        captured.url.queryParameters['captured_before'],
-        '2026-07-01T12:00:00.000',
+        captured.url.queryParameters['captured_after'],
+        '2026-07-01T09:00:00.000',
       );
       expect(page.assets, hasLength(3));
       final a1 = page.assets[0];
