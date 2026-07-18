@@ -213,21 +213,22 @@ class LightroomScanService {
     final assets = <LightroomAsset>[];
     for (final span in spans) {
       // captured_after/captured_before are mutually exclusive on the assets
-      // endpoint, so query the upper bound only and page `next` (older). The
-      // listing is newest-first, so once assets cross below the window start
-      // every later page is older too -- stop then.
+      // endpoint, so query the lower bound only and page `next`. Adobe lists
+      // assets oldest-first, so querying captured_after=window start puts the
+      // window's assets on the first pages; once an asset crosses above the
+      // window end every later asset is newer too -- stop then.
       _log.info(
         '[LR-SCAN] span ${span.start.toIso8601String()} .. '
         '${span.end.toIso8601String()} '
-        '(query captured_before=${span.end.toIso8601String()})',
+        '(query captured_after=${span.start.toIso8601String()})',
       );
       String? next;
-      var reachedStart = false;
+      var reachedEnd = false;
       var pageNum = 0;
       do {
         final page = await _api.listAssets(
           catalogId,
-          capturedBefore: span.end,
+          capturedAfter: span.start,
           nextUrl: next,
         );
         pageNum++;
@@ -242,18 +243,18 @@ class LightroomScanService {
         );
         for (final asset in page.assets) {
           final captureDate = asset.captureDate;
-          if (captureDate != null && captureDate.isBefore(span.start)) {
-            // Assets page newest-first, so everything after this one is older
-            // than the window start too -- stop scanning this page.
-            reachedStart = true;
+          if (captureDate != null && captureDate.isAfter(span.end)) {
+            // Assets page oldest-first, so everything after this one is newer
+            // than the window end too -- stop scanning this page.
+            reachedEnd = true;
             break;
           }
           assets.add(asset);
         }
-        next = reachedStart ? null : page.nextUrl;
+        next = reachedEnd ? null : page.nextUrl;
       } while (next != null);
-      if (reachedStart) {
-        _log.info('[LR-SCAN] early-stop fired (asset older than window start)');
+      if (reachedEnd) {
+        _log.info('[LR-SCAN] early-stop fired (asset newer than window end)');
       }
     }
     _log.info('[LR-SCAN] total collected within windows=${assets.length}');

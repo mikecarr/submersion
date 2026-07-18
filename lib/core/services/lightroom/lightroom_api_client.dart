@@ -101,12 +101,14 @@ class LightroomApiClient {
             queryParameters: {
               'subtype': 'image;video',
               // captured_after and captured_before are mutually exclusive on
-              // this endpoint (Adobe returns 400 if both are sent). Prefer the
-              // upper bound; the scanner pages `next` (older) from there.
-              if (capturedBefore != null)
-                'captured_before': _isoWallClock(capturedBefore)!
-              else if (capturedAfter != null)
-                'captured_after': _isoWallClock(capturedAfter)!,
+              // this endpoint (Adobe returns 400 if both are sent). Adobe lists
+              // assets oldest-first, so the scanner queries the lower bound
+              // (captured_after) and pages `next` toward newer assets; prefer
+              // it when both are supplied.
+              if (capturedAfter != null)
+                'captured_after': _isoWallClock(capturedAfter)!
+              else if (capturedBefore != null)
+                'captured_before': _isoWallClock(capturedBefore)!,
             },
           );
     final json = await _getJson(uri);
