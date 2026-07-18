@@ -1,6 +1,14 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:submersion/core/constants/sort_options.dart';
+import 'package:submersion/core/models/sort_state.dart';
 import 'package:submersion/core/providers/provider.dart';
+import 'package:submersion/features/dive_log/data/repositories/dive_repository_impl.dart';
+import 'package:submersion/features/dive_log/domain/models/dive_filter_state.dart';
+import 'package:submersion/features/dive_log/presentation/providers/dive_repository_provider.dart';
+import 'package:submersion/features/dive_log/presentation/providers/safety_review_providers.dart';
 import 'package:submersion/features/settings/presentation/pages/safety_settings_page.dart';
 import 'package:submersion/features/settings/presentation/providers/settings_providers.dart';
 import 'package:submersion/l10n/arb/app_localizations.dart';
@@ -59,4 +67,63 @@ void main() {
       expect(s.onChanged, isNull);
     }
   });
+
+  Widget backfillApp(List<Override> extra) => ProviderScope(
+    overrides: [
+      settingsProvider.overrideWith((ref) => MockSettingsNotifier()),
+      ...extra,
+    ],
+    child: const MaterialApp(
+      locale: Locale('en'),
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      home: SafetySettingsPage(),
+    ),
+  );
+
+  testWidgets('backfill shows progress while analyzing, then completes', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(400, 1600));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    final gate = Completer<void>();
+    await tester.pumpWidget(
+      backfillApp([
+        diveRepositoryProvider.overrideWithValue(_FakeDiveRepository(['d1'])),
+        safetyReviewProvider('d1').overrideWith((ref) async {
+          await gate.future;
+          return null;
+        }),
+      ]),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Analyze all dives'));
+    await tester.pump(); // enter the analyzing state
+    await tester.pump();
+    expect(find.byType(LinearProgressIndicator), findsOneWidget);
+    expect(find.textContaining('Analyzed 0 of 1'), findsOneWidget);
+
+    gate.complete();
+    await tester.pumpAndSettle();
+    expect(find.text('Analysis complete'), findsOneWidget);
+  });
+}
+
+/// Minimal [DiveRepository] fake returning a fixed ordered id list.
+class _FakeDiveRepository implements DiveRepository {
+  _FakeDiveRepository(this.ids);
+
+  final List<String> ids;
+
+  @override
+  Future<List<String>> getOrderedDiveIds({
+    String? diverId,
+    DiveFilterState filter = const DiveFilterState(),
+    SortState<DiveSortField>? sort,
+  }) async => ids;
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
