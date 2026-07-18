@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -299,9 +300,11 @@ class _PhotoViewerPageState extends ConsumerState<PhotoViewerPage> {
                         ),
                     onOpenInLightroom: _lightroomWebUrl(currentItem) == null
                         ? null
-                        : () => launchUrl(
-                            Uri.parse(_lightroomWebUrl(currentItem)!),
-                            mode: LaunchMode.externalApplication,
+                        : () => unawaited(
+                            launchUrl(
+                              Uri.parse(_lightroomWebUrl(currentItem)!),
+                              mode: LaunchMode.externalApplication,
+                            ),
                           ),
                   ),
 
@@ -556,6 +559,17 @@ class _PhotoGallery extends ConsumerWidget {
 
         // Videos use custom player, photos use PhotoView
         if (item.isVideo) {
+          // Lightroom-linked videos are poster-only (the original is never
+          // downloaded), so show the poster with an Open-in-Lightroom play
+          // affordance instead of the local player, which would otherwise
+          // fail with "video file not found".
+          if (item.sourceType == MediaSourceType.serviceConnector) {
+            return PhotoViewGalleryPageOptions.customChild(
+              minScale: PhotoViewComputedScale.contained,
+              maxScale: PhotoViewComputedScale.contained,
+              child: _ConnectorVideoItem(item: item),
+            );
+          }
           return PhotoViewGalleryPageOptions.customChild(
             minScale: PhotoViewComputedScale.contained,
             maxScale: PhotoViewComputedScale.contained, // No zoom for videos
@@ -589,6 +603,79 @@ class _PhotoItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MediaItemView(item: item, fit: BoxFit.contain);
+  }
+}
+
+/// A Lightroom-linked video: the original is never downloaded (only a poster
+/// rendition is stored), so this shows the poster with a play badge that
+/// opens the video in Lightroom rather than attempting local playback.
+class _ConnectorVideoItem extends ConsumerWidget {
+  final MediaItem item;
+
+  const _ConnectorVideoItem({required this.item});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final catalogId = ref
+        .watch(lightroomAccountProvider)
+        .value
+        ?.accountIdentifier;
+    final url = (catalogId != null && item.remoteAssetId != null)
+        ? LightroomApiClient.assetWebUrl(catalogId, item.remoteAssetId!)
+        : null;
+    // Shared open action: drives both the pointer tap (GestureDetector) and the
+    // semantic activation on the labeled play button so screen readers can
+    // actually trigger it, not just announce it.
+    final onOpen = url == null
+        ? null
+        : () => unawaited(
+            launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication),
+          );
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onOpen,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          MediaItemView(item: item, fit: BoxFit.contain),
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Semantics(
+                button: url != null,
+                label: context.l10n.media_lightroom_openInLightroom,
+                onTap: onOpen,
+                child: Container(
+                  width: 72,
+                  height: 72,
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.5),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.play_arrow,
+                    color: Colors.white,
+                    size: 48,
+                  ),
+                ),
+              ),
+              if (url != null) ...[
+                const SizedBox(height: 12),
+                // Label already voiced by the Semantics button above.
+                ExcludeSemantics(
+                  child: Text(
+                    context.l10n.media_lightroom_openInLightroom,
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.85),
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ],
+      ),
+    );
   }
 }
 

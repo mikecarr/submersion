@@ -12850,7 +12850,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String settings_lightroom_clientId_help(String redirectUri) {
-    return 'أنشئ تكاملًا في Adobe Developer Console باستخدام واجهة Lightroom Services API ونوع اعتماد يدعم PKCE. عيّن عنوان إعادة التوجيه إلى $redirectUri.';
+    return 'أنشئ تكاملًا في Adobe Developer Console باستخدام واجهة Lightroom Services API ونوع اعتماد يدعم PKCE. أدخل عنوان إعادة التوجيه الخاص باعتمادك أدناه (تستخدم اعتمادات Native App مخططًا مخصصًا) أو اتركه فارغًا لاستخدام $redirectUri.';
   }
 
   @override
@@ -12860,7 +12860,18 @@ class AppLocalizationsAr extends AppLocalizations {
   String get settings_lightroom_clientSecret_label => 'سر العميل (اختياري)';
 
   @override
+  String get settings_lightroom_redirectUri_label =>
+      'عنوان إعادة التوجيه (اختياري)';
+
+  @override
   String get settings_lightroom_connect => 'ربط Lightroom';
+
+  @override
+  String get settings_lightroom_connectEmbedded => 'الاتصال عبر Adobe';
+
+  @override
+  String get settings_lightroom_advancedByo =>
+      'استخدم بيانات اعتماد Adobe الخاصة بك';
 
   @override
   String get settings_lightroom_connect_codeLabel =>

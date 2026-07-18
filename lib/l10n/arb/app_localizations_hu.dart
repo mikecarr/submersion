@@ -13061,7 +13061,7 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String settings_lightroom_clientId_help(String redirectUri) {
-    return 'Hozz létre egy integrációt az Adobe Developer Console-ban a Lightroom Services API-val és egy PKCE-t támogató hitelesítőtípussal. Az átirányítási URI legyen $redirectUri.';
+    return 'Hozz létre egy integrációt az Adobe Developer Console-ban a Lightroom Services API-val és egy PKCE-t támogató hitelesítőtípussal. Add meg alább a hitelesítő adatod átirányítási URI-jét — a Native App hitelesítők egyedi sémát használnak —, vagy hagyd üresen a(z) $redirectUri használatához.';
   }
 
   @override
@@ -13072,7 +13072,18 @@ class AppLocalizationsHu extends AppLocalizations {
       'Klienstitok (nem kötelező)';
 
   @override
+  String get settings_lightroom_redirectUri_label =>
+      'Átirányítási URI (nem kötelező)';
+
+  @override
   String get settings_lightroom_connect => 'Lightroom csatlakoztatása';
+
+  @override
+  String get settings_lightroom_connectEmbedded => 'Csatlakozás az Adobe-hoz';
+
+  @override
+  String get settings_lightroom_advancedByo =>
+      'Saját Adobe hitelesítő adatok használata';
 
   @override
   String get settings_lightroom_connect_codeLabel =>

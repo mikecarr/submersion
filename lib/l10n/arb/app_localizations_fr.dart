@@ -13144,7 +13144,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String settings_lightroom_clientId_help(String redirectUri) {
-    return 'Créez une intégration dans l\'Adobe Developer Console avec l\'API Lightroom Services et un type d\'identifiant compatible PKCE. Définissez l\'URI de redirection sur $redirectUri.';
+    return 'Créez une intégration dans l\'Adobe Developer Console avec l\'API Lightroom Services et un type d\'identifiant compatible PKCE. Saisissez ci-dessous l\'URI de redirection de votre identifiant — les identifiants Native App utilisent un schéma personnalisé — ou laissez le champ vide pour utiliser $redirectUri.';
   }
 
   @override
@@ -13155,7 +13155,18 @@ class AppLocalizationsFr extends AppLocalizations {
       'Secret client (facultatif)';
 
   @override
+  String get settings_lightroom_redirectUri_label =>
+      'URI de redirection (facultatif)';
+
+  @override
   String get settings_lightroom_connect => 'Connecter Lightroom';
+
+  @override
+  String get settings_lightroom_connectEmbedded => 'Se connecter avec Adobe';
+
+  @override
+  String get settings_lightroom_advancedByo =>
+      'Utiliser vos propres identifiants Adobe';
 
   @override
   String get settings_lightroom_connect_codeLabel => 'URL redirigée ou code';

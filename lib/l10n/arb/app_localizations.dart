@@ -22156,7 +22156,7 @@ abstract class AppLocalizations {
   /// No description provided for @settings_lightroom_clientId_help.
   ///
   /// In en, this message translates to:
-  /// **'Create an integration in the Adobe Developer Console with the Lightroom Services API and a credential type that supports PKCE. Set the redirect URI to {redirectUri}.'**
+  /// **'Create an integration in the Adobe Developer Console with the Lightroom Services API and a credential type that supports PKCE. Enter your credential\'s redirect URI below — Native App credentials use a custom scheme — or leave it blank to use {redirectUri}.'**
   String settings_lightroom_clientId_help(String redirectUri);
 
   /// No description provided for @settings_lightroom_clientId_label.
@@ -22171,11 +22171,29 @@ abstract class AppLocalizations {
   /// **'Client secret (optional)'**
   String get settings_lightroom_clientSecret_label;
 
+  /// No description provided for @settings_lightroom_redirectUri_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Redirect URI (optional)'**
+  String get settings_lightroom_redirectUri_label;
+
   /// No description provided for @settings_lightroom_connect.
   ///
   /// In en, this message translates to:
   /// **'Connect Lightroom'**
   String get settings_lightroom_connect;
+
+  /// Primary button to connect Lightroom with the app's bundled Adobe credential
+  ///
+  /// In en, this message translates to:
+  /// **'Connect with Adobe'**
+  String get settings_lightroom_connectEmbedded;
+
+  /// Header for the advanced BYO client-id connect path
+  ///
+  /// In en, this message translates to:
+  /// **'Use your own Adobe credentials'**
+  String get settings_lightroom_advancedByo;
 
   /// No description provided for @settings_lightroom_connect_codeLabel.
   ///
