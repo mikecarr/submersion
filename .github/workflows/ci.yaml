@@ -228,15 +228,30 @@ jobs:
           fi
           flutter test --coverage --exclude-tags performance "${files[@]}"
 
-      - name: Upload coverage
-        uses: codecov/codecov-action@v7
+      # Upload this shard's partial lcov as an ARTIFACT (not straight to
+      # Codecov). The `coverage` job merges all shards into one authoritative
+      # report before a single upload. Sharding by file means a shard often
+      # only COMPILES a file (all lines hit=0) that another shard executes;
+      # per-shard Codecov flags let those zero reports win the cross-flag merge
+      # and zero-out genuinely-tested files. Merging first (max hits per line)
+      # fixes that -- see scripts/merge_lcov.py.
+      - name: Diagnostic - this shard's photo_viewer coverage
         if: always()
+        run: |
+          awk '
+            /^SF:.*photo_viewer_page\.dart/ { f=1; c=0; t=0 }
+            f && /^DA:/ { t++; split($0,a,","); if (a[2]+0>0) c++ }
+            f && /^end_of_record/ { print "[COV-DIAG] shard ${{ matrix.shard }}: photo_viewer_page.dart " c "/" t " covered"; f=0 }
+          ' coverage/lcov.info 2>/dev/null \
+            || echo "[COV-DIAG] shard ${{ matrix.shard }}: no photo_viewer record"
+      - name: Upload shard coverage artifact
+        if: always()
+        uses: actions/upload-artifact@v7
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          files: coverage/lcov.info
-          # Per-shard flag so Codecov merges the partial reports for this commit.
-          flags: shard-${{ matrix.shard }}
-          fail_ci_if_error: false  # Enable after configuring repo on codecov.io
+          name: coverage-shard-${{ matrix.shard }}
+          path: coverage/lcov.info
+          if-no-files-found: warn
+          retention-days: 1
 
   # Unit-tests the dependency-free Python guard scripts (e.g. the issue #318
   # ProGuard keep-rule checker). No Flutter/codegen needed, so it runs in
@@ -289,6 +304,52 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: coverage/scripts.xml
           flags: scripts
+          fail_ci_if_error: false
+
+  # Merge every Dart shard's partial lcov into ONE report, then do a single
+  # Codecov upload. Replaces the per-shard flagged uploads, whose cross-flag
+  # merge let all-zero "compiled-but-not-executed" reports override a file's
+  # real coverage (e.g. photo_viewer_page.dart's connector-video item -- tested
+  # only in the shard running photo_viewer_lightroom_test, but compiled as 0 by
+  # every shard whose tests import it for navigation). See scripts/merge_lcov.py.
+  coverage:
+    name: Merge & upload coverage
+    if: always()
+    needs:
+      - test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.x'
+      - name: Download shard coverage artifacts
+        uses: actions/download-artifact@v8
+        with:
+          pattern: coverage-shard-*
+          path: shard-coverage
+      - name: Merge shard lcov reports into one
+        run: |
+          mkdir -p coverage
+          shopt -s nullglob
+          reports=(shard-coverage/coverage-shard-*/lcov.info)
+          echo "Merging ${#reports[@]} shard report(s)."
+          if [ ${#reports[@]} -eq 0 ]; then
+            : > coverage/lcov.info
+          else
+            python3 scripts/merge_lcov.py coverage/lcov.info "${reports[@]}"
+          fi
+          awk '
+            /^SF:.*photo_viewer_page\.dart/ { f=1; c=0; t=0 }
+            f && /^DA:/ { t++; split($0,a,","); if (a[2]+0>0) c++ }
+            f && /^end_of_record/ { print "[COV-DIAG] MERGED photo_viewer_page.dart " c "/" t " covered"; f=0 }
+          ' coverage/lcov.info 2>/dev/null \
+            || echo "[COV-DIAG] merged: no photo_viewer record"
+      - name: Upload merged coverage to Codecov
+        uses: codecov/codecov-action@v7
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: coverage/lcov.info
           fail_ci_if_error: false
 
   integration-test:
