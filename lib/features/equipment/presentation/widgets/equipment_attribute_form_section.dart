@@ -71,7 +71,7 @@ class EquipmentAttributeFormSection extends StatelessWidget {
           initialValue: current?.valueText ?? '',
           decoration: InputDecoration(
             labelText: label,
-            hintText: '5, 5/4, 7/5/3',
+            hintText: context.l10n.equipment_edit_thicknessDesignationHint,
           ),
           validator: (text) => isValidThicknessDesignation(text ?? '')
               ? null

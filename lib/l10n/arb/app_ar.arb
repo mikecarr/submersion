@@ -3129,6 +3129,7 @@
   "equipment_edit_snackbar_error": "خطأ في حفظ المعدات: {error}",
   "equipment_edit_snackbar_updated": "تم تحديث المعدات",
   "equipment_edit_statusLabel": "الحالة",
+  "equipment_edit_thicknessDesignationHint": "مثلاً 5، 5/4، 7/5/3",
   "equipment_edit_thicknessHint": "مثلاً 5 مم، 7 مم",
   "equipment_edit_thicknessLabel": "السُمك",
   "equipment_edit_typeLabel": "النوع *",

@@ -9701,6 +9701,9 @@ class AppLocalizationsHe extends AppLocalizations {
   String get equipment_edit_statusLabel => 'סטטוס';
 
   @override
+  String get equipment_edit_thicknessDesignationHint => 'למשל, 5, 5/4, 7/5/3';
+
+  @override
   String get equipment_edit_thicknessHint => 'למשל, 5 מ\"מ, 7 מ\"מ';
 
   @override

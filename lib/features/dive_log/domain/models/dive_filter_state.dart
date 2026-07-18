@@ -202,10 +202,13 @@ class DiveFilterState {
   }
 
   /// Filter a list of dives based on current filter state.
-  /// Used as a fallback for non-paginated code paths (e.g., export).
+  /// Used as a fallback for non-paginated code paths (e.g., export, table/map
+  /// views).
   ///
-  /// equipmentAttr*: SQL-only axis (see buildFilteredDiveIdSubquery); this
-  /// in-memory fallback ignores it, matching the equipmentIds precedent.
+  /// equipmentAttr* is applied in-memory here to mirror the SQL axis (see
+  /// buildFilteredDiveIdSubquery), so non-paginated views stay consistent with
+  /// the SQL-backed list. It relies on dive.equipment being hydrated with its
+  /// curated attributes (getAllDives does this).
   List<Dive> apply(List<Dive> dives) {
     return dives.where((dive) {
       if (startDate != null && dive.dateTime.isBefore(startDate!)) {
@@ -298,6 +301,29 @@ class DiveFilterState {
           return true;
         });
         if (!hasMatch) return false;
+      }
+      // Equipment-attribute axis: mirror the SQL subquery (curated rows only,
+      // value_text exact-matches choice, value_num bounded by min/max).
+      if (equipmentAttrKey != null) {
+        final matches = dive.equipment.any(
+          (item) => item.attributes.any((attr) {
+            if (attr.isCustom || attr.key != equipmentAttrKey) return false;
+            if (equipmentAttrChoice != null &&
+                attr.valueText != equipmentAttrChoice) {
+              return false;
+            }
+            if (equipmentAttrMin != null &&
+                (attr.valueNum == null || attr.valueNum! < equipmentAttrMin!)) {
+              return false;
+            }
+            if (equipmentAttrMax != null &&
+                (attr.valueNum == null || attr.valueNum! > equipmentAttrMax!)) {
+              return false;
+            }
+            return true;
+          }),
+        );
+        if (!matches) return false;
       }
       return true;
     }).toList();

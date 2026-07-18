@@ -3095,6 +3095,7 @@
   "equipment_edit_snackbar_error": "Erreur d'enregistrement de l'equipement : {error}",
   "equipment_edit_snackbar_updated": "Equipement mis a jour",
   "equipment_edit_statusLabel": "Statut",
+  "equipment_edit_thicknessDesignationHint": "ex: 5, 5/4, 7/5/3",
   "equipment_edit_thicknessHint": "ex: 5mm, 7mm",
   "equipment_edit_thicknessLabel": "Épaisseur",
   "equipment_edit_typeLabel": "Type *",

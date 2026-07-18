@@ -3129,6 +3129,7 @@
   "equipment_edit_snackbar_error": "Error al guardar el equipo: {error}",
   "equipment_edit_snackbar_updated": "Equipo actualizado",
   "equipment_edit_statusLabel": "Estado",
+  "equipment_edit_thicknessDesignationHint": "p. ej., 5, 5/4, 7/5/3",
   "equipment_edit_thicknessHint": "p. ej., 5mm, 7mm",
   "equipment_edit_thicknessLabel": "Grosor",
   "equipment_edit_typeLabel": "Tipo *",

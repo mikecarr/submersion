@@ -16996,6 +16996,12 @@ abstract class AppLocalizations {
   /// **'Status'**
   String get equipment_edit_statusLabel;
 
+  /// No description provided for @equipment_edit_thicknessDesignationHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g., 5, 5/4, 7/5/3'**
+  String get equipment_edit_thicknessDesignationHint;
+
   /// No description provided for @equipment_edit_thicknessHint.
   ///
   /// In en, this message translates to:

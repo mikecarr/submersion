@@ -91,6 +91,63 @@ void main() {
       expect(saved.weightKg, 3.0);
     });
 
+    testWidgets('de-dupes custom fields sharing a label on save', (
+      tester,
+    ) async {
+      final created = await repository.createEquipment(
+        const EquipmentItem(
+          id: '',
+          name: 'Wetsuit',
+          type: EquipmentType.wetsuit,
+        ),
+      );
+      await pumpEditor(tester, created.id);
+
+      Future<void> scrollTo(Finder finder) async {
+        await tester.scrollUntilVisible(
+          finder,
+          200,
+          scrollable: find.byType(Scrollable).first,
+        );
+        await tester.pumpAndSettle();
+      }
+
+      // Add two custom-field rows (the section lives at the bottom of the
+      // lazy ListView, so scroll it into view before tapping).
+      final addButton = find.text('Add custom field');
+      await scrollTo(addButton);
+      await tester.tap(addButton);
+      await tester.pumpAndSettle();
+      await scrollTo(addButton);
+      await tester.tap(addButton);
+      await tester.pumpAndSettle();
+
+      // Give both the same key but distinct values; dedup keeps the first.
+      final key0 = find.byKey(const ValueKey('custom-key-0'));
+      final value0 = find.byKey(const ValueKey('custom-value-0'));
+      final key1 = find.byKey(const ValueKey('custom-key-1'));
+      final value1 = find.byKey(const ValueKey('custom-value-1'));
+      await scrollTo(key0);
+      await tester.enterText(key0, 'warranty');
+      await tester.enterText(value0, 'first');
+      await tester.enterText(key1, 'warranty');
+      await tester.enterText(value1, 'second');
+
+      final saveButton = find.text('Save');
+      await scrollTo(saveButton);
+      await tester.tap(saveButton);
+      await tester.pumpAndSettle();
+
+      // The UNIQUE(equipment_id, attr_key, is_custom) constraint would have
+      // failed the insert without dedup; exactly one custom row survives.
+      final saved = await repository.getEquipmentById(created.id);
+      final customFields = saved!.attributes
+          .where((a) => a.isCustom && a.key == 'warranty')
+          .toList();
+      expect(customFields, hasLength(1));
+      expect(customFields.single.valueText, 'first');
+    });
+
     testWidgets('empty fields save as null', (tester) async {
       final created = await repository.createEquipment(
         EquipmentItem(

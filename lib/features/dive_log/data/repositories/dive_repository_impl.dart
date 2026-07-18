@@ -5420,9 +5420,14 @@ class DiveRepository {
   ) async {
     final ids = equipmentIds.toSet().toList();
     if (ids.isEmpty) return const {};
-    final rows = await (_db.select(
-      _db.equipmentAttributes,
-    )..where((t) => t.equipmentId.isIn(ids))).get();
+    // Order by sortOrder like the canonical equipment-repo loaders so custom
+    // fields (and any ordered attributes) come back deterministically; without
+    // it the UI/detail/export output can reshuffle between runs.
+    final rows =
+        await (_db.select(_db.equipmentAttributes)
+              ..where((t) => t.equipmentId.isIn(ids))
+              ..orderBy([(t) => OrderingTerm.asc(t.sortOrder)]))
+            .get();
     final byEquipment = <String, List<EquipmentAttribute>>{};
     for (final row in rows) {
       byEquipment

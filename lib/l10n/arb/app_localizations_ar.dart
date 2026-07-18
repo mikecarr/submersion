@@ -9760,6 +9760,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get equipment_edit_statusLabel => 'الحالة';
 
   @override
+  String get equipment_edit_thicknessDesignationHint => 'مثلاً 5، 5/4، 7/5/3';
+
+  @override
   String get equipment_edit_thicknessHint => 'مثلاً 5 مم، 7 مم';
 
   @override

@@ -3271,6 +3271,7 @@
   "equipment_edit_snackbar_error": "保存装备出错：{error}",
   "equipment_edit_snackbar_updated": "装备已更新",
   "equipment_edit_statusLabel": "状态",
+  "equipment_edit_thicknessDesignationHint": "例如：5, 5/4, 7/5/3",
   "equipment_edit_thicknessHint": "例如：5mm, 7mm",
   "equipment_edit_thicknessLabel": "厚度",
   "equipment_edit_typeLabel": "类型 *",

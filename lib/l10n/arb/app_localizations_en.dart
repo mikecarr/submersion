@@ -9781,6 +9781,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get equipment_edit_statusLabel => 'Status';
 
   @override
+  String get equipment_edit_thicknessDesignationHint => 'e.g., 5, 5/4, 7/5/3';
+
+  @override
   String get equipment_edit_thicknessHint => 'e.g., 5mm, 7mm';
 
   @override

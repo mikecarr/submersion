@@ -9488,6 +9488,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get equipment_edit_statusLabel => '状态';
 
   @override
+  String get equipment_edit_thicknessDesignationHint => '例如：5, 5/4, 7/5/3';
+
+  @override
   String get equipment_edit_thicknessHint => '例如：5mm, 7mm';
 
   @override
