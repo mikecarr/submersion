@@ -424,7 +424,7 @@ class _PhotoGallery extends ConsumerWidget {
             return PhotoViewGalleryPageOptions.customChild(
               minScale: PhotoViewComputedScale.contained,
               maxScale: PhotoViewComputedScale.contained,
-              child: _ConnectorVideoItem(item: item),
+              child: ConnectorVideoItem(item: item),
             );
           }
           return PhotoViewGalleryPageOptions.customChild(
@@ -465,10 +465,10 @@ class _PhotoItem extends StatelessWidget {
 /// A Lightroom-linked video: the original is never downloaded (only a poster
 /// rendition is stored), so this shows the poster with a play badge that
 /// opens the video in Lightroom rather than attempting local playback.
-class _ConnectorVideoItem extends ConsumerWidget {
+class ConnectorVideoItem extends ConsumerWidget {
   final MediaItem item;
 
-  const _ConnectorVideoItem({required this.item});
+  const ConnectorVideoItem({super.key, required this.item});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
