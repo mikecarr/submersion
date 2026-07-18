@@ -6370,6 +6370,8 @@
   "plannerCanvas_ccr_setpointHigh": "Setpoint high (bar)",
   "plannerCanvas_ccr_setpointLow": "Setpoint low (bar)",
   "plannerCanvas_ccr_switchDepth": "Setpoint switch depth",
+  "plannerCanvas_pscr_ratio": "pSCR ratio",
+  "plannerCanvas_pscr_ratio_hint": "Larger adds more fresh gas and lowers the O₂ drop",
   "plannerCanvas_chip_cns": "CNS {value}%",
   "@plannerCanvas_chip_cns": {
     "placeholders": {
@@ -6400,6 +6402,14 @@
     }
   },
   "plannerCanvas_contingency_timeDelta": "Extra minutes",
+  "plannerCanvas_chart_meanDepth": "mean {depth}",
+  "@plannerCanvas_chart_meanDepth": {
+    "placeholders": {
+      "depth": {
+        "type": "String"
+      }
+    }
+  },
   "plannerCanvas_contingency_title": "Contingencies",
   "plannerCanvas_contingency_turnFraction": "Turn fraction",
   "plannerCanvas_contingency_turnRule": "Turn pressure rule",
@@ -6471,6 +6481,13 @@
   "plannerCanvas_issue_noDecoGas": "Decompression required but no deco gas carried",
   "plannerCanvas_range_base": "Base",
   "plannerCanvas_range_legend": "Cells show time to surface; red = not diveable as planned",
+  "plannerCanvas_pane_collapse": "Collapse panel",
+  "plannerCanvas_pane_expand": "Expand panel",
+  "plannerCanvas_tab_setup": "Setup",
+  "plannerCanvas_o2Narcotic": "Treat O₂ as narcotic",
+  "plannerCanvas_rates_ascent": "Ascent rate",
+  "plannerCanvas_rates_descent": "Descent rate",
+  "plannerCanvas_rates_title": "Rates",
   "plannerCanvas_range_title": "Range table",
   "plannerCanvas_results_noDeco": "No decompression required",
   "plannerCanvas_sac_useLogged": "Use logged average ({sac})",

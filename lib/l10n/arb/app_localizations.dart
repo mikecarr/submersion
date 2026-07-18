@@ -19340,6 +19340,18 @@ abstract class AppLocalizations {
   /// **'Setpoint switch depth'**
   String get plannerCanvas_ccr_switchDepth;
 
+  /// No description provided for @plannerCanvas_pscr_ratio.
+  ///
+  /// In en, this message translates to:
+  /// **'pSCR ratio'**
+  String get plannerCanvas_pscr_ratio;
+
+  /// No description provided for @plannerCanvas_pscr_ratio_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Larger adds more fresh gas and lowers the O₂ drop'**
+  String get plannerCanvas_pscr_ratio_hint;
+
   /// No description provided for @plannerCanvas_chip_cns.
   ///
   /// In en, this message translates to:
@@ -19393,6 +19405,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Extra minutes'**
   String get plannerCanvas_contingency_timeDelta;
+
+  /// No description provided for @plannerCanvas_chart_meanDepth.
+  ///
+  /// In en, this message translates to:
+  /// **'mean {depth}'**
+  String plannerCanvas_chart_meanDepth(String depth);
 
   /// No description provided for @plannerCanvas_contingency_title.
   ///
@@ -19507,6 +19525,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Cells show time to surface; red = not diveable as planned'**
   String get plannerCanvas_range_legend;
+
+  /// No description provided for @plannerCanvas_pane_collapse.
+  ///
+  /// In en, this message translates to:
+  /// **'Collapse panel'**
+  String get plannerCanvas_pane_collapse;
+
+  /// No description provided for @plannerCanvas_pane_expand.
+  ///
+  /// In en, this message translates to:
+  /// **'Expand panel'**
+  String get plannerCanvas_pane_expand;
+
+  /// No description provided for @plannerCanvas_tab_setup.
+  ///
+  /// In en, this message translates to:
+  /// **'Setup'**
+  String get plannerCanvas_tab_setup;
+
+  /// No description provided for @plannerCanvas_o2Narcotic.
+  ///
+  /// In en, this message translates to:
+  /// **'Treat O₂ as narcotic'**
+  String get plannerCanvas_o2Narcotic;
+
+  /// No description provided for @plannerCanvas_rates_ascent.
+  ///
+  /// In en, this message translates to:
+  /// **'Ascent rate'**
+  String get plannerCanvas_rates_ascent;
+
+  /// No description provided for @plannerCanvas_rates_descent.
+  ///
+  /// In en, this message translates to:
+  /// **'Descent rate'**
+  String get plannerCanvas_rates_descent;
+
+  /// No description provided for @plannerCanvas_rates_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Rates'**
+  String get plannerCanvas_rates_title;
 
   /// No description provided for @plannerCanvas_range_title.
   ///

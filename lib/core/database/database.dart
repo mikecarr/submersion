@@ -257,9 +257,13 @@ class DivePlans extends Table {
   TextColumn get name => text()();
   TextColumn get notes => text().withDefault(const Constant(''))();
 
-  /// PlanMode enum name: 'oc' | 'ccr'.
+  /// PlanMode enum name: 'oc' | 'ccr' | 'scr' | 'pscr'.
   TextColumn get mode => text().withDefault(const Constant('oc'))();
   TextColumn get siteId => text().nullable().references(DiveSites, #id)();
+
+  /// Planned start time (Unix seconds); null = "now" at planning. Drives
+  /// repetitive tissue init and overlap detection (v120).
+  IntColumn get startDateTime => integer().nullable()();
 
   /// Tissue-seeding source dive (repetitive planning, Phase 6).
   TextColumn get sourceDiveId => text().nullable().references(Dives, #id)();
@@ -343,6 +347,10 @@ class DivePlanTanks extends Table {
   /// TankMaterial enum name; null = unspecified.
   TextColumn get material => text().nullable()();
   TextColumn get presetName => text().nullable()();
+
+  /// Deco gas-switch depth override in meters; null = auto (MOD at deco pO2).
+  /// Subsurface per-cylinder "Deco switch at" (v120).
+  RealColumn get decoSwitchDepth => real().nullable()();
   IntColumn get sortOrder => integer().withDefault(const Constant(0))();
   IntColumn get createdAt => integer()();
   IntColumn get updatedAt => integer()();
@@ -372,6 +380,14 @@ class DivePlanSegments extends Table {
   RealColumn get gasHe => real()();
   RealColumn get rate => real().nullable()();
   TextColumn get switchToTankId => text().nullable()();
+
+  /// Per-segment CCR setpoint override in bar; null = the plan's depth-based
+  /// setpoint (v120, Subsurface per-segment setpoint column).
+  RealColumn get setpointBar => real().nullable()();
+
+  /// Per-segment dive-mode override enum name ('oc'|'ccr'|'scr'|'pscr'); null =
+  /// the plan's mode. Models mid-plan bailout (v120).
+  TextColumn get diveModeOverride => text().nullable()();
   IntColumn get sortOrder => integer().withDefault(const Constant(0))();
   IntColumn get createdAt => integer()();
   IntColumn get updatedAt => integer()();
@@ -2213,7 +2229,7 @@ class AppDatabase extends _$AppDatabase {
 
   /// The current schema version as a static constant so that pre-open checks
   /// (e.g. version-mismatch guard) can reference it without an instance.
-  static const int currentSchemaVersion = 114;
+  static const int currentSchemaVersion = 120;
 
   /// Every schema version that has a migration block in onUpgrade.
   /// Used to calculate progress step counts. When adding a new migration,
@@ -2331,6 +2347,9 @@ class AppDatabase extends _$AppDatabase {
     112,
     113,
     114,
+    // v120 claimed in-worktree for the planner Subsurface-parity columns;
+    // 115-119 belong to other branches and interleave at merge time.
+    120,
   ];
 
   /// Idempotent DDL for the v106 connector-suggestion columns (Lightroom
@@ -2469,6 +2488,26 @@ class AppDatabase extends _$AppDatabase {
     if (cols.isNotEmpty && !hasThickness) {
       await customStatement('ALTER TABLE equipment ADD COLUMN thickness TEXT');
     }
+  }
+
+  /// v120: planner Subsurface-parity columns - plan start time, per-segment
+  /// setpoint + dive-mode override, and per-tank deco-switch depth. Idempotent
+  /// (each ALTER is PRAGMA-guarded) so it is safe from both onUpgrade and the
+  /// beforeOpen backstop (shared sandbox DB heals across parallel branches).
+  Future<void> _assertPlannerParitySchema() async {
+    Future<void> add(String table, String column, String type) async {
+      final cols = await customSelect("PRAGMA table_info('$table')").get();
+      if (cols.isEmpty) return;
+      final has = cols.any((c) => c.read<String>('name') == column);
+      if (!has) {
+        await customStatement('ALTER TABLE $table ADD COLUMN $column $type');
+      }
+    }
+
+    await add('dive_plans', 'start_date_time', 'INTEGER');
+    await add('dive_plan_segments', 'setpoint_bar', 'REAL');
+    await add('dive_plan_segments', 'dive_mode_override', 'TEXT');
+    await add('dive_plan_tanks', 'deco_switch_depth', 'REAL');
   }
 
   /// v113: diver_settings.cns_calculation_method column. Self-guarding when
@@ -5636,6 +5675,12 @@ class AppDatabase extends _$AppDatabase {
           await ensureDeletionLogIndex();
         }
         if (from < 114) await reportProgress();
+        // v120: planner Subsurface-parity columns. Version claimed in-worktree
+        // per the schema-ladder convention; reconcile numbering at merge time.
+        if (from < 120) {
+          await _assertPlannerParitySchema();
+        }
+        if (from < 120) await reportProgress();
       },
       beforeOpen: (details) async {
         // Enable foreign keys
@@ -5686,6 +5731,9 @@ class AppDatabase extends _$AppDatabase {
           );
         }
         await ensureDeletionLogIndex();
+
+        // v120 backstop: re-assert planner Subsurface-parity columns.
+        await _assertPlannerParitySchema();
 
         // Built-in dive types are reference data: identical on every device and
         // undeletable through DiveTypeRepository. Nothing else restores them --

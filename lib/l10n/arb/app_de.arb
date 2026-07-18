@@ -3595,6 +3595,8 @@
   "plannerCanvas_ccr_setpointHigh": "Setpoint hoch (bar)",
   "plannerCanvas_ccr_setpointLow": "Setpoint niedrig (bar)",
   "plannerCanvas_ccr_switchDepth": "Setpoint-Wechseltiefe",
+  "plannerCanvas_pscr_ratio": "pSCR-Verhältnis",
+  "plannerCanvas_pscr_ratio_hint": "Größer = mehr Frischgas, geringerer O₂-Abfall",
   "plannerCanvas_chip_cns": "CNS {value}%",
   "plannerCanvas_chip_issues": "{count, plural, =1{1 Problem} other{{count} Probleme}}",
   "plannerCanvas_compare_action": "Vergleichen",
@@ -3604,6 +3606,14 @@
   "plannerCanvas_contingency_depthDelta": "Zusatztiefe",
   "plannerCanvas_contingency_lostGas": "{gas} verloren",
   "plannerCanvas_contingency_timeDelta": "Zusatzminuten",
+  "plannerCanvas_chart_meanDepth": "Mittel {depth}",
+  "@plannerCanvas_chart_meanDepth": {
+    "placeholders": {
+      "depth": {
+        "type": "String"
+      }
+    }
+  },
   "plannerCanvas_contingency_title": "Eventualpläne",
   "plannerCanvas_contingency_turnFraction": "Umkehranteil",
   "plannerCanvas_contingency_turnRule": "Umkehrdruck-Regel",
@@ -3623,6 +3633,13 @@
   "plannerCanvas_issue_noDecoGas": "Dekompression erforderlich, aber kein Deko-Gas mitgeführt",
   "plannerCanvas_range_base": "Basis",
   "plannerCanvas_range_legend": "Zellen zeigen die Zeit bis zur Oberfläche; rot = nicht wie geplant tauchbar",
+  "plannerCanvas_pane_collapse": "Bereich einklappen",
+  "plannerCanvas_pane_expand": "Bereich ausklappen",
+  "plannerCanvas_tab_setup": "Einrichtung",
+  "plannerCanvas_o2Narcotic": "O₂ als narkotisch behandeln",
+  "plannerCanvas_rates_ascent": "Aufstiegsrate",
+  "plannerCanvas_rates_descent": "Abstiegsrate",
+  "plannerCanvas_rates_title": "Raten",
   "plannerCanvas_range_title": "Bereichstabelle",
   "plannerCanvas_results_noDeco": "Keine Dekompression erforderlich",
   "plannerCanvas_saved_deleteConfirmBody": "„{name}“ endgültig löschen?",

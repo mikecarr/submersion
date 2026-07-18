@@ -11150,6 +11150,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get plannerCanvas_ccr_switchDepth => 'عمق تبديل نقطة الضبط';
 
   @override
+  String get plannerCanvas_pscr_ratio => 'نسبة pSCR';
+
+  @override
+  String get plannerCanvas_pscr_ratio_hint =>
+      'أكبر = غاز طازج أكثر وانخفاض أقل في الأكسجين';
+
+  @override
   String plannerCanvas_chip_cns(String value) {
     return 'CNS $value%';
   }
@@ -11187,6 +11194,11 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get plannerCanvas_contingency_timeDelta => 'دقائق إضافية';
+
+  @override
+  String plannerCanvas_chart_meanDepth(String depth) {
+    return 'المتوسط $depth';
+  }
 
   @override
   String get plannerCanvas_contingency_title => 'خطط الطوارئ';
@@ -11262,6 +11274,27 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get plannerCanvas_range_legend =>
       'تعرض الخلايا زمن الصعود إلى السطح؛ الأحمر = غير قابلة للغطس كما هو مخطط';
+
+  @override
+  String get plannerCanvas_pane_collapse => 'طي اللوحة';
+
+  @override
+  String get plannerCanvas_pane_expand => 'توسيع اللوحة';
+
+  @override
+  String get plannerCanvas_tab_setup => 'الإعداد';
+
+  @override
+  String get plannerCanvas_o2Narcotic => 'اعتبار الأكسجين مخدرًا';
+
+  @override
+  String get plannerCanvas_rates_ascent => 'معدل الصعود';
+
+  @override
+  String get plannerCanvas_rates_descent => 'معدل النزول';
+
+  @override
+  String get plannerCanvas_rates_title => 'المعدلات';
 
   @override
   String get plannerCanvas_range_title => 'جدول النطاقات';

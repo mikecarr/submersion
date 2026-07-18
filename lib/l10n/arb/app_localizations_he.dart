@@ -11074,6 +11074,13 @@ class AppLocalizationsHe extends AppLocalizations {
   String get plannerCanvas_ccr_switchDepth => 'עומק החלפת נקודת הכיוון';
 
   @override
+  String get plannerCanvas_pscr_ratio => 'יחס pSCR';
+
+  @override
+  String get plannerCanvas_pscr_ratio_hint =>
+      'גדול יותר = יותר גז טרי, ירידת חמצן קטנה יותר';
+
+  @override
   String plannerCanvas_chip_cns(String value) {
     return 'CNS $value%';
   }
@@ -11111,6 +11118,11 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get plannerCanvas_contingency_timeDelta => 'דקות נוספות';
+
+  @override
+  String plannerCanvas_chart_meanDepth(String depth) {
+    return 'ממוצע $depth';
+  }
 
   @override
   String get plannerCanvas_contingency_title => 'תוכניות חירום';
@@ -11186,6 +11198,27 @@ class AppLocalizationsHe extends AppLocalizations {
   @override
   String get plannerCanvas_range_legend =>
       'התאים מציגים את זמן העלייה לפני המים; אדום = לא ניתן לצלול כמתוכנן';
+
+  @override
+  String get plannerCanvas_pane_collapse => 'כווץ חלונית';
+
+  @override
+  String get plannerCanvas_pane_expand => 'הרחב חלונית';
+
+  @override
+  String get plannerCanvas_tab_setup => 'הגדרה';
+
+  @override
+  String get plannerCanvas_o2Narcotic => 'התייחס לחמצן כמשכר';
+
+  @override
+  String get plannerCanvas_rates_ascent => 'קצב עלייה';
+
+  @override
+  String get plannerCanvas_rates_descent => 'קצב ירידה';
+
+  @override
+  String get plannerCanvas_rates_title => 'קצבים';
 
   @override
   String get plannerCanvas_range_title => 'טבלת טווחים';

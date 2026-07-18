@@ -10840,6 +10840,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get plannerCanvas_ccr_switchDepth => '设定点切换深度';
 
   @override
+  String get plannerCanvas_pscr_ratio => 'pSCR 比率';
+
+  @override
+  String get plannerCanvas_pscr_ratio_hint => '越大 = 新鲜气体越多，氧分压下降越小';
+
+  @override
   String plannerCanvas_chip_cns(String value) {
     return 'CNS $value%';
   }
@@ -10876,6 +10882,11 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get plannerCanvas_contingency_timeDelta => '额外分钟';
+
+  @override
+  String plannerCanvas_chart_meanDepth(String depth) {
+    return '平均 $depth';
+  }
 
   @override
   String get plannerCanvas_contingency_title => '应急计划';
@@ -10947,6 +10958,27 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get plannerCanvas_range_legend => '单元格显示到达水面所需时间；红色 = 无法按计划潜水';
+
+  @override
+  String get plannerCanvas_pane_collapse => '折叠面板';
+
+  @override
+  String get plannerCanvas_pane_expand => '展开面板';
+
+  @override
+  String get plannerCanvas_tab_setup => '设置';
+
+  @override
+  String get plannerCanvas_o2Narcotic => '将氧气视为麻醉性';
+
+  @override
+  String get plannerCanvas_rates_ascent => '上升速率';
+
+  @override
+  String get plannerCanvas_rates_descent => '下降速率';
+
+  @override
+  String get plannerCanvas_rates_title => '速率';
 
   @override
   String get plannerCanvas_range_title => '范围表';

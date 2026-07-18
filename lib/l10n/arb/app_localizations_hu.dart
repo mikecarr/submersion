@@ -11331,6 +11331,13 @@ class AppLocalizationsHu extends AppLocalizations {
   String get plannerCanvas_ccr_switchDepth => 'Setpoint váltási mélység';
 
   @override
+  String get plannerCanvas_pscr_ratio => 'pSCR arány';
+
+  @override
+  String get plannerCanvas_pscr_ratio_hint =>
+      'Nagyobb = több friss gáz, kisebb O₂-esés';
+
+  @override
   String plannerCanvas_chip_cns(String value) {
     return 'CNS $value%';
   }
@@ -11369,6 +11376,11 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get plannerCanvas_contingency_timeDelta => 'Extra percek';
+
+  @override
+  String plannerCanvas_chart_meanDepth(String depth) {
+    return 'átlag $depth';
+  }
 
   @override
   String get plannerCanvas_contingency_title => 'Vészhelyzeti tervek';
@@ -11444,6 +11456,27 @@ class AppLocalizationsHu extends AppLocalizations {
   @override
   String get plannerCanvas_range_legend =>
       'A cellák a felszínre érés idejét mutatják; piros = a terv szerint nem merülhető';
+
+  @override
+  String get plannerCanvas_pane_collapse => 'Panel összecsukása';
+
+  @override
+  String get plannerCanvas_pane_expand => 'Panel kibontása';
+
+  @override
+  String get plannerCanvas_tab_setup => 'Beállítás';
+
+  @override
+  String get plannerCanvas_o2Narcotic => 'O₂ kezelése kábítóként';
+
+  @override
+  String get plannerCanvas_rates_ascent => 'Emelkedési ütem';
+
+  @override
+  String get plannerCanvas_rates_descent => 'Merülési ütem';
+
+  @override
+  String get plannerCanvas_rates_title => 'Ütemek';
 
   @override
   String get plannerCanvas_range_title => 'Tartománytáblázat';

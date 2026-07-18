@@ -3561,6 +3561,8 @@
   "plannerCanvas_ccr_setpointHigh": "Setpoint alto (bar)",
   "plannerCanvas_ccr_setpointLow": "Setpoint basso (bar)",
   "plannerCanvas_ccr_switchDepth": "Profondità di cambio setpoint",
+  "plannerCanvas_pscr_ratio": "Rapporto pSCR",
+  "plannerCanvas_pscr_ratio_hint": "Maggiore = più gas fresco, minore calo di O₂",
   "plannerCanvas_chip_cns": "CNS {value}%",
   "plannerCanvas_chip_issues": "{count, plural, =1{1 problema} other{{count} problemi}}",
   "plannerCanvas_compare_action": "Confronta",
@@ -3570,6 +3572,14 @@
   "plannerCanvas_contingency_depthDelta": "Profondità extra",
   "plannerCanvas_contingency_lostGas": "{gas} perso",
   "plannerCanvas_contingency_timeDelta": "Minuti extra",
+  "plannerCanvas_chart_meanDepth": "media {depth}",
+  "@plannerCanvas_chart_meanDepth": {
+    "placeholders": {
+      "depth": {
+        "type": "String"
+      }
+    }
+  },
   "plannerCanvas_contingency_title": "Contingenze",
   "plannerCanvas_contingency_turnFraction": "Frazione di rientro",
   "plannerCanvas_contingency_turnRule": "Regola pressione di rientro",
@@ -3589,6 +3599,13 @@
   "plannerCanvas_issue_noDecoGas": "Decompressione necessaria ma nessun gas deco a bordo",
   "plannerCanvas_range_base": "Base",
   "plannerCanvas_range_legend": "Le celle mostrano il tempo di risalita; rosso = non immergibile come pianificato",
+  "plannerCanvas_pane_collapse": "Comprimi pannello",
+  "plannerCanvas_pane_expand": "Espandi pannello",
+  "plannerCanvas_tab_setup": "Configurazione",
+  "plannerCanvas_o2Narcotic": "Tratta l'O₂ come narcotico",
+  "plannerCanvas_rates_ascent": "Velocità di risalita",
+  "plannerCanvas_rates_descent": "Velocità di discesa",
+  "plannerCanvas_rates_title": "Velocità",
   "plannerCanvas_range_title": "Tabella di variazione",
   "plannerCanvas_results_noDeco": "Nessuna decompressione necessaria",
   "plannerCanvas_saved_deleteConfirmBody": "Eliminare definitivamente «{name}»?",

@@ -3561,6 +3561,8 @@
   "plannerCanvas_ccr_setpointHigh": "Setpoint haut (bar)",
   "plannerCanvas_ccr_setpointLow": "Setpoint bas (bar)",
   "plannerCanvas_ccr_switchDepth": "Profondeur de bascule du setpoint",
+  "plannerCanvas_pscr_ratio": "Ratio pSCR",
+  "plannerCanvas_pscr_ratio_hint": "Plus grand = plus de gaz frais, chute d'O₂ plus faible",
   "plannerCanvas_chip_cns": "CNS {value}%",
   "plannerCanvas_chip_issues": "{count, plural, =1{1 problème} other{{count} problèmes}}",
   "plannerCanvas_compare_action": "Comparer",
@@ -3570,6 +3572,14 @@
   "plannerCanvas_contingency_depthDelta": "Profondeur en plus",
   "plannerCanvas_contingency_lostGas": "{gas} perdu",
   "plannerCanvas_contingency_timeDelta": "Minutes en plus",
+  "plannerCanvas_chart_meanDepth": "moyenne {depth}",
+  "@plannerCanvas_chart_meanDepth": {
+    "placeholders": {
+      "depth": {
+        "type": "String"
+      }
+    }
+  },
   "plannerCanvas_contingency_title": "Plans de secours",
   "plannerCanvas_contingency_turnFraction": "Fraction de demi-tour",
   "plannerCanvas_contingency_turnRule": "Règle de pression de demi-tour",
@@ -3589,6 +3599,13 @@
   "plannerCanvas_issue_noDecoGas": "Décompression requise mais aucun gaz de déco emporté",
   "plannerCanvas_range_base": "Base",
   "plannerCanvas_range_legend": "Les cellules indiquent le temps de remontée ; rouge = non plongeable comme prévu",
+  "plannerCanvas_pane_collapse": "Réduire le panneau",
+  "plannerCanvas_pane_expand": "Développer le panneau",
+  "plannerCanvas_tab_setup": "Réglages",
+  "plannerCanvas_o2Narcotic": "Traiter l'O₂ comme narcotique",
+  "plannerCanvas_rates_ascent": "Vitesse de remontée",
+  "plannerCanvas_rates_descent": "Vitesse de descente",
+  "plannerCanvas_rates_title": "Vitesses",
   "plannerCanvas_range_title": "Table de variations",
   "plannerCanvas_results_noDeco": "Aucune décompression requise",
   "plannerCanvas_saved_deleteConfirmBody": "Supprimer définitivement « {name} » ?",

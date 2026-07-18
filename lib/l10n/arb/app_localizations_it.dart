@@ -11361,6 +11361,13 @@ class AppLocalizationsIt extends AppLocalizations {
   String get plannerCanvas_ccr_switchDepth => 'Profondità di cambio setpoint';
 
   @override
+  String get plannerCanvas_pscr_ratio => 'Rapporto pSCR';
+
+  @override
+  String get plannerCanvas_pscr_ratio_hint =>
+      'Maggiore = più gas fresco, minore calo di O₂';
+
+  @override
   String plannerCanvas_chip_cns(String value) {
     return 'CNS $value%';
   }
@@ -11399,6 +11406,11 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get plannerCanvas_contingency_timeDelta => 'Minuti extra';
+
+  @override
+  String plannerCanvas_chart_meanDepth(String depth) {
+    return 'media $depth';
+  }
 
   @override
   String get plannerCanvas_contingency_title => 'Contingenze';
@@ -11475,6 +11487,27 @@ class AppLocalizationsIt extends AppLocalizations {
   @override
   String get plannerCanvas_range_legend =>
       'Le celle mostrano il tempo di risalita; rosso = non immergibile come pianificato';
+
+  @override
+  String get plannerCanvas_pane_collapse => 'Comprimi pannello';
+
+  @override
+  String get plannerCanvas_pane_expand => 'Espandi pannello';
+
+  @override
+  String get plannerCanvas_tab_setup => 'Configurazione';
+
+  @override
+  String get plannerCanvas_o2Narcotic => 'Tratta l\'O₂ come narcotico';
+
+  @override
+  String get plannerCanvas_rates_ascent => 'Velocità di risalita';
+
+  @override
+  String get plannerCanvas_rates_descent => 'Velocità di discesa';
+
+  @override
+  String get plannerCanvas_rates_title => 'Velocità';
 
   @override
   String get plannerCanvas_range_title => 'Tabella di variazione';

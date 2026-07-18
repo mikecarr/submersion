@@ -3595,6 +3595,8 @@
   "plannerCanvas_ccr_setpointHigh": "Setpoint alto (bar)",
   "plannerCanvas_ccr_setpointLow": "Setpoint bajo (bar)",
   "plannerCanvas_ccr_switchDepth": "Profundidad de cambio de setpoint",
+  "plannerCanvas_pscr_ratio": "Relación pSCR",
+  "plannerCanvas_pscr_ratio_hint": "Mayor = más gas fresco, menor caída de O₂",
   "plannerCanvas_chip_cns": "CNS {value}%",
   "plannerCanvas_chip_issues": "{count, plural, =1{1 problema} other{{count} problemas}}",
   "plannerCanvas_compare_action": "Comparar",
@@ -3604,6 +3606,14 @@
   "plannerCanvas_contingency_depthDelta": "Profundidad extra",
   "plannerCanvas_contingency_lostGas": "{gas} perdido",
   "plannerCanvas_contingency_timeDelta": "Minutos extra",
+  "plannerCanvas_chart_meanDepth": "media {depth}",
+  "@plannerCanvas_chart_meanDepth": {
+    "placeholders": {
+      "depth": {
+        "type": "String"
+      }
+    }
+  },
   "plannerCanvas_contingency_title": "Contingencias",
   "plannerCanvas_contingency_turnFraction": "Fracción de retorno",
   "plannerCanvas_contingency_turnRule": "Regla de presión de retorno",
@@ -3623,6 +3633,13 @@
   "plannerCanvas_issue_noDecoGas": "Se requiere descompresión pero no se lleva gas de deco",
   "plannerCanvas_range_base": "Base",
   "plannerCanvas_range_legend": "Las celdas muestran el tiempo hasta la superficie; rojo = no buceable según lo planeado",
+  "plannerCanvas_pane_collapse": "Contraer panel",
+  "plannerCanvas_pane_expand": "Expandir panel",
+  "plannerCanvas_tab_setup": "Configuración",
+  "plannerCanvas_o2Narcotic": "Tratar el O₂ como narcótico",
+  "plannerCanvas_rates_ascent": "Tasa de ascenso",
+  "plannerCanvas_rates_descent": "Tasa de descenso",
+  "plannerCanvas_rates_title": "Tasas",
   "plannerCanvas_range_title": "Tabla de rangos",
   "plannerCanvas_results_noDeco": "No se requiere descompresión",
   "plannerCanvas_saved_deleteConfirmBody": "¿Eliminar permanentemente «{name}»?",

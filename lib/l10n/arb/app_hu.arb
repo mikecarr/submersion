@@ -3561,6 +3561,8 @@
   "plannerCanvas_ccr_setpointHigh": "Magas setpoint (bar)",
   "plannerCanvas_ccr_setpointLow": "Alacsony setpoint (bar)",
   "plannerCanvas_ccr_switchDepth": "Setpoint váltási mélység",
+  "plannerCanvas_pscr_ratio": "pSCR arány",
+  "plannerCanvas_pscr_ratio_hint": "Nagyobb = több friss gáz, kisebb O₂-esés",
   "plannerCanvas_chip_cns": "CNS {value}%",
   "plannerCanvas_chip_issues": "{count, plural, =1{1 probléma} other{{count} probléma}}",
   "plannerCanvas_compare_action": "Összehasonlítás",
@@ -3570,6 +3572,14 @@
   "plannerCanvas_contingency_depthDelta": "Extra mélység",
   "plannerCanvas_contingency_lostGas": "{gas} elveszett",
   "plannerCanvas_contingency_timeDelta": "Extra percek",
+  "plannerCanvas_chart_meanDepth": "átlag {depth}",
+  "@plannerCanvas_chart_meanDepth": {
+    "placeholders": {
+      "depth": {
+        "type": "String"
+      }
+    }
+  },
   "plannerCanvas_contingency_title": "Vészhelyzeti tervek",
   "plannerCanvas_contingency_turnFraction": "Fordulási hányad",
   "plannerCanvas_contingency_turnRule": "Fordulónyomás-szabály",
@@ -3589,6 +3599,13 @@
   "plannerCanvas_issue_noDecoGas": "Dekompresszió szükséges, de nincs deco gáz",
   "plannerCanvas_range_base": "Alap",
   "plannerCanvas_range_legend": "A cellák a felszínre érés idejét mutatják; piros = a terv szerint nem merülhető",
+  "plannerCanvas_pane_collapse": "Panel összecsukása",
+  "plannerCanvas_pane_expand": "Panel kibontása",
+  "plannerCanvas_tab_setup": "Beállítás",
+  "plannerCanvas_o2Narcotic": "O₂ kezelése kábítóként",
+  "plannerCanvas_rates_ascent": "Emelkedési ütem",
+  "plannerCanvas_rates_descent": "Merülési ütem",
+  "plannerCanvas_rates_title": "Ütemek",
   "plannerCanvas_range_title": "Tartománytáblázat",
   "plannerCanvas_results_noDeco": "Nincs szükség dekompresszióra",
   "plannerCanvas_saved_deleteConfirmBody": "Véglegesen törli a(z) „{name}” tervet?",

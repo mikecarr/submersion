@@ -3746,6 +3746,8 @@
   "plannerCanvas_ccr_setpointHigh": "高设定点（bar）",
   "plannerCanvas_ccr_setpointLow": "低设定点（bar）",
   "plannerCanvas_ccr_switchDepth": "设定点切换深度",
+  "plannerCanvas_pscr_ratio": "pSCR 比率",
+  "plannerCanvas_pscr_ratio_hint": "越大 = 新鲜气体越多，氧分压下降越小",
   "plannerCanvas_chip_cns": "CNS {value}%",
   "plannerCanvas_chip_issues": "{count, plural, other{{count} 个问题}}",
   "plannerCanvas_compare_action": "比较",
@@ -3755,6 +3757,14 @@
   "plannerCanvas_contingency_depthDelta": "额外深度",
   "plannerCanvas_contingency_lostGas": "失去 {gas}",
   "plannerCanvas_contingency_timeDelta": "额外分钟",
+  "plannerCanvas_chart_meanDepth": "平均 {depth}",
+  "@plannerCanvas_chart_meanDepth": {
+    "placeholders": {
+      "depth": {
+        "type": "String"
+      }
+    }
+  },
   "plannerCanvas_contingency_title": "应急计划",
   "plannerCanvas_contingency_turnFraction": "折返比例",
   "plannerCanvas_contingency_turnRule": "折返压力规则",
@@ -3774,6 +3784,13 @@
   "plannerCanvas_issue_noDecoGas": "需要减压但未携带减压气体",
   "plannerCanvas_range_base": "基准",
   "plannerCanvas_range_legend": "单元格显示到达水面所需时间；红色 = 无法按计划潜水",
+  "plannerCanvas_pane_collapse": "折叠面板",
+  "plannerCanvas_pane_expand": "展开面板",
+  "plannerCanvas_tab_setup": "设置",
+  "plannerCanvas_o2Narcotic": "将氧气视为麻醉性",
+  "plannerCanvas_rates_ascent": "上升速率",
+  "plannerCanvas_rates_descent": "下降速率",
+  "plannerCanvas_rates_title": "速率",
   "plannerCanvas_range_title": "范围表",
   "plannerCanvas_results_noDeco": "无需减压",
   "plannerCanvas_saved_deleteConfirmBody": "永久删除“{name}”？",
