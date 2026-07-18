@@ -3,6 +3,7 @@ import 'package:equatable/equatable.dart';
 import 'package:submersion/core/constants/enums.dart';
 import 'package:submersion/core/deco/constants/buhlmann_coefficients.dart';
 import 'package:submersion/core/utils/gas_compressibility.dart';
+import 'package:submersion/features/buddies/domain/entities/buddy.dart';
 import 'package:submersion/features/dive_centers/domain/entities/dive_center.dart';
 import 'package:submersion/features/dive_sites/domain/entities/dive_site.dart';
 import 'package:submersion/features/dive_types/domain/entities/dive_type_entity.dart';
@@ -48,6 +49,15 @@ class Dive extends Equatable {
   final DiveTypeEntity? diveType; // Loaded dive type entity (for display)
   final String? buddy;
   final String? diveMaster;
+
+  /// Buddies and dive guides recorded on this dive via the many-to-many
+  /// `dive_buddies` junction (#553), each paired with their [DiveRole].
+  ///
+  /// Display-only: hydrated for list/table views (see
+  /// `DiveRepository.getAllDives`) and never persisted from this entity — the
+  /// dive editor writes the junction directly. Empty on the legacy scalar-only
+  /// path, in which case the [buddy] / [diveMaster] text fields are the source.
+  final List<BuddyWithRole> buddies;
 
   /// The active diver's own role on this dive (dive_roles id, #547).
   final String? diverRoleId;
@@ -168,6 +178,7 @@ class Dive extends Equatable {
     this.diveType,
     this.buddy,
     this.diveMaster,
+    this.buddies = const [],
     this.diverRoleId,
     this.rating,
     this.currentDirection,
@@ -541,6 +552,7 @@ class Dive extends Equatable {
     DiveTypeEntity? diveType,
     String? buddy,
     String? diveMaster,
+    List<BuddyWithRole>? buddies,
     String? diverRoleId,
     int? rating,
     CurrentDirection? currentDirection,
@@ -632,6 +644,7 @@ class Dive extends Equatable {
       diveType: diveType ?? this.diveType,
       buddy: buddy ?? this.buddy,
       diveMaster: diveMaster ?? this.diveMaster,
+      buddies: buddies ?? this.buddies,
       diverRoleId: diverRoleId ?? this.diverRoleId,
       rating: rating ?? this.rating,
       currentDirection: currentDirection ?? this.currentDirection,
@@ -726,6 +739,7 @@ class Dive extends Equatable {
     diveType,
     buddy,
     diveMaster,
+    buddies,
     diverRoleId,
     rating,
     currentDirection,

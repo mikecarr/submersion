@@ -2,6 +2,7 @@ import 'package:submersion/core/constants/dive_field.dart';
 import 'package:submersion/core/constants/units.dart';
 import 'package:submersion/features/dive_log/domain/entities/dive.dart';
 import 'package:submersion/features/dive_log/domain/entities/dive_summary.dart';
+import 'package:submersion/features/dive_roles/domain/entities/dive_role.dart';
 
 /// Extension providing raw value extraction from [Dive] and [DiveSummary]
 /// entities for each [DiveField].
@@ -108,9 +109,9 @@ extension DiveFieldExtractor on DiveField {
       case DiveField.setpointDeco:
         return dive.setpointDeco;
       case DiveField.buddy:
-        return dive.buddy;
+        return _buddyColumnValue(dive);
       case DiveField.diveMaster:
-        return dive.diveMaster;
+        return _diveMasterColumnValue(dive);
       case DiveField.siteLocation:
         return dive.site?.locationString;
       case DiveField.diveCenterName:
@@ -190,6 +191,42 @@ extension DiveFieldExtractor on DiveField {
 ///   (back gas tank pressure drop; no tank volume required).
 double? _computeSacRate(Dive dive, SacUnit sacUnit) =>
     sacUnit == SacUnit.litersPerMin ? dive.sac : dive.sacPressure;
+
+/// Names shown in the Buddy table column: every recorded participant whose
+/// role is NOT a guide/divemaster (see [_isGuideRole]), comma-joined.
+///
+/// Modern dives store people in the `dive_buddies` junction (#553), so this
+/// prefers the hydrated [Dive.buddies]. Falls back to the legacy free-text
+/// [Dive.buddy] scalar when no junction buddies are present -- either a legacy
+/// dive that only ever used the scalar, or a code path that did not hydrate
+/// buddies (in which case the scalar preserves prior behavior).
+String? _buddyColumnValue(Dive dive) {
+  final names = dive.buddies
+      .where((b) => !_isGuideRole(b.role.id))
+      .map((b) => b.buddy.name.trim())
+      .where((n) => n.isNotEmpty)
+      .toList();
+  if (names.isNotEmpty) return names.join(', ');
+  return dive.buddy;
+}
+
+/// Names shown in the Dive Master table column: recorded participants whose
+/// role is a guide/divemaster, comma-joined. Falls back to the legacy
+/// free-text [Dive.diveMaster] scalar when none are hydrated.
+String? _diveMasterColumnValue(Dive dive) {
+  final names = dive.buddies
+      .where((b) => _isGuideRole(b.role.id))
+      .map((b) => b.buddy.name.trim())
+      .where((n) => n.isNotEmpty)
+      .toList();
+  if (names.isNotEmpty) return names.join(', ');
+  return dive.diveMaster;
+}
+
+/// A `dive_roles` id representing someone guiding the dive rather than a peer
+/// buddy: the built-in dive guide or dive master roles (#553).
+bool _isGuideRole(String roleId) =>
+    roleId == DiveRole.diveGuideId || roleId == DiveRole.diveMasterId;
 
 /// Compute the total gas consumed in liters across all tanks of a [Dive].
 double? _computeGasConsumed(Dive dive) {

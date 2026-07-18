@@ -2,13 +2,39 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:submersion/core/constants/dive_field.dart';
 import 'package:submersion/core/constants/enums.dart';
 import 'package:submersion/core/constants/units.dart';
+import 'package:submersion/features/buddies/domain/entities/buddy.dart';
 import 'package:submersion/features/dive_centers/domain/entities/dive_center.dart';
 import 'package:submersion/features/dive_log/domain/entities/dive.dart';
 import 'package:submersion/features/dive_log/domain/entities/dive_summary.dart';
 import 'package:submersion/features/dive_log/domain/entities/dive_weight.dart';
+import 'package:submersion/features/dive_roles/domain/entities/dive_role.dart';
 import 'package:submersion/features/dive_sites/domain/entities/dive_site.dart';
 import 'package:submersion/features/tags/domain/entities/tag.dart';
 import 'package:submersion/features/trips/domain/entities/trip.dart';
+
+/// A junction participant with the given display [name] and dive_roles [roleId].
+BuddyWithRole _person(String name, String roleId) => BuddyWithRole(
+  buddy: Buddy(
+    id: name,
+    name: name,
+    createdAt: DateTime(2024, 1, 1),
+    updatedAt: DateTime(2024, 1, 1),
+  ),
+  role: DiveRole.synthetic(roleId),
+);
+
+/// A minimal dive carrying junction [buddies] plus optional legacy scalars.
+Dive _diveWithBuddies(
+  List<BuddyWithRole> buddies, {
+  String? buddy,
+  String? diveMaster,
+}) => Dive(
+  id: 'dive-b',
+  dateTime: DateTime(2024, 1, 1),
+  buddy: buddy,
+  diveMaster: diveMaster,
+  buddies: buddies,
+);
 
 void main() {
   final now = DateTime(2024, 6, 15, 10, 30);
@@ -306,6 +332,94 @@ void main() {
 
     test('diveMaster returns dive master name', () {
       expect(DiveField.diveMaster.extractFromDive(testDive), 'Jane Smith');
+    });
+
+    // Issue #626: modern dives store people in the dive_buddies junction, so
+    // the Buddy / Dive Master columns must read the hydrated Dive.buddies, not
+    // just the legacy scalar text fields.
+    group('junction-hydrated buddies (#626)', () {
+      test('buddy column shows junction buddy names', () {
+        final dive = _diveWithBuddies([_person('Alice', DiveRole.buddyId)]);
+        expect(DiveField.buddy.extractFromDive(dive), 'Alice');
+      });
+
+      test('buddy column comma-joins multiple buddies', () {
+        final dive = _diveWithBuddies([
+          _person('Alice', DiveRole.buddyId),
+          _person('Bob', DiveRole.buddyId),
+        ]);
+        expect(DiveField.buddy.extractFromDive(dive), 'Alice, Bob');
+      });
+
+      test('diveMaster column shows dive master role names', () {
+        final dive = _diveWithBuddies([
+          _person('Guido', DiveRole.diveMasterId),
+        ]);
+        expect(DiveField.diveMaster.extractFromDive(dive), 'Guido');
+      });
+
+      test('diveMaster column also includes dive guide role', () {
+        final dive = _diveWithBuddies([_person('Gaia', DiveRole.diveGuideId)]);
+        expect(DiveField.diveMaster.extractFromDive(dive), 'Gaia');
+      });
+
+      test('guides are excluded from the buddy column', () {
+        final dive = _diveWithBuddies([
+          _person('Alice', DiveRole.buddyId),
+          _person('Guido', DiveRole.diveMasterId),
+        ]);
+        expect(DiveField.buddy.extractFromDive(dive), 'Alice');
+        expect(DiveField.diveMaster.extractFromDive(dive), 'Guido');
+      });
+
+      test(
+        'non-guide roles (student, instructor) fall in the buddy column',
+        () {
+          // Names are joined in list order (the repository query pre-sorts by
+          // name; the extractor does not re-sort).
+          final dive = _diveWithBuddies([
+            _person('Sam', DiveRole.studentId),
+            _person('Ines', DiveRole.instructorId),
+          ]);
+          expect(DiveField.buddy.extractFromDive(dive), 'Sam, Ines');
+          expect(DiveField.diveMaster.extractFromDive(dive), isNull);
+        },
+      );
+
+      test('junction data takes precedence over the legacy scalar', () {
+        final dive = _diveWithBuddies(
+          [_person('Alice', DiveRole.buddyId)],
+          buddy: 'Legacy Name',
+          diveMaster: 'Legacy DM',
+        );
+        expect(DiveField.buddy.extractFromDive(dive), 'Alice');
+      });
+
+      test('falls back to the legacy scalar when no junction buddies', () {
+        final dive = _diveWithBuddies(
+          const [],
+          buddy: 'Legacy Buddy',
+          diveMaster: 'Legacy DM',
+        );
+        expect(DiveField.buddy.extractFromDive(dive), 'Legacy Buddy');
+        expect(DiveField.diveMaster.extractFromDive(dive), 'Legacy DM');
+      });
+
+      test('buddy column falls back to scalar when junction has only a DM', () {
+        final dive = _diveWithBuddies([
+          _person('Guido', DiveRole.diveMasterId),
+        ], buddy: 'Legacy Buddy');
+        // No non-guide participant -> scalar buddy still shows.
+        expect(DiveField.buddy.extractFromDive(dive), 'Legacy Buddy');
+        expect(DiveField.diveMaster.extractFromDive(dive), 'Guido');
+      });
+
+      test('blank buddy names are ignored', () {
+        final dive = _diveWithBuddies([
+          _person('   ', DiveRole.buddyId),
+        ], buddy: 'Legacy Buddy');
+        expect(DiveField.buddy.extractFromDive(dive), 'Legacy Buddy');
+      });
     });
 
     test('siteLocation returns site location string', () {
