@@ -2418,7 +2418,9 @@ class AppDatabase extends _$AppDatabase {
   /// v114: collapse duplicate tombstones (newest deleted_at per entity_type +
   /// record_id wins) and (re-)assert the unique index that keeps the deletion
   /// log collapsed. Cheap when the index already exists; the dedupe DELETE
-  /// only runs when index creation fails on pre-existing duplicates. Called
+  /// only runs when index creation fails *and* actual duplicates are present.
+  /// Any other index-creation failure (corruption, disk full, locked DB) is
+  /// rethrown unchanged rather than masked behind a destructive DELETE. Called
   /// from the v114 upgrade and the beforeOpen backstop (parallel-branch
   /// schema-version collisions heal here, mirroring the v111 backstop).
   Future<void> ensureDeletionLogIndex() async {
@@ -2434,6 +2436,17 @@ class AppDatabase extends _$AppDatabase {
     try {
       await customStatement(createIndex);
     } catch (_) {
+      // The only expected cause is pre-existing duplicate (entity_type,
+      // record_id) rows -- a DB written before the unique index existed
+      // (parallel-branch collision, or logDeletion duplicates from before the
+      // v114 upsert). Confirm duplicates are actually present before running
+      // the dedupe DELETE; if there are none, the failure is something else
+      // (corruption, disk full, locked) that must surface, not be swallowed.
+      final hasDuplicates = await customSelect(
+        'SELECT 1 FROM deletion_log GROUP BY entity_type, record_id '
+        'HAVING COUNT(*) > 1 LIMIT 1',
+      ).get();
+      if (hasDuplicates.isEmpty) rethrow;
       await customStatement('''
         DELETE FROM deletion_log WHERE rowid NOT IN (
           SELECT rowid FROM (

@@ -39,7 +39,7 @@ void main() {
     'ensureDeletionLogIndex collapses pre-existing duplicates, newest wins',
     () async {
       final db = DatabaseService.instance.database;
-      // Simulate a pre-v113 database: drop the index, insert raw duplicates.
+      // Simulate a pre-v114 database: drop the index, insert raw duplicates.
       await db.customStatement(
         'DROP INDEX IF EXISTS idx_deletion_log_entity_record',
       );
@@ -65,6 +65,40 @@ void main() {
           .get();
       expect(rows, hasLength(1));
       expect(rows.single.data['deleted_at'], 3000);
+    },
+  );
+
+  test(
+    'ensureDeletionLogIndex on a duplicate-free table preserves every row',
+    () async {
+      final db = DatabaseService.instance.database;
+      // Index missing (as on a pre-v114 DB) but no duplicates: the heal path
+      // must recreate the index without deleting any tombstones.
+      await db.customStatement(
+        'DROP INDEX IF EXISTS idx_deletion_log_entity_record',
+      );
+      await db.customStatement(
+        "INSERT INTO deletion_log (id, entity_type, record_id, deleted_at, hlc) "
+        "VALUES ('a', 'dives', 'r1', 1000, NULL)",
+      );
+      await db.customStatement(
+        "INSERT INTO deletion_log (id, entity_type, record_id, deleted_at, hlc) "
+        "VALUES ('b', 'sites', 'r1', 2000, NULL)",
+      );
+
+      await db.ensureDeletionLogIndex();
+
+      final rows = await db
+          .customSelect('SELECT record_id FROM deletion_log')
+          .get();
+      expect(rows, hasLength(2));
+      final index = await db
+          .customSelect(
+            "SELECT name FROM sqlite_master WHERE type='index' "
+            "AND name='idx_deletion_log_entity_record'",
+          )
+          .get();
+      expect(index, hasLength(1));
     },
   );
 
