@@ -879,6 +879,9 @@ void main() {
         overrides: overrides,
         child: MaterialApp.router(
           routerConfig: router,
+          // Pin the locale so the English string-based finders below are
+          // deterministic regardless of the host environment locale.
+          locale: const Locale('en'),
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
         ),
