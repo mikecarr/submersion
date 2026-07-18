@@ -131,7 +131,6 @@ class _PhotoPickerPageState extends ConsumerState<PhotoPickerPage> {
       ),
     ];
 
-    // TODO(media): localize tab labels when phases 2/3 ship
     return DefaultTabController(
       length: 3,
       child: Scaffold(
@@ -139,11 +138,11 @@ class _PhotoPickerPageState extends ConsumerState<PhotoPickerPage> {
           leading: appBarLeading,
           title: Text(context.l10n.media_photoPicker_appBarTitle),
           actions: appBarActions,
-          bottom: const TabBar(
+          bottom: TabBar(
             tabs: [
-              Tab(text: 'Gallery'),
-              Tab(text: 'Files'),
-              Tab(text: 'URL'),
+              Tab(text: context.l10n.media_photoPicker_tab_gallery),
+              Tab(text: context.l10n.media_photoPicker_tab_files),
+              Tab(text: context.l10n.media_photoPicker_tab_url),
             ],
           ),
         ),

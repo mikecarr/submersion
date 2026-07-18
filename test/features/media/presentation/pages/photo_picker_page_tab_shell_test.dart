@@ -100,6 +100,7 @@ Widget _wrap() {
       networkCredentialsServiceProvider.overrideWithValue(credentials),
     ],
     child: MaterialApp(
+      locale: const Locale('en'),
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       home: PhotoPickerPage(

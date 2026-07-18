@@ -41,6 +41,7 @@ class _StubDiagnosticsService implements LocalFilesDiagnosticsService {
 
 Widget _wrap() => const ProviderScope(
   child: MaterialApp(
+    locale: Locale('en'),
     localizationsDelegates: AppLocalizations.localizationsDelegates,
     supportedLocales: AppLocalizations.supportedLocales,
     home: MediaSourcesPage(),
@@ -50,6 +51,7 @@ Widget _wrap() => const ProviderScope(
 Widget _wrapWith(List<Object> overrides) => ProviderScope(
   overrides: overrides.cast(),
   child: const MaterialApp(
+    locale: Locale('en'),
     localizationsDelegates: AppLocalizations.localizationsDelegates,
     supportedLocales: AppLocalizations.supportedLocales,
     home: MediaSourcesPage(),
@@ -205,6 +207,7 @@ void main() {
       ProviderScope(
         child: MaterialApp.router(
           routerConfig: router,
+          locale: const Locale('en'),
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
         ),

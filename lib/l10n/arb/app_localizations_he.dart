@@ -10651,6 +10651,15 @@ class AppLocalizationsHe extends AppLocalizations {
   String get media_photoPicker_appBarTitle => 'בחר תמונות';
 
   @override
+  String get media_photoPicker_tab_gallery => 'גלריה';
+
+  @override
+  String get media_photoPicker_tab_files => 'קבצים';
+
+  @override
+  String get media_photoPicker_tab_url => 'URL';
+
+  @override
   String get media_photoPicker_clearSelectionButton => 'נקה';
 
   @override

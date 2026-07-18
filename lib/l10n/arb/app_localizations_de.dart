@@ -10926,6 +10926,15 @@ class AppLocalizationsDe extends AppLocalizations {
   String get media_photoPicker_appBarTitle => 'Fotos auswählen';
 
   @override
+  String get media_photoPicker_tab_gallery => 'Galerie';
+
+  @override
+  String get media_photoPicker_tab_files => 'Dateien';
+
+  @override
+  String get media_photoPicker_tab_url => 'URL';
+
+  @override
   String get media_photoPicker_clearSelectionButton => 'Löschen';
 
   @override
