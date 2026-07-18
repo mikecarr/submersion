@@ -74,8 +74,12 @@ void main() {
     },
   );
 
-  test('v112 is the current schema version (exact-latest tripwire)', () {
-    expect(AppDatabase.currentSchemaVersion, 112);
+  test('v112 (equipment sets/geofences) stays on the migration ladder', () {
+    // Superseded-tripwire convention: this was the exact-latest tripwire when
+    // v112 was newest. This branch adds v119 (equipment.lift_capacity_kg), so
+    // the exact assertion is relaxed to greaterThanOrEqualTo -- the newest
+    // migration's own test now holds the exact-latest tripwire.
+    expect(AppDatabase.currentSchemaVersion, greaterThanOrEqualTo(112));
     expect(AppDatabase.migrationVersions, contains(112));
   });
 }
