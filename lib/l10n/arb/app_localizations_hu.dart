@@ -10897,6 +10897,15 @@ class AppLocalizationsHu extends AppLocalizations {
   String get media_photoPicker_appBarTitle => 'Fotok kivalasztasa';
 
   @override
+  String get media_photoPicker_tab_gallery => 'Galeria';
+
+  @override
+  String get media_photoPicker_tab_files => 'Fajlok';
+
+  @override
+  String get media_photoPicker_tab_url => 'URL';
+
+  @override
   String get media_photoPicker_clearSelectionButton => 'Törlés';
 
   @override

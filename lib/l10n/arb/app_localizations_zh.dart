@@ -10430,6 +10430,15 @@ class AppLocalizationsZh extends AppLocalizations {
   String get media_photoPicker_appBarTitle => '选择照片';
 
   @override
+  String get media_photoPicker_tab_gallery => '图库';
+
+  @override
+  String get media_photoPicker_tab_files => '文件';
+
+  @override
+  String get media_photoPicker_tab_url => 'URL';
+
+  @override
   String get media_photoPicker_clearSelectionButton => '清除';
 
   @override

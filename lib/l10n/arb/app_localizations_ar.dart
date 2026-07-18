@@ -10724,6 +10724,15 @@ class AppLocalizationsAr extends AppLocalizations {
   String get media_photoPicker_appBarTitle => 'اختيار الصور';
 
   @override
+  String get media_photoPicker_tab_gallery => 'المعرض';
+
+  @override
+  String get media_photoPicker_tab_files => 'الملفات';
+
+  @override
+  String get media_photoPicker_tab_url => 'URL';
+
+  @override
   String get media_photoPicker_clearSelectionButton => 'مسح';
 
   @override
