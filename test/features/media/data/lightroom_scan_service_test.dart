@@ -62,11 +62,13 @@ class _FakeLightroomApi extends LightroomApiClient {
   }
 }
 
-/// Models the live Lightroom assets endpoint faithfully: results are sorted
-/// oldest-first (ascending capture date) and paginated via `next`. The cursor
-/// (captured_after / captured_before) is honoured on the first call and then
-/// re-encoded into the next URL, mirroring how the real `next` link carries the
-/// original query forward.
+/// Models the ordering and pagination of the live Lightroom assets endpoint:
+/// dated assets are sorted oldest-first (ascending capture date) and paginated
+/// via `next`. The cursor (captured_after / captured_before) is honoured on the
+/// first call and then re-encoded into the next URL, mirroring how the real
+/// `next` link carries the original query forward. Assets without a capture
+/// date are not modelled here (the catalog path is capture-date filtered); the
+/// null-capture accounting is exercised through [_FakeLightroomApi] instead.
 class _PagingLightroomApi extends LightroomApiClient {
   _PagingLightroomApi({required this.assets, this.pageSize = 2})
     : super(auth: AdobeImsAuthManager());
