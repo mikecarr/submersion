@@ -216,12 +216,25 @@ class EquipmentRepository {
       SyncEventBus.notifyLocalChange();
 
       // Seed service clocks for kinds flagged auto-attach (hydro/VIP for
-      // tanks, reg service for regulators, ...).
-      await ServiceScheduleRepository().autoAttachForEquipment(
-        equipmentId: id,
-        type: equipment.type,
-        diverId: equipment.diverId,
-      );
+      // tanks, reg service for regulators, ...). Best-effort: the equipment
+      // row is already committed and marked pending above, so a failure here
+      // must not rethrow and make the caller treat the whole create as failed
+      // (which could prompt a retry and duplicate the item). The clocks can be
+      // added manually later; log and continue.
+      try {
+        await ServiceScheduleRepository().autoAttachForEquipment(
+          equipmentId: id,
+          type: equipment.type,
+          diverId: equipment.diverId,
+        );
+      } catch (e, stackTrace) {
+        _log.error(
+          'Auto-attach of default service clocks failed for equipment $id; '
+          'the equipment was still created',
+          error: e,
+          stackTrace: stackTrace,
+        );
+      }
 
       _log.info('Created equipment with id: $id');
       return equipment.copyWith(

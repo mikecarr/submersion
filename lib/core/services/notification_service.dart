@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
@@ -140,6 +141,22 @@ class NotificationService {
     return false;
   }
 
+  /// Compose the body text for a service reminder notification.
+  ///
+  /// A reminder fires on or before the due date, so [daysBefore] == 0 means
+  /// "due today" (never overdue), and 1 must read "tomorrow" rather than the
+  /// ungrammatical "1 days". Any negative value degrades to "due today".
+  @visibleForTesting
+  static String serviceReminderBody({
+    required String prefix,
+    required String kindName,
+    required int daysBefore,
+  }) {
+    if (daysBefore <= 0) return '$prefix: $kindName is due today';
+    if (daysBefore == 1) return '$prefix: $kindName is due tomorrow';
+    return '$prefix: $kindName is due in $daysBefore days';
+  }
+
   /// Schedule a notification for one service clock.
   ///
   /// The platform id derives from [scheduleId], NOT the equipment id: two
@@ -160,10 +177,11 @@ class NotificationService {
     final notificationId = _stableNotificationId('$scheduleId#$daysBefore');
 
     final title = '$kindName due: $equipmentName';
-    final body = daysBefore > 0
-        ? '${brandModel ?? equipmentName}: $kindName is due in '
-              '$daysBefore days'
-        : '${brandModel ?? equipmentName}: $kindName is overdue';
+    final body = serviceReminderBody(
+      prefix: brandModel ?? equipmentName,
+      kindName: kindName,
+      daysBefore: daysBefore,
+    );
 
     const androidDetails = AndroidNotificationDetails(
       'equipment_service_reminders',
