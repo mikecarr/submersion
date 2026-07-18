@@ -5795,5 +5795,13 @@
   "safetySettings_analyzeAll_subtitle": "Ejecutar la revisión de seguridad en todas las inmersiones con perfil que aún no se hayan analizado",
   "safetySettings_analyzeAll_progress": "Analizadas {done} de {total}",
   "@safetySettings_analyzeAll_progress": {"placeholders": {"done": {"type": "int"}, "total": {"type": "int"}}},
-  "safetySettings_analyzeAll_done": "Análisis completado"
+  "safetySettings_analyzeAll_done": "Análisis completado",
+  "safetySettings_analyzeAll_doneWithErrors": "Análisis completado — {count, plural, =1{No se pudo analizar 1 inmersión} other{No se pudieron analizar {count} inmersiones}}",
+  "@safetySettings_analyzeAll_doneWithErrors": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

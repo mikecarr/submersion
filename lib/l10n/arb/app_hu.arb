@@ -5795,5 +5795,13 @@
   "safetySettings_analyzeAll_subtitle": "A biztonsági áttekintés futtatása minden olyan profillal rendelkező merülésen, amely még nincs elemezve",
   "safetySettings_analyzeAll_progress": "{done} / {total} elemezve",
   "@safetySettings_analyzeAll_progress": {"placeholders": {"done": {"type": "int"}, "total": {"type": "int"}}},
-  "safetySettings_analyzeAll_done": "Elemzés kész"
+  "safetySettings_analyzeAll_done": "Elemzés kész",
+  "safetySettings_analyzeAll_doneWithErrors": "Elemzés kész — {count, plural, =1{1 merülést nem sikerült elemezni} other{{count} merülést nem sikerült elemezni}}",
+  "@safetySettings_analyzeAll_doneWithErrors": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

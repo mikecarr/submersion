@@ -5795,5 +5795,13 @@
   "safetySettings_analyzeAll_subtitle": "הרצת סקירת הבטיחות על כל צלילה עם פרופיל שטרם נותחה",
   "safetySettings_analyzeAll_progress": "נותחו {done} מתוך {total}",
   "@safetySettings_analyzeAll_progress": {"placeholders": {"done": {"type": "int"}, "total": {"type": "int"}}},
-  "safetySettings_analyzeAll_done": "הניתוח הושלם"
+  "safetySettings_analyzeAll_done": "הניתוח הושלם",
+  "safetySettings_analyzeAll_doneWithErrors": "הניתוח הושלם — {count, plural, =1{לא ניתן היה לנתח צלילה אחת} other{לא ניתן היה לנתח {count} צלילות}}",
+  "@safetySettings_analyzeAll_doneWithErrors": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

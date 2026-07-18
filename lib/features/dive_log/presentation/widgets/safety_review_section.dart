@@ -201,7 +201,9 @@ class _FindingTile extends StatelessWidget {
             : l10n.safetyReview_sawtoothProfile_title(value.round()),
       SafetyRuleId.highSurfaceGf => l10n.safetyReview_highSurfaceGf_title(
         value == null ? unknown : '${value.toStringAsFixed(0)}%',
-        'GF ${units.settings.gfHigh}',
+        // Pass a plain percentage (matching the surfaced-GF formatting) so the
+        // localized template owns every word; no baked-in English "GF" token.
+        '${units.settings.gfHigh}%',
       ),
     };
   }

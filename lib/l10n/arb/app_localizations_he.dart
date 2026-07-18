@@ -11569,6 +11569,17 @@ class AppLocalizationsHe extends AppLocalizations {
   String get safetySettings_analyzeAll_done => 'הניתוח הושלם';
 
   @override
+  String safetySettings_analyzeAll_doneWithErrors(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'לא ניתן היה לנתח $count צלילות',
+      one: 'לא ניתן היה לנתח צלילה אחת',
+    );
+    return 'הניתוח הושלם — $_temp0';
+  }
+
+  @override
   String safetyReview_showDismissed(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,

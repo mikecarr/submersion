@@ -11871,6 +11871,17 @@ class AppLocalizationsIt extends AppLocalizations {
   String get safetySettings_analyzeAll_done => 'Analisi completata';
 
   @override
+  String safetySettings_analyzeAll_doneWithErrors(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Impossibile analizzare $count immersioni',
+      one: 'Impossibile analizzare 1 immersione',
+    );
+    return 'Analisi completata — $_temp0';
+  }
+
+  @override
   String safetyReview_showDismissed(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,

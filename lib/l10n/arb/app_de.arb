@@ -5795,5 +5795,13 @@
   "safetySettings_analyzeAll_subtitle": "Sicherheitsüberprüfung für alle noch nicht analysierten Tauchgänge mit Profil ausführen",
   "safetySettings_analyzeAll_progress": "{done} von {total} analysiert",
   "@safetySettings_analyzeAll_progress": {"placeholders": {"done": {"type": "int"}, "total": {"type": "int"}}},
-  "safetySettings_analyzeAll_done": "Analyse abgeschlossen"
+  "safetySettings_analyzeAll_done": "Analyse abgeschlossen",
+  "safetySettings_analyzeAll_doneWithErrors": "Analyse abgeschlossen — {count, plural, =1{1 Tauchgang konnte nicht analysiert werden} other{{count} Tauchgänge konnten nicht analysiert werden}}",
+  "@safetySettings_analyzeAll_doneWithErrors": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

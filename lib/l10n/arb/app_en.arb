@@ -6669,6 +6669,14 @@
     }
   },
   "safetySettings_analyzeAll_done": "Analysis complete",
+  "safetySettings_analyzeAll_doneWithErrors": "Analysis complete — {count, plural, =1{1 dive could not be analyzed} other{{count} dives could not be analyzed}}",
+  "@safetySettings_analyzeAll_doneWithErrors": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "safetyReview_showDismissed": "{count, plural, =1{Show 1 dismissed} other{Show {count} dismissed}}",
   "@safetyReview_showDismissed": {
     "placeholders": {

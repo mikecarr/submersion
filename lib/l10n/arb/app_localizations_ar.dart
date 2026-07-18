@@ -11651,6 +11651,17 @@ class AppLocalizationsAr extends AppLocalizations {
   String get safetySettings_analyzeAll_done => 'اكتمل التحليل';
 
   @override
+  String safetySettings_analyzeAll_doneWithErrors(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'تعذّر تحليل $count غوصات',
+      one: 'تعذّر تحليل غوصة واحدة',
+    );
+    return 'اكتمل التحليل — $_temp0';
+  }
+
+  @override
   String safetyReview_showDismissed(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,

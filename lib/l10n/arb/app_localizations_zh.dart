@@ -11309,6 +11309,17 @@ class AppLocalizationsZh extends AppLocalizations {
   String get safetySettings_analyzeAll_done => '分析完成';
 
   @override
+  String safetySettings_analyzeAll_doneWithErrors(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '有 $count 次潜水无法分析',
+      one: '有 1 次潜水无法分析',
+    );
+    return '分析完成 — $_temp0';
+  }
+
+  @override
   String safetyReview_showDismissed(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,

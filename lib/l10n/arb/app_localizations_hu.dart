@@ -11838,6 +11838,17 @@ class AppLocalizationsHu extends AppLocalizations {
   String get safetySettings_analyzeAll_done => 'Elemzés kész';
 
   @override
+  String safetySettings_analyzeAll_doneWithErrors(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count merülést nem sikerült elemezni',
+      one: '1 merülést nem sikerült elemezni',
+    );
+    return 'Elemzés kész — $_temp0';
+  }
+
+  @override
   String safetyReview_showDismissed(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,

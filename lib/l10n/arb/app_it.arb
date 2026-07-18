@@ -5795,5 +5795,13 @@
   "safetySettings_analyzeAll_subtitle": "Esegui la revisione di sicurezza su tutte le immersioni con profilo non ancora analizzate",
   "safetySettings_analyzeAll_progress": "Analizzate {done} di {total}",
   "@safetySettings_analyzeAll_progress": {"placeholders": {"done": {"type": "int"}, "total": {"type": "int"}}},
-  "safetySettings_analyzeAll_done": "Analisi completata"
+  "safetySettings_analyzeAll_done": "Analisi completata",
+  "safetySettings_analyzeAll_doneWithErrors": "Analisi completata — {count, plural, =1{Impossibile analizzare 1 immersione} other{Impossibile analizzare {count} immersioni}}",
+  "@safetySettings_analyzeAll_doneWithErrors": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

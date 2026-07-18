@@ -5795,5 +5795,13 @@
   "safetySettings_analyzeAll_subtitle": "Voer de veiligheidscontrole uit op alle duiken met een profiel die nog niet geanalyseerd zijn",
   "safetySettings_analyzeAll_progress": "{done} van {total} geanalyseerd",
   "@safetySettings_analyzeAll_progress": {"placeholders": {"done": {"type": "int"}, "total": {"type": "int"}}},
-  "safetySettings_analyzeAll_done": "Analyse voltooid"
+  "safetySettings_analyzeAll_done": "Analyse voltooid",
+  "safetySettings_analyzeAll_doneWithErrors": "Analyse voltooid — {count, plural, =1{1 duik kon niet worden geanalyseerd} other{{count} duiken konden niet worden geanalyseerd}}",
+  "@safetySettings_analyzeAll_doneWithErrors": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

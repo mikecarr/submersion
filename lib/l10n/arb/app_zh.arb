@@ -5795,5 +5795,13 @@
   "safetySettings_analyzeAll_subtitle": "对所有具有剖面且尚未分析的潜水运行安全回顾",
   "safetySettings_analyzeAll_progress": "已分析 {done}/{total}",
   "@safetySettings_analyzeAll_progress": {"placeholders": {"done": {"type": "int"}, "total": {"type": "int"}}},
-  "safetySettings_analyzeAll_done": "分析完成"
+  "safetySettings_analyzeAll_done": "分析完成",
+  "safetySettings_analyzeAll_doneWithErrors": "分析完成 — {count, plural, =1{有 1 次潜水无法分析} other{有 {count} 次潜水无法分析}}",
+  "@safetySettings_analyzeAll_doneWithErrors": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

@@ -20168,6 +20168,12 @@ abstract class AppLocalizations {
   /// **'Analysis complete'**
   String get safetySettings_analyzeAll_done;
 
+  /// No description provided for @safetySettings_analyzeAll_doneWithErrors.
+  ///
+  /// In en, this message translates to:
+  /// **'Analysis complete — {count, plural, =1{1 dive could not be analyzed} other{{count} dives could not be analyzed}}'**
+  String safetySettings_analyzeAll_doneWithErrors(int count);
+
   /// No description provided for @safetyReview_showDismissed.
   ///
   /// In en, this message translates to:

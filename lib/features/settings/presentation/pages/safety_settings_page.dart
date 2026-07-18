@@ -21,6 +21,7 @@ class _SafetySettingsPageState extends ConsumerState<SafetySettingsPage> {
   bool _analyzing = false;
   int _analyzeDone = 0;
   int _analyzeTotal = 0;
+  int _analyzeFailed = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -112,6 +113,7 @@ class _SafetySettingsPageState extends ConsumerState<SafetySettingsPage> {
       _analyzing = true;
       _analyzeDone = 0;
       _analyzeTotal = diveIds.length;
+      _analyzeFailed = 0;
     });
 
     for (final diveId in diveIds) {
@@ -122,16 +124,27 @@ class _SafetySettingsPageState extends ConsumerState<SafetySettingsPage> {
         await ref.read(safetyReviewProvider(diveId).future);
       } catch (_) {
         // A dive that fails analysis (corrupt profile) must not abort the
-        // sweep; it simply stays unanalyzed.
+        // sweep; it simply stays unanalyzed. Count it so completion can report
+        // failures honestly rather than implying every dive was analyzed.
+        _analyzeFailed++;
       }
       if (!mounted) return;
+      // _analyzeDone tracks dives swept (the progress bar's position), so it
+      // advances on failure too; the failure count is surfaced separately.
       setState(() => _analyzeDone++);
     }
 
     if (!mounted) return;
+    final failed = _analyzeFailed;
     setState(() => _analyzing = false);
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(context.l10n.safetySettings_analyzeAll_done)),
+      SnackBar(
+        content: Text(
+          failed == 0
+              ? context.l10n.safetySettings_analyzeAll_done
+              : context.l10n.safetySettings_analyzeAll_doneWithErrors(failed),
+        ),
+      ),
     );
   }
 }

@@ -5795,5 +5795,13 @@
   "safetySettings_analyzeAll_subtitle": "Executar a revisão de segurança em todos os mergulhos com perfil ainda não analisados",
   "safetySettings_analyzeAll_progress": "Analisados {done} de {total}",
   "@safetySettings_analyzeAll_progress": {"placeholders": {"done": {"type": "int"}, "total": {"type": "int"}}},
-  "safetySettings_analyzeAll_done": "Análise concluída"
+  "safetySettings_analyzeAll_done": "Análise concluída",
+  "safetySettings_analyzeAll_doneWithErrors": "Análise concluída — {count, plural, =1{Não foi possível analisar 1 mergulho} other{Não foi possível analisar {count} mergulhos}}",
+  "@safetySettings_analyzeAll_doneWithErrors": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

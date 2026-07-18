@@ -5795,5 +5795,13 @@
   "safetySettings_analyzeAll_subtitle": "تشغيل مراجعة السلامة على كل غطسة ذات ملف لم تُحلل بعد",
   "safetySettings_analyzeAll_progress": "تم تحليل {done} من {total}",
   "@safetySettings_analyzeAll_progress": {"placeholders": {"done": {"type": "int"}, "total": {"type": "int"}}},
-  "safetySettings_analyzeAll_done": "اكتمل التحليل"
+  "safetySettings_analyzeAll_done": "اكتمل التحليل",
+  "safetySettings_analyzeAll_doneWithErrors": "اكتمل التحليل — {count, plural, =1{تعذّر تحليل غوصة واحدة} other{تعذّر تحليل {count} غوصات}}",
+  "@safetySettings_analyzeAll_doneWithErrors": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }
