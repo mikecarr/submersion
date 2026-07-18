@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:submersion/features/dive_log/domain/entities/safety_finding.dart';
 import 'package:submersion/features/dive_log/presentation/providers/dive_repository_provider.dart';
 import 'package:submersion/features/dive_log/presentation/providers/safety_review_providers.dart';
+import 'package:submersion/features/divers/presentation/providers/diver_providers.dart';
 import 'package:submersion/features/settings/presentation/providers/settings_providers.dart';
 import 'package:submersion/l10n/arb/app_localizations.dart';
 import 'package:submersion/l10n/l10n_extension.dart';
@@ -107,7 +108,12 @@ class _SafetySettingsPageState extends ConsumerState<SafetySettingsPage> {
   }
 
   Future<void> _analyzeAllDives() async {
-    final diveIds = await ref.read(diveRepositoryProvider).getOrderedDiveIds();
+    // Scope the sweep to the active diver's logbook so "Analyze all dives"
+    // only touches the current diver's dives, not every diver on the device.
+    final diverId = ref.read(currentDiverIdProvider);
+    final diveIds = await ref
+        .read(diveRepositoryProvider)
+        .getOrderedDiveIds(diverId: diverId);
     if (!mounted) return;
     setState(() {
       _analyzing = true;

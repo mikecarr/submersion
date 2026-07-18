@@ -9,6 +9,7 @@ import 'package:submersion/features/dive_log/data/repositories/dive_repository_i
 import 'package:submersion/features/dive_log/domain/models/dive_filter_state.dart';
 import 'package:submersion/features/dive_log/presentation/providers/dive_repository_provider.dart';
 import 'package:submersion/features/dive_log/presentation/providers/safety_review_providers.dart';
+import 'package:submersion/features/divers/presentation/providers/diver_providers.dart';
 import 'package:submersion/features/settings/presentation/pages/safety_settings_page.dart';
 import 'package:submersion/features/settings/presentation/providers/settings_providers.dart';
 import 'package:submersion/l10n/arb/app_localizations.dart';
@@ -71,6 +72,9 @@ void main() {
   Widget backfillApp(List<Override> extra) => ProviderScope(
     overrides: [
       settingsProvider.overrideWith((ref) => MockSettingsNotifier()),
+      // The sweep now scopes to the active diver; override the provider so it
+      // does not build the real notifier (which hits SharedPreferences/DB).
+      currentDiverIdProvider.overrideWith((ref) => MockCurrentDiverIdNotifier()),
       ...extra,
     ],
     child: const MaterialApp(

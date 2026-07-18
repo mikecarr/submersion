@@ -252,6 +252,44 @@ void main() {
   });
 
   test(
+    'getReview skips rows whose rule_id is not a known SafetyRuleId',
+    () async {
+      // Persist a valid review with one recognized finding.
+      await repo.saveReview(
+        SafetyReview(
+          diveId: 'dive-1',
+          engineVersion: 1,
+          reviewedAt: now,
+          findings: [finding('f1')],
+        ),
+      );
+      // Simulate a finding synced from a newer app whose rule_id this build does
+      // not recognize. It is inserted raw because saveReview only accepts valid
+      // enum values. It must be dropped on read, not coerced to a default rule.
+      await db
+          .into(db.diveSafetyFindings)
+          .insert(
+            DiveSafetyFindingsCompanion.insert(
+              id: 'f-unknown',
+              diveId: 'dive-1',
+              ruleId: 'someFutureRuleThatDoesNotExist',
+              severity: SafetySeverity.caution.dbValue,
+              engineVersion: 1,
+              createdAt: now.millisecondsSinceEpoch,
+            ),
+          );
+
+      final review = await repo.getReview('dive-1');
+      expect(review, isNotNull);
+      expect(
+        review!.findings.map((f) => f.id),
+        ['f1'],
+        reason: 'the unknown-rule row is skipped, not coerced to rapidAscent',
+      );
+    },
+  );
+
+  test(
     'clearReviewForDive removes marker and findings with tombstones',
     () async {
       await repo.saveReview(

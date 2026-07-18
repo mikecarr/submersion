@@ -38,7 +38,11 @@ class SafetyFindingsRepository {
       diveId: diveId,
       engineVersion: marker.engineVersion,
       reviewedAt: DateTime.fromMillisecondsSinceEpoch(marker.reviewedAt),
-      findings: [for (final row in rows) _toDomain(row)],
+      // Skip rows whose rule_id does not round-trip to a known SafetyRuleId:
+      // an unknown value can only come from a newer app/sync payload, and
+      // coercing it to a default rule would surface misleading UI text
+      // (_toDomain returns null for such rows).
+      findings: [for (final row in rows) ?_toDomain(row)],
     );
   }
 
@@ -174,11 +178,16 @@ class SafetyFindingsRepository {
     }
   }
 
-  SafetyFinding _toDomain(DiveSafetyFinding row) {
+  /// Maps a stored finding row to its domain entity, or null when the row's
+  /// rule_id does not correspond to a known [SafetyRuleId]. Callers drop null
+  /// rows rather than surface a coerced (misleading) rule.
+  SafetyFinding? _toDomain(DiveSafetyFinding row) {
+    final ruleId = SafetyRuleId.fromDbValue(row.ruleId);
+    if (ruleId == null) return null;
     return SafetyFinding(
       id: row.id,
       diveId: row.diveId,
-      ruleId: SafetyRuleId.fromDbValue(row.ruleId) ?? SafetyRuleId.rapidAscent,
+      ruleId: ruleId,
       severity: SafetySeverity.fromDbValue(row.severity),
       startTimestamp: row.startTimestamp,
       endTimestamp: row.endTimestamp,
