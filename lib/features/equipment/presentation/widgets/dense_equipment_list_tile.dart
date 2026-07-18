@@ -5,6 +5,7 @@ import 'package:submersion/core/providers/provider.dart';
 import 'package:submersion/features/equipment/domain/entities/equipment_item.dart';
 import 'package:submersion/features/equipment/domain/entities/service_clock_status.dart';
 import 'package:submersion/features/equipment/presentation/providers/equipment_providers.dart';
+import 'package:submersion/l10n/l10n_extension.dart';
 
 /// Single-row flat tile for the equipment list (maximum density).
 ///
@@ -114,7 +115,7 @@ class DenseEquipmentListTile extends ConsumerWidget {
     // items whose only signal is the legacy interval).
     if (item.isServiceDue) {
       return Text(
-        'Service Due',
+        context.l10n.equipment_list_tile_serviceDueChip,
         style: theme.textTheme.labelSmall?.copyWith(
           color: theme.colorScheme.error,
           fontWeight: FontWeight.w600,
@@ -127,7 +128,7 @@ class DenseEquipmentListTile extends ConsumerWidget {
     if (item.daysUntilService != null) {
       final days = item.daysUntilService!;
       return Text(
-        'In $days days',
+        context.l10n.equipment_list_tile_serviceInDays(days),
         style: theme.textTheme.labelSmall?.copyWith(
           color: theme.colorScheme.onSurfaceVariant,
         ),

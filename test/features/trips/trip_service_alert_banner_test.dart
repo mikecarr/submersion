@@ -185,6 +185,51 @@ void main() {
     expect(find.text('EQUIPMENT_PAGE'), findsOneWidget);
   });
 
+  testWidgets(
+    'usage-overdue clock with a future dueDate still reads as overdue',
+    (tester) async {
+      // Overdue on dive count while the date trigger is still in the future.
+      final usageOverdue = (
+        item: const EquipmentItem(
+          id: 'e1',
+          name: 'Apeks XTX50',
+          type: EquipmentType.regulator,
+        ),
+        status: ServiceClockStatus(
+          schedule: ServiceSchedule(
+            id: 's1',
+            equipmentId: 'e1',
+            serviceKindId: 'reg',
+            createdAt: t0,
+            updatedAt: t0,
+          ),
+          kind: ServiceKind(
+            id: 'reg',
+            name: 'Reg service',
+            defaultIntervalDives: 100,
+            isBuiltIn: true,
+            createdAt: t0,
+            updatedAt: t0,
+          ),
+          anchor: t0,
+          dueDate: now.add(const Duration(days: 200)), // future
+          divesRemaining: -4,
+          severity: ServiceClockSeverity.overdue,
+          now: now,
+        ),
+      );
+      await tester.pumpWidget(buildBanner(upcomingTrip(), [usageOverdue]));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byType(InkWell).first);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Reg service overdue'), findsOneWidget);
+      // Must not present the future date via the "{kind} due {date}" phrasing.
+      expect(find.textContaining('Reg service due'), findsNothing);
+    },
+  );
+
   testWidgets('renders nothing when there are no alerts', (tester) async {
     await tester.pumpWidget(buildBanner(upcomingTrip(), const []));
     await tester.pumpAndSettle();

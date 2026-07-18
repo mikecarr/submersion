@@ -27,14 +27,18 @@ class ServiceSchedule extends Equatable {
     required this.updatedAt,
   });
 
+  /// The nullable override fields (intervalDays/intervalDives/intervalHours/
+  /// anchorDate) use the [_undefined] sentinel so callers can explicitly clear
+  /// them to null (e.g. "Clear baseline date" or reset an interval to inherit
+  /// the kind default) rather than only ever overwriting with a non-null value.
   ServiceSchedule copyWith({
     String? id,
     String? equipmentId,
     String? serviceKindId,
-    int? intervalDays,
-    int? intervalDives,
-    double? intervalHours,
-    DateTime? anchorDate,
+    Object? intervalDays = _undefined,
+    Object? intervalDives = _undefined,
+    Object? intervalHours = _undefined,
+    Object? anchorDate = _undefined,
     bool? enabled,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -43,10 +47,18 @@ class ServiceSchedule extends Equatable {
       id: id ?? this.id,
       equipmentId: equipmentId ?? this.equipmentId,
       serviceKindId: serviceKindId ?? this.serviceKindId,
-      intervalDays: intervalDays ?? this.intervalDays,
-      intervalDives: intervalDives ?? this.intervalDives,
-      intervalHours: intervalHours ?? this.intervalHours,
-      anchorDate: anchorDate ?? this.anchorDate,
+      intervalDays: intervalDays == _undefined
+          ? this.intervalDays
+          : intervalDays as int?,
+      intervalDives: intervalDives == _undefined
+          ? this.intervalDives
+          : intervalDives as int?,
+      intervalHours: intervalHours == _undefined
+          ? this.intervalHours
+          : intervalHours as double?,
+      anchorDate: anchorDate == _undefined
+          ? this.anchorDate
+          : anchorDate as DateTime?,
       enabled: enabled ?? this.enabled,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
@@ -67,3 +79,6 @@ class ServiceSchedule extends Equatable {
     updatedAt,
   ];
 }
+
+// Sentinel value for distinguishing null from undefined in copyWith
+const _undefined = Object();

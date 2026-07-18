@@ -5101,6 +5101,7 @@
       }
     }
   },
+  "equipment_serviceClocks_overdue": "Overdue",
   "equipment_serviceClocks_divesLeft": "{remaining} of {total} dives left",
   "@equipment_serviceClocks_divesLeft": {
     "placeholders": {
@@ -5345,6 +5346,7 @@
   "equipment_list_sortTitle": "Sort Equipment",
   "equipment_list_sortTooltip": "Sort",
   "equipment_list_tile_daysCount": "{days} days",
+  "equipment_list_tile_serviceInDays": "Service in {days} days",
   "equipment_list_tile_serviceDueChip": "Service Due",
   "equipment_list_tile_serviceIn": "Service in",
   "equipment_menu_delete": "Delete",
@@ -5626,6 +5628,13 @@
   "@equipment_list_errorLoading": {
     "placeholders": {
       "error": {
+        "type": "Object"
+      }
+    }
+  },
+  "@equipment_list_tile_serviceInDays": {
+    "placeholders": {
+      "days": {
         "type": "Object"
       }
     }

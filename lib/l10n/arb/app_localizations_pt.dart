@@ -9443,6 +9443,9 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
+  String get equipment_serviceClocks_overdue => 'Atrasado';
+
+  @override
   String equipment_serviceClocks_divesLeft(int remaining, int total) {
     return 'Restam $remaining de $total mergulhos';
   }
@@ -9917,6 +9920,11 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String equipment_list_tile_daysCount(Object days) {
     return '$days dias';
+  }
+
+  @override
+  String equipment_list_tile_serviceInDays(Object days) {
+    return 'Manutencao em $days dias';
   }
 
   @override

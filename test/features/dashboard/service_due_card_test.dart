@@ -82,6 +82,52 @@ void main() {
     expect(find.text('Apeks XTX50'), findsOneWidget);
   });
 
+  testWidgets(
+    'usage-triggered overdue with a future dueDate reads as Overdue, not Due',
+    (tester) async {
+      final kind = ServiceKind(
+        id: 'reg',
+        name: 'Reg service',
+        defaultIntervalDives: 100,
+        isBuiltIn: true,
+        createdAt: t0,
+        updatedAt: t0,
+      );
+      // Overdue on dive count while the date trigger is still months out.
+      final usageOverdue = (
+        item: const EquipmentItem(
+          id: 'e1',
+          name: 'Apeks XTX50',
+          type: EquipmentType.regulator,
+        ),
+        status: ServiceClockStatus(
+          schedule: ServiceSchedule(
+            id: 's1',
+            equipmentId: 'e1',
+            serviceKindId: 'reg',
+            createdAt: t0,
+            updatedAt: t0,
+          ),
+          kind: kind,
+          anchor: t0,
+          dueDate: DateTime(2026, 12, 1), // future
+          divesRemaining: -3,
+          severity: ServiceClockSeverity.overdue,
+          now: now,
+        ),
+      );
+
+      await tester.pumpWidget(buildCard([usageOverdue]));
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('Overdue'), findsOneWidget);
+      // The future date trigger must not be surfaced at all (it would only
+      // appear via the "Due {date}"/"Overdue since {date}" phrasings, both
+      // wrong for a usage-triggered overdue clock).
+      expect(find.textContaining('2026'), findsNothing);
+    },
+  );
+
   testWidgets('truncates past five rows with a +N more footer', (tester) async {
     await tester.pumpWidget(
       buildCard([

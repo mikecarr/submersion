@@ -16216,6 +16216,12 @@ abstract class AppLocalizations {
   /// **'Overdue since {date}'**
   String equipment_serviceClocks_overdueSince(String date);
 
+  /// No description provided for @equipment_serviceClocks_overdue.
+  ///
+  /// In en, this message translates to:
+  /// **'Overdue'**
+  String get equipment_serviceClocks_overdue;
+
   /// No description provided for @equipment_serviceClocks_divesLeft.
   ///
   /// In en, this message translates to:
@@ -17001,6 +17007,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{days} days'**
   String equipment_list_tile_daysCount(Object days);
+
+  /// No description provided for @equipment_list_tile_serviceInDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Service in {days} days'**
+  String equipment_list_tile_serviceInDays(Object days);
 
   /// No description provided for @equipment_list_tile_serviceDueChip.
   ///

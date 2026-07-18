@@ -9033,6 +9033,9 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get equipment_serviceClocks_overdue => '已逾期';
+
+  @override
   String equipment_serviceClocks_divesLeft(int remaining, int total) {
     return '剩余 $remaining/$total 次潜水';
   }
@@ -9476,6 +9479,11 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String equipment_list_tile_daysCount(Object days) {
     return '$days 天';
+  }
+
+  @override
+  String equipment_list_tile_serviceInDays(Object days) {
+    return '维护在 $days 天';
   }
 
   @override

@@ -9432,6 +9432,9 @@ class AppLocalizationsHu extends AppLocalizations {
   }
 
   @override
+  String get equipment_serviceClocks_overdue => 'Lejárt';
+
+  @override
   String equipment_serviceClocks_divesLeft(int remaining, int total) {
     return '$remaining / $total merülés van hátra';
   }
@@ -9903,6 +9906,11 @@ class AppLocalizationsHu extends AppLocalizations {
   @override
   String equipment_list_tile_daysCount(Object days) {
     return '$days nap';
+  }
+
+  @override
+  String equipment_list_tile_serviceInDays(Object days) {
+    return 'Szerviz $days nap';
   }
 
   @override

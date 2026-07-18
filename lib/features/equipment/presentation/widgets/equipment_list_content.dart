@@ -559,8 +559,13 @@ class EquipmentListTile extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final worstClock = ref.watch(equipmentWorstClockProvider).value?[item.id];
-    final isOverdue =
-        worstClock?.status.severity == ServiceClockSeverity.overdue;
+    // Mirror the trailing's fallback: when the ledger map is still loading or
+    // the item only has a legacy interval, worstClock is null but the trailing
+    // still shows "Service Due" from item.isServiceDue -- so the avatar must
+    // read as overdue too, otherwise the two disagree.
+    final isOverdue = worstClock != null
+        ? worstClock.status.severity == ServiceClockSeverity.overdue
+        : item.isServiceDue;
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
@@ -633,7 +638,7 @@ class EquipmentListTile extends ConsumerWidget {
           typeLabel,
           const SizedBox(height: 2),
           Text(
-            'Service Due',
+            context.l10n.equipment_list_tile_serviceDueChip,
             style: theme.textTheme.labelSmall?.copyWith(
               color: theme.colorScheme.error,
               fontWeight: FontWeight.w600,
@@ -652,7 +657,7 @@ class EquipmentListTile extends ConsumerWidget {
           typeLabel,
           const SizedBox(height: 2),
           Text(
-            'Service in $days days',
+            context.l10n.equipment_list_tile_serviceInDays(days),
             style: theme.textTheme.labelSmall?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
             ),

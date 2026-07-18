@@ -81,18 +81,29 @@ class ServiceDueCard extends ConsumerWidget {
 
   String _subtitle(BuildContext context, ServiceClockStatus status) {
     final l10n = context.l10n;
+    final kind = status.kind.name;
     final dueDate = status.dueDate;
+
+    // Severity is the engine's verdict across all triggers (date, dives,
+    // hours); dueDate only reflects the date trigger. Key the label off
+    // severity so a clock that is overdue on dives/hours -- but whose date
+    // trigger is null or still in the future -- never renders as merely "due".
+    if (status.severity == ServiceClockSeverity.overdue) {
+      if (dueDate != null && !status.now.isBefore(dueDate)) {
+        final formatted = MaterialLocalizations.of(
+          context,
+        ).formatShortDate(dueDate);
+        return '$kind · ${l10n.equipment_serviceClocks_overdueSince(formatted)}';
+      }
+      return '$kind · ${l10n.equipment_serviceClocks_overdue}';
+    }
+
     if (dueDate != null) {
       final formatted = MaterialLocalizations.of(
         context,
       ).formatShortDate(dueDate);
-      return status.severity == ServiceClockSeverity.overdue &&
-              !status.now.isBefore(dueDate)
-          ? '${status.kind.name} · '
-                '${l10n.equipment_serviceClocks_overdueSince(formatted)}'
-          : '${status.kind.name} · '
-                '${l10n.equipment_serviceClocks_dueOn(formatted)}';
+      return '$kind · ${l10n.equipment_serviceClocks_dueOn(formatted)}';
     }
-    return status.kind.name;
+    return kind;
   }
 }

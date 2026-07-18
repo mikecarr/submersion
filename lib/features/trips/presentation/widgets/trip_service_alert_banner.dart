@@ -106,8 +106,12 @@ class TripServiceAlertBanner extends ConsumerWidget {
   }
 
   String _alertSubtitle(BuildContext context, ServiceClockStatus status) {
+    // Key off severity, not now-vs-dueDate: a clock overdue on dives/hours can
+    // still have a future (or null) date trigger, and must read as "overdue".
+    // Non-overdue alerts only reach the banner with a concrete future dueDate
+    // (see tripServiceAlertsProvider), so "due before {date}" is always safe.
     final dueDate = status.dueDate;
-    if (dueDate == null || !status.now.isBefore(dueDate)) {
+    if (status.severity == ServiceClockSeverity.overdue || dueDate == null) {
       return context.l10n.trips_serviceAlert_overdue(status.kind.name);
     }
     return context.l10n.trips_serviceAlert_dueBefore(

@@ -100,6 +100,48 @@ void main() {
     expect(base.copyWith(), base);
   });
 
+  test(
+    'ServiceSchedule.copyWith clears nullable overrides when passed null',
+    () {
+      final full = ServiceSchedule(
+        id: 's1',
+        equipmentId: 'e1',
+        serviceKindId: 'hydro',
+        intervalDays: 365,
+        intervalDives: 100,
+        intervalHours: 50.0,
+        anchorDate: DateTime(2026, 5, 5),
+        createdAt: t0,
+        updatedAt: t0,
+      );
+
+      // Explicit null clears the field (e.g. "Clear baseline date", or resetting
+      // an interval override to inherit the kind default).
+      final cleared = full.copyWith(
+        intervalDays: null,
+        intervalDives: null,
+        intervalHours: null,
+        anchorDate: null,
+      );
+      expect(cleared.intervalDays, isNull);
+      expect(cleared.intervalDives, isNull);
+      expect(cleared.intervalHours, isNull);
+      expect(cleared.anchorDate, isNull);
+
+      // Omitting an argument leaves the existing value untouched.
+      final untouched = full.copyWith(enabled: false);
+      expect(untouched.intervalDays, 365);
+      expect(untouched.intervalDives, 100);
+      expect(untouched.intervalHours, 50.0);
+      expect(untouched.anchorDate, DateTime(2026, 5, 5));
+
+      // Clearing one override does not disturb the others.
+      final onlyAnchorCleared = full.copyWith(anchorDate: null);
+      expect(onlyAnchorCleared.anchorDate, isNull);
+      expect(onlyAnchorCleared.intervalDays, 365);
+    },
+  );
+
   test('ServiceClockStatus equality and null daysUntilDue', () {
     final schedule = ServiceSchedule(
       id: 's1',
