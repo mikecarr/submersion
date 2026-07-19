@@ -171,7 +171,9 @@ class _IncidentEditPageState extends ConsumerState<IncidentEditPage> {
                 hintText: l10n.incidentEdit_narrative_hint,
               ),
               maxLines: 5,
-              validator: (v) => (v == null || v.trim().isEmpty) ? '' : null,
+              validator: (v) => (v == null || v.trim().isEmpty)
+                  ? l10n.incidentEdit_narrative_required
+                  : null,
             ),
             const SizedBox(height: 12),
             TextFormField(
@@ -261,7 +263,7 @@ class _IncidentEditPageState extends ConsumerState<IncidentEditPage> {
           ),
           FilledButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: Text(l10n.emergencyCard_deleteChamber),
+            child: Text(l10n.common_action_delete),
           ),
         ],
       ),

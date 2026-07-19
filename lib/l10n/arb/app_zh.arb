@@ -6279,6 +6279,7 @@
   "incidentEdit_date": "发生时间",
   "incidentEdit_narrative": "发生了什么",
   "incidentEdit_narrative_hint": "只写事实,用你自己的话。此内容保持私密。",
+  "incidentEdit_narrative_required": "描述发生了什么",
   "incidentEdit_contributingFactors": "促成因素(可选)",
   "incidentEdit_lessonsLearned": "下次怎样会更好(可选)",
   "incidentEdit_save": "保存",

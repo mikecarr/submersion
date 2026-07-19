@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -23,7 +24,10 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [incidentsProvider.overrideWith((ref) async => incidents)],
-        child: localizedMaterialApp(home: const IncidentsListPage()),
+        child: localizedMaterialApp(
+          locale: const Locale('en'),
+          home: const IncidentsListPage(),
+        ),
       ),
     );
     await tester.pump();

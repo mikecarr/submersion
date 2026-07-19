@@ -35358,6 +35358,12 @@ abstract class AppLocalizations {
   /// **'Just the facts, in your own words. This stays private.'**
   String get incidentEdit_narrative_hint;
 
+  /// No description provided for @incidentEdit_narrative_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Describe what happened'**
+  String get incidentEdit_narrative_required;
+
   /// No description provided for @incidentEdit_contributingFactors.
   ///
   /// In en, this message translates to:

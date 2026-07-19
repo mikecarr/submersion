@@ -6279,6 +6279,7 @@
   "incidentEdit_date": "Cuándo ocurrió",
   "incidentEdit_narrative": "Qué pasó",
   "incidentEdit_narrative_hint": "Solo los hechos, con tus palabras. Esto es privado.",
+  "incidentEdit_narrative_required": "Describe qué pasó",
   "incidentEdit_contributingFactors": "Qué contribuyó (opcional)",
   "incidentEdit_lessonsLearned": "Qué ayudaría la próxima vez (opcional)",
   "incidentEdit_save": "Guardar",

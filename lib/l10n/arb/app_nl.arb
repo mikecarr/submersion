@@ -6279,6 +6279,7 @@
   "incidentEdit_date": "Wanneer het gebeurde",
   "incidentEdit_narrative": "Wat er gebeurde",
   "incidentEdit_narrative_hint": "Alleen de feiten, in je eigen woorden. Dit blijft privé.",
+  "incidentEdit_narrative_required": "Beschrijf wat er gebeurde",
   "incidentEdit_contributingFactors": "Wat eraan bijdroeg (optioneel)",
   "incidentEdit_lessonsLearned": "Wat de volgende keer zou helpen (optioneel)",
   "incidentEdit_save": "Opslaan",

@@ -21088,6 +21088,10 @@ class AppLocalizationsDe extends AppLocalizations {
       'Nur die Fakten, in eigenen Worten. Das bleibt privat.';
 
   @override
+  String get incidentEdit_narrative_required =>
+      'Beschreiben Sie, was passiert ist';
+
+  @override
   String get incidentEdit_contributingFactors =>
       'Was dazu beigetragen hat (optional)';
 

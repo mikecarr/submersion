@@ -6279,6 +6279,7 @@
   "incidentEdit_date": "מתי זה קרה",
   "incidentEdit_narrative": "מה קרה",
   "incidentEdit_narrative_hint": "רק העובדות, במילים שלך. זה נשאר פרטי.",
+  "incidentEdit_narrative_required": "תאר מה קרה",
   "incidentEdit_contributingFactors": "מה תרם (אופציונלי)",
   "incidentEdit_lessonsLearned": "מה יעזור בפעם הבאה (אופציונלי)",
   "incidentEdit_save": "שמור",

@@ -20738,6 +20738,9 @@ class AppLocalizationsAr extends AppLocalizations {
       'الحقائق فقط، بكلماتك. يبقى هذا خاصًا.';
 
   @override
+  String get incidentEdit_narrative_required => 'صف ما حدث';
+
+  @override
   String get incidentEdit_contributingFactors => 'ما الذي ساهم (اختياري)';
 
   @override

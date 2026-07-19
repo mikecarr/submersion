@@ -20956,6 +20956,9 @@ class AppLocalizationsNl extends AppLocalizations {
       'Alleen de feiten, in je eigen woorden. Dit blijft privé.';
 
   @override
+  String get incidentEdit_narrative_required => 'Beschrijf wat er gebeurde';
+
+  @override
   String get incidentEdit_contributingFactors =>
       'Wat eraan bijdroeg (optioneel)';
 

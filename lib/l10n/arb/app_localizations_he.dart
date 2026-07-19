@@ -20592,6 +20592,9 @@ class AppLocalizationsHe extends AppLocalizations {
       'רק העובדות, במילים שלך. זה נשאר פרטי.';
 
   @override
+  String get incidentEdit_narrative_required => 'תאר מה קרה';
+
+  @override
   String get incidentEdit_contributingFactors => 'מה תרם (אופציונלי)';
 
   @override

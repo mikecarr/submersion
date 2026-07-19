@@ -13219,6 +13219,7 @@
   "incidentEdit_date": "When it happened",
   "incidentEdit_narrative": "What happened",
   "incidentEdit_narrative_hint": "Just the facts, in your own words. This stays private.",
+  "incidentEdit_narrative_required": "Describe what happened",
   "incidentEdit_contributingFactors": "What contributed (optional)",
   "incidentEdit_lessonsLearned": "What would help next time (optional)",
   "incidentEdit_save": "Save",

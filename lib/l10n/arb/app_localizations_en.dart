@@ -20767,6 +20767,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'Just the facts, in your own words. This stays private.';
 
   @override
+  String get incidentEdit_narrative_required => 'Describe what happened';
+
+  @override
   String get incidentEdit_contributingFactors => 'What contributed (optional)';
 
   @override

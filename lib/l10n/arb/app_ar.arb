@@ -6279,6 +6279,7 @@
   "incidentEdit_date": "متى حدث",
   "incidentEdit_narrative": "ماذا حدث",
   "incidentEdit_narrative_hint": "الحقائق فقط، بكلماتك. يبقى هذا خاصًا.",
+  "incidentEdit_narrative_required": "صف ما حدث",
   "incidentEdit_contributingFactors": "ما الذي ساهم (اختياري)",
   "incidentEdit_lessonsLearned": "ما الذي سيساعد المرة القادمة (اختياري)",
   "incidentEdit_save": "حفظ",

@@ -21056,6 +21056,9 @@ class AppLocalizationsHu extends AppLocalizations {
       'Csak a tények, a saját szavaiddal. Ez privát marad.';
 
   @override
+  String get incidentEdit_narrative_required => 'Írja le, mi történt';
+
+  @override
   String get incidentEdit_contributingFactors =>
       'Mi játszott közre (opcionális)';
 

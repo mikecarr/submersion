@@ -21133,6 +21133,9 @@ class AppLocalizationsEs extends AppLocalizations {
       'Solo los hechos, con tus palabras. Esto es privado.';
 
   @override
+  String get incidentEdit_narrative_required => 'Describe qué pasó';
+
+  @override
   String get incidentEdit_contributingFactors => 'Qué contribuyó (opcional)';
 
   @override

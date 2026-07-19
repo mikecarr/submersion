@@ -6279,6 +6279,7 @@
   "incidentEdit_date": "Mikor történt",
   "incidentEdit_narrative": "Mi történt",
   "incidentEdit_narrative_hint": "Csak a tények, a saját szavaiddal. Ez privát marad.",
+  "incidentEdit_narrative_required": "Írja le, mi történt",
   "incidentEdit_contributingFactors": "Mi játszott közre (opcionális)",
   "incidentEdit_lessonsLearned": "Mi segítene legközelebb (opcionális)",
   "incidentEdit_save": "Mentés",

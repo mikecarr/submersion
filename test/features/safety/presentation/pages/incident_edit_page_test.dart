@@ -33,6 +33,7 @@ void main() {
       ProviderScope(
         overrides: [incidentRepositoryProvider.overrideWithValue(repo)],
         child: localizedMaterialApp(
+          locale: const Locale('en'),
           home: const IncidentEditPage(incidentId: 'missing'),
         ),
       ),
@@ -66,5 +67,37 @@ void main() {
       findsOneWidget,
     );
     expect(find.text('Save'), findsNothing);
+  });
+
+  testWidgets('empty narrative shows the required message, not a blank error', (
+    tester,
+  ) async {
+    // Tall surface so the whole form (incl. the Save button below the fold in
+    // a default viewport) is laid out and hittable without scrolling.
+    tester.view.physicalSize = const Size(1000, 2400);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          incidentRepositoryProvider.overrideWithValue(
+            _FakeIncidentRepository(),
+          ),
+        ],
+        child: localizedMaterialApp(
+          locale: const Locale('en'),
+          home: const IncidentEditPage(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Save a new report with the (required) narrative left blank.
+    await tester.tap(find.widgetWithText(FilledButton, 'Save'));
+    await tester.pump();
+
+    expect(find.text('Describe what happened'), findsOneWidget);
   });
 }

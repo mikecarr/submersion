@@ -20055,6 +20055,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get incidentEdit_narrative_hint => '只写事实,用你自己的话。此内容保持私密。';
 
   @override
+  String get incidentEdit_narrative_required => '描述发生了什么';
+
+  @override
   String get incidentEdit_contributingFactors => '促成因素(可选)';
 
   @override

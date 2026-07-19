@@ -21194,6 +21194,9 @@ class AppLocalizationsFr extends AppLocalizations {
       'Juste les faits, avec vos mots. Cela reste privé.';
 
   @override
+  String get incidentEdit_narrative_required => 'Décrivez ce qui s\'est passé';
+
+  @override
   String get incidentEdit_contributingFactors =>
       'Facteurs contributifs (facultatif)';
 
