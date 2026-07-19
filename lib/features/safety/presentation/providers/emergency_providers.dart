@@ -28,7 +28,13 @@ final emergencyRegionProvider = FutureProvider<String?>((ref) async {
 
   final repository = ref.watch(diveRepositoryProvider);
   ref.invalidateSelfWhen(repository.watchDivesChanges());
-  final summaries = await repository.getDiveSummaries(limit: 1);
+  // Scope to the effective diver so the region isn't derived from another
+  // profile's most recent dive in a multi-diver database.
+  final diverId = await ref.watch(validatedCurrentDiverIdProvider.future);
+  final summaries = await repository.getDiveSummaries(
+    limit: 1,
+    diverId: diverId,
+  );
   if (summaries.isEmpty) return null;
   final country = summaries.first.siteCountry;
   if (country == null || country.isEmpty) return null;
@@ -76,7 +82,12 @@ final emergencyCardDataProvider = FutureProvider<EmergencyCardData>((
   // emergencyRegionProvider return early (and skip its own subscription).
   final repository = ref.watch(diveRepositoryProvider);
   ref.invalidateSelfWhen(repository.watchDivesChanges());
-  final summaries = await repository.getDiveSummaries(limit: 1);
+  // Scope the GPS anchor to the active diver's most recent dive, not another
+  // profile's.
+  final summaries = await repository.getDiveSummaries(
+    limit: 1,
+    diverId: diver?.id,
+  );
   final lat = summaries.isNotEmpty ? summaries.first.siteLatitude : null;
   final lon = summaries.isNotEmpty ? summaries.first.siteLongitude : null;
   if (lat != null && lon != null) {
