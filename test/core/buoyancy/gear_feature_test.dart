@@ -382,6 +382,8 @@ void main() {
         EquipmentType.drysuit,
         EquipmentType.bcd,
         EquipmentType.hood,
+        EquipmentType.gloves,
+        EquipmentType.boots,
         EquipmentType.fins,
       ]) {
         expect(bare(t).priorStrength, 2.0, reason: t.name);
