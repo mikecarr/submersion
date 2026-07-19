@@ -48,6 +48,25 @@ void main() {
     expect(synthesizePlanProfile(const []), isEmpty);
   });
 
+  test('skips zero-duration segments to keep timestamps monotonic', () {
+    // The segment editor defaults a blank/invalid duration field to 0, so a
+    // 0-minute leg is reachable. It must not emit a duplicate timestamp.
+    final withZero = [
+      seg(SegmentType.descent, 0, 30, 60),
+      seg(SegmentType.bottom, 30, 30, 0), // blank duration field
+      seg(SegmentType.ascent, 30, 5, 150),
+      seg(SegmentType.safetyStop, 5, 5, 180),
+    ];
+    final profile = synthesizePlanProfile(withZero);
+    for (var i = 1; i < profile.length; i++) {
+      expect(
+        profile[i].timestamp,
+        greaterThan(profile[i - 1].timestamp),
+        reason: 'a zero-duration leg duplicated a timestamp at sample $i',
+      );
+    }
+  });
+
   test('anchor detection finds the safety stop', () {
     final model = WeightPredictionEngine.fit(
       observations: const [],

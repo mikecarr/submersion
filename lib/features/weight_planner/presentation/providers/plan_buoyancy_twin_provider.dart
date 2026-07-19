@@ -26,6 +26,11 @@ List<TwinProfileSample> synthesizePlanProfile(List<PlanSegment> segments) {
   );
   var t = 0;
   for (final seg in segments) {
+    // A zero- or negative-duration leg adds no time (the segment editor
+    // defaults a blank/invalid duration field to 0). Emitting its end
+    // boundary would duplicate the previous sample's timestamp and break the
+    // monotonic invariant, so skip it.
+    if (seg.durationSeconds <= 0) continue;
     final start = t;
     t += seg.durationSeconds;
     if (seg.startDepth == seg.endDepth &&
