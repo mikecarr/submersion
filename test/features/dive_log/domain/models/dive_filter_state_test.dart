@@ -45,12 +45,13 @@ Dive _makeDive({
 /// Helper to build an equipment item carrying the given attributes.
 EquipmentItem _makeEquipment(
   String id, {
+  EquipmentType type = EquipmentType.wetsuit,
   List<EquipmentAttribute> attributes = const [],
 }) {
   return EquipmentItem(
     id: id,
-    name: 'Suit $id',
-    type: EquipmentType.wetsuit,
+    name: 'Gear $id',
+    type: type,
     attributes: attributes,
   );
 }
@@ -602,6 +603,36 @@ void main() {
           ];
 
           expect(filter.apply(dives), isEmpty);
+        });
+
+        test('thickness_mm matches only exposure suits, not hoods', () {
+          const filter = DiveFilterState(equipmentAttrKey: 'thickness_mm');
+          final dives = [
+            _makeDive(
+              id: 'suit',
+              equipment: [
+                _makeEquipment(
+                  'eq1',
+                  type: EquipmentType.wetsuit,
+                  attributes: [curated('thickness_mm', num: 5.0)],
+                ),
+              ],
+            ),
+            _makeDive(
+              id: 'hood',
+              equipment: [
+                _makeEquipment(
+                  'eq2',
+                  type: EquipmentType.hood,
+                  attributes: [curated('thickness_mm', num: 5.0)],
+                ),
+              ],
+            ),
+          ];
+
+          final result = filter.apply(dives);
+
+          expect(result.map((d) => d.id), ['suit']);
         });
 
         test('custom attributes are ignored (curated-only, like the SQL)', () {

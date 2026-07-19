@@ -1,4 +1,6 @@
+import 'package:submersion/core/constants/enums.dart';
 import 'package:submersion/features/dive_log/domain/entities/dive.dart';
+import 'package:submersion/features/equipment/domain/constants/equipment_attribute_catalog.dart';
 
 /// Filter state for dive list.
 ///
@@ -305,8 +307,17 @@ class DiveFilterState {
       // Equipment-attribute axis: mirror the SQL subquery (curated rows only,
       // value_text exact-matches choice, value_num bounded by min/max).
       if (equipmentAttrKey != null) {
-        final matches = dive.equipment.any(
-          (item) => item.attributes.any((attr) {
+        // "Suit thickness" (thickness_mm) matches only exposure suits, mirroring
+        // getDivesBySuitThickness() and the SQL axis; hoods/gloves/boots also
+        // carry thickness_mm but are not suits.
+        final suitOnly = equipmentAttrKey == EquipmentAttrKeys.thicknessMm;
+        final matches = dive.equipment.any((item) {
+          if (suitOnly &&
+              item.type != EquipmentType.wetsuit &&
+              item.type != EquipmentType.drysuit) {
+            return false;
+          }
+          return item.attributes.any((attr) {
             if (attr.isCustom || attr.key != equipmentAttrKey) return false;
             if (equipmentAttrChoice != null &&
                 attr.valueText != equipmentAttrChoice) {
@@ -321,8 +332,8 @@ class DiveFilterState {
               return false;
             }
             return true;
-          }),
-        );
+          });
+        });
         if (!matches) return false;
       }
       return true;

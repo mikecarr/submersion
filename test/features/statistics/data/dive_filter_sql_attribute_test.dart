@@ -16,10 +16,13 @@ void main() {
     expect(result.subquery, contains('ea.attr_key = ?'));
     expect(result.subquery, contains('ea.value_num >= ?'));
     expect(result.subquery, contains('ea.value_num <= ?'));
+    // Suit thickness is restricted to exposure suits, mirroring
+    // getDivesBySuitThickness().
+    expect(result.subquery, contains("eqf.type IN ('wetsuit', 'drysuit')"));
     expect(result.params, ['thickness_mm', 5.0, 7.0]);
   });
 
-  test('choice variant binds value_text', () {
+  test('choice variant binds value_text and is not suit-restricted', () {
     final result = buildFilteredDiveIdSubquery(
       const DiveFilterState(
         equipmentAttrKey: 'valve_type',
@@ -27,6 +30,8 @@ void main() {
       ),
     );
     expect(result.subquery, contains('ea.value_text = ?'));
+    // Only thickness_mm carries the suit-type restriction.
+    expect(result.subquery, isNot(contains("eqf.type IN")));
     expect(result.params, ['valve_type', 'din']);
   });
 
