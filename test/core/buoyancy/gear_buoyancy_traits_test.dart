@@ -28,17 +28,33 @@ void main() {
     expect(GearBuoyancyTraits.parsePanelsMm('5/$overflow/3'), [5.0, 3.0]);
   });
 
-  test('value equality', () {
-    const a = GearBuoyancyTraits(
+  test('value equality compares panel lists by content, not identity', () {
+    // Distinct list instances with equal contents. The lists live in
+    // non-const locals so the constructors can't be const-canonicalized,
+    // which is what would otherwise mask content-vs-identity equality.
+    final aPanels = [5.0, 4.0];
+    final bPanels = [5.0, 4.0];
+    final cPanels = [5.0, 3.0];
+    final a = GearBuoyancyTraits(
       primaryThicknessMm: 5,
-      panelThicknessesMm: [5, 4],
+      panelThicknessesMm: aPanels,
       suitStyle: 'full',
     );
-    const b = GearBuoyancyTraits(
+    final b = GearBuoyancyTraits(
       primaryThicknessMm: 5,
-      panelThicknessesMm: [5, 4],
+      panelThicknessesMm: bPanels,
       suitStyle: 'full',
     );
+    expect(identical(aPanels, bPanels), isFalse);
     expect(a, b);
+    expect(a.hashCode, b.hashCode);
+
+    // Differing panel contents make the traits unequal.
+    final c = GearBuoyancyTraits(
+      primaryThicknessMm: 5,
+      panelThicknessesMm: cPanels,
+      suitStyle: 'full',
+    );
+    expect(a, isNot(c));
   });
 }
