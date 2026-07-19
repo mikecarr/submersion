@@ -108,6 +108,27 @@ void main() {
       expect(saved!.liftCapacityKg, 18.0);
     });
 
+    testWidgets('loading existing equipment does not mark the form dirty', (
+      tester,
+    ) async {
+      final created = await repository.createEquipment(
+        const EquipmentItem(
+          id: '',
+          name: 'Wing 18',
+          type: EquipmentType.bcd,
+          liftCapacityKg: 15.0,
+        ),
+      );
+      await pumpEditor(tester, created.id);
+
+      // No user edits: populating controllers during init must not flip
+      // _hasChanges, so cancelling goes straight through with no discard prompt.
+      expect(tester.takeException(), isNull);
+      await tester.tap(find.text('Cancel'));
+      await tester.pumpAndSettle();
+      expect(find.text('Discard Changes?'), findsNothing);
+    });
+
     testWidgets('non-positive lift capacity saves as null', (tester) async {
       final created = await repository.createEquipment(
         const EquipmentItem(

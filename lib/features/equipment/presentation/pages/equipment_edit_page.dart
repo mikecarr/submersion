@@ -100,7 +100,6 @@ class _EquipmentEditPageState extends ConsumerState<EquipmentEditPage> {
 
   void _initializeFromEquipment(EquipmentItem equipment) {
     if (_isInitialized) return;
-    _isInitialized = true;
 
     _nameController.text = equipment.name;
     _brandController.text = equipment.brand ?? '';
@@ -129,6 +128,13 @@ class _EquipmentEditPageState extends ConsumerState<EquipmentEditPage> {
     _liftCapacityController.text = equipment.liftCapacityKg != null
         ? units.convertWeight(equipment.liftCapacityKg!).toStringAsFixed(1)
         : '';
+
+    // Mark initialized only after every controller is populated: each `.text =`
+    // above synchronously notifies `_onFieldChanged`, which must not flip
+    // `_hasChanges` (a false discard-on-back prompt) or call setState mid-build
+    // during initial hydration. The early-return guard above still prevents
+    // re-initialization on later builds.
+    _isInitialized = true;
   }
 
   double? _parseWeightToKg(String text) {
