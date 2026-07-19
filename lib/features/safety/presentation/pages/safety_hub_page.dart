@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import 'package:submersion/features/safety/domain/services/no_fly_service.dart';
+import 'package:submersion/features/safety/presentation/formatters/no_fly_format.dart';
 import 'package:submersion/features/safety/presentation/providers/no_fly_providers.dart';
 import 'package:submersion/l10n/arb/app_localizations.dart';
 import 'package:submersion/l10n/l10n_extension.dart';
@@ -47,7 +48,23 @@ class _SafetyHubPageState extends ConsumerState<SafetyHubPage> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          _NoFlyCard(status: statusAsync.value),
+          // Only render the all-clear/active card once we actually have a
+          // result. During the very first load or an error with no prior
+          // value, show an explicit placeholder instead of silently implying
+          // "no restriction" -- misleading for a safety readout. A refresh
+          // after data exists keeps the retained value (no flicker).
+          if (statusAsync.hasValue)
+            _NoFlyCard(status: statusAsync.value)
+          else if (statusAsync.hasError)
+            _NoFlyStatusPlaceholder(
+              icon: Icons.error_outline,
+              text: l10n.common_label_error,
+            )
+          else
+            _NoFlyStatusPlaceholder(
+              icon: Icons.hourglass_empty,
+              text: l10n.common_label_loading,
+            ),
           const SizedBox(height: 16),
           Card(
             child: ListTile(
@@ -130,7 +147,7 @@ class _NoFlyCard extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             Text(
-              _categoryText(l10n, status!.category, remaining),
+              _categoryText(l10n, status!.category),
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
@@ -149,11 +166,7 @@ class _NoFlyCard extends StatelessWidget {
     );
   }
 
-  String _categoryText(
-    AppLocalizations l10n,
-    NoFlyCategory category,
-    Duration remaining,
-  ) {
+  String _categoryText(AppLocalizations l10n, NoFlyCategory category) {
     final hours = status!.interval.inHours;
     return switch (category) {
       NoFlyCategory.single => l10n.safetyHub_noFly_category_single(hours),
@@ -165,10 +178,22 @@ class _NoFlyCard extends StatelessWidget {
   }
 }
 
-/// "14h 20m" style remaining-time label shared by hub and dashboard.
-String formatNoFlyRemaining(Duration remaining) {
-  final hours = remaining.inHours;
-  final minutes = remaining.inMinutes % 60;
-  if (hours == 0) return '${minutes}m';
-  return '${hours}h ${minutes}m';
+/// Neutral placeholder shown while the no-fly status is still loading or has
+/// failed to load, so the hub never implies "no restriction" before it knows.
+class _NoFlyStatusPlaceholder extends StatelessWidget {
+  final IconData icon;
+  final String text;
+
+  const _NoFlyStatusPlaceholder({required this.icon, required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Card(
+      child: ListTile(
+        leading: Icon(icon, color: theme.colorScheme.onSurfaceVariant),
+        title: Text(text),
+      ),
+    );
+  }
 }

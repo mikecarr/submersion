@@ -4,8 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import 'package:submersion/features/dashboard/presentation/providers/dashboard_providers.dart';
 import 'package:submersion/features/equipment/domain/entities/service_clock_status.dart';
-import 'package:submersion/features/safety/presentation/pages/safety_hub_page.dart'
-    show formatNoFlyRemaining;
+import 'package:submersion/features/safety/presentation/formatters/no_fly_format.dart';
 import 'package:submersion/l10n/l10n_extension.dart';
 
 /// A compact single-line banner showing alerts and reminders.

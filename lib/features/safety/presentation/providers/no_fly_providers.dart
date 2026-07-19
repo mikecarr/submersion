@@ -15,6 +15,12 @@ final noFlyStatusProvider = FutureProvider<NoFlyStatus?>((ref) async {
   final diverId = ref.watch(currentDiverIdProvider);
   final preset = ref.watch(settingsProvider.select((s) => s.noFlyPreset));
 
+  // No active diver yet (transient at startup, or a fresh install): report no
+  // restriction rather than folding every diver's dives into one countdown.
+  // `getNoFlyDiveInputs` drops its diver filter when diverId is null, which
+  // would otherwise scan the whole logbook.
+  if (diverId == null) return null;
+
   final now = DateTime.now().toUtc();
   final dives = await repository.getNoFlyDiveInputs(
     since: now.subtract(NoFlyService.lookback),
