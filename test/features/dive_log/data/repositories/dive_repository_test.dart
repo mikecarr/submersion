@@ -292,6 +292,40 @@ void main() {
           'size',
         ]);
       });
+
+      // Issue #626: junction buddies must be hydrated onto the Dive entities
+      // so the table view's Buddy / Dive Master columns can render them.
+      test('hydrates junction buddies onto each dive', () async {
+        final created = await repository.createDive(
+          createTestDive(diveNumber: 1, dateTime: DateTime(2024, 1, 1)),
+        );
+        final buddyRepo = BuddyRepository();
+        final alice = await buddyRepo.createBuddy(
+          Buddy(
+            id: 'b1',
+            name: 'Alice',
+            createdAt: DateTime(2024, 1, 1),
+            updatedAt: DateTime(2024, 1, 1),
+          ),
+        );
+        await buddyRepo.addBuddyToDive(created.id, alice.id, DiveRole.buddyId);
+
+        final result = await repository.getAllDives();
+
+        expect(result.single.buddies, hasLength(1));
+        expect(result.single.buddies.single.buddy.name, 'Alice');
+        expect(result.single.buddies.single.role.id, DiveRole.buddyId);
+      });
+
+      test('leaves buddies empty for dives with no junction records', () async {
+        await repository.createDive(
+          createTestDive(diveNumber: 1, dateTime: DateTime(2024, 1, 1)),
+        );
+
+        final result = await repository.getAllDives();
+
+        expect(result.single.buddies, isEmpty);
+      });
     });
 
     group('updateDive', () {

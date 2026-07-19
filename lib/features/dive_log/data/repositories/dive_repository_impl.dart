@@ -39,6 +39,9 @@ import 'package:submersion/features/dive_log/data/repositories/dive_custom_field
 import 'package:submersion/features/tags/domain/entities/tag.dart' as domain;
 import 'package:submersion/features/tags/data/repositories/tag_repository.dart';
 import 'package:submersion/features/trips/domain/entities/trip.dart' as domain;
+import 'package:submersion/features/buddies/domain/entities/buddy.dart'
+    as domain;
+import 'package:submersion/features/buddies/data/repositories/buddy_repository.dart';
 
 class DiveRepository {
   AppDatabase get _db => DatabaseService.instance.database;
@@ -46,6 +49,7 @@ class DiveRepository {
   final _uuid = const Uuid();
   final _log = LoggerService.forClass(DiveRepository);
   final TagRepository _tagRepository = TagRepository();
+  final BuddyRepository _buddyRepository = BuddyRepository();
   late final DiveCustomFieldRepository _customFieldRepository =
       DiveCustomFieldRepository(_db);
 
@@ -263,6 +267,13 @@ class DiveRepository {
         final customFieldsByDive = await _customFieldRepository
             .getFieldsForDiveIds(diveIds);
 
+        // Load all buddies (junction) for these dives in one query so the
+        // table view's Buddy / Dive Master columns render recorded people
+        // (issue #626). Scalar buddy/diveMaster remain the fallback.
+        final buddiesByDive = await _buddyRepository.getBuddiesForDives(
+          diveIds,
+        );
+
         return rows
             .map(
               (row) => _mapRowToDiveWithPreloadedData(
@@ -277,6 +288,7 @@ class DiveRepository {
                 tags: tagsByDive[row.id] ?? [],
                 diveTypeIds: diveTypesByDive[row.id],
                 customFields: customFieldsByDive[row.id] ?? [],
+                buddies: buddiesByDive[row.id] ?? const [],
               ),
             )
             .toList();
@@ -2586,6 +2598,7 @@ class DiveRepository {
     List<domain.Tag> tags = const [],
     List<String>? diveTypeIds,
     List<domain.DiveCustomField> customFields = const [],
+    List<domain.BuddyWithRole> buddies = const [],
   }) {
     // Map site if exists
     domain.DiveSite? domainSite;
@@ -2689,6 +2702,7 @@ class DiveRepository {
       diveTypeIds: diveTypeIds ?? [row.diveType],
       buddy: row.buddy,
       diveMaster: row.diveMaster,
+      buddies: buddies,
       diverRoleId: row.diverRole,
       notes: row.notes,
       name: row.name,
