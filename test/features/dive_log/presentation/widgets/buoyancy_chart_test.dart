@@ -78,6 +78,7 @@ void main() {
   testWidgets('renders a LineChart with labelled axes', (tester) async {
     await tester.pumpWidget(
       const MaterialApp(
+        locale: Locale('en'),
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
         home: Scaffold(body: _ChartHost()),
@@ -92,6 +93,7 @@ void main() {
   testWidgets('renders nothing for fewer than two samples', (tester) async {
     await tester.pumpWidget(
       MaterialApp(
+        locale: const Locale('en'),
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
         home: Scaffold(

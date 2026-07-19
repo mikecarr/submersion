@@ -34,6 +34,7 @@ TwinInput _base() => TwinInput(
 Future<void> _open(WidgetTester tester) async {
   await tester.pumpWidget(
     MaterialApp(
+      locale: const Locale('en'),
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       home: Scaffold(
