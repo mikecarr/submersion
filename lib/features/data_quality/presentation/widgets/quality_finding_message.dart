@@ -7,6 +7,7 @@ class QualityUnitFormatters {
     required this.pressure,
     required this.temperature,
     required this.sac,
+    required this.date,
   });
   final String Function(double meters) depth;
   final String Function(double bar) pressure;
@@ -15,6 +16,11 @@ class QualityUnitFormatters {
   /// Formats a surface air consumption rate given in L/min into the diver's
   /// preferred volume unit (L/min vs cuft/min), including the unit suffix.
   final String Function(double litersPerMin) sac;
+
+  /// Formats a (UTC) calendar date in the diver's configured date-format
+  /// preference, so a clock finding reads "01/06/1900" or "1900-06-01" to
+  /// match the rest of the app instead of an ISO timestamp.
+  final String Function(DateTime date) date;
 }
 
 class QualityFindingMessage {
@@ -62,13 +68,17 @@ QualityFindingMessage buildFindingMessage(
       } else {
         // Stored as UTC epoch millis; reconstruct with isUtc so the displayed
         // year/date and the ancient-vs-future split don't drift by timezone.
+        // Render through the diver's date formatter (not an ISO timestamp);
+        // the UTC calendar fields format as-is, preserving the stored
+        // wall-clock.
         final date = DateTime.fromMillisecondsSinceEpoch(
           i('entryTimeMs'),
           isUtc: true,
         );
+        final dateText = fmt.date(date);
         detail = date.year < 1950
-            ? l10n.dataQuality_msg_clock_ancient('$date')
-            : l10n.dataQuality_msg_clock_future('$date');
+            ? l10n.dataQuality_msg_clock_ancient(dateText)
+            : l10n.dataQuality_msg_clock_future(dateText);
       }
     case 'duplicate':
       detail = l10n.dataQuality_msg_duplicate(

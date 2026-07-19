@@ -31,9 +31,12 @@ const _formatters = QualityUnitFormatters(
   pressure: _fmt,
   temperature: _fmt,
   sac: _fmt,
+  date: _fmtDate,
 );
 
 String _fmt(double v) => '$v';
+
+String _fmtDate(DateTime d) => '$d';
 
 void main() {
   Future<void> pumpCard(

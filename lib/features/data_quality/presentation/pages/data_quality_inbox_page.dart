@@ -31,6 +31,7 @@ QualityUnitFormatters buildQualityUnitFormatters(WidgetRef ref) {
     // preference (L/min vs cuft/min) rather than the pressure-based SAC mode.
     sac: (lpm) =>
         '${units.convertVolume(lpm).toStringAsFixed(1)} ${units.volumeSymbol}/min',
+    date: (d) => units.formatDate(d),
   );
 }
 

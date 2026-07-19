@@ -15,6 +15,9 @@ void main() {
     pressure: (bar) => 'P${bar.toStringAsFixed(1)}',
     temperature: (c) => 'T${c.toStringAsFixed(1)}',
     sac: (lpm) => 'S${lpm.toStringAsFixed(1)}',
+    // Renders the UTC calendar date so assertions can prove the clock message
+    // routes through the diver's date formatter rather than an ISO timestamp.
+    date: (d) => 'DATE(${d.year}-${d.month}-${d.day})',
   );
 
   setUp(() {
@@ -75,8 +78,9 @@ void main() {
     });
 
     test('ancient date branch uses UTC so year < 1950 classifies', () {
+      final ancientDate = DateTime.utc(1900, 6);
       final ancient = detailFor('clock_offset', {
-        'entryTimeMs': DateTime.utc(1900, 6).millisecondsSinceEpoch,
+        'entryTimeMs': ancientDate.millisecondsSinceEpoch,
       });
       final future = detailFor('clock_offset', {
         'entryTimeMs': DateTime.utc(2100, 6).millisecondsSinceEpoch,
@@ -86,6 +90,16 @@ void main() {
       // Ancient vs future must produce different copy; if the UTC flag were
       // dropped the 1900 timestamp could drift and misclassify.
       expect(ancient, isNot(equals(future)));
+      // The date renders through the diver's date formatter, not a raw ISO
+      // timestamp: the formatter output appears and the ISO time/zone does not.
+      expect(
+        ancient,
+        contains(
+          'DATE(${ancientDate.year}-${ancientDate.month}-'
+          '${ancientDate.day})',
+        ),
+      );
+      expect(ancient, isNot(contains('Z')));
     });
   });
 

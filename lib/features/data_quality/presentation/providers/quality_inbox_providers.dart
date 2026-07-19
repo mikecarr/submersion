@@ -42,17 +42,13 @@ String importedDivesFindingsKey(Iterable<String> diveIds) =>
 
 /// Open-finding count over an import's dive set (for the import summary line).
 /// Keyed by [importedDivesFindingsKey] so equal id sets share one provider.
+/// Counts in SQL (scoped to the id set) instead of watching the whole findings
+/// stream and filtering in Dart, so the update cost stays flat as the library
+/// grows rather than being O(findings) per change.
 final importedDivesOpenFindingsCountProvider = StreamProvider.autoDispose
     .family<int, String>((ref, key) {
       final ids = key.isEmpty ? const <String>{} : key.split(',').toSet();
-      final repo = ref.watch(qualityFindingsRepositoryProvider);
-      return repo.watchFindings().map(
-        (all) => all
-            .where(
-              (f) =>
-                  f.status == QualityStatus.open &&
-                  (ids.contains(f.diveId) || ids.contains(f.relatedDiveId)),
-            )
-            .length,
-      );
+      return ref
+          .watch(qualityFindingsRepositoryProvider)
+          .watchOpenCountForDives(ids);
     });

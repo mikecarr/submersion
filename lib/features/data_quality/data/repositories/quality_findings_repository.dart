@@ -200,6 +200,23 @@ class QualityFindingsRepository {
     return query.watchSingle().map((row) => row.read(count) ?? 0);
   }
 
+  /// Open-finding count scoped to a set of dive ids (dive_id OR related_dive_id
+  /// in the set). Counts in SQL so the stream stays cheap regardless of how
+  /// large the overall findings library grows. Empty set -> constant 0.
+  Stream<int> watchOpenCountForDives(Set<String> diveIds) {
+    if (diveIds.isEmpty) return Stream.value(0);
+    final ids = diveIds.toList();
+    final count = _db.qualityFindings.id.count();
+    final query = _db.selectOnly(_db.qualityFindings)
+      ..addColumns([count])
+      ..where(
+        _db.qualityFindings.status.equals(QualityStatus.open.name) &
+            (_db.qualityFindings.diveId.isIn(ids) |
+                _db.qualityFindings.relatedDiveId.isIn(ids)),
+      );
+    return query.watchSingle().map((row) => row.read(count) ?? 0);
+  }
+
   /// Bulk dismiss with ONE notify (fifty false positives, one tap).
   Future<void> dismissAll(Iterable<String> ids) async {
     final idList = ids.toList();

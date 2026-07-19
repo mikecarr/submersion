@@ -105,6 +105,7 @@ void main() {
   test('scheduler merges bursts and is awaitable', () async {
     await seedFutureDive('d1');
     QualityScanScheduler.enabled = true;
+    addTearDown(() => QualityScanScheduler.enabled = false);
     scheduleQualityScan(['d1']);
     scheduleQualityScan(['d1']);
     await QualityScanScheduler.instance.idle;

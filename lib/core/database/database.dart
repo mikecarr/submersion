@@ -843,8 +843,10 @@ class EquipmentSetGeofences extends Table {
 /// Data-quality findings produced by the Data Quality Assistant detectors.
 /// One row per (dive, detector, discriminator). Ids are deterministic
 /// UUIDv5 values so independent scans on two devices converge on the same
-/// row. Dismissal is a status update, never a delete (deterministic ids
-/// would resurrect deleted findings on rescan).
+/// row. A user dismissal is a status update, never a delete -- deterministic
+/// ids would otherwise resurrect a dismissed finding on the next rescan. (The
+/// scan pipeline itself may still delete a finding that no longer reproduces;
+/// that path writes a sync tombstone.)
 @DataClassName('QualityFindingRow')
 class QualityFindings extends Table {
   TextColumn get id => text()();

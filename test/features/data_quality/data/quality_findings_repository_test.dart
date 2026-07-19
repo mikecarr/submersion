@@ -208,4 +208,49 @@ void main() {
     );
     expect(await repo.watchOpenCountForDive('dY').first, 1);
   });
+
+  test('watchOpenCountForDives is empty for an empty id set', () async {
+    expect(await repo.watchOpenCountForDives(const {}).first, 0);
+  });
+
+  test(
+    'watchOpenCountForDives counts diveId or relatedDiveId in the set',
+    () async {
+      // d1: scalar finding; dP<->dQ: a pair anchored on dP with related dQ.
+      final scalar = finding(diveId: 'd1');
+      final pid = qualityPairIdentity(
+        detectorId: 'duplicate',
+        a: 'dP',
+        b: 'dQ',
+      );
+      final pair = QualityFinding(
+        id: pid.id,
+        diveId: pid.diveId, // 'dP'
+        relatedDiveId: pid.relatedDiveId, // 'dQ'
+        detectorId: 'duplicate',
+        detectorVersion: 1,
+        category: QualityCategory.duplicate,
+        severity: QualitySeverity.warning,
+        status: QualityStatus.open,
+        createdAt: DateTime.utc(2026, 7, 17),
+        updatedAt: DateTime.utc(2026, 7, 17),
+      );
+      // dOut's finding is outside every queried set and must never count.
+      final outside = finding(diveId: 'dOut');
+      await repo.applyScanResults(
+        scopeDiveIds: {'d1', 'dP', 'dQ', 'dOut'},
+        ranDetectorIds: {'sample_gap', 'duplicate'},
+        produced: [scalar, pair, outside],
+      );
+
+      // Reaches the pair via its related dive only.
+      expect(await repo.watchOpenCountForDives({'dQ'}).first, 1);
+      // Union across the set: scalar + pair, dOut excluded.
+      expect(await repo.watchOpenCountForDives({'d1', 'dP'}).first, 2);
+
+      // Dismissed findings drop out of the open count.
+      await repo.setStatus(scalar.id, QualityStatus.dismissed);
+      expect(await repo.watchOpenCountForDives({'d1', 'dP'}).first, 1);
+    },
+  );
 }
