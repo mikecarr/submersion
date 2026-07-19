@@ -19,6 +19,20 @@ void main() {
 
   tearDown(() => tearDownTestDatabase());
 
+  Future<void> insertDiver(String id) async {
+    final now = when.millisecondsSinceEpoch;
+    await db
+        .into(db.divers)
+        .insert(
+          DiversCompanion(
+            id: Value(id),
+            name: Value(id),
+            createdAt: Value(now),
+            updatedAt: Value(now),
+          ),
+        );
+  }
+
   Future<void> insertDive(String id) async {
     final now = when.millisecondsSinceEpoch;
     await db
@@ -58,6 +72,61 @@ void main() {
     expect(await repo.getIncidents(), isEmpty);
     final tombstones = await db.select(db.deletionLog).get();
     expect(tombstones.map((t) => t.entityType), contains('incidents'));
+  });
+
+  test(
+    'getIncidents(diverId:) scopes to that diver and unowned rows',
+    () async {
+      await insertDiver('diver-1');
+      await insertDiver('diver-2');
+      // One owned by diver-1, one owned by diver-2, one unowned (diverId null).
+      await repo.createIncident(
+        occurredAt: when,
+        category: IncidentCategory.gasSupply,
+        severity: IncidentSeverity.minor,
+        narrative: 'Owned by diver-1.',
+        diverId: 'diver-1',
+      );
+      await repo.createIncident(
+        occurredAt: when,
+        category: IncidentCategory.equipment,
+        severity: IncidentSeverity.minor,
+        narrative: 'Owned by diver-2.',
+        diverId: 'diver-2',
+      );
+      await repo.createIncident(
+        occurredAt: when,
+        category: IncidentCategory.other,
+        severity: IncidentSeverity.minor,
+        narrative: 'Unowned (legacy).',
+      );
+
+      final forDiver1 = await repo.getIncidents(diverId: 'diver-1');
+      // diver-1's own row plus the unowned row, never diver-2's.
+      expect(
+        forDiver1.map((i) => i.narrative),
+        containsAll(<String>['Owned by diver-1.', 'Unowned (legacy).']),
+      );
+      expect(
+        forDiver1.map((i) => i.narrative),
+        isNot(contains('Owned by diver-2.')),
+      );
+    },
+  );
+
+  test('watchChanges emits when the incidents table changes', () async {
+    final emissions = repo.watchChanges();
+    final firstEmit = emissions.first;
+
+    await repo.createIncident(
+      occurredAt: when,
+      category: IncidentCategory.planning,
+      severity: IncidentSeverity.minor,
+      narrative: 'Triggers a table update.',
+    );
+
+    // Completes only if the insert drove an emission on the change stream.
+    await firstEmit;
   });
 
   test('dive link survives dive deletion (severed, not cascaded)', () async {

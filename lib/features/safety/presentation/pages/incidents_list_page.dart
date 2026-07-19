@@ -26,7 +26,15 @@ class IncidentsListPage extends ConsumerWidget {
       ),
       body: incidentsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('$e')),
+        error: (e, _) => Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Text(
+              l10n.common_error_tryAgain,
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ),
         data: (incidents) => incidents.isEmpty
             ? Center(
                 child: Padding(
