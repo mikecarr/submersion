@@ -5,8 +5,7 @@ import 'package:intl/intl.dart';
 
 import 'package:submersion/features/divers/presentation/providers/diver_providers.dart';
 import 'package:submersion/features/safety/domain/entities/incident.dart';
-import 'package:submersion/features/safety/presentation/pages/incidents_list_page.dart'
-    show incidentCategoryLabel, incidentSeverityLabel;
+import 'package:submersion/features/safety/presentation/formatters/incident_labels.dart';
 import 'package:submersion/features/safety/presentation/providers/incident_providers.dart';
 import 'package:submersion/l10n/l10n_extension.dart';
 

@@ -72,8 +72,9 @@ final emergencyCardDataProvider = FutureProvider<EmergencyCardData>((
   ref.invalidateSelfWhen(chamberRepo.watchChanges());
   final userChambers = await chamberRepo.getUserChambers(diverId: diver?.id);
 
-  // Bundled chambers for the region's country first, then the rest; user
-  // chambers always shown. Hidden bundled entries filtered out.
+  // User chambers first, then bundled chambers (hidden entries filtered out).
+  // The final ordering is applied below: by distance when the last dive has
+  // GPS, else same-country-first, else this insertion order.
   final visibleBundled = bundled.where((c) => !hidden.contains(c.id)).toList();
   final chambers = [...userChambers, ...visibleBundled];
 
@@ -120,12 +121,16 @@ double _distanceKm(double lat, double lon, double? lat2, double? lon2) {
   const r = 6371.0;
   final dLat = _rad(lat2 - lat);
   final dLon = _rad(lon2 - lon);
-  final a =
+  final aRaw =
       math.sin(dLat / 2) * math.sin(dLat / 2) +
       math.cos(_rad(lat)) *
           math.cos(_rad(lat2)) *
           math.sin(dLon / 2) *
           math.sin(dLon / 2);
+  // Clamp to [0, 1]: floating-point drift can push `a` just past 1 for very
+  // small distances, and asin(sqrt(a > 1)) is NaN, which corrupts the chamber
+  // sort comparator.
+  final a = aRaw.clamp(0.0, 1.0);
   return 2 * r * math.asin(math.sqrt(a));
 }
 
@@ -209,6 +214,72 @@ String? _isoFromCountry(String country) {
     'ARGENTINA': 'AR',
     'CHILE': 'CL',
     'PERU': 'PE',
+    // Localized country names for the supported (Latin-script) locales:
+    // platform geocoding returns `Placemark.country` in the device language,
+    // so an English-only map would fall back to the worldwide hotline for a
+    // German device reporting "Deutschland". Best-effort for the common diving
+    // and home countries; the complete fix is to persist Placemark's ISO code.
+    'DEUTSCHLAND': 'DE',
+    'ALLEMAGNE': 'DE',
+    'ALEMANIA': 'DE',
+    'GERMANIA': 'DE',
+    'DUITSLAND': 'DE',
+    'FRANKREICH': 'FR',
+    'FRANCIA': 'FR',
+    'FRANKRIJK': 'FR',
+    'FRANÇA': 'FR',
+    'ESPAÑA': 'ES',
+    'SPANIEN': 'ES',
+    'ESPAGNE': 'ES',
+    'SPAGNA': 'ES',
+    'SPANJE': 'ES',
+    'ITALIA': 'IT',
+    'ITALIEN': 'IT',
+    'ITALIE': 'IT',
+    'ITALIË': 'IT',
+    'ITÁLIA': 'IT',
+    'NIEDERLANDE': 'NL',
+    'PAÍSES BAJOS': 'NL',
+    'PAYS-BAS': 'NL',
+    'PAESI BASSI': 'NL',
+    'NEDERLAND': 'NL',
+    'GRIECHENLAND': 'GR',
+    'GRECIA': 'GR',
+    'GRÈCE': 'GR',
+    'GRIEKENLAND': 'GR',
+    'KROATIEN': 'HR',
+    'CROACIA': 'HR',
+    'CROATIE': 'HR',
+    'CROAZIA': 'HR',
+    'ÄGYPTEN': 'EG',
+    'EGIPTO': 'EG',
+    'ÉGYPTE': 'EG',
+    'EGITTO': 'EG',
+    'EGITO': 'EG',
+    'MEXIKO': 'MX',
+    'MÉXICO': 'MX',
+    'MEXIQUE': 'MX',
+    'MESSICO': 'MX',
+    'MALEDIVEN': 'MV',
+    'MALDIVAS': 'MV',
+    'MALDIVE': 'MV',
+    'INDONESIEN': 'ID',
+    'INDONÉSIE': 'ID',
+    'INDONÉSIA': 'ID',
+    'INDONESIË': 'ID',
+    'TAILANDIA': 'TH',
+    'THAÏLANDE': 'TH',
+    'THAILANDIA': 'TH',
+    'TAILÂNDIA': 'TH',
+    'FILIPINAS': 'PH',
+    'PHILIPPINEN': 'PH',
+    'FILIPPINE': 'PH',
+    'FILIPIJNEN': 'PH',
+    'TÜRKEI': 'TR',
+    'TURQUÍA': 'TR',
+    'TURQUIE': 'TR',
+    'TURCHIA': 'TR',
+    'TURQUIA': 'TR',
   };
   return names[normalized];
 }

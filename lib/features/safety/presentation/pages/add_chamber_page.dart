@@ -53,6 +53,9 @@ class _AddChamberPageState extends ConsumerState<AddChamberPage> {
               controller: _country,
               decoration: InputDecoration(labelText: l10n.addChamber_country),
               textCapitalization: TextCapitalization.characters,
+              // A 2-letter ISO code; the same-country sort compares against
+              // upper-case ISO codes, so cap the length to steer input.
+              maxLength: 2,
               validator: (v) => (v == null || v.trim().isEmpty)
                   ? l10n.addChamber_countryRequired
                   : null,

@@ -2982,7 +2982,7 @@ class AppDatabase extends _$AppDatabase {
     }
   }
 
-  /// v119: incidents table (near-miss log). Idempotent for onUpgrade +
+  /// v127: incidents table (near-miss log). Idempotent for onUpgrade +
   /// beforeOpen backstop use.
   Future<void> _assertIncidentsSchema() async {
     await createMigrator().createTable(incidents);
@@ -6374,7 +6374,7 @@ class AppDatabase extends _$AppDatabase {
         // v126 backstop: re-assert emergency card schema.
         await _assertEmergencyCardSchema();
 
-        // v119 backstop: re-assert incidents table.
+        // v127 backstop: re-assert incidents table.
         await _assertIncidentsSchema();
 
         // Built-in dive types are reference data: identical on every device and
