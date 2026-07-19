@@ -51,10 +51,10 @@ void main() {
     expect(row.read<String?>('emergency_region'), isNull);
   });
 
-  test('v126 is on the migration ladder', () {
-    // Relaxed from the exact-latest tripwire: the pre-dive checklist migration
-    // (v127) landed on top of v126 at merge time, so v126 no longer owns the
-    // latest slot. The exact-latest assertion now lives in the v127 test.
+  test('v126 emergency card migration is present', () {
+    // The exact-latest tripwire moved to migration_v127_incidents_test when the
+    // incidents migration (v127) landed on top of v126.
+
     expect(AppDatabase.currentSchemaVersion, greaterThanOrEqualTo(126));
     expect(AppDatabase.migrationVersions, contains(126));
   });

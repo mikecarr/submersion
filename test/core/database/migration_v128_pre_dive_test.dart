@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:submersion/core/database/database.dart';
 
 void main() {
-  test('v127 creates the four pre-dive checklist tables', () async {
+  test('v128 creates the four pre-dive checklist tables', () async {
     final nativeDb = NativeDatabase.memory(
       setup: (rawDb) {
         rawDb.execute('PRAGMA user_version = 112');
@@ -68,11 +68,11 @@ void main() {
     }
   });
 
-  test('v127 is the current schema version (exact-latest tripwire)', () {
+  test('v128 is the current schema version (exact-latest tripwire)', () {
     // Exact assertion: the newest migration owns the tripwire, so the next
     // schema bump must move it forward. Relax to greaterThanOrEqualTo and add
-    // a fresh exact test when a later migration lands on top of v127.
-    expect(AppDatabase.currentSchemaVersion, 127);
-    expect(AppDatabase.migrationVersions, contains(127));
+    // a fresh exact test when a later migration lands on top of v128.
+    expect(AppDatabase.currentSchemaVersion, 128);
+    expect(AppDatabase.migrationVersions, contains(128));
   });
 }

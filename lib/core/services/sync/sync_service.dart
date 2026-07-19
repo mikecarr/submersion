@@ -1201,6 +1201,7 @@ class SyncService {
             records: data.emergencyChambers,
             hasUpdatedAt: true,
           ),
+          (type: 'incidents', records: data.incidents, hasUpdatedAt: true),
         ];
 
     // Precompute the locally-tombstoned parents this payload will REVIVE (a
@@ -1736,6 +1737,7 @@ class SyncService {
     'diveSafetyReviews': false,
     'diveSafetyFindings': false,
     'emergencyChambers': true,
+    'incidents': true,
     'gasSwitches': false,
     'diveCustomFields': false,
     'diveDataSources': false,
@@ -1808,6 +1810,10 @@ class SyncService {
       (field: 'computerId', parent: 'diveComputers', nullable: true),
     ],
     'emergencyChambers': [(field: 'diverId', parent: 'divers', nullable: true)],
+    'incidents': [
+      (field: 'diverId', parent: 'divers', nullable: true),
+      (field: 'diveId', parent: 'dives', nullable: true),
+    ],
     'diveSafetyReviews': [(field: 'diveId', parent: 'dives', nullable: false)],
     'diveSafetyFindings': [(field: 'diveId', parent: 'dives', nullable: false)],
     'gasSwitches': [(field: 'diveId', parent: 'dives', nullable: false)],
