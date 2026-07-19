@@ -140,6 +140,11 @@ class _CompactAlertsBannerState extends State<_CompactAlertsBanner> {
     final alerts = widget.alerts;
     final alertText = _alertText(context);
 
+    // No renderable alert (e.g. the sole no-fly restriction just elapsed and
+    // the ticker rebuilt before the provider re-emitted): hide the row rather
+    // than show an empty label with a chevron and count.
+    if (alertText.isEmpty) return const SizedBox.shrink();
+
     return GestureDetector(
       onTap: () => _onTap(context),
       child: Container(
