@@ -42,7 +42,6 @@ void main() {
           id: '',
           name: '5mm Wetsuit',
           type: EquipmentType.wetsuit,
-          thickness: '5mm',
         ),
       );
       final dive = await DiveRepository().createDive(

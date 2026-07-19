@@ -14,11 +14,13 @@ void main() {
     bodyWeightKg: 75,
   );
 
+  // 5 mm signal lives in the name; gear_feature parses thickness from the name
+  // when no thickness attribute is present (thickness is a curated attribute
+  // in the equipment-attributes model, not a scalar field).
   const wetsuit = EquipmentItem(
     id: 'suit1',
     name: 'Wetsuit 5mm',
     type: EquipmentType.wetsuit,
-    thickness: '5mm',
   );
   const drysuit = EquipmentItem(
     id: 'dry1',

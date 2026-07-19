@@ -74,12 +74,15 @@ void main() {
     },
   );
 
-  test('v112 (equipment sets/geofences) stays on the migration ladder', () {
-    // Superseded-tripwire convention: this was the exact-latest tripwire when
-    // v112 was newest. This branch adds v119 (equipment.lift_capacity_kg), so
-    // the exact assertion is relaxed to greaterThanOrEqualTo -- the newest
-    // migration's own test now holds the exact-latest tripwire.
-    expect(AppDatabase.currentSchemaVersion, greaterThanOrEqualTo(112));
+  test('v112+ objects are present at the current schema version', () {
+    // v112: equipment.thickness (main). v113: diver_settings.cns_calculation_method
+    // (main). v114: deletion_log unique index + sync_peer_cursors.applied_hlc_high
+    // (fleet-acked tombstone GC). The exact-latest tripwire moved to
+    // migration_v120_planner_parity_test when the planner-parity migration
+    // (v120) landed on top of these.
+    expect(AppDatabase.currentSchemaVersion, greaterThanOrEqualTo(114));
     expect(AppDatabase.migrationVersions, contains(112));
+    expect(AppDatabase.migrationVersions, contains(113));
+    expect(AppDatabase.migrationVersions, contains(114));
   });
 }
