@@ -47,6 +47,7 @@ void main() {
   ProviderContainer container({
     required List<WeightObservation> observations,
     required Map<String, Dive?> divesById,
+    Dive? currentDive,
   }) {
     return ProviderContainer(
       overrides: [
@@ -63,9 +64,9 @@ void main() {
         // typed weights) and the isPrimary-filtered diveProfileProvider, not
         // the lean analysisDiveProvider. See buoyancyTwinProvider for the same
         // hydration pairing.
-        diveProvider(
-          'cur',
-        ).overrideWith((ref) async => diveWith(equipment: [suit])),
+        diveProvider('cur').overrideWith(
+          (ref) async => currentDive ?? diveWith(equipment: [suit]),
+        ),
         for (final entry in divesById.entries) ...[
           diveProvider(entry.key).overrideWith((ref) async => entry.value),
           diveProfileProvider(
@@ -116,5 +117,23 @@ void main() {
 
     final entries = await c.read(buoyancyHistoryProvider('cur').future);
     expect(entries.map((e) => e.diveId), ['d1']);
+  });
+
+  test('returns empty when the current dive has no exposure suit', () async {
+    // Same-suit observations exist, but the current dive is suitless, so the
+    // filter must self-suppress rather than degrade to matching every dive.
+    final c = container(
+      observations: [obs('d1'), obs('d2'), obs('d3')],
+      divesById: {
+        'd1': diveWith(equipment: [suit]),
+        'd2': diveWith(equipment: [suit]),
+        'd3': diveWith(equipment: [suit]),
+      },
+      currentDive: diveWith(equipment: const []),
+    );
+    addTearDown(c.dispose);
+
+    final entries = await c.read(buoyancyHistoryProvider('cur').future);
+    expect(entries, isEmpty);
   });
 }

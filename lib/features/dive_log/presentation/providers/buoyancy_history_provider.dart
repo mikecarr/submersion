@@ -56,9 +56,14 @@ final buoyancyHistoryProvider =
           .map((e) => e.id)
           .firstOrNull;
 
+      // Same-suit comparison only: the exposure suit dominates lead needs, so
+      // comparing a suitless dive (or one that failed to load) against every
+      // dive would mislead. Suppress the strip by returning no entries.
+      if (suitId == null) return const <BuoyancyHistoryEntry>[];
+
       final matching = observations
           .where((o) => o.diveId != currentDiveId)
-          .where((o) => suitId == null || o.equipmentIds.contains(suitId))
+          .where((o) => o.equipmentIds.contains(suitId))
           .toList();
       final recent = matching.length > 10
           ? matching.sublist(matching.length - 10)
