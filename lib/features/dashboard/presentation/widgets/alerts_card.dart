@@ -94,6 +94,12 @@ class _CompactAlertsBannerState extends State<_CompactAlertsBanner> {
     if (alerts.insuranceExpiringSoon) {
       return context.l10n.dashboard_alerts_insuranceExpiringSoon;
     }
+    if (alerts.serviceClocksDue.isEmpty) {
+      // The minute ticker can rebuild this banner in the brief window between a
+      // sole no-fly restriction elapsing and the provider re-emitting to remove
+      // the banner. Render nothing rather than reading .first on an empty list.
+      return '';
+    }
     final clock = alerts.serviceClocksDue.first;
     final isOverdue = clock.status.severity == ServiceClockSeverity.overdue;
     return isOverdue
