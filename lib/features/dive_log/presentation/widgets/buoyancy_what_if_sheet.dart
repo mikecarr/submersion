@@ -149,7 +149,7 @@ class _BuoyancyWhatIfSheetState extends State<_BuoyancyWhatIfSheet> {
               style: theme.textTheme.bodySmall,
             ),
             Slider(
-              value: _suitAnchor.clamp(0, 12),
+              value: _suitAnchor.clamp(0.0, 12.0),
               max: 12,
               divisions: 24,
               // Live value keeps the label/thumb responsive during the drag;
@@ -198,7 +198,7 @@ class _BuoyancyWhatIfSheetState extends State<_BuoyancyWhatIfSheet> {
         IconButton(
           icon: const Icon(Icons.remove),
           onPressed: () {
-            _leadKg = (_leadKg - _incrementKg).clamp(0, 100);
+            _leadKg = (_leadKg - _incrementKg).clamp(0.0, 100.0);
             _recompute();
           },
         ),
@@ -213,7 +213,7 @@ class _BuoyancyWhatIfSheetState extends State<_BuoyancyWhatIfSheet> {
         IconButton(
           icon: const Icon(Icons.add),
           onPressed: () {
-            _leadKg = (_leadKg + _incrementKg).clamp(0, 100);
+            _leadKg = (_leadKg + _incrementKg).clamp(0.0, 100.0);
             _recompute();
           },
         ),

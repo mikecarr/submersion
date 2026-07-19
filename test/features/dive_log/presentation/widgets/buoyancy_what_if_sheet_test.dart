@@ -77,4 +77,22 @@ void main() {
     await tester.pump();
     expect(find.text('6.0 kg'), findsOneWidget);
   });
+
+  testWidgets('decrementing lead below zero clamps to 0 without crashing', (
+    tester,
+  ) async {
+    await _open(tester);
+
+    // Base lead 6.0 kg at 0.5 kg steps: 12 taps reach 0.0. The 13th once
+    // computed (0.0 - 0.5).clamp(0, 100), which returns an int and threw on the
+    // double assignment; double bounds keep it at 0.0.
+    final minus = find.byIcon(Icons.remove);
+    for (var i = 0; i < 13; i++) {
+      await tester.tap(minus);
+      await tester.pump();
+    }
+
+    expect(tester.takeException(), isNull);
+    expect(find.text('0.0 kg'), findsOneWidget);
+  });
 }

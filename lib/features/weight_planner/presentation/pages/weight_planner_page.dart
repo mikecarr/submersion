@@ -181,7 +181,7 @@ class _WeightPlannerPageState extends ConsumerState<WeightPlannerPage> {
               style: theme.textTheme.bodySmall,
             ),
             Slider(
-              value: _displayDepthM.clamp(5, 60),
+              value: _displayDepthM.clamp(5.0, 60.0),
               min: 5,
               max: 60,
               divisions: 55,
@@ -197,7 +197,7 @@ class _WeightPlannerPageState extends ConsumerState<WeightPlannerPage> {
               style: theme.textTheme.bodySmall,
             ),
             Slider(
-              value: _displayBottomMinutes.toDouble().clamp(5, 90),
+              value: _displayBottomMinutes.toDouble().clamp(5.0, 90.0),
               min: 5,
               max: 90,
               divisions: 85,
