@@ -1,10 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:submersion/core/providers/provider.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:submersion/features/dashboard/presentation/providers/dashboard_providers.dart';
-import 'package:submersion/features/safety/presentation/pages/no_fly_page.dart'
-    show formatNoFlyRemaining;
+import 'package:submersion/features/equipment/domain/entities/service_clock_status.dart';
+import 'package:submersion/features/safety/presentation/formatters/no_fly_format.dart';
 import 'package:submersion/l10n/l10n_extension.dart';
 
 /// A compact single-line banner showing alerts and reminders.
@@ -28,16 +30,62 @@ class AlertsCard extends ConsumerWidget {
   }
 }
 
-class _CompactAlertsBanner extends StatelessWidget {
+class _CompactAlertsBanner extends StatefulWidget {
   final DashboardAlerts alerts;
 
   const _CompactAlertsBanner({required this.alerts});
 
+  @override
+  State<_CompactAlertsBanner> createState() => _CompactAlertsBannerState();
+}
+
+class _CompactAlertsBannerState extends State<_CompactAlertsBanner> {
+  Timer? _ticker;
+
+  @override
+  void initState() {
+    super.initState();
+    _syncTicker();
+  }
+
+  @override
+  void didUpdateWidget(covariant _CompactAlertsBanner oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _syncTicker();
+  }
+
+  @override
+  void dispose() {
+    _ticker?.cancel();
+    super.dispose();
+  }
+
+  /// The no-fly label is derived from `DateTime.now()`, so refresh it once a
+  /// minute while a restriction is active (matching NoFlyPage). No ticker
+  /// runs when there is no countdown to update.
+  void _syncTicker() {
+    final active = widget.alerts.noFlyStatus != null;
+    if (active && _ticker == null) {
+      _ticker = Timer.periodic(const Duration(minutes: 1), (_) {
+        if (mounted) setState(() {});
+      });
+    } else if (!active && _ticker != null) {
+      _ticker!.cancel();
+      _ticker = null;
+    }
+  }
+
   String _alertText(BuildContext context) {
+    final alerts = widget.alerts;
     final noFly = alerts.noFlyStatus;
-    if (noFly != null) {
+    // A cached status can expire while the dashboard stays mounted; only show
+    // the countdown while it is still active, otherwise fall through to the
+    // next-priority alert. Sample the clock once so the active check and the
+    // remaining-time label agree at the expiry boundary.
+    final now = DateTime.now().toUtc();
+    if (noFly != null && noFly.isActiveAt(now)) {
       return context.l10n.safetyHub_alert_noFly(
-        formatNoFlyRemaining(noFly.remaining(DateTime.now().toUtc())),
+        formatNoFlyRemaining(noFly.remaining(now)),
       );
     }
     if (alerts.insuranceExpired) {
@@ -46,16 +94,28 @@ class _CompactAlertsBanner extends StatelessWidget {
     if (alerts.insuranceExpiringSoon) {
       return context.l10n.dashboard_alerts_insuranceExpiringSoon;
     }
-    final equipment = alerts.equipmentServiceDue.first;
-    final daysUntil = equipment.daysUntilService;
-    final isOverdue = daysUntil != null && daysUntil < 0;
+    if (alerts.serviceClocksDue.isEmpty) {
+      // The minute ticker can rebuild this banner in the brief window between a
+      // sole no-fly restriction elapsing and the provider re-emitting to remove
+      // the banner. Render nothing rather than reading .first on an empty list.
+      return '';
+    }
+    final clock = alerts.serviceClocksDue.first;
+    final isOverdue = clock.status.severity == ServiceClockSeverity.overdue;
     return isOverdue
-        ? context.l10n.dashboard_alerts_equipmentServiceOverdue(equipment.name)
-        : context.l10n.dashboard_alerts_equipmentServiceDue(equipment.name);
+        ? context.l10n.dashboard_alerts_clockOverdue(
+            clock.item.name,
+            clock.status.kind.name,
+          )
+        : context.l10n.dashboard_alerts_clockDue(
+            clock.item.name,
+            clock.status.kind.name,
+          );
   }
 
   void _onTap(BuildContext context) {
-    if (alerts.noFlyStatus != null) {
+    final alerts = widget.alerts;
+    if (alerts.hasActiveNoFly) {
       context.push('/planning/no-fly');
       return;
     }
@@ -64,9 +124,9 @@ class _CompactAlertsBanner extends StatelessWidget {
         context.go('/settings');
         return;
       }
-      if (alerts.equipmentServiceDue.isNotEmpty) {
-        final equipment = alerts.equipmentServiceDue.first;
-        context.push('/equipment/${equipment.id}');
+      if (alerts.serviceClocksDue.isNotEmpty) {
+        final clock = alerts.serviceClocksDue.first;
+        context.push('/equipment/${clock.item.id}');
         return;
       }
     }
@@ -77,6 +137,7 @@ class _CompactAlertsBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final alerts = widget.alerts;
     final alertText = _alertText(context);
 
     return GestureDetector(

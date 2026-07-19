@@ -20,6 +20,10 @@ class EmergencyCardPage extends ConsumerWidget {
     final l10n = context.l10n;
     final dataAsync = ref.watch(emergencyCardDataProvider);
 
+    // A new chamber is stamped with the active diver id; with no diver profile
+    // loaded it would create a null-diver (global) row, so gate the action.
+    final canAddChamber = dataAsync.value?.diver != null;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.emergencyCard_title),
@@ -27,15 +31,25 @@ class EmergencyCardPage extends ConsumerWidget {
           IconButton(
             icon: const Icon(Icons.add_location_alt_outlined),
             tooltip: l10n.emergencyCard_addChamber,
-            onPressed: () => context.push(
-              '/settings/diver-profile/emergency-card/add-chamber',
-            ),
+            onPressed: canAddChamber
+                ? () => context.push(
+                    '/settings/diver-profile/emergency-card/add-chamber',
+                  )
+                : null,
           ),
         ],
       ),
       body: dataAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('$e')),
+        error: (e, _) => Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Text(
+              l10n.common_error_tryAgain,
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ),
         data: (data) => _CardBody(data: data),
       ),
     );
@@ -100,7 +114,7 @@ class _CardBody extends ConsumerWidget {
         ),
         const SizedBox(height: 24),
         if (diver != null) ...[
-          _DiverSection(diver: diver),
+          _DiverSection(diver: diver, onCall: _call),
         ] else
           Card(
             child: Padding(
@@ -126,14 +140,17 @@ class _CardBody extends ConsumerWidget {
 
   Future<void> _call(String number) async {
     final uri = Uri(scheme: 'tel', path: number.replaceAll(' ', ''));
-    await launchUrl(uri);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
+    }
   }
 }
 
 class _DiverSection extends StatelessWidget {
   final Diver diver;
+  final Future<void> Function(String) onCall;
 
-  const _DiverSection({required this.diver});
+  const _DiverSection({required this.diver, required this.onCall});
 
   @override
   Widget build(BuildContext context) {
@@ -152,9 +169,7 @@ class _DiverSection extends StatelessWidget {
         ),
         subtitle: Text(c.phone ?? ''),
         trailing: const Icon(Icons.phone, size: 20),
-        onTap: c.phone != null
-            ? () => launchUrl(Uri(scheme: 'tel', path: c.phone!))
-            : null,
+        onTap: c.phone != null ? () => onCall(c.phone!) : null,
       );
     }
 
@@ -219,12 +234,23 @@ class _ChamberTile extends ConsumerWidget {
         subtitle: Text(subtitle),
         trailing: PopupMenuButton<String>(
           onSelected: (value) async {
-            if (value == 'call') {
-              await onCall(chamber.phone);
-            } else if (value == 'hide') {
-              await ref
-                  .read(settingsProvider.notifier)
-                  .setChamberHidden(chamber.id, true);
+            if (value == 'hide') {
+              // Capture the messenger before the await; hiding a bundled
+              // chamber is otherwise irreversible from this screen, so offer
+              // an immediate undo.
+              final messenger = ScaffoldMessenger.of(context);
+              final notifier = ref.read(settingsProvider.notifier);
+              await notifier.setChamberHidden(chamber.id, true);
+              messenger.showSnackBar(
+                SnackBar(
+                  content: Text(l10n.emergencyCard_chamberHidden),
+                  action: SnackBarAction(
+                    label: l10n.emergencyCard_undo,
+                    onPressed: () =>
+                        notifier.setChamberHidden(chamber.id, false),
+                  ),
+                ),
+              );
             } else if (value == 'delete') {
               await ref
                   .read(emergencyChamberRepositoryProvider)
@@ -232,7 +258,6 @@ class _ChamberTile extends ConsumerWidget {
             }
           },
           itemBuilder: (context) => [
-            const PopupMenuItem(value: 'call', child: Icon(Icons.phone)),
             if (chamber.isBuiltIn)
               PopupMenuItem(
                 value: 'hide',

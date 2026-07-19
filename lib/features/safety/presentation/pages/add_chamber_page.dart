@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:submersion/features/divers/presentation/providers/diver_providers.dart';
 import 'package:submersion/features/safety/presentation/providers/emergency_providers.dart';
 import 'package:submersion/l10n/l10n_extension.dart';
 
@@ -44,13 +45,17 @@ class _AddChamberPageState extends ConsumerState<AddChamberPage> {
             TextFormField(
               controller: _name,
               decoration: InputDecoration(labelText: l10n.addChamber_name),
-              validator: (v) => (v == null || v.trim().isEmpty) ? '' : null,
+              validator: (v) => (v == null || v.trim().isEmpty)
+                  ? l10n.addChamber_nameRequired
+                  : null,
             ),
             TextFormField(
               controller: _country,
               decoration: InputDecoration(labelText: l10n.addChamber_country),
               textCapitalization: TextCapitalization.characters,
-              validator: (v) => (v == null || v.trim().isEmpty) ? '' : null,
+              validator: (v) => (v == null || v.trim().isEmpty)
+                  ? l10n.addChamber_countryRequired
+                  : null,
             ),
             TextFormField(
               controller: _city,
@@ -60,7 +65,9 @@ class _AddChamberPageState extends ConsumerState<AddChamberPage> {
               controller: _phone,
               decoration: InputDecoration(labelText: l10n.addChamber_phone),
               keyboardType: TextInputType.phone,
-              validator: (v) => (v == null || v.trim().isEmpty) ? '' : null,
+              validator: (v) => (v == null || v.trim().isEmpty)
+                  ? l10n.addChamber_phoneRequired
+                  : null,
             ),
             TextFormField(
               controller: _notes,
@@ -77,6 +84,7 @@ class _AddChamberPageState extends ConsumerState<AddChamberPage> {
 
   Future<void> _save() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
+    final diverId = await ref.read(validatedCurrentDiverIdProvider.future);
     await ref
         .read(emergencyChamberRepositoryProvider)
         .createChamber(
@@ -85,6 +93,7 @@ class _AddChamberPageState extends ConsumerState<AddChamberPage> {
           phone: _phone.text.trim(),
           city: _city.text.trim().isEmpty ? null : _city.text.trim(),
           notes: _notes.text.trim().isEmpty ? null : _notes.text.trim(),
+          diverId: diverId,
         );
     if (mounted) context.pop();
   }

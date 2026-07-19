@@ -20,11 +20,21 @@ final emergencyChamberRepositoryProvider = Provider<EmergencyChamberRepository>(
 /// Null means "unknown" (worldwide hotline + default EMS number).
 final emergencyRegionProvider = FutureProvider<String?>((ref) async {
   final override = ref.watch(settingsProvider.select((s) => s.emergencyRegion));
-  if (override != null && override.isNotEmpty) return override;
+  if (override != null && override.trim().isNotEmpty) {
+    // Chamber countries and the dataset keys are upper-case ISO codes, so
+    // normalize the manual override to match same-country comparisons.
+    return override.trim().toUpperCase();
+  }
 
   final repository = ref.watch(diveRepositoryProvider);
   ref.invalidateSelfWhen(repository.watchDivesChanges());
-  final summaries = await repository.getDiveSummaries(limit: 1);
+  // Scope to the effective diver so the region isn't derived from another
+  // profile's most recent dive in a multi-diver database.
+  final diverId = await ref.watch(validatedCurrentDiverIdProvider.future);
+  final summaries = await repository.getDiveSummaries(
+    limit: 1,
+    diverId: diverId,
+  );
   if (summaries.isEmpty) return null;
   final country = summaries.first.siteCountry;
   if (country == null || country.isEmpty) return null;
@@ -60,16 +70,24 @@ final emergencyCardDataProvider = FutureProvider<EmergencyCardData>((
 
   final chamberRepo = ref.watch(emergencyChamberRepositoryProvider);
   ref.invalidateSelfWhen(chamberRepo.watchChanges());
-  final userChambers = await chamberRepo.getUserChambers();
+  final userChambers = await chamberRepo.getUserChambers(diverId: diver?.id);
 
   // Bundled chambers for the region's country first, then the rest; user
   // chambers always shown. Hidden bundled entries filtered out.
   final visibleBundled = bundled.where((c) => !hidden.contains(c.id)).toList();
   final chambers = [...userChambers, ...visibleBundled];
 
-  // Distance sort when the most recent dive site has GPS.
+  // Distance sort when the most recent dive site has GPS. Re-run when dives
+  // change so the sort stays fresh even when a manual region override makes
+  // emergencyRegionProvider return early (and skip its own subscription).
   final repository = ref.watch(diveRepositoryProvider);
-  final summaries = await repository.getDiveSummaries(limit: 1);
+  ref.invalidateSelfWhen(repository.watchDivesChanges());
+  // Scope the GPS anchor to the active diver's most recent dive, not another
+  // profile's.
+  final summaries = await repository.getDiveSummaries(
+    limit: 1,
+    diverId: diver?.id,
+  );
   final lat = summaries.isNotEmpty ? summaries.first.siteLatitude : null;
   final lon = summaries.isNotEmpty ? summaries.first.siteLongitude : null;
   if (lat != null && lon != null) {

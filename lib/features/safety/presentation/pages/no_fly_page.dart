@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import 'package:submersion/features/safety/domain/services/no_fly_service.dart';
+import 'package:submersion/features/safety/presentation/formatters/no_fly_format.dart';
 import 'package:submersion/features/safety/presentation/providers/no_fly_providers.dart';
 import 'package:submersion/l10n/arb/app_localizations.dart';
 import 'package:submersion/l10n/l10n_extension.dart';
@@ -45,7 +46,25 @@ class _NoFlyPageState extends ConsumerState<NoFlyPage> {
       appBar: AppBar(title: Text(l10n.safetySettings_noFlyHeader)),
       body: ListView(
         padding: const EdgeInsets.all(16),
-        children: [NoFlyStatusCard(status: statusAsync.value)],
+        children: [
+          // Only render the all-clear/active card once we actually have a
+          // result. During the very first load or an error with no prior
+          // value, show an explicit placeholder instead of silently implying
+          // "no restriction" -- misleading for a safety readout. A refresh
+          // after data exists keeps the retained value (no flicker).
+          if (statusAsync.hasValue)
+            NoFlyStatusCard(status: statusAsync.value)
+          else if (statusAsync.hasError)
+            _NoFlyStatusPlaceholder(
+              icon: Icons.error_outline,
+              text: l10n.common_label_error,
+            )
+          else
+            _NoFlyStatusPlaceholder(
+              icon: Icons.hourglass_empty,
+              text: l10n.common_label_loading,
+            ),
+        ],
       ),
     );
   }
@@ -62,7 +81,7 @@ class NoFlyStatusCard extends StatelessWidget {
     final l10n = context.l10n;
     final theme = Theme.of(context);
     final now = DateTime.now().toUtc();
-    final active = status != null && status!.until.isAfter(now);
+    final active = status != null && status!.isActiveAt(now);
 
     if (!active) {
       return Card(
@@ -141,10 +160,22 @@ class NoFlyStatusCard extends StatelessWidget {
   }
 }
 
-/// "14h 20m" style remaining-time label shared with the dashboard banner.
-String formatNoFlyRemaining(Duration remaining) {
-  final hours = remaining.inHours;
-  final minutes = remaining.inMinutes % 60;
-  if (hours == 0) return '${minutes}m';
-  return '${hours}h ${minutes}m';
+/// Neutral placeholder shown while the no-fly status is still loading or has
+/// failed to load, so the page never implies "no restriction" before it knows.
+class _NoFlyStatusPlaceholder extends StatelessWidget {
+  final IconData icon;
+  final String text;
+
+  const _NoFlyStatusPlaceholder({required this.icon, required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Card(
+      child: ListTile(
+        leading: Icon(icon, color: theme.colorScheme.onSurfaceVariant),
+        title: Text(text),
+      ),
+    );
+  }
 }
