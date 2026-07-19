@@ -96,6 +96,7 @@ class _WeightPlannerPageState extends ConsumerState<WeightPlannerPage> {
   BuoyancyTwinOutcome? _buoyancyOutcome(
     FittedWeightModel? model,
     UnitFormatter units,
+    Map<String, double>? placement,
   ) {
     if (model == null || _tanks.isEmpty) return null;
     final lead = _predict(model, units)?.totalKg ?? 0.0;
@@ -127,7 +128,12 @@ class _WeightPlannerPageState extends ConsumerState<WeightPlannerPage> {
       suit: rig.suit,
       staticTerms: rig.staticTerms,
       leadKg: lead,
-      droppableLeadKg: lead,
+      // Only belt + integrated lead is ditchable; fixed placements
+      // (backplate/trim) must not inflate the droppable figure, which would
+      // suppress the min-ditchable warning.
+      droppableLeadKg: placement != null
+          ? BuoyancyTwinAssembler.droppableLeadFromPlacement(placement)
+          : lead,
       environment: DiveEnvironment.forConditions(waterType: _water),
       totalMassKg: rig.totalMassKg,
     );
@@ -291,7 +297,6 @@ class _WeightPlannerPageState extends ConsumerState<WeightPlannerPage> {
 
     final model = ref.watch(weightCalibrationProvider).valueOrNull;
     final prediction = _predict(model, units);
-    final buoyancy = _buoyancyOutcome(model, units);
     final observations =
         ref.watch(weightObservationsProvider).valueOrNull ?? const [];
     final placement = prediction != null
@@ -304,6 +309,9 @@ class _WeightPlannerPageState extends ConsumerState<WeightPlannerPage> {
                 : 0.45359237,
           )
         : null;
+    // Placement (belt/integrated vs fixed) computed before the twin so its
+    // droppable-lead figure can distinguish ditchable from fixed weight.
+    final buoyancy = _buoyancyOutcome(model, units, placement);
 
     final savedWeightKg = latestWeight?.weightKg;
     final enteredKg = _bodyWeightKg(units);
