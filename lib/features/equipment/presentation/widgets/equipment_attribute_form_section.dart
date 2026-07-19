@@ -71,15 +71,11 @@ class EquipmentAttributeFormSection extends StatelessWidget {
           initialValue: current?.valueText ?? '',
           decoration: InputDecoration(
             labelText: label,
-            hintText: '5, 5/4, 7/5/3',
+            hintText: context.l10n.equipment_edit_thicknessDesignationHint,
           ),
-          validator: (text) {
-            final t = text?.trim() ?? '';
-            if (t.isEmpty) return null;
-            return RegExp(r'^\d+(\.\d+)?(/\d+(\.\d+)?)*$').hasMatch(t)
-                ? null
-                : context.l10n.equipment_edit_invalidThickness;
-          },
+          validator: (text) => isValidThicknessDesignation(text ?? '')
+              ? null
+              : context.l10n.equipment_edit_invalidThickness,
           onChanged: (text) {
             final trimmed = text.trim();
             if (trimmed.isEmpty) {
@@ -103,11 +99,11 @@ class EquipmentAttributeFormSection extends StatelessWidget {
           key: fieldKey,
           initialValue: current?.valueNum == null
               ? ''
-              : attributeDisplayFromMetric(
+              : formatAttributeNumberForEditing(
                   def.dimension,
                   units,
                   current!.valueNum!,
-                ).toString(),
+                ),
           decoration: InputDecoration(
             labelText: symbol.isEmpty ? label : '$label ($symbol)',
           ),
@@ -116,10 +112,15 @@ class EquipmentAttributeFormSection extends StatelessWidget {
             signed: true,
           ),
           onChanged: (text) {
-            final parsed = double.tryParse(text.trim());
-            if (parsed == null) {
+            final trimmed = text.trim();
+            if (trimmed.isEmpty) {
               onCleared(def.key);
-            } else {
+              return;
+            }
+            // Tolerate a comma decimal separator (many locales' numeric
+            // keyboards produce "7,5"), like the suit-thickness filter bounds.
+            final parsed = double.tryParse(trimmed.replaceAll(',', '.'));
+            if (parsed != null) {
               onChanged(
                 _base(def.key).copyWith(
                   valueNum: attributeMetricFromDisplay(
@@ -130,6 +131,8 @@ class EquipmentAttributeFormSection extends StatelessWidget {
                 ),
               );
             }
+            // Non-empty but unparseable (transient like "-", or invalid): keep
+            // the last pending value rather than silently dropping the field.
           },
         );
 
@@ -174,11 +177,16 @@ class EquipmentAttributeFormSection extends StatelessWidget {
         return InkWell(
           key: fieldKey,
           onTap: () async {
+            // Catalog date attributes (last visual inspection / hydro test)
+            // record past events, so cap at today. Clamp initialDate too: a
+            // stored future date would otherwise trip showDatePicker's
+            // initialDate <= lastDate assertion.
+            final now = DateTime.now();
             final picked = await showDatePicker(
               context: context,
-              initialDate: date ?? DateTime.now(),
+              initialDate: (date == null || date.isAfter(now)) ? now : date,
               firstDate: DateTime(1970),
-              lastDate: DateTime.now().add(const Duration(days: 365 * 10)),
+              lastDate: now,
             );
             if (picked != null) {
               onChanged(

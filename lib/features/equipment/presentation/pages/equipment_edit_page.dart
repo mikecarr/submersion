@@ -314,9 +314,13 @@ class _EquipmentEditPageState extends ConsumerState<EquipmentEditPage> {
           _buildDateSection(context),
           const SizedBox(height: 24),
 
-          // Service Settings
-          _buildServiceSection(context),
-          const SizedBox(height: 24),
+          // Service Settings (legacy single clock). New items get service
+          // clocks auto-attached on create and manage them from the detail
+          // page, so the legacy section only shows when editing.
+          if (widget.isEditing) ...[
+            _buildServiceSection(context),
+            const SizedBox(height: 24),
+          ],
 
           // Notes
           TextFormField(
@@ -826,6 +830,21 @@ class _EquipmentEditPageState extends ConsumerState<EquipmentEditPage> {
           existingEquipment?.diverId ??
           await ref.read(validatedCurrentDiverIdProvider.future);
 
+      // De-dupe custom fields by trimmed key before building the attribute
+      // list. The schema enforces UNIQUE(equipment_id, attr_key, is_custom),
+      // so two custom fields sharing a label would fail the insert. First
+      // occurrence wins; sort order is re-packed to the surviving order.
+      final customAttributes = <EquipmentAttribute>[];
+      final seenCustomKeys = <String>{};
+      for (final field in _customFields) {
+        final key = field.key.trim();
+        if (key.isEmpty || !field.hasValue) continue;
+        if (!seenCustomKeys.add(key)) continue;
+        customAttributes.add(
+          field.copyWith(key: key, sortOrder: customAttributes.length),
+        );
+      }
+
       final equipment = EquipmentItem(
         id: widget.equipmentId ?? '',
         diverId: diverId,
@@ -862,10 +881,7 @@ class _EquipmentEditPageState extends ConsumerState<EquipmentEditPage> {
             _selectedType,
           ))
             if (_attrValues[def.key] case final attr? when attr.hasValue) attr,
-          for (var i = 0; i < _customFields.length; i++)
-            if (_customFields[i].key.trim().isNotEmpty &&
-                _customFields[i].hasValue)
-              _customFields[i].copyWith(sortOrder: i),
+          ...customAttributes,
         ],
         customReminderEnabled: _customReminderEnabled,
         customReminderDays: _customReminderEnabled == true

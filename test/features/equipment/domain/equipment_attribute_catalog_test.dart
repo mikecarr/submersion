@@ -104,4 +104,22 @@ void main() {
     expect(parsePrimaryThickness('thin'), isNull);
     expect(parsePrimaryThickness(''), isNull);
   });
+
+  test('isValidThicknessDesignation accepts what the migration preserves', () {
+    // Legacy values the v124 migration copies verbatim into valueText must
+    // pass the edit-form validator, or the item can never be saved again.
+    expect(isValidThicknessDesignation('6mm'), isTrue);
+    expect(isValidThicknessDesignation('6 mm'), isTrue);
+    expect(isValidThicknessDesignation('5/4/3'), isTrue);
+    expect(isValidThicknessDesignation('8/7/6mm'), isTrue);
+    expect(isValidThicknessDesignation('4,3'), isTrue);
+    expect(isValidThicknessDesignation('6-3'), isTrue);
+    expect(isValidThicknessDesignation('2.5'), isTrue);
+    expect(isValidThicknessDesignation(' 5 / 4 '), isTrue);
+    // Empty is valid (the field is optional).
+    expect(isValidThicknessDesignation(''), isTrue);
+    // Non-numeric garbage is still rejected.
+    expect(isValidThicknessDesignation('thin'), isFalse);
+    expect(isValidThicknessDesignation('abc'), isFalse);
+  });
 }

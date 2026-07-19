@@ -103,6 +103,23 @@ class _DiveFilterSheetState extends ConsumerState<DiveFilterSheet> {
     super.dispose();
   }
 
+  /// Suit thickness can be fractional (e.g. 2.5 mm), so keep decimals rather
+  /// than truncating with toStringAsFixed(0); integers still render cleanly.
+  String _formatThicknessBound(double? value) {
+    if (value == null) return '';
+    return value == value.roundToDouble()
+        ? value.toStringAsFixed(0)
+        : value.toString();
+  }
+
+  /// Parse a user-entered thickness bound, tolerating a comma decimal
+  /// separator (common in many locales). Empty/invalid input clears the bound.
+  double? _parseThicknessBound(String value) {
+    final trimmed = value.trim().replaceAll(',', '.');
+    if (trimmed.isEmpty) return null;
+    return double.tryParse(trimmed);
+  }
+
   @override
   Widget build(BuildContext context) {
     final sites = ref.watch(sitesProvider);
@@ -463,26 +480,30 @@ class _DiveFilterSheetState extends ConsumerState<DiveFilterSheet> {
                 children: [
                   Expanded(
                     child: TextFormField(
-                      initialValue: _suitThicknessMin?.toStringAsFixed(0) ?? '',
+                      initialValue: _formatThicknessBound(_suitThicknessMin),
                       decoration: InputDecoration(
                         labelText: context.l10n.diveLog_filter_thicknessMin,
                       ),
-                      keyboardType: TextInputType.number,
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
                       onChanged: (value) => setState(
-                        () => _suitThicknessMin = double.tryParse(value),
+                        () => _suitThicknessMin = _parseThicknessBound(value),
                       ),
                     ),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
                     child: TextFormField(
-                      initialValue: _suitThicknessMax?.toStringAsFixed(0) ?? '',
+                      initialValue: _formatThicknessBound(_suitThicknessMax),
                       decoration: InputDecoration(
                         labelText: context.l10n.diveLog_filter_thicknessMax,
                       ),
-                      keyboardType: TextInputType.number,
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
                       onChanged: (value) => setState(
-                        () => _suitThicknessMax = double.tryParse(value),
+                        () => _suitThicknessMax = _parseThicknessBound(value),
                       ),
                     ),
                   ),

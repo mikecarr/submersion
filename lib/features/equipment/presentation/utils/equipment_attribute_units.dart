@@ -44,6 +44,21 @@ String attributeUnitSymbol(AttributeDimension d, UnitFormatter units) =>
       AttributeDimension.none => '',
     };
 
+/// The display value of a metric-stored number formatted for a text field or
+/// label, with no unit symbol: integers render without decimals, otherwise one
+/// decimal place. Keeps edit fields readable after a unit conversion (e.g.
+/// kg->lbs) instead of leaking full floating-point precision.
+String formatAttributeNumberForEditing(
+  AttributeDimension dimension,
+  UnitFormatter units,
+  double metricValue,
+) {
+  final display = attributeDisplayFromMetric(dimension, units, metricValue);
+  return display == display.roundToDouble()
+      ? display.toStringAsFixed(0)
+      : display.toStringAsFixed(1);
+}
+
 /// Display string for a stored attribute value (detail page, CSV).
 String formatAttributeValue(
   EquipmentAttribute attr,
@@ -56,24 +71,32 @@ String formatAttributeValue(
     case AttributeKind.text:
       return attr.valueText ?? '';
     case AttributeKind.thickness:
-      return attr.valueText == null ? '' : '${attr.valueText} mm';
+      if (attr.valueText == null) return '';
+      // Strip any unit the stored designation already carries (legacy values
+      // like "6mm" that the v124 migration preserved verbatim) so the unit is
+      // appended exactly once.
+      final raw = attr.valueText!.trim();
+      final base = raw.toLowerCase().endsWith('mm')
+          ? raw.substring(0, raw.length - 2).trim()
+          : raw;
+      return base.isEmpty ? '' : '$base mm';
     case AttributeKind.number:
       if (attr.valueNum == null) return '';
-      final display = attributeDisplayFromMetric(
+      final text = formatAttributeNumberForEditing(
         def.dimension,
         units,
         attr.valueNum!,
       );
       final symbol = attributeUnitSymbol(def.dimension, units);
-      final text = display == display.roundToDouble()
-          ? display.toStringAsFixed(0)
-          : display.toStringAsFixed(1);
       return symbol.isEmpty ? text : '$text $symbol';
     case AttributeKind.choice:
       return attr.valueText == null
           ? ''
           : attributeChoiceLabel(l10n, def.key, attr.valueText!);
     case AttributeKind.flag:
+      // Unset (null) renders empty like the other kinds; only an explicit 0/1
+      // maps to No/Yes.
+      if (attr.valueNum == null) return '';
       return attr.valueNum == 1 ? l10n.attr_flagYes : l10n.attr_flagNo;
     case AttributeKind.date:
       return attr.valueNum == null

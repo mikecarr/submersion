@@ -154,8 +154,10 @@ class StatisticsProgressionPage extends ConsumerWidget {
   ) {
     final thicknessAsync = ref.watch(divesBySuitThicknessProvider);
 
+    // Space before the unit ("5 mm"), matching the attribute formatter and
+    // the rest of the app's thickness rendering.
     String label(double mm) =>
-        mm == mm.roundToDouble() ? '${mm.toStringAsFixed(0)}mm' : '${mm}mm';
+        mm == mm.roundToDouble() ? '${mm.toStringAsFixed(0)} mm' : '$mm mm';
 
     return StatSectionCard(
       title: context.l10n.statistics_progression_divesBySuitThickness_title,
@@ -174,8 +176,10 @@ class StatisticsProgressionPage extends ConsumerWidget {
           final chartData = data
               .map((d) => (label: label(d.mm), count: d.count))
               .toList();
+          // Locale-neutral label:count pairs so the screen-reader summary
+          // matches the app locale rather than hard-coded English prose.
           final description = data
-              .map((d) => '${d.count} dives in a ${label(d.mm)} suit')
+              .map((d) => '${label(d.mm)}: ${d.count}')
               .join(', ');
           return Semantics(
             label: chartSummaryLabel(

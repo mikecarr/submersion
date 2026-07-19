@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:uuid/uuid.dart';
 
 import 'package:submersion/features/equipment/domain/entities/equipment_attribute.dart';
 import 'package:submersion/l10n/l10n_extension.dart';
@@ -14,6 +15,15 @@ class EquipmentCustomFieldsSection extends StatelessWidget {
     required this.fields,
     required this.onChanged,
   });
+
+  /// Stable widget-key seed for a row: prefer the field's own id so the
+  /// TextFormFields keep their FormFieldState when other rows are deleted
+  /// (index-based keys would shift and reuse the wrong state). Falls back to
+  /// the index only for the (unexpected) case of an id-less field.
+  String _rowKey(int index) {
+    final id = fields[index].id;
+    return id.isNotEmpty ? id : 'idx-$index';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +43,7 @@ class EquipmentCustomFieldsSection extends StatelessWidget {
                 Expanded(
                   flex: 4,
                   child: TextFormField(
-                    key: ValueKey('custom-key-$i'),
+                    key: ValueKey('custom-key-${_rowKey(i)}'),
                     initialValue: fields[i].key,
                     decoration: InputDecoration(
                       labelText: context.l10n.diveLog_edit_customFieldKey,
@@ -48,7 +58,7 @@ class EquipmentCustomFieldsSection extends StatelessWidget {
                 Expanded(
                   flex: 6,
                   child: TextFormField(
-                    key: ValueKey('custom-value-$i'),
+                    key: ValueKey('custom-value-${_rowKey(i)}'),
                     initialValue: fields[i].valueText ?? '',
                     decoration: InputDecoration(
                       labelText: context.l10n.diveLog_edit_customFieldValue,
@@ -75,7 +85,10 @@ class EquipmentCustomFieldsSection extends StatelessWidget {
           onPressed: () => onChanged([
             ...fields,
             EquipmentAttribute(
-              id: '',
+              // Assign a stable client-side id up front so the row keeps its
+              // widget identity across edits/removals; saveAttributes keeps
+              // the id for custom rows.
+              id: const Uuid().v4(),
               equipmentId: '',
               key: '',
               isCustom: true,

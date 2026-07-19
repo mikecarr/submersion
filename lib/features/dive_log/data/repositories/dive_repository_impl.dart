@@ -36,9 +36,14 @@ import 'package:submersion/features/equipment/domain/entities/equipment_item.dar
 import 'package:submersion/features/dive_log/domain/entities/dive_custom_field.dart'
     as domain;
 import 'package:submersion/features/dive_log/data/repositories/dive_custom_field_repository.dart';
+import 'package:submersion/features/dive_log/data/repositories/safety_findings_repository.dart';
+import 'package:submersion/features/safety/domain/services/no_fly_service.dart';
 import 'package:submersion/features/tags/domain/entities/tag.dart' as domain;
 import 'package:submersion/features/tags/data/repositories/tag_repository.dart';
 import 'package:submersion/features/trips/domain/entities/trip.dart' as domain;
+import 'package:submersion/features/buddies/domain/entities/buddy.dart'
+    as domain;
+import 'package:submersion/features/buddies/data/repositories/buddy_repository.dart';
 
 class DiveRepository {
   AppDatabase get _db => DatabaseService.instance.database;
@@ -46,6 +51,7 @@ class DiveRepository {
   final _uuid = const Uuid();
   final _log = LoggerService.forClass(DiveRepository);
   final TagRepository _tagRepository = TagRepository();
+  final BuddyRepository _buddyRepository = BuddyRepository();
   late final DiveCustomFieldRepository _customFieldRepository =
       DiveCustomFieldRepository(_db);
 
@@ -263,6 +269,13 @@ class DiveRepository {
         final customFieldsByDive = await _customFieldRepository
             .getFieldsForDiveIds(diveIds);
 
+        // Load all buddies (junction) for these dives in one query so the
+        // table view's Buddy / Dive Master columns render recorded people
+        // (issue #626). Scalar buddy/diveMaster remain the fallback.
+        final buddiesByDive = await _buddyRepository.getBuddiesForDives(
+          diveIds,
+        );
+
         return rows
             .map(
               (row) => _mapRowToDiveWithPreloadedData(
@@ -277,6 +290,7 @@ class DiveRepository {
                 tags: tagsByDive[row.id] ?? [],
                 diveTypeIds: diveTypesByDive[row.id],
                 customFields: customFieldsByDive[row.id] ?? [],
+                buddies: buddiesByDive[row.id] ?? const [],
               ),
             )
             .toList();
@@ -586,6 +600,13 @@ class DiveRepository {
           );
         }
       });
+
+      // Profile changed: drop the stored safety review so it recomputes.
+      await SafetyFindingsRepository.clearReviewForDive(
+        _db,
+        _syncRepository,
+        diveId,
+      );
 
       await _syncRepository.markRecordPending(
         entityType: 'dives',
@@ -1478,6 +1499,21 @@ class DiveRepository {
   /// Uses cursor-based pagination for stable page boundaries even when
   /// rows are inserted or deleted between page loads.
   /// Returns lightweight [DiveSummary] objects optimized for list display.
+  /// Builds the `AND sf.rule_id NOT IN (...)` fragment and its bound args for
+  /// the safety-finding count subquery, so the dive-list badge counts only
+  /// findings whose rule is enabled (matching SafetyReviewSection). Returns an
+  /// empty fragment and no args when the diver has disabled no rules.
+  (String, List<Variable<Object>>) _disabledRulesCountFilter(
+    Set<String> disabledRules,
+  ) {
+    if (disabledRules.isEmpty) return ('', const []);
+    final placeholders = List.filled(disabledRules.length, '?').join(', ');
+    return (
+      ' AND sf.rule_id NOT IN ($placeholders)',
+      disabledRules.map((r) => Variable<Object>(r)).toList(),
+    );
+  }
+
   Future<List<DiveSummary>> getDiveSummaries({
     String? diverId,
     DiveFilterState filter = const DiveFilterState(),
@@ -1485,6 +1521,7 @@ class DiveRepository {
     int? offset,
     int limit = 50,
     SortState<DiveSortField>? sort,
+    Set<String> disabledSafetyRules = const {},
   }) async {
     try {
       return await PerfTimer.measure('getDiveSummaries', () async {
@@ -1531,6 +1568,14 @@ class DiveRepository {
             ? 'OFFSET $offset'
             : '';
 
+        // Exclude findings for rules the diver has disabled so the badge count
+        // matches what SafetyReviewSection actually renders. The subquery lives
+        // in the SELECT list, so its placeholders bind BEFORE the WHERE/LIMIT
+        // args and must be prepended to the variable list.
+        final (safetyCountFilter, safetyCountArgs) = _disabledRulesCountFilter(
+          disabledSafetyRules,
+        );
+
         final sql =
             'SELECT '
             'd.id, d.dive_number, d.name AS dive_name, '
@@ -1540,7 +1585,14 @@ class DiveRepository {
             'COALESCE(d.entry_time, d.dive_date_time) AS sort_timestamp, '
             's.name AS site_name, s.country AS site_country, '
             's.region AS site_region, s.latitude AS site_latitude, '
-            's.longitude AS site_longitude '
+            's.longitude AS site_longitude, '
+            // Correlated count keyed by d.id so SQLite uses
+            // idx_dive_safety_findings_dive_id and only counts findings for the
+            // page's dives, instead of grouping the whole findings table.
+            '(SELECT COUNT(*) FROM dive_safety_findings sf '
+            'WHERE sf.dive_id = d.id AND sf.dismissed_at IS NULL'
+            '$safetyCountFilter) '
+            'AS safety_finding_count '
             'FROM dives d '
             'LEFT JOIN dive_sites s ON d.site_id = s.id '
             '$whereClause '
@@ -1551,8 +1603,8 @@ class DiveRepository {
         final rows = await _db
             .customSelect(
               sql,
-              variables: args,
-              readsFrom: {_db.dives, _db.diveSites},
+              variables: [...safetyCountArgs, ...args],
+              readsFrom: {_db.dives, _db.diveSites, _db.diveSafetyFindings},
             )
             .get();
 
@@ -1990,6 +2042,7 @@ class DiveRepository {
     String query, {
     String? diverId,
     int limit = kDiveSearchResultLimit,
+    Set<String> disabledSafetyRules = const {},
   }) async {
     try {
       return await PerfTimer.measure('searchDiveSummaries', () async {
@@ -2051,7 +2104,7 @@ class DiveRepository {
         if (matchingIds.isEmpty) return <DiveSummary>[];
 
         final ids = matchingIds.map((r) => r.read<String>('id')).toList();
-        return _summariesForIds(ids);
+        return _summariesForIds(ids, disabledSafetyRules: disabledSafetyRules);
       });
     } catch (e, stackTrace) {
       _log.error(
@@ -2065,8 +2118,16 @@ class DiveRepository {
 
   /// Loads [DiveSummary] rows for [ids] (slim SELECT plus batched tags and
   /// dive types), ordered most recent first.
-  Future<List<DiveSummary>> _summariesForIds(List<String> ids) async {
+  Future<List<DiveSummary>> _summariesForIds(
+    List<String> ids, {
+    Set<String> disabledSafetyRules = const {},
+  }) async {
     final placeholders = List.filled(ids.length, '?').join(', ');
+    // Count subquery lives in the SELECT list, so its placeholders bind BEFORE
+    // the WHERE id args and must be prepended to the variable list.
+    final (safetyCountFilter, safetyCountArgs) = _disabledRulesCountFilter(
+      disabledSafetyRules,
+    );
     final rows = await _db
         .customSelect(
           'SELECT '
@@ -2077,14 +2138,24 @@ class DiveRepository {
           'COALESCE(d.entry_time, d.dive_date_time) AS sort_timestamp, '
           's.name AS site_name, s.country AS site_country, '
           's.region AS site_region, s.latitude AS site_latitude, '
-          's.longitude AS site_longitude '
+          's.longitude AS site_longitude, '
+          // Correlated count keyed by d.id so SQLite uses
+          // idx_dive_safety_findings_dive_id and only counts findings for the
+          // requested dives, instead of grouping the whole findings table.
+          '(SELECT COUNT(*) FROM dive_safety_findings sf '
+          'WHERE sf.dive_id = d.id AND sf.dismissed_at IS NULL'
+          '$safetyCountFilter) '
+          'AS safety_finding_count '
           'FROM dives d '
           'LEFT JOIN dive_sites s ON d.site_id = s.id '
           'WHERE d.id IN ($placeholders) '
           'ORDER BY sort_timestamp DESC, '
           'COALESCE(d.dive_number, 0) DESC, d.id DESC',
-          variables: [for (final id in ids) Variable<String>(id)],
-          readsFrom: {_db.dives, _db.diveSites},
+          variables: [
+            ...safetyCountArgs,
+            for (final id in ids) Variable<String>(id),
+          ],
+          readsFrom: {_db.dives, _db.diveSites, _db.diveSafetyFindings},
         )
         .get();
 
@@ -2134,6 +2205,7 @@ class DiveRepository {
         siteLatitude: row.readNullable<double>('site_latitude'),
         siteLongitude: row.readNullable<double>('site_longitude'),
         sortTimestamp: row.read<int>('sort_timestamp'),
+        safetyFindingCount: row.readNullable<int>('safety_finding_count') ?? 0,
       );
     }).toList();
   }
@@ -2586,6 +2658,7 @@ class DiveRepository {
     List<domain.Tag> tags = const [],
     List<String>? diveTypeIds,
     List<domain.DiveCustomField> customFields = const [],
+    List<domain.BuddyWithRole> buddies = const [],
   }) {
     // Map site if exists
     domain.DiveSite? domainSite;
@@ -2689,6 +2762,7 @@ class DiveRepository {
       diveTypeIds: diveTypeIds ?? [row.diveType],
       buddy: row.buddy,
       diveMaster: row.diveMaster,
+      buddies: buddies,
       diverRoleId: row.diverRole,
       notes: row.notes,
       name: row.name,
@@ -3859,6 +3933,56 @@ class DiveRepository {
   // ============================================================================
   // Surface Interval Operations
   // ============================================================================
+
+  /// Lightweight trailing-window query for the flying-after-diving
+  /// classifier: end time (exit time, else entry/date + runtime) plus a
+  /// had-deco flag derived from the recorded profile (any sample with
+  /// deco_type = 2 or a positive ceiling).
+  Future<List<NoFlyDiveInput>> getNoFlyDiveInputs({
+    required DateTime since,
+    String? diverId,
+  }) async {
+    try {
+      final diverClause = diverId != null ? 'AND d.diver_id = ?' : '';
+      final rows = await _db
+          .customSelect(
+            'SELECT '
+            'COALESCE(d.exit_time, '
+            'COALESCE(d.entry_time, d.dive_date_time) '
+            '+ COALESCE(d.runtime, 0) * 1000) AS end_ms, '
+            'EXISTS(SELECT 1 FROM dive_profiles p WHERE p.dive_id = d.id '
+            'AND (p.deco_type = 2 OR p.ceiling > 0)) AS had_deco '
+            'FROM dives d '
+            'WHERE COALESCE(d.exit_time, '
+            'COALESCE(d.entry_time, d.dive_date_time) '
+            '+ COALESCE(d.runtime, 0) * 1000) >= ? '
+            '$diverClause',
+            variables: [
+              Variable(since.millisecondsSinceEpoch),
+              if (diverId != null) Variable(diverId),
+            ],
+            readsFrom: {_db.dives, _db.diveProfiles},
+          )
+          .get();
+      return [
+        for (final row in rows)
+          NoFlyDiveInput(
+            endTime: DateTime.fromMillisecondsSinceEpoch(
+              row.read<int>('end_ms'),
+              isUtc: true,
+            ),
+            hadDecoObligation: row.read<int>('had_deco') == 1,
+          ),
+      ];
+    } catch (e, stackTrace) {
+      _log.error(
+        'Failed to load no-fly dive inputs',
+        error: e,
+        stackTrace: stackTrace,
+      );
+      rethrow;
+    }
+  }
 
   /// Get the previous dive (by entry time) for surface interval calculation
   /// Returns null if this is the first dive
@@ -5420,9 +5544,14 @@ class DiveRepository {
   ) async {
     final ids = equipmentIds.toSet().toList();
     if (ids.isEmpty) return const {};
-    final rows = await (_db.select(
-      _db.equipmentAttributes,
-    )..where((t) => t.equipmentId.isIn(ids))).get();
+    // Order by sortOrder like the canonical equipment-repo loaders so custom
+    // fields (and any ordered attributes) come back deterministically; without
+    // it the UI/detail/export output can reshuffle between runs.
+    final rows =
+        await (_db.select(_db.equipmentAttributes)
+              ..where((t) => t.equipmentId.isIn(ids))
+              ..orderBy([(t) => OrderingTerm.asc(t.sortOrder)]))
+            .get();
     final byEquipment = <String, List<EquipmentAttribute>>{};
     for (final row in rows) {
       byEquipment

@@ -75,6 +75,7 @@ void main() {
             ].cast(),
             child: MaterialApp.router(
               routerConfig: router,
+              locale: const Locale('en'),
               localizationsDelegates: AppLocalizations.localizationsDelegates,
               supportedLocales: AppLocalizations.supportedLocales,
             ),
@@ -137,6 +138,7 @@ void main() {
           ].cast(),
           child: MaterialApp.router(
             routerConfig: router,
+            locale: const Locale('en'),
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
           ),
@@ -205,6 +207,7 @@ void main() {
             ).overrideWith((ref) async => 0.0),
           ].cast(),
           child: MaterialApp(
+            locale: const Locale('en'),
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
             home: EquipmentDetailPage(equipmentId: equipment.id),

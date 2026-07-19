@@ -291,3 +291,16 @@ double? parsePrimaryThickness(String text) {
   if (match == null) return null;
   return double.parse(match.group(1)!);
 }
+
+/// Whether [text] is an acceptable thickness designation for the edit form:
+/// one or more numeric panels separated by `/`, `,` or `-`, each optionally
+/// suffixed with `mm`. Accepts the legacy values the v124 migration preserves
+/// verbatim (e.g. "6mm") and multi-panel forms ("5/4/3"); empty is valid
+/// because the field is optional. Only non-numeric garbage ("thin") fails.
+bool isValidThicknessDesignation(String text) {
+  final t = text.trim();
+  if (t.isEmpty) return true;
+  return RegExp(
+    r'^\d+(?:\.\d+)?\s*(?:mm)?(?:\s*[/,\-]\s*\d+(?:\.\d+)?\s*(?:mm)?)*$',
+  ).hasMatch(t);
+}

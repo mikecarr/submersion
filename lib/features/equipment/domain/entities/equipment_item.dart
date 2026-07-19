@@ -30,6 +30,10 @@ class EquipmentItem extends Equatable {
   final bool? customReminderEnabled; // NULL = use global
   final List<int>? customReminderDays; // Override reminder days
 
+  /// Row creation time (null for entities built before persistence); used as
+  /// the last anchor fallback for service clocks.
+  final DateTime? createdAt;
+
   const EquipmentItem({
     required this.id,
     this.diverId,
@@ -49,6 +53,7 @@ class EquipmentItem extends Equatable {
     this.attributes = const [],
     this.customReminderEnabled,
     this.customReminderDays,
+    this.createdAt,
   });
 
   /// Curated attribute lookup helpers. Legacy field names are preserved as
@@ -126,6 +131,7 @@ class EquipmentItem extends Equatable {
     List<EquipmentAttribute>? attributes,
     bool? customReminderEnabled,
     List<int>? customReminderDays,
+    DateTime? createdAt,
   }) {
     return EquipmentItem(
       id: id ?? this.id,
@@ -147,6 +153,7 @@ class EquipmentItem extends Equatable {
       customReminderEnabled:
           customReminderEnabled ?? this.customReminderEnabled,
       customReminderDays: customReminderDays ?? this.customReminderDays,
+      createdAt: createdAt ?? this.createdAt,
     );
   }
 
@@ -170,5 +177,6 @@ class EquipmentItem extends Equatable {
     attributes,
     customReminderEnabled,
     customReminderDays,
+    createdAt,
   ];
 }
