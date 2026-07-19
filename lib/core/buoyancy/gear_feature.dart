@@ -143,10 +143,16 @@ class GearFeature extends Equatable {
           'sidemount' => -0.3,
           _ => null,
         };
-        if (styleOffset == null && t.liftCapacityKg == null) return null;
+        // Lift capacity is physically non-negative; a signed or non-finite
+        // value from the free numeric field is not a usable signal.
+        final rawLift = t.liftCapacityKg;
+        final lift = (rawLift != null && rawLift.isFinite && rawLift > 0)
+            ? rawLift
+            : 0.0;
+        if (styleOffset == null && lift == 0.0) return null;
         // An absent or unknown style contributes the absent-style base.
         final base = styleOffset ?? -0.5;
-        final bladder = 0.01 * (t.liftCapacityKg ?? 0.0);
+        final bladder = 0.01 * lift;
         return (base + bladder).clamp(-2.0, 2.0);
       default:
         return null;

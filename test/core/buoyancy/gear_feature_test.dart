@@ -288,6 +288,28 @@ void main() {
       );
       expect(unknownWithLift.priorKg, closeTo(-0.5 + 0.3, 0.001));
       expect(unknownWithLift.priorStrength, 4.0);
+      // Lift is physically non-negative; a signed value from the free
+      // numeric field must not drag the prior downward.
+      final negLift = bcd(
+        traits: const GearBuoyancyTraits(bcdStyle: 'wing', liftCapacityKg: -50),
+      );
+      expect(negLift.priorKg, closeTo(-0.5, 0.001));
+      expect(negLift.priorStrength, 4.0);
+      // A non-finite lift is likewise ignored and never yields NaN.
+      final infLift = bcd(
+        traits: GearBuoyancyTraits(
+          bcdStyle: 'jacket',
+          liftCapacityKg: double.infinity,
+        ),
+      );
+      expect(infLift.priorKg, closeTo(0.5, 0.001));
+      expect(infLift.priorKg.isFinite, isTrue);
+      // A negative-lift-only item carries no usable signal -> type default.
+      final negLiftOnly = bcd(
+        traits: const GearBuoyancyTraits(liftCapacityKg: -10),
+      );
+      expect(negLiftOnly.priorKg, -0.5);
+      expect(negLiftOnly.priorStrength, 2.0);
     });
 
     test('explicit buoyancy still wins over traits', () {
