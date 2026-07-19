@@ -6006,23 +6006,83 @@
   "diveDetailSection_safetyReview_description": "Automatische profielobservaties na de duik",
   "safetyReview_sectionTitle": "Veiligheidscontrole",
   "safetyReview_findingCount": "{count, plural, =1{1 observatie} other{{count} observaties}}",
-  "@safetyReview_findingCount": {"placeholders": {"count": {"type": "int"}}},
+  "@safetyReview_findingCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "safetyReview_rapidAscent_title": "Opstijging overschreed {rate} gedurende {duration}",
-  "@safetyReview_rapidAscent_title": {"placeholders": {"rate": {"type": "String"}, "duration": {"type": "String"}}},
+  "@safetyReview_rapidAscent_title": {
+    "placeholders": {
+      "rate": {
+        "type": "String"
+      },
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
   "safetyReview_missedDecoStop_title": "Diepte lag {excess} boven het vereiste stopplafond gedurende {duration}",
-  "@safetyReview_missedDecoStop_title": {"placeholders": {"excess": {"type": "String"}, "duration": {"type": "String"}}},
+  "@safetyReview_missedDecoStop_title": {
+    "placeholders": {
+      "excess": {
+        "type": "String"
+      },
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
   "safetyReview_omittedSafetyStop_title": "De aanbevolen veiligheidsstop is met {remaining} ingekort",
-  "@safetyReview_omittedSafetyStop_title": {"placeholders": {"remaining": {"type": "String"}}},
+  "@safetyReview_omittedSafetyStop_title": {
+    "placeholders": {
+      "remaining": {
+        "type": "String"
+      }
+    }
+  },
   "safetyReview_sawtoothProfile_title": "{count} herhaalde op-en-neer dieptewisselingen tijdens de duik",
-  "@safetyReview_sawtoothProfile_title": {"placeholders": {"count": {"type": "int"}}},
+  "@safetyReview_sawtoothProfile_title": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "safetyReview_highSurfaceGf_title": "Aan de oppervlakte gekomen met gradiëntfactor {gf}, boven de ingestelde {gfHigh}",
-  "@safetyReview_highSurfaceGf_title": {"placeholders": {"gf": {"type": "String"}, "gfHigh": {"type": "String"}}},
+  "@safetyReview_highSurfaceGf_title": {
+    "placeholders": {
+      "gf": {
+        "type": "String"
+      },
+      "gfHigh": {
+        "type": "String"
+      }
+    }
+  },
   "safetyReview_timeRange": "Op {start}–{end}",
-  "@safetyReview_timeRange": {"placeholders": {"start": {"type": "String"}, "end": {"type": "String"}}},
+  "@safetyReview_timeRange": {
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
   "safetyReview_dismiss": "Negeren",
   "safetyReview_restore": "Herstellen",
   "safetyReview_showDismissed": "{count, plural, =1{Toon 1 genegeerde} other{Toon {count} genegeerde}}",
-  "@safetyReview_showDismissed": {"placeholders": {"count": {"type": "int"}}},
+  "@safetyReview_showDismissed": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "safetySettings_title": "Veiligheidscontrole",
   "safetySettings_entry_subtitle": "Observaties en regels na de duik",
   "safetySettings_masterToggle": "Veiligheidscontrole na de duik",
@@ -6036,7 +6096,16 @@
   "safetySettings_analyzeAll": "Alle duiken analyseren",
   "safetySettings_analyzeAll_subtitle": "Voer de veiligheidscontrole uit op alle duiken met een profiel die nog niet geanalyseerd zijn",
   "safetySettings_analyzeAll_progress": "{done} van {total} geanalyseerd",
-  "@safetySettings_analyzeAll_progress": {"placeholders": {"done": {"type": "int"}, "total": {"type": "int"}}},
+  "@safetySettings_analyzeAll_progress": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "safetySettings_analyzeAll_done": "Analyse voltooid",
   "safetySettings_analyzeAll_doneWithErrors": "Analyse voltooid — {count, plural, =1{1 duik kon niet worden geanalyseerd} other{{count} duiken konden niet worden geanalyseerd}}",
   "@safetySettings_analyzeAll_doneWithErrors": {
@@ -6045,5 +6114,66 @@
         "type": "int"
       }
     }
-  }
+  },
+  "safetySettings_noFlyHeader": "Vliegen na het duiken",
+  "safetySettings_noFlyPreset_standard": "Standaard (12/18/24 u)",
+  "safetySettings_noFlyPreset_strict": "Strikt (18/24/48 u)",
+  "safetySettings_noFlyPreset_subtitle": "Richttijden na een enkele duik zonder deco, herhalingsduiken en decoduiken",
+  "safetyHub_title": "Veiligheid",
+  "safetyHub_noFly_active_title": "Vliegverbod: nog {remaining}",
+  "@safetyHub_noFly_active_title": {
+    "placeholders": {
+      "remaining": {
+        "type": "String"
+      }
+    }
+  },
+  "safetyHub_noFly_until": "Tot {time}",
+  "@safetyHub_noFly_until": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "safetyHub_noFly_clear_title": "Geen vliegbeperking",
+  "safetyHub_noFly_clear_subtitle": "Geen actieve vliegbeperking",
+  "safetyHub_noFly_category_single": "Na een enkele duik zonder deco: richtlijn van {hours} u",
+  "@safetyHub_noFly_category_single": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "safetyHub_noFly_category_repetitive": "Na herhalingsduiken: richtlijn van {hours} u",
+  "@safetyHub_noFly_category_repetitive": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "safetyHub_noFly_category_deco": "Na een decompressieduik: richtlijn van {hours} u",
+  "@safetyHub_noFly_category_deco": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "safetyHub_noFly_disclaimer": "DAN/UHMS-richtlijnen vanaf je laatste duik. Geen vervanging voor de no-fly-tijd van je duikcomputer.",
+  "safetyHub_surfaceIntervalLink": "Oppervlakte-interval-tool",
+  "safetyHub_surfaceIntervalLink_subtitle": "Educatief model van weefselontzadiging",
+  "safetyHub_settingsLink": "Veiligheidsinstellingen",
+  "safetyHub_alert_noFly": "Vliegverbod: nog {remaining}",
+  "@safetyHub_alert_noFly": {
+    "placeholders": {
+      "remaining": {
+        "type": "String"
+      }
+    }
+  },
+  "diveLog_detail_altitudeMismatch_title": "Duikstek ligt op hoogte",
+  "diveLog_detail_altitudeMismatch_subtitle": "Deze stek heeft een hoogte geregistreerd maar de duik niet, dus de deco-analyse ging uit van zeeniveau. Stel de hoogte van de duik in om dit te corrigeren."
 }

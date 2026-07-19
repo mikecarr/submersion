@@ -6006,23 +6006,83 @@
   "diveDetailSection_safetyReview_description": "Observations automatiques du profil après la plongée",
   "safetyReview_sectionTitle": "Bilan de sécurité",
   "safetyReview_findingCount": "{count, plural, =1{1 observation} other{{count} observations}}",
-  "@safetyReview_findingCount": {"placeholders": {"count": {"type": "int"}}},
+  "@safetyReview_findingCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "safetyReview_rapidAscent_title": "La remontée a dépassé {rate} pendant {duration}",
-  "@safetyReview_rapidAscent_title": {"placeholders": {"rate": {"type": "String"}, "duration": {"type": "String"}}},
+  "@safetyReview_rapidAscent_title": {
+    "placeholders": {
+      "rate": {
+        "type": "String"
+      },
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
   "safetyReview_missedDecoStop_title": "La profondeur est restée {excess} au-dessus du plafond de palier requis pendant {duration}",
-  "@safetyReview_missedDecoStop_title": {"placeholders": {"excess": {"type": "String"}, "duration": {"type": "String"}}},
+  "@safetyReview_missedDecoStop_title": {
+    "placeholders": {
+      "excess": {
+        "type": "String"
+      },
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
   "safetyReview_omittedSafetyStop_title": "Le palier de sécurité recommandé a été écourté de {remaining}",
-  "@safetyReview_omittedSafetyStop_title": {"placeholders": {"remaining": {"type": "String"}}},
+  "@safetyReview_omittedSafetyStop_title": {
+    "placeholders": {
+      "remaining": {
+        "type": "String"
+      }
+    }
+  },
   "safetyReview_sawtoothProfile_title": "{count} variations répétées de profondeur en montée et descente pendant la plongée",
-  "@safetyReview_sawtoothProfile_title": {"placeholders": {"count": {"type": "int"}}},
+  "@safetyReview_sawtoothProfile_title": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "safetyReview_highSurfaceGf_title": "Surface atteinte avec un facteur de gradient de {gf}, au-dessus du {gfHigh} configuré",
-  "@safetyReview_highSurfaceGf_title": {"placeholders": {"gf": {"type": "String"}, "gfHigh": {"type": "String"}}},
+  "@safetyReview_highSurfaceGf_title": {
+    "placeholders": {
+      "gf": {
+        "type": "String"
+      },
+      "gfHigh": {
+        "type": "String"
+      }
+    }
+  },
   "safetyReview_timeRange": "À {start}–{end}",
-  "@safetyReview_timeRange": {"placeholders": {"start": {"type": "String"}, "end": {"type": "String"}}},
+  "@safetyReview_timeRange": {
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
   "safetyReview_dismiss": "Ignorer",
   "safetyReview_restore": "Restaurer",
   "safetyReview_showDismissed": "{count, plural, =1{Afficher 1 ignorée} other{Afficher {count} ignorées}}",
-  "@safetyReview_showDismissed": {"placeholders": {"count": {"type": "int"}}},
+  "@safetyReview_showDismissed": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "safetySettings_title": "Bilan de sécurité",
   "safetySettings_entry_subtitle": "Observations et règles après la plongée",
   "safetySettings_masterToggle": "Bilan de sécurité après la plongée",
@@ -6036,7 +6096,16 @@
   "safetySettings_analyzeAll": "Analyser toutes les plongées",
   "safetySettings_analyzeAll_subtitle": "Exécuter le bilan de sécurité sur toutes les plongées avec profil pas encore analysées",
   "safetySettings_analyzeAll_progress": "{done} sur {total} analysées",
-  "@safetySettings_analyzeAll_progress": {"placeholders": {"done": {"type": "int"}, "total": {"type": "int"}}},
+  "@safetySettings_analyzeAll_progress": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "safetySettings_analyzeAll_done": "Analyse terminée",
   "safetySettings_analyzeAll_doneWithErrors": "Analyse terminée — {count, plural, =1{1 plongée n'a pas pu être analysée} other{{count} plongées n'ont pas pu être analysées}}",
   "@safetySettings_analyzeAll_doneWithErrors": {
@@ -6045,5 +6114,66 @@
         "type": "int"
       }
     }
-  }
+  },
+  "safetySettings_noFlyHeader": "Voler après la plongée",
+  "safetySettings_noFlyPreset_standard": "Standard (12/18/24 h)",
+  "safetySettings_noFlyPreset_strict": "Strict (18/24/48 h)",
+  "safetySettings_noFlyPreset_subtitle": "Intervalles indicatifs après une plongée unique sans déco, des plongées successives et des plongées avec déco",
+  "safetyHub_title": "Sécurité",
+  "safetyHub_noFly_active_title": "Interdiction de vol : {remaining} restant",
+  "@safetyHub_noFly_active_title": {
+    "placeholders": {
+      "remaining": {
+        "type": "String"
+      }
+    }
+  },
+  "safetyHub_noFly_until": "Jusqu'à {time}",
+  "@safetyHub_noFly_until": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "safetyHub_noFly_clear_title": "Aucune restriction de vol",
+  "safetyHub_noFly_clear_subtitle": "Aucune restriction de vol active",
+  "safetyHub_noFly_category_single": "Après une plongée unique sans déco : recommandation de {hours} h",
+  "@safetyHub_noFly_category_single": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "safetyHub_noFly_category_repetitive": "Après des plongées successives : recommandation de {hours} h",
+  "@safetyHub_noFly_category_repetitive": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "safetyHub_noFly_category_deco": "Après une plongée avec décompression : recommandation de {hours} h",
+  "@safetyHub_noFly_category_deco": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "safetyHub_noFly_disclaimer": "Recommandations DAN/UHMS depuis votre dernière plongée. Ne remplace pas le temps d'interdiction de vol de votre ordinateur de plongée.",
+  "safetyHub_surfaceIntervalLink": "Outil d'intervalle de surface",
+  "safetyHub_surfaceIntervalLink_subtitle": "Modèle pédagogique de désaturation des tissus",
+  "safetyHub_settingsLink": "Réglages de sécurité",
+  "safetyHub_alert_noFly": "Interdiction de vol : {remaining} restant",
+  "@safetyHub_alert_noFly": {
+    "placeholders": {
+      "remaining": {
+        "type": "String"
+      }
+    }
+  },
+  "diveLog_detail_altitudeMismatch_title": "Le site est en altitude",
+  "diveLog_detail_altitudeMismatch_subtitle": "Ce site indique une altitude mais la plongée n'en a aucune : l'analyse de décompression a supposé le niveau de la mer. Définissez l'altitude de la plongée pour corriger."
 }

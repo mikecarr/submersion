@@ -6006,23 +6006,83 @@
   "diveDetailSection_safetyReview_description": "潜水后自动生成的剖面观察",
   "safetyReview_sectionTitle": "安全回顾",
   "safetyReview_findingCount": "{count, plural, =1{1 条观察} other{{count} 条观察}}",
-  "@safetyReview_findingCount": {"placeholders": {"count": {"type": "int"}}},
+  "@safetyReview_findingCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "safetyReview_rapidAscent_title": "上升速度超过 {rate},持续 {duration}",
-  "@safetyReview_rapidAscent_title": {"placeholders": {"rate": {"type": "String"}, "duration": {"type": "String"}}},
+  "@safetyReview_rapidAscent_title": {
+    "placeholders": {
+      "rate": {
+        "type": "String"
+      },
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
   "safetyReview_missedDecoStop_title": "深度高于所需停留天花板 {excess},持续 {duration}",
-  "@safetyReview_missedDecoStop_title": {"placeholders": {"excess": {"type": "String"}, "duration": {"type": "String"}}},
+  "@safetyReview_missedDecoStop_title": {
+    "placeholders": {
+      "excess": {
+        "type": "String"
+      },
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
   "safetyReview_omittedSafetyStop_title": "建议的安全停留缩短了 {remaining}",
-  "@safetyReview_omittedSafetyStop_title": {"placeholders": {"remaining": {"type": "String"}}},
+  "@safetyReview_omittedSafetyStop_title": {
+    "placeholders": {
+      "remaining": {
+        "type": "String"
+      }
+    }
+  },
   "safetyReview_sawtoothProfile_title": "潜水期间出现 {count} 次反复的上下深度变化",
-  "@safetyReview_sawtoothProfile_title": {"placeholders": {"count": {"type": "int"}}},
+  "@safetyReview_sawtoothProfile_title": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "safetyReview_highSurfaceGf_title": "出水时梯度因子为 {gf},高于设定的 {gfHigh}",
-  "@safetyReview_highSurfaceGf_title": {"placeholders": {"gf": {"type": "String"}, "gfHigh": {"type": "String"}}},
+  "@safetyReview_highSurfaceGf_title": {
+    "placeholders": {
+      "gf": {
+        "type": "String"
+      },
+      "gfHigh": {
+        "type": "String"
+      }
+    }
+  },
   "safetyReview_timeRange": "于 {start}–{end}",
-  "@safetyReview_timeRange": {"placeholders": {"start": {"type": "String"}, "end": {"type": "String"}}},
+  "@safetyReview_timeRange": {
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
   "safetyReview_dismiss": "忽略",
   "safetyReview_restore": "恢复",
   "safetyReview_showDismissed": "{count, plural, =1{显示 1 条已忽略} other{显示 {count} 条已忽略}}",
-  "@safetyReview_showDismissed": {"placeholders": {"count": {"type": "int"}}},
+  "@safetyReview_showDismissed": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "safetySettings_title": "安全回顾",
   "safetySettings_entry_subtitle": "潜水后的观察与规则",
   "safetySettings_masterToggle": "潜水后安全回顾",
@@ -6036,7 +6096,16 @@
   "safetySettings_analyzeAll": "分析所有潜水",
   "safetySettings_analyzeAll_subtitle": "对所有具有剖面且尚未分析的潜水运行安全回顾",
   "safetySettings_analyzeAll_progress": "已分析 {done}/{total}",
-  "@safetySettings_analyzeAll_progress": {"placeholders": {"done": {"type": "int"}, "total": {"type": "int"}}},
+  "@safetySettings_analyzeAll_progress": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "safetySettings_analyzeAll_done": "分析完成",
   "safetySettings_analyzeAll_doneWithErrors": "分析完成 — {count, plural, =1{有 1 次潜水无法分析} other{有 {count} 次潜水无法分析}}",
   "@safetySettings_analyzeAll_doneWithErrors": {
@@ -6045,5 +6114,66 @@
         "type": "int"
       }
     }
-  }
+  },
+  "safetySettings_noFlyHeader": "潜水后飞行",
+  "safetySettings_noFlyPreset_standard": "标准(12/18/24 小时)",
+  "safetySettings_noFlyPreset_strict": "严格(18/24/48 小时)",
+  "safetySettings_noFlyPreset_subtitle": "单次免减压潜水、重复潜水和减压潜水后的指导间隔",
+  "safetyHub_title": "安全",
+  "safetyHub_noFly_active_title": "禁飞:剩余 {remaining}",
+  "@safetyHub_noFly_active_title": {
+    "placeholders": {
+      "remaining": {
+        "type": "String"
+      }
+    }
+  },
+  "safetyHub_noFly_until": "直到 {time}",
+  "@safetyHub_noFly_until": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "safetyHub_noFly_clear_title": "无飞行限制",
+  "safetyHub_noFly_clear_subtitle": "无活动的飞行限制",
+  "safetyHub_noFly_category_single": "单次免减压潜水后:{hours} 小时指导值",
+  "@safetyHub_noFly_category_single": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "safetyHub_noFly_category_repetitive": "重复潜水后:{hours} 小时指导值",
+  "@safetyHub_noFly_category_repetitive": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "safetyHub_noFly_category_deco": "减压潜水后:{hours} 小时指导值",
+  "@safetyHub_noFly_category_deco": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "safetyHub_noFly_disclaimer": "自最后一次潜水起的 DAN/UHMS 指导值。不能替代潜水电脑的禁飞时间。",
+  "safetyHub_surfaceIntervalLink": "水面间隔工具",
+  "safetyHub_surfaceIntervalLink_subtitle": "组织脱饱和教学模型",
+  "safetyHub_settingsLink": "安全设置",
+  "safetyHub_alert_noFly": "禁飞:剩余 {remaining}",
+  "@safetyHub_alert_noFly": {
+    "placeholders": {
+      "remaining": {
+        "type": "String"
+      }
+    }
+  },
+  "diveLog_detail_altitudeMismatch_title": "潜点位于高海拔",
+  "diveLog_detail_altitudeMismatch_subtitle": "该潜点记录了海拔,但此次潜水未设置海拔,因此减压分析按海平面计算。请设置潜水海拔以更正。"
 }

@@ -1,12 +1,20 @@
 {
   "diveLog_edit_geofenceSuggestion_near": "Near {location}",
   "@diveLog_edit_geofenceSuggestion_near": {
-    "placeholders": { "location": { "type": "String" } }
+    "placeholders": {
+      "location": {
+        "type": "String"
+      }
+    }
   },
   "diveLog_edit_geofenceSuggestion_title": "Equipment suggestion",
   "diveLog_edit_geofenceSuggestion_body": "Apply your \"{setName}\" set?",
   "@diveLog_edit_geofenceSuggestion_body": {
-    "placeholders": { "setName": { "type": "String" } }
+    "placeholders": {
+      "setName": {
+        "type": "String"
+      }
+    }
   },
   "diveLog_edit_geofenceSuggestion_apply": "Apply",
   "common_action_dismiss": "Dismiss",
@@ -19,7 +27,11 @@
   "equipment_setEdit_removeGeofence": "Remove geofence",
   "equipment_setEdit_geofenceRadius": "Radius: {distance}",
   "@equipment_setEdit_geofenceRadius": {
-    "placeholders": { "distance": { "type": "String" } }
+    "placeholders": {
+      "distance": {
+        "type": "String"
+      }
+    }
   },
   "equipment_geofenceEditor_title": "Geofence",
   "equipment_geofenceEditor_fromSite": "From dive site",
@@ -31,7 +43,11 @@
   "equipment_setDetail_setAsDefault": "Set as default",
   "equipment_setDetail_setAsDefaultSnackbar": "\"{name}\" is now your default set",
   "@equipment_setDetail_setAsDefaultSnackbar": {
-    "placeholders": { "name": { "type": "String" } }
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
   },
   "equipment_setDetail_geofencesTitle": "Geofences",
   "equipment_setDetail_noGeofences": "No geofences",
@@ -13034,5 +13050,66 @@
   "statistics_progression_divesBySuitThickness_error": "Could not load suit thickness data",
   "diveLog_filter_sectionSuitThickness": "Suit thickness (mm)",
   "diveLog_filter_thicknessMin": "Min",
-  "diveLog_filter_thicknessMax": "Max"
+  "diveLog_filter_thicknessMax": "Max",
+  "safetySettings_noFlyHeader": "Flying after diving",
+  "safetySettings_noFlyPreset_standard": "Standard (12/18/24 h)",
+  "safetySettings_noFlyPreset_strict": "Strict (18/24/48 h)",
+  "safetySettings_noFlyPreset_subtitle": "Guideline intervals after a single no-deco dive, repetitive dives, and deco dives",
+  "safetyHub_title": "Safety",
+  "safetyHub_noFly_active_title": "No-fly: {remaining} remaining",
+  "@safetyHub_noFly_active_title": {
+    "placeholders": {
+      "remaining": {
+        "type": "String"
+      }
+    }
+  },
+  "safetyHub_noFly_until": "Until {time}",
+  "@safetyHub_noFly_until": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "safetyHub_noFly_clear_title": "No flying restriction",
+  "safetyHub_noFly_clear_subtitle": "No active flying restriction",
+  "safetyHub_noFly_category_single": "After a single no-deco dive: {hours} h guideline",
+  "@safetyHub_noFly_category_single": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "safetyHub_noFly_category_repetitive": "After repetitive dives: {hours} h guideline",
+  "@safetyHub_noFly_category_repetitive": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "safetyHub_noFly_category_deco": "After a decompression dive: {hours} h guideline",
+  "@safetyHub_noFly_category_deco": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "safetyHub_noFly_disclaimer": "DAN/UHMS guideline intervals from your last dive. Not a substitute for your dive computer's no-fly time.",
+  "safetyHub_surfaceIntervalLink": "Surface interval tool",
+  "safetyHub_surfaceIntervalLink_subtitle": "Educational tissue desaturation model",
+  "safetyHub_settingsLink": "Safety settings",
+  "diveLog_detail_altitudeMismatch_title": "Site is at altitude",
+  "diveLog_detail_altitudeMismatch_subtitle": "This site records an altitude but the dive has none set, so decompression analysis assumed sea level. Set the dive's altitude to correct it.",
+  "safetyHub_alert_noFly": "No-fly: {remaining} remaining",
+  "@safetyHub_alert_noFly": {
+    "placeholders": {
+      "remaining": {
+        "type": "String"
+      }
+    }
+  }
 }

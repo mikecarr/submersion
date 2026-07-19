@@ -1308,6 +1308,9 @@ class DiverSettings extends Table {
       boolean().withDefault(const Constant(true))();
   // JSON array of SafetyRuleId.dbValue strings; null/absent = none disabled.
   TextColumn get safetyReviewDisabledRules => text().nullable()();
+  // Flying-after-diving conservatism (NoFlyPreset.dbValue, v125).
+  TextColumn get noFlyPreset =>
+      text().withDefault(const Constant('standard'))();
   // Appearance settings
   BoolColumn get showDepthColoredDiveCards =>
       boolean().withDefault(const Constant(false))();
@@ -2452,7 +2455,7 @@ class AppDatabase extends _$AppDatabase {
 
   /// The current schema version as a static constant so that pre-open checks
   /// (e.g. version-mismatch guard) can reference it without an instance.
-  static const int currentSchemaVersion = 124;
+  static const int currentSchemaVersion = 125;
 
   /// Every schema version that has a migration block in onUpgrade.
   /// Used to calculate progress step counts. When adding a new migration,
@@ -2585,6 +2588,10 @@ class AppDatabase extends _$AppDatabase {
     // v124: equipment type-specific attributes (renumbered from v115/v123 as
     // main advanced past it at merge time; see schema-version ladder).
     124,
+    // v125: diver_settings.no_fly_preset column (safety phase 2, no-fly
+    // countdown). Renumbered from v117/v124 as main advanced past it at merge
+    // time.
+    125,
   ];
 
   /// Idempotent DDL for the v106 connector-suggestion columns (Lightroom
@@ -2877,6 +2884,21 @@ class AppDatabase extends _$AppDatabase {
       await customStatement(
         'ALTER TABLE diver_settings ADD COLUMN safety_review_disabled_rules '
         'TEXT',
+      );
+    }
+  }
+
+  /// v125: diver_settings.no_fly_preset column. Idempotent so it is safe to
+  /// call from both onUpgrade and the beforeOpen backstop.
+  Future<void> _assertNoFlySettingsColumn() async {
+    final cols = await customSelect(
+      "PRAGMA table_info('diver_settings')",
+    ).get();
+    final names = cols.map((c) => c.read<String>('name')).toSet();
+    if (cols.isNotEmpty && !names.contains('no_fly_preset')) {
+      await customStatement(
+        "ALTER TABLE diver_settings ADD COLUMN no_fly_preset TEXT "
+        "NOT NULL DEFAULT 'standard'",
       );
     }
   }
@@ -6169,6 +6191,13 @@ class AppDatabase extends _$AppDatabase {
           await _migrateLegacyEquipmentColumnsToAttributes();
         }
         if (from < 124) await reportProgress();
+        // v125: diver_settings.no_fly_preset column (safety phase 2, no-fly
+        // countdown). Renumbered from v117/v124 as main advanced past it at
+        // merge time.
+        if (from < 125) {
+          await _assertNoFlySettingsColumn();
+        }
+        if (from < 125) await reportProgress();
       },
       beforeOpen: (details) async {
         // Enable foreign keys
@@ -6241,6 +6270,9 @@ class AppDatabase extends _$AppDatabase {
         // only -- the legacy-column copy must NOT run here, it would
         // resurrect attribute rows the user has cleared).
         await _assertEquipmentAttributesSchema();
+
+        // v125 backstop: re-assert diver_settings.no_fly_preset.
+        await _assertNoFlySettingsColumn();
 
         // Built-in dive types are reference data: identical on every device and
         // undeletable through DiveTypeRepository. Nothing else restores them --

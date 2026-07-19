@@ -6006,23 +6006,83 @@
   "diveDetailSection_safetyReview_description": "Automatische Profilbeobachtungen nach dem Tauchgang",
   "safetyReview_sectionTitle": "Sicherheitsüberprüfung",
   "safetyReview_findingCount": "{count, plural, =1{1 Beobachtung} other{{count} Beobachtungen}}",
-  "@safetyReview_findingCount": {"placeholders": {"count": {"type": "int"}}},
+  "@safetyReview_findingCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "safetyReview_rapidAscent_title": "Aufstieg überschritt {rate} für {duration}",
-  "@safetyReview_rapidAscent_title": {"placeholders": {"rate": {"type": "String"}, "duration": {"type": "String"}}},
+  "@safetyReview_rapidAscent_title": {
+    "placeholders": {
+      "rate": {
+        "type": "String"
+      },
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
   "safetyReview_missedDecoStop_title": "Tiefe lag für {duration} {excess} über dem erforderlichen Deko-Ceiling",
-  "@safetyReview_missedDecoStop_title": {"placeholders": {"excess": {"type": "String"}, "duration": {"type": "String"}}},
+  "@safetyReview_missedDecoStop_title": {
+    "placeholders": {
+      "excess": {
+        "type": "String"
+      },
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
   "safetyReview_omittedSafetyStop_title": "Der empfohlene Sicherheitsstopp wurde um {remaining} verkürzt",
-  "@safetyReview_omittedSafetyStop_title": {"placeholders": {"remaining": {"type": "String"}}},
+  "@safetyReview_omittedSafetyStop_title": {
+    "placeholders": {
+      "remaining": {
+        "type": "String"
+      }
+    }
+  },
   "safetyReview_sawtoothProfile_title": "{count} wiederholte Auf- und Abwärtsbewegungen während des Tauchgangs",
-  "@safetyReview_sawtoothProfile_title": {"placeholders": {"count": {"type": "int"}}},
+  "@safetyReview_sawtoothProfile_title": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "safetyReview_highSurfaceGf_title": "Aufgetaucht bei Gradientenfaktor {gf}, über dem konfigurierten {gfHigh}",
-  "@safetyReview_highSurfaceGf_title": {"placeholders": {"gf": {"type": "String"}, "gfHigh": {"type": "String"}}},
+  "@safetyReview_highSurfaceGf_title": {
+    "placeholders": {
+      "gf": {
+        "type": "String"
+      },
+      "gfHigh": {
+        "type": "String"
+      }
+    }
+  },
   "safetyReview_timeRange": "Bei {start}–{end}",
-  "@safetyReview_timeRange": {"placeholders": {"start": {"type": "String"}, "end": {"type": "String"}}},
+  "@safetyReview_timeRange": {
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
   "safetyReview_dismiss": "Ausblenden",
   "safetyReview_restore": "Wiederherstellen",
   "safetyReview_showDismissed": "{count, plural, =1{1 Ausgeblendete anzeigen} other{{count} Ausgeblendete anzeigen}}",
-  "@safetyReview_showDismissed": {"placeholders": {"count": {"type": "int"}}},
+  "@safetyReview_showDismissed": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "safetySettings_title": "Sicherheitsüberprüfung",
   "safetySettings_entry_subtitle": "Beobachtungen und Regeln nach dem Tauchgang",
   "safetySettings_masterToggle": "Sicherheitsüberprüfung nach dem Tauchgang",
@@ -6036,7 +6096,16 @@
   "safetySettings_analyzeAll": "Alle Tauchgänge analysieren",
   "safetySettings_analyzeAll_subtitle": "Sicherheitsüberprüfung für alle noch nicht analysierten Tauchgänge mit Profil ausführen",
   "safetySettings_analyzeAll_progress": "{done} von {total} analysiert",
-  "@safetySettings_analyzeAll_progress": {"placeholders": {"done": {"type": "int"}, "total": {"type": "int"}}},
+  "@safetySettings_analyzeAll_progress": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "safetySettings_analyzeAll_done": "Analyse abgeschlossen",
   "safetySettings_analyzeAll_doneWithErrors": "Analyse abgeschlossen — {count, plural, =1{1 Tauchgang konnte nicht analysiert werden} other{{count} Tauchgänge konnten nicht analysiert werden}}",
   "@safetySettings_analyzeAll_doneWithErrors": {
@@ -6045,5 +6114,66 @@
         "type": "int"
       }
     }
-  }
+  },
+  "safetySettings_noFlyHeader": "Fliegen nach dem Tauchen",
+  "safetySettings_noFlyPreset_standard": "Standard (12/18/24 h)",
+  "safetySettings_noFlyPreset_strict": "Streng (18/24/48 h)",
+  "safetySettings_noFlyPreset_subtitle": "Richtwerte nach einem einzelnen Nullzeit-Tauchgang, Wiederholungstauchgängen und Deko-Tauchgängen",
+  "safetyHub_title": "Sicherheit",
+  "safetyHub_noFly_active_title": "Flugverbot: noch {remaining}",
+  "@safetyHub_noFly_active_title": {
+    "placeholders": {
+      "remaining": {
+        "type": "String"
+      }
+    }
+  },
+  "safetyHub_noFly_until": "Bis {time}",
+  "@safetyHub_noFly_until": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "safetyHub_noFly_clear_title": "Keine Flugeinschränkung",
+  "safetyHub_noFly_clear_subtitle": "Keine aktive Flugbeschränkung",
+  "safetyHub_noFly_category_single": "Nach einem einzelnen Nullzeit-Tauchgang: {hours} h Richtwert",
+  "@safetyHub_noFly_category_single": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "safetyHub_noFly_category_repetitive": "Nach Wiederholungstauchgängen: {hours} h Richtwert",
+  "@safetyHub_noFly_category_repetitive": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "safetyHub_noFly_category_deco": "Nach einem Deko-Tauchgang: {hours} h Richtwert",
+  "@safetyHub_noFly_category_deco": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "safetyHub_noFly_disclaimer": "DAN/UHMS-Richtwerte ab dem letzten Tauchgang. Kein Ersatz für die Flugverbotszeit Ihres Tauchcomputers.",
+  "safetyHub_surfaceIntervalLink": "Oberflächenpausen-Tool",
+  "safetyHub_surfaceIntervalLink_subtitle": "Lehrreiches Modell der Gewebeentsättigung",
+  "safetyHub_settingsLink": "Sicherheitseinstellungen",
+  "safetyHub_alert_noFly": "Flugverbot: noch {remaining}",
+  "@safetyHub_alert_noFly": {
+    "placeholders": {
+      "remaining": {
+        "type": "String"
+      }
+    }
+  },
+  "diveLog_detail_altitudeMismatch_title": "Tauchplatz liegt in Höhenlage",
+  "diveLog_detail_altitudeMismatch_subtitle": "Für diesen Platz ist eine Höhe hinterlegt, der Tauchgang hat jedoch keine, daher ging die Deko-Analyse von Meereshöhe aus. Höhe des Tauchgangs setzen, um dies zu korrigieren."
 }

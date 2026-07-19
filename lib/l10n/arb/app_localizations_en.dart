@@ -20516,4 +20516,77 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get diveLog_filter_thicknessMax => 'Max';
+
+  @override
+  String get safetySettings_noFlyHeader => 'Flying after diving';
+
+  @override
+  String get safetySettings_noFlyPreset_standard => 'Standard (12/18/24 h)';
+
+  @override
+  String get safetySettings_noFlyPreset_strict => 'Strict (18/24/48 h)';
+
+  @override
+  String get safetySettings_noFlyPreset_subtitle =>
+      'Guideline intervals after a single no-deco dive, repetitive dives, and deco dives';
+
+  @override
+  String get safetyHub_title => 'Safety';
+
+  @override
+  String safetyHub_noFly_active_title(String remaining) {
+    return 'No-fly: $remaining remaining';
+  }
+
+  @override
+  String safetyHub_noFly_until(String time) {
+    return 'Until $time';
+  }
+
+  @override
+  String get safetyHub_noFly_clear_title => 'No flying restriction';
+
+  @override
+  String get safetyHub_noFly_clear_subtitle => 'No active flying restriction';
+
+  @override
+  String safetyHub_noFly_category_single(int hours) {
+    return 'After a single no-deco dive: $hours h guideline';
+  }
+
+  @override
+  String safetyHub_noFly_category_repetitive(int hours) {
+    return 'After repetitive dives: $hours h guideline';
+  }
+
+  @override
+  String safetyHub_noFly_category_deco(int hours) {
+    return 'After a decompression dive: $hours h guideline';
+  }
+
+  @override
+  String get safetyHub_noFly_disclaimer =>
+      'DAN/UHMS guideline intervals from your last dive. Not a substitute for your dive computer\'s no-fly time.';
+
+  @override
+  String get safetyHub_surfaceIntervalLink => 'Surface interval tool';
+
+  @override
+  String get safetyHub_surfaceIntervalLink_subtitle =>
+      'Educational tissue desaturation model';
+
+  @override
+  String get safetyHub_settingsLink => 'Safety settings';
+
+  @override
+  String get diveLog_detail_altitudeMismatch_title => 'Site is at altitude';
+
+  @override
+  String get diveLog_detail_altitudeMismatch_subtitle =>
+      'This site records an altitude but the dive has none set, so decompression analysis assumed sea level. Set the dive\'s altitude to correct it.';
+
+  @override
+  String safetyHub_alert_noFly(String remaining) {
+    return 'No-fly: $remaining remaining';
+  }
 }

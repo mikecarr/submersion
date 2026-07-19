@@ -6006,23 +6006,83 @@
   "diveDetailSection_safetyReview_description": "Osservazioni automatiche del profilo dopo l'immersione",
   "safetyReview_sectionTitle": "Revisione di sicurezza",
   "safetyReview_findingCount": "{count, plural, =1{1 osservazione} other{{count} osservazioni}}",
-  "@safetyReview_findingCount": {"placeholders": {"count": {"type": "int"}}},
+  "@safetyReview_findingCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "safetyReview_rapidAscent_title": "La risalita ha superato {rate} per {duration}",
-  "@safetyReview_rapidAscent_title": {"placeholders": {"rate": {"type": "String"}, "duration": {"type": "String"}}},
+  "@safetyReview_rapidAscent_title": {
+    "placeholders": {
+      "rate": {
+        "type": "String"
+      },
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
   "safetyReview_missedDecoStop_title": "La profondità è rimasta {excess} sopra il ceiling di tappa richiesto per {duration}",
-  "@safetyReview_missedDecoStop_title": {"placeholders": {"excess": {"type": "String"}, "duration": {"type": "String"}}},
+  "@safetyReview_missedDecoStop_title": {
+    "placeholders": {
+      "excess": {
+        "type": "String"
+      },
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
   "safetyReview_omittedSafetyStop_title": "La tappa di sicurezza consigliata è stata accorciata di {remaining}",
-  "@safetyReview_omittedSafetyStop_title": {"placeholders": {"remaining": {"type": "String"}}},
+  "@safetyReview_omittedSafetyStop_title": {
+    "placeholders": {
+      "remaining": {
+        "type": "String"
+      }
+    }
+  },
   "safetyReview_sawtoothProfile_title": "{count} variazioni ripetute di profondità su e giù durante l'immersione",
-  "@safetyReview_sawtoothProfile_title": {"placeholders": {"count": {"type": "int"}}},
+  "@safetyReview_sawtoothProfile_title": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "safetyReview_highSurfaceGf_title": "Emersione con fattore di gradiente {gf}, oltre il {gfHigh} configurato",
-  "@safetyReview_highSurfaceGf_title": {"placeholders": {"gf": {"type": "String"}, "gfHigh": {"type": "String"}}},
+  "@safetyReview_highSurfaceGf_title": {
+    "placeholders": {
+      "gf": {
+        "type": "String"
+      },
+      "gfHigh": {
+        "type": "String"
+      }
+    }
+  },
   "safetyReview_timeRange": "A {start}–{end}",
-  "@safetyReview_timeRange": {"placeholders": {"start": {"type": "String"}, "end": {"type": "String"}}},
+  "@safetyReview_timeRange": {
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
   "safetyReview_dismiss": "Ignora",
   "safetyReview_restore": "Ripristina",
   "safetyReview_showDismissed": "{count, plural, =1{Mostra 1 ignorata} other{Mostra {count} ignorate}}",
-  "@safetyReview_showDismissed": {"placeholders": {"count": {"type": "int"}}},
+  "@safetyReview_showDismissed": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "safetySettings_title": "Revisione di sicurezza",
   "safetySettings_entry_subtitle": "Osservazioni e regole post-immersione",
   "safetySettings_masterToggle": "Revisione di sicurezza post-immersione",
@@ -6036,7 +6096,16 @@
   "safetySettings_analyzeAll": "Analizza tutte le immersioni",
   "safetySettings_analyzeAll_subtitle": "Esegui la revisione di sicurezza su tutte le immersioni con profilo non ancora analizzate",
   "safetySettings_analyzeAll_progress": "Analizzate {done} di {total}",
-  "@safetySettings_analyzeAll_progress": {"placeholders": {"done": {"type": "int"}, "total": {"type": "int"}}},
+  "@safetySettings_analyzeAll_progress": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "safetySettings_analyzeAll_done": "Analisi completata",
   "safetySettings_analyzeAll_doneWithErrors": "Analisi completata — {count, plural, =1{Impossibile analizzare 1 immersione} other{Impossibile analizzare {count} immersioni}}",
   "@safetySettings_analyzeAll_doneWithErrors": {
@@ -6045,5 +6114,66 @@
         "type": "int"
       }
     }
-  }
+  },
+  "safetySettings_noFlyHeader": "Volare dopo l'immersione",
+  "safetySettings_noFlyPreset_standard": "Standard (12/18/24 h)",
+  "safetySettings_noFlyPreset_strict": "Rigoroso (18/24/48 h)",
+  "safetySettings_noFlyPreset_subtitle": "Intervalli indicativi dopo una singola immersione senza deco, immersioni ripetitive e immersioni con deco",
+  "safetyHub_title": "Sicurezza",
+  "safetyHub_noFly_active_title": "No-fly: mancano {remaining}",
+  "@safetyHub_noFly_active_title": {
+    "placeholders": {
+      "remaining": {
+        "type": "String"
+      }
+    }
+  },
+  "safetyHub_noFly_until": "Fino alle {time}",
+  "@safetyHub_noFly_until": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "safetyHub_noFly_clear_title": "Nessuna restrizione di volo",
+  "safetyHub_noFly_clear_subtitle": "Nessuna restrizione di volo attiva",
+  "safetyHub_noFly_category_single": "Dopo una singola immersione senza deco: linea guida di {hours} h",
+  "@safetyHub_noFly_category_single": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "safetyHub_noFly_category_repetitive": "Dopo immersioni ripetitive: linea guida di {hours} h",
+  "@safetyHub_noFly_category_repetitive": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "safetyHub_noFly_category_deco": "Dopo un'immersione con decompressione: linea guida di {hours} h",
+  "@safetyHub_noFly_category_deco": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "safetyHub_noFly_disclaimer": "Linee guida DAN/UHMS dall'ultima immersione. Non sostituisce il tempo no-fly del tuo computer subacqueo.",
+  "safetyHub_surfaceIntervalLink": "Strumento intervallo di superficie",
+  "safetyHub_surfaceIntervalLink_subtitle": "Modello educativo di desaturazione dei tessuti",
+  "safetyHub_settingsLink": "Impostazioni di sicurezza",
+  "safetyHub_alert_noFly": "No-fly: mancano {remaining}",
+  "@safetyHub_alert_noFly": {
+    "placeholders": {
+      "remaining": {
+        "type": "String"
+      }
+    }
+  },
+  "diveLog_detail_altitudeMismatch_title": "Il sito è in quota",
+  "diveLog_detail_altitudeMismatch_subtitle": "Questo sito registra un'altitudine ma l'immersione non ne ha una, quindi l'analisi di decompressione ha assunto il livello del mare. Imposta l'altitudine dell'immersione per correggere."
 }

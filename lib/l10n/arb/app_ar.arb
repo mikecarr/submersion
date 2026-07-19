@@ -6006,23 +6006,83 @@
   "diveDetailSection_safetyReview_description": "ملاحظات تلقائية على ملف الغوص بعد الغطسة",
   "safetyReview_sectionTitle": "مراجعة السلامة",
   "safetyReview_findingCount": "{count, plural, =1{ملاحظة واحدة} other{{count} ملاحظات}}",
-  "@safetyReview_findingCount": {"placeholders": {"count": {"type": "int"}}},
+  "@safetyReview_findingCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "safetyReview_rapidAscent_title": "تجاوز الصعود {rate} لمدة {duration}",
-  "@safetyReview_rapidAscent_title": {"placeholders": {"rate": {"type": "String"}, "duration": {"type": "String"}}},
+  "@safetyReview_rapidAscent_title": {
+    "placeholders": {
+      "rate": {
+        "type": "String"
+      },
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
   "safetyReview_missedDecoStop_title": "كان العمق أعلى من سقف التوقف المطلوب بمقدار {excess} لمدة {duration}",
-  "@safetyReview_missedDecoStop_title": {"placeholders": {"excess": {"type": "String"}, "duration": {"type": "String"}}},
+  "@safetyReview_missedDecoStop_title": {
+    "placeholders": {
+      "excess": {
+        "type": "String"
+      },
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
   "safetyReview_omittedSafetyStop_title": "تم تقصير توقف السلامة الموصى به بمقدار {remaining}",
-  "@safetyReview_omittedSafetyStop_title": {"placeholders": {"remaining": {"type": "String"}}},
+  "@safetyReview_omittedSafetyStop_title": {
+    "placeholders": {
+      "remaining": {
+        "type": "String"
+      }
+    }
+  },
   "safetyReview_sawtoothProfile_title": "{count} تغيرات متكررة في العمق صعودًا وهبوطًا أثناء الغطسة",
-  "@safetyReview_sawtoothProfile_title": {"placeholders": {"count": {"type": "int"}}},
+  "@safetyReview_sawtoothProfile_title": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "safetyReview_highSurfaceGf_title": "الصعود إلى السطح بعامل تدرج {gf}، أعلى من {gfHigh} المُعد",
-  "@safetyReview_highSurfaceGf_title": {"placeholders": {"gf": {"type": "String"}, "gfHigh": {"type": "String"}}},
+  "@safetyReview_highSurfaceGf_title": {
+    "placeholders": {
+      "gf": {
+        "type": "String"
+      },
+      "gfHigh": {
+        "type": "String"
+      }
+    }
+  },
   "safetyReview_timeRange": "عند {start}–{end}",
-  "@safetyReview_timeRange": {"placeholders": {"start": {"type": "String"}, "end": {"type": "String"}}},
+  "@safetyReview_timeRange": {
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
   "safetyReview_dismiss": "تجاهل",
   "safetyReview_restore": "استعادة",
   "safetyReview_showDismissed": "{count, plural, =1{إظهار ملاحظة متجاهلة واحدة} other{إظهار {count} ملاحظات متجاهلة}}",
-  "@safetyReview_showDismissed": {"placeholders": {"count": {"type": "int"}}},
+  "@safetyReview_showDismissed": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "safetySettings_title": "مراجعة السلامة",
   "safetySettings_entry_subtitle": "ملاحظات وقواعد ما بعد الغطسة",
   "safetySettings_masterToggle": "مراجعة السلامة بعد الغطسة",
@@ -6036,7 +6096,16 @@
   "safetySettings_analyzeAll": "تحليل جميع الغطسات",
   "safetySettings_analyzeAll_subtitle": "تشغيل مراجعة السلامة على كل غطسة ذات ملف لم تُحلل بعد",
   "safetySettings_analyzeAll_progress": "تم تحليل {done} من {total}",
-  "@safetySettings_analyzeAll_progress": {"placeholders": {"done": {"type": "int"}, "total": {"type": "int"}}},
+  "@safetySettings_analyzeAll_progress": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "safetySettings_analyzeAll_done": "اكتمل التحليل",
   "safetySettings_analyzeAll_doneWithErrors": "اكتمل التحليل — {count, plural, =1{تعذّر تحليل غوصة واحدة} other{تعذّر تحليل {count} غوصات}}",
   "@safetySettings_analyzeAll_doneWithErrors": {
@@ -6045,5 +6114,66 @@
         "type": "int"
       }
     }
-  }
+  },
+  "safetySettings_noFlyHeader": "الطيران بعد الغوص",
+  "safetySettings_noFlyPreset_standard": "قياسي (12/18/24 س)",
+  "safetySettings_noFlyPreset_strict": "صارم (18/24/48 س)",
+  "safetySettings_noFlyPreset_subtitle": "فترات إرشادية بعد غطسة واحدة بلا توقفات، وغطسات متكررة، وغطسات بتخفيف الضغط",
+  "safetyHub_title": "السلامة",
+  "safetyHub_noFly_active_title": "حظر الطيران: متبقٍ {remaining}",
+  "@safetyHub_noFly_active_title": {
+    "placeholders": {
+      "remaining": {
+        "type": "String"
+      }
+    }
+  },
+  "safetyHub_noFly_until": "حتى {time}",
+  "@safetyHub_noFly_until": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "safetyHub_noFly_clear_title": "لا قيود على الطيران",
+  "safetyHub_noFly_clear_subtitle": "لا يوجد قيد نشط على الطيران",
+  "safetyHub_noFly_category_single": "بعد غطسة واحدة بلا توقفات: إرشاد {hours} ساعة",
+  "@safetyHub_noFly_category_single": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "safetyHub_noFly_category_repetitive": "بعد غطسات متكررة: إرشاد {hours} ساعة",
+  "@safetyHub_noFly_category_repetitive": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "safetyHub_noFly_category_deco": "بعد غطسة بتخفيف الضغط: إرشاد {hours} ساعة",
+  "@safetyHub_noFly_category_deco": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "safetyHub_noFly_disclaimer": "إرشادات DAN/UHMS منذ آخر غطسة. ليست بديلاً عن وقت حظر الطيران في حاسوب الغوص الخاص بك.",
+  "safetyHub_surfaceIntervalLink": "أداة الفاصل السطحي",
+  "safetyHub_surfaceIntervalLink_subtitle": "نموذج تعليمي لتخلص الأنسجة من التشبع",
+  "safetyHub_settingsLink": "إعدادات السلامة",
+  "safetyHub_alert_noFly": "حظر الطيران: متبقٍ {remaining}",
+  "@safetyHub_alert_noFly": {
+    "placeholders": {
+      "remaining": {
+        "type": "String"
+      }
+    }
+  },
+  "diveLog_detail_altitudeMismatch_title": "موقع الغوص على ارتفاع",
+  "diveLog_detail_altitudeMismatch_subtitle": "هذا الموقع مسجل له ارتفاع لكن الغطسة بلا ارتفاع، لذا افترض تحليل تخفيف الضغط مستوى سطح البحر. عيّن ارتفاع الغطسة للتصحيح."
 }

@@ -20803,4 +20803,79 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get diveLog_filter_thicknessMax => 'Max';
+
+  @override
+  String get safetySettings_noFlyHeader => 'Repülés merülés után';
+
+  @override
+  String get safetySettings_noFlyPreset_standard => 'Normál (12/18/24 ó)';
+
+  @override
+  String get safetySettings_noFlyPreset_strict => 'Szigorú (18/24/48 ó)';
+
+  @override
+  String get safetySettings_noFlyPreset_subtitle =>
+      'Irányadó időközök egyetlen nullidős merülés, ismétlő merülések és dekós merülések után';
+
+  @override
+  String get safetyHub_title => 'Biztonság';
+
+  @override
+  String safetyHub_noFly_active_title(String remaining) {
+    return 'Repülési tilalom: $remaining van hátra';
+  }
+
+  @override
+  String safetyHub_noFly_until(String time) {
+    return 'Eddig: $time';
+  }
+
+  @override
+  String get safetyHub_noFly_clear_title => 'Nincs repülési korlátozás';
+
+  @override
+  String get safetyHub_noFly_clear_subtitle =>
+      'Nincs aktív repülési korlátozás';
+
+  @override
+  String safetyHub_noFly_category_single(int hours) {
+    return 'Egyetlen nullidős merülés után: $hours ó irányelv';
+  }
+
+  @override
+  String safetyHub_noFly_category_repetitive(int hours) {
+    return 'Ismétlő merülések után: $hours ó irányelv';
+  }
+
+  @override
+  String safetyHub_noFly_category_deco(int hours) {
+    return 'Dekompressziós merülés után: $hours ó irányelv';
+  }
+
+  @override
+  String get safetyHub_noFly_disclaimer =>
+      'DAN/UHMS irányelvek az utolsó merüléstől számítva. Nem helyettesíti a búvárkomputer no-fly idejét.';
+
+  @override
+  String get safetyHub_surfaceIntervalLink => 'Felszíni intervallum eszköz';
+
+  @override
+  String get safetyHub_surfaceIntervalLink_subtitle =>
+      'Oktató jellegű szöveti telítettségcsökkenési modell';
+
+  @override
+  String get safetyHub_settingsLink => 'Biztonsági beállítások';
+
+  @override
+  String get diveLog_detail_altitudeMismatch_title =>
+      'A merülőhely magaslaton fekszik';
+
+  @override
+  String get diveLog_detail_altitudeMismatch_subtitle =>
+      'Ehhez a helyhez magasság van rögzítve, a merüléshez azonban nincs, így a dekompressziós elemzés tengerszintet feltételezett. A javításhoz állítsd be a merülés magasságát.';
+
+  @override
+  String safetyHub_alert_noFly(String remaining) {
+    return 'Repülési tilalom: $remaining van hátra';
+  }
 }

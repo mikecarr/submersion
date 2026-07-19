@@ -29,30 +29,36 @@ import 'package:submersion/features/dive_log/data/services/profile_markers_servi
 import 'package:submersion/features/dive_log/domain/entities/dive.dart';
 import 'package:submersion/features/dive_log/domain/entities/dive_computer.dart';
 import 'package:submersion/features/dive_log/domain/entities/dive_data_source.dart';
-import 'package:submersion/features/dive_log/domain/entities/source_profile.dart';
-import 'package:submersion/features/dive_log/domain/services/field_attribution_service.dart';
-import 'package:submersion/features/dive_log/domain/services/source_name_resolver.dart';
 import 'package:submersion/features/dive_log/presentation/formatters/dive_mode_label.dart';
-import 'package:submersion/features/dive_log/presentation/pages/fullscreen_profile_page.dart';
-import 'package:submersion/features/dive_log/presentation/providers/active_source_provider.dart';
 import 'package:submersion/features/dive_log/presentation/providers/dive_computer_providers.dart';
 import 'package:submersion/features/dive_log/presentation/providers/dive_detail_ui_providers.dart';
 import 'package:submersion/features/dive_log/presentation/providers/dive_providers.dart';
+import 'package:submersion/features/dive_log/presentation/widgets/dive_nav_buttons.dart';
 import 'package:submersion/features/dive_log/presentation/providers/gas_analysis_providers.dart';
 import 'package:submersion/features/dive_log/presentation/providers/gas_switch_providers.dart';
 import 'package:submersion/features/dive_log/presentation/providers/profile_analysis_provider.dart';
-import 'package:submersion/features/dive_log/presentation/providers/profile_playback_provider.dart';
-import 'package:submersion/features/dive_log/presentation/providers/profile_range_provider.dart';
-import 'package:submersion/features/dive_log/presentation/providers/profile_tracking_provider.dart';
+import 'package:submersion/features/dive_log/presentation/pages/fullscreen_profile_page.dart';
 import 'package:submersion/features/dive_log/presentation/utils/sac_normalization.dart';
+import 'package:submersion/features/planner/presentation/providers/plan_overlay_provider.dart';
+import 'package:submersion/shared/widgets/master_detail/detail_scroll_retainer.dart';
+import 'package:submersion/shared/widgets/master_detail/responsive_breakpoints.dart';
+import 'package:submersion/features/dive_log/presentation/providers/profile_playback_provider.dart';
+import 'package:submersion/features/dive_log/presentation/providers/profile_tracking_provider.dart';
+import 'package:submersion/features/dive_log/presentation/providers/profile_range_provider.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/collapsible_section.dart';
+import 'package:submersion/features/dive_log/presentation/widgets/safety_review_section.dart';
+import 'package:submersion/features/safety/domain/services/altitude_flag.dart';
+import 'package:submersion/features/dive_log/presentation/widgets/dive_locations_map.dart';
+import 'package:submersion/features/dive_log/presentation/widgets/surface_gps_section.dart';
+import 'package:submersion/features/dive_log/presentation/widgets/data_sources_section.dart';
+import 'package:submersion/features/dive_log/presentation/widgets/dive_detail_row.dart';
+import 'package:submersion/features/dive_log/domain/entities/source_profile.dart';
+import 'package:submersion/features/dive_log/domain/services/field_attribution_service.dart';
+import 'package:submersion/features/dive_log/domain/services/source_name_resolver.dart';
+import 'package:submersion/features/dive_log/presentation/providers/active_source_provider.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/compact_deco_status_card.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/compact_tissue_loading_card.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/cylinders_card.dart';
-import 'package:submersion/features/dive_log/presentation/widgets/data_sources_section.dart';
-import 'package:submersion/features/dive_log/presentation/widgets/dive_detail_row.dart';
-import 'package:submersion/features/dive_log/presentation/widgets/dive_locations_map.dart';
-import 'package:submersion/features/dive_log/presentation/widgets/dive_nav_buttons.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/dive_profile_chart.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/environment_enum_display.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/o2_toxicity_card.dart';
@@ -62,9 +68,7 @@ import 'package:submersion/features/dive_log/presentation/widgets/playback_stats
 import 'package:submersion/features/dive_log/presentation/widgets/range_selection_overlay.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/range_stats_panel.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/responsive_section_pair.dart';
-import 'package:submersion/features/dive_log/presentation/widgets/safety_review_section.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/source_bar.dart';
-import 'package:submersion/features/dive_log/presentation/widgets/surface_gps_section.dart';
 import 'package:submersion/features/dive_log/presentation/widgets/tissue_saturation_panel.dart';
 import 'package:submersion/features/dive_roles/domain/entities/dive_role.dart';
 import 'package:submersion/features/dive_roles/presentation/dive_role_display.dart';
@@ -78,7 +82,6 @@ import 'package:submersion/features/media/presentation/helpers/photo_import_help
 import 'package:submersion/features/media/presentation/providers/media_providers.dart';
 import 'package:submersion/features/media/presentation/providers/photo_picker_providers.dart';
 import 'package:submersion/features/media/presentation/widgets/dive_media_section.dart';
-import 'package:submersion/features/planner/presentation/providers/plan_overlay_provider.dart';
 import 'package:submersion/features/settings/presentation/providers/export_providers.dart';
 import 'package:submersion/features/settings/presentation/providers/settings_providers.dart';
 import 'package:submersion/features/signatures/presentation/providers/signature_providers.dart';
@@ -89,8 +92,6 @@ import 'package:submersion/features/tides/domain/entities/tide_record.dart';
 import 'package:submersion/features/tides/presentation/providers/tide_providers.dart';
 import 'package:submersion/features/tides/presentation/widgets/tide_cycle_graph.dart';
 import 'package:submersion/l10n/l10n_extension.dart';
-import 'package:submersion/shared/widgets/master_detail/detail_scroll_retainer.dart';
-import 'package:submersion/shared/widgets/master_detail/responsive_breakpoints.dart';
 
 class DiveDetailPage extends ConsumerStatefulWidget {
   final String diveId;
@@ -328,7 +329,21 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
         ];
       },
       DiveDetailSectionId.altitude: () {
-        if (dive.altitude == null || dive.altitude! <= 0) return [];
+        if (dive.altitude == null || dive.altitude! <= 0) {
+          // Safety phase 2: the site is at altitude but the dive was not
+          // altitude-adjusted -- surface an informational note instead of
+          // silently hiding the section.
+          if (needsAltitudeAdjustmentFlag(
+            diveAltitude: dive.altitude,
+            siteAltitude: dive.site?.altitude,
+          )) {
+            return [
+              const SizedBox(height: 24),
+              _buildAltitudeMismatchNote(context, dive),
+            ];
+          }
+          return [];
+        }
         return [
           const SizedBox(height: 24),
           _buildAltitudeSection(context, ref, dive),
@@ -3023,6 +3038,21 @@ class _DiveDetailPageState extends ConsumerState<DiveDetailPage> {
             ],
           ],
         ),
+      ),
+    );
+  }
+
+  /// Informational note shown when the site records a meaningful altitude
+  /// but the dive itself has none, so deco replay ran at sea-level pressure.
+  Widget _buildAltitudeMismatchNote(BuildContext context, Dive dive) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Card(
+      child: ListTile(
+        leading: Icon(Icons.terrain, color: colorScheme.onSurfaceVariant),
+        title: Text(context.l10n.diveLog_detail_altitudeMismatch_title),
+        subtitle: Text(context.l10n.diveLog_detail_altitudeMismatch_subtitle),
+        trailing: const Icon(Icons.edit_outlined, size: 18),
+        onTap: () => context.push('/dives/${dive.id}/edit'),
       ),
     );
   }
