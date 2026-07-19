@@ -20966,7 +20966,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get safetyHub_noFly_clear_subtitle =>
-      'Aucune plongée dans les dernières 48 heures';
+      'Aucune restriction de vol active';
 
   @override
   String safetyHub_noFly_category_single(int hours) {

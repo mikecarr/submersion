@@ -6135,7 +6135,7 @@
     }
   },
   "safetyHub_noFly_clear_title": "无飞行限制",
-  "safetyHub_noFly_clear_subtitle": "过去 48 小时内没有潜水",
+  "safetyHub_noFly_clear_subtitle": "无活动的飞行限制",
   "safetyHub_noFly_category_single": "单次免减压潜水后:{hours} 小时指导值",
   "@safetyHub_noFly_category_single": {
     "placeholders": {

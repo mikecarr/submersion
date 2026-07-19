@@ -6135,7 +6135,7 @@
     }
   },
   "safetyHub_noFly_clear_title": "Nessuna restrizione di volo",
-  "safetyHub_noFly_clear_subtitle": "Nessuna immersione nelle ultime 48 ore",
+  "safetyHub_noFly_clear_subtitle": "Nessuna restrizione di volo attiva",
   "safetyHub_noFly_category_single": "Dopo una singola immersione senza deco: linea guida di {hours} h",
   "@safetyHub_noFly_category_single": {
     "placeholders": {

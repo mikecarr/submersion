@@ -6135,7 +6135,7 @@
     }
   },
   "safetyHub_noFly_clear_title": "لا قيود على الطيران",
-  "safetyHub_noFly_clear_subtitle": "لا غطسات خلال الـ 48 ساعة الماضية",
+  "safetyHub_noFly_clear_subtitle": "لا يوجد قيد نشط على الطيران",
   "safetyHub_noFly_category_single": "بعد غطسة واحدة بلا توقفات: إرشاد {hours} ساعة",
   "@safetyHub_noFly_category_single": {
     "placeholders": {

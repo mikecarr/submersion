@@ -6135,7 +6135,7 @@
     }
   },
   "safetyHub_noFly_clear_title": "Keine Flugeinschränkung",
-  "safetyHub_noFly_clear_subtitle": "Keine Tauchgänge in den letzten 48 Stunden",
+  "safetyHub_noFly_clear_subtitle": "Keine aktive Flugbeschränkung",
   "safetyHub_noFly_category_single": "Nach einem einzelnen Nullzeit-Tauchgang: {hours} h Richtwert",
   "@safetyHub_noFly_category_single": {
     "placeholders": {

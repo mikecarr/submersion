@@ -99,7 +99,7 @@ class _NoFlyCard extends StatelessWidget {
     final l10n = context.l10n;
     final theme = Theme.of(context);
     final now = DateTime.now().toUtc();
-    final active = status != null && status!.until.isAfter(now);
+    final active = status != null && status!.isActiveAt(now);
 
     if (!active) {
       return Card(

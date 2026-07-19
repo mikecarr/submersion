@@ -30,16 +30,23 @@ class DashboardAlerts {
     this.noFlyStatus,
   });
 
+  /// Whether an unexpired flying-after-diving restriction is in effect right
+  /// now. [noFlyStatus] is a cached snapshot that can elapse while the
+  /// dashboard stays mounted, so every consumer must re-check it against the
+  /// clock instead of treating a non-null value as active.
+  bool get hasActiveNoFly =>
+      noFlyStatus != null && noFlyStatus!.isActiveAt(DateTime.now().toUtc());
+
   bool get hasAlerts =>
       serviceClocksDue.isNotEmpty ||
       insuranceExpiringSoon ||
       insuranceExpired ||
-      noFlyStatus != null;
+      hasActiveNoFly;
 
   int get alertCount {
     int count = serviceClocksDue.length;
     if (insuranceExpiringSoon || insuranceExpired) count++;
-    if (noFlyStatus != null) count++;
+    if (hasActiveNoFly) count++;
     return count;
   }
 }

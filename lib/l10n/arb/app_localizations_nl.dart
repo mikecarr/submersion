@@ -20728,8 +20728,7 @@ class AppLocalizationsNl extends AppLocalizations {
   String get safetyHub_noFly_clear_title => 'Geen vliegbeperking';
 
   @override
-  String get safetyHub_noFly_clear_subtitle =>
-      'Geen duiken in de afgelopen 48 uur';
+  String get safetyHub_noFly_clear_subtitle => 'Geen actieve vliegbeperking';
 
   @override
   String safetyHub_noFly_category_single(int hours) {

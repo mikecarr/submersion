@@ -6135,7 +6135,7 @@
     }
   },
   "safetyHub_noFly_clear_title": "אין הגבלת טיסה",
-  "safetyHub_noFly_clear_subtitle": "לא היו צלילות ב-48 השעות האחרונות",
+  "safetyHub_noFly_clear_subtitle": "אין הגבלת טיסה פעילה",
   "safetyHub_noFly_category_single": "אחרי צלילה בודדת ללא דקו: הנחיה של {hours} שעות",
   "@safetyHub_noFly_category_single": {
     "placeholders": {

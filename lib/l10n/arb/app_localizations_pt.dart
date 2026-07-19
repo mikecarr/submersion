@@ -20891,8 +20891,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get safetyHub_noFly_clear_title => 'Sem restrição de voo';
 
   @override
-  String get safetyHub_noFly_clear_subtitle =>
-      'Sem mergulhos nas últimas 48 horas';
+  String get safetyHub_noFly_clear_subtitle => 'Nenhuma restrição de voo ativa';
 
   @override
   String safetyHub_noFly_category_single(int hours) {

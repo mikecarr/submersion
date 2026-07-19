@@ -19836,7 +19836,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get safetyHub_noFly_clear_title => '无飞行限制';
 
   @override
-  String get safetyHub_noFly_clear_subtitle => '过去 48 小时内没有潜水';
+  String get safetyHub_noFly_clear_subtitle => '无活动的飞行限制';
 
   @override
   String safetyHub_noFly_category_single(int hours) {

@@ -1308,7 +1308,7 @@ class DiverSettings extends Table {
       boolean().withDefault(const Constant(true))();
   // JSON array of SafetyRuleId.dbValue strings; null/absent = none disabled.
   TextColumn get safetyReviewDisabledRules => text().nullable()();
-  // Flying-after-diving conservatism (NoFlyPreset.dbValue, v117).
+  // Flying-after-diving conservatism (NoFlyPreset.dbValue, v124).
   TextColumn get noFlyPreset =>
       text().withDefault(const Constant('standard'))();
   // Appearance settings
@@ -2888,7 +2888,7 @@ class AppDatabase extends _$AppDatabase {
     }
   }
 
-  /// v117: diver_settings.no_fly_preset column. Idempotent so it is safe to
+  /// v124: diver_settings.no_fly_preset column. Idempotent so it is safe to
   /// call from both onUpgrade and the beforeOpen backstop.
   Future<void> _assertNoFlySettingsColumn() async {
     final cols = await customSelect(

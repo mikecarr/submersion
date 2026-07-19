@@ -34977,7 +34977,7 @@ abstract class AppLocalizations {
   /// No description provided for @safetyHub_noFly_clear_subtitle.
   ///
   /// In en, this message translates to:
-  /// **'No dives in the last 48 hours'**
+  /// **'No active flying restriction'**
   String get safetyHub_noFly_clear_subtitle;
 
   /// No description provided for @safetyHub_noFly_category_single.

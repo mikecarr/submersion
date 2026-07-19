@@ -20828,7 +20828,7 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get safetyHub_noFly_clear_subtitle =>
-      'Nem volt merülés az elmúlt 48 órában';
+      'Nincs aktív repülési korlátozás';
 
   @override
   String safetyHub_noFly_category_single(int hours) {

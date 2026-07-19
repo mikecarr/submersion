@@ -6135,7 +6135,7 @@
     }
   },
   "safetyHub_noFly_clear_title": "Geen vliegbeperking",
-  "safetyHub_noFly_clear_subtitle": "Geen duiken in de afgelopen 48 uur",
+  "safetyHub_noFly_clear_subtitle": "Geen actieve vliegbeperking",
   "safetyHub_noFly_category_single": "Na een enkele duik zonder deco: richtlijn van {hours} u",
   "@safetyHub_noFly_category_single": {
     "placeholders": {

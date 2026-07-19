@@ -20366,8 +20366,7 @@ class AppLocalizationsHe extends AppLocalizations {
   String get safetyHub_noFly_clear_title => 'אין הגבלת טיסה';
 
   @override
-  String get safetyHub_noFly_clear_subtitle =>
-      'לא היו צלילות ב-48 השעות האחרונות';
+  String get safetyHub_noFly_clear_subtitle => 'אין הגבלת טיסה פעילה';
 
   @override
   String safetyHub_noFly_category_single(int hours) {

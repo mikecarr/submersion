@@ -6135,7 +6135,7 @@
     }
   },
   "safetyHub_noFly_clear_title": "Sem restrição de voo",
-  "safetyHub_noFly_clear_subtitle": "Sem mergulhos nas últimas 48 horas",
+  "safetyHub_noFly_clear_subtitle": "Nenhuma restrição de voo ativa",
   "safetyHub_noFly_category_single": "Após um único mergulho sem deco: orientação de {hours} h",
   "@safetyHub_noFly_category_single": {
     "placeholders": {

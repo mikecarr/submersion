@@ -20512,8 +20512,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get safetyHub_noFly_clear_title => 'لا قيود على الطيران';
 
   @override
-  String get safetyHub_noFly_clear_subtitle =>
-      'لا غطسات خلال الـ 48 ساعة الماضية';
+  String get safetyHub_noFly_clear_subtitle => 'لا يوجد قيد نشط على الطيران';
 
   @override
   String safetyHub_noFly_category_single(int hours) {

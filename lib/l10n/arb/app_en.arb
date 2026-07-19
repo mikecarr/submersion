@@ -13071,7 +13071,7 @@
     }
   },
   "safetyHub_noFly_clear_title": "No flying restriction",
-  "safetyHub_noFly_clear_subtitle": "No dives in the last 48 hours",
+  "safetyHub_noFly_clear_subtitle": "No active flying restriction",
   "safetyHub_noFly_category_single": "After a single no-deco dive: {hours} h guideline",
   "@safetyHub_noFly_category_single": {
     "placeholders": {

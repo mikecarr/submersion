@@ -6135,7 +6135,7 @@
     }
   },
   "safetyHub_noFly_clear_title": "Nincs repülési korlátozás",
-  "safetyHub_noFly_clear_subtitle": "Nem volt merülés az elmúlt 48 órában",
+  "safetyHub_noFly_clear_subtitle": "Nincs aktív repülési korlátozás",
   "safetyHub_noFly_category_single": "Egyetlen nullidős merülés után: {hours} ó irányelv",
   "@safetyHub_noFly_category_single": {
     "placeholders": {

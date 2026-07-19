@@ -20894,7 +20894,7 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get safetyHub_noFly_clear_subtitle =>
-      'Nessuna immersione nelle ultime 48 ore';
+      'Nessuna restrizione di volo attiva';
 
   @override
   String safetyHub_noFly_category_single(int hours) {

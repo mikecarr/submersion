@@ -6135,7 +6135,7 @@
     }
   },
   "safetyHub_noFly_clear_title": "Aucune restriction de vol",
-  "safetyHub_noFly_clear_subtitle": "Aucune plongée dans les dernières 48 heures",
+  "safetyHub_noFly_clear_subtitle": "Aucune restriction de vol active",
   "safetyHub_noFly_category_single": "Après une plongée unique sans déco : recommandation de {hours} h",
   "@safetyHub_noFly_category_single": {
     "placeholders": {
