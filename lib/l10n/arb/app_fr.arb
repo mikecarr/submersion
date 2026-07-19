@@ -5371,6 +5371,42 @@
   "diveDetailSection_tide_description": "Graphique du cycle de maree et horaires",
   "diveDetailSection_tide_name": "Maree",
   "diveDetailSection_weights_description": "Repartition des lests, poids total",
+  "diveDetailSection_buoyancy_name": "Flottabilité",
+  "diveDetailSection_buoyancy_description": "Flottabilité pendant la plongée, variation, lest largable",
+  "buoyancy_tooltip": "Flottabilité nette modélisée pendant la plongée d'après le profil, la consommation de gaz et l'équipement.",
+  "buoyancy_verdictBuoyant": "À votre dernier palier (~{depth}), vous aviez environ {amount} de portance",
+  "buoyancy_verdictHeavy": "À votre dernier palier (~{depth}), vous étiez environ {amount} trop lourd",
+  "buoyancy_verdictNeutral": "Votre configuration était proche de la neutralité au dernier palier",
+  "buoyancy_verdictConvention": "Estimé selon la convention du palier de sécurité à 5 m",
+  "buoyancy_breakdownTitle": "Détail des termes",
+  "buoyancy_suitTerm": "Combinaison",
+  "buoyancy_leadTerm": "Lest",
+  "buoyancy_beginNet": "Début de plongée",
+  "buoyancy_endNet": "Fin de plongée",
+  "buoyancy_swing": "Variation de flottabilité",
+  "buoyancy_peakLift": "Portance maximale requise",
+  "buoyancy_wingWarning": "Dépasse la portance nominale de votre wing",
+  "buoyancy_minDitchable": "Lest largable minimal",
+  "buoyancy_droppable": "Largable",
+  "buoyancy_ditchWarning": "Plus que ce que vous pouvez larguer",
+  "buoyancy_drysuitGas": "Gaz d'étanche ajouté",
+  "buoyancy_estimatedPressures": "Les pressions des blocs sont estimées",
+  "buoyancy_linkSuitHint": "Associez une combinaison à cette plongée pour un tableau plus complet",
+  "buoyancy_chartNet": "Net",
+  "buoyancy_chartRig": "Équipement + lest",
+  "buoyancy_chartMinutes": "Temps (min)",
+  "buoyancy_historyTitle": "Historique de lestage",
+  "buoyancy_historyCarried": "Porté",
+  "buoyancy_historyModeled": "Modélisé",
+  "buoyancy_historyMore": "Vous portez généralement {delta} de plus que ce que le modèle suggère",
+  "buoyancy_historyLess": "Vous portez généralement {delta} de moins que ce que le modèle suggère",
+  "buoyancy_throughDive": "Pendant la plongée",
+  "buoyancy_adjust": "Ajuster",
+  "buoyancy_whatIfTitle": "Ajuster cette plongée",
+  "buoyancy_whatIfLead": "Lest",
+  "buoyancy_whatIfSuit": "Flottabilité de la combinaison",
+  "buoyancy_whatIfReset": "Réinitialiser",
+  "buoyancy_whatIfDelta": "{delta} vs réel",
   "diveDetailSection_weights_name": "Lestage",
   "diveLog_edit_section_environment": "Environnement",
   "diveLog_edit_subsection_weather": "Météo",
@@ -5685,6 +5721,8 @@
   "equipment_edit_buoyancyHint_tank": "Laisser vide - les blocs utilisent leurs propres spécifications",
   "equipment_edit_buoyancyLabel": "Flottabilité ({unit})",
   "equipment_edit_dryWeightLabel": "Poids à sec ({unit})",
+  "equipment_edit_liftCapacityLabel": "Capacité de portance ({unit})",
+  "equipment_edit_liftCapacityHint": "Portance nominale du wing ou gilet",
   "planner_gearWeights_accept": "Utiliser comme lestage prévu",
   "planner_gearWeights_addGear": "Ajouter équipement",
   "planner_gearWeights_empty": "Ajoutez de l'équipement pour prédire votre lestage",
@@ -6175,5 +6213,96 @@
     }
   },
   "diveLog_detail_altitudeMismatch_title": "Le site est en altitude",
-  "diveLog_detail_altitudeMismatch_subtitle": "Ce site indique une altitude mais la plongée n'en a aucune : l'analyse de décompression a supposé le niveau de la mer. Définissez l'altitude de la plongée pour corriger."
+  "diveLog_detail_altitudeMismatch_subtitle": "Ce site indique une altitude mais la plongée n'en a aucune : l'analyse de décompression a supposé le niveau de la mer. Définissez l'altitude de la plongée pour corriger.",
+  "emergencyCard_title": "Urgence",
+  "emergencyCard_callDan": "Appeler {name}",
+  "@emergencyCard_callDan": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "emergencyCard_callDan_subtitle": "Ligne d'urgence plongeurs. Appelez d'abord : ils coordonnent l'évacuation et l'orientation vers un caisson.",
+  "emergencyCard_ems": "Secours locaux : {number}",
+  "@emergencyCard_ems": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "emergencyCard_diverSection": "Plongeur",
+  "emergencyCard_bloodType": "Groupe sanguin : {value}",
+  "@emergencyCard_bloodType": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "emergencyCard_allergies": "Allergies : {value}",
+  "@emergencyCard_allergies": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "emergencyCard_medications": "Médicaments : {value}",
+  "@emergencyCard_medications": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "emergencyCard_contactsSection": "Contacts d'urgence",
+  "emergencyCard_insuranceSection": "Assurance plongée",
+  "emergencyCard_insurancePolicy": "Police {number}",
+  "@emergencyCard_insurancePolicy": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "emergencyCard_chambersSection": "Caissons hyperbares",
+  "emergencyCard_chambersNote": "La disponibilité évolue. Appelez toujours d'abord la ligne d'urgence plongeurs pour l'orientation.",
+  "emergencyCard_chamberVerified": "Coordonnées vérifiées {date}",
+  "@emergencyCard_chamberVerified": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "emergencyCard_hideChamber": "Masquer",
+  "emergencyCard_chamberHidden": "Caisson masqué",
+  "emergencyCard_undo": "Annuler",
+  "emergencyCard_addChamber": "Ajouter un caisson",
+  "emergencyCard_deleteChamber": "Supprimer",
+  "emergencyCard_regionLabel": "Région : {region}",
+  "@emergencyCard_regionLabel": {
+    "placeholders": {
+      "region": {
+        "type": "String"
+      }
+    }
+  },
+  "emergencyCard_regionUnknown": "Région inconnue : ligne mondiale utilisée",
+  "emergencyCard_noDiverData": "Aucune donnée de profil plongeur. Ajoutez contacts d'urgence, données médicales et assurance dans le profil plongeur.",
+  "addChamber_title": "Ajouter un caisson",
+  "addChamber_name": "Nom",
+  "addChamber_country": "Code pays (ex. FR)",
+  "addChamber_city": "Ville",
+  "addChamber_phone": "Téléphone",
+  "addChamber_notes": "Notes",
+  "addChamber_save": "Enregistrer",
+  "addChamber_nameRequired": "Le nom est requis",
+  "addChamber_countryRequired": "Le code pays est requis",
+  "addChamber_phoneRequired": "Le numéro de téléphone est requis",
+  "safetyHub_emergencyCardLink": "Carte d'urgence",
+  "safetyHub_emergencyCardLink_subtitle": "Hors ligne : ligne directe, secours, caissons, vos données médicales et d'assurance",
+  "dashboard_quickAction_emergency": "Carte d'urgence"
 }

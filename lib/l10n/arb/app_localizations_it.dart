@@ -12378,6 +12378,130 @@ class AppLocalizationsIt extends AppLocalizations {
       'Ripartizione pesi, peso totale';
 
   @override
+  String get diveDetailSection_buoyancy_name => 'Assetto';
+
+  @override
+  String get diveDetailSection_buoyancy_description =>
+      'Assetto durante l\'immersione, variazione, zavorra sganciabile';
+
+  @override
+  String get buoyancy_tooltip =>
+      'Assetto netto modellato durante l\'immersione da profilo, consumo di gas ed equipaggiamento.';
+
+  @override
+  String buoyancy_verdictBuoyant(String depth, String amount) {
+    return 'Alla tua ultima sosta (~$depth) avevi circa $amount di spinta';
+  }
+
+  @override
+  String buoyancy_verdictHeavy(String depth, String amount) {
+    return 'Alla tua ultima sosta (~$depth) eri circa $amount troppo pesante';
+  }
+
+  @override
+  String get buoyancy_verdictNeutral =>
+      'La tua configurazione era quasi neutra all\'ultima sosta';
+
+  @override
+  String get buoyancy_verdictConvention =>
+      'Stimato secondo la convenzione della sosta di sicurezza a 5 m';
+
+  @override
+  String get buoyancy_breakdownTitle => 'Dettaglio dei termini';
+
+  @override
+  String get buoyancy_suitTerm => 'Muta';
+
+  @override
+  String get buoyancy_leadTerm => 'Zavorra';
+
+  @override
+  String get buoyancy_beginNet => 'Inizio immersione';
+
+  @override
+  String get buoyancy_endNet => 'Fine immersione';
+
+  @override
+  String get buoyancy_swing => 'Variazione di assetto';
+
+  @override
+  String get buoyancy_peakLift => 'Spinta massima necessaria';
+
+  @override
+  String get buoyancy_wingWarning => 'Supera la portanza nominale del tuo GAV';
+
+  @override
+  String get buoyancy_minDitchable => 'Zavorra sganciabile minima';
+
+  @override
+  String get buoyancy_droppable => 'Puoi sganciare';
+
+  @override
+  String get buoyancy_ditchWarning => 'Più di quanto puoi sganciare';
+
+  @override
+  String get buoyancy_drysuitGas => 'Gas muta stagna aggiunto';
+
+  @override
+  String get buoyancy_estimatedPressures =>
+      'Le pressioni delle bombole sono stimate';
+
+  @override
+  String get buoyancy_linkSuitHint =>
+      'Associa una muta a questa immersione per un quadro più completo';
+
+  @override
+  String get buoyancy_chartNet => 'Netto';
+
+  @override
+  String get buoyancy_chartRig => 'Attrezzatura + zavorra';
+
+  @override
+  String get buoyancy_chartMinutes => 'Tempo (min)';
+
+  @override
+  String get buoyancy_historyTitle => 'Cronologia zavorra';
+
+  @override
+  String get buoyancy_historyCarried => 'Portato';
+
+  @override
+  String get buoyancy_historyModeled => 'Modellato';
+
+  @override
+  String buoyancy_historyMore(String delta) {
+    return 'Di solito porti $delta in più rispetto al modello';
+  }
+
+  @override
+  String buoyancy_historyLess(String delta) {
+    return 'Di solito porti $delta in meno rispetto al modello';
+  }
+
+  @override
+  String get buoyancy_throughDive => 'Durante l\'immersione';
+
+  @override
+  String get buoyancy_adjust => 'Regola';
+
+  @override
+  String get buoyancy_whatIfTitle => 'Regola questa immersione';
+
+  @override
+  String get buoyancy_whatIfLead => 'Zavorra';
+
+  @override
+  String get buoyancy_whatIfSuit => 'Spinta della muta';
+
+  @override
+  String get buoyancy_whatIfReset => 'Ripristina';
+
+  @override
+  String buoyancy_whatIfDelta(String delta) {
+    return '$delta vs reale';
+  }
+
+  @override
   String get diveDetailSection_tanks_name => 'Bombole';
 
   @override
@@ -20122,6 +20246,15 @@ class AppLocalizationsIt extends AppLocalizations {
   }
 
   @override
+  String equipment_edit_liftCapacityLabel(String unit) {
+    return 'Capacità di sollevamento ($unit)';
+  }
+
+  @override
+  String get equipment_edit_liftCapacityHint =>
+      'Portanza nominale di GAV o sacco';
+
+  @override
   String get planner_gearWeights_accept => 'Usa come zavorra pianificata';
 
   @override
@@ -20944,4 +21077,130 @@ class AppLocalizationsIt extends AppLocalizations {
   String safetyHub_alert_noFly(String remaining) {
     return 'No-fly: mancano $remaining';
   }
+
+  @override
+  String get emergencyCard_title => 'Emergenza';
+
+  @override
+  String emergencyCard_callDan(String name) {
+    return 'Chiama $name';
+  }
+
+  @override
+  String get emergencyCard_callDan_subtitle =>
+      'Linea di emergenza subacquei. Chiama prima: coordinano evacuazione e invio in camera iperbarica.';
+
+  @override
+  String emergencyCard_ems(String number) {
+    return 'Emergenze locali: $number';
+  }
+
+  @override
+  String get emergencyCard_diverSection => 'Subacqueo';
+
+  @override
+  String emergencyCard_bloodType(String value) {
+    return 'Gruppo sanguigno: $value';
+  }
+
+  @override
+  String emergencyCard_allergies(String value) {
+    return 'Allergie: $value';
+  }
+
+  @override
+  String emergencyCard_medications(String value) {
+    return 'Farmaci: $value';
+  }
+
+  @override
+  String get emergencyCard_contactsSection => 'Contatti di emergenza';
+
+  @override
+  String get emergencyCard_insuranceSection => 'Assicurazione subacquea';
+
+  @override
+  String emergencyCard_insurancePolicy(String number) {
+    return 'Polizza $number';
+  }
+
+  @override
+  String get emergencyCard_chambersSection => 'Camere iperbariche';
+
+  @override
+  String get emergencyCard_chambersNote =>
+      'La disponibilità cambia. Chiama sempre prima la linea di emergenza subacquei per l\'invio.';
+
+  @override
+  String emergencyCard_chamberVerified(String date) {
+    return 'Dati verificati $date';
+  }
+
+  @override
+  String get emergencyCard_hideChamber => 'Nascondi';
+
+  @override
+  String get emergencyCard_chamberHidden => 'Camera nascosta';
+
+  @override
+  String get emergencyCard_undo => 'Annulla';
+
+  @override
+  String get emergencyCard_addChamber => 'Aggiungi camera';
+
+  @override
+  String get emergencyCard_deleteChamber => 'Elimina';
+
+  @override
+  String emergencyCard_regionLabel(String region) {
+    return 'Regione: $region';
+  }
+
+  @override
+  String get emergencyCard_regionUnknown =>
+      'Regione sconosciuta: si usa la linea mondiale';
+
+  @override
+  String get emergencyCard_noDiverData =>
+      'Nessun dato del profilo subacqueo. Aggiungi contatti di emergenza, dati medici e assicurazione nel profilo subacqueo.';
+
+  @override
+  String get addChamber_title => 'Aggiungi camera';
+
+  @override
+  String get addChamber_name => 'Nome';
+
+  @override
+  String get addChamber_country => 'Codice paese (es. IT)';
+
+  @override
+  String get addChamber_city => 'Città';
+
+  @override
+  String get addChamber_phone => 'Telefono';
+
+  @override
+  String get addChamber_notes => 'Note';
+
+  @override
+  String get addChamber_save => 'Salva';
+
+  @override
+  String get addChamber_nameRequired => 'Il nome è obbligatorio';
+
+  @override
+  String get addChamber_countryRequired => 'Il codice paese è obbligatorio';
+
+  @override
+  String get addChamber_phoneRequired => 'Il numero di telefono è obbligatorio';
+
+  @override
+  String get safetyHub_emergencyCardLink => 'Scheda di emergenza';
+
+  @override
+  String get safetyHub_emergencyCardLink_subtitle =>
+      'Offline: linea diretta, emergenze, camere, i tuoi dati medici e assicurativi';
+
+  @override
+  String get dashboard_quickAction_emergency => 'Scheda di emergenza';
 }

@@ -12418,6 +12418,131 @@ class AppLocalizationsFr extends AppLocalizations {
       'Repartition des lests, poids total';
 
   @override
+  String get diveDetailSection_buoyancy_name => 'Flottabilité';
+
+  @override
+  String get diveDetailSection_buoyancy_description =>
+      'Flottabilité pendant la plongée, variation, lest largable';
+
+  @override
+  String get buoyancy_tooltip =>
+      'Flottabilité nette modélisée pendant la plongée d\'après le profil, la consommation de gaz et l\'équipement.';
+
+  @override
+  String buoyancy_verdictBuoyant(String depth, String amount) {
+    return 'À votre dernier palier (~$depth), vous aviez environ $amount de portance';
+  }
+
+  @override
+  String buoyancy_verdictHeavy(String depth, String amount) {
+    return 'À votre dernier palier (~$depth), vous étiez environ $amount trop lourd';
+  }
+
+  @override
+  String get buoyancy_verdictNeutral =>
+      'Votre configuration était proche de la neutralité au dernier palier';
+
+  @override
+  String get buoyancy_verdictConvention =>
+      'Estimé selon la convention du palier de sécurité à 5 m';
+
+  @override
+  String get buoyancy_breakdownTitle => 'Détail des termes';
+
+  @override
+  String get buoyancy_suitTerm => 'Combinaison';
+
+  @override
+  String get buoyancy_leadTerm => 'Lest';
+
+  @override
+  String get buoyancy_beginNet => 'Début de plongée';
+
+  @override
+  String get buoyancy_endNet => 'Fin de plongée';
+
+  @override
+  String get buoyancy_swing => 'Variation de flottabilité';
+
+  @override
+  String get buoyancy_peakLift => 'Portance maximale requise';
+
+  @override
+  String get buoyancy_wingWarning =>
+      'Dépasse la portance nominale de votre wing';
+
+  @override
+  String get buoyancy_minDitchable => 'Lest largable minimal';
+
+  @override
+  String get buoyancy_droppable => 'Largable';
+
+  @override
+  String get buoyancy_ditchWarning => 'Plus que ce que vous pouvez larguer';
+
+  @override
+  String get buoyancy_drysuitGas => 'Gaz d\'étanche ajouté';
+
+  @override
+  String get buoyancy_estimatedPressures =>
+      'Les pressions des blocs sont estimées';
+
+  @override
+  String get buoyancy_linkSuitHint =>
+      'Associez une combinaison à cette plongée pour un tableau plus complet';
+
+  @override
+  String get buoyancy_chartNet => 'Net';
+
+  @override
+  String get buoyancy_chartRig => 'Équipement + lest';
+
+  @override
+  String get buoyancy_chartMinutes => 'Temps (min)';
+
+  @override
+  String get buoyancy_historyTitle => 'Historique de lestage';
+
+  @override
+  String get buoyancy_historyCarried => 'Porté';
+
+  @override
+  String get buoyancy_historyModeled => 'Modélisé';
+
+  @override
+  String buoyancy_historyMore(String delta) {
+    return 'Vous portez généralement $delta de plus que ce que le modèle suggère';
+  }
+
+  @override
+  String buoyancy_historyLess(String delta) {
+    return 'Vous portez généralement $delta de moins que ce que le modèle suggère';
+  }
+
+  @override
+  String get buoyancy_throughDive => 'Pendant la plongée';
+
+  @override
+  String get buoyancy_adjust => 'Ajuster';
+
+  @override
+  String get buoyancy_whatIfTitle => 'Ajuster cette plongée';
+
+  @override
+  String get buoyancy_whatIfLead => 'Lest';
+
+  @override
+  String get buoyancy_whatIfSuit => 'Flottabilité de la combinaison';
+
+  @override
+  String get buoyancy_whatIfReset => 'Réinitialiser';
+
+  @override
+  String buoyancy_whatIfDelta(String delta) {
+    return '$delta vs réel';
+  }
+
+  @override
   String get diveDetailSection_tanks_name => 'Bouteilles';
 
   @override
@@ -20192,6 +20317,15 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String equipment_edit_liftCapacityLabel(String unit) {
+    return 'Capacité de portance ($unit)';
+  }
+
+  @override
+  String get equipment_edit_liftCapacityHint =>
+      'Portance nominale du wing ou gilet';
+
+  @override
   String get planner_gearWeights_accept => 'Utiliser comme lestage prévu';
 
   @override
@@ -21015,4 +21149,130 @@ class AppLocalizationsFr extends AppLocalizations {
   String safetyHub_alert_noFly(String remaining) {
     return 'Interdiction de vol : $remaining restant';
   }
+
+  @override
+  String get emergencyCard_title => 'Urgence';
+
+  @override
+  String emergencyCard_callDan(String name) {
+    return 'Appeler $name';
+  }
+
+  @override
+  String get emergencyCard_callDan_subtitle =>
+      'Ligne d\'urgence plongeurs. Appelez d\'abord : ils coordonnent l\'évacuation et l\'orientation vers un caisson.';
+
+  @override
+  String emergencyCard_ems(String number) {
+    return 'Secours locaux : $number';
+  }
+
+  @override
+  String get emergencyCard_diverSection => 'Plongeur';
+
+  @override
+  String emergencyCard_bloodType(String value) {
+    return 'Groupe sanguin : $value';
+  }
+
+  @override
+  String emergencyCard_allergies(String value) {
+    return 'Allergies : $value';
+  }
+
+  @override
+  String emergencyCard_medications(String value) {
+    return 'Médicaments : $value';
+  }
+
+  @override
+  String get emergencyCard_contactsSection => 'Contacts d\'urgence';
+
+  @override
+  String get emergencyCard_insuranceSection => 'Assurance plongée';
+
+  @override
+  String emergencyCard_insurancePolicy(String number) {
+    return 'Police $number';
+  }
+
+  @override
+  String get emergencyCard_chambersSection => 'Caissons hyperbares';
+
+  @override
+  String get emergencyCard_chambersNote =>
+      'La disponibilité évolue. Appelez toujours d\'abord la ligne d\'urgence plongeurs pour l\'orientation.';
+
+  @override
+  String emergencyCard_chamberVerified(String date) {
+    return 'Coordonnées vérifiées $date';
+  }
+
+  @override
+  String get emergencyCard_hideChamber => 'Masquer';
+
+  @override
+  String get emergencyCard_chamberHidden => 'Caisson masqué';
+
+  @override
+  String get emergencyCard_undo => 'Annuler';
+
+  @override
+  String get emergencyCard_addChamber => 'Ajouter un caisson';
+
+  @override
+  String get emergencyCard_deleteChamber => 'Supprimer';
+
+  @override
+  String emergencyCard_regionLabel(String region) {
+    return 'Région : $region';
+  }
+
+  @override
+  String get emergencyCard_regionUnknown =>
+      'Région inconnue : ligne mondiale utilisée';
+
+  @override
+  String get emergencyCard_noDiverData =>
+      'Aucune donnée de profil plongeur. Ajoutez contacts d\'urgence, données médicales et assurance dans le profil plongeur.';
+
+  @override
+  String get addChamber_title => 'Ajouter un caisson';
+
+  @override
+  String get addChamber_name => 'Nom';
+
+  @override
+  String get addChamber_country => 'Code pays (ex. FR)';
+
+  @override
+  String get addChamber_city => 'Ville';
+
+  @override
+  String get addChamber_phone => 'Téléphone';
+
+  @override
+  String get addChamber_notes => 'Notes';
+
+  @override
+  String get addChamber_save => 'Enregistrer';
+
+  @override
+  String get addChamber_nameRequired => 'Le nom est requis';
+
+  @override
+  String get addChamber_countryRequired => 'Le code pays est requis';
+
+  @override
+  String get addChamber_phoneRequired => 'Le numéro de téléphone est requis';
+
+  @override
+  String get safetyHub_emergencyCardLink => 'Carte d\'urgence';
+
+  @override
+  String get safetyHub_emergencyCardLink_subtitle =>
+      'Hors ligne : ligne directe, secours, caissons, vos données médicales et d\'assurance';
+
+  @override
+  String get dashboard_quickAction_emergency => 'Carte d\'urgence';
 }

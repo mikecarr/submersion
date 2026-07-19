@@ -12176,6 +12176,129 @@ class AppLocalizationsEn extends AppLocalizations {
       'Weight breakdown, total weight';
 
   @override
+  String get diveDetailSection_buoyancy_name => 'Buoyancy';
+
+  @override
+  String get diveDetailSection_buoyancy_description =>
+      'Buoyancy through the dive, swing, ditchable weight';
+
+  @override
+  String get buoyancy_tooltip =>
+      'Modeled net buoyancy through the dive from your profile, gas use, and gear.';
+
+  @override
+  String buoyancy_verdictBuoyant(String depth, String amount) {
+    return 'At your final stop (~$depth) you were about $amount buoyant';
+  }
+
+  @override
+  String buoyancy_verdictHeavy(String depth, String amount) {
+    return 'At your final stop (~$depth) you were about $amount heavy';
+  }
+
+  @override
+  String get buoyancy_verdictNeutral =>
+      'Your rig was close to neutral at the final stop';
+
+  @override
+  String get buoyancy_verdictConvention =>
+      'Estimated at the 5 m safety-stop convention';
+
+  @override
+  String get buoyancy_breakdownTitle => 'Term breakdown';
+
+  @override
+  String get buoyancy_suitTerm => 'Suit';
+
+  @override
+  String get buoyancy_leadTerm => 'Lead';
+
+  @override
+  String get buoyancy_beginNet => 'Start of dive';
+
+  @override
+  String get buoyancy_endNet => 'End of dive';
+
+  @override
+  String get buoyancy_swing => 'Buoyancy swing';
+
+  @override
+  String get buoyancy_peakLift => 'Peak lift needed';
+
+  @override
+  String get buoyancy_wingWarning => 'Exceeds your wing\'s rated lift';
+
+  @override
+  String get buoyancy_minDitchable => 'Min ditchable weight';
+
+  @override
+  String get buoyancy_droppable => 'You can ditch';
+
+  @override
+  String get buoyancy_ditchWarning => 'More than you can ditch';
+
+  @override
+  String get buoyancy_drysuitGas => 'Drysuit gas added';
+
+  @override
+  String get buoyancy_estimatedPressures => 'Tank pressures are estimated';
+
+  @override
+  String get buoyancy_linkSuitHint =>
+      'Link an exposure suit to this dive for a fuller picture';
+
+  @override
+  String get buoyancy_chartNet => 'Net';
+
+  @override
+  String get buoyancy_chartRig => 'Rig + lead';
+
+  @override
+  String get buoyancy_chartMinutes => 'Time (min)';
+
+  @override
+  String get buoyancy_historyTitle => 'Weighting history';
+
+  @override
+  String get buoyancy_historyCarried => 'Carried';
+
+  @override
+  String get buoyancy_historyModeled => 'Modeled';
+
+  @override
+  String buoyancy_historyMore(String delta) {
+    return 'You typically carry $delta more than the model suggests';
+  }
+
+  @override
+  String buoyancy_historyLess(String delta) {
+    return 'You typically carry $delta less than the model suggests';
+  }
+
+  @override
+  String get buoyancy_throughDive => 'Through the dive';
+
+  @override
+  String get buoyancy_adjust => 'Adjust';
+
+  @override
+  String get buoyancy_whatIfTitle => 'Adjust this dive';
+
+  @override
+  String get buoyancy_whatIfLead => 'Lead';
+
+  @override
+  String get buoyancy_whatIfSuit => 'Suit buoyancy';
+
+  @override
+  String get buoyancy_whatIfReset => 'Reset';
+
+  @override
+  String buoyancy_whatIfDelta(String delta) {
+    return '$delta vs. actual';
+  }
+
+  @override
   String get diveDetailSection_tanks_name => 'Cylinders';
 
   @override
@@ -19779,6 +19902,14 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String equipment_edit_liftCapacityLabel(String unit) {
+    return 'Lift capacity ($unit)';
+  }
+
+  @override
+  String get equipment_edit_liftCapacityHint => 'Wing or BCD rated lift';
+
+  @override
   String get planner_gearWeights_accept => 'Use as planned weight';
 
   @override
@@ -20589,4 +20720,130 @@ class AppLocalizationsEn extends AppLocalizations {
   String safetyHub_alert_noFly(String remaining) {
     return 'No-fly: $remaining remaining';
   }
+
+  @override
+  String get emergencyCard_title => 'Emergency';
+
+  @override
+  String emergencyCard_callDan(String name) {
+    return 'Call $name';
+  }
+
+  @override
+  String get emergencyCard_callDan_subtitle =>
+      'Diver emergency hotline. Call first: they coordinate evacuation and chamber referral.';
+
+  @override
+  String emergencyCard_ems(String number) {
+    return 'Local emergency services: $number';
+  }
+
+  @override
+  String get emergencyCard_diverSection => 'Diver';
+
+  @override
+  String emergencyCard_bloodType(String value) {
+    return 'Blood type: $value';
+  }
+
+  @override
+  String emergencyCard_allergies(String value) {
+    return 'Allergies: $value';
+  }
+
+  @override
+  String emergencyCard_medications(String value) {
+    return 'Medications: $value';
+  }
+
+  @override
+  String get emergencyCard_contactsSection => 'Emergency contacts';
+
+  @override
+  String get emergencyCard_insuranceSection => 'Dive insurance';
+
+  @override
+  String emergencyCard_insurancePolicy(String number) {
+    return 'Policy $number';
+  }
+
+  @override
+  String get emergencyCard_chambersSection => 'Hyperbaric chambers';
+
+  @override
+  String get emergencyCard_chambersNote =>
+      'Availability changes. Always call the diver emergency hotline first for referral.';
+
+  @override
+  String emergencyCard_chamberVerified(String date) {
+    return 'Details verified $date';
+  }
+
+  @override
+  String get emergencyCard_hideChamber => 'Hide';
+
+  @override
+  String get emergencyCard_chamberHidden => 'Chamber hidden';
+
+  @override
+  String get emergencyCard_undo => 'Undo';
+
+  @override
+  String get emergencyCard_addChamber => 'Add chamber';
+
+  @override
+  String get emergencyCard_deleteChamber => 'Delete';
+
+  @override
+  String emergencyCard_regionLabel(String region) {
+    return 'Region: $region';
+  }
+
+  @override
+  String get emergencyCard_regionUnknown =>
+      'Region unknown - using worldwide hotline';
+
+  @override
+  String get emergencyCard_noDiverData =>
+      'No diver profile data. Add emergency contacts, medical and insurance details in Diver Profile settings.';
+
+  @override
+  String get addChamber_title => 'Add chamber';
+
+  @override
+  String get addChamber_name => 'Name';
+
+  @override
+  String get addChamber_country => 'Country code (e.g. US)';
+
+  @override
+  String get addChamber_city => 'City';
+
+  @override
+  String get addChamber_phone => 'Phone';
+
+  @override
+  String get addChamber_notes => 'Notes';
+
+  @override
+  String get addChamber_save => 'Save';
+
+  @override
+  String get addChamber_nameRequired => 'Name is required';
+
+  @override
+  String get addChamber_countryRequired => 'Country code is required';
+
+  @override
+  String get addChamber_phoneRequired => 'Phone number is required';
+
+  @override
+  String get safetyHub_emergencyCardLink => 'Emergency card';
+
+  @override
+  String get safetyHub_emergencyCardLink_subtitle =>
+      'Offline: hotline, EMS, chambers, your medical and insurance details';
+
+  @override
+  String get dashboard_quickAction_emergency => 'Emergency card';
 }

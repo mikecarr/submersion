@@ -5410,6 +5410,42 @@
   "diveDetailSection_tide_description": "Grafico ciclo marea e tempi",
   "diveDetailSection_tide_name": "Marea",
   "diveDetailSection_weights_description": "Ripartizione pesi, peso totale",
+  "diveDetailSection_buoyancy_name": "Assetto",
+  "diveDetailSection_buoyancy_description": "Assetto durante l'immersione, variazione, zavorra sganciabile",
+  "buoyancy_tooltip": "Assetto netto modellato durante l'immersione da profilo, consumo di gas ed equipaggiamento.",
+  "buoyancy_verdictBuoyant": "Alla tua ultima sosta (~{depth}) avevi circa {amount} di spinta",
+  "buoyancy_verdictHeavy": "Alla tua ultima sosta (~{depth}) eri circa {amount} troppo pesante",
+  "buoyancy_verdictNeutral": "La tua configurazione era quasi neutra all'ultima sosta",
+  "buoyancy_verdictConvention": "Stimato secondo la convenzione della sosta di sicurezza a 5 m",
+  "buoyancy_breakdownTitle": "Dettaglio dei termini",
+  "buoyancy_suitTerm": "Muta",
+  "buoyancy_leadTerm": "Zavorra",
+  "buoyancy_beginNet": "Inizio immersione",
+  "buoyancy_endNet": "Fine immersione",
+  "buoyancy_swing": "Variazione di assetto",
+  "buoyancy_peakLift": "Spinta massima necessaria",
+  "buoyancy_wingWarning": "Supera la portanza nominale del tuo GAV",
+  "buoyancy_minDitchable": "Zavorra sganciabile minima",
+  "buoyancy_droppable": "Puoi sganciare",
+  "buoyancy_ditchWarning": "Più di quanto puoi sganciare",
+  "buoyancy_drysuitGas": "Gas muta stagna aggiunto",
+  "buoyancy_estimatedPressures": "Le pressioni delle bombole sono stimate",
+  "buoyancy_linkSuitHint": "Associa una muta a questa immersione per un quadro più completo",
+  "buoyancy_chartNet": "Netto",
+  "buoyancy_chartRig": "Attrezzatura + zavorra",
+  "buoyancy_chartMinutes": "Tempo (min)",
+  "buoyancy_historyTitle": "Cronologia zavorra",
+  "buoyancy_historyCarried": "Portato",
+  "buoyancy_historyModeled": "Modellato",
+  "buoyancy_historyMore": "Di solito porti {delta} in più rispetto al modello",
+  "buoyancy_historyLess": "Di solito porti {delta} in meno rispetto al modello",
+  "buoyancy_throughDive": "Durante l'immersione",
+  "buoyancy_adjust": "Regola",
+  "buoyancy_whatIfTitle": "Regola questa immersione",
+  "buoyancy_whatIfLead": "Zavorra",
+  "buoyancy_whatIfSuit": "Spinta della muta",
+  "buoyancy_whatIfReset": "Ripristina",
+  "buoyancy_whatIfDelta": "{delta} vs reale",
   "diveDetailSection_weights_name": "Zavorra",
   "dashboard_activityStats_divesInYear": "immersioni nel {year}",
   "dashboard_hero_daysSinceLabel": "giorni dall'ultima immersione",
@@ -5685,6 +5721,8 @@
   "equipment_edit_buoyancyHint_tank": "Lasciare vuoto: le bombole usano le proprie specifiche",
   "equipment_edit_buoyancyLabel": "Galleggiabilità ({unit})",
   "equipment_edit_dryWeightLabel": "Peso a secco ({unit})",
+  "equipment_edit_liftCapacityLabel": "Capacità di sollevamento ({unit})",
+  "equipment_edit_liftCapacityHint": "Portanza nominale di GAV o sacco",
   "planner_gearWeights_accept": "Usa come zavorra pianificata",
   "planner_gearWeights_addGear": "Aggiungi attrezzatura",
   "planner_gearWeights_empty": "Aggiungi attrezzatura per prevedere la zavorra",
@@ -6175,5 +6213,96 @@
     }
   },
   "diveLog_detail_altitudeMismatch_title": "Il sito è in quota",
-  "diveLog_detail_altitudeMismatch_subtitle": "Questo sito registra un'altitudine ma l'immersione non ne ha una, quindi l'analisi di decompressione ha assunto il livello del mare. Imposta l'altitudine dell'immersione per correggere."
+  "diveLog_detail_altitudeMismatch_subtitle": "Questo sito registra un'altitudine ma l'immersione non ne ha una, quindi l'analisi di decompressione ha assunto il livello del mare. Imposta l'altitudine dell'immersione per correggere.",
+  "emergencyCard_title": "Emergenza",
+  "emergencyCard_callDan": "Chiama {name}",
+  "@emergencyCard_callDan": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "emergencyCard_callDan_subtitle": "Linea di emergenza subacquei. Chiama prima: coordinano evacuazione e invio in camera iperbarica.",
+  "emergencyCard_ems": "Emergenze locali: {number}",
+  "@emergencyCard_ems": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "emergencyCard_diverSection": "Subacqueo",
+  "emergencyCard_bloodType": "Gruppo sanguigno: {value}",
+  "@emergencyCard_bloodType": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "emergencyCard_allergies": "Allergie: {value}",
+  "@emergencyCard_allergies": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "emergencyCard_medications": "Farmaci: {value}",
+  "@emergencyCard_medications": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "emergencyCard_contactsSection": "Contatti di emergenza",
+  "emergencyCard_insuranceSection": "Assicurazione subacquea",
+  "emergencyCard_insurancePolicy": "Polizza {number}",
+  "@emergencyCard_insurancePolicy": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "emergencyCard_chambersSection": "Camere iperbariche",
+  "emergencyCard_chambersNote": "La disponibilità cambia. Chiama sempre prima la linea di emergenza subacquei per l'invio.",
+  "emergencyCard_chamberVerified": "Dati verificati {date}",
+  "@emergencyCard_chamberVerified": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "emergencyCard_hideChamber": "Nascondi",
+  "emergencyCard_chamberHidden": "Camera nascosta",
+  "emergencyCard_undo": "Annulla",
+  "emergencyCard_addChamber": "Aggiungi camera",
+  "emergencyCard_deleteChamber": "Elimina",
+  "emergencyCard_regionLabel": "Regione: {region}",
+  "@emergencyCard_regionLabel": {
+    "placeholders": {
+      "region": {
+        "type": "String"
+      }
+    }
+  },
+  "emergencyCard_regionUnknown": "Regione sconosciuta: si usa la linea mondiale",
+  "emergencyCard_noDiverData": "Nessun dato del profilo subacqueo. Aggiungi contatti di emergenza, dati medici e assicurazione nel profilo subacqueo.",
+  "addChamber_title": "Aggiungi camera",
+  "addChamber_name": "Nome",
+  "addChamber_country": "Codice paese (es. IT)",
+  "addChamber_city": "Città",
+  "addChamber_phone": "Telefono",
+  "addChamber_notes": "Note",
+  "addChamber_save": "Salva",
+  "addChamber_nameRequired": "Il nome è obbligatorio",
+  "addChamber_countryRequired": "Il codice paese è obbligatorio",
+  "addChamber_phoneRequired": "Il numero di telefono è obbligatorio",
+  "safetyHub_emergencyCardLink": "Scheda di emergenza",
+  "safetyHub_emergencyCardLink_subtitle": "Offline: linea diretta, emergenze, camere, i tuoi dati medici e assicurativi",
+  "dashboard_quickAction_emergency": "Scheda di emergenza"
 }

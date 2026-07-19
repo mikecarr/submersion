@@ -12337,6 +12337,130 @@ class AppLocalizationsHu extends AppLocalizations {
       'Súly lebontás, teljes súly';
 
   @override
+  String get diveDetailSection_buoyancy_name => 'Felhajtóerő';
+
+  @override
+  String get diveDetailSection_buoyancy_description =>
+      'Felhajtóerő a merülés során, ingadozás, ledobható ólom';
+
+  @override
+  String get buoyancy_tooltip =>
+      'Modellezett nettó felhajtóerő a merülés során a profilból, gázfogyasztásból és felszerelésből.';
+
+  @override
+  String buoyancy_verdictBuoyant(String depth, String amount) {
+    return 'Az utolsó megállónál (~$depth) körülbelül $amount felhajtóerőd volt';
+  }
+
+  @override
+  String buoyancy_verdictHeavy(String depth, String amount) {
+    return 'Az utolsó megállónál (~$depth) körülbelül $amount-mal nehezebb voltál';
+  }
+
+  @override
+  String get buoyancy_verdictNeutral =>
+      'A konfigurációd közel semleges volt az utolsó megállónál';
+
+  @override
+  String get buoyancy_verdictConvention =>
+      'Az 5 m-es biztonsági megálló konvenciója szerint becsülve';
+
+  @override
+  String get buoyancy_breakdownTitle => 'Tételek részletezése';
+
+  @override
+  String get buoyancy_suitTerm => 'Ruha';
+
+  @override
+  String get buoyancy_leadTerm => 'Ólom';
+
+  @override
+  String get buoyancy_beginNet => 'Merülés kezdete';
+
+  @override
+  String get buoyancy_endNet => 'Merülés vége';
+
+  @override
+  String get buoyancy_swing => 'Felhajtóerő-ingadozás';
+
+  @override
+  String get buoyancy_peakLift => 'Max. szükséges felhajtóerő';
+
+  @override
+  String get buoyancy_wingWarning =>
+      'Meghaladja a szárnyad névleges felhajtóerejét';
+
+  @override
+  String get buoyancy_minDitchable => 'Min. ledobható ólom';
+
+  @override
+  String get buoyancy_droppable => 'Ledobható';
+
+  @override
+  String get buoyancy_ditchWarning => 'Több, mint amennyit ledobhatsz';
+
+  @override
+  String get buoyancy_drysuitGas => 'Hozzáadott szárazruha-gáz';
+
+  @override
+  String get buoyancy_estimatedPressures => 'A palacknyomások becsültek';
+
+  @override
+  String get buoyancy_linkSuitHint =>
+      'Kapcsolj egy búvárruhát ehhez a merüléshez a teljesebb képért';
+
+  @override
+  String get buoyancy_chartNet => 'Nettó';
+
+  @override
+  String get buoyancy_chartRig => 'Felszerelés + ólom';
+
+  @override
+  String get buoyancy_chartMinutes => 'Idő (perc)';
+
+  @override
+  String get buoyancy_historyTitle => 'Ólomelőzmények';
+
+  @override
+  String get buoyancy_historyCarried => 'Vitt';
+
+  @override
+  String get buoyancy_historyModeled => 'Modellezett';
+
+  @override
+  String buoyancy_historyMore(String delta) {
+    return 'Általában $delta-mal többet viszel, mint amit a modell javasol';
+  }
+
+  @override
+  String buoyancy_historyLess(String delta) {
+    return 'Általában $delta-mal kevesebbet viszel, mint amit a modell javasol';
+  }
+
+  @override
+  String get buoyancy_throughDive => 'A merülés során';
+
+  @override
+  String get buoyancy_adjust => 'Módosítás';
+
+  @override
+  String get buoyancy_whatIfTitle => 'Merülés módosítása';
+
+  @override
+  String get buoyancy_whatIfLead => 'Ólom';
+
+  @override
+  String get buoyancy_whatIfSuit => 'Ruha felhajtóereje';
+
+  @override
+  String get buoyancy_whatIfReset => 'Visszaállítás';
+
+  @override
+  String buoyancy_whatIfDelta(String delta) {
+    return '$delta a ténylegeshez';
+  }
+
+  @override
   String get diveDetailSection_tanks_name => 'Palackok';
 
   @override
@@ -20061,6 +20185,15 @@ class AppLocalizationsHu extends AppLocalizations {
   }
 
   @override
+  String equipment_edit_liftCapacityLabel(String unit) {
+    return 'Emelőkapacitás ($unit)';
+  }
+
+  @override
+  String get equipment_edit_liftCapacityHint =>
+      'A szárny vagy BCD névleges felhajtóereje';
+
+  @override
   String get planner_gearWeights_accept => 'Használat tervezett súlyként';
 
   @override
@@ -20878,4 +21011,130 @@ class AppLocalizationsHu extends AppLocalizations {
   String safetyHub_alert_noFly(String remaining) {
     return 'Repülési tilalom: $remaining van hátra';
   }
+
+  @override
+  String get emergencyCard_title => 'Vészhelyzet';
+
+  @override
+  String emergencyCard_callDan(String name) {
+    return '$name hívása';
+  }
+
+  @override
+  String get emergencyCard_callDan_subtitle =>
+      'Búvár segélyvonal. Először ezt hívd: ők koordinálják az evakuálást és a kamrába irányítást.';
+
+  @override
+  String emergencyCard_ems(String number) {
+    return 'Helyi segélyhívó: $number';
+  }
+
+  @override
+  String get emergencyCard_diverSection => 'Búvár';
+
+  @override
+  String emergencyCard_bloodType(String value) {
+    return 'Vércsoport: $value';
+  }
+
+  @override
+  String emergencyCard_allergies(String value) {
+    return 'Allergiák: $value';
+  }
+
+  @override
+  String emergencyCard_medications(String value) {
+    return 'Gyógyszerek: $value';
+  }
+
+  @override
+  String get emergencyCard_contactsSection => 'Vészhelyzeti kapcsolatok';
+
+  @override
+  String get emergencyCard_insuranceSection => 'Búvárbiztosítás';
+
+  @override
+  String emergencyCard_insurancePolicy(String number) {
+    return 'Kötvény: $number';
+  }
+
+  @override
+  String get emergencyCard_chambersSection => 'Hiperbárikus kamrák';
+
+  @override
+  String get emergencyCard_chambersNote =>
+      'Az elérhetőség változik. Irányításért mindig először a búvár segélyvonalat hívd.';
+
+  @override
+  String emergencyCard_chamberVerified(String date) {
+    return 'Adatok ellenőrizve: $date';
+  }
+
+  @override
+  String get emergencyCard_hideChamber => 'Elrejtés';
+
+  @override
+  String get emergencyCard_chamberHidden => 'Kamra elrejtve';
+
+  @override
+  String get emergencyCard_undo => 'Visszavonás';
+
+  @override
+  String get emergencyCard_addChamber => 'Kamra hozzáadása';
+
+  @override
+  String get emergencyCard_deleteChamber => 'Törlés';
+
+  @override
+  String emergencyCard_regionLabel(String region) {
+    return 'Régió: $region';
+  }
+
+  @override
+  String get emergencyCard_regionUnknown =>
+      'Ismeretlen régió - a világméretű segélyvonal használata';
+
+  @override
+  String get emergencyCard_noDiverData =>
+      'Nincsenek búvárprofil-adatok. Add meg a vészhelyzeti kapcsolatokat, egészségügyi és biztosítási adatokat a búvárprofilban.';
+
+  @override
+  String get addChamber_title => 'Kamra hozzáadása';
+
+  @override
+  String get addChamber_name => 'Név';
+
+  @override
+  String get addChamber_country => 'Országkód (pl. HU)';
+
+  @override
+  String get addChamber_city => 'Város';
+
+  @override
+  String get addChamber_phone => 'Telefon';
+
+  @override
+  String get addChamber_notes => 'Jegyzetek';
+
+  @override
+  String get addChamber_save => 'Mentés';
+
+  @override
+  String get addChamber_nameRequired => 'A név megadása kötelező';
+
+  @override
+  String get addChamber_countryRequired => 'Az országkód megadása kötelező';
+
+  @override
+  String get addChamber_phoneRequired => 'A telefonszám megadása kötelező';
+
+  @override
+  String get safetyHub_emergencyCardLink => 'Vészhelyzeti kártya';
+
+  @override
+  String get safetyHub_emergencyCardLink_subtitle =>
+      'Offline: segélyvonal, segélyhívó, kamrák, egészségügyi és biztosítási adataid';
+
+  @override
+  String get dashboard_quickAction_emergency => 'Vészhelyzeti kártya';
 }

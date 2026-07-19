@@ -12366,6 +12366,130 @@ class AppLocalizationsDe extends AppLocalizations {
       'Gewichtsaufteilung, Gesamtgewicht';
 
   @override
+  String get diveDetailSection_buoyancy_name => 'Auftrieb';
+
+  @override
+  String get diveDetailSection_buoyancy_description =>
+      'Auftrieb im Tauchgangverlauf, Schwankung, abwerfbares Blei';
+
+  @override
+  String get buoyancy_tooltip =>
+      'Modellierter Nettoauftrieb im Tauchgangverlauf aus Profil, Gasverbrauch und Ausrüstung.';
+
+  @override
+  String buoyancy_verdictBuoyant(String depth, String amount) {
+    return 'Am letzten Stopp (~$depth) hattest du etwa $amount Auftrieb';
+  }
+
+  @override
+  String buoyancy_verdictHeavy(String depth, String amount) {
+    return 'Am letzten Stopp (~$depth) warst du etwa $amount zu schwer';
+  }
+
+  @override
+  String get buoyancy_verdictNeutral =>
+      'Am letzten Stopp war deine Konfiguration nahezu neutral';
+
+  @override
+  String get buoyancy_verdictConvention =>
+      'Geschätzt an der 5-m-Sicherheitsstopp-Konvention';
+
+  @override
+  String get buoyancy_breakdownTitle => 'Term-Aufschlüsselung';
+
+  @override
+  String get buoyancy_suitTerm => 'Anzug';
+
+  @override
+  String get buoyancy_leadTerm => 'Blei';
+
+  @override
+  String get buoyancy_beginNet => 'Tauchgangbeginn';
+
+  @override
+  String get buoyancy_endNet => 'Tauchgangende';
+
+  @override
+  String get buoyancy_swing => 'Auftriebsschwankung';
+
+  @override
+  String get buoyancy_peakLift => 'Max. benötigter Auftrieb';
+
+  @override
+  String get buoyancy_wingWarning =>
+      'Übersteigt die Nennauftriebskraft deines Wings';
+
+  @override
+  String get buoyancy_minDitchable => 'Min. abwerfbares Blei';
+
+  @override
+  String get buoyancy_droppable => 'Abwerfbar';
+
+  @override
+  String get buoyancy_ditchWarning => 'Mehr als du abwerfen kannst';
+
+  @override
+  String get buoyancy_drysuitGas => 'Trocki-Gas zugegeben';
+
+  @override
+  String get buoyancy_estimatedPressures => 'Flaschendrücke sind geschätzt';
+
+  @override
+  String get buoyancy_linkSuitHint =>
+      'Verknüpfe einen Tauchanzug mit diesem Tauchgang für ein vollständigeres Bild';
+
+  @override
+  String get buoyancy_chartNet => 'Netto';
+
+  @override
+  String get buoyancy_chartRig => 'Rig + Blei';
+
+  @override
+  String get buoyancy_chartMinutes => 'Zeit (min)';
+
+  @override
+  String get buoyancy_historyTitle => 'Bleiverlauf';
+
+  @override
+  String get buoyancy_historyCarried => 'Getragen';
+
+  @override
+  String get buoyancy_historyModeled => 'Modelliert';
+
+  @override
+  String buoyancy_historyMore(String delta) {
+    return 'Du trägst typischerweise $delta mehr als vom Modell vorgeschlagen';
+  }
+
+  @override
+  String buoyancy_historyLess(String delta) {
+    return 'Du trägst typischerweise $delta weniger als vom Modell vorgeschlagen';
+  }
+
+  @override
+  String get buoyancy_throughDive => 'Im Tauchgangverlauf';
+
+  @override
+  String get buoyancy_adjust => 'Anpassen';
+
+  @override
+  String get buoyancy_whatIfTitle => 'Diesen Tauchgang anpassen';
+
+  @override
+  String get buoyancy_whatIfLead => 'Blei';
+
+  @override
+  String get buoyancy_whatIfSuit => 'Anzugsauftrieb';
+
+  @override
+  String get buoyancy_whatIfReset => 'Zurücksetzen';
+
+  @override
+  String buoyancy_whatIfDelta(String delta) {
+    return '$delta ggü. tatsächlich';
+  }
+
+  @override
   String get diveDetailSection_tanks_name => 'Flaschen';
 
   @override
@@ -20086,6 +20210,15 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
+  String equipment_edit_liftCapacityLabel(String unit) {
+    return 'Auftriebskapazität ($unit)';
+  }
+
+  @override
+  String get equipment_edit_liftCapacityHint =>
+      'Nennauftrieb von Wing oder Jacket';
+
+  @override
   String get planner_gearWeights_accept => 'Als geplantes Blei übernehmen';
 
   @override
@@ -20909,4 +21042,130 @@ class AppLocalizationsDe extends AppLocalizations {
   String safetyHub_alert_noFly(String remaining) {
     return 'Flugverbot: noch $remaining';
   }
+
+  @override
+  String get emergencyCard_title => 'Notfall';
+
+  @override
+  String emergencyCard_callDan(String name) {
+    return '$name anrufen';
+  }
+
+  @override
+  String get emergencyCard_callDan_subtitle =>
+      'Taucher-Notfallhotline. Zuerst anrufen: sie koordiniert Evakuierung und Kammerzuweisung.';
+
+  @override
+  String emergencyCard_ems(String number) {
+    return 'Örtlicher Notruf: $number';
+  }
+
+  @override
+  String get emergencyCard_diverSection => 'Taucher';
+
+  @override
+  String emergencyCard_bloodType(String value) {
+    return 'Blutgruppe: $value';
+  }
+
+  @override
+  String emergencyCard_allergies(String value) {
+    return 'Allergien: $value';
+  }
+
+  @override
+  String emergencyCard_medications(String value) {
+    return 'Medikamente: $value';
+  }
+
+  @override
+  String get emergencyCard_contactsSection => 'Notfallkontakte';
+
+  @override
+  String get emergencyCard_insuranceSection => 'Tauchversicherung';
+
+  @override
+  String emergencyCard_insurancePolicy(String number) {
+    return 'Police $number';
+  }
+
+  @override
+  String get emergencyCard_chambersSection => 'Druckkammern';
+
+  @override
+  String get emergencyCard_chambersNote =>
+      'Verfügbarkeit ändert sich. Immer zuerst die Taucher-Notfallhotline zur Zuweisung anrufen.';
+
+  @override
+  String emergencyCard_chamberVerified(String date) {
+    return 'Angaben geprüft $date';
+  }
+
+  @override
+  String get emergencyCard_hideChamber => 'Ausblenden';
+
+  @override
+  String get emergencyCard_chamberHidden => 'Kammer ausgeblendet';
+
+  @override
+  String get emergencyCard_undo => 'Rückgängig';
+
+  @override
+  String get emergencyCard_addChamber => 'Kammer hinzufügen';
+
+  @override
+  String get emergencyCard_deleteChamber => 'Löschen';
+
+  @override
+  String emergencyCard_regionLabel(String region) {
+    return 'Region: $region';
+  }
+
+  @override
+  String get emergencyCard_regionUnknown =>
+      'Region unbekannt - weltweite Hotline wird verwendet';
+
+  @override
+  String get emergencyCard_noDiverData =>
+      'Keine Taucherprofildaten. Notfallkontakte, medizinische Daten und Versicherung im Taucherprofil hinterlegen.';
+
+  @override
+  String get addChamber_title => 'Kammer hinzufügen';
+
+  @override
+  String get addChamber_name => 'Name';
+
+  @override
+  String get addChamber_country => 'Ländercode (z. B. DE)';
+
+  @override
+  String get addChamber_city => 'Stadt';
+
+  @override
+  String get addChamber_phone => 'Telefon';
+
+  @override
+  String get addChamber_notes => 'Notizen';
+
+  @override
+  String get addChamber_save => 'Speichern';
+
+  @override
+  String get addChamber_nameRequired => 'Name ist erforderlich';
+
+  @override
+  String get addChamber_countryRequired => 'Ländercode ist erforderlich';
+
+  @override
+  String get addChamber_phoneRequired => 'Telefonnummer ist erforderlich';
+
+  @override
+  String get safetyHub_emergencyCardLink => 'Notfallkarte';
+
+  @override
+  String get safetyHub_emergencyCardLink_subtitle =>
+      'Offline: Hotline, Notruf, Kammern, deine medizinischen und Versicherungsdaten';
+
+  @override
+  String get dashboard_quickAction_emergency => 'Notfallkarte';
 }

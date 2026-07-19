@@ -12366,6 +12366,131 @@ class AppLocalizationsEs extends AppLocalizations {
       'Desglose de pesos, peso total';
 
   @override
+  String get diveDetailSection_buoyancy_name => 'Flotabilidad';
+
+  @override
+  String get diveDetailSection_buoyancy_description =>
+      'Flotabilidad durante la inmersión, variación, lastre soltable';
+
+  @override
+  String get buoyancy_tooltip =>
+      'Flotabilidad neta modelada durante la inmersión a partir del perfil, el consumo de gas y el equipo.';
+
+  @override
+  String buoyancy_verdictBuoyant(String depth, String amount) {
+    return 'En tu última parada (~$depth) tenías unos $amount de flotabilidad';
+  }
+
+  @override
+  String buoyancy_verdictHeavy(String depth, String amount) {
+    return 'En tu última parada (~$depth) estabas unos $amount sobrelastrado';
+  }
+
+  @override
+  String get buoyancy_verdictNeutral =>
+      'Tu configuración estaba casi neutra en la última parada';
+
+  @override
+  String get buoyancy_verdictConvention =>
+      'Estimado en la convención de parada de seguridad a 5 m';
+
+  @override
+  String get buoyancy_breakdownTitle => 'Desglose de términos';
+
+  @override
+  String get buoyancy_suitTerm => 'Traje';
+
+  @override
+  String get buoyancy_leadTerm => 'Lastre';
+
+  @override
+  String get buoyancy_beginNet => 'Inicio de la inmersión';
+
+  @override
+  String get buoyancy_endNet => 'Fin de la inmersión';
+
+  @override
+  String get buoyancy_swing => 'Variación de flotabilidad';
+
+  @override
+  String get buoyancy_peakLift => 'Sustentación máxima necesaria';
+
+  @override
+  String get buoyancy_wingWarning =>
+      'Supera la sustentación nominal de tu wing';
+
+  @override
+  String get buoyancy_minDitchable => 'Lastre soltable mínimo';
+
+  @override
+  String get buoyancy_droppable => 'Puedes soltar';
+
+  @override
+  String get buoyancy_ditchWarning => 'Más de lo que puedes soltar';
+
+  @override
+  String get buoyancy_drysuitGas => 'Gas de traje seco añadido';
+
+  @override
+  String get buoyancy_estimatedPressures =>
+      'Las presiones de botella son estimadas';
+
+  @override
+  String get buoyancy_linkSuitHint =>
+      'Asocia un traje a esta inmersión para un panorama más completo';
+
+  @override
+  String get buoyancy_chartNet => 'Neto';
+
+  @override
+  String get buoyancy_chartRig => 'Equipo + lastre';
+
+  @override
+  String get buoyancy_chartMinutes => 'Tiempo (min)';
+
+  @override
+  String get buoyancy_historyTitle => 'Historial de lastre';
+
+  @override
+  String get buoyancy_historyCarried => 'Llevado';
+
+  @override
+  String get buoyancy_historyModeled => 'Modelado';
+
+  @override
+  String buoyancy_historyMore(String delta) {
+    return 'Sueles llevar $delta más de lo que sugiere el modelo';
+  }
+
+  @override
+  String buoyancy_historyLess(String delta) {
+    return 'Sueles llevar $delta menos de lo que sugiere el modelo';
+  }
+
+  @override
+  String get buoyancy_throughDive => 'Durante la inmersión';
+
+  @override
+  String get buoyancy_adjust => 'Ajustar';
+
+  @override
+  String get buoyancy_whatIfTitle => 'Ajustar esta inmersión';
+
+  @override
+  String get buoyancy_whatIfLead => 'Lastre';
+
+  @override
+  String get buoyancy_whatIfSuit => 'Flotabilidad del traje';
+
+  @override
+  String get buoyancy_whatIfReset => 'Restablecer';
+
+  @override
+  String buoyancy_whatIfDelta(String delta) {
+    return '$delta vs real';
+  }
+
+  @override
   String get diveDetailSection_tanks_name => 'Tanques';
 
   @override
@@ -20129,6 +20254,15 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String equipment_edit_liftCapacityLabel(String unit) {
+    return 'Capacidad de flotación ($unit)';
+  }
+
+  @override
+  String get equipment_edit_liftCapacityHint =>
+      'Sustentación nominal del wing o jacket';
+
+  @override
   String get planner_gearWeights_accept => 'Usar como lastre planificado';
 
   @override
@@ -20955,4 +21089,130 @@ class AppLocalizationsEs extends AppLocalizations {
   String safetyHub_alert_noFly(String remaining) {
     return 'No volar: quedan $remaining';
   }
+
+  @override
+  String get emergencyCard_title => 'Emergencia';
+
+  @override
+  String emergencyCard_callDan(String name) {
+    return 'Llamar a $name';
+  }
+
+  @override
+  String get emergencyCard_callDan_subtitle =>
+      'Línea de emergencias para buceadores. Llama primero: coordinan la evacuación y la derivación a cámara.';
+
+  @override
+  String emergencyCard_ems(String number) {
+    return 'Emergencias locales: $number';
+  }
+
+  @override
+  String get emergencyCard_diverSection => 'Buceador';
+
+  @override
+  String emergencyCard_bloodType(String value) {
+    return 'Grupo sanguíneo: $value';
+  }
+
+  @override
+  String emergencyCard_allergies(String value) {
+    return 'Alergias: $value';
+  }
+
+  @override
+  String emergencyCard_medications(String value) {
+    return 'Medicación: $value';
+  }
+
+  @override
+  String get emergencyCard_contactsSection => 'Contactos de emergencia';
+
+  @override
+  String get emergencyCard_insuranceSection => 'Seguro de buceo';
+
+  @override
+  String emergencyCard_insurancePolicy(String number) {
+    return 'Póliza $number';
+  }
+
+  @override
+  String get emergencyCard_chambersSection => 'Cámaras hiperbáricas';
+
+  @override
+  String get emergencyCard_chambersNote =>
+      'La disponibilidad cambia. Llama siempre primero a la línea de emergencias para buceadores para la derivación.';
+
+  @override
+  String emergencyCard_chamberVerified(String date) {
+    return 'Datos verificados $date';
+  }
+
+  @override
+  String get emergencyCard_hideChamber => 'Ocultar';
+
+  @override
+  String get emergencyCard_chamberHidden => 'Cámara ocultada';
+
+  @override
+  String get emergencyCard_undo => 'Deshacer';
+
+  @override
+  String get emergencyCard_addChamber => 'Añadir cámara';
+
+  @override
+  String get emergencyCard_deleteChamber => 'Eliminar';
+
+  @override
+  String emergencyCard_regionLabel(String region) {
+    return 'Región: $region';
+  }
+
+  @override
+  String get emergencyCard_regionUnknown =>
+      'Región desconocida: se usa la línea mundial';
+
+  @override
+  String get emergencyCard_noDiverData =>
+      'Sin datos del perfil del buceador. Añade contactos de emergencia, datos médicos y seguro en Perfil del buceador.';
+
+  @override
+  String get addChamber_title => 'Añadir cámara';
+
+  @override
+  String get addChamber_name => 'Nombre';
+
+  @override
+  String get addChamber_country => 'Código de país (p. ej. ES)';
+
+  @override
+  String get addChamber_city => 'Ciudad';
+
+  @override
+  String get addChamber_phone => 'Teléfono';
+
+  @override
+  String get addChamber_notes => 'Notas';
+
+  @override
+  String get addChamber_save => 'Guardar';
+
+  @override
+  String get addChamber_nameRequired => 'El nombre es obligatorio';
+
+  @override
+  String get addChamber_countryRequired => 'El código de país es obligatorio';
+
+  @override
+  String get addChamber_phoneRequired => 'El número de teléfono es obligatorio';
+
+  @override
+  String get safetyHub_emergencyCardLink => 'Tarjeta de emergencia';
+
+  @override
+  String get safetyHub_emergencyCardLink_subtitle =>
+      'Sin conexión: línea directa, emergencias, cámaras, tus datos médicos y de seguro';
+
+  @override
+  String get dashboard_quickAction_emergency => 'Tarjeta de emergencia';
 }

@@ -1207,6 +1207,42 @@
   "diveDetailSection_tide_description": "Getijdecyclusgrafiek en timing",
   "diveDetailSection_tide_name": "Getij",
   "diveDetailSection_weights_description": "Gewichtsoverzicht, totaalgewicht",
+  "diveDetailSection_buoyancy_name": "Drijfvermogen",
+  "diveDetailSection_buoyancy_description": "Drijfvermogen tijdens de duik, variatie, afwerpbaar lood",
+  "buoyancy_tooltip": "Gemodelleerd netto drijfvermogen tijdens de duik op basis van profiel, gasverbruik en uitrusting.",
+  "buoyancy_verdictBuoyant": "Bij je laatste stop (~{depth}) had je ongeveer {amount} opdrijvend vermogen",
+  "buoyancy_verdictHeavy": "Bij je laatste stop (~{depth}) was je ongeveer {amount} te zwaar",
+  "buoyancy_verdictNeutral": "Je configuratie was bijna neutraal bij de laatste stop",
+  "buoyancy_verdictConvention": "Geschat volgens de 5 m-veiligheidsstopconventie",
+  "buoyancy_breakdownTitle": "Termuitsplitsing",
+  "buoyancy_suitTerm": "Pak",
+  "buoyancy_leadTerm": "Lood",
+  "buoyancy_beginNet": "Begin van de duik",
+  "buoyancy_endNet": "Einde van de duik",
+  "buoyancy_swing": "Drijfvermogenvariatie",
+  "buoyancy_peakLift": "Maximaal benodigde lift",
+  "buoyancy_wingWarning": "Overschrijdt de nominale lift van je wing",
+  "buoyancy_minDitchable": "Min. afwerpbaar lood",
+  "buoyancy_droppable": "Je kunt afwerpen",
+  "buoyancy_ditchWarning": "Meer dan je kunt afwerpen",
+  "buoyancy_drysuitGas": "Droogpakgas toegevoegd",
+  "buoyancy_estimatedPressures": "Flesdrukken zijn geschat",
+  "buoyancy_linkSuitHint": "Koppel een duikpak aan deze duik voor een vollediger beeld",
+  "buoyancy_chartNet": "Netto",
+  "buoyancy_chartRig": "Uitrusting + lood",
+  "buoyancy_chartMinutes": "Tijd (min)",
+  "buoyancy_historyTitle": "Loodgeschiedenis",
+  "buoyancy_historyCarried": "Gedragen",
+  "buoyancy_historyModeled": "Gemodelleerd",
+  "buoyancy_historyMore": "Je draagt doorgaans {delta} meer dan het model voorstelt",
+  "buoyancy_historyLess": "Je draagt doorgaans {delta} minder dan het model voorstelt",
+  "buoyancy_throughDive": "Tijdens de duik",
+  "buoyancy_adjust": "Aanpassen",
+  "buoyancy_whatIfTitle": "Deze duik aanpassen",
+  "buoyancy_whatIfLead": "Lood",
+  "buoyancy_whatIfSuit": "Pakdrijfvermogen",
+  "buoyancy_whatIfReset": "Herstellen",
+  "buoyancy_whatIfDelta": "{delta} t.o.v. werkelijk",
   "diveDetailSection_weights_name": "Gewichten",
   "diveImport_alreadyImported": "Al geimporteerd",
   "diveImport_avgHR": "Gem. HR",
@@ -5685,6 +5721,8 @@
   "equipment_edit_buoyancyHint_tank": "Leeg laten - flessen gebruiken hun eigen specificaties",
   "equipment_edit_buoyancyLabel": "Drijfvermogen ({unit})",
   "equipment_edit_dryWeightLabel": "Drooggewicht ({unit})",
+  "equipment_edit_liftCapacityLabel": "Liftcapaciteit ({unit})",
+  "equipment_edit_liftCapacityHint": "Nominale liftkracht van wing of trimvest",
   "planner_gearWeights_accept": "Gebruik als gepland lood",
   "planner_gearWeights_addGear": "Uitrusting toevoegen",
   "planner_gearWeights_empty": "Voeg uitrusting toe om je lood te voorspellen",
@@ -6175,5 +6213,96 @@
     }
   },
   "diveLog_detail_altitudeMismatch_title": "Duikstek ligt op hoogte",
-  "diveLog_detail_altitudeMismatch_subtitle": "Deze stek heeft een hoogte geregistreerd maar de duik niet, dus de deco-analyse ging uit van zeeniveau. Stel de hoogte van de duik in om dit te corrigeren."
+  "diveLog_detail_altitudeMismatch_subtitle": "Deze stek heeft een hoogte geregistreerd maar de duik niet, dus de deco-analyse ging uit van zeeniveau. Stel de hoogte van de duik in om dit te corrigeren.",
+  "emergencyCard_title": "Noodgeval",
+  "emergencyCard_callDan": "Bel {name}",
+  "@emergencyCard_callDan": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "emergencyCard_callDan_subtitle": "Noodlijn voor duikers. Bel eerst: zij coördineren evacuatie en doorverwijzing naar een kamer.",
+  "emergencyCard_ems": "Lokale hulpdiensten: {number}",
+  "@emergencyCard_ems": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "emergencyCard_diverSection": "Duiker",
+  "emergencyCard_bloodType": "Bloedgroep: {value}",
+  "@emergencyCard_bloodType": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "emergencyCard_allergies": "Allergieën: {value}",
+  "@emergencyCard_allergies": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "emergencyCard_medications": "Medicatie: {value}",
+  "@emergencyCard_medications": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "emergencyCard_contactsSection": "Noodcontacten",
+  "emergencyCard_insuranceSection": "Duikverzekering",
+  "emergencyCard_insurancePolicy": "Polis {number}",
+  "@emergencyCard_insurancePolicy": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "emergencyCard_chambersSection": "Decompressiekamers",
+  "emergencyCard_chambersNote": "Beschikbaarheid verandert. Bel altijd eerst de noodlijn voor duikers voor doorverwijzing.",
+  "emergencyCard_chamberVerified": "Gegevens gecontroleerd {date}",
+  "@emergencyCard_chamberVerified": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "emergencyCard_hideChamber": "Verbergen",
+  "emergencyCard_chamberHidden": "Kamer verborgen",
+  "emergencyCard_undo": "Ongedaan maken",
+  "emergencyCard_addChamber": "Kamer toevoegen",
+  "emergencyCard_deleteChamber": "Verwijderen",
+  "emergencyCard_regionLabel": "Regio: {region}",
+  "@emergencyCard_regionLabel": {
+    "placeholders": {
+      "region": {
+        "type": "String"
+      }
+    }
+  },
+  "emergencyCard_regionUnknown": "Regio onbekend - wereldwijde noodlijn wordt gebruikt",
+  "emergencyCard_noDiverData": "Geen duikersprofielgegevens. Voeg noodcontacten, medische gegevens en verzekering toe in het duikersprofiel.",
+  "addChamber_title": "Kamer toevoegen",
+  "addChamber_name": "Naam",
+  "addChamber_country": "Landcode (bijv. NL)",
+  "addChamber_city": "Stad",
+  "addChamber_phone": "Telefoon",
+  "addChamber_notes": "Notities",
+  "addChamber_save": "Opslaan",
+  "addChamber_nameRequired": "Naam is verplicht",
+  "addChamber_countryRequired": "Landcode is verplicht",
+  "addChamber_phoneRequired": "Telefoonnummer is verplicht",
+  "safetyHub_emergencyCardLink": "Noodkaart",
+  "safetyHub_emergencyCardLink_subtitle": "Offline: noodlijn, hulpdiensten, kamers, je medische en verzekeringsgegevens",
+  "dashboard_quickAction_emergency": "Noodkaart"
 }

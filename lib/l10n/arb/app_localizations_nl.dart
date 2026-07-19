@@ -12283,6 +12283,130 @@ class AppLocalizationsNl extends AppLocalizations {
       'Gewichtsoverzicht, totaalgewicht';
 
   @override
+  String get diveDetailSection_buoyancy_name => 'Drijfvermogen';
+
+  @override
+  String get diveDetailSection_buoyancy_description =>
+      'Drijfvermogen tijdens de duik, variatie, afwerpbaar lood';
+
+  @override
+  String get buoyancy_tooltip =>
+      'Gemodelleerd netto drijfvermogen tijdens de duik op basis van profiel, gasverbruik en uitrusting.';
+
+  @override
+  String buoyancy_verdictBuoyant(String depth, String amount) {
+    return 'Bij je laatste stop (~$depth) had je ongeveer $amount opdrijvend vermogen';
+  }
+
+  @override
+  String buoyancy_verdictHeavy(String depth, String amount) {
+    return 'Bij je laatste stop (~$depth) was je ongeveer $amount te zwaar';
+  }
+
+  @override
+  String get buoyancy_verdictNeutral =>
+      'Je configuratie was bijna neutraal bij de laatste stop';
+
+  @override
+  String get buoyancy_verdictConvention =>
+      'Geschat volgens de 5 m-veiligheidsstopconventie';
+
+  @override
+  String get buoyancy_breakdownTitle => 'Termuitsplitsing';
+
+  @override
+  String get buoyancy_suitTerm => 'Pak';
+
+  @override
+  String get buoyancy_leadTerm => 'Lood';
+
+  @override
+  String get buoyancy_beginNet => 'Begin van de duik';
+
+  @override
+  String get buoyancy_endNet => 'Einde van de duik';
+
+  @override
+  String get buoyancy_swing => 'Drijfvermogenvariatie';
+
+  @override
+  String get buoyancy_peakLift => 'Maximaal benodigde lift';
+
+  @override
+  String get buoyancy_wingWarning =>
+      'Overschrijdt de nominale lift van je wing';
+
+  @override
+  String get buoyancy_minDitchable => 'Min. afwerpbaar lood';
+
+  @override
+  String get buoyancy_droppable => 'Je kunt afwerpen';
+
+  @override
+  String get buoyancy_ditchWarning => 'Meer dan je kunt afwerpen';
+
+  @override
+  String get buoyancy_drysuitGas => 'Droogpakgas toegevoegd';
+
+  @override
+  String get buoyancy_estimatedPressures => 'Flesdrukken zijn geschat';
+
+  @override
+  String get buoyancy_linkSuitHint =>
+      'Koppel een duikpak aan deze duik voor een vollediger beeld';
+
+  @override
+  String get buoyancy_chartNet => 'Netto';
+
+  @override
+  String get buoyancy_chartRig => 'Uitrusting + lood';
+
+  @override
+  String get buoyancy_chartMinutes => 'Tijd (min)';
+
+  @override
+  String get buoyancy_historyTitle => 'Loodgeschiedenis';
+
+  @override
+  String get buoyancy_historyCarried => 'Gedragen';
+
+  @override
+  String get buoyancy_historyModeled => 'Gemodelleerd';
+
+  @override
+  String buoyancy_historyMore(String delta) {
+    return 'Je draagt doorgaans $delta meer dan het model voorstelt';
+  }
+
+  @override
+  String buoyancy_historyLess(String delta) {
+    return 'Je draagt doorgaans $delta minder dan het model voorstelt';
+  }
+
+  @override
+  String get buoyancy_throughDive => 'Tijdens de duik';
+
+  @override
+  String get buoyancy_adjust => 'Aanpassen';
+
+  @override
+  String get buoyancy_whatIfTitle => 'Deze duik aanpassen';
+
+  @override
+  String get buoyancy_whatIfLead => 'Lood';
+
+  @override
+  String get buoyancy_whatIfSuit => 'Pakdrijfvermogen';
+
+  @override
+  String get buoyancy_whatIfReset => 'Herstellen';
+
+  @override
+  String buoyancy_whatIfDelta(String delta) {
+    return '$delta t.o.v. werkelijk';
+  }
+
+  @override
   String get diveDetailSection_tanks_name => 'Flessen';
 
   @override
@@ -19959,6 +20083,15 @@ class AppLocalizationsNl extends AppLocalizations {
   }
 
   @override
+  String equipment_edit_liftCapacityLabel(String unit) {
+    return 'Liftcapaciteit ($unit)';
+  }
+
+  @override
+  String get equipment_edit_liftCapacityHint =>
+      'Nominale liftkracht van wing of trimvest';
+
+  @override
   String get planner_gearWeights_accept => 'Gebruik als gepland lood';
 
   @override
@@ -20777,4 +20910,130 @@ class AppLocalizationsNl extends AppLocalizations {
   String safetyHub_alert_noFly(String remaining) {
     return 'Vliegverbod: nog $remaining';
   }
+
+  @override
+  String get emergencyCard_title => 'Noodgeval';
+
+  @override
+  String emergencyCard_callDan(String name) {
+    return 'Bel $name';
+  }
+
+  @override
+  String get emergencyCard_callDan_subtitle =>
+      'Noodlijn voor duikers. Bel eerst: zij coördineren evacuatie en doorverwijzing naar een kamer.';
+
+  @override
+  String emergencyCard_ems(String number) {
+    return 'Lokale hulpdiensten: $number';
+  }
+
+  @override
+  String get emergencyCard_diverSection => 'Duiker';
+
+  @override
+  String emergencyCard_bloodType(String value) {
+    return 'Bloedgroep: $value';
+  }
+
+  @override
+  String emergencyCard_allergies(String value) {
+    return 'Allergieën: $value';
+  }
+
+  @override
+  String emergencyCard_medications(String value) {
+    return 'Medicatie: $value';
+  }
+
+  @override
+  String get emergencyCard_contactsSection => 'Noodcontacten';
+
+  @override
+  String get emergencyCard_insuranceSection => 'Duikverzekering';
+
+  @override
+  String emergencyCard_insurancePolicy(String number) {
+    return 'Polis $number';
+  }
+
+  @override
+  String get emergencyCard_chambersSection => 'Decompressiekamers';
+
+  @override
+  String get emergencyCard_chambersNote =>
+      'Beschikbaarheid verandert. Bel altijd eerst de noodlijn voor duikers voor doorverwijzing.';
+
+  @override
+  String emergencyCard_chamberVerified(String date) {
+    return 'Gegevens gecontroleerd $date';
+  }
+
+  @override
+  String get emergencyCard_hideChamber => 'Verbergen';
+
+  @override
+  String get emergencyCard_chamberHidden => 'Kamer verborgen';
+
+  @override
+  String get emergencyCard_undo => 'Ongedaan maken';
+
+  @override
+  String get emergencyCard_addChamber => 'Kamer toevoegen';
+
+  @override
+  String get emergencyCard_deleteChamber => 'Verwijderen';
+
+  @override
+  String emergencyCard_regionLabel(String region) {
+    return 'Regio: $region';
+  }
+
+  @override
+  String get emergencyCard_regionUnknown =>
+      'Regio onbekend - wereldwijde noodlijn wordt gebruikt';
+
+  @override
+  String get emergencyCard_noDiverData =>
+      'Geen duikersprofielgegevens. Voeg noodcontacten, medische gegevens en verzekering toe in het duikersprofiel.';
+
+  @override
+  String get addChamber_title => 'Kamer toevoegen';
+
+  @override
+  String get addChamber_name => 'Naam';
+
+  @override
+  String get addChamber_country => 'Landcode (bijv. NL)';
+
+  @override
+  String get addChamber_city => 'Stad';
+
+  @override
+  String get addChamber_phone => 'Telefoon';
+
+  @override
+  String get addChamber_notes => 'Notities';
+
+  @override
+  String get addChamber_save => 'Opslaan';
+
+  @override
+  String get addChamber_nameRequired => 'Naam is verplicht';
+
+  @override
+  String get addChamber_countryRequired => 'Landcode is verplicht';
+
+  @override
+  String get addChamber_phoneRequired => 'Telefoonnummer is verplicht';
+
+  @override
+  String get safetyHub_emergencyCardLink => 'Noodkaart';
+
+  @override
+  String get safetyHub_emergencyCardLink_subtitle =>
+      'Offline: noodlijn, hulpdiensten, kamers, je medische en verzekeringsgegevens';
+
+  @override
+  String get dashboard_quickAction_emergency => 'Noodkaart';
 }

@@ -12152,6 +12152,129 @@ class AppLocalizationsAr extends AppLocalizations {
       'تفصيل الأوزان، إجمالي الوزن';
 
   @override
+  String get diveDetailSection_buoyancy_name => 'الطفو';
+
+  @override
+  String get diveDetailSection_buoyancy_description =>
+      'الطفو خلال الغطسة، التغيّر، والوزن القابل للإسقاط';
+
+  @override
+  String get buoyancy_tooltip =>
+      'الطفو الصافي المُنمذَج خلال الغطسة من المخطط واستهلاك الغاز والمعدات.';
+
+  @override
+  String buoyancy_verdictBuoyant(String depth, String amount) {
+    return 'عند محطتك الأخيرة (~$depth) كان لديك نحو $amount من الطفو';
+  }
+
+  @override
+  String buoyancy_verdictHeavy(String depth, String amount) {
+    return 'عند محطتك الأخيرة (~$depth) كنت أثقل بنحو $amount';
+  }
+
+  @override
+  String get buoyancy_verdictNeutral =>
+      'كانت تهيئتك قريبة من التعادل عند المحطة الأخيرة';
+
+  @override
+  String get buoyancy_verdictConvention =>
+      'مُقدَّر وفق اصطلاح محطة الأمان عند 5 أمتار';
+
+  @override
+  String get buoyancy_breakdownTitle => 'تفصيل العناصر';
+
+  @override
+  String get buoyancy_suitTerm => 'البدلة';
+
+  @override
+  String get buoyancy_leadTerm => 'الرصاص';
+
+  @override
+  String get buoyancy_beginNet => 'بداية الغطسة';
+
+  @override
+  String get buoyancy_endNet => 'نهاية الغطسة';
+
+  @override
+  String get buoyancy_swing => 'تغيّر الطفو';
+
+  @override
+  String get buoyancy_peakLift => 'أقصى رفع مطلوب';
+
+  @override
+  String get buoyancy_wingWarning => 'يتجاوز قدرة الرفع الاسمية لجناحك';
+
+  @override
+  String get buoyancy_minDitchable => 'أدنى وزن قابل للإسقاط';
+
+  @override
+  String get buoyancy_droppable => 'يمكنك إسقاط';
+
+  @override
+  String get buoyancy_ditchWarning => 'أكثر مما يمكنك إسقاطه';
+
+  @override
+  String get buoyancy_drysuitGas => 'غاز البدلة الجافة المُضاف';
+
+  @override
+  String get buoyancy_estimatedPressures => 'ضغوط الأسطوانات تقديرية';
+
+  @override
+  String get buoyancy_linkSuitHint =>
+      'اربط بدلة تعرّض بهذه الغطسة للحصول على صورة أوفى';
+
+  @override
+  String get buoyancy_chartNet => 'الصافي';
+
+  @override
+  String get buoyancy_chartRig => 'المعدات + الرصاص';
+
+  @override
+  String get buoyancy_chartMinutes => 'الزمن (دقيقة)';
+
+  @override
+  String get buoyancy_historyTitle => 'سجل الترصيص';
+
+  @override
+  String get buoyancy_historyCarried => 'المحمول';
+
+  @override
+  String get buoyancy_historyModeled => 'المُنمذَج';
+
+  @override
+  String buoyancy_historyMore(String delta) {
+    return 'عادةً ما تحمل $delta أكثر مما يقترحه النموذج';
+  }
+
+  @override
+  String buoyancy_historyLess(String delta) {
+    return 'عادةً ما تحمل $delta أقل مما يقترحه النموذج';
+  }
+
+  @override
+  String get buoyancy_throughDive => 'خلال الغطسة';
+
+  @override
+  String get buoyancy_adjust => 'تعديل';
+
+  @override
+  String get buoyancy_whatIfTitle => 'تعديل هذه الغطسة';
+
+  @override
+  String get buoyancy_whatIfLead => 'الرصاص';
+
+  @override
+  String get buoyancy_whatIfSuit => 'طفو البدلة';
+
+  @override
+  String get buoyancy_whatIfReset => 'إعادة تعيين';
+
+  @override
+  String buoyancy_whatIfDelta(String delta) {
+    return '$delta مقابل الفعلي';
+  }
+
+  @override
   String get diveDetailSection_tanks_name => 'الأسطوانات';
 
   @override
@@ -19752,6 +19875,14 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
+  String equipment_edit_liftCapacityLabel(String unit) {
+    return 'سعة الرفع ($unit)';
+  }
+
+  @override
+  String get equipment_edit_liftCapacityHint => 'قوة رفع الجناح أو منظم الطفو';
+
+  @override
   String get planner_gearWeights_accept => 'استخدام كوزن مخطط';
 
   @override
@@ -20560,4 +20691,130 @@ class AppLocalizationsAr extends AppLocalizations {
   String safetyHub_alert_noFly(String remaining) {
     return 'حظر الطيران: متبقٍ $remaining';
   }
+
+  @override
+  String get emergencyCard_title => 'الطوارئ';
+
+  @override
+  String emergencyCard_callDan(String name) {
+    return 'اتصل بـ $name';
+  }
+
+  @override
+  String get emergencyCard_callDan_subtitle =>
+      'خط طوارئ الغواصين. اتصل به أولاً: فهم ينسقون الإخلاء والإحالة إلى غرفة الضغط.';
+
+  @override
+  String emergencyCard_ems(String number) {
+    return 'خدمات الطوارئ المحلية: $number';
+  }
+
+  @override
+  String get emergencyCard_diverSection => 'الغواص';
+
+  @override
+  String emergencyCard_bloodType(String value) {
+    return 'فصيلة الدم: $value';
+  }
+
+  @override
+  String emergencyCard_allergies(String value) {
+    return 'الحساسية: $value';
+  }
+
+  @override
+  String emergencyCard_medications(String value) {
+    return 'الأدوية: $value';
+  }
+
+  @override
+  String get emergencyCard_contactsSection => 'جهات اتصال الطوارئ';
+
+  @override
+  String get emergencyCard_insuranceSection => 'تأمين الغوص';
+
+  @override
+  String emergencyCard_insurancePolicy(String number) {
+    return 'وثيقة $number';
+  }
+
+  @override
+  String get emergencyCard_chambersSection => 'غرف الضغط العالي';
+
+  @override
+  String get emergencyCard_chambersNote =>
+      'التوفر يتغير. اتصل دائمًا بخط طوارئ الغواصين أولاً للإحالة.';
+
+  @override
+  String emergencyCard_chamberVerified(String date) {
+    return 'تم التحقق من البيانات $date';
+  }
+
+  @override
+  String get emergencyCard_hideChamber => 'إخفاء';
+
+  @override
+  String get emergencyCard_chamberHidden => 'تم إخفاء الغرفة';
+
+  @override
+  String get emergencyCard_undo => 'تراجع';
+
+  @override
+  String get emergencyCard_addChamber => 'إضافة غرفة';
+
+  @override
+  String get emergencyCard_deleteChamber => 'حذف';
+
+  @override
+  String emergencyCard_regionLabel(String region) {
+    return 'المنطقة: $region';
+  }
+
+  @override
+  String get emergencyCard_regionUnknown =>
+      'المنطقة غير معروفة - يُستخدم الخط العالمي';
+
+  @override
+  String get emergencyCard_noDiverData =>
+      'لا توجد بيانات ملف الغواص. أضف جهات اتصال الطوارئ والبيانات الطبية والتأمين في ملف الغواص.';
+
+  @override
+  String get addChamber_title => 'إضافة غرفة';
+
+  @override
+  String get addChamber_name => 'الاسم';
+
+  @override
+  String get addChamber_country => 'رمز الدولة (مثل EG)';
+
+  @override
+  String get addChamber_city => 'المدينة';
+
+  @override
+  String get addChamber_phone => 'الهاتف';
+
+  @override
+  String get addChamber_notes => 'ملاحظات';
+
+  @override
+  String get addChamber_save => 'حفظ';
+
+  @override
+  String get addChamber_nameRequired => 'الاسم مطلوب';
+
+  @override
+  String get addChamber_countryRequired => 'رمز الدولة مطلوب';
+
+  @override
+  String get addChamber_phoneRequired => 'رقم الهاتف مطلوب';
+
+  @override
+  String get safetyHub_emergencyCardLink => 'بطاقة الطوارئ';
+
+  @override
+  String get safetyHub_emergencyCardLink_subtitle =>
+      'دون اتصال: الخط الساخن، الطوارئ، الغرف، بياناتك الطبية والتأمينية';
+
+  @override
+  String get dashboard_quickAction_emergency => 'بطاقة الطوارئ';
 }

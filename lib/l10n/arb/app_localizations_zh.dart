@@ -11788,6 +11788,124 @@ class AppLocalizationsZh extends AppLocalizations {
   String get diveDetailSection_weights_description => '配重明细、总重量';
 
   @override
+  String get diveDetailSection_buoyancy_name => '浮力';
+
+  @override
+  String get diveDetailSection_buoyancy_description => '整个潜水过程的浮力、变化和可抛弃配重';
+
+  @override
+  String get buoyancy_tooltip => '根据剖面、气体消耗和装备模拟的整个潜水过程净浮力。';
+
+  @override
+  String buoyancy_verdictBuoyant(String depth, String amount) {
+    return '在最后停留点（~$depth），你约有 $amount 的正浮力';
+  }
+
+  @override
+  String buoyancy_verdictHeavy(String depth, String amount) {
+    return '在最后停留点（~$depth），你约超重 $amount';
+  }
+
+  @override
+  String get buoyancy_verdictNeutral => '在最后停留点，你的配置接近中性';
+
+  @override
+  String get buoyancy_verdictConvention => '按 5 米安全停留惯例估算';
+
+  @override
+  String get buoyancy_breakdownTitle => '分项明细';
+
+  @override
+  String get buoyancy_suitTerm => '潜水服';
+
+  @override
+  String get buoyancy_leadTerm => '配重';
+
+  @override
+  String get buoyancy_beginNet => '潜水开始';
+
+  @override
+  String get buoyancy_endNet => '潜水结束';
+
+  @override
+  String get buoyancy_swing => '浮力变化';
+
+  @override
+  String get buoyancy_peakLift => '所需峰值浮力';
+
+  @override
+  String get buoyancy_wingWarning => '超过浮力背心的额定浮力';
+
+  @override
+  String get buoyancy_minDitchable => '最小可抛弃配重';
+
+  @override
+  String get buoyancy_droppable => '可抛弃';
+
+  @override
+  String get buoyancy_ditchWarning => '超过可抛弃的量';
+
+  @override
+  String get buoyancy_drysuitGas => '干式潜水服充气量';
+
+  @override
+  String get buoyancy_estimatedPressures => '气瓶压力为估算值';
+
+  @override
+  String get buoyancy_linkSuitHint => '为本次潜水关联一件暴露服以获得更完整的分析';
+
+  @override
+  String get buoyancy_chartNet => '净值';
+
+  @override
+  String get buoyancy_chartRig => '装备 + 配重';
+
+  @override
+  String get buoyancy_chartMinutes => '时间（分钟）';
+
+  @override
+  String get buoyancy_historyTitle => '配重历史';
+
+  @override
+  String get buoyancy_historyCarried => '实际携带';
+
+  @override
+  String get buoyancy_historyModeled => '模型建议';
+
+  @override
+  String buoyancy_historyMore(String delta) {
+    return '你通常比模型建议多带 $delta';
+  }
+
+  @override
+  String buoyancy_historyLess(String delta) {
+    return '你通常比模型建议少带 $delta';
+  }
+
+  @override
+  String get buoyancy_throughDive => '整个潜水过程';
+
+  @override
+  String get buoyancy_adjust => '调整';
+
+  @override
+  String get buoyancy_whatIfTitle => '调整此次潜水';
+
+  @override
+  String get buoyancy_whatIfLead => '配重';
+
+  @override
+  String get buoyancy_whatIfSuit => '潜水服浮力';
+
+  @override
+  String get buoyancy_whatIfReset => '重置';
+
+  @override
+  String buoyancy_whatIfDelta(String delta) {
+    return '$delta（对比实际）';
+  }
+
+  @override
   String get diveDetailSection_tanks_name => '气瓶';
 
   @override
@@ -19091,6 +19209,14 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String equipment_edit_liftCapacityLabel(String unit) {
+    return '浮力容量（$unit）';
+  }
+
+  @override
+  String get equipment_edit_liftCapacityHint => '浮力背心或 BCD 的额定浮力';
+
+  @override
   String get planner_gearWeights_accept => '用作计划配重';
 
   @override
@@ -19883,4 +20009,125 @@ class AppLocalizationsZh extends AppLocalizations {
   String safetyHub_alert_noFly(String remaining) {
     return '禁飞:剩余 $remaining';
   }
+
+  @override
+  String get emergencyCard_title => '紧急情况';
+
+  @override
+  String emergencyCard_callDan(String name) {
+    return '呼叫 $name';
+  }
+
+  @override
+  String get emergencyCard_callDan_subtitle => '潜水员紧急热线。请先拨打:他们负责协调撤离和减压舱转诊。';
+
+  @override
+  String emergencyCard_ems(String number) {
+    return '当地急救电话:$number';
+  }
+
+  @override
+  String get emergencyCard_diverSection => '潜水员';
+
+  @override
+  String emergencyCard_bloodType(String value) {
+    return '血型:$value';
+  }
+
+  @override
+  String emergencyCard_allergies(String value) {
+    return '过敏:$value';
+  }
+
+  @override
+  String emergencyCard_medications(String value) {
+    return '用药:$value';
+  }
+
+  @override
+  String get emergencyCard_contactsSection => '紧急联系人';
+
+  @override
+  String get emergencyCard_insuranceSection => '潜水保险';
+
+  @override
+  String emergencyCard_insurancePolicy(String number) {
+    return '保单 $number';
+  }
+
+  @override
+  String get emergencyCard_chambersSection => '高压氧舱';
+
+  @override
+  String get emergencyCard_chambersNote => '可用性会变化。转诊请务必先拨打潜水员紧急热线。';
+
+  @override
+  String emergencyCard_chamberVerified(String date) {
+    return '信息核实于 $date';
+  }
+
+  @override
+  String get emergencyCard_hideChamber => '隐藏';
+
+  @override
+  String get emergencyCard_chamberHidden => '已隐藏氧舱';
+
+  @override
+  String get emergencyCard_undo => '撤消';
+
+  @override
+  String get emergencyCard_addChamber => '添加减压舱';
+
+  @override
+  String get emergencyCard_deleteChamber => '删除';
+
+  @override
+  String emergencyCard_regionLabel(String region) {
+    return '区域:$region';
+  }
+
+  @override
+  String get emergencyCard_regionUnknown => '区域未知 - 使用全球热线';
+
+  @override
+  String get emergencyCard_noDiverData => '无潜水员资料。请在潜水员资料设置中添加紧急联系人、医疗和保险信息。';
+
+  @override
+  String get addChamber_title => '添加减压舱';
+
+  @override
+  String get addChamber_name => '名称';
+
+  @override
+  String get addChamber_country => '国家代码(如 CN)';
+
+  @override
+  String get addChamber_city => '城市';
+
+  @override
+  String get addChamber_phone => '电话';
+
+  @override
+  String get addChamber_notes => '备注';
+
+  @override
+  String get addChamber_save => '保存';
+
+  @override
+  String get addChamber_nameRequired => '名称为必填项';
+
+  @override
+  String get addChamber_countryRequired => '国家代码为必填项';
+
+  @override
+  String get addChamber_phoneRequired => '电话号码为必填项';
+
+  @override
+  String get safetyHub_emergencyCardLink => '紧急卡片';
+
+  @override
+  String get safetyHub_emergencyCardLink_subtitle => '离线可用:热线、急救、减压舱、你的医疗和保险信息';
+
+  @override
+  String get dashboard_quickAction_emergency => '紧急卡片';
 }

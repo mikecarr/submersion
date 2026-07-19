@@ -12374,6 +12374,130 @@ class AppLocalizationsPt extends AppLocalizations {
       'Detalhamento de peso, peso total';
 
   @override
+  String get diveDetailSection_buoyancy_name => 'Flutuabilidade';
+
+  @override
+  String get diveDetailSection_buoyancy_description =>
+      'Flutuabilidade durante o mergulho, variação, lastro descartável';
+
+  @override
+  String get buoyancy_tooltip =>
+      'Flutuabilidade líquida modelada durante o mergulho a partir do perfil, consumo de gás e equipamento.';
+
+  @override
+  String buoyancy_verdictBuoyant(String depth, String amount) {
+    return 'Na sua última parada (~$depth) você tinha cerca de $amount de flutuabilidade';
+  }
+
+  @override
+  String buoyancy_verdictHeavy(String depth, String amount) {
+    return 'Na sua última parada (~$depth) você estava cerca de $amount pesado demais';
+  }
+
+  @override
+  String get buoyancy_verdictNeutral =>
+      'Sua configuração estava quase neutra na última parada';
+
+  @override
+  String get buoyancy_verdictConvention =>
+      'Estimado pela convenção de parada de segurança a 5 m';
+
+  @override
+  String get buoyancy_breakdownTitle => 'Detalhe dos termos';
+
+  @override
+  String get buoyancy_suitTerm => 'Roupa';
+
+  @override
+  String get buoyancy_leadTerm => 'Lastro';
+
+  @override
+  String get buoyancy_beginNet => 'Início do mergulho';
+
+  @override
+  String get buoyancy_endNet => 'Fim do mergulho';
+
+  @override
+  String get buoyancy_swing => 'Variação de flutuabilidade';
+
+  @override
+  String get buoyancy_peakLift => 'Sustentação máxima necessária';
+
+  @override
+  String get buoyancy_wingWarning => 'Excede a sustentação nominal do seu wing';
+
+  @override
+  String get buoyancy_minDitchable => 'Lastro descartável mínimo';
+
+  @override
+  String get buoyancy_droppable => 'Você pode soltar';
+
+  @override
+  String get buoyancy_ditchWarning => 'Mais do que você pode soltar';
+
+  @override
+  String get buoyancy_drysuitGas => 'Gás de roupa seca adicionado';
+
+  @override
+  String get buoyancy_estimatedPressures =>
+      'As pressões dos cilindros são estimadas';
+
+  @override
+  String get buoyancy_linkSuitHint =>
+      'Associe uma roupa de exposição a este mergulho para um quadro mais completo';
+
+  @override
+  String get buoyancy_chartNet => 'Líquido';
+
+  @override
+  String get buoyancy_chartRig => 'Equipamento + lastro';
+
+  @override
+  String get buoyancy_chartMinutes => 'Tempo (min)';
+
+  @override
+  String get buoyancy_historyTitle => 'Histórico de lastro';
+
+  @override
+  String get buoyancy_historyCarried => 'Levado';
+
+  @override
+  String get buoyancy_historyModeled => 'Modelado';
+
+  @override
+  String buoyancy_historyMore(String delta) {
+    return 'Você costuma levar $delta a mais do que o modelo sugere';
+  }
+
+  @override
+  String buoyancy_historyLess(String delta) {
+    return 'Você costuma levar $delta a menos do que o modelo sugere';
+  }
+
+  @override
+  String get buoyancy_throughDive => 'Durante o mergulho';
+
+  @override
+  String get buoyancy_adjust => 'Ajustar';
+
+  @override
+  String get buoyancy_whatIfTitle => 'Ajustar este mergulho';
+
+  @override
+  String get buoyancy_whatIfLead => 'Lastro';
+
+  @override
+  String get buoyancy_whatIfSuit => 'Flutuabilidade da roupa';
+
+  @override
+  String get buoyancy_whatIfReset => 'Redefinir';
+
+  @override
+  String buoyancy_whatIfDelta(String delta) {
+    return '$delta vs real';
+  }
+
+  @override
   String get diveDetailSection_tanks_name => 'Cilindros';
 
   @override
@@ -20120,6 +20244,15 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
+  String equipment_edit_liftCapacityLabel(String unit) {
+    return 'Capacidade de sustentação ($unit)';
+  }
+
+  @override
+  String get equipment_edit_liftCapacityHint =>
+      'Sustentação nominal do wing ou colete';
+
+  @override
   String get planner_gearWeights_accept => 'Usar como lastro planejado';
 
   @override
@@ -20942,4 +21075,130 @@ class AppLocalizationsPt extends AppLocalizations {
   String safetyHub_alert_noFly(String remaining) {
     return 'Não voar: faltam $remaining';
   }
+
+  @override
+  String get emergencyCard_title => 'Emergência';
+
+  @override
+  String emergencyCard_callDan(String name) {
+    return 'Ligar para $name';
+  }
+
+  @override
+  String get emergencyCard_callDan_subtitle =>
+      'Linha de emergência para mergulhadores. Ligue primeiro: eles coordenam a evacuação e o encaminhamento para câmara.';
+
+  @override
+  String emergencyCard_ems(String number) {
+    return 'Emergência local: $number';
+  }
+
+  @override
+  String get emergencyCard_diverSection => 'Mergulhador';
+
+  @override
+  String emergencyCard_bloodType(String value) {
+    return 'Tipo sanguíneo: $value';
+  }
+
+  @override
+  String emergencyCard_allergies(String value) {
+    return 'Alergias: $value';
+  }
+
+  @override
+  String emergencyCard_medications(String value) {
+    return 'Medicamentos: $value';
+  }
+
+  @override
+  String get emergencyCard_contactsSection => 'Contatos de emergência';
+
+  @override
+  String get emergencyCard_insuranceSection => 'Seguro de mergulho';
+
+  @override
+  String emergencyCard_insurancePolicy(String number) {
+    return 'Apólice $number';
+  }
+
+  @override
+  String get emergencyCard_chambersSection => 'Câmaras hiperbáricas';
+
+  @override
+  String get emergencyCard_chambersNote =>
+      'A disponibilidade muda. Ligue sempre primeiro para a linha de emergência de mergulhadores para encaminhamento.';
+
+  @override
+  String emergencyCard_chamberVerified(String date) {
+    return 'Dados verificados em $date';
+  }
+
+  @override
+  String get emergencyCard_hideChamber => 'Ocultar';
+
+  @override
+  String get emergencyCard_chamberHidden => 'Câmara ocultada';
+
+  @override
+  String get emergencyCard_undo => 'Desfazer';
+
+  @override
+  String get emergencyCard_addChamber => 'Adicionar câmara';
+
+  @override
+  String get emergencyCard_deleteChamber => 'Excluir';
+
+  @override
+  String emergencyCard_regionLabel(String region) {
+    return 'Região: $region';
+  }
+
+  @override
+  String get emergencyCard_regionUnknown =>
+      'Região desconhecida - usando a linha mundial';
+
+  @override
+  String get emergencyCard_noDiverData =>
+      'Sem dados do perfil do mergulhador. Adicione contatos de emergência, dados médicos e seguro no perfil do mergulhador.';
+
+  @override
+  String get addChamber_title => 'Adicionar câmara';
+
+  @override
+  String get addChamber_name => 'Nome';
+
+  @override
+  String get addChamber_country => 'Código do país (ex. BR)';
+
+  @override
+  String get addChamber_city => 'Cidade';
+
+  @override
+  String get addChamber_phone => 'Telefone';
+
+  @override
+  String get addChamber_notes => 'Notas';
+
+  @override
+  String get addChamber_save => 'Salvar';
+
+  @override
+  String get addChamber_nameRequired => 'O nome é obrigatório';
+
+  @override
+  String get addChamber_countryRequired => 'O código do país é obrigatório';
+
+  @override
+  String get addChamber_phoneRequired => 'O número de telefone é obrigatório';
+
+  @override
+  String get safetyHub_emergencyCardLink => 'Cartão de emergência';
+
+  @override
+  String get safetyHub_emergencyCardLink_subtitle =>
+      'Offline: linha direta, emergência, câmaras, seus dados médicos e de seguro';
+
+  @override
+  String get dashboard_quickAction_emergency => 'Cartão de emergência';
 }

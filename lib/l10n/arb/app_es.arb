@@ -1207,6 +1207,42 @@
   "diveDetailSection_tide_description": "Grafico del ciclo de mareas y temporalizacion",
   "diveDetailSection_tide_name": "Marea",
   "diveDetailSection_weights_description": "Desglose de pesos, peso total",
+  "diveDetailSection_buoyancy_name": "Flotabilidad",
+  "diveDetailSection_buoyancy_description": "Flotabilidad durante la inmersión, variación, lastre soltable",
+  "buoyancy_tooltip": "Flotabilidad neta modelada durante la inmersión a partir del perfil, el consumo de gas y el equipo.",
+  "buoyancy_verdictBuoyant": "En tu última parada (~{depth}) tenías unos {amount} de flotabilidad",
+  "buoyancy_verdictHeavy": "En tu última parada (~{depth}) estabas unos {amount} sobrelastrado",
+  "buoyancy_verdictNeutral": "Tu configuración estaba casi neutra en la última parada",
+  "buoyancy_verdictConvention": "Estimado en la convención de parada de seguridad a 5 m",
+  "buoyancy_breakdownTitle": "Desglose de términos",
+  "buoyancy_suitTerm": "Traje",
+  "buoyancy_leadTerm": "Lastre",
+  "buoyancy_beginNet": "Inicio de la inmersión",
+  "buoyancy_endNet": "Fin de la inmersión",
+  "buoyancy_swing": "Variación de flotabilidad",
+  "buoyancy_peakLift": "Sustentación máxima necesaria",
+  "buoyancy_wingWarning": "Supera la sustentación nominal de tu wing",
+  "buoyancy_minDitchable": "Lastre soltable mínimo",
+  "buoyancy_droppable": "Puedes soltar",
+  "buoyancy_ditchWarning": "Más de lo que puedes soltar",
+  "buoyancy_drysuitGas": "Gas de traje seco añadido",
+  "buoyancy_estimatedPressures": "Las presiones de botella son estimadas",
+  "buoyancy_linkSuitHint": "Asocia un traje a esta inmersión para un panorama más completo",
+  "buoyancy_chartNet": "Neto",
+  "buoyancy_chartRig": "Equipo + lastre",
+  "buoyancy_chartMinutes": "Tiempo (min)",
+  "buoyancy_historyTitle": "Historial de lastre",
+  "buoyancy_historyCarried": "Llevado",
+  "buoyancy_historyModeled": "Modelado",
+  "buoyancy_historyMore": "Sueles llevar {delta} más de lo que sugiere el modelo",
+  "buoyancy_historyLess": "Sueles llevar {delta} menos de lo que sugiere el modelo",
+  "buoyancy_throughDive": "Durante la inmersión",
+  "buoyancy_adjust": "Ajustar",
+  "buoyancy_whatIfTitle": "Ajustar esta inmersión",
+  "buoyancy_whatIfLead": "Lastre",
+  "buoyancy_whatIfSuit": "Flotabilidad del traje",
+  "buoyancy_whatIfReset": "Restablecer",
+  "buoyancy_whatIfDelta": "{delta} vs real",
   "diveDetailSection_weights_name": "Lastres",
   "diveImport_alreadyImported": "Ya importada",
   "diveImport_avgHR": "FC media",
@@ -5685,6 +5721,8 @@
   "equipment_edit_buoyancyHint_tank": "Dejar vacío: los tanques usan sus propias especificaciones",
   "equipment_edit_buoyancyLabel": "Flotabilidad ({unit})",
   "equipment_edit_dryWeightLabel": "Peso en seco ({unit})",
+  "equipment_edit_liftCapacityLabel": "Capacidad de flotación ({unit})",
+  "equipment_edit_liftCapacityHint": "Sustentación nominal del wing o jacket",
   "planner_gearWeights_accept": "Usar como lastre planificado",
   "planner_gearWeights_addGear": "Añadir equipo",
   "planner_gearWeights_empty": "Añade equipo para predecir tu lastre",
@@ -6175,5 +6213,96 @@
     }
   },
   "diveLog_detail_altitudeMismatch_title": "El punto de buceo está en altitud",
-  "diveLog_detail_altitudeMismatch_subtitle": "Este punto registra una altitud pero la inmersión no tiene ninguna, así que el análisis de descompresión asumió nivel del mar. Establece la altitud de la inmersión para corregirlo."
+  "diveLog_detail_altitudeMismatch_subtitle": "Este punto registra una altitud pero la inmersión no tiene ninguna, así que el análisis de descompresión asumió nivel del mar. Establece la altitud de la inmersión para corregirlo.",
+  "emergencyCard_title": "Emergencia",
+  "emergencyCard_callDan": "Llamar a {name}",
+  "@emergencyCard_callDan": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "emergencyCard_callDan_subtitle": "Línea de emergencias para buceadores. Llama primero: coordinan la evacuación y la derivación a cámara.",
+  "emergencyCard_ems": "Emergencias locales: {number}",
+  "@emergencyCard_ems": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "emergencyCard_diverSection": "Buceador",
+  "emergencyCard_bloodType": "Grupo sanguíneo: {value}",
+  "@emergencyCard_bloodType": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "emergencyCard_allergies": "Alergias: {value}",
+  "@emergencyCard_allergies": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "emergencyCard_medications": "Medicación: {value}",
+  "@emergencyCard_medications": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "emergencyCard_contactsSection": "Contactos de emergencia",
+  "emergencyCard_insuranceSection": "Seguro de buceo",
+  "emergencyCard_insurancePolicy": "Póliza {number}",
+  "@emergencyCard_insurancePolicy": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "emergencyCard_chambersSection": "Cámaras hiperbáricas",
+  "emergencyCard_chambersNote": "La disponibilidad cambia. Llama siempre primero a la línea de emergencias para buceadores para la derivación.",
+  "emergencyCard_chamberVerified": "Datos verificados {date}",
+  "@emergencyCard_chamberVerified": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "emergencyCard_hideChamber": "Ocultar",
+  "emergencyCard_chamberHidden": "Cámara ocultada",
+  "emergencyCard_undo": "Deshacer",
+  "emergencyCard_addChamber": "Añadir cámara",
+  "emergencyCard_deleteChamber": "Eliminar",
+  "emergencyCard_regionLabel": "Región: {region}",
+  "@emergencyCard_regionLabel": {
+    "placeholders": {
+      "region": {
+        "type": "String"
+      }
+    }
+  },
+  "emergencyCard_regionUnknown": "Región desconocida: se usa la línea mundial",
+  "emergencyCard_noDiverData": "Sin datos del perfil del buceador. Añade contactos de emergencia, datos médicos y seguro en Perfil del buceador.",
+  "addChamber_title": "Añadir cámara",
+  "addChamber_name": "Nombre",
+  "addChamber_country": "Código de país (p. ej. ES)",
+  "addChamber_city": "Ciudad",
+  "addChamber_phone": "Teléfono",
+  "addChamber_notes": "Notas",
+  "addChamber_save": "Guardar",
+  "addChamber_nameRequired": "El nombre es obligatorio",
+  "addChamber_countryRequired": "El código de país es obligatorio",
+  "addChamber_phoneRequired": "El número de teléfono es obligatorio",
+  "safetyHub_emergencyCardLink": "Tarjeta de emergencia",
+  "safetyHub_emergencyCardLink_subtitle": "Sin conexión: línea directa, emergencias, cámaras, tus datos médicos y de seguro",
+  "dashboard_quickAction_emergency": "Tarjeta de emergencia"
 }
