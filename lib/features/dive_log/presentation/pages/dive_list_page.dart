@@ -13,6 +13,9 @@ import 'package:submersion/core/providers/provider.dart';
 import 'package:submersion/core/utils/unit_formatter.dart';
 import 'package:submersion/features/dive_log/domain/entities/dive.dart';
 import 'package:submersion/features/dive_log/domain/entities/dive_summary.dart';
+import 'package:submersion/features/dive_log/presentation/formatters/dive_type_label.dart';
+import 'package:submersion/features/dive_types/domain/entities/dive_type_entity.dart';
+import 'package:submersion/features/dive_types/presentation/providers/dive_type_providers.dart';
 import 'package:submersion/features/data_quality/presentation/providers/data_quality_providers.dart';
 import 'package:submersion/features/dive_log/presentation/pages/dive_detail_page.dart';
 import 'package:submersion/features/dive_log/presentation/pages/dive_edit_page.dart';
@@ -768,12 +771,26 @@ class DiveListTile extends ConsumerWidget {
     final titleField = slotField('title', DiveField.siteName);
     final dateField = slotField('date', DiveField.dateTime);
 
+    // Watched once for the whole card and shared by every slot and extra
+    // field, so a Dive Type slot honors the active locale (issue #643) and
+    // keeps a custom type's own name.
+    final typesById = {
+      for (final t
+          in ref.watch(diveTypesProvider).value ?? const <DiveTypeEntity>[])
+        t.id: t,
+    };
+    String typeLabel(String id) =>
+        diveTypeLabel(context.l10n, id, typesById: typesById);
+
     // Resolve the title and date lines from their slot assignments, keeping
     // the legacy rendering when the slot holds its default field (mirrors
     // CompactDiveListTile).
     String buildTitleText() {
       if (summary != null && titleField != DiveField.siteName) {
-        final value = titleField.extractFromSummary(summary!);
+        final value = titleField.extractFromSummary(
+          summary!,
+          diveTypeLabel: typeLabel,
+        );
         return titleField.formatValue(value, units);
       }
       return siteName ?? context.l10n.diveLog_listPage_unknownSite;
@@ -781,7 +798,10 @@ class DiveListTile extends ConsumerWidget {
 
     String buildDateText() {
       if (summary != null && dateField != DiveField.dateTime) {
-        final value = dateField.extractFromSummary(summary!);
+        final value = dateField.extractFromSummary(
+          summary!,
+          diveTypeLabel: typeLabel,
+        );
         return dateField.formatValue(value, units);
       }
       return units.formatDateTime(dateTime, l10n: context.l10n);
@@ -966,6 +986,7 @@ class DiveListTile extends ConsumerWidget {
                             context,
                             accentColor,
                             secondaryTextColor,
+                            typeLabel,
                           ),
                           const SizedBox(width: 16),
                           _buildStatWidget(
@@ -975,6 +996,7 @@ class DiveListTile extends ConsumerWidget {
                             context,
                             accentColor,
                             secondaryTextColor,
+                            typeLabel,
                           ),
                         ],
                       ),
@@ -1000,8 +1022,12 @@ class DiveListTile extends ConsumerWidget {
                                 ? field.extractFromDive(
                                     fullDive!,
                                     sacUnit: units.sacUnit,
+                                    diveTypeLabel: typeLabel,
                                   )
-                                : (field.extractFromSummary(summary!) ??
+                                : (field.extractFromSummary(
+                                        summary!,
+                                        diveTypeLabel: typeLabel,
+                                      ) ??
                                       _fallbackValue(field));
                             final formatted = field.formatValue(value, units);
                             return SizedBox(
@@ -1144,12 +1170,17 @@ class DiveListTile extends ConsumerWidget {
     BuildContext context,
     Color accentColor,
     Color secondaryTextColor,
+    String Function(String id) typeLabel,
   ) {
     // Use full Dive when available (has all fields), otherwise try summary
     dynamic value = fullDive != null
-        ? field.extractFromDive(fullDive!, sacUnit: units.sacUnit)
+        ? field.extractFromDive(
+            fullDive!,
+            sacUnit: units.sacUnit,
+            diveTypeLabel: typeLabel,
+          )
         : summary != null
-        ? field.extractFromSummary(summary)
+        ? field.extractFromSummary(summary, diveTypeLabel: typeLabel)
         : null;
     value ??= _fallbackValue(field);
     final formatted = field.formatValue(value, units);

@@ -5,6 +5,9 @@ import 'package:submersion/core/constants/dive_field.dart';
 import 'package:submersion/core/providers/provider.dart';
 import 'package:submersion/core/utils/unit_formatter.dart';
 import 'package:submersion/features/dive_log/domain/entities/dive_summary.dart';
+import 'package:submersion/features/dive_log/presentation/formatters/dive_type_label.dart';
+import 'package:submersion/features/dive_types/domain/entities/dive_type_entity.dart';
+import 'package:submersion/features/dive_types/presentation/providers/dive_type_providers.dart';
 import 'package:submersion/features/settings/presentation/providers/settings_providers.dart';
 import 'package:submersion/l10n/l10n_extension.dart';
 
@@ -83,18 +86,31 @@ class CompactDiveListTile extends ConsumerWidget {
   }
 
   /// Returns the display string for the title slot.
-  String _buildTitleText(UnitFormatter units, BuildContext context) {
+  String _buildTitleText(
+    UnitFormatter units,
+    BuildContext context,
+    String Function(String id) typeLabel,
+  ) {
     if (summary != null && titleField != DiveField.siteName) {
-      final value = titleField.extractFromSummary(summary!);
+      final value = titleField.extractFromSummary(
+        summary!,
+        diveTypeLabel: typeLabel,
+      );
       return titleField.formatValue(value, units);
     }
     return siteName ?? context.l10n.diveLog_listPage_unknownSite;
   }
 
   /// Returns the display string for the date slot.
-  String _buildDateText(UnitFormatter units) {
+  String _buildDateText(
+    UnitFormatter units,
+    String Function(String id) typeLabel,
+  ) {
     if (summary != null && dateField != DiveField.dateTime) {
-      final value = dateField.extractFromSummary(summary!);
+      final value = dateField.extractFromSummary(
+        summary!,
+        diveTypeLabel: typeLabel,
+      );
       return dateField.formatValue(value, units);
     }
     return units.formatDateTime(dateTime, l10n: null);
@@ -105,9 +121,13 @@ class CompactDiveListTile extends ConsumerWidget {
     DiveField field,
     DiveField defaultField,
     UnitFormatter units,
+    String Function(String id) typeLabel,
   ) {
     if (summary != null && field != defaultField) {
-      final value = field.extractFromSummary(summary!);
+      final value = field.extractFromSummary(
+        summary!,
+        diveTypeLabel: typeLabel,
+      );
       return field.formatValue(value, units);
     }
     // Use legacy parameters for default fields
@@ -118,7 +138,9 @@ class CompactDiveListTile extends ConsumerWidget {
       return duration != null ? '${duration!.inMinutes} min' : '--';
     }
     // Fallback for any other field value
-    final value = summary != null ? field.extractFromSummary(summary!) : null;
+    final value = summary != null
+        ? field.extractFromSummary(summary!, diveTypeLabel: typeLabel)
+        : null;
     return field.formatValue(value, units);
   }
 
@@ -182,11 +204,31 @@ class CompactDiveListTile extends ConsumerWidget {
         ? Colors.cyan.shade200
         : Colors.teal.shade800;
 
-    // Resolve slot text values
-    final titleText = _buildTitleText(units, context);
-    final dateText = _buildDateText(units);
-    final stat1Text = _buildStatText(stat1Field, DiveField.maxDepth, units);
-    final stat2Text = _buildStatText(stat2Field, DiveField.bottomTime, units);
+    // Resolve slot text values. The dive-type list is watched once here and
+    // shared by every slot, so a Dive Type column honors the active locale
+    // (issue #643) and keeps a custom type's own name.
+    final typesById = {
+      for (final t
+          in ref.watch(diveTypesProvider).value ?? const <DiveTypeEntity>[])
+        t.id: t,
+    };
+    String typeLabel(String id) =>
+        diveTypeLabel(context.l10n, id, typesById: typesById);
+
+    final titleText = _buildTitleText(units, context, typeLabel);
+    final dateText = _buildDateText(units, typeLabel);
+    final stat1Text = _buildStatText(
+      stat1Field,
+      DiveField.maxDepth,
+      units,
+      typeLabel,
+    );
+    final stat2Text = _buildStatText(
+      stat2Field,
+      DiveField.bottomTime,
+      units,
+      typeLabel,
+    );
 
     final statStyle = Theme.of(context).textTheme.bodySmall?.copyWith(
       fontWeight: FontWeight.w600,

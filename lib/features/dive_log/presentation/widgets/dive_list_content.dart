@@ -19,6 +19,7 @@ import 'package:submersion/shared/widgets/sort_bottom_sheet.dart';
 import 'package:submersion/features/dive_sites/presentation/providers/site_providers.dart';
 import 'package:submersion/features/settings/presentation/providers/settings_providers.dart';
 import 'package:submersion/features/settings/presentation/providers/export_providers.dart';
+import 'package:submersion/features/dive_types/presentation/dive_type_display.dart';
 import 'package:submersion/features/dive_types/presentation/providers/dive_type_providers.dart';
 import 'package:submersion/features/equipment/presentation/providers/equipment_providers.dart';
 import 'package:submersion/features/trips/presentation/providers/trip_providers.dart';
@@ -1382,7 +1383,11 @@ class _DiveListContentState extends ConsumerState<DiveListContent> {
 
     if (filter.diveTypeId != null) {
       final diveTypeName =
-          ref.watch(diveTypeProvider(filter.diveTypeId!)).value?.name ??
+          ref
+              .watch(diveTypeProvider(filter.diveTypeId!))
+              .value
+              ?.localizedName(context.l10n) ??
+          builtInDiveTypeName(context.l10n, filter.diveTypeId!) ??
           filter.diveTypeId!;
       chips.add(
         _buildFilterChip(context, diveTypeName, () {

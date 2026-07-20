@@ -6,6 +6,9 @@ import 'package:submersion/core/constants/dive_field.dart';
 import 'package:submersion/core/providers/provider.dart';
 import 'package:submersion/core/utils/unit_formatter.dart';
 import 'package:submersion/features/dive_log/domain/entities/dive_summary.dart';
+import 'package:submersion/features/dive_log/presentation/formatters/dive_type_label.dart';
+import 'package:submersion/features/dive_types/domain/entities/dive_type_entity.dart';
+import 'package:submersion/features/dive_types/presentation/providers/dive_type_providers.dart';
 import 'package:submersion/features/settings/presentation/providers/settings_providers.dart';
 import 'package:submersion/l10n/l10n_extension.dart';
 
@@ -97,9 +100,13 @@ class DenseDiveListTile extends ConsumerWidget {
     DiveField defaultField,
     UnitFormatter units,
     BuildContext context,
+    String Function(String id) typeLabel,
   ) {
     if (summary != null && field != defaultField) {
-      final value = field.extractFromSummary(summary!);
+      final value = field.extractFromSummary(
+        summary!,
+        diveTypeLabel: typeLabel,
+      );
       return field.formatValue(value, units);
     }
     if (field == DiveField.siteName) {
@@ -108,7 +115,9 @@ class DenseDiveListTile extends ConsumerWidget {
     if (field == DiveField.dateTime) {
       return _formatShortDate(dateTime);
     }
-    final value = summary != null ? field.extractFromSummary(summary!) : null;
+    final value = summary != null
+        ? field.extractFromSummary(summary!, diveTypeLabel: typeLabel)
+        : null;
     return field.formatValue(value, units);
   }
 
@@ -117,9 +126,13 @@ class DenseDiveListTile extends ConsumerWidget {
     DiveField field,
     DiveField defaultField,
     UnitFormatter units,
+    String Function(String id) typeLabel,
   ) {
     if (summary != null && field != defaultField) {
-      final value = field.extractFromSummary(summary!);
+      final value = field.extractFromSummary(
+        summary!,
+        diveTypeLabel: typeLabel,
+      );
       return field.formatValue(value, units);
     }
     if (field == DiveField.maxDepth) {
@@ -128,7 +141,9 @@ class DenseDiveListTile extends ConsumerWidget {
     if (field == DiveField.bottomTime) {
       return duration != null ? '${duration!.inMinutes} min' : '--';
     }
-    final value = summary != null ? field.extractFromSummary(summary!) : null;
+    final value = summary != null
+        ? field.extractFromSummary(summary!, diveTypeLabel: typeLabel)
+        : null;
     return field.formatValue(value, units);
   }
 
@@ -191,28 +206,42 @@ class DenseDiveListTile extends ConsumerWidget {
         ? Colors.cyan.shade200
         : Colors.teal.shade800;
 
-    // Resolve slot text values
+    // Resolve slot text values. The dive-type list is watched once here and
+    // shared by every slot, so a Dive Type column honors the active locale
+    // (issue #643) and keeps a custom type's own name.
+    final typesById = {
+      for (final t
+          in ref.watch(diveTypesProvider).value ?? const <DiveTypeEntity>[])
+        t.id: t,
+    };
+    String typeLabel(String id) =>
+        diveTypeLabel(context.l10n, id, typesById: typesById);
+
     final slot1Text = _buildTextSlotValue(
       slot1Field,
       DiveField.siteName,
       units,
       context,
+      typeLabel,
     );
     final slot2Text = _buildTextSlotValue(
       slot2Field,
       DiveField.dateTime,
       units,
       context,
+      typeLabel,
     );
     final slot3Text = _buildStatSlotValue(
       slot3Field,
       DiveField.maxDepth,
       units,
+      typeLabel,
     );
     final slot4Text = _buildStatSlotValue(
       slot4Field,
       DiveField.bottomTime,
       units,
+      typeLabel,
     );
 
     // Determine if stat values are present
