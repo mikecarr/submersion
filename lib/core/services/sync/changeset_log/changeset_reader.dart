@@ -57,6 +57,7 @@ class ChangesetReader {
     required ApplyPayload apply,
     required ApplyBaseFile applyBaseFile,
     String? currentEpochId,
+    int? legacyEpochCutoffMs,
     List<CloudFileInfo>? preListedFiles,
   }) async {
     final providerId = provider.providerId;
@@ -107,11 +108,20 @@ class ChangesetReader {
         peerManifests.add(manifest);
 
         // Stale-epoch filter: once this device is on a library epoch, a peer
-        // stamped with a different epoch (or unstamped) is inert -- applying it
-        // would leak a replaced-away library back in. Mirrors performSync's
-        // per-file filter. Null currentEpochId is the pre-epoch world: no
-        // filtering, apply every peer.
-        if (currentEpochId != null && manifest.epochId != currentEpochId) {
+        // stamped with a different epoch is inert -- applying it would leak a
+        // replaced-away library back in. Unstamped peers are allowed only when
+        // their manifest was rewritten after the current epoch began; this
+        // supports devices that upgraded around the epoch-protocol rollout.
+        // Null currentEpochId is the pre-epoch world: no filtering, apply every
+        // peer.
+        final isPostEpochLegacyManifest =
+            currentEpochId != null &&
+            manifest.epochId == null &&
+            legacyEpochCutoffMs != null &&
+            manifest.updatedAt >= legacyEpochCutoffMs;
+        if (currentEpochId != null &&
+            manifest.epochId != currentEpochId &&
+            !isPostEpochLegacyManifest) {
           continue;
         }
         peersProcessed++;

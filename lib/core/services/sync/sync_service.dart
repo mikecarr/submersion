@@ -163,9 +163,13 @@ typedef ParentRef = ({String field, String parent, bool nullable});
 /// resolved [currentEpochId] to stamp and filter by for the rest of the sync
 /// (null in the pre-epoch world).
 class _EpochGate {
-  const _EpochGate.proceed(this.currentEpochId) : terminal = null;
-  const _EpochGate.halt(this.terminal) : currentEpochId = null;
+  const _EpochGate.proceed(this.currentEpochId, {this.legacyEpochCutoffMs})
+    : terminal = null;
+  const _EpochGate.halt(this.terminal)
+    : currentEpochId = null,
+      legacyEpochCutoffMs = null;
   final String? currentEpochId;
+  final int? legacyEpochCutoffMs;
   final SyncResult? terminal;
 }
 
@@ -450,6 +454,7 @@ class SyncService {
         selfDeviceId: deviceId,
         folderId: folderId,
         currentEpochId: currentEpochId,
+        legacyEpochCutoffMs: gate.legacyEpochCutoffMs,
         // Reuse the fence check's listing (null after a rejoin, which mutates
         // the folder and needs a fresh view).
         preListedFiles: fence.files,
@@ -680,12 +685,18 @@ class SyncService {
             _log.warning('Could not self-heal epoch marker: $e');
           }
         }
-        return _EpochGate.proceed(accepted);
+        return _EpochGate.proceed(
+          accepted,
+          legacyEpochCutoffMs: epochStore.lastAcceptedMarker?.replacedAt,
+        );
       }
       return const _EpochGate.proceed(null); // pre-epoch world
     }
     if (marker.epochId == accepted) {
-      return _EpochGate.proceed(accepted);
+      return _EpochGate.proceed(
+        accepted,
+        legacyEpochCutoffMs: marker.replacedAt,
+      );
     }
     // Before halting for adoption, make sure the marked library is actually
     // readable. A marker with no current-format (ssv1) library is either a
