@@ -26,6 +26,8 @@ void main() {
     );
     await repo.bulkShiftDiveTimes(['d1'], const Duration(hours: -6));
     final shifted = (await repo.getDiveById('d1'))!;
+    // dive_date_time shifts too (the SQL updates it unconditionally).
+    expect(shifted.dateTime, entry.subtract(const Duration(hours: 6)));
     expect(shifted.entryTime, entry.subtract(const Duration(hours: 6)));
     expect(
       shifted.exitTime,

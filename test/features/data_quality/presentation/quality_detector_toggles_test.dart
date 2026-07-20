@@ -19,4 +19,26 @@ void main() {
     await notifier.setEnabled('impossible_rate', true);
     expect(QualityDetectorToggles.disabled, isNot(contains('impossible_rate')));
   });
+
+  test('hydrateFromPrefs loads persisted toggles without building the '
+      'provider (so scans honor them before settings is opened)', () async {
+    SharedPreferences.setMockInitialValues({
+      'quality_disabled_detectors': ['gas_mod', 'temp_anomaly'],
+    });
+    final prefs = await SharedPreferences.getInstance();
+
+    // No notifier/provider constructed -- mirrors a fresh launch where the
+    // settings page hasn't been opened yet.
+    QualityDetectorTogglesNotifier.hydrateFromPrefs(prefs);
+
+    expect(QualityDetectorToggles.disabled, {'gas_mod', 'temp_anomaly'});
+  });
+
+  test('hydrateFromPrefs with no saved toggles yields an empty set', () async {
+    SharedPreferences.setMockInitialValues({});
+    final prefs = await SharedPreferences.getInstance();
+    QualityDetectorToggles.disabled = {'stale'};
+    QualityDetectorTogglesNotifier.hydrateFromPrefs(prefs);
+    expect(QualityDetectorToggles.disabled, isEmpty);
+  });
 }

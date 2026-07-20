@@ -15,6 +15,15 @@ class QualityDetectorTogglesNotifier extends StateNotifier<Set<String>> {
   final SharedPreferences _prefs;
   static const _key = 'quality_disabled_detectors';
 
+  /// Load persisted toggles into the process-wide [QualityDetectorToggles.disabled]
+  /// mirror at startup. The fire-and-forget scan scheduler reads that static
+  /// directly, so without this the settings page (the only builder of this
+  /// provider) would have to be opened once before scans honor saved toggles.
+  static void hydrateFromPrefs(SharedPreferences prefs) {
+    QualityDetectorToggles.disabled =
+        prefs.getStringList(_key)?.toSet() ?? <String>{};
+  }
+
   Future<void> setEnabled(String detectorId, bool enabled) async {
     final next = Set<String>.of(state);
     if (enabled) {
