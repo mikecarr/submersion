@@ -99,10 +99,19 @@ class QualityContextBuilder {
     // NULL-vs-non-NULL, so a null-diver dive is never paired across into a
     // specific diver's dives. Do not "fix" this to `=`: that drops neighbor
     // detection for the common single-diver (all-NULL) library.
+    // Project each neighbor's first/last primary-sample depth via correlated
+    // subqueries so the whole window resolves in one query instead of two
+    // extra point lookups per neighbor (an N+1 during full-library scans).
     final rows = await _db
         .customSelect(
           'SELECT id, entry_time, dive_date_time, exit_time, max_depth, '
-          'runtime, bottom_time, dive_computer_serial '
+          'runtime, bottom_time, dive_computer_serial, '
+          '(SELECT depth FROM dive_profiles p WHERE p.dive_id = dives.id '
+          'AND p.is_primary = 1 ORDER BY p.timestamp ASC LIMIT 1) '
+          'AS first_depth, '
+          '(SELECT depth FROM dive_profiles p WHERE p.dive_id = dives.id '
+          'AND p.is_primary = 1 ORDER BY p.timestamp DESC LIMIT 1) '
+          'AS last_depth '
           'FROM dives WHERE id != ?1 AND diver_id IS ?2 '
           'AND COALESCE(entry_time, dive_date_time) BETWEEN ?3 AND ?4 '
           'ORDER BY COALESCE(entry_time, dive_date_time) ASC',
@@ -112,7 +121,7 @@ class QualityContextBuilder {
             Variable.withInt(entry.millisecondsSinceEpoch - windowMs),
             Variable.withInt(exit.millisecondsSinceEpoch + windowMs),
           ],
-          readsFrom: {_db.dives},
+          readsFrom: {_db.dives, _db.diveProfiles},
         )
         .get();
     final out = <QualityNeighbor>[];
@@ -138,25 +147,13 @@ class QualityContextBuilder {
           maxDepth: row.read<double?>('max_depth'),
           durationSeconds: durationSeconds,
           computerSerial: row.read<String?>('dive_computer_serial'),
-          firstSampleDepth: await _edgeDepth(id, first: true),
-          lastSampleDepth: await _edgeDepth(id, first: false),
+          firstSampleDepth: _finiteDepth(row.read<double?>('first_depth')),
+          lastSampleDepth: _finiteDepth(row.read<double?>('last_depth')),
         ),
       );
     }
     return out;
   }
 
-  Future<double?> _edgeDepth(String diveId, {required bool first}) async {
-    final q = _db.select(_db.diveProfiles)
-      ..where((t) => t.diveId.equals(diveId) & t.isPrimary.equals(true))
-      ..orderBy([
-        (t) => first
-            ? OrderingTerm.asc(t.timestamp)
-            : OrderingTerm.desc(t.timestamp),
-      ])
-      ..limit(1);
-    final row = await q.getSingleOrNull();
-    final d = row?.depth;
-    return (d != null && d.isFinite) ? d : null;
-  }
+  double? _finiteDepth(double? d) => (d != null && d.isFinite) ? d : null;
 }

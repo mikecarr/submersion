@@ -52,8 +52,9 @@ List<_DiveGroup> _groupByDive(List<QualityFinding> findings) {
 class DataQualityInboxPage extends ConsumerStatefulWidget {
   const DataQualityInboxPage({super.key, this.filterDiveId});
 
-  /// When set (deep link from import summary / dive detail), only findings
-  /// touching this dive are shown.
+  /// Comma-separated set of dive ids to scope the inbox to (deep link from
+  /// dive detail with one id, or the import summary with the whole imported
+  /// set). When null/empty, all findings are shown.
   final String? filterDiveId;
 
   @override
@@ -299,13 +300,20 @@ class _DataQualityInboxPageState extends ConsumerState<DataQualityInboxPage> {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('$e')),
         data: (all) {
+          // `filterDiveId` is a comma-separated set of dive ids (a single id
+          // from dive-detail, the whole imported set from the import summary),
+          // so the review deep-link never hides other flagged dives in scope.
+          final filterIds =
+              (widget.filterDiveId == null || widget.filterDiveId!.isEmpty)
+              ? null
+              : widget.filterDiveId!.split(',').toSet();
           final open = [
             for (final f in all)
               if (f.status == QualityStatus.open &&
                   categoriesFor(chip).contains(f.category) &&
-                  (widget.filterDiveId == null ||
-                      f.diveId == widget.filterDiveId ||
-                      f.relatedDiveId == widget.filterDiveId))
+                  (filterIds == null ||
+                      filterIds.contains(f.diveId) ||
+                      filterIds.contains(f.relatedDiveId)))
                 f,
           ];
           return Column(

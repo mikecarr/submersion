@@ -354,6 +354,49 @@ void main() {
     expect(find.text('Likely duplicate'), findsOneWidget);
   });
 
+  testWidgets(
+    'comma-separated filterDiveId shows findings for every id in the set',
+    (tester) async {
+      final prefs = await _prefs();
+      await tester.pumpWidget(
+        _scope(
+          prefs,
+          // Whole imported set (as the import summary deep-links); no dive in
+          // scope may be hidden even though the count spans all of them.
+          filterDiveId: 'd1,d2',
+          findings: [
+            _f(
+              id: 'gap-d1',
+              detectorId: 'sample_gap',
+              category: QualityCategory.profile,
+              params: const {'gapCount': 1, 'longestGapSeconds': 30},
+            ),
+            _f(
+              id: 'clock-d2',
+              diveId: 'd2',
+              detectorId: 'clock_offset',
+              category: QualityCategory.time,
+              params: const {'offsetHours': 2},
+            ),
+            _f(
+              id: 'spike-d3',
+              diveId: 'd3',
+              detectorId: 'depth_spike',
+              category: QualityCategory.profile,
+              params: const {'depth': 55.0, 'atSeconds': 120},
+            ),
+          ],
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // d1 and d2 findings both show; d3 (outside the set) is hidden.
+      expect(find.text('Sample gaps'), findsOneWidget);
+      expect(find.text('Clock & timezone'), findsOneWidget);
+      expect(find.text('Depth spike'), findsNothing);
+    },
+  );
+
   // --- Empty state variants + library scan flow ----------------------------
 
   testWidgets('empty state shows last-scan line and scans on tap', (

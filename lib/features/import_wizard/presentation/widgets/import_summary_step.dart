@@ -216,7 +216,7 @@ class _SuccessView extends StatelessWidget {
                     title: Text(l10n.dataQuality_summary_flagged(count)),
                     trailing: TextButton(
                       onPressed: () => context.push(
-                        '/dives/quality?dive=${importedDiveIds.first}',
+                        '/dives/quality?dive=${importedDiveIds.join(',')}',
                       ),
                       child: Text(l10n.dataQuality_summary_review),
                     ),
