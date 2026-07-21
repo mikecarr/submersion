@@ -52,7 +52,7 @@ class FileReviewCard extends ConsumerWidget {
       return const SizedBox(
         width: 48,
         height: 48,
-        child: Icon(Icons.movie_outlined, size: 32),
+        child: Center(child: Icon(Icons.movie_outlined, size: 32)),
       );
     }
     return Image.file(

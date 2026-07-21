@@ -99,6 +99,10 @@ class _DiveMediaSectionState extends ConsumerState<DiveMediaSection> {
   }
 
   Future<void> _runEnrichmentBackfill() async {
+    // The post-frame callback can fire after this state is disposed; touching
+    // `ref` then throws, so bail before using it rather than leaning on the
+    // catch-all below.
+    if (!mounted) return;
     try {
       final enriched = await ref
           .read(diveMediaEnricherProvider)
