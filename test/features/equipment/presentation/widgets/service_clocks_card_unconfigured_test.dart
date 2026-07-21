@@ -41,11 +41,11 @@ void main() {
           ).overrideWith((ref) async => [schedule]),
           serviceKindsProvider.overrideWith((ref) async => [kind]),
         ],
-        child: MaterialApp(
-          locale: const Locale('en'),
+        child: const MaterialApp(
+          locale: Locale('en'),
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
-          home: const Scaffold(
+          home: Scaffold(
             body: ServiceClocksCard(
               equipmentId: 'e1',
               equipmentType: EquipmentType.mask,
