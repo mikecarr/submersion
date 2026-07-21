@@ -255,11 +255,13 @@ class _EquipmentListContentState extends ConsumerState<EquipmentListContent> {
         final notifier = ref.read(equipmentTableConfigProvider.notifier);
         final settings = ref.watch(settingsProvider);
         final units = UnitFormatter(settings);
+        final serviceUrgency =
+            ref.watch(equipmentServiceUrgencyProvider).value ?? const {};
 
         return EntityTableView<EquipmentItem, EquipmentField>(
           entities: equipment,
           idExtractor: (e) => e.id,
-          adapter: EquipmentFieldAdapter.instance,
+          adapter: EquipmentFieldAdapter(worstClocks: serviceUrgency),
           config: config,
           units: units,
           onSortFieldChanged: notifier.setSortField,
