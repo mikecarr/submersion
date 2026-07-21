@@ -146,6 +146,11 @@ class MediaRepository {
               remoteThumbUploadedAt: Value(
                 item.remoteThumbUploadedAt?.millisecondsSinceEpoch,
               ),
+              compressedLevel: Value(item.compressedLevel),
+              compressedSizeBytes: Value(item.compressedSizeBytes),
+              remoteCompressedUploadedAt: Value(
+                item.remoteCompressedUploadedAt?.millisecondsSinceEpoch,
+              ),
               createdAt: Value(now.millisecondsSinceEpoch),
               updatedAt: Value(now.millisecondsSinceEpoch),
             ),
@@ -221,6 +226,11 @@ class MediaRepository {
           ),
           remoteThumbUploadedAt: Value(
             item.remoteThumbUploadedAt?.millisecondsSinceEpoch,
+          ),
+          compressedLevel: Value(item.compressedLevel),
+          compressedSizeBytes: Value(item.compressedSizeBytes),
+          remoteCompressedUploadedAt: Value(
+            item.remoteCompressedUploadedAt?.millisecondsSinceEpoch,
           ),
           updatedAt: Value(now),
         ),
@@ -905,6 +915,7 @@ class MediaRepository {
       ..addColumns([id])
       ..where(
         (_db.media.remoteUploadedAt.isNull() &
+                _db.media.remoteCompressedUploadedAt.isNull() &
                 _db.media.fileType.equals('photo') &
                 _db.media.sourceType.isIn([
                   'platformGallery',
@@ -940,6 +951,93 @@ class MediaRepository {
       localUpdatedAt: now,
     );
     SyncEventBus.notifyLocalChange();
+  }
+
+  /// Confirms a compressed rendition exists in the store, recording which
+  /// level produced it (first-writer-wins) and its byte size.
+  Future<void> stampRemoteCompressedUploaded(
+    String mediaId, {
+    required DateTime uploadedAt,
+    required String level,
+    required int sizeBytes,
+  }) async {
+    final now = DateTime.now().millisecondsSinceEpoch;
+    await (_db.update(_db.media)..where((t) => t.id.equals(mediaId))).write(
+      MediaCompanion(
+        remoteCompressedUploadedAt: Value(uploadedAt.millisecondsSinceEpoch),
+        compressedLevel: Value(level),
+        compressedSizeBytes: Value(sizeBytes),
+        updatedAt: Value(now),
+      ),
+    );
+    await _syncRepository.markRecordPending(
+      entityType: 'media',
+      recordId: mediaId,
+      localUpdatedAt: now,
+    );
+    SyncEventBus.notifyLocalChange();
+  }
+
+  /// Clears the original-upload stamp (used when a re-upload override
+  /// switches an item from original to compressed).
+  Future<void> clearRemoteUploaded(String mediaId) async {
+    final now = DateTime.now().millisecondsSinceEpoch;
+    await (_db.update(_db.media)..where((t) => t.id.equals(mediaId))).write(
+      MediaCompanion(
+        remoteUploadedAt: const Value<int?>(null),
+        updatedAt: Value(now),
+      ),
+    );
+    await _syncRepository.markRecordPending(
+      entityType: 'media',
+      recordId: mediaId,
+      localUpdatedAt: now,
+    );
+    SyncEventBus.notifyLocalChange();
+  }
+
+  /// Clears the compressed-rendition stamps (override switching to original).
+  Future<void> clearRemoteCompressed(String mediaId) async {
+    final now = DateTime.now().millisecondsSinceEpoch;
+    await (_db.update(_db.media)..where((t) => t.id.equals(mediaId))).write(
+      MediaCompanion(
+        remoteCompressedUploadedAt: const Value<int?>(null),
+        compressedLevel: const Value<String?>(null),
+        compressedSizeBytes: const Value<int?>(null),
+        updatedAt: Value(now),
+      ),
+    );
+    await _syncRepository.markRecordPending(
+      entityType: 'media',
+      recordId: mediaId,
+      localUpdatedAt: now,
+    );
+    SyncEventBus.notifyLocalChange();
+  }
+
+  /// Number of media rows sharing [contentHash] that still want the original
+  /// object (remote_uploaded_at set). Guards a targeted delete.
+  Future<int> countRowsWithOriginal(String contentHash) async {
+    final count = _db.media.id.count();
+    final query = _db.selectOnly(_db.media)
+      ..addColumns([count])
+      ..where(
+        _db.media.contentHash.equals(contentHash) &
+            _db.media.remoteUploadedAt.isNotNull(),
+      );
+    return (await query.getSingle()).read(count) ?? 0;
+  }
+
+  /// Number of media rows sharing [contentHash] that still want the rendition.
+  Future<int> countRowsWithRendition(String contentHash) async {
+    final count = _db.media.id.count();
+    final query = _db.selectOnly(_db.media)
+      ..addColumns([count])
+      ..where(
+        _db.media.contentHash.equals(contentHash) &
+            _db.media.remoteCompressedUploadedAt.isNotNull(),
+      );
+    return (await query.getSingle()).read(count) ?? 0;
   }
 
   domain.MediaItem _mapRowToMediaItem(
@@ -993,6 +1091,11 @@ class MediaRepository {
           : null,
       remoteThumbUploadedAt: row.remoteThumbUploadedAt != null
           ? DateTime.fromMillisecondsSinceEpoch(row.remoteThumbUploadedAt!)
+          : null,
+      compressedLevel: row.compressedLevel,
+      compressedSizeBytes: row.compressedSizeBytes,
+      remoteCompressedUploadedAt: row.remoteCompressedUploadedAt != null
+          ? DateTime.fromMillisecondsSinceEpoch(row.remoteCompressedUploadedAt!)
           : null,
       createdAt: DateTime.fromMillisecondsSinceEpoch(row.createdAt),
       updatedAt: DateTime.fromMillisecondsSinceEpoch(row.updatedAt),
