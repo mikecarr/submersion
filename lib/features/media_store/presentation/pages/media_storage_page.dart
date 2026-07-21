@@ -10,6 +10,7 @@ import 'package:submersion/core/services/cloud_storage/s3/s3_credentials_store.d
 import 'package:submersion/core/services/cloud_storage/s3/s3_region.dart';
 import 'package:submersion/core/services/media_store/media_object_store.dart';
 import 'package:submersion/features/media_store/data/media_store_service.dart';
+import 'package:submersion/features/media_store/domain/media_upload_quality.dart';
 import 'package:submersion/features/media_store/presentation/providers/media_store_providers.dart';
 import 'package:submersion/features/settings/presentation/providers/sync_providers.dart';
 import 'package:submersion/l10n/arb/app_localizations.dart';
@@ -45,6 +46,8 @@ class _MediaStoragePageState extends ConsumerState<MediaStoragePage> {
   // Null until loaded; the switches render only once values are known.
   bool? _autoUpload;
   bool? _photosOnCellular;
+  MediaUploadQuality? _photoQuality;
+  MediaUploadQuality? _videoQuality;
 
   @override
   void initState() {
@@ -60,11 +63,31 @@ class _MediaStoragePageState extends ConsumerState<MediaStoragePage> {
     final policies = ref.read(mediaStorePoliciesProvider);
     final autoUpload = await policies.autoUpload();
     final photosOnCellular = await policies.photosOnCellular();
+    final photoQuality = await policies.photoUploadQuality();
+    final videoQuality = await policies.videoUploadQuality();
     if (!mounted) return;
     setState(() {
       _autoUpload = autoUpload;
       _photosOnCellular = photosOnCellular;
+      _photoQuality = photoQuality;
+      _videoQuality = videoQuality;
     });
+  }
+
+  List<DropdownMenuItem<MediaUploadQuality>> _qualityItems(
+    AppLocalizations l10n,
+  ) {
+    String label(MediaUploadQuality q) => switch (q) {
+      MediaUploadQuality.original =>
+        l10n.settings_mediaStorage_quality_original,
+      MediaUploadQuality.high => l10n.settings_mediaStorage_quality_high,
+      MediaUploadQuality.balanced =>
+        l10n.settings_mediaStorage_quality_balanced,
+      MediaUploadQuality.small => l10n.settings_mediaStorage_quality_small,
+    };
+    return MediaUploadQuality.values
+        .map((q) => DropdownMenuItem(value: q, child: Text(label(q))))
+        .toList();
   }
 
   void _onRegionChanged() => setState(() {});
@@ -596,6 +619,55 @@ class _MediaStoragePageState extends ConsumerState<MediaStoragePage> {
                         .setPhotosOnCellular(value);
                   },
                 ),
+              if (_photoQuality != null && _videoQuality != null) ...[
+                const Divider(),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                  child: Text(
+                    l10n.settings_mediaStorage_quality_section,
+                    style: Theme.of(context).textTheme.titleSmall,
+                  ),
+                ),
+                ListTile(
+                  title: Text(l10n.settings_mediaStorage_quality_photos),
+                  trailing: DropdownButton<MediaUploadQuality>(
+                    key: const Key('media-quality-photos'),
+                    value: _photoQuality,
+                    underline: const SizedBox(),
+                    onChanged: (value) async {
+                      if (value == null) return;
+                      setState(() => _photoQuality = value);
+                      await ref
+                          .read(mediaStorePoliciesProvider)
+                          .setPhotoUploadQuality(value);
+                    },
+                    items: _qualityItems(l10n),
+                  ),
+                ),
+                ListTile(
+                  title: Text(l10n.settings_mediaStorage_quality_video),
+                  trailing: DropdownButton<MediaUploadQuality>(
+                    key: const Key('media-quality-video'),
+                    value: _videoQuality,
+                    underline: const SizedBox(),
+                    onChanged: (value) async {
+                      if (value == null) return;
+                      setState(() => _videoQuality = value);
+                      await ref
+                          .read(mediaStorePoliciesProvider)
+                          .setVideoUploadQuality(value);
+                    },
+                    items: _qualityItems(l10n),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                  child: Text(
+                    l10n.settings_mediaStorage_quality_caveat,
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ),
+              ],
               FilledButton.tonal(
                 key: const Key('media-s3-backfill'),
                 onPressed: _busy ? null : _backfill,
