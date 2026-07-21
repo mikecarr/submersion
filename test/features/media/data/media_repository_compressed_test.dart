@@ -43,29 +43,37 @@ void main() {
     expect((await repo.getMediaById('m2'))!.remoteUploadedAt, isNull);
   });
 
-  test('countRowsWithOriginal counts only rows with remoteUploadedAt set', () async {
-    await repo.createMedia(
-      photo('a', hash: 'h9').copyWith(remoteUploadedAt: DateTime(2026, 1, 2)),
-    );
-    await repo.createMedia(photo('b', hash: 'h9')); // no original stamp
-    expect(await repo.countRowsWithOriginal('h9'), 1);
-  });
+  test(
+    'countRowsWithOriginal counts only rows with remoteUploadedAt set',
+    () async {
+      await repo.createMedia(
+        photo('a', hash: 'h9').copyWith(remoteUploadedAt: DateTime(2026, 1, 2)),
+      );
+      await repo.createMedia(photo('b', hash: 'h9')); // no original stamp
+      expect(await repo.countRowsWithOriginal('h9'), 1);
+    },
+  );
 
-  test('countRowsWithRendition counts rows with the compressed stamp', () async {
-    await repo.createMedia(
-      photo('c', hash: 'h4').copyWith(
-        remoteCompressedUploadedAt: DateTime(2026, 1, 3),
-      ),
-    );
-    expect(await repo.countRowsWithRendition('h4'), 1);
-    expect(await repo.countRowsWithRendition('nope'), 0);
-  });
+  test(
+    'countRowsWithRendition counts rows with the compressed stamp',
+    () async {
+      await repo.createMedia(
+        photo(
+          'c',
+          hash: 'h4',
+        ).copyWith(remoteCompressedUploadedAt: DateTime(2026, 1, 3)),
+      );
+      expect(await repo.countRowsWithRendition('h4'), 1);
+      expect(await repo.countRowsWithRendition('nope'), 0);
+    },
+  );
 
   test('compressed-only photo is NOT a backfill candidate', () async {
     await repo.createMedia(
-      photo('d', hash: 'h3').copyWith(
-        remoteCompressedUploadedAt: DateTime(2026, 1, 3),
-      ),
+      photo(
+        'd',
+        hash: 'h3',
+      ).copyWith(remoteCompressedUploadedAt: DateTime(2026, 1, 3)),
     );
     expect(await repo.getBackfillCandidateIds(), isNot(contains('d')));
   });
