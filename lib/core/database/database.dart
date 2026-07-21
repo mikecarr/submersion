@@ -3489,6 +3489,52 @@ class AppDatabase extends _$AppDatabase {
     ''');
   }
 
+  /// Data self-heal: synthesize a primary [DiveDataSources] row for any dive
+  /// that has profile samples but no data-source row. Older file imports (and
+  /// any import path predating dive_data_sources) wrote dive_profiles without
+  /// the metadata row, which stranded the grouped-by-source view that the 3D
+  /// scene, spatial map, and computer-compare all read -- they spun forever on
+  /// a null scene. The 2D chart survived because it reads dive.profile directly.
+  ///
+  /// Runs on every open; a cheap no-op once healed (the NOT EXISTS guard leaves
+  /// nothing to insert). Local-only by design: the id is deterministic
+  /// (`legacy-src-<diveId>`), so every device heals to the identical row
+  /// without syncing, and a device on an older build simply heals itself after
+  /// upgrade. It never touches the parent dive's HLC, so it does not trigger a
+  /// fleet re-sync of the healed dives. imported_at/created_at are Drift
+  /// dateTime() columns stored as unix SECONDS (unlike the dives table's plain
+  /// millisecond int columns), hence strftime('%s') without the *1000.
+  Future<void> _backfillMissingDataSources() async {
+    // Self-guard for partial/legacy schemas (migration tests and databases
+    // caught mid-upgrade): skip unless all three tables exist. beforeOpen runs
+    // for every open, including old-version fixtures where these tables may not
+    // exist yet.
+    final tables = await customSelect(
+      "SELECT name FROM sqlite_master WHERE type='table' "
+      "AND name IN ('dives', 'dive_profiles', 'dive_data_sources')",
+    ).get();
+    final present = tables.map((r) => r.read<String>('name')).toSet();
+    if (!present.containsAll({'dives', 'dive_profiles', 'dive_data_sources'})) {
+      return;
+    }
+    await customStatement('''
+      INSERT OR IGNORE INTO dive_data_sources
+        (id, dive_id, is_primary, imported_at, created_at)
+      SELECT 'legacy-src-' || d.id, d.id, 1, n.now_s, n.now_s
+      FROM dives d
+      CROSS JOIN (
+        SELECT CAST(strftime('%s','now') AS INTEGER) AS now_s
+      ) n
+      WHERE EXISTS (
+        SELECT 1 FROM dive_profiles p
+        WHERE p.dive_id = d.id AND p.is_primary = 1
+      )
+      AND NOT EXISTS (
+        SELECT 1 FROM dive_data_sources s WHERE s.dive_id = d.id
+      )
+    ''');
+  }
+
   /// Copy each buddy's inline certification into a certifications row owned by
   /// that buddy (issue #553). Invoked from the onUpgrade blocks only (v109
   /// expand + the v110 contract safety-net), NEVER the beforeOpen backstop --
@@ -6897,6 +6943,12 @@ class AppDatabase extends _$AppDatabase {
             'ALTER TABLE dive_profiles ADD COLUMN heading REAL',
           );
         }
+
+        // Data self-heal: backfill a primary dive_data_sources row for dives
+        // that have profile samples but no source row (legacy file imports).
+        // Without it, the 3D/spatial/compare views spin forever on those dives.
+        // Idempotent and local-only (deterministic ids, no HLC bump).
+        await _backfillMissingDataSources();
 
         // Performance indexes historically existed only in onUpgrade blocks,
         // so a database created fresh at a recent schema version -- or

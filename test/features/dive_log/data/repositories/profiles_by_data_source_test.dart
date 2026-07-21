@@ -222,7 +222,12 @@ void main() {
     expect(result['src-meta']!.points, isEmpty);
   });
 
-  test('returns empty map when the dive has no data source rows', () async {
+  test('synthesizes a primary source from raw profile rows when the dive has '
+      'no data source metadata row (legacy import)', () async {
+    // Older imports wrote dive_profiles rows without a dive_data_sources
+    // row. The profile is still real and the 2D chart shows it, so the
+    // grouped view must surface it too (otherwise 3D/spatial/compare spin
+    // forever on a null scene).
     await insertProfileRow(
       diveId: 'dive-2',
       timestamp: 0,
@@ -230,7 +235,33 @@ void main() {
       computerId: null,
       isPrimary: true,
     );
+    await insertProfileRow(
+      diveId: 'dive-2',
+      timestamp: 10,
+      depth: 9.0,
+      computerId: null,
+      isPrimary: true,
+    );
+    // A demoted (non-primary) row is excluded, mirroring getDiveProfile /
+    // dive.profile, which the 2D chart renders.
+    await insertProfileRow(
+      diveId: 'dive-2',
+      timestamp: 5,
+      depth: 99.0,
+      computerId: null,
+      isPrimary: false,
+    );
 
+    final result = await repository.getProfilesByDataSource('dive-2');
+
+    expect(result, hasLength(1));
+    final source = result.values.single;
+    expect(source.points.map((p) => p.depth).toList(), [8.0, 9.0]);
+    expect(source.isEdited, false);
+  });
+
+  test('returns empty map when the dive has neither data sources nor profile '
+      'rows', () async {
     final result = await repository.getProfilesByDataSource('dive-2');
 
     expect(result, isEmpty);

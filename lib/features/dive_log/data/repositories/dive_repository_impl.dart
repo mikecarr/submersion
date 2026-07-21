@@ -671,7 +671,30 @@ class DiveRepository {
                   (t) => OrderingTerm.asc(t.createdAt),
                 ]))
               .get();
-      if (sourceRows.isEmpty) return {};
+      if (sourceRows.isEmpty) {
+        // Legacy/imported dives can carry dive_profiles rows without a
+        // dive_data_sources metadata row (older import paths predate that
+        // table). The profile is real -- the 2D chart renders it via
+        // dive.profile -- so synthesize a single primary source from the
+        // primary rows. Without this, every profile-consuming feature that
+        // reads only the grouped view (3D scene, spatial, computer compare,
+        // profile analysis) sees an empty map and stalls on a null scene.
+        final primaryRows =
+            await (_db.select(_db.diveProfiles)
+                  ..where((t) => t.diveId.equals(diveId))
+                  ..where((t) => t.isPrimary.equals(true))
+                  ..orderBy([(t) => OrderingTerm.asc(t.timestamp)]))
+                .get();
+        if (primaryRows.isEmpty) return {};
+        return {
+          diveId: domain.SourceProfile(
+            sourceId: diveId,
+            computerId: primaryRows.first.computerId,
+            isEdited: false,
+            points: primaryRows.map(_profilePointFromRow).toList(),
+          ),
+        };
+      }
 
       final primary = sourceRows.first;
       final sourceIdByComputer = <String, String>{
