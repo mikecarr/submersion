@@ -145,7 +145,11 @@ void main() {
     // Minimal HEIC: ftyp, mdat holding the Exif payload, then meta whose
     // iinf declares an 'Exif' item and iloc points at the payload's absolute
     // offset (base_offset_size 0, construction_method 0).
-    List<int> heicFile(String date, {int declaredOffset = 6}) {
+    List<int> heicFile(
+      String date, {
+      int declaredOffset = 6,
+      int ilocVersion = 1,
+    }) {
       final ftyp = _box('ftyp', 'heic'.codeUnits);
       final payload = exifItemPayload(date, declaredOffset: declaredOffset);
       final mdat = _box('mdat', payload);
@@ -159,13 +163,16 @@ void main() {
         0, // item_name (empty)
       ]);
       final iinf = _box('iinf', [0, 0, 0, 0, ...u16(1), ...infe]);
+      // iloc v2 widens item_count and item_ID to 32-bit (v0/v1 use 16-bit).
+      final countAndId = ilocVersion >= 2
+          ? [..._u32(1), ..._u32(1)]
+          : [...u16(1), ...u16(1)];
       final iloc = _box('iloc', [
-        1, 0, 0, 0, // version 1 + flags
+        ilocVersion, 0, 0, 0, // version + flags
         0x44, // offset_size=4, length_size=4
         0x00, // base_offset_size=0, index_size=0
-        ...u16(1), // item_count
-        ...u16(1), // item_ID
-        ...u16(0), // construction_method
+        ...countAndId, // item_count + item_ID
+        ...u16(0), // construction_method (v1/v2)
         ...u16(0), // data_reference_index
         ...u16(1), // extent_count
         ..._u32(payloadOffset), // extent_offset
@@ -178,6 +185,17 @@ void main() {
     test('reads DateTimeOriginal from a HEIC Exif item', () async {
       final f = File('${tempDir.path}/photo.heic')
         ..writeAsBytesSync(heicFile('2026:05:06 17:35:39'));
+      expect(
+        readLocalCaptureTime(f, 'image/heic'),
+        DateTime.utc(2026, 5, 6, 17, 35, 39),
+      );
+    });
+
+    test('reads DateTimeOriginal from an iloc v2 container', () async {
+      // iloc v2 widens item_count and item_ID to 32-bit (per ISO 14496-12;
+      // v3 is an infe concept, not iloc). Confirms the version branch.
+      final f = File('${tempDir.path}/v2.heic')
+        ..writeAsBytesSync(heicFile('2026:05:06 17:35:39', ilocVersion: 2));
       expect(
         readLocalCaptureTime(f, 'image/heic'),
         DateTime.utc(2026, 5, 6, 17, 35, 39),

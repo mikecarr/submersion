@@ -57,6 +57,10 @@ DateTime? _dateFromExif(img.ExifData exif) {
   return parseExifDateTimeOriginal(raw?.toString());
 }
 
+// Upper bound on a HEIC `Exif` item read. Real items are a few KB (tens of KB
+// with an embedded thumbnail); this only exists to cap a corrupt/crafted length.
+const _maxExifItemBytes = 64 * 1024 * 1024;
+
 /// Reads EXIF from a HEIC/HEIF file. HEIC is ISO-BMFF: the EXIF lives in a
 /// metadata item declared by the `meta > iinf` box (type `Exif`) and located
 /// by `meta > iloc`. We read only the `meta` box and the Exif item's extent
@@ -81,6 +85,15 @@ DateTime? _readHeicExifDate(File file) {
     if (itemId == null) return null;
     final extent = _heicExifExtent(metaBytes, iloc.start, iloc.end, itemId);
     if (extent == null) return null;
+    // Reject a corrupt/crafted extent that points past EOF or advertises an
+    // absurd length, so we fall back to mtime instead of attempting a huge
+    // read/allocation. Real EXIF items are a few KB.
+    if (extent.offset < 0 ||
+        extent.length <= 0 ||
+        extent.length > _maxExifItemBytes ||
+        extent.offset + extent.length > end) {
+      return null;
+    }
 
     raf.setPositionSync(extent.offset);
     final item = raf.readSync(extent.length);
