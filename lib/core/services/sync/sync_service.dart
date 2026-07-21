@@ -395,6 +395,10 @@ class SyncService {
       );
       await _syncRepository.ensureSyncClockConfigured();
 
+      // Self-heal: stamp an HLC on pre-v130 enrichment rows so the depth/time
+      // association replicates and repairs peers that lost it (schema v130).
+      await _syncRepository.backfillMediaEnrichmentHlc();
+
       // ---- Library epoch gate (restore Replace mode) ----
       // A pending replace runs INSTEAD of a merge, and a marker from an
       // unaccepted epoch halts everything until the user adopts.
@@ -1218,6 +1222,11 @@ class SyncService {
           ),
           (type: 'settings', records: data.settings, hasUpdatedAt: true),
           (type: 'media', records: data.media, hasUpdatedAt: false),
+          (
+            type: 'mediaEnrichment',
+            records: data.mediaEnrichment,
+            hasUpdatedAt: false,
+          ),
           (type: 'mediaStores', records: data.mediaStores, hasUpdatedAt: false),
           (
             type: 'connectedAccounts',
@@ -1788,6 +1797,7 @@ class SyncService {
     'serviceSchedules': true,
     'settings': true,
     'media': false,
+    'mediaEnrichment': false,
     'mediaStores': false,
     'connectedAccounts': true,
     'mediaSubscriptions': true,
@@ -1839,6 +1849,10 @@ class SyncService {
       (field: 'buddyId', parent: 'buddies', nullable: false),
     ],
     'buddyRoles': [(field: 'buddyId', parent: 'buddies', nullable: false)],
+    'mediaEnrichment': [
+      (field: 'mediaId', parent: 'media', nullable: false),
+      (field: 'diveId', parent: 'dives', nullable: false),
+    ],
     'diveTags': [
       (field: 'diveId', parent: 'dives', nullable: false),
       (field: 'tagId', parent: 'tags', nullable: false),

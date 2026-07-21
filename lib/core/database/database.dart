@@ -1256,6 +1256,10 @@ class MediaEnrichment extends Table {
   )(); // exact, interpolated, estimated, no_profile
   IntColumn get timestampOffsetSeconds => integer().nullable()();
   IntColumn get createdAt => integer()();
+  // v130: sync replication. media_enrichment is the depth/time association for
+  // a linked photo; without an hlc it never travelled through sync and was
+  // lost on other devices / after restore.
+  TextColumn get hlc => text().nullable()();
 
   @override
   Set<Column> get primaryKey => {id};
@@ -2827,7 +2831,7 @@ class AppDatabase extends _$AppDatabase {
 
   /// The current schema version as a static constant so that pre-open checks
   /// (e.g. version-mismatch guard) can reference it without an instance.
-  static const int currentSchemaVersion = 129;
+  static const int currentSchemaVersion = 130;
 
   /// Every schema version that has a migration block in onUpgrade.
   /// Used to calculate progress step counts. When adding a new migration,
@@ -2976,6 +2980,8 @@ class AppDatabase extends _$AppDatabase {
     // v129: quality_findings table for the Data Quality Assistant (renumbered
     // from v118 as main advanced past it at merge time).
     129,
+    // v130: media_enrichment.hlc so a photo's depth/time association syncs.
+    130,
   ];
 
   /// Idempotent DDL for the v106 connector-suggestion columns (Lightroom
@@ -3602,6 +3608,20 @@ class AppDatabase extends _$AppDatabase {
           orElse: () => CertificationAgency.other,
         )
         .displayName;
+  }
+
+  /// v130: media_enrichment.hlc column. Self-guarding when the table is absent
+  /// (partial-schema migration fixtures) and PRAGMA-guarded so it is safe to
+  /// call from both onUpgrade and the beforeOpen backstop (parallel-branch
+  /// collision self-heal).
+  Future<void> _assertMediaEnrichmentHlcColumn() async {
+    final cols = await customSelect(
+      "PRAGMA table_info('media_enrichment')",
+    ).get();
+    final hasColumn = cols.any((c) => c.read<String>('name') == 'hlc');
+    if (cols.isNotEmpty && !hasColumn) {
+      await customStatement('ALTER TABLE media_enrichment ADD COLUMN hlc TEXT');
+    }
   }
 
   /// Idempotent DDL for the v103 media store objects. Called from the v103
@@ -6756,6 +6776,12 @@ class AppDatabase extends _$AppDatabase {
           await _assertQualityFindingsSchema();
         }
         if (from < 129) await reportProgress();
+        // v130: media_enrichment.hlc so a photo's depth/time association
+        // replicates through sync (it was local-only before).
+        if (from < 130) {
+          await _assertMediaEnrichmentHlcColumn();
+        }
+        if (from < 130) await reportProgress();
       },
       beforeOpen: (details) async {
         // Enable foreign keys
@@ -6764,6 +6790,9 @@ class AppDatabase extends _$AppDatabase {
         // v103 backstop: re-assert media store schema (the helper is
         // self-guarding when the media table is absent).
         await _assertMediaStoreSchema();
+
+        // v130 backstop: re-assert the media_enrichment.hlc column.
+        await _assertMediaEnrichmentHlcColumn();
 
         // v106 backstop: re-assert connector-suggestion columns (the helper
         // is self-guarding when the suggestions table is absent).
