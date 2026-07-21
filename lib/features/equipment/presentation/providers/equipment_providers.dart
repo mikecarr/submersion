@@ -90,12 +90,22 @@ final equipmentSortProvider = StateProvider<SortState<EquipmentSortField>>(
   ),
 );
 
-/// Apply sorting to a list of equipment items
+/// Apply sorting to a list of equipment items.
+///
+/// [serviceUrgency] is the most-urgent clock per equipment id (from
+/// [equipmentServiceUrgencyProvider]); it is only consulted for the
+/// [EquipmentSortField.serviceDue] field.
 List<EquipmentItem> applyEquipmentSorting(
   List<EquipmentItem> equipment,
-  SortState<EquipmentSortField> sort,
-) {
+  SortState<EquipmentSortField> sort, {
+  Map<String, ServiceClockStatus> serviceUrgency = const {},
+}) {
   final sorted = List<EquipmentItem>.from(equipment);
+
+  // Rank for the service-due sort: overdue (2) > dueSoon (1) > ok (0); items
+  // with no clock rank -1 so they sort last on ascending (most-urgent first).
+  int urgencyRank(EquipmentItem e) =>
+      serviceUrgency[e.id]?.severity.index ?? -1;
 
   sorted.sort((a, b) {
     int comparison;
@@ -117,6 +127,17 @@ List<EquipmentItem> applyEquipmentSorting(
         comparison = (a.lastServiceDate ?? DateTime(1900)).compareTo(
           b.lastServiceDate ?? DateTime(1900),
         );
+      case EquipmentSortField.serviceDue:
+        final ra = urgencyRank(a), rb = urgencyRank(b);
+        if (ra != rb) {
+          // Higher rank = more urgent; ascending lists most urgent first.
+          final c = rb.compareTo(ra);
+          return sort.direction == SortDirection.ascending ? c : -c;
+        }
+        final da = serviceUrgency[a.id]?.dueDate;
+        final db = serviceUrgency[b.id]?.dueDate;
+        final byDate = (da ?? DateTime(9999)).compareTo(db ?? DateTime(9999));
+        return sort.direction == SortDirection.ascending ? byDate : -byDate;
     }
 
     if (invertForText) {
@@ -618,6 +639,33 @@ final equipmentWorstClockProvider = FutureProvider<Map<String, DueClock>>((
   }
   return worst;
 });
+
+/// Most-urgent clock per active equipment id, INCLUDING ok (not-yet-due)
+/// clocks -- unlike [equipmentWorstClockProvider], which only carries due or
+/// overdue clocks. Backs the service-due sort and the Next Service Due table
+/// column so not-yet-due gear still sorts and displays its upcoming date.
+final equipmentServiceUrgencyProvider =
+    FutureProvider<Map<String, ServiceClockStatus>>((ref) async {
+      final repository = ref.watch(equipmentRepositoryProvider);
+      final validatedDiverId = await ref.watch(
+        validatedCurrentDiverIdProvider.future,
+      );
+      ref.invalidateSelfWhen(repository.watchEquipmentChanges());
+      final items = await repository.getActiveEquipment(
+        diverId: validatedDiverId,
+      );
+      final kinds = await ref
+          .watch(serviceKindRepositoryProvider)
+          .getAllKinds();
+      final out = <String, ServiceClockStatus>{};
+      for (final item in items) {
+        final statuses = await _evaluateClocksFor(ref, item, kinds: kinds);
+        if (statuses.isEmpty) continue;
+        // Engine returns statuses worst-severity-first, then dueDate ascending.
+        out[item.id] = statuses.first;
+      }
+      return out;
+    });
 
 /// Clocks that block an upcoming trip: date trigger before the trip ends, or
 /// already due/overdue now. Usage triggers are never forecast into the trip.

@@ -117,6 +117,8 @@ class _EquipmentListContentState extends ConsumerState<EquipmentListContent> {
   Widget build(BuildContext context) {
     final sort = ref.watch(equipmentSortProvider);
     final viewMode = ref.watch(equipmentListViewModeProvider);
+    final serviceUrgency =
+        ref.watch(equipmentServiceUrgencyProvider).value ?? const {};
 
     final AsyncValue<List<EquipmentItem>> equipmentAsync;
     if (_selectedFilter == _serviceDueFilter) {
@@ -129,14 +131,22 @@ class _EquipmentListContentState extends ConsumerState<EquipmentListContent> {
     // Table mode uses a dedicated scaffold with column configuration support.
     if (viewMode == ListViewMode.table) {
       final sortedAsync = equipmentAsync.whenData(
-        (equipment) => applyEquipmentSorting(equipment, sort),
+        (equipment) => applyEquipmentSorting(
+          equipment,
+          sort,
+          serviceUrgency: serviceUrgency,
+        ),
       );
       return _buildTableModeScaffold(context, sortedAsync);
     }
 
     final content = equipmentAsync.when(
       data: (equipment) {
-        final sorted = applyEquipmentSorting(equipment, sort);
+        final sorted = applyEquipmentSorting(
+          equipment,
+          sort,
+          serviceUrgency: serviceUrgency,
+        );
         return sorted.isEmpty
             ? _buildEmptyState(context, ref)
             : _buildEquipmentList(context, ref, sorted);
