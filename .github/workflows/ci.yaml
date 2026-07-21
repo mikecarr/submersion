@@ -82,6 +82,9 @@ jobs:
           echo "Changed files:"
           printf '%s\n' "$files"
           # code=true unless EVERY changed file matches an inert pattern below.
+          # NB: these are `case` globs, not filesystem globs - in `case`, `*`
+          # matches `/` too, so `docs/*` and `.github/*` DO match nested paths
+          # (docs/img/x.png, .github/workflows/ci.yaml). No globstar/`**` needed.
           code=false
           while IFS= read -r f; do
             [ -n "$f" ] || continue
