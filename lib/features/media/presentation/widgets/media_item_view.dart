@@ -186,9 +186,16 @@ class _VideoThumbnailPlaceholder extends StatelessWidget {
   }
 }
 
-/// Graceful fallback when image bytes fail to decode (corrupt/unsupported),
-/// so the raw "Invalid image data" exception never reaches the UI.
-Widget _imageError(BuildContext context, Object error, StackTrace? stack) =>
-    const UnavailableMediaPlaceholder(
-      data: UnavailableData(kind: UnavailableKind.notFound),
-    );
+/// Graceful fallback when image bytes fail to decode (corrupt/unsupported), so
+/// the raw "Invalid image data" exception never reaches the UI. Shows a
+/// broken-image tile rather than the "file not found" placeholder: the file is
+/// present, it just couldn't be rendered.
+Widget _imageError(BuildContext context, Object error, StackTrace? stack) {
+  final scheme = Theme.of(context).colorScheme;
+  return ColoredBox(
+    color: scheme.surfaceContainerHighest,
+    child: Center(
+      child: Icon(Icons.broken_image_outlined, color: scheme.onSurfaceVariant),
+    ),
+  );
+}

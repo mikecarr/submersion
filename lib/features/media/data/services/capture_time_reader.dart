@@ -66,6 +66,9 @@ DateTime? _readMp4CreationTime(File file) {
     if (mvhd == null) return null;
 
     final version = raf.readByteAt(mvhd.start);
+    // Only v0/v1 mvhd headers exist. Bail on anything else rather than
+    // mis-reading a corrupt byte as v0 and emitting a bogus timestamp.
+    if (version != 0 && version != 1) return null;
     // creation_time follows the 1-byte version + 3 flag bytes. It is uint32 in
     // a v0 header and uint64 in a v1 header.
     final creation = version == 1

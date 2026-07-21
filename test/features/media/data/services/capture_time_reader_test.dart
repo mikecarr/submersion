@@ -97,6 +97,21 @@ void main() {
       expect(readLocalCaptureTime(f, 'video/mp4'), isNull);
     });
 
+    test('unknown mvhd version returns null (falls back to mtime)', () async {
+      // Spec allows only v0/v1. A corrupt byte here must not be parsed as v0,
+      // which would emit a plausible-but-wrong timestamp.
+      final badVersion = <int>[
+        2, 0, 0, 0, // version 2 + flags
+        ..._u32(goProRaw),
+        ..._u32(0),
+        ..._u32(1000),
+        ..._u32(0),
+      ];
+      final f = File('${tempDir.path}/badver.mp4')
+        ..writeAsBytesSync(_goProMp4(badVersion));
+      expect(readLocalCaptureTime(f, 'video/mp4'), isNull);
+    });
+
     test('truncated / non-MP4 bytes return null without throwing', () async {
       final f = File('${tempDir.path}/junk.mp4')
         ..writeAsBytesSync([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
