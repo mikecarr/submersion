@@ -84,7 +84,7 @@ DateTime? _readHeicExifDate(File file) {
 
     raf.setPositionSync(extent.offset);
     final item = raf.readSync(extent.length);
-    final tiff = _findTiffHeader(item);
+    final tiff = _tiffHeaderOffset(item);
     if (tiff == null) return null;
 
     final exif = img.ExifData.fromInputBuffer(
@@ -115,16 +115,15 @@ int? _heicExifItemId(Uint8List b, int start, int end) {
   for (var i = 0; i < count && p + 8 <= end; i++) {
     final size = _beU32(b, p);
     if (size < 8 || p + size > end) return null;
+    final infeEnd = p + size;
     final infeVersion = b[p + 8];
-    var q = p + 12; // skip infe box header (8) + version+flags (4)
-    if (infeVersion >= 3) {
-      q += 4; // item_ID uint32
-    } else {
-      q += 2; // item_ID uint16
-    }
+    final idBytes = infeVersion >= 3 ? 4 : 2; // item_ID width
     final itemId = infeVersion >= 3 ? _beU32(b, p + 12) : _beU16(b, p + 12);
-    q += 2; // item_protection_index
-    if (q + 4 <= end && _fourCC(b, q) == 'Exif') return itemId;
+    // item_type follows: infe header (8) + version/flags (4) + item_ID +
+    // item_protection_index (2). Bound the read to THIS infe box so a corrupt
+    // size can't match an 'Exif' fourCC that belongs to a following entry.
+    final typePos = p + 12 + idBytes + 2;
+    if (typePos + 4 <= infeEnd && _fourCC(b, typePos) == 'Exif') return itemId;
     p += size;
   }
   return null;
@@ -176,18 +175,29 @@ _Extent? _heicExifExtent(Uint8List b, int start, int end, int wantId) {
   return null;
 }
 
-/// Locates the TIFF header (`II*\0` or `MM\0*`) that begins the EXIF block
-/// inside a HEIC `Exif` item (which is prefixed by a small offset header).
-int? _findTiffHeader(Uint8List b) {
+/// The HEIC `Exif` item begins with a 4-byte big-endian offset to the TIFF
+/// header (counted from just past that field). Use it directly; fall back to a
+/// bounded scan only when the declared offset is out of range or does not point
+/// at a TIFF signature, so malformed input degrades gracefully instead of
+/// mis-locating an earlier byte sequence.
+int? _tiffHeaderOffset(Uint8List b) {
+  if (b.length >= 8) {
+    final declared = 4 + _beU32(b, 0);
+    if (declared + 4 <= b.length && _isTiffHeader(b, declared)) return declared;
+  }
   for (var i = 0; i + 4 <= b.length; i++) {
-    final a = b[i], c = b[i + 1], d = b[i + 2], e = b[i + 3];
-    if ((a == 0x49 && c == 0x49 && d == 0x2a && e == 0x00) ||
-        (a == 0x4d && c == 0x4d && d == 0x00 && e == 0x2a)) {
-      return i;
-    }
+    if (_isTiffHeader(b, i)) return i;
   }
   return null;
 }
+
+/// A TIFF header is `II*\0` (little-endian) or `MM\0*` (big-endian).
+bool _isTiffHeader(Uint8List b, int o) =>
+    (b[o] == 0x49 &&
+        b[o + 1] == 0x49 &&
+        b[o + 2] == 0x2a &&
+        b[o + 3] == 0x00) ||
+    (b[o] == 0x4d && b[o + 1] == 0x4d && b[o + 2] == 0x00 && b[o + 3] == 0x2a);
 
 /// Byte-buffer twin of [_findBox], for walking sub-boxes already read into
 /// memory (e.g. inside a `meta` box).

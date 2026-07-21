@@ -125,14 +125,18 @@ void main() {
     // A real TIFF/EXIF block: encode a JPEG with the tag, then lift its APP1
     // payload. `image` can't encode HEIC, but a HEIC `Exif` item carries the
     // same "Exif\0\0" + TIFF payload, prefixed by a 4-byte tiff-header offset.
-    List<int> exifItemPayload(String date) {
+    List<int> exifItemPayload(String date, {int declaredOffset = 6}) {
       final image = img.Image(width: 2, height: 2);
       image.exif.exifIfd['DateTimeOriginal'] = date;
       final jpg = img.encodeJpg(image);
       for (var i = 0; i + 3 < jpg.length; i++) {
         if (jpg[i] == 0xFF && jpg[i + 1] == 0xE1) {
           final segLen = (jpg[i + 2] << 8) | jpg[i + 3];
-          return [0, 0, 0, 6, ...jpg.sublist(i + 4, i + 2 + segLen)];
+          // 4-byte tiff-header offset (6 skips the "Exif\0\0" prefix) + payload.
+          return [
+            ..._u32(declaredOffset),
+            ...jpg.sublist(i + 4, i + 2 + segLen),
+          ];
         }
       }
       throw StateError('no APP1 EXIF segment in encoded JPEG');
@@ -141,9 +145,9 @@ void main() {
     // Minimal HEIC: ftyp, mdat holding the Exif payload, then meta whose
     // iinf declares an 'Exif' item and iloc points at the payload's absolute
     // offset (base_offset_size 0, construction_method 0).
-    List<int> heicFile(String date) {
+    List<int> heicFile(String date, {int declaredOffset = 6}) {
       final ftyp = _box('ftyp', 'heic'.codeUnits);
-      final payload = exifItemPayload(date);
+      final payload = exifItemPayload(date, declaredOffset: declaredOffset);
       final mdat = _box('mdat', payload);
       final payloadOffset = ftyp.length + 8; // just past the mdat box header
 
@@ -194,6 +198,22 @@ void main() {
         ..writeAsBytesSync([0, 1, 2, 3]);
       expect(readLocalCaptureTime(f, 'image/heic'), isNull);
     });
+
+    test(
+      'falls back to scanning when the declared TIFF offset is bogus',
+      () async {
+        // Out-of-range declared offset: the reader must still find the TIFF via
+        // its bounded scan rather than give up.
+        final f = File('${tempDir.path}/badoffset.heic')
+          ..writeAsBytesSync(
+            heicFile('2026:05:06 17:35:39', declaredOffset: 99999),
+          );
+        expect(
+          readLocalCaptureTime(f, 'image/heic'),
+          DateTime.utc(2026, 5, 6, 17, 35, 39),
+        );
+      },
+    );
   });
 
   group('JPEG EXIF (shared reader)', () {
