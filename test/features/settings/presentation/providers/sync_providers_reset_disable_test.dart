@@ -3,7 +3,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:submersion/core/data/repositories/sync_repository.dart'
     show CloudProviderType;
-import 'package:submersion/core/services/database_service.dart';
 import 'package:submersion/core/services/sync/sync_preferences.dart';
 import 'package:submersion/features/settings/presentation/providers/settings_providers.dart';
 import 'package:submersion/features/settings/presentation/providers/sync_providers.dart';
@@ -38,7 +37,7 @@ void main() {
     cloud = FakeCloudStorageProvider();
   });
 
-  tearDown(() => DatabaseService.instance.resetForTesting());
+  tearDown(tearDownTestDatabase);
 
   Future<ProviderContainer> makeContainer() async {
     final container = ProviderContainer(

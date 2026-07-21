@@ -109,6 +109,7 @@ void main() {
     late ProviderContainer container;
     await tester.pumpWidget(
       testApp(
+        locale: const Locale('en'),
         overrides: await overrides(),
         child: Builder(
           builder: (context) {
@@ -141,6 +142,7 @@ void main() {
     late ProviderContainer container;
     await tester.pumpWidget(
       testApp(
+        locale: const Locale('en'),
         overrides: await overrides(),
         child: Builder(
           builder: (context) {
@@ -174,6 +176,7 @@ void main() {
     late ProviderContainer container;
     await tester.pumpWidget(
       testApp(
+        locale: const Locale('en'),
         overrides: await overrides(),
         child: Builder(
           builder: (context) {
@@ -213,6 +216,7 @@ void main() {
     late ProviderContainer container;
     await tester.pumpWidget(
       testApp(
+        locale: const Locale('en'),
         overrides: await overrides(failSync: true),
         child: Builder(
           builder: (context) {
@@ -252,6 +256,7 @@ void main() {
     late ProviderContainer container;
     await tester.pumpWidget(
       testApp(
+        locale: const Locale('en'),
         overrides: await overrides(onSync: _writeSyncedDiver),
         child: Builder(
           builder: (context) {
@@ -298,6 +303,7 @@ void main() {
     late ProviderContainer container;
     await tester.pumpWidget(
       testApp(
+        locale: const Locale('en'),
         overrides: [
           ...base,
           isApplePlatformProvider.overrideWithValue(false),
@@ -377,6 +383,7 @@ void main() {
     );
     await tester.pumpWidget(
       testAppRouter(
+        locale: const Locale('en'),
         router: router,
         overrides: await overrides(onSync: _writeSyncedDiver),
       ),

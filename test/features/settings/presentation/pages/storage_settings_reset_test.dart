@@ -58,17 +58,28 @@ class _FakeStorageConfig extends StateNotifier<StorageConfigState>
 
 void main() {
   late SharedPreferences prefs;
+  late Directory tempDir;
 
   setUp(() async {
     await setUpTestDatabase();
     SharedPreferences.setMockInitialValues({});
     prefs = await SharedPreferences.getInstance();
-    PathProviderPlatform.instance = _FakePathProvider(
-      Directory.systemTemp.createTempSync('storage_reset_test').path,
-    );
+    tempDir = Directory.systemTemp.createTempSync('storage_reset_test');
+    PathProviderPlatform.instance = _FakePathProvider(tempDir.path);
   });
 
-  tearDown(() => DatabaseService.instance.resetForTesting());
+  tearDown(() async {
+    // The reset can swap in an on-disk DB; close whatever is open (best-effort
+    // -- it may be null if the reset failed), reset the service, then drop the
+    // temp docs directory the reset may have written a fresh DB into.
+    try {
+      await DatabaseService.instance.database.close();
+    } catch (_) {}
+    DatabaseService.instance.resetForTesting();
+    try {
+      tempDir.deleteSync(recursive: true);
+    } catch (_) {}
+  });
 
   /// Pumps the storage page and drives the Reset Database confirm flow with
   /// [spy] wired in as the sync notifier.
@@ -98,6 +109,7 @@ void main() {
         currentDatabasePathProvider.overrideWith((ref) async => '/tmp/db'),
       ],
       child: const MaterialApp(
+        locale: Locale('en'),
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
         home: StorageSettingsPage(),
