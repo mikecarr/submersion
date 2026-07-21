@@ -34,8 +34,10 @@ void main() {
     );
   });
 
-  test('v130 is the current schema version (exact-latest tripwire)', () {
-    expect(AppDatabase.currentSchemaVersion, 130);
+  test('v130 media_enrichment migration is present', () {
+    // Membership only: v131 landed on top, so the exact-latest tripwire now
+    // lives in migration_v131_service_reconcile_test.dart.
+    expect(AppDatabase.currentSchemaVersion, greaterThanOrEqualTo(130));
     expect(AppDatabase.migrationVersions, contains(130));
   });
 }

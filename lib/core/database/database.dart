@@ -2831,7 +2831,7 @@ class AppDatabase extends _$AppDatabase {
 
   /// The current schema version as a static constant so that pre-open checks
   /// (e.g. version-mismatch guard) can reference it without an instance.
-  static const int currentSchemaVersion = 130;
+  static const int currentSchemaVersion = 131;
 
   /// Every schema version that has a migration block in onUpgrade.
   /// Used to calculate progress step counts. When adding a new migration,
@@ -2982,6 +2982,9 @@ class AppDatabase extends _$AppDatabase {
     129,
     // v130: media_enrichment.hlc so a photo's depth/time association syncs.
     130,
+    // v131: reconcile legacy service intervals edited after the v122 backfill
+    // into General service clocks (deletion-log guarded).
+    131,
   ];
 
   /// Idempotent DDL for the v106 connector-suggestion columns (Lightroom
@@ -3507,6 +3510,60 @@ class AppDatabase extends _$AppDatabase {
       WHERE e.service_interval_days IS NOT NULL
     ''');
   }
+
+  /// v131 one-time reconciliation: items whose legacy interval was set via the
+  /// edit form AFTER the v122 backfill ran have an interval column but no
+  /// clock. Create the same deterministic `legacy-svc-<id>` "General service"
+  /// clock for them so removing the legacy edit field does not drop their due
+  /// signal. Guarded by the deletion log so a clock the user deleted is never
+  /// resurrected. onUpgrade only, never beforeOpen (re-running would resurrect
+  /// a user-deleted clock; mirrors [_backfillLegacyServiceSchedules]).
+  Future<void> _reconcileLegacyServiceSchedules() async {
+    // Self-guard for partial fixture databases (old-migration tests): skip
+    // unless every table the copy reads exists. Real databases always have
+    // deletion_log; a minimal fixture that omits it must not crash the copy.
+    final tables = await customSelect(
+      "SELECT name FROM sqlite_master WHERE type='table'",
+    ).get();
+    final tableNames = tables.map((t) => t.read<String>('name')).toSet();
+    if (!tableNames.containsAll({
+      'equipment',
+      'service_schedules',
+      'deletion_log',
+    })) {
+      return;
+    }
+    final eqCols = await customSelect("PRAGMA table_info('equipment')").get();
+    final names = eqCols.map((c) => c.read<String>('name')).toSet();
+    if (!names.containsAll({'service_interval_days', 'last_service_date'})) {
+      return;
+    }
+    await customStatement('''
+      INSERT OR IGNORE INTO service_schedules
+        (id, equipment_id, service_kind_id, interval_days, anchor_date,
+         enabled, created_at, updated_at)
+      SELECT 'legacy-svc-' || e.id, e.id, 'general-service',
+             e.service_interval_days, e.last_service_date, 1,
+             n.now_ms, n.now_ms
+      FROM equipment e
+      CROSS JOIN (
+        SELECT CAST(strftime('%s','now') AS INTEGER) * 1000 AS now_ms
+      ) n
+      WHERE e.service_interval_days IS NOT NULL
+        AND NOT EXISTS (
+          SELECT 1 FROM service_schedules s WHERE s.id = 'legacy-svc-' || e.id
+        )
+        AND NOT EXISTS (
+          SELECT 1 FROM deletion_log d
+          WHERE d.entity_type = 'serviceSchedules'
+            AND d.record_id = 'legacy-svc-' || e.id
+        )
+    ''');
+  }
+
+  /// Test-only hook exercising the v131 reconciliation directly.
+  Future<void> reconcileLegacyServiceSchedulesForTest() =>
+      _reconcileLegacyServiceSchedules();
 
   /// Data self-heal: synthesize a primary [DiveDataSources] row for any dive
   /// that has profile samples but no data-source row. Older file imports (and
@@ -6782,6 +6839,12 @@ class AppDatabase extends _$AppDatabase {
           await _assertMediaEnrichmentHlcColumn();
         }
         if (from < 130) await reportProgress();
+        // v131: reconcile legacy service intervals edited after the v122
+        // backfill into General service clocks (deletion-log guarded).
+        if (from < 131) {
+          await _reconcileLegacyServiceSchedules();
+        }
+        if (from < 131) await reportProgress();
       },
       beforeOpen: (details) async {
         // Enable foreign keys
