@@ -173,11 +173,11 @@ void main() {
     });
   });
 
-  test('v133 is the current schema version (exact-latest tripwire)', () {
-    // Exact assertion: the newest migration owns the tripwire, so the next
-    // schema bump must move it forward. Relax to greaterThanOrEqualTo and add
-    // a fresh exact test when a later migration lands on top of v133.
-    expect(AppDatabase.currentSchemaVersion, 133);
+  test('v133 deco-stops migration stays in the schema ladder', () {
+    // Relaxed from an exact-latest tripwire: v134 (media compressed rendition
+    // columns) landed on top of v133, so the exact-latest assertion now lives
+    // in media_compressed_columns_migration_test.dart.
+    expect(AppDatabase.currentSchemaVersion, greaterThanOrEqualTo(133));
     expect(AppDatabase.migrationVersions, contains(133));
   });
 }

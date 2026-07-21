@@ -1230,6 +1230,12 @@ class Media extends Table {
   IntColumn get contentSizeBytes => integer().nullable()();
   IntColumn get remoteUploadedAt => integer().nullable()();
   IntColumn get remoteThumbUploadedAt => integer().nullable()();
+
+  // Adjustable upload quality (v133): a compressed rendition, keyed by the
+  // original's content hash, may be uploaded instead of the original.
+  TextColumn get compressedLevel => text().nullable()();
+  IntColumn get compressedSizeBytes => integer().nullable()();
+  IntColumn get remoteCompressedUploadedAt => integer().nullable()();
   // coverage:ignore-end
   IntColumn get createdAt => integer()();
   IntColumn get updatedAt => integer()();
@@ -2837,7 +2843,7 @@ class AppDatabase extends _$AppDatabase {
 
   /// The current schema version as a static constant so that pre-open checks
   /// (e.g. version-mismatch guard) can reference it without an instance.
-  static const int currentSchemaVersion = 133;
+  static const int currentSchemaVersion = 134;
 
   /// Every schema version that has a migration block in onUpgrade.
   /// Used to calculate progress step counts. When adding a new migration,
@@ -2997,6 +3003,9 @@ class AppDatabase extends _$AppDatabase {
     // v133: deco stop band columns on diver_settings (renumbered from v130 as
     // main advanced past it at merge time).
     133,
+    // v134: media compressed-rendition columns (adjustable upload quality
+    // Phase A). Renumbered from v130 as main advanced past it at merge time.
+    134,
   ];
 
   /// Idempotent DDL for the v106 connector-suggestion columns (Lightroom
@@ -3851,6 +3860,25 @@ class AppDatabase extends _$AppDatabase {
         hlc TEXT
       )
     ''');
+  }
+
+  /// Idempotent DDL for the v133 compressed-rendition columns. Called from the
+  /// v133 onUpgrade step and the beforeOpen backstop, matching the
+  /// _assertMediaStoreSchema pattern so a schema-version collision cannot
+  /// strand a database without them.
+  Future<void> _assertMediaCompressedRenditionColumns() async {
+    final cols = await customSelect("PRAGMA table_info('media')").get();
+    if (cols.isEmpty) return;
+    final names = cols.map((c) => c.read<String>('name')).toSet();
+    Future<void> add(String name, String type) async {
+      if (!names.contains(name)) {
+        await customStatement('ALTER TABLE media ADD COLUMN $name $type');
+      }
+    }
+
+    await add('compressed_level', 'TEXT');
+    await add('compressed_size_bytes', 'INTEGER');
+    await add('remote_compressed_uploaded_at', 'INTEGER');
   }
 
   /// Tables that carry a per-row Hybrid Logical Clock for cross-device conflict
@@ -7001,6 +7029,12 @@ class AppDatabase extends _$AppDatabase {
           await _assertDecoStopSettingsColumns();
         }
         if (from < 133) await reportProgress();
+        // v134: media compressed-rendition columns (adjustable upload quality
+        // Phase A). Renumbered from v130 as main advanced past it at merge time.
+        if (from < 134) {
+          await _assertMediaCompressedRenditionColumns();
+        }
+        if (from < 134) await reportProgress();
       },
       beforeOpen: (details) async {
         // Enable foreign keys
@@ -7012,6 +7046,9 @@ class AppDatabase extends _$AppDatabase {
 
         // v130 backstop: re-assert the media_enrichment.hlc column.
         await _assertMediaEnrichmentHlcColumn();
+
+        // v134 backstop: re-assert compressed-rendition columns.
+        await _assertMediaCompressedRenditionColumns();
 
         // v106 backstop: re-assert connector-suggestion columns (the helper
         // is self-guarding when the suggestions table is absent).

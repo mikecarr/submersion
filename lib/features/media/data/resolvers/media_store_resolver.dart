@@ -42,8 +42,14 @@ class MediaStoreResolver {
       if (thumb != null) return thumb;
       // Fall through: a missing/broken thumb degrades to the original.
     }
-    if (item.remoteUploadedAt == null) return null;
-    return _fetchOriginal(item, hash);
+    if (item.remoteUploadedAt != null) {
+      final original = await _fetchOriginal(item, hash);
+      if (original != null) return original;
+    }
+    if (item.remoteCompressedUploadedAt != null) {
+      return _fetchCompressed(item, hash);
+    }
+    return null;
   }
 
   Future<MediaSourceData?> _fetchThumb(MediaItem item, String hash) async {
@@ -59,6 +65,36 @@ class MediaStoreResolver {
       return FileData(file: file);
     } on Exception catch (e) {
       _log.warning('Thumb fetch failed for ${item.id}: $e');
+      return null;
+    } finally {
+      await _discardStaging(staging);
+    }
+  }
+
+  /// Fetches the compressed rendition (spec section 11). Derived bytes, so no
+  /// hash verification; validated against remoteCompressedUploadedAt so a
+  /// re-uploaded (overwritten) rendition invalidates a stale cache entry.
+  Future<MediaSourceData?> _fetchCompressed(MediaItem item, String hash) async {
+    final ext = item.mediaType == MediaType.video ? 'mp4' : 'jpg';
+    File? staging;
+    try {
+      final cached = await _cache.get(
+        hash,
+        MediaCacheKind.rendition,
+        freshAfter: item.remoteCompressedUploadedAt,
+      );
+      if (cached != null) return FileData(file: cached);
+      staging = await _cache.stagingFile();
+      await _store.getFile(StoreKeys.renditionKey(hash, ext: ext), staging);
+      final file = await _cache.put(
+        hash,
+        MediaCacheKind.rendition,
+        staging,
+        sourceVersion: item.remoteCompressedUploadedAt?.millisecondsSinceEpoch,
+      );
+      return FileData(file: file);
+    } on Exception catch (e) {
+      _log.warning('Rendition fetch failed for ${item.id}: $e');
       return null;
     } finally {
       await _discardStaging(staging);

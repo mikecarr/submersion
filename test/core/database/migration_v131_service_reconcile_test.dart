@@ -78,10 +78,10 @@ void main() {
     expect(await scheduleIntervals('legacy-svc-e3'), [999]);
   });
 
-  test('v131 is present in the schema-version ladder', () {
-    // Relaxed from an exact-latest tripwire: v132 (bottom-time backfill) landed
-    // on top of v131, so the exact-latest assertion now lives in
-    // migration_v132_bottom_time_backfill_test.dart.
+  test('v131 service-reconcile migration stays in the schema ladder', () {
+    // Relaxed from an exact-latest tripwire: later migrations landed on top of
+    // v131. The exact-latest assertion now lives in
+    // media_compressed_columns_migration_test.dart (v133).
     expect(AppDatabase.currentSchemaVersion, greaterThanOrEqualTo(131));
     expect(AppDatabase.migrationVersions, contains(131));
   });

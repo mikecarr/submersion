@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:submersion/core/services/logger_service.dart';
 import 'package:submersion/core/services/media_store/media_object_store.dart';
+import 'package:submersion/core/services/media_store/media_store_policies.dart';
 import 'package:submersion/core/services/media_store/store_keys.dart';
 import 'package:submersion/features/media/data/repositories/media_repository.dart';
 import 'package:submersion/features/media/data/services/media_source_resolver_registry.dart';
@@ -11,7 +12,11 @@ import 'package:submersion/features/media/domain/entities/media_source_type.dart
 import 'package:submersion/features/media/domain/value_objects/media_source_data.dart';
 import 'package:submersion/features/media_store/data/media_cache_store.dart';
 import 'package:submersion/features/media_store/data/media_transfer_queue_repository.dart';
+import 'package:submersion/features/media_store/data/image_compressor.dart';
+import 'package:submersion/features/media_store/data/media_compressor.dart';
 import 'package:submersion/features/media_store/data/thumbnail_generator.dart';
+import 'package:submersion/features/media_store/data/video_transcoder.dart';
+import 'package:submersion/features/media_store/domain/media_upload_quality.dart';
 
 enum UploadOutcome { uploaded, deduplicated, skippedIneligible, failed }
 
@@ -27,6 +32,9 @@ class MediaUploadPipeline {
     required MediaSourceResolverRegistry registry,
     required MediaCacheStore cache,
     ThumbnailGenerator? thumbnails,
+    MediaStorePolicies? policies,
+    MediaCompressor? imageCompressor,
+    VideoTranscoder? videoTranscoder,
     DateTime Function()? now,
   }) : _mediaRepository = mediaRepository,
        _queue = queue,
@@ -35,6 +43,10 @@ class MediaUploadPipeline {
        _cache = cache,
        _thumbnails =
            thumbnails ?? ThumbnailGenerator(registry: registry, cache: cache),
+       _policies = policies ?? MediaStorePolicies(),
+       _imageCompressor =
+           imageCompressor ?? ImageCompressor(registry: registry, cache: cache),
+       _videoTranscoder = videoTranscoder,
        _now = now ?? DateTime.now;
 
   final MediaRepository _mediaRepository;
@@ -43,6 +55,9 @@ class MediaUploadPipeline {
   final MediaSourceResolverRegistry _registry;
   final MediaCacheStore _cache;
   final ThumbnailGenerator _thumbnails;
+  final MediaStorePolicies _policies;
+  final MediaCompressor _imageCompressor;
+  final VideoTranscoder? _videoTranscoder;
   final DateTime Function() _now;
   final _log = LoggerService.forClass(MediaUploadPipeline);
 
@@ -68,11 +83,17 @@ class MediaUploadPipeline {
       await _queue.markDone(entry.id);
       return UploadOutcome.skippedIneligible;
     }
-    if (_isThumbOnly(item)
-        ? item.remoteThumbUploadedAt != null
-        : item.remoteUploadedAt != null) {
-      await _queue.markDone(entry.id);
-      return UploadOutcome.deduplicated;
+    final isOverride = entry.overrideLevel != null;
+    if (!isOverride) {
+      final alreadyUploaded =
+          item.remoteUploadedAt != null ||
+          item.remoteCompressedUploadedAt != null;
+      if (_isThumbOnly(item)
+          ? item.remoteThumbUploadedAt != null
+          : alreadyUploaded) {
+        await _queue.markDone(entry.id);
+        return UploadOutcome.deduplicated;
+      }
     }
 
     File? staged;
@@ -126,10 +147,73 @@ class MediaUploadPipeline {
         return UploadOutcome.uploaded;
       }
 
+      // Quality branch: a non-Original level uploads a compressed rendition
+      // instead of the original. A null rendition (Original level, already
+      // under the ceiling, undecodable, or a video with no transcoder in
+      // Phase A) falls through to the untouched-original upload below.
+      // An override entry forces its chosen level and replaces whatever the
+      // store currently holds for this item.
+      final hadOriginal = item.remoteUploadedAt != null;
+      final hadCompressed = item.remoteCompressedUploadedAt != null;
+      // A corrupt or future-enum override string must not fail the upload:
+      // fall back to the device's configured level so the item still uploads.
+      final level =
+          (isOverride ? _tryParseQuality(entry.overrideLevel!) : null) ??
+          await _policies.qualityFor(item.mediaType);
+      final rendition = await _renditionFor(item, staged, level);
+      if (rendition != null) {
+        final renditionKey = StoreKeys.renditionKey(
+          digest.hash,
+          ext: rendition.ext,
+        );
+        // Override forces a rewrite (the key ignores quality, so a level
+        // change lands at the same key); otherwise head() dedups.
+        final existingRendition = isOverride
+            ? null
+            : await _store.head(renditionKey);
+        if (existingRendition == null) {
+          await _store.putFile(
+            renditionKey,
+            rendition.file,
+            contentType: StoreKeys.contentTypeFor(rendition.ext),
+          );
+        }
+        await _mediaRepository.stampRemoteCompressedUploaded(
+          item.id,
+          uploadedAt: _now(),
+          level: level.name,
+          // First-writer-wins: on the dedup path the stored object was written
+          // by the first uploader and may differ from this device's local
+          // rendition (renditions are not hash-verified and can vary by level),
+          // so record the authoritative stored size, not our local bytes. The
+          // stored object's level is not recoverable, so it stays this device's
+          // best signal (the design keeps one rendition per hash, not one per
+          // level).
+          sizeBytes: existingRendition?.sizeBytes ?? rendition.sizeBytes,
+        );
+        await _cleanupRendition(rendition.file);
+        // Namespace switch (override original -> compressed): drop the now
+        // unreferenced original object.
+        if (hadOriginal) {
+          await _mediaRepository.clearRemoteUploaded(item.id);
+          if (await _mediaRepository.countRowsWithOriginal(digest.hash) == 0) {
+            await _bestEffortDelete(
+              StoreKeys.objectKey(
+                digest.hash,
+                extension: StoreKeys.extensionFor(item.originalFilename),
+              ),
+              'abandoned original',
+            );
+          }
+        }
+        await _queue.markDone(entry.id);
+        return UploadOutcome.uploaded;
+      }
+
       final extension = StoreKeys.extensionFor(item.originalFilename);
       final key = StoreKeys.objectKey(digest.hash, extension: extension);
       final existing = await _store.head(key);
-      if (existing == null) {
+      if (isOverride || existing == null) {
         // Resume state survives failures on the queue row; content
         // addressing makes replaying it against a re-materialized staging
         // copy safe (identical bytes, identical part boundaries).
@@ -151,8 +235,22 @@ class MediaUploadPipeline {
       }
 
       await _mediaRepository.stampRemoteUploaded(item.id, uploadedAt: _now());
+      // Namespace switch (override compressed -> original): drop the now
+      // unreferenced rendition object.
+      if (hadCompressed) {
+        await _mediaRepository.clearRemoteCompressed(item.id);
+        if (await _mediaRepository.countRowsWithRendition(digest.hash) == 0) {
+          await _bestEffortDelete(
+            StoreKeys.renditionKey(
+              digest.hash,
+              ext: item.mediaType == MediaType.video ? 'mp4' : 'jpg',
+            ),
+            'abandoned rendition',
+          );
+        }
+      }
       await _queue.markDone(entry.id);
-      return existing == null
+      return (isOverride || existing == null)
           ? UploadOutcome.uploaded
           : UploadOutcome.deduplicated;
     } on Exception catch (e, stackTrace) {
@@ -202,6 +300,57 @@ class MediaUploadPipeline {
       case NetworkData():
       case UnavailableData():
         return null;
+    }
+  }
+
+  /// Chooses the compressor by media type; returns null for the Original
+  /// level, when the compressor declines (ceiling/undecodable), or when a
+  /// video has no transcoder registered (Phase A -> upload the original).
+  Future<CompressionResult?> _renditionFor(
+    MediaItem item,
+    File source,
+    MediaUploadQuality level,
+  ) async {
+    if (level == MediaUploadQuality.original) return null;
+    if (item.mediaType == MediaType.video) {
+      return _videoTranscoder?.transcode(item, source, level);
+    }
+    return _imageCompressor.compress(item, source, level);
+  }
+
+  Future<void> _cleanupRendition(File file) async {
+    try {
+      await file.delete();
+    } on PathNotFoundException {
+      // Already gone -- best-effort.
+    }
+  }
+
+  /// Parses a persisted override level name, tolerating a corrupt or
+  /// future-enum string (returns null so the caller can fall back) rather
+  /// than throwing ArgumentError and failing the whole upload.
+  MediaUploadQuality? _tryParseQuality(String name) {
+    for (final quality in MediaUploadQuality.values) {
+      if (quality.name == name) return quality;
+    }
+    _log.warning('Ignoring unrecognized override upload level "$name"');
+    return null;
+  }
+
+  /// Deletes a now-unreferenced store object as best-effort cleanup after a
+  /// namespace switch. The primary upload has already succeeded, so a
+  /// transient/auth failure here must not turn the outcome into a failure
+  /// (which would endlessly retry an upload whose bytes are already stored).
+  Future<void> _bestEffortDelete(String key, String label) async {
+    try {
+      await _store.delete(key);
+    } on Exception catch (e, stackTrace) {
+      _log.warning(
+        'Best-effort cleanup of $label object failed for $key '
+        '(upload already succeeded)',
+        error: e,
+        stackTrace: stackTrace,
+      );
     }
   }
 }

@@ -138,6 +138,7 @@ void main() {
           isApplePlatformProvider.overrideWithValue(apple),
         ],
         child: const MaterialApp(
+          locale: Locale('en'),
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           home: MediaStoragePage(),
@@ -461,6 +462,51 @@ void main() {
     );
   });
 
+  testWidgets('the quality section renders both dropdowns and the caveat', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(800, 2600);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+    await tester.runAsync(() async {
+      await tester.pumpWidget(app(statusHint: 'dive-media @ minio'));
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+      await tester.pump();
+    });
+    expect(find.byKey(const Key('media-quality-photos')), findsOneWidget);
+    expect(find.byKey(const Key('media-quality-video')), findsOneWidget);
+  });
+
+  testWidgets('changing the photo quality dropdown writes through', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(800, 2600);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+    await tester.runAsync(() async {
+      await tester.pumpWidget(app(statusHint: 'dive-media @ minio'));
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+      await tester.pump();
+    });
+
+    final dropdown = find.byKey(const Key('media-quality-photos'));
+    await tester.ensureVisible(dropdown);
+    await tester.runAsync(() async {
+      await tester.tap(dropdown);
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+    });
+    await tester.runAsync(() async {
+      await tester.tap(find.text('Small').last);
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+      await tester.pump();
+    });
+
+    final prefs = await SharedPreferences.getInstance();
+    expect(prefs.getString('media_store_photo_quality'), 'small');
+  });
+
   testWidgets('backfill enqueues and reports the count', (tester) async {
     tester.view.physicalSize = const Size(800, 2200);
     tester.view.devicePixelRatio = 1.0;
@@ -555,6 +601,7 @@ void main() {
             isApplePlatformProvider.overrideWithValue(true),
           ],
           child: const MaterialApp(
+            locale: Locale('en'),
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
             home: MediaStoragePage(),
@@ -599,6 +646,7 @@ void main() {
             isApplePlatformProvider.overrideWithValue(true),
           ],
           child: const MaterialApp(
+            locale: Locale('en'),
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
             home: MediaStoragePage(),
@@ -630,6 +678,7 @@ void main() {
             isApplePlatformProvider.overrideWithValue(true),
           ],
           child: const MaterialApp(
+            locale: Locale('en'),
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
             home: MediaStoragePage(),
