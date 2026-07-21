@@ -45,6 +45,11 @@ class _SavedPlansSheetState extends ConsumerState<SavedPlansSheet> {
     // Render stale data during a reload rather than flashing a spinner.
     final plans = summaries.valueOrNull;
 
+    // The compare-mode toggle only renders with >=2 plans; if an in-mode delete
+    // drops the count below that, fall back to normal rows so the user is never
+    // stranded in a mode whose exit control has disappeared.
+    final selecting = _selecting && (plans?.length ?? 0) >= 2;
+
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
@@ -104,9 +109,10 @@ class _SavedPlansSheetState extends ConsumerState<SavedPlansSheet> {
                 child: ListView.builder(
                   shrinkWrap: true,
                   itemCount: plans.length,
-                  itemBuilder: (context, i) => _selecting
+                  itemBuilder: (context, i) => selecting
                       ? CheckboxListTile(
                           contentPadding: EdgeInsets.zero,
+                          controlAffinity: ListTileControlAffinity.leading,
                           title: Text(plans[i].name),
                           value: _selected.contains(plans[i].id),
                           onChanged: (checked) => setState(() {
@@ -118,11 +124,22 @@ class _SavedPlansSheetState extends ConsumerState<SavedPlansSheet> {
                               _selected.remove(plans[i].id);
                             }
                           }),
+                          secondary: IconButton(
+                            icon: const Icon(Icons.delete_outline),
+                            color: theme.colorScheme.error,
+                            tooltip: context.l10n.common_action_delete,
+                            onPressed: () => _confirmAndDeletePlan(
+                              context,
+                              ref,
+                              plans[i].id,
+                              plans[i].name,
+                            ),
+                          ),
                         )
                       : _PlanTile(summary: plans[i], units: units),
                 ),
               ),
-            if (_selecting)
+            if (selecting)
               Padding(
                 padding: const EdgeInsets.only(top: 8),
                 child: FilledButton(
@@ -213,66 +230,81 @@ class _PlanTile extends ConsumerWidget {
         context.pop();
         context.go('/planning/dive-planner/${summary.id}');
       },
-      trailing: PopupMenuButton<String>(
-        onSelected: (value) async {
-          final repository = ref.read(divePlanRepositoryProvider);
-          if (value == 'duplicate') {
-            await repository.duplicatePlan(summary.id);
-          } else if (value == 'share') {
-            final plan = await repository.getPlan(summary.id);
-            if (plan == null) return;
-            final safeName = plan.name
-                .replaceAll(RegExp(r'[^\w\s-]'), '')
-                .trim()
-                .replaceAll(RegExp(r'\s+'), '_');
-            await saveAndShareFile(
-              planToSubplanJson(plan),
-              '${safeName.isEmpty ? 'dive_plan' : safeName}.$subplanExtension',
-              'application/json',
-            );
-          } else if (value == 'delete') {
-            final confirmed = await _confirmDelete(context);
-            if (confirmed) await repository.deletePlan(summary.id);
-          }
-        },
-        itemBuilder: (context) => [
-          PopupMenuItem(
-            value: 'duplicate',
-            child: Text(context.l10n.plannerCanvas_saved_duplicate),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          IconButton(
+            icon: const Icon(Icons.delete_outline),
+            color: Theme.of(context).colorScheme.error,
+            tooltip: context.l10n.common_action_delete,
+            onPressed: () =>
+                _confirmAndDeletePlan(context, ref, summary.id, summary.name),
           ),
-          PopupMenuItem(
-            value: 'share',
-            child: Text(context.l10n.plannerCanvas_share_menu),
-          ),
-          PopupMenuItem(
-            value: 'delete',
-            child: Text(context.l10n.common_action_delete),
+          PopupMenuButton<String>(
+            onSelected: (value) async {
+              final repository = ref.read(divePlanRepositoryProvider);
+              if (value == 'duplicate') {
+                await repository.duplicatePlan(summary.id);
+              } else if (value == 'share') {
+                final plan = await repository.getPlan(summary.id);
+                if (plan == null) return;
+                final safeName = plan.name
+                    .replaceAll(RegExp(r'[^\w\s-]'), '')
+                    .trim()
+                    .replaceAll(RegExp(r'\s+'), '_');
+                await saveAndShareFile(
+                  planToSubplanJson(plan),
+                  '${safeName.isEmpty ? 'dive_plan' : safeName}.$subplanExtension',
+                  'application/json',
+                );
+              }
+            },
+            itemBuilder: (context) => [
+              PopupMenuItem(
+                value: 'duplicate',
+                child: Text(context.l10n.plannerCanvas_saved_duplicate),
+              ),
+              PopupMenuItem(
+                value: 'share',
+                child: Text(context.l10n.plannerCanvas_share_menu),
+              ),
+            ],
           ),
         ],
       ),
     );
   }
+}
 
-  Future<bool> _confirmDelete(BuildContext context) async {
-    final result = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(context.l10n.plannerCanvas_saved_deleteConfirmTitle),
-        content: Text(
-          context.l10n.plannerCanvas_saved_deleteConfirmBody(summary.name),
+/// Confirms deletion of the plan named [name], then removes plan [id].
+///
+/// Shared by the normal row's trash button and the compare-mode row's trash
+/// button so both modes delete through a single confirmation path. The
+/// repository is read before the dialog await to avoid using [ref] across an
+/// async gap.
+Future<void> _confirmAndDeletePlan(
+  BuildContext context,
+  WidgetRef ref,
+  String id,
+  String name,
+) async {
+  final repository = ref.read(divePlanRepositoryProvider);
+  final confirmed = await showDialog<bool>(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: Text(context.l10n.plannerCanvas_saved_deleteConfirmTitle),
+      content: Text(context.l10n.plannerCanvas_saved_deleteConfirmBody(name)),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(false),
+          child: Text(context.l10n.common_action_cancel),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: Text(context.l10n.common_action_cancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: Text(context.l10n.common_action_delete),
-          ),
-        ],
-      ),
-    );
-    return result ?? false;
-  }
+        FilledButton(
+          onPressed: () => Navigator.of(context).pop(true),
+          child: Text(context.l10n.common_action_delete),
+        ),
+      ],
+    ),
+  );
+  if (confirmed ?? false) await repository.deletePlan(id);
 }

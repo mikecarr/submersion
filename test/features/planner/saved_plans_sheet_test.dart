@@ -121,9 +121,7 @@ void main() {
     await tester.pumpWidget(harness());
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byType(PopupMenuButton<String>));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Delete').last);
+    await tester.tap(find.byIcon(Icons.delete_outline));
     await tester.pumpAndSettle();
 
     // Confirmation dialog.
@@ -179,6 +177,28 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('compare-page'), findsOneWidget);
+  });
+
+  testWidgets('delete is reachable from compare mode', (tester) async {
+    await repository.savePlan(_plan('a', 'Reef dive'));
+    await repository.savePlan(_plan('b', 'Wreck dive'));
+
+    await tester.pumpWidget(harness());
+    await tester.pumpAndSettle();
+
+    // Enter compare mode -> each checkbox row carries its own trash button.
+    await tester.tap(find.text('Compare'));
+    await tester.pumpAndSettle();
+    expect(find.byIcon(Icons.delete_outline), findsNWidgets(2));
+
+    await tester.tap(find.byIcon(Icons.delete_outline).first);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Delete plan?'), findsOneWidget);
+    await tester.tap(find.widgetWithText(FilledButton, 'Delete'));
+    await tester.pumpAndSettle();
+
+    expect(await repository.getAllPlanSummaries(), hasLength(1));
   });
 
   testWidgets('import reads a .subplan file and opens the imported plan', (
