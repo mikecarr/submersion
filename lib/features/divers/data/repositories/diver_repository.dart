@@ -52,6 +52,19 @@ class DiverRepository {
     }
   }
 
+  /// Number of divers, counted in SQL without loading or mapping any rows.
+  ///
+  /// Used by the setup wizard's post-restore "did a library arrive?" gate,
+  /// which only needs existence -- loading and mapping every diver row (with
+  /// its emergency contacts, insurance, etc.) just to call `isNotEmpty` is
+  /// wasted work after a pull that may have brought in a large library.
+  Future<int> getDiverCount() async {
+    final result = await _db
+        .customSelect('SELECT COUNT(*) AS count FROM divers')
+        .getSingle();
+    return result.read<int>('count');
+  }
+
   /// Emits whenever the `divers` table changes so list providers can
   /// refresh after a sync or any other write.
   Stream<void> watchDiversChanges() =>

@@ -80,7 +80,7 @@ class _SyncConnectStepState extends ConsumerState<SyncConnectStep> {
       // hasAnyDiversProvider read reflects the freshly pulled rows.
       ref.invalidate(allDiversProvider);
       final hasDivers =
-          (await ref.read(diverRepositoryProvider).getAllDivers()).isNotEmpty;
+          (await ref.read(diverRepositoryProvider).getDiverCount()) > 0;
       if (mounted) {
         setState(() => _phase = hasDivers ? _PullPhase.done : _PullPhase.empty);
       }
